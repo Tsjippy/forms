@@ -1,5 +1,6 @@
 {
     "require": {
-        "garfix/js-minify": "^1.0"
+        "garfix/js-minify": "^1.0",
+        "phpoffice/phpspreadsheet": "^3.3"
     }
 }
