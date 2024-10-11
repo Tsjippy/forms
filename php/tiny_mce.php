@@ -26,7 +26,7 @@ add_action('init', function(){
 			[$simForms->formSelect()]
 		);
 
-		$plugins['insert_form_shortcode']		= plugins_url("js/tiny_mce.js?ver=".MODULE_VERSION, __DIR__);
+		$plugins['insert_form_shortcode']		= SIM\pathToUrl(MODULE_PATH."js/tiny_mce.js?ver=".MODULE_VERSION);
 
 		return $plugins;
 	}, 999);

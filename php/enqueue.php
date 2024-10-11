@@ -103,14 +103,14 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__.'\registerScripts');
 add_action( 'admin_enqueue_scripts', __NAMESPACE__.'\registerScripts');
 
 function registerScripts(){
-    wp_register_style( 'sim_forms_style', plugins_url('css/forms.min.css', __DIR__), array(), MODULE_VERSION);
-    wp_register_style( 'sim_formtable_style', plugins_url('css/formtable.min.css', __DIR__), array(), MODULE_VERSION);
+    wp_register_style( 'sim_forms_style', SIM\pathToUrl(MODULE_PATH.'css/forms.min.css'), array(), MODULE_VERSION);
+    wp_register_style( 'sim_formtable_style', SIM\pathToUrl(MODULE_PATH.'css/formtable.min.css'), array(), MODULE_VERSION);
 
-    wp_register_script('sim_forms_script', plugins_url('js/forms.min.js', __DIR__), array('sweetalert', 'sim_formsubmit_script', 'sim_fileupload_script'), MODULE_VERSION, true);
+    wp_register_script('sim_forms_script', SIM\pathToUrl(MODULE_PATH.'js/forms.min.js'), array('sweetalert', 'sim_formsubmit_script', 'sim_fileupload_script'), MODULE_VERSION, true);
 
-    wp_register_script( 'sim_formbuilderjs', plugins_url('js/formbuilder.min.js', __DIR__), array('sim_forms_script','sortable'), MODULE_VERSION, true);
+    wp_register_script( 'sim_formbuilderjs', SIM\pathToUrl(MODULE_PATH.'js/formbuilder.min.js'), array('sim_forms_script','sortable'), MODULE_VERSION, true);
     
-    wp_register_script('sim_forms_table_script', plugins_url('js/forms_table.js', __DIR__), array('sim_forms_script', 'sim_table_script'), MODULE_VERSION, true);
+    wp_register_script('sim_forms_table_script', SIM\pathToUrl(MODULE_PATH.'js/forms_table.js'), array('sim_forms_script', 'sim_table_script'), MODULE_VERSION, true);
 
     if(is_numeric(get_the_ID())){
         $formBuilderPages   = SIM\getModuleOption(MODULE_SLUG, 'formbuilder_pages');
