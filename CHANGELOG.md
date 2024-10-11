@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- removed reference to user pages
 
 ### Fixed
 
