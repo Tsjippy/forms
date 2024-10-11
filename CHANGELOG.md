@@ -6,6 +6,16 @@
 ### Changed
 
 ### Fixed
+
+### Updated
+
+## [8.0.2] - 2024-10-09
+
+
+### Changed
+- code clean up
+
+### Fixed
 - form reminders
 
 ### Updated
