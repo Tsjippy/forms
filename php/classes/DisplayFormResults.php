@@ -670,11 +670,6 @@ class DisplayFormResults extends DisplayForm{
 
 				$output		= date($format, strtotime($string));
 			}
-		}elseif($elementName == 'userid'){
-			$output				= SIM\USERPAGE\getUserPageLink($string);
-			if(!$output){
-				$output	= $string;
-			}
 		}
 	
 		$output = apply_filters('sim_transform_formtable_data', $output, $elementName);
