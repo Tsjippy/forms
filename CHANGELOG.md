@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- removed reference to user pages
 
 ### Fixed
 
 ### Updated
+
+## [8.0.4] - 2024-10-11
+
+
+### Changed
+- removed reference to user pages
 
 ## [8.0.3] - 2024-10-11
 
