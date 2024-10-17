@@ -1,6 +1,5 @@
 import { __ } from '@wordpress/i18n';
 import {useBlockProps, InspectorControls} from "@wordpress/block-editor";
-import './editor.scss';
 import apiFetch from "@wordpress/api-fetch";
 import {useState, useEffect} from "@wordpress/element";
 import {ToggleControl, SelectControl, Panel, PanelBody, Spinner} from "@wordpress/components";
