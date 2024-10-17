@@ -10,6 +10,7 @@
 
 ### Updated
 - readme
+- blocks
 
 ## [8.0.4] - 2024-10-11
 
