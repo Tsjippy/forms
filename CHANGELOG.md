@@ -6,6 +6,13 @@
 ### Changed
 
 ### Fixed
+
+### Updated
+
+## [8.05] - 2024-10-17
+
+
+### Fixed
 - global css reference
 
 ### Updated
