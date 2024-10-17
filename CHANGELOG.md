@@ -9,6 +9,7 @@
 - global css reference
 
 ### Updated
+- readme
 
 ## [8.0.4] - 2024-10-11
 
