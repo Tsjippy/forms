@@ -1,5 +1,5 @@
-import { addStyles } from './../../../js/imports.js';
-import { getFieldValue } from  '../../../js/field_value.js';
+import { addStyles } from '../../../plugins/sim-plugin/includes/js/imports.js';
+import { getFieldValue } from  '../../../plugins/sim-plugin/includes/js/field_value.js';
 export{ getFieldValue };
 
 console.log('Forms.js is loaded');
@@ -52,7 +52,9 @@ function prepareForCloning(originalNode){
 		}
 		
 		//remove the original
-		select._niceselect.destroy()
+		if(select._niceselect != undefined){
+			select._niceselect.destroy();
+		}
 	});
 
 	//also remove any tinymce's
@@ -76,9 +78,11 @@ export function cloneNode(originalNode, clear=true){
 	
 	//Then add niceselects again after cloning took place
 	originalNode.querySelectorAll('select').forEach(select => {
-		select._niceselect = NiceSelect.bind(select,{searchable: true});
-		if(select.value == ''){
-			select._niceselect.clear();
+		if(select._niceselect != undefined){
+			select._niceselect = NiceSelect.bind(select,{searchable: true});
+			if(select.value == ''){
+				select._niceselect.clear();
+			}
 		}
 	});
 	
@@ -99,7 +103,7 @@ export function cloneNode(originalNode, clear=true){
 			}
 			
 			//if this is a select
-			if(input.type == "select-one"){
+			if(input.type == "select-one" && input._niceselect != undefined){
 				//remove any defaults
 				removeDefaultSelect(input);
 				
@@ -109,7 +113,9 @@ export function cloneNode(originalNode, clear=true){
 		});
 	}else{
 		newNode.querySelectorAll('select').forEach(select => {
-			select._niceselect = NiceSelect.bind(select,{searchable: true});
+			if(select._niceselect != undefined){
+				select._niceselect = NiceSelect.bind(select,{searchable: true});
+			}
 		});
 	}
 	
