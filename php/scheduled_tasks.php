@@ -110,7 +110,7 @@ function mandatoryFieldsReminder(){
 	wp_set_current_user(1);
 	
 	//Retrieve all users
-	$users = SIM\getUserAccounts(false, true, true);
+	$users          = SIM\getUserAccounts(false, true, true);
 
     $accountUrl		= SIM\ADMIN\getDefaultPageLink('usermanagement', 'account_page');
 		

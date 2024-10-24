@@ -14,6 +14,7 @@ trait ElementHtml{
 			}
 
 			$this->defaultValues		= (array)$this->user->data;
+			
 			//Change ID to userid because its a confusing name
 			$this->defaultValues['user_id']	= $this->defaultValues['ID'];
 			unset($this->defaultValues['ID']);
