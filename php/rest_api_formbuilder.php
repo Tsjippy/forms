@@ -222,7 +222,7 @@ add_action( 'rest_api_init', function () {
 
 	// save_form_input
 	register_rest_route(
-		'sim/v2/forms',
+		RESTAPIPREFIX.'/forms',
 		'/save_form_input',
 		array(
 			'methods' 				=> 'POST',

@@ -1697,6 +1697,8 @@ class FormBuilderForm extends SimForms{
 	 * @param	int		$conditions		The existing conditions
 	 */
 	public function warningConditionsForm($name, $conditions = ''){
+		global $wpdb;
+
 		if(empty($conditions) || !is_array($conditions)){
 			$conditions	=[
 				[
@@ -1704,10 +1706,17 @@ class FormBuilderForm extends SimForms{
 					"equation"		=> ''
 				]
 			];
-		}		
+		}	
 		
-		$userMetaKeys	= get_user_meta($this->user->ID);
-		ksort($userMetaKeys);
+		// get all possible user meta keys, not just the one the current user has
+		$result			= $wpdb->get_results("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}`", ARRAY_N);
+		$userMetaKeys	= [];
+		foreach($result as $metaKey){
+			$userMetaKeys[]	= $metaKey[0];
+		}
+		sort($userMetaKeys, SORT_STRING | SORT_FLAG_CASE);
+
+		$userMetas		= get_user_meta($this->user->ID);
 
 		ob_start();
 		?>
@@ -1728,9 +1737,14 @@ class FormBuilderForm extends SimForms{
 					<input type="text" class="warning_condition meta_key" name="<?php echo $name;?>[<?php echo $conditionIndex;?>][meta_key]" value="<?php echo $condition['meta_key'];?>" list="meta_key" style="width: fit-content;">
 					<datalist id="meta_key">
 						<?php
-						foreach($userMetaKeys as $key=>$value){
+						foreach($userMetaKeys as $key){
+							if(isset($userMetas[$key])){
+								$value	= $userMetas[$key][0];
+							}else{
+								$value	= $wpdb->get_var("SELECT `meta_value` FROM `{$wpdb->usermeta}` WHERE meta_key = '$key'");
+							}
 							// Check if array, store array keys
-							$value 	= maybe_unserialize($value[0]);
+							$value 	= maybe_unserialize($value);
 							$data	= '';
 							if(is_array($value)){
 								$keys	= implode(',', array_keys($value));

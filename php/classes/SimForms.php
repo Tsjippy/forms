@@ -72,6 +72,8 @@ class SimForms{
 		}else{
 			$this->editRights		= false;
 		}
+
+		wp_enqueue_style('sim_forms_style');
 	}
 
 	/**
