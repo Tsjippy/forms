@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- login redirect action
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.0.7] - 2024-10-24
+
+
+### Added
+- login redirect action
 
 ## [8.0.6] - 2024-10-22
 
