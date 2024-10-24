@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- support for non-nice selects
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.0.6] - 2024-10-22
+
+
+### Added
+- support for non-nice selects
 
 ## [8.05] - 2024-10-17
 
