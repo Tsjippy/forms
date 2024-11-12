@@ -1389,11 +1389,11 @@ class DisplayFormResults extends DisplayForm{
 				<input type='hidden' class='shortcode_settings' name='shortcode_id'	value='<?php echo $this->shortcodeData->id;?>'>
 				<input type='hidden' class='shortcode_settings' name='formid'		value='<?php echo $this->formData->id;?>'>
 				
-				<label>Set the title for the results table</label><br>
+				<h4>Set the title for the results table</h4>
 				<input type='text' name="table_settings[title]" value='<?php echo $this->tableSettings['title'];?>' style='width:500px;'>
 
 				<div class="table_rights_wrapper">
-					<label>Select the default column the table is sorted on</label>
+					<h4>Select the default column the table is sorted on</h4>
 					<select name="table_settings[default_sort]">
 						<?php
 						if($this->tableSettings['default_sort'] == ''){
@@ -1419,10 +1419,20 @@ class DisplayFormResults extends DisplayForm{
 						}
 						?>
 					</select>
-				</div>
 
+					<h4>Select the sort direction</h4>
+					<label>
+						<input type='radio' name='table_settings[sort-direction]' id='sort-direction' value='asc' <?php if($this->tableSettings['sort-direction'] == 'asc'){echo 'checked';}?>>
+						Ascending
+					</label>
+					<label>
+						<input type='radio' name='table_settings[sort-direction]' id='sort-direction' value='dsc' <?php if($this->tableSettings['sort-direction'] == 'dsc'){echo 'checked';}?>>
+						Decending
+					</label>
+				</div>
+				<br>
 				<div class="table_filters_wrapper" style='margin-top:10px;'>
-					<label>Select the fields the table can be filtered on</label>
+					<h4>Select the fields the table can be filtered on</h4>
 					<table class='clone_divs_wrapper' style='border: none;'>
 						<?php
 						$filters	= $this->tableSettings['filter'];
@@ -1482,8 +1492,8 @@ class DisplayFormResults extends DisplayForm{
 				</div>
 				
 				<div class="table_rights_wrapper">
+					<h4>Select a column which determines if a row should be shown.</h4>
 					<label>
-						Select a column which determines if a row should be shown.<br>
 						The row will be hidden if a cell in this column has no value and the viewer has no right to edit.
 					</label>
 					<select name="table_settings[hiderow]">
@@ -1514,10 +1524,7 @@ class DisplayFormResults extends DisplayForm{
 				</div>
 
 				<div class="table_rights_wrapper">
-					<label class="label">
-						Select which results to display
-					</label>
-					<br>
+					<h4>Select which results to display</h4>
 					<select name="table_settings[result_type]">
 						<option value="personal" <?php if($this->tableSettings['result_type'] == 'personal'){echo 'selected';}?>>Only personal</option>
 						<option value="all" <?php if($this->tableSettings['result_type'] == 'all'){echo 'selected';}?>>All the viewer has permission for</option>
@@ -1531,49 +1538,45 @@ class DisplayFormResults extends DisplayForm{
 				</div>
 				
 				<div class="table_rights_wrapper">
-					<label class="label">
-						Select if you want to view archived results by default<br>
-						<?php
-						if($this->tableSettings['archived'] == 'true'){
-							$checked1	= 'checked';
-							$checked2	= '';
-						}else{
-							$checked1	= '';
-							$checked2	= 'checked';
-						}
-						?>
-						<label>
-							<input type="radio" name="table_settings[archived]" value="true" <?php echo $checked1;?>>
-							Yes
-						</label>
-						<label>
-							<input type="radio" name="table_settings[archived]" value="false" <?php echo $checked2;?>>
-							No
-						</label>
+					<h4 class="label">Select if you want to view archived results by default</h4>
+					<?php
+					if($this->tableSettings['archived'] == 'true'){
+						$checked1	= 'checked';
+						$checked2	= '';
+					}else{
+						$checked1	= '';
+						$checked2	= 'checked';
+					}
+					?>
+					<label>
+						<input type="radio" name="table_settings[archived]" value="true" <?php echo $checked1;?>>
+						Yes
+					</label>
+					<label>
+						<input type="radio" name="table_settings[archived]" value="false" <?php echo $checked2;?>>
+						No
 					</label>
 				</div>
 				
 				<!-- We can define auto archive field both on table and on form settings-->
 				<div class="table_rights_wrapper">
-					<label class="label">
-						Auto archive results<br>
-						<?php
-						if($this->formData->autoarchive){
-							$checked1	= 'checked';
-							$checked2	= '';
-						}else{
-							$checked1	= '';
-							$checked2	= 'checked';
-						}
-						?>
-						<label>
-							<input type="radio" name="form_settings[autoarchive]" value="1" <?php echo $checked1;?>>
-							Yes
-						</label>
-						<label>
-							<input type="radio" name="form_settings[autoarchive]" value="0" <?php echo $checked2;?>>
-							No
-						</label>
+					<h4 class="label">Auto archive results</h4>
+					<?php
+					if($this->formData->autoarchive){
+						$checked1	= 'checked';
+						$checked2	= '';
+					}else{
+						$checked1	= '';
+						$checked2	= 'checked';
+					}
+					?>
+					<label>
+						<input type="radio" name="form_settings[autoarchive]" value="1" <?php echo $checked1;?>>
+						Yes
+					</label>
+					<label>
+						<input type="radio" name="form_settings[autoarchive]" value="0" <?php echo $checked2;?>>
+						No
 					</label>
 					<br>
 					<br>
@@ -1667,7 +1670,7 @@ class DisplayFormResults extends DisplayForm{
 							}
 							?>
 						<div class="table_rights_wrapper">
-							<label class="label">Select roles with permission to VIEW the table, finetune it per column on the 'column settings' tab</label>
+							<h4>Select roles with permission to VIEW the table, finetune it per column on the 'column settings' tab</h4>
 							<div class="role_info">
 							<?php
 							foreach($viewRoles as $key=>$roleName){
@@ -1687,7 +1690,7 @@ class DisplayFormResults extends DisplayForm{
 						</div>
 						
 						<div class="table_rights_wrapper">
-							<label class="label">Select roles with permission to edit ALL form submission data</label>
+							<h4>Select roles with permission to edit ALL form submission data</h4>
 							<div class="role_info">
 							<?php
 							foreach($editRoles as $key=>$roleName){
@@ -2151,6 +2154,10 @@ class DisplayFormResults extends DisplayForm{
 
 		if(isset($_REQUEST['sortdir'])){
 			$this->sortDirection	= $_REQUEST['sortdir'];
+		}
+
+		if(isset($this->tableSettings['sort-direction'])){
+			$this->sortDirection	= strtoupper($this->tableSettings['sort-direction']);
 		}
 
 		if(isset($_REQUEST['export_pfd']) || isset($_REQUEST['export_xls'])){
