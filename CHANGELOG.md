@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- default sor direction
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.08] - 2024-11-12
+
+
+### Added
+- default sor direction
 
 ## [8.0.7] - 2024-10-24
 
