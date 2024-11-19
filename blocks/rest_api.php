@@ -2,7 +2,8 @@
 namespace SIM\FORMS;
 use SIM;
 
-add_action( 'rest_api_init', function () {
+add_action( 'rest_api_init', __NAMESPACE__.'\restApiInit');
+function restApiInit() {
 	// add element to form
 	register_rest_route(
 		RESTAPIPREFIX.'/forms',
@@ -80,7 +81,7 @@ add_action( 'rest_api_init', function () {
 			'permission_callback' 	=> '__return_true',
 		)
 	);
-});
+}
 
 function showFormBuilder($attributes){
 	$isRest	= false;

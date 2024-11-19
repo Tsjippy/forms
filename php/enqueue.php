@@ -25,7 +25,8 @@ function checkFormExistence($formName){
     return $formName;
 }
 
-add_action( 'wp_after_insert_post', function($postId, $post){
+add_action( 'wp_after_insert_post', __NAMESPACE__.'\afterInsertPost', 10, 2);
+function afterInsertPost($postId, $post){
     global $Modules;
 
     if(has_block('sim/formbuilder', $post)){
@@ -97,7 +98,7 @@ add_action( 'wp_after_insert_post', function($postId, $post){
 
         update_option('sim_modules', $Modules);
     }
-}, 10, 2);
+}
 
 add_action( 'wp_enqueue_scripts', __NAMESPACE__.'\registerScripts');
 add_action( 'admin_enqueue_scripts', __NAMESPACE__.'\registerScripts');

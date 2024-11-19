@@ -13,7 +13,9 @@ function checkPermissions(){
 	return false;
 }
 
-add_action( 'rest_api_init', function () {
+
+add_action( 'rest_api_init', __NAMESPACE__.'\restApiInitForms');
+function restApiInitForms() {
 	// add element to form
 	register_rest_route(
 		RESTAPIPREFIX.'/forms',
@@ -264,7 +266,7 @@ add_action( 'rest_api_init', function () {
 			)
 		)
 	);
-});
+}
 
 function getUniqueName($element, $update, $oldElement, $simForms){
 	$element->name	= end(explode('\\', $element->name));

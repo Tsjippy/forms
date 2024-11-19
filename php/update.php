@@ -2,7 +2,8 @@
 namespace SIM\FORMS;
 use SIM;
 
-add_action('sim_plugin_update', function($oldVersion){
+add_action('sim_plugin_update', __NAMESPACE__.'\pluginUpdate');
+function pluginUpdate($oldVersion){
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     require_once ABSPATH . 'wp-admin/install-helper.php';
 
@@ -58,4 +59,4 @@ add_action('sim_plugin_update', function($oldVersion){
         }
         maybe_drop_column($simForms->tableName, 'settings', "ALTER TABLE $simForms->tableName DROP COLUMN `settings`");
     }
-});
+}

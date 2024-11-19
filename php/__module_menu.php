@@ -8,7 +8,8 @@ DEFINE(__NAMESPACE__.'\MODULE_SLUG', strtolower(basename(dirname(__DIR__))));
 
 DEFINE(__NAMESPACE__.'\MODULE_PATH', plugin_dir_path(__DIR__));
 
-add_filter('sim_submenu_description', function($description, $moduleSlug){
+add_filter('sim_submenu_description', __NAMESPACE__.'\moduleDescription', 10, 2);
+function moduleDescription($description, $moduleSlug){
 	//module slug should be the same as the constant
 	if($moduleSlug != MODULE_SLUG)	{
 		return $description;
@@ -27,9 +28,10 @@ add_filter('sim_submenu_description', function($description, $moduleSlug){
 	?>
 	<?php
 	return $description.ob_get_clean();
-}, 10, 2);
+}
 
-add_filter('sim_submenu_options', function($optionsHtml, $moduleSlug, $settings){
+add_filter('sim_submenu_options', __NAMESPACE__.'\moduleOptions', 10, 3);
+function moduleOptions($optionsHtml, $moduleSlug, $settings){
 	//module slug should be the same as grandparent folder name
 	if($moduleSlug != MODULE_SLUG){
 		return $optionsHtml;
@@ -62,9 +64,10 @@ add_filter('sim_submenu_options', function($optionsHtml, $moduleSlug, $settings)
 	}
 
 	return ob_get_clean();
-}, 10, 3);
+}
 
-add_filter('sim_email_settings', function($optionsHtml, $moduleSlug, $settings){
+add_filter('sim_email_settings', __NAMESPACE__.'\emailSettings', 10, 3);
+function emailSettings($optionsHtml, $moduleSlug, $settings){
 	//module slug should be the same as grandparent folder name
 	if($moduleSlug != MODULE_SLUG || !isset($settings['userdata'])){
 		return $optionsHtml;
@@ -100,9 +103,10 @@ add_filter('sim_email_settings', function($optionsHtml, $moduleSlug, $settings){
 	$formAdultEmails->printInputs($settings);
 
 	return ob_get_clean();
-}, 10, 3);
+}
 
-add_filter('sim_module_data', function($dataHtml, $moduleSlug){
+add_filter('sim_module_data', __NAMESPACE__.'\moduleData', 10, 2);
+function moduleData($dataHtml, $moduleSlug){
 	//module slug should be the same as grandparent folder name
 	if($moduleSlug != MODULE_SLUG){
 		return $dataHtml;
@@ -162,9 +166,10 @@ add_filter('sim_module_data', function($dataHtml, $moduleSlug){
 	$html	.= "</table>";
 
 	return $dataHtml.$html;
-}, 10, 2);
+}
 
-add_filter('sim_module_functions', function($functionHtml, $moduleSlug){
+add_filter('sim_module_functions', __NAMESPACE__.'\moduleFunctions', 10, 2);
+function moduleFunctions($functionHtml, $moduleSlug){
 	//module slug should be the same as grandparent folder name
 	if($moduleSlug != MODULE_SLUG){
 		return $functionHtml;
@@ -188,10 +193,10 @@ add_filter('sim_module_functions', function($functionHtml, $moduleSlug){
 
 	<?php
 	return ob_get_clean();
-}, 10, 2);
+}
 
-
-add_filter('sim_module_updated', function($options, $moduleSlug, $oldOptions){
+add_filter('sim_module_updated', __NAMESPACE__.'\moduleUpdated', 10, 3);
+function moduleUpdated($options, $moduleSlug, $oldOptions){
 	//module slug should be the same as grandparent folder name
 	if($moduleSlug != MODULE_SLUG){
 		return $options;
@@ -206,9 +211,10 @@ add_filter('sim_module_updated', function($options, $moduleSlug, $oldOptions){
 	scheduleTasks();
 
 	return $options;
-}, 10, 3);
+}
 
-add_action('sim_module_actions', function(){
+add_action('sim_module_actions',__NAMESPACE__.'\moduleActions' );
+function moduleActions(){
 	if(isset($_POST['import-form'])){
 		$formBuilder	= new FormBuilderForm();
 		$formBuilder->importForm($_FILES['formfile']['tmp_name']);
@@ -223,18 +229,20 @@ add_action('sim_module_actions', function(){
 		$simForms	= new SaveFormSettings();
 		$simForms->deleteForm($_POST['delete']);
 	}
-});
+}
 
-add_filter('display_post_states', function ( $states, $post ) {
+add_filter('display_post_states', __NAMESPACE__.'\postStates', 10, 2);
+function postStates( $states, $post ) {
     
     if (is_array(SIM\getModuleOption(MODULE_SLUG, 'forms_pages')) && in_array($post->ID, SIM\getModuleOption(MODULE_SLUG, 'forms_pages', false))) {
         $states[] = __('Form selector page');
     }
 
     return $states;
-}, 10, 2);
+}
 
-add_action('sim_module_activated', function($moduleSlug){
+add_action('sim_module_activated', __NAMESPACE__.'\moduleActivated');
+function moduleActivated($moduleSlug){
 	//module slug should be the same as grandparent folder name
 	if($moduleSlug != MODULE_SLUG)	{return;}
 	
@@ -245,9 +253,10 @@ add_action('sim_module_activated', function($moduleSlug){
 	$formTable->createDbShortcodeTable();
 
 	scheduleTasks();
-});
+}
 
-add_action('sim_module_deactivated', function($moduleSlug, $options){
+add_action('sim_module_deactivated', __NAMESPACE__.'\moduleDeActivated', 10, 2);
+function moduleDeActivated($moduleSlug, $options){
 	//module slug should be the same as grandparent folder name
 	if($moduleSlug != MODULE_SLUG)	{
 		return;
@@ -257,4 +266,7 @@ add_action('sim_module_deactivated', function($moduleSlug, $options){
 		// Remove the auto created page
 		wp_delete_post($page, true);
 	}
-}, 10, 2);
+
+	wp_clear_scheduled_hook( 'auto_archive_action' );
+	wp_clear_scheduled_hook( 'mandatory_fields_reminder_action' );
+}

@@ -2,14 +2,15 @@
 namespace SIM\FORMS;
 use SIM;
 
-add_action('init', function(){
+add_action('init', __NAMESPACE__.'\initTasks');
+function initTasks(){
 	//add action for use in scheduled task
 	add_action( 'auto_archive_action', __NAMESPACE__.'\autoArchiveFormEntries' );
     
 	add_action( 'form_reminder_action', __NAMESPACE__.'\formReminder' );
 
     add_action( 'mandatory_fields_reminder_action', __NAMESPACE__.'\mandatoryFieldsReminder' );
-});
+}
 
 function scheduleTasks(){
     SIM\scheduleTask('auto_archive_action', 'daily');
@@ -182,12 +183,3 @@ function mandatoryFieldsReminder(){
 	}
 
 }
-
-// Remove scheduled tasks upon module deactivatio
-add_action('sim_module_deactivated', function($moduleSlug){
-	//module slug should be the same as grandparent folder name
-	if($moduleSlug != MODULE_SLUG)	{return;}
-
-	wp_clear_scheduled_hook( 'auto_archive_action' );
-	wp_clear_scheduled_hook( 'mandatory_fields_reminder_action' );
-});

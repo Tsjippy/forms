@@ -2,7 +2,8 @@
 namespace SIM\FORMS;
 use SIM;
 
-add_action('init', function () {
+add_action('init', __NAMESPACE__.'\initBlocks');
+function initBlocks() {
 	register_block_type(
 		__DIR__ . '/formselector/build',
 		array(
@@ -54,9 +55,10 @@ add_action('init', function () {
 			]
 		)
 	);
-});
+}
 
-add_action( 'enqueue_block_assets', function(){
+add_action( 'enqueue_block_assets', __NAMESPACE__.'\loadAssets');
+function loadAssets(){
 	if(is_admin()){
 		SIM\enqueueScripts();
 
@@ -68,4 +70,4 @@ add_action( 'enqueue_block_assets', function(){
 
 		wp_enqueue_script('sim_forms_table_script');
 	}
-} );
+}

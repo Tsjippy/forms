@@ -132,10 +132,11 @@ function showForm($atts){
     return $simForms->determineForm($atts);
 }
 
-add_shortcode( 'formresults', function($atts){
+add_shortcode( 'formresults', __NAMESPACE__.'\formResults' );
+function formResults($atts){
 	$displayFormResults = new DisplayFormResults($atts);
 	return $displayFormResults->showFormresultsTable();
-});
+}
 
 //Shortcode for recommended fields
 add_shortcode("missing_form_fields", __NAMESPACE__.'\missingFormFields');
@@ -160,11 +161,12 @@ function missingFormFields($atts){
 	return $html;
 }
 
-add_filter( 'wp_insert_post_data', function($data , $postarr){
+add_filter( 'wp_insert_post_data', __NAMESPACE__.'\insertPostData', 10, 2 );
+function insertPostData($data , $postarr){
 	if(function_exists('wp_get_current_user')){
 		$formtable  = new DisplayFormResults();
         return $formtable->checkForFormShortcode($data , $postarr);
 	}
 
 	return $data;
-}, 10, 2 );
+}

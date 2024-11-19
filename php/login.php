@@ -2,7 +2,8 @@
 namespace SIM\FORMS;
 use SIM;
 
-add_filter('login_redirect', function($redirect, $requestedRedirect, $user){
+add_filter('login_redirect', __NAMESPACE__.'\loginRedirect', 10, 3);
+function loginRedirect($redirect, $requestedRedirect, $user){
     $accountPage  = SIM\ADMIN\getDefaultPageLink('usermanagement', 'account_page');
 
     if( empty($accountPage)){
@@ -18,4 +19,4 @@ add_filter('login_redirect', function($redirect, $requestedRedirect, $user){
     }
 
     return $redirect;
-}, 10, 3);
+}

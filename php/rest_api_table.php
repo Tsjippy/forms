@@ -4,7 +4,9 @@ use SIM;
 use stdClass;
 use WP_Error;
 
-add_action( 'rest_api_init', function () {
+
+add_action( 'rest_api_init', __NAMESPACE__.'\restApiInitTable' );
+function restApiInitTable() {
 	//save_table_prefs
 	register_rest_route(
 		RESTAPIPREFIX.'/forms',
@@ -224,7 +226,7 @@ add_action( 'rest_api_init', function () {
 			)
 		)
 	);
-} );
+}
 
 function getPage(){
 	$displayFormResults		= new DisplayFormResults([
