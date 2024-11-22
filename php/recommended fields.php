@@ -358,7 +358,8 @@ function addChildFields($html, $userId){
 	return $html;
 }
 
-add_action('sim_dashboard_warnings', function($userId){
+add_action('sim_dashboard_warnings', __NAMESPACE__.'\dashboardWarnings');
+function dashboardWarnings($userId){
 	$html	 = getAllEmptyRequiredElements($userId, 'recommended');
 	
 	if (empty($html)){
@@ -370,4 +371,4 @@ add_action('sim_dashboard_warnings', function($userId){
 	if (!empty($html)){
 		echo "<p>Please complete the following:<br></p>$html";
 	}
-});
+}
