@@ -270,6 +270,7 @@ class SaveFormSettings extends SimForms{
 			'form_name'				=> isset($settings['form_name']) 			? $settings['form_name'] 							: null,
 			'save_in_meta'			=> isset($settings['save_in_meta']) 		? true 												: false,
 			'reminder_frequency'	=> isset($settings['reminder_frequency']) 	? $settings['reminder_frequency'] 					: null,
+			'reminder_amount'		=> isset($settings['reminder_amount']) 		? $settings['reminder_amount'] 						: null,
 			'reminder_period'		=> isset($settings['reminder_period']) 		? $settings['reminder_period'] 						: null,
 			'reminder_conditions'	=> isset($settings['reminder_conditions']) 	? maybe_serialize($settings['reminder_conditions']) : null,
 			'reminder_startdate'	=> isset($settings['reminder_startdate']) 	? $settings['reminder_startdate'] 					: null,

@@ -439,6 +439,12 @@ class FormBuilderForm extends SimForms{
 							}
 						?>
 
+						<br>
+						<label>
+							How many times should people be reminded?
+							<input type="number" name='reminder_amount' value='<?php echo $this->formData->reminder_amount;?>' style='width: 70px;'>
+						</label>
+
 						<div class='<?php if($this->formData->save_in_meta){ echo 'hidden';}?>'>
 							<label>
 								Start reminding from 

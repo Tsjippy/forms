@@ -316,6 +316,7 @@ class SimForms{
 		  formname text,
 		  save_in_meta boolean,
 		  reminder_frequency text,
+		  reminder_amount text,
 		  reminder_period text,
 		  reminder_startdate date,
 		  reminder_conditions LONGTEXT,
