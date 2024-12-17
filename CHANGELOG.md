@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- reminder amount
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.1.1] - 2024-12-17
+
+
+### Added
+- reminder amount
 
 ## [8.1.0] - 2024-11-22
 
