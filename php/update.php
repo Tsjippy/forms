@@ -11,7 +11,7 @@ function pluginUpdate($oldVersion){
 
     $simForms = new SimForms();
 
-    if($oldVersion < '8.1.1'){
+    if($oldVersion < '8.2.1'){
         maybe_add_column($simForms->tableName, 'reminder_amount', "ALTER TABLE $simForms->tableName ADD COLUMN `reminder_amount` LONGTEXT");
 
         SIM\printArray("Added column");
