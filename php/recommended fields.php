@@ -277,6 +277,14 @@ function getAllRequiredForms($userId=''){
 			$threshold = $date1->format('Y-m-d');
 		}
 
+		// Do not continue if already count is set
+		if(
+			!empty($form->reminder_amount) &&											// There is an max amount set in weeks
+			strtotime("+ $form->reminder_amount weeks", strtotime($threshold)) < time()	// we are passed the amount
+		){
+			continue;
+		}
+
 		// get all submissions created after the threshold
 		$query			= "SELECT * FROM {$simForms->submissionTableName} WHERE form_id=$form->id AND timecreated > '$threshold'";
 
