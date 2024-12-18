@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- after update hook
 
 ### Fixed
 
 ### Updated
+
+## [8.1.2] - 2024-12-18
+
+
+### Changed
+- after update hook
 
 ## [8.1.1] - 2024-12-17
 
