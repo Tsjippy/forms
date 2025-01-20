@@ -253,8 +253,6 @@ class FormBuilderForm extends SimForms{
 		wp_enqueue_script('sim_forms_script');
 
 		// make sure we use unique priorities
-		
-
 		ob_start();
 
 		if(isset($_POST['export-form']) && is_numeric($_POST['export-form'])){

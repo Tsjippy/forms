@@ -381,6 +381,7 @@ class DisplayForm extends SubmitForm{
 			$this->createJs();
 		}
 
+		wp_enqueue_script('sim_forms_script');
 		//Only enqueue if there is content in the file
 		if(file_exists($jsPath) && filesize($jsPath) > 0){
 			wp_enqueue_script( "dynamic_{$this->formName}forms", SIM\pathToUrl($jsPath), array('sim_forms_script'), $this->formData->version, true);
