@@ -2,14 +2,21 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- max amount of reminders
 
 ### Changed
 
 ### Fixed
-- load js
 
 ### Updated
+
+## [8.1.4] - 2025-01-20
+
+
+### Added
+- max amount of reminders
+
+### Fixed
+- load js
 
 ## [8.1.3] - 2024-12-18
 
