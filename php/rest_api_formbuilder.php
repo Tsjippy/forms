@@ -6,13 +6,12 @@ use WP_Error;
 
 function checkPermissions(){
 	$user	= wp_get_current_user();
-	if(in_array('editor', $user->roles)){
+	if(in_array('edit_others_posts', array_keys($user->allcaps))){
 		return true;
 	}
 
 	return false;
 }
-
 
 add_action( 'rest_api_init', __NAMESPACE__.'\restApiInitForms');
 function restApiInitForms() {
