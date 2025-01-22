@@ -1087,7 +1087,7 @@ class DisplayFormResults extends DisplayForm{
 				
 				//transform if needed
 				$orgFieldValue	= $value;
-				$value 	= $this->transformInputData($value, $elementName, (object)$values);
+				$value 			= $this->transformInputData($value, $elementName, (object)$values);
 				
 				//show original email in excel
 				if(gettype($value) == 'string' && str_contains($value, '@')){
@@ -1136,7 +1136,7 @@ class DisplayFormResults extends DisplayForm{
 				$class	= trim($class);
 
 				// check if we can update the element name with the indexed one
-				if(isset($values['elementindex']) && isset($this->submission->formresults[$name][0][$elementName])){
+				if(isset($values['elementindex']) && $this->getElementByName($name.'['.$values['elementindex'].']['.$elementName.']')){
 					$elementName	= $name.'['.$values['elementindex'].']['.$elementName.']';
 				}
 				$class	= " class='$class' data-name='$elementName'";

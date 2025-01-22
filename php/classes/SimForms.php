@@ -455,7 +455,7 @@ class SimForms{
 				// add []
 				$name	.= '[]';
 			}elseif(!empty($this->formData->split)){
-				// only the last part of a plitted name is give
+				// only the last part of a splitted name is give
 				$mainName	= explode('[', $this->getElementById($this->formData->split[0], 'name'))[0];
 
 				// we already tried adding splits, did not work
