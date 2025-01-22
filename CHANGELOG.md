@@ -8,6 +8,7 @@
 ### Fixed
 - form id setting
 - bug in editing splitted data
+- database creation
 
 ### Updated
 
