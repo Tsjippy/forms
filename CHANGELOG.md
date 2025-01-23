@@ -11,6 +11,7 @@
 - database creation
 - error when ' in element name
 - reordering of elements
+- element reordering
 
 ### Updated
 
