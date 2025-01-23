@@ -115,51 +115,11 @@ class SaveFormSettings extends SimForms{
 		// Get all elements of this form
 		$this->getAllFormElements('priority', $this->formId, true);
 
-		$newFormElements		= [
-			$newPriority - 1	=> $element
-		];
-
-		$untouchedMin			= min($oldPriority, $newPriority);
-		$untouchedMax			= max($oldPriority, $newPriority);
-		if($oldPriority == -1){
-			$untouchedMin	= $newPriority;
-		}
-
-		foreach($this->formElements as $el){
-			// skip the element with the new priority
-			if($el->id == $element->id){
-				if($el->priority != $newPriority){
-					$el->priority	= $newPriority;
-					$result 		= $this->updatePriority($el);
-
-					if(is_wp_error($result)){
-						return $result;
-					}
-				}
-				continue;
-			}
-
-			if($el->priority < $untouchedMin){
-				$newFormElements[$el->priority - 1]	= $el;
-			}elseif($el->priority > $untouchedMax){
-				$newFormElements[$el->priority]	= $el;
-			}else{
-				if($oldPriority == -1){
-					// we inserted a new element
-					$newFormElements[$el->priority]	= $el;
-
-					$el->priority	= $el->priority + 1;
-				}elseif($oldPriority < $newPriority){
-					// we moved an element down
-					$el->priority	= $el->priority - 1;
-
-					$newFormElements[$el->priority]	= $el;
-				}else{
-					// me moved an element up
-					$el->priority	= $el->priority + 1;
-
-					$newFormElements[$el->priority]	= $el;
-				}
+		// Make sure all priorities are right to begin with
+		$prioArray	= [];
+		foreach($this->formElements as $index => &$el){
+			while(!empty($prioArray[$el->priority])){
+				$el->priority = $el->priority + 1;
 
 				$result 		= $this->updatePriority($el);
 
@@ -167,9 +127,105 @@ class SaveFormSettings extends SimForms{
 					return $result;
 				}
 			}
+
+			$prioArray[$el->priority]	= $el;
 		}
 
-		$this->formElements	= $newFormElements;
+		// Find any missing numbers
+		$expectedArray = range(1, end($this->formElements)->priority);
+
+		$missingNumber = array_diff($expectedArray, array_keys($prioArray));
+
+		while(!empty($missingNumber)){
+
+			foreach($missingNumber as $nr){
+				foreach($this->formElements as $index => &$el){
+					if($el->priority > $nr){
+						$el->priority = $el->priority - 1;
+
+						$result 		= $this->updatePriority($el);
+
+						if(is_wp_error($result)){
+							return $result;
+						}
+					}
+				}
+			}
+
+			$expectedArray = range(1, end($this->formElements)->priority);
+
+			$missingNumber = array_diff($expectedArray, array_keys($this->formElements));
+		}
+
+		$element->priority	= $newPriority;
+		$result 		= $this->updatePriority($element);
+
+		if(is_wp_error($result)){
+			return $result;
+		}
+
+		$newFormElements	= [
+			$newPriority - 1	=> $element // index is the priority minus one
+		];
+
+		// the priorities below the changed ones
+		$untouchedMin			= min($oldPriority, $newPriority);
+
+		// the priorities above the changed ones
+		$untouchedMax			= max($oldPriority, $newPriority);
+
+		foreach($this->formElements as $el){
+			// skip the element who is reordered
+			if($el->id == $element->id){
+				continue;
+			}
+
+			// We inserted a new element
+			if($oldPriority == -1){
+				if($el->priority >= $newPriority){
+					$newPriority	= $el->priority + 1;
+				}else{
+					$newPriority	= $el->priority;
+				}
+			// we changed the order of existing elements
+			}else{
+				// we are in the safe range
+				if($el->priority < $untouchedMin || $el->priority > $untouchedMax){
+					$newPriority	= $el->priority;
+				}else{
+					if($oldPriority < $newPriority){
+						// we moved an element down
+						$newPriority	= $el->priority - 1;
+					}else{
+						// me moved an element up
+						$newPriority	= $el->priority + 1;
+					}
+				}
+			}
+
+			// Somehow we ended up with multiple elements with the same priority
+			while(!empty($newFormElements[$newPriority])){
+				$newPriority++;
+			}
+
+			// Update the priority in the DB if needed
+			if($newPriority	!= $el->priority){
+				$el->priority	= $newPriority;
+
+				$result 		= $this->updatePriority($el);
+
+				if(is_wp_error($result)){
+					return $result;
+				}
+			}
+
+			// store in var
+			$newFormElements[$newPriority]	= $el;
+		}
+
+		ksort($newFormElements);
+
+		$this->formElements	= array_values($newFormElements);
 
 		return;
 	}
