@@ -268,7 +268,12 @@ function restApiInitForms() {
 }
 
 function getUniqueName($element, $update, $oldElement, $simForms){
+	// Remove any ' from the name
+	$element->name	= str_replace("\\'", '', $element->name);
+
+	// Make sure we only are working on the name
 	$element->name	= end(explode('\\', $element->name));
+
 	if(
 		str_contains($element->name, '[]') || 
 		(
@@ -299,6 +304,11 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 		return $element->name;
 	}
 
+	foreach($simForms->formElements as &$el){
+		if($el->id == $element->id){
+			$el->name	= $element->name;
+		}
+	}
 	// update js
 	$simForms->createJs();
 
