@@ -99,15 +99,10 @@ class SaveFormSettings extends SimForms{
 	/**
 	 * Change the order of form elements
 	 *
-	 * @param	int				$oldPriority	The old priority of the element
-	 * @param	int				$newPriority	The new priority of the element
+	 * @param	array			$newIndexes		The updated array of element id - priority pairs
 	 * @param	object|array	$element		The element to change the priority of
 	 */
-	public function reorderElements($oldPriority, $newPriority, $element) {
-		if ($oldPriority == $newPriority){
-			return;
-		}
-
+	public function reorderElements($newIndexes, $element) {
 		if(!isset($this->formId) && !empty($element) && isset($element->form_id)){
 			$this->formId	= $element->form_id;
 		}
@@ -115,63 +110,13 @@ class SaveFormSettings extends SimForms{
 		// Get all elements of this form
 		$this->getAllFormElements('priority', $this->formId, true);
 
-		$newFormElements		= [
-			$newPriority - 1	=> $element
-		];
+		foreach($this->formElements	as &$element){
+			if($element->priority != $newIndexes[$element->id]){
+				$element->priority	= $newIndexes[$element->id];
 
-		$untouchedMin			= min($oldPriority, $newPriority);
-		$untouchedMax			= max($oldPriority, $newPriority);
-		if($oldPriority == -1){
-			$untouchedMin	= $newPriority;
-		}
-
-		foreach($this->formElements as $el){
-			// skip the element with the new priority
-			if($el->id == $element->id){
-				if($el->priority != $newPriority){
-					$el->priority	= $newPriority;
-					$result 		= $this->updatePriority($el);
-
-					if(is_wp_error($result)){
-						return $result;
-					}
-				}
-				continue;
-			}
-
-			if($el->priority < $untouchedMin){
-				$newFormElements[$el->priority - 1]	= $el;
-			}elseif($el->priority > $untouchedMax){
-				$newFormElements[$el->priority]	= $el;
-			}else{
-				if($oldPriority == -1){
-					// we inserted a new element
-					$newFormElements[$el->priority]	= $el;
-
-					$el->priority	= $el->priority + 1;
-				}elseif($oldPriority < $newPriority){
-					// we moved an element down
-					$el->priority	= $el->priority - 1;
-
-					$newFormElements[$el->priority]	= $el;
-				}else{
-					// me moved an element up
-					$el->priority	= $el->priority + 1;
-
-					$newFormElements[$el->priority]	= $el;
-				}
-
-				$result 		= $this->updatePriority($el);
-
-				if(is_wp_error($result)){
-					return $result;
-				}
+				$this->updatePriority($element);
 			}
 		}
-
-		$this->formElements	= $newFormElements;
-
-		return;
 	}
 
 	/**

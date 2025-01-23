@@ -136,22 +136,35 @@ async function requestEditElementData(target){
 
 async function addFormElement(target){
 	let form		= target.closest('form');
-	let response	= await FormSubmit.submitForm(target, 'forms/add_form_element');
+
+	let referenceNode		= document.querySelector('.form_elements .clicked');
+	if(referenceNode == null){
+		window.location.href = window.location.href+'&formbuilder=true';
+	}
+	referenceNode.classList.remove('clicked');
+	referenceNode.closest('.form_element_wrapper').insertAdjacentHTML('afterEnd', 
+		`<div class='loadergif_wrapper form_element_wrapper' data-id=-1 data-priority=${referenceNode.dataset.priority + 1}><img class='loadergif' src='${sim.loadingGif}' width=50 loading='lazy'>Loading element...</div>`
+	)
+	
+	fixElementNumbering(referenceNode.closest('form'));
+
+	let indexes	= {};
+	document.querySelectorAll(`.form_element_wrapper`).forEach(el => {
+		indexes[el.dataset.id]	= el.dataset.priority;
+	})
+	
+	indexes	= JSON.stringify(indexes);
+
+	let response	= await FormSubmit.submitForm(target, 'forms/add_form_element', indexes);
 
 	if(response){
 		if(form.querySelector('[name="element_id"]').value == ''){
 			//First clear any previous input
 			clearFormInputs();
+			
+			// Replace loader with element
+			document.querySelectorAll(`.loadergif_wrapper`).forEach(el=>el.outerHTML = response.html);
 
-			let referenceNode		= document.querySelector('.form_elements .clicked');
-			if(referenceNode == null){
-				window.location.href = window.location.href+'&formbuilder=true';
-			}
-			referenceNode.classList.remove('clicked');
-			referenceNode.closest('.form_element_wrapper').insertAdjacentHTML('afterEnd', response.html)
-			
-			fixElementNumbering(referenceNode.closest('form'));
-			
 			//add resize listener
 			form.querySelectorAll('.resizer').forEach(el=>{resizeOb.observe(el);});
 		}else{
@@ -219,17 +232,18 @@ async function reorderformelements(event){
 	if(!reorderingBusy){
 		reorderingBusy = true;
 
-		let oldIndex	= parseInt(event.item.dataset.priority);
-
 		fixElementNumbering(event.item.closest('form'));
-		
-		let difference = event.newIndex-event.oldIndex
 
 		let formData = new FormData();
 		formData.append('form_id', event.item.dataset.formid);
 		formData.append('el_id', event.item.dataset.id);
-		formData.append('old_index', oldIndex);
-		formData.append('new_index', (oldIndex + difference));
+
+		let indexes	= {};
+		document.querySelectorAll(`.form_element_wrapper`).forEach(el => {
+			indexes[el.dataset.id]	= el.dataset.priority;
+		})
+		
+		formData.append('indexes', JSON.stringify(indexes));
 		
 		let response	= await FormSubmit.fetchRestApi('forms/reorder_form_elements', formData);
 

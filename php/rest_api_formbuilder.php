@@ -105,17 +105,8 @@ function restApiInitForms() {
 						return is_numeric($elementId);
 					}
 				),
-				'old_index'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($oldIndex){
-						return is_numeric($oldIndex);
-					}
-				),
-				'new_index'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($newIndex){
-						return is_numeric($newIndex);
-					}
+				'indexes'		=> array(
+					'required'	=> true
 				)
 			)
 		)
@@ -443,8 +434,15 @@ function addFormElement(){
 		}
 
 		$element->id	= $simForms->insertElement($element);
+
+		// The current indexes without the new element
+		$newIndexes 	= (array)json_decode(sanitize_text_field(stripslashes($_POST['extra'])));
+
+		// The new element has an unknow id of -1, replace it with the real id.
+		$newIndexes[$element->id]	= $newIndexes[-1];
+		unset($newIndexes[-1]);
 		
-		$simForms->reorderElements(-1, $element->priority, $element);
+		$simForms->reorderElements($newIndexes, $element);
 	}
 		
 	$formBuilderForm	= new FormBuilderForm();
@@ -522,12 +520,11 @@ function reorderFormElements(){
 
 	$formBuilder->formId	= $_POST['form_id'];
 	
-	$oldIndex 				= $_POST['old_index'];
-	$newIndex				= $_POST['new_index'];
+	$newIndexes 			= (array)json_decode(sanitize_text_field(stripslashes($_POST['indexes'])));
 
 	$element				= $formBuilder->getElementById($_POST['el_id']);
 	
-	$formBuilder->reorderElements($oldIndex, $newIndex, $element);
+	$formBuilder->reorderElements($newIndexes, $element);
 	
 	return "Succesfully saved new form order";
 }
