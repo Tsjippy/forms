@@ -10,6 +10,7 @@
 - bug in editing splitted data
 - database creation
 - error when ' in element name
+- reordering of elements
 
 ### Updated
 
