@@ -475,20 +475,11 @@ function removeElement(){
 	
 	//Loop over all elements and give them the new priority
 	foreach($formBuilder->formElements as $key=>$el){
-		if($el->priority != $key+1){
+		if($el->priority != $key + 1){
+			$el->priority = $key + 1;
 			//Update the database
-			$wpdb->update($formBuilder->elTableName,
-				array(
-					'priority'	=> $key+1
-				),
-				array(
-					'id'		=> $el->id
-				),
-			);
-			
-			if(!empty($wpdb->last_error)){
-				return new \WP_Error('Error', $wpdb->print_error());
-			}
+
+			$formBuilder->updatePriority($el);
 		}
 	}
 
