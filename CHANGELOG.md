@@ -6,13 +6,19 @@
 ### Changed
 
 ### Fixed
+
+### Updated
+
+## [8.1.6] - 2025-01-23
+
+
+### Fixed
 - form id setting
 - bug in editing splitted data
 - database creation
 - error when ' in element name
 - reordering of elements
-
-### Updated
+- element reordering
 
 ## [8.1.4] - 2025-01-20
 
