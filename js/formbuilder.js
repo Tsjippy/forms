@@ -554,6 +554,10 @@ function addRuleRow(row){
 function addOppositeCondition(clone, target){
 	//Set values to opposite
 	clone.querySelectorAll('.element_condition').forEach(function(el){
+		if(el.matches('select:not(.nonice,.swal2-select)')){
+			el._niceselect = NiceSelect.bind(el, {searchable: true});
+		}
+		
 		if(el.tagName == 'SELECT' && el.classList.contains('equation')){
 			//remove all default selected
 			FormFunctions.removeDefaultSelect(el);
@@ -572,7 +576,9 @@ function addOppositeCondition(clone, target){
 			}
 			
 			//reflect changes in niceselect
-			el._niceselect.update();
+			if(el._niceselect != undefined){
+				el._niceselect.update();
+			}
 		}else if(el.type == 'radio' && el.classList.contains('element_condition') && (el.value == 'show' || el.value == 'hide')){
 			if(!el.checked){
 				el.checked = true;

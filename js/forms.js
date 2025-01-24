@@ -282,7 +282,10 @@ export function updateMultiStepControls(form){
 	let visibleFormsteps	= form.querySelectorAll('.formstep:not(.hidden)');
 	let stepIndicators		= form.querySelectorAll('.multistepcontrols_wrapper .step');
 
-	// update step circles amount
+	// show all step circles
+	stepIndicators.forEach(el => el.classList.remove('hidden'));
+
+	// hide some step circles if needed
 	for(let x = visibleFormsteps.length; x < formsteps.length; x++){
 		stepIndicators[x].classList.add('hidden');
 	}
