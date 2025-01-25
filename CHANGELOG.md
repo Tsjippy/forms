@@ -8,6 +8,7 @@
 ### Fixed
 - formstep indicators
 - issue with column rights setting
+- form import
 
 ### Updated
 
