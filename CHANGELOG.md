@@ -7,6 +7,7 @@
 
 ### Fixed
 - formstep indicators
+- issue with column rights setting
 
 ### Updated
 
