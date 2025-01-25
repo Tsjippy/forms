@@ -1912,6 +1912,8 @@ class FormBuilderForm extends SimForms{
 						SIM\printArray("query failed: ".$query."\n{$wpdb->last_error}");
 
 						echo "<div class='error'>Import failed.<br>{$wpdb->last_error}</div>";
+
+						return;
 					}else{
 						// First line of the form
 						if($formId == -1){
