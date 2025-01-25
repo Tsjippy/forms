@@ -6,11 +6,16 @@
 ### Changed
 
 ### Fixed
+
+### Updated
+
+## [8.1.7] - 2025-01-25
+
+
+### Fixed
 - formstep indicators
 - issue with column rights setting
 - form import
-
-### Updated
 
 ## [8.1.6] - 2025-01-23
 
