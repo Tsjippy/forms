@@ -289,20 +289,26 @@ function saveColumnSettings($settings='', $shortcodeId=''){
 		return new \WP_Error('forms', 'No shortcode id provided');
 	}
 
-	foreach($settings as $key=>$setting){
+	foreach($settings as &$setting){
 		if(!is_array($setting)){
 			continue;
 		}
+
+		if(isset($setting['view_right_roles'][0]) && count($setting['view_right_roles']) == 1){
+			$setting['view_right_roles']	= explode(',', $setting['view_right_roles'][0]);
+		}
 		
 		//if there are edit rights defined
-		if(isset($setting['edit_right_roles'])){
+		if(isset($setting['edit_right_roles']) && count($setting['edit_right_roles']) == 1){
+			$setting['edit_right_roles']	= explode(',', $setting['edit_right_roles'][0]);
+
 			//create view array if it does not exist
 			if(!is_array($setting['view_right_roles'])){
 				$setting['view_right_roles'] = [];
 			}
 			
 			//merge and save
-			$settings[$key]['view_right_roles'] = array_merge($setting['view_right_roles'], $setting['edit_right_roles']);
+			$setting['view_right_roles'] = array_merge($setting['view_right_roles'], $setting['edit_right_roles']);
 		}
 	}
 	

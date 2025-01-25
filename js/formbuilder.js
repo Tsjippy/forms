@@ -169,7 +169,7 @@ async function addFormElement(target){
 			form.querySelectorAll('.resizer').forEach(el=>{resizeOb.observe(el);});
 		}else{
 			//Runs after an element update
-			document.querySelector('.form_elements .clicked').closest('.form_element_wrapper').outerHTML = response.html;
+			referenceNode.closest('.form_element_wrapper').outerHTML = response.html;
 		}
 
 		Main.hideModals();

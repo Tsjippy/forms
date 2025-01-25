@@ -1822,16 +1822,16 @@ class FormBuilderForm extends SimForms{
 
 		$this->getForm($formId);
 
-		$tableName		= str_replace($wpdb->prefix, '%PREFIX%', $this->tableName);
-		$elTableName	= str_replace($wpdb->prefix, '%PREFIX%', $this->elTableName);
+		$tableName			= str_replace($wpdb->prefix, '%PREFIX%', $this->tableName);
+		$elTableName		= str_replace($wpdb->prefix, '%PREFIX%', $this->elTableName);
 
-		$name			= esc_sql($this->formData->name);
+		$name				= esc_sql($this->formData->name);
 
 		$query				= "SELECT * FROM {$this->tableName} WHERE id= '$formId'";
 		$result				= $wpdb->get_results($query)[0];
 
 		// Fix the settings
-		$result->form_url		= "%FORMURL%";
+		$result->form_url	= "%FORMURL%";
 
 		$result->emails	= maybe_unserialize($result->emails);
 		if(!empty($result->emails)){

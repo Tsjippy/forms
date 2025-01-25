@@ -1352,7 +1352,7 @@ class DisplayFormResults extends DisplayForm{
 									<select class='column_settings inline' name='column_settings[<?php echo $elementIndex;?>][edit_right_roles][]' multiple='multiple' style="margin-right:0px;">
 										<?php
 										foreach($editRoles as $key=>$roleName){
-											if(isset($columnSetting['edit_right_roles']) && @in_array($key,(array)$columnSetting['edit_right_roles'])){
+											if(isset($columnSetting['edit_right_roles']) && @in_array($key, (array)$columnSetting['edit_right_roles'])){
 												$selected = 'selected="selected"';
 											}else{
 												$selected = '';
