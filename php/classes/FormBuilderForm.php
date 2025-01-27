@@ -1309,13 +1309,13 @@ class FormBuilderForm extends SimForms{
 					<h3>Warning conditions</h3>
 					<label class="option-label">
 						<input type="checkbox" class="formbuilder" name="formfield[mandatory]" value="true" <?php if($element != null && $element->mandatory){echo 'checked';}?>>
-						Check if people should be warned by e-mail/signal if they have not filled in this field.
+						People should be warned by e-mail/signal if they have not filled in this field.
 					</label><br>
 					<br>
 
 					<label class="option-label">
 						<input type="checkbox" class="formbuilder" name="formfield[recommended]" value="true" <?php if($element != null && $element->recommended){echo 'checked';}?>>
-						Check if people should be notified on their homepage if they have not filled in this field.
+						People should be notified on their homepage if they have not filled in this field.
 					</label><br>
 					<br>
 
@@ -1334,11 +1334,11 @@ class FormBuilderForm extends SimForms{
 					?>
 					<label class="option-label">
 						<input type="checkbox" class="formbuilder" name="formfield[required]" value="true" <?php if($element != null && $element->required){echo 'checked';}?>>
-						Check if this should be a required field
+						This should be a required field
 					</label><br>
 					<label class="option-label">
 						<input type="checkbox" class="formbuilder" name="formfield[mandatory]" value="true" <?php if($element != null && $element->mandatory){echo 'checked';}?>>
-						Check if this should be a conditional required field: its only required when visible
+						This should be a conditional required field: its only required when visible
 					</label><br>
 					<br>
 					<?php
@@ -1348,7 +1348,7 @@ class FormBuilderForm extends SimForms{
 			<br>
 			<label class="option-label">
 				<input type="checkbox" class="formbuilder" name="formfield[hidden]" value="true" <?php if($element != null && $element->hidden){echo 'checked';}?>>
-				Check if this should be a hidden field
+				Hidden field
 			</label><br>
 
 			<?php
@@ -1897,7 +1897,7 @@ class FormBuilderForm extends SimForms{
 		foreach(file($path) as $line) {
 			$oldId	= -1;
 			if(!empty($line)){
-				$query	= str_replace(['%PREFIX%', '%SITEURL%', '%FORMID%'], [$wpdb->prefix, SITEURL, $formId], $line);
+				$query	= str_replace(['%PREFIX%', '%FORMURL%', '%FORMID%'], [$wpdb->prefix, SITEURL, $formId], $line);
 				
 				if(!empty(trim($query))){
 					// Find the old id
@@ -1909,7 +1909,7 @@ class FormBuilderForm extends SimForms{
 					$result	= $wpdb->query($query);
 
 					if(!$result){
-						SIM\printArray("query failed: ".$query."\n{$wpdb->last_error}");
+						SIM\printArray("query failed: $query\n{$wpdb->last_error}");
 
 						echo "<div class='error'>Import failed.<br>{$wpdb->last_error}</div>";
 
@@ -2015,7 +2015,7 @@ class FormBuilderForm extends SimForms{
 		// Update the form url
 		$wpdb->update($this->tableName,
 			array(
-				'form_url' 	=> $this->formData->form_url
+				'form_url' 	=> $url
 			),
 			array(
 				'id'		=> $this->formData->id,

@@ -174,6 +174,7 @@ class SimForms{
 
 			// Form does not exist yet
 			if(empty($result)){
+				SIM\printArray("Form does not exist. Query used is '$query'");
 				$this->insertForm();
 				$this->formData 	=  new \stdClass();
 			}else{

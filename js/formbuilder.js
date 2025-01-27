@@ -138,14 +138,16 @@ async function addFormElement(target){
 	let form		= target.closest('form');
 
 	let referenceNode		= document.querySelector('.form_elements .clicked');
+	let wrapper				= referenceNode.closest('.form_element_wrapper');
+
 	if(referenceNode == null){
 		window.location.href = window.location.href+'&formbuilder=true';
 	}
 	referenceNode.classList.remove('clicked');
-	referenceNode.closest('.form_element_wrapper').insertAdjacentHTML('afterEnd', 
-		`<div class='loadergif_wrapper form_element_wrapper' data-id=-1 data-priority=${referenceNode.dataset.priority + 1}><img class='loadergif' src='${sim.loadingGif}' width=50 loading='lazy'>Loading element...</div>`
-	)
-	
+	wrapper.insertAdjacentHTML('afterEnd', 
+		`<div class='loadergif_wrapper form_element_wrapper' data-id=-1 data-priority=${parseInt(wrapper.dataset.priority) + 1}><img class='loadergif' src='${sim.loadingGif}' width=50 loading='lazy'>Loading element...</div>`
+	);
+
 	fixElementNumbering(referenceNode.closest('form'));
 
 	let indexes	= {};
