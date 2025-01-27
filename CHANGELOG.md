@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- element insertion
 
 ### Updated
+
+## [8.1.8] - 2025-01-27
+
+
+### Fixed
+- element insertion
 
 ## [8.1.7] - 2025-01-25
 
