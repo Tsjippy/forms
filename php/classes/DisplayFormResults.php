@@ -402,7 +402,9 @@ class DisplayFormResults extends DisplayForm{
 			}
 		}
 
-		if(count($this->submissions) == 1){
+		if(!empty($this->splittedSubmissions) && count($this->splittedSubmissions) == 1){
+			$this->submission	= array_values($this->splittedSubmissions)[0];
+		}elseif(count($this->submissions) == 1){
 			$this->submission	= array_values($this->submissions)[0];
 		}elseif(!empty($submissionId)){
 			$this->submission	= $this->submissions;
@@ -1131,14 +1133,8 @@ class DisplayFormResults extends DisplayForm{
 			
 			//if the user has one of the roles defined for this element
 			if($elementEditRights && $elementName != 'id'){
-				
 				$class	.= ' edit_forms_table';
 				$class	= trim($class);
-
-				// check if we can update the element name with the indexed one
-				if(isset($values['elementindex']) && $this->getElementByName($name.'['.$values['elementindex'].']['.$elementName.']')){
-					$elementName	= $name.'['.$values['elementindex'].']['.$elementName.']';
-				}
 				$class	= " class='$class' data-name='$elementName'";
 			}elseif(!empty($class)){
 				$class	= trim($class);
@@ -1151,8 +1147,13 @@ class DisplayFormResults extends DisplayForm{
 			}
 
 			$oldValue		= json_encode($orgFieldValue);
-			
-			$element		= $this->getElementByName($elementName);
+
+			// Use the indexed name to get the element, otherwise we might get the wrong
+			if(isset($values['elementindex']) && $this->getElementByName($name.'['.$values['elementindex'].']['.$elementName.']')){
+				$element		= $this->getElementByName( $name.'['.$values['elementindex'].']['.$elementName.']');
+			}else{			
+				$element		= $this->getElementByName($elementName);
+			}
 
 			$style			= '';
 			if(!empty($columnSetting['width'])){

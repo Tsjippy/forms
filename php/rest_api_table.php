@@ -501,34 +501,47 @@ function editValue(){
 	$transValue		= $formTable->transformInputData($newValue, $elementName, $formTable->submission->formresults);
 	
 	$subId			= $_POST['subid'];
+	// By default -> submission is the splitted submission, we want the original
+	if(is_numeric($subId)){
+		$formTable->submission		= $formTable->submissions[0];
+	}
 
+	$updated		= false;
+
+	if(isset($formTable->submission->formresults[$elementName])){
+		$oldValue											= $formTable->submission->formresults[$elementName];
+		$formTable->submission->formresults[$elementName]	= $newValue;
+
+		$updated											= true;
 	// If there is a sub id set and this field is not a main field
-	if(!empty($subId) && is_numeric($subId)){
+	}elseif(is_numeric($subId)){
 		$splitElements				= $formTable->formData->split;
 
 		foreach($splitElements as $index){
-			$elementName			= $formTable->getElementById($index, 'name');
 
-			preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $elementName, $matches);
+			$splitElementName			= $formTable->getElementById($index, 'name');
+
+			preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $splitElementName, $matches);
 
 			if(isset($matches[1])){
-				$elementName	= $matches[1];
+				$splitElementName	= $matches[1];
 			}
 
 			//check if this is a main field
-			if(isset($formTable->submission->formresults[$elementName][$subId][$elementName])){
-				$oldValue	= $formTable->submission->formresults[$elementName][$subId][$elementName];
-				$formTable->submission->formresults[$elementName][$subId][$elementName]	= $newValue;
-			}elseif(isset($formTable->submission->formresults[$elementName])){
-				$oldValue	= $formTable->submission->formresults[$elementName];
-				$formTable->submission->formresults[$elementName]	= $newValue;
+			if(isset($formTable->submission->formresults[$splitElementName][$subId][$elementName])){
+				$oldValue																		= $formTable->submission->formresults[$splitElementName][$subId][$elementName];
+				$formTable->submission->formresults[$splitElementName][$subId][$elementName]	= $newValue;
+
+				$updated																		= true;
+				break;
 			}
-			$message = "Succesfully updated '$elementName' to $transValue";
 		}
-	}else{
-		$oldValue	= $formTable->submission->formresults[$elementName];
-		$formTable->submission->formresults[$elementName]	= $newValue;
+	}
+
+	if($updated){
 		$message = "Succesfully updated '$elementName' to $transValue";
+	}else{
+		return new WP_Error('submission-update', 'Could not update the value');
 	}
 
 	$message	= apply_filters('sim-forms-submission-updated', $message, $formTable, $elementName, $oldValue, $newValue);
