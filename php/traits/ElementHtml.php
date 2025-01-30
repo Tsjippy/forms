@@ -133,7 +133,7 @@ trait ElementHtml{
 				
 				//Remove starting or ending spaces and make it lowercase
 				$value 			= trim($split[0]);
-				$escapedValue 	= str_replace([' ', ',', '(', ')'], ['_', '', '', ''], $value);
+				$escapedValue 	= str_replace([',', '(', ')'], ['', '', ''], $value);
 				
 				if(!empty($split[1])){
 					$displayName	= $split[1];
