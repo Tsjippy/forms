@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- formbuilder loader removal after element update
 
 ### Updated
 
