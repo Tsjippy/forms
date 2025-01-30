@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- find element functions
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.2.1] - 2025-01-30
+
+
+### Added
+- find element functions
 
 ## [8.2.0] - 2025-01-30
 
