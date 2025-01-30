@@ -160,6 +160,7 @@ async function addFormElement(target){
 	let response	= await FormSubmit.submitForm(target, 'forms/add_form_element', indexes);
 
 	if(response){
+		// New Element
 		if(form.querySelector('[name="element_id"]').value == ''){
 			//First clear any previous input
 			clearFormInputs();
@@ -172,6 +173,9 @@ async function addFormElement(target){
 		}else{
 			//Runs after an element update
 			referenceNode.closest('.form_element_wrapper').outerHTML = response.html;
+
+			// Remove loader
+			document.querySelector(`.loadergif_wrapper`).remove()
 		}
 
 		Main.hideModals();
