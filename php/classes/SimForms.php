@@ -562,6 +562,64 @@ class SimForms{
 	}
 
 	/**
+	 * Finds the user name element in a form
+	 *
+	 * @return	string	the element name or false if no user id element is found
+	 */
+	public function findUserNameElementName(){
+		// find the user id element
+		$userNameKey	= false;
+
+		if($this->getElementByName('name')){
+			$userNameKey	= 'name';
+		}elseif($this->getElementByName('fullname')){
+			$userNameKey	= 'fullname';
+		}elseif($this->getElementByName('firstname')){
+			$userNameKey	= 'firstname';
+		}elseif($this->getElementByName('lasttname')){
+			$userNameKey	= 'lasttname';
+		}
+
+		return $userNameKey;
+	}
+
+	/**
+	 * Finds the phonenumber element in a form
+	 *
+	 * @return	string	the element name or false if no phonenumber element is found
+	 */
+	public function findPhoneNumberElementName(){
+		// find the user id element
+		$phonenumberKey	= false;
+
+		if($this->getElementByName('phone')){
+			$phonenumberKey	= 'phone';
+		}elseif($this->getElementByName('phonenumber')){
+			$phonenumberKey	= 'phonenumber';
+		}
+
+		return $phonenumberKey;
+	}
+
+	/**
+	 * Finds the e-mail element in a form
+	 *
+	 * @return	string	the element name or false if no e-mail element is found
+	 */
+	public function findEmailNumberElementName(){
+		// find the user id element
+		$emailKey	= false;
+
+		if($this->getElementByName('email')){
+			$emailKey	= 'email';
+		}elseif($this->getElementByName('e-mail')){
+			$emailKey	= 'e-mail';
+		}
+
+		return $emailKey;
+	}
+
+	/**
 	 * Get all elements belonging to the current form
 	 *
 	 * @param	string	$sortCol	the column to sort on. Default empty

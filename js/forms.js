@@ -629,7 +629,6 @@ export function changeVisibility(action, el, functionRef){
 		}
 		wrapper.classList.remove('hidden');
 	}
-	//form.querySelector("[name='$conditionalFieldName']").closest('.hidden') == null;
 
 	//create a new event
 	let evt = new Event('input');

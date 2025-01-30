@@ -143,7 +143,7 @@ async function addFormElement(target){
 	if(referenceNode == null){
 		window.location.href = window.location.href+'&formbuilder=true';
 	}
-	referenceNode.classList.remove('clicked');
+
 	wrapper.insertAdjacentHTML('afterEnd', 
 		`<div class='loadergif_wrapper form_element_wrapper' data-id=-1 data-priority=${parseInt(wrapper.dataset.priority) + 1}><img class='loadergif' src='${sim.loadingGif}' width=50 loading='lazy'>Loading element...</div>`
 	);
@@ -173,15 +173,17 @@ async function addFormElement(target){
 		}else{
 			//Runs after an element update
 			referenceNode.closest('.form_element_wrapper').outerHTML = response.html;
-
-			// Remove loader
-			document.querySelector(`.loadergif_wrapper`).remove()
 		}
 
 		Main.hideModals();
 
 		Main.displayMessage(response.message);
+
+		referenceNode.classList.remove('clicked');
 	}
+
+	// Remove loaders
+	document.querySelectorAll(`.loadergif_wrapper`).forEach(el=>el.remove());
 }
 
 async function sendElementSize(el, widthPercentage){
