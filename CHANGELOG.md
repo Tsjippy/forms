@@ -7,6 +7,7 @@
 
 ### Fixed
 - formbuilder loader removal after element update
+- do not replace spaces with underscores in checkbox values
 
 ### Updated
 
