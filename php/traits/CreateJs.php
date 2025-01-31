@@ -563,7 +563,7 @@ trait CreateJs{
                 $minifiedJs
             );
 
-            $minifiedJs     .= "\n\n".apply_filters('sim_form_extra_js', '', $this->formName, true);
+            $minifiedJs     .= "\n\n".apply_filters('sim_form_extra_js', '', $this, true);
             // Create minified version
             //$minifier = new Minify\CSS($js);
             //$minifier->minify($this->jsFileName.'.min.js');

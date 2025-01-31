@@ -1070,7 +1070,7 @@ class DisplayFormResults extends DisplayForm{
 				}
 					
 				// Add sub id if this is an sub value
-				if($subId > -1 && $id > -1){
+				if($subId > -1){
 					$element	= $this->getElementById($id);
 					preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $element->name, $matches);
 					$name	= $element->name;

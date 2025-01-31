@@ -31,6 +31,10 @@ class SaveFormSettings extends SimForms{
 			return new WP_Error('forms', $wpdb->last_error);
 		}
 
+		// Update the element in the formElements array
+		$oldElement								= $this->getElementById($element->id);
+		$this->formElements[$oldElement->index]	= $element;
+
 		if($this->formData == null){
 			$this->getForm($_POST['formid']);
 		}
@@ -46,7 +50,7 @@ class SaveFormSettings extends SimForms{
 			return new WP_Error('forms', $wpdb->last_error);
 		}
 
-		do_action('sim-after-formelement-updated', $element, $this);
+		do_action('sim-after-formelement-updated', $element, $this, $oldElement);
 
 		return $result;
 	}

@@ -467,6 +467,9 @@ function getInputHtml(){
 	}
 
 	// get value
+	if(isset($_POST['subid'])){
+		$subId = $_POST['subid'];
+	}
 
 	// Check if we are dealing with an split element with form name[X]name
 	preg_match('/(.*?)\[[0-9]\]\[(.*?)\]/', $element->name, $matches);
@@ -476,10 +479,13 @@ function getInputHtml(){
 	}elseif(isset($formTable->submission->formresults[str_replace('[]', '', $element->name)])){
 		$curValue	= $formTable->submission->formresults[str_replace('[]', '', $element->name)];
 	}elseif(isset($formTable->submission->formresults[$matches[1]])){
-		$subId = $_POST['subid'];
 		if(is_numeric($subId) && isset($formTable->submission->formresults[$matches[1]][$subId][$matches[2]])){
 			$curValue	= $formTable->submission->formresults[$matches[1]][$subId][$matches[2]];
 		}
+	}
+
+	if(is_array($curValue) && isset($subId) && !empty($curValue[$subId])){
+		$curValue	= $curValue[$subId];
 	}
 
 	// Get element html with the value allready set
@@ -510,6 +516,12 @@ function editValue(){
 
 	if(isset($formTable->submission->formresults[$elementName])){
 		$oldValue											= $formTable->submission->formresults[$elementName];
+
+		if(is_array($oldValue) && is_numeric($subId) && isset($oldValue[$subId])){
+			$temp			= $oldValue;
+			$temp[$subId]	= $newValue;
+			$newValue		= $temp;
+		}
 		$formTable->submission->formresults[$elementName]	= $newValue;
 
 		$updated											= true;

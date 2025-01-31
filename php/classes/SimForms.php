@@ -394,7 +394,7 @@ class SimForms{
 	 *
 	 * @return	object|array|string|false			The element or element property
 	 */
-	public function getElementById($id, $key=''){
+	public function getElementById(int $id, $key=''){
 		if(empty($id)){
 			return false;
 		}
@@ -416,6 +416,7 @@ class SimForms{
 		$elementIndex	= $this->formData->elementMapping['id'][$id];
 					
 		$element		= $this->formElements[$elementIndex];
+		$element->index	= $elementIndex;
 		
 		if(empty($key)){
 			return $element;
@@ -482,7 +483,9 @@ class SimForms{
 		$elements		= [];
 		
 		foreach($elementIndexes as $index){
-			$elements[]	= $this->formElements[$index];
+			$element		= $this->formElements[$index];
+			$element->index	= $index;
+			$elements[]		= $element;
 		}
 
 		if(!$single){
@@ -530,7 +533,9 @@ class SimForms{
 		$elements		= [];
 		
 		foreach($elementIndexes as $index){
-			$elements[]	= $this->formElements[$index];
+			$element		= $this->formElements[$index];
+			$element->index	= $index;
+			$elements[]		= $element;
 		}
 
 		return $elements;
@@ -756,6 +761,6 @@ class SimForms{
 			$this->submission->formresults	= maybe_unserialize($this->submission->formresults);
 		}
 
-
+		return $this->submission;
 	}
 }
