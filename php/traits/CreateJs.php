@@ -524,7 +524,7 @@ trait CreateJs{
         /*
         ** EXTERNAL JS
         */
-        $extraJs   = apply_filters('sim_form_extra_js', '', $this->formName, false);
+        $extraJs   = apply_filters('sim_form_extra_js', '', $this, false);
         if(!empty($extraJs)){
             if(empty($checks)){
                 $js = $extraJs;
