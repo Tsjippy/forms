@@ -3,6 +3,7 @@
 
 ### Added
 - edit value which did not exist on form submission
+- getSubmission function
 
 ### Changed
 
