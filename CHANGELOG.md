@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- edit value which did not exist on form submission
 
 ### Changed
 
