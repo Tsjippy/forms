@@ -5,6 +5,7 @@
 - double check form ordering
 
 ### Changed
+- sim_form_extra_js filter
 
 ### Fixed
 - bug while adding new elements
