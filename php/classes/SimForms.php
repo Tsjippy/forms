@@ -184,7 +184,7 @@ class SimForms{
 				$this->formData->full_right_roles	= maybe_unserialize($this->formData->full_right_roles);
 				$this->formData->submit_others_form	= maybe_unserialize($this->formData->submit_others_form);				
 				
-				$formId				= $this->formData->id;
+				$formId								= $this->formData->id;
 			}
 		}
 
