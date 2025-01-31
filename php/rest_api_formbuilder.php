@@ -434,14 +434,16 @@ function addFormElement(){
 
 		$element->id	= $simForms->insertElement($element);
 
-		// The current indexes without the new element
-		$newIndexes 	= (array)json_decode(sanitize_text_field(stripslashes($_POST['extra'])));
+		if(!empty($_POST['extra'])){
+			// The current indexes without the new element
+			$newIndexes 	= (array)json_decode(sanitize_text_field(stripslashes($_POST['extra'])));
 
-		// The new element has an unknow id of -1, replace it with the real id.
-		$newIndexes[$element->id]	= $newIndexes[-1];
-		unset($newIndexes[-1]);
-		
-		$simForms->reorderElements($newIndexes, $element);
+			// The new element has an unknow id of -1, replace it with the real id.
+			$newIndexes[$element->id]	= $newIndexes[-1];
+			unset($newIndexes[-1]);
+			
+			$simForms->reorderElements($newIndexes, $element);
+		}
 	}
 		
 	$formBuilderForm	= new FormBuilderForm();
