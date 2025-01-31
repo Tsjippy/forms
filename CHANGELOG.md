@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [8.2.3] - 2025-01-31
+
+
+### Added
 - double check form ordering
 
 ### Changed
@@ -9,8 +20,6 @@
 
 ### Fixed
 - bug while adding new elements
-
-### Updated
 
 ## [8.2.2] - 2025-01-31
 
