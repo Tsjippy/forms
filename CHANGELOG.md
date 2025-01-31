@@ -2,14 +2,19 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- edit value which did not exist on form submission
-- getSubmission function
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.2.2] - 2025-01-31
+
+
+### Added
+- edit value which did not exist on form submission
+- getSubmission function
 
 ## [8.2.1] - 2025-01-30
 
