@@ -31,6 +31,7 @@ class SimForms{
 	public $shortcodeId;
 	public $onlyOwn;
 	public $all;
+	public $submission;
 
 	public function __construct(){
 		global $wpdb;
@@ -734,5 +735,27 @@ class SimForms{
 			$displayForm	= new DisplayForm($atts);
 			return $displayForm->showForm();
 		}
+	}
+
+	/**
+	 * Get a singleform submission
+	 *
+	 * @param	int		$submissionId	The id of a submission
+	 */
+	public function getSubmission($submissionId){
+		global $wpdb;
+
+		$query	= "SELECT * FROM $this->submissionTableName WHERE id = $submissionId";
+
+		$result	= $wpdb->get_results($query);
+
+		if(isset($result[0])){
+
+			$this->submission	= $result[0];
+
+			$this->submission->formresults	= maybe_unserialize($this->submission->formresults);
+		}
+
+
 	}
 }
