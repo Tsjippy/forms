@@ -536,6 +536,9 @@ function editValue(){
 				break;
 			}
 		}
+	}else{
+		$formTable->submission->formresults[$elementName]	= $newValue;
+		$updated											= true;
 	}
 
 	if($updated){
