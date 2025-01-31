@@ -155,7 +155,7 @@ async function addFormElement(target){
 		indexes[el.dataset.id]	= el.dataset.priority;
 	})
 	
-	indexes	= JSON.stringify(indexes);
+	indexes			= JSON.stringify(indexes);
 
 	let response	= await FormSubmit.submitForm(target, 'forms/add_form_element', indexes);
 
@@ -477,7 +477,6 @@ async function addConditionRule(target){
 	let condition		= target.closest('.condition_row');
 	let row				= target.closest('.rule_row');
 	let activeButton	= row.querySelector('.active');
-		
 	
 	if(
 		(
@@ -532,7 +531,6 @@ async function addConditionRule(target){
 			//store action 
 			row.querySelector('.combinator').value = target.textContent;
 		}
-		
 			
 	//add new rule at the end
 	}else{

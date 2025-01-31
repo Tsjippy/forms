@@ -383,7 +383,6 @@ function addFormElement(){
 	}
 
 	$element->nicename	= ucfirst(trim($element->name, '[]'));
-	//$element->name		= str_replace(" ", "_", strtolower(trim($element->name)));
 
 	if(
 		in_array($element->type, $simForms->nonInputs) 		&& 	// this is a non-input
@@ -412,7 +411,7 @@ function addFormElement(){
 		}
 
 		if(is_array($val)){
-			$val=serialize($val);
+			$val	= serialize($val);
 		}else{
 			$val	= SIM\deslash($val);
 		}

@@ -100,9 +100,9 @@ class SaveFormSettings extends SimForms{
 	 * Change the order of form elements
 	 *
 	 * @param	array			$newIndexes		The updated array of element id - priority pairs
-	 * @param	object|array	$element		The element to change the priority of
+	 * @param	object			$element		The element to change the priority of
 	 */
-	public function reorderElements($newIndexes, $element) {
+	public function reorderElements(array $newIndexes, $element) {
 		if(!isset($this->formId) && !empty($element) && isset($element->form_id)){
 			$this->formId	= $element->form_id;
 		}
@@ -111,7 +111,7 @@ class SaveFormSettings extends SimForms{
 		$this->getAllFormElements('priority', $this->formId, true);
 
 		foreach($this->formElements	as &$element){
-			if($element->priority != $newIndexes[$element->id]){
+			if(is_numeric($newIndexes[$element->id]) && $element->priority != $newIndexes[$element->id]){
 				$element->priority	= $newIndexes[$element->id];
 
 				$this->updatePriority($element);

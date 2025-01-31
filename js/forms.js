@@ -111,13 +111,13 @@ export function cloneNode(originalNode, clear=true){
 				input._niceselect.clear();
 			}
 		});
-	}else{
-		newNode.querySelectorAll('select').forEach(select => {
-			if(select._niceselect != undefined){
-				select._niceselect = NiceSelect.bind(select,{searchable: true});
-			}
-		});
 	}
+
+	newNode.querySelectorAll('select').forEach(select => {
+		if(select._niceselect == undefined){
+			select._niceselect = NiceSelect.bind(select,{searchable: true});
+		}
+	});
 	
 	return newNode;
 }
