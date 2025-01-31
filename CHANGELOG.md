@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- bug while adding new elements
 
 ### Updated
 
