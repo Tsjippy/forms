@@ -7,6 +7,7 @@
 
 ### Fixed
 - form conditions
+- loop when no multi_end element
 
 ### Updated
 
