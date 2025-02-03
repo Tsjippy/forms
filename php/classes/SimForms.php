@@ -394,7 +394,7 @@ class SimForms{
 	 *
 	 * @return	object|array|string|false			The element or element property
 	 */
-	public function getElementById(int $id, $key=''){
+	public function getElementById($id, $key=''){
 		if(empty($id)){
 			return false;
 		}

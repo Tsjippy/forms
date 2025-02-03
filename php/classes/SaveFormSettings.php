@@ -17,6 +17,8 @@ class SaveFormSettings extends SimForms{
 	 */
 	public function updateFormElement($element){
 		global $wpdb;
+
+		unset($element->index);
 		
 		//Update element
 		$wpdb->update(

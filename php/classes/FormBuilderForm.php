@@ -1631,7 +1631,11 @@ class FormBuilderForm extends SimForms{
 							</select>
 
 							<?php
-							$type	= $this->getElementById($condition['property_value'], 'type');
+							if(!empty($condition['property_value'])){
+								$type	= $this->getElementById($condition['property_value'], 'type');
+							}else{
+								$type	= '';
+							}
 							$hidden	= 'hidden';
 							$hidden2= 'hidden';
 							if(in_array($type, ['date', 'number', 'range', 'week', 'month']) ){
@@ -1987,6 +1991,8 @@ class FormBuilderForm extends SimForms{
 			}
 
 			if($update){
+				unset($element->index);
+				
 				$result = $wpdb->update(
 					$this->elTableName,
 					(array)$element,

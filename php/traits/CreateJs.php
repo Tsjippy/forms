@@ -53,13 +53,18 @@ trait CreateJs{
                         $checkForChange         = false;
                         
                         //Loop over the rules
-                        foreach($condition['rules'] as $ruleIndex=>$rule){
+                        foreach($condition['rules'] as $ruleIndex => $rule){
                             $fieldNumber1	= $ruleIndex * 2  + 1;
                             $fieldNumber2	= $fieldNumber1 + 1;
                             $equation		= str_replace(' value', '', $rule['equation']);
                             
                             //Get field names of the fields who's value we are checking
-                            $conditionalElement		= $this->getElementById($rule['conditional_field']);
+                            if(is_numeric($rule['conditional_field'])){
+                                $conditionalElement		= $this->getElementById($rule['conditional_field']);
+                            }else{
+                                $conditionalElement     = false;
+                            }
+                            
                             if(!$conditionalElement){
                                 $errors[]   = "Element $element->name has an invalid rule";
 

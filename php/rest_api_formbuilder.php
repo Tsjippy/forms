@@ -549,17 +549,17 @@ function requestFormConditionsHtml(){
 
 // DONE
 function saveElementConditions(){
-	$formBuilder	= new SaveFormSettings();
+	$formBuilder		= new SaveFormSettings();
 
-	$elementId		= $_POST['elementid'];
+	$elementId			= $_POST['elementid'];
 	if(!$elementId){
 		return new \WP_Error('forms', "First save the element before adding conditions to it");
 	}
-	$formId			= $_POST['formid'];
+	$formId				= $_POST['formid'];
 	
 	$formBuilder->getForm($formId);
 	
-	$element = $formBuilder->getElementById($elementId);
+	$element 			= $formBuilder->getElementById($elementId);
 	
 	$elementConditions	= $_POST['element_conditions'];
 	if(empty($elementConditions)){
@@ -567,9 +567,9 @@ function saveElementConditions(){
 		
 		$message = "Succesfully removed all conditions for {$element->name}";
 	}else{
-		$element->conditions = serialize($elementConditions);
+		$element->conditions 	= serialize($elementConditions);
 		
-		$message = "Succesfully updated conditions for {$element->name}";
+		$message 				= "Succesfully updated conditions for {$element->name}";
 	}
 
 	$formBuilder->updateFormElement($element);

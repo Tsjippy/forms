@@ -36,27 +36,6 @@ export function removeDefaultSelect(el){
 
 let tinymceSettings = [];
 function prepareForCloning(originalNode){
-	//First remove any nice selects
-	originalNode.querySelectorAll('select').forEach(select => {
-		//remove defaults if it has changed
-		if(select.selectedIndex != -1){
-			if(!select.options[select.selectedIndex].defaultSelected){
-				//remove all default selected
-				removeDefaultSelect(select);
-			}
-		}
-		
-		//Then add a new default selected if needed
-		if(select.selectedOptions.length>0){
-			select.selectedOptions[0].defaultSelected = true;
-		}
-		
-		//remove the original
-		if(select._niceselect != undefined){
-			select._niceselect.destroy();
-		}
-	});
-
 	//also remove any tinymce's
 	if(typeof(tinymce) != 'undefined'){
 		originalNode.querySelectorAll('.wp-editor-area').forEach(el =>{
@@ -71,20 +50,14 @@ function prepareForCloning(originalNode){
 }
 
 export function cloneNode(originalNode, clear=true){
+	console.log('test');
 	prepareForCloning(originalNode);
 	
 	//make a clone
 	let newNode = originalNode.cloneNode(true);
-	
-	//Then add niceselects again after cloning took place
-	originalNode.querySelectorAll('select').forEach(select => {
-		if(select._niceselect != undefined){
-			select._niceselect = NiceSelect.bind(select,{searchable: true});
-			if(select.value == ''){
-				select._niceselect.clear();
-			}
-		}
-	});
+
+	// remove all nice select containers
+	newNode.querySelectorAll('.nice-select').forEach(el=>el.remove());
 	
 	//add tinymce's again
 	originalNode.querySelectorAll('.wp-editor-area').forEach(el =>{
@@ -103,12 +76,9 @@ export function cloneNode(originalNode, clear=true){
 			}
 			
 			//if this is a select
-			if(input.type == "select-one" && input._niceselect != undefined){
+			if(input.type == "select-one"){
 				//remove any defaults
 				removeDefaultSelect(input);
-				
-				input._niceselect = NiceSelect.bind(input,{searchable: true});
-				input._niceselect.clear();
 			}
 		});
 	}
