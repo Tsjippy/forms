@@ -50,14 +50,13 @@ function prepareForCloning(originalNode){
 }
 
 export function cloneNode(originalNode, clear=true){
-	console.log('test');
 	prepareForCloning(originalNode);
 	
 	//make a clone
 	let newNode = originalNode.cloneNode(true);
 
-	// remove all nice select containers
-	newNode.querySelectorAll('.nice-select').forEach(el=>el.remove());
+	// remove niceselect drop down from clone
+	newNode.querySelectorAll('.niceselect').forEach(select => select.remove());
 	
 	//add tinymce's again
 	originalNode.querySelectorAll('.wp-editor-area').forEach(el =>{
@@ -84,9 +83,10 @@ export function cloneNode(originalNode, clear=true){
 	}
 
 	newNode.querySelectorAll('select').forEach(select => {
-		if(select._niceselect == undefined){
-			select._niceselect = NiceSelect.bind(select,{searchable: true});
-		}
+		//remove any defaults
+		removeDefaultSelect(input);
+
+		select._niceselect = NiceSelect.bind(select,{searchable: true});
 	});
 	
 	return newNode;
