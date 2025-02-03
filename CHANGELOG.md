@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- form conditions
-- loop when no multi_end element
 
 ### Updated
+
+## [8.2.5] - 2025-02-03
+
+
+### Fixed
+- form conditions
+- loop when no multi_end element
 
 ## [8.2.4] - 2025-02-03
 
