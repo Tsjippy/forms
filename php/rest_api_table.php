@@ -452,7 +452,7 @@ function getInputHtml(){
 
 	$formTable->getForm($_POST['formid']);
 
-	$formTable->parseSubmissions(null, $_POST['submissionid']);
+	$formTable->getSubmission($_POST['submissionid']);
 
 	$elementId		= sanitize_text_field($_POST['id']);
 
@@ -517,6 +517,7 @@ function editValue(){
 	if(isset($formTable->submission->formresults[$elementName])){
 		$oldValue											= $formTable->submission->formresults[$elementName];
 
+		// Update only one entry in the array
 		if(is_array($oldValue) && is_numeric($subId) && isset($oldValue[$subId])){
 			$temp			= $oldValue;
 			$temp[$subId]	= $newValue;
