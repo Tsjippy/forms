@@ -246,7 +246,7 @@ class DisplayForm extends SubmitForm{
 			//loop over all consequent wrapped elements
 			while(true){
 				$type	= $this->formElements[$i]->type;
-				if($type != 'multi_end'){
+				if($type != 'multi_end' && !empty($this->formElements[$i])){
 					if(!in_array($type, $this->nonInputs)){
 						//Get the field values and count
 						$valueCount		= count($this->getElementValues($this->formElements[$i]));
