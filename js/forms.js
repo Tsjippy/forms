@@ -668,12 +668,6 @@ async function formbuilderSwitch(target){
 	if(response){
 		wrapper.innerHTML	= response.html;
 
-		// Enable any inline js script
-		let scripts = wrapper.getElementsByTagName('script');
-		for (let n = 0; n < scripts.length; n++){
-    		eval(scripts[n].innerHTML)				//run script inside div
-		}
-
 		addStyles(response, document);
 
 		// Activate tinyMce's again
