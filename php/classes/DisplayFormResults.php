@@ -1171,7 +1171,7 @@ class DisplayFormResults extends DisplayForm{
 				$cellOpeningTag	= "<td $class data-id='$element->id' data-oldvalue='$oldValue'";
 			}
 
-			$cellOpeningTag	= apply_filters('sim-formresult-cell-opening-tag', $cellOpeningTag, $this, $columnSetting, $values);
+			$cellOpeningTag	= apply_filters('sim-formresult-cell-opening-tag', $cellOpeningTag.' '. $subIdString, $this, $columnSetting, $values);
 
 			// Add a copy option to the value
 			$copy	= "";
@@ -1179,7 +1179,7 @@ class DisplayFormResults extends DisplayForm{
 				$copy	= "<img class='copy' src='".SIM\pathToUrl(MODULE_PATH.'/pictures/copy.png')."' width='20' height='20' loading='lazy' title='Click to copy cell contents'>";
 			}
 			
-			$rowContents .= "$cellOpeningTag $subIdString $style>$copy$value</td>";
+			$rowContents .= "$cellOpeningTag $style>$copy$value</td>";
 		}
 
 		// none of the cells in this row has a value, only X

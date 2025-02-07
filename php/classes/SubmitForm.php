@@ -472,6 +472,7 @@ class SubmitForm extends SimForms{
 			
 			//Get the id from db before insert so we can use it in emails and file uploads
 			$this->submission->formresults['id']	= $wpdb->get_var( "SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE (TABLE_NAME = '{$this->submissionTableName}') AND table_schema='$wpdb->dbname'");
+			$this->submission->id					= $this->submission->formresults['id'];
 			
 			//sort arrays
 			foreach($this->submission->formresults as $key=>$result){
