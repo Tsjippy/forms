@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [8.2.7] - 2025-02-07
+
+
+### Added
 - newest js import version
 - 'sim-table-view-permissions' filter
 - filter subid
@@ -11,8 +22,6 @@
 
 ### Fixed
 - loaded after form submission update
-
-### Updated
 
 ## [8.2.6] - 2025-02-04
 
