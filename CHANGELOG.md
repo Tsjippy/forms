@@ -3,6 +3,7 @@
 
 ### Added
 - newest js import version
+- 'sim-table-view-permissions' filter
 
 ### Changed
 - code clean up
