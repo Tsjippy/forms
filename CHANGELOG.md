@@ -5,6 +5,7 @@
 - newest js import version
 
 ### Changed
+- code clean up
 
 ### Fixed
 
