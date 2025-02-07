@@ -570,7 +570,7 @@ class SimForms{
 	/**
 	 * Finds the user name element in a form
 	 *
-	 * @return	string	the element name or false if no user id element is found
+	 * @return	string	the element name or false if no name element is found
 	 */
 	public function findUserNameElementName(){
 		// find the user id element
@@ -612,7 +612,7 @@ class SimForms{
 	 *
 	 * @return	string	the element name or false if no e-mail element is found
 	 */
-	public function findEmailNumberElementName(){
+	public function findEmailElementName(){
 		// find the user id element
 		$emailKey	= false;
 
