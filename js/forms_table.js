@@ -229,7 +229,7 @@ async function getInputHtml(target){
 	let response	= await FormSubmit.fetchRestApi('forms/get_input_html', formData);
 
 	if(response){
-		target.innerHTML	 		= response;
+		target.innerHTML	 		= `<div class='input-wrapper'>${response}</div>`;
 
 		addFormsTableInputEventListeners(target);
 
@@ -471,7 +471,7 @@ async function processFormsTableInput(target){
 
 	//Only update when needed
 	if (value != JSON.parse(cell.dataset.oldvalue)){
-		Main.showLoader(cell.firstChild);
+		Main.showLoader(cell.querySelector('.input-wrapper'));
 		
 		// Submit new value and receive the filtered value back
 		let formData = new FormData();
@@ -543,7 +543,7 @@ function addChangeButton(target){
 
 	// only add the button once
 	if(activeCell.querySelector('.save') == null){
-		activeCell.appendChild(button)
+		activeCell.querySelector('.input-wrapper').appendChild(button)
 	}
 }
 

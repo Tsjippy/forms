@@ -956,7 +956,9 @@ class DisplayFormResults extends DisplayForm{
 		$rowContents	= '';
 		$excelRow		= [];
 
-		if($values['userid'] == $this->user->ID || $values['userid'] == $this->user->partnerId){
+		$userIdElName   = $this->findUserIdElementName();
+
+		if($values[$userIdElName] == $this->user->ID || $values[$userIdElName] == $this->user->partnerId){
 			$ownEntry	= true;
 		}else{
 			$ownEntry	= false;
@@ -1810,6 +1812,8 @@ class DisplayFormResults extends DisplayForm{
 			}else{
 				$this->tableEditPermissions = false;
 			}
+
+			$this->tableEditPermissions	= apply_filters('sim-table-edit-permissions', $this->tableEditPermissions, $this);
 		}
 		
 		$this->tableViewPermissions	= true;
@@ -2040,7 +2044,7 @@ class DisplayFormResults extends DisplayForm{
 	 * @return	bool						If there are submissions or not
 	 */
 	public function theTable($type, $submissions){
-		if(!$this->spliced){
+		if($this->spliced){
 			// only use the submissions for this page
 			$submissions	= array_splice($submissions, ($this->currentPage*$this->pageSize), $this->pageSize);
 		}
