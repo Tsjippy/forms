@@ -30,5 +30,6 @@
 - apply_filters('sim-forms-element-html', $html, $element, $this);
 - apply_filters('sim-form-element-html', $html, $element, $this);
 - sim_form_extra_js
+- sim-table-view-permissions
 
 # Actions

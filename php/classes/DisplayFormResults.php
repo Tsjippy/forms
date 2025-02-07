@@ -1826,7 +1826,7 @@ class DisplayFormResults extends DisplayForm{
 			$this->tableViewPermissions 	= false;
 		}
 
-		apply_filters('sim-table-view-permissions', $this->tableViewPermissions, $this);
+		$this->tableViewPermissions	= apply_filters('sim-table-view-permissions', $this->tableViewPermissions, $this);
 	}
 
 	/**
