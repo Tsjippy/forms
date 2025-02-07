@@ -341,33 +341,36 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	function sortSubmissions(&$submissions){
 		// sort if needed
-		if($this->sortColumn && !$this->sortColumnFound){
-			$sortElement	= $this->getElementByName($this->sortColumn);
-
-			if(empty($sortElement)){
-				$defaultSortElement	= $this->tableSettings['default_sort'];
-				$sortElement		= $this->getElementById($defaultSortElement);
-			}
-
-			$sortElementType	= $sortElement->type;
-
-			//Sort the array
-			usort($submissions, function($a, $b) use ($sortElementType){
-				// ascending
-				if($this->sortDirection == 'ASC'){
-					if($sortElementType == 'date'){
-						return strtotime($a->formresults[$this->sortColumn]) <=> strtotime($b->formresults[$this->sortColumn]);
-					}
-					return $a->formresults[$this->sortColumn] > $b->formresults[$this->sortColumn];
-				// Decending
-				}else{
-					if($sortElementType == 'date'){
-						return strtotime($b->formresults[$this->sortColumn]) <=> strtotime($a->formresults[$this->sortColumn]);
-					}
-					return $b->formresults[$this->sortColumn] > $a->formresults[$this->sortColumn];
-				}
-			});
+		if(!$this->sortColumn || $this->sortColumnFound){
+			// sorting not needed
+			return;
 		}
+
+		$sortElement	= $this->getElementByName($this->sortColumn);
+
+		if(empty($sortElement)){
+			$defaultSortElement	= $this->tableSettings['default_sort'];
+			$sortElement		= $this->getElementById($defaultSortElement);
+		}
+
+		$sortElementType	= $sortElement->type;
+
+		//Sort the array
+		usort($submissions, function($a, $b) use ($sortElementType){
+			// ascending
+			if($this->sortDirection == 'ASC'){
+				if($sortElementType == 'date'){
+					return strtotime($a->formresults[$this->sortColumn]) <=> strtotime($b->formresults[$this->sortColumn]);
+				}
+				return $a->formresults[$this->sortColumn] > $b->formresults[$this->sortColumn];
+			// Decending
+			}else{
+				if($sortElementType == 'date'){
+					return strtotime($b->formresults[$this->sortColumn]) <=> strtotime($a->formresults[$this->sortColumn]);
+				}
+				return $b->formresults[$this->sortColumn] > $a->formresults[$this->sortColumn];
+			}
+		});
 	}
 
 	/**
@@ -1822,6 +1825,8 @@ class DisplayFormResults extends DisplayForm{
 		){
 			$this->tableViewPermissions 	= false;
 		}
+
+		apply_filters('sim-table-view-permissions', $this->tableViewPermissions, $this);
 	}
 
 	/**
