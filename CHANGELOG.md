@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- bug in formbuilder
 
 ### Updated
+
+## [8.2.9] - 2025-02-10
+
+
+### Fixed
+- bug in formbuilder
 
 ## [8.2.8] - 2025-02-10
 
