@@ -259,8 +259,8 @@ function restApiInitForms() {
 }
 
 function getUniqueName($element, $update, $oldElement, $simForms){
-	// Remove any ' from the name
-	$element->name	= str_replace("\\'", '', $element->name);
+	// Remove any ' from the name, replace white space with _ as php does this automatically in post
+	$element->name	= str_replace(["\\'", " "], ['', "_"], $element->name);
 
 	// Make sure we only are working on the name
 	$element->name	= end(explode('\\', $element->name));

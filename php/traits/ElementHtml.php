@@ -102,8 +102,12 @@ trait ElementHtml{
 		//add default values
 		if(empty($element->multiple) || in_array($element->type, ['select','checkbox'])){
 			$defaultKey					= $element->default_value;
-			if(!empty($defaultKey) && !empty($this->defaultValues[$defaultKey])){
-				$values['defaults']		= $this->defaultValues[$defaultKey];
+			if(!empty($defaultKey)){
+				if(!empty($this->defaultValues[$defaultKey])){
+					$values['defaults']		= $this->defaultValues[$defaultKey];
+				}else{
+					$values['defaults']		= $defaultKey;
+				}
 			}
 		}else{
 			$defaultKey					= $element->default_array_value;

@@ -1275,7 +1275,8 @@ class FormBuilderForm extends SimForms{
 
 			<div name='defaults' class='elementoption reverse notlabel notbutton notformstep notp notphp notfile notimage shouldhide'>
 				<label class='block'>Specify a default value if desired</label>
-				<input type='text' class="formbuilder" name="formfield[default_value]" list='defaults' value='<?php if($element != null){echo trim($element->default_value);}?>'>
+
+				<textarea class="formbuilder" name="formfield[default_value]" list='defaults' rows='1' ><?php if($element != null){echo trim($element->default_value);}?></textarea>
 
 				<datalist id='defaults'>
 					<?php
@@ -1609,7 +1610,7 @@ class FormBuilderForm extends SimForms{
 							</label>
 							<input type="text" list="propertylist" name="element_conditions[<?php echo $conditionIndex;?>][propertyname1]" class='element_condition' placeholder="property name" value="<?php echo $condition['propertyname1'];?>">
 							<label> to:</label>
-							<input type="text" name="element_conditions[<?php echo $conditionIndex;?>][action_value]" class='element_condition' value="<?php echo $condition['action_value'];?>">
+							<textarea class='element_condition' name="element_conditions[<?php echo $conditionIndex;?>][action_value]" rows='1'><?php echo $condition['action_value'];?></textarea>
 							<br>
 							<label>
 								<input type='radio' name='element_conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='property' <?php if($condition['action'] == 'property'){echo 'checked';}?> required>

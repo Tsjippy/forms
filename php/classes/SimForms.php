@@ -544,7 +544,7 @@ class SimForms{
 	/**
 	 * Finds the user id element in a form
 	 *
-	 * @return	string	the element name or false if no user id element is found
+	 * @return	string|false|WP_error	the element name, a wp error object or false if no user id element is found
 	 */
 	public function findUserIdElementName(){
 		// find the user id element
