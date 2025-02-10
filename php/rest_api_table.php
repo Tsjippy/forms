@@ -400,6 +400,8 @@ function archiveSubmission(){
 
 	$formTable->parseSubmissions(null, $formTable->submissionId);
 
+	$formTable->submission->archivedsubs	= maybe_unserialize($formTable->submission->archivedsubs);
+
 	$action	= $_POST['action'];
 
 	if($action	== 'archive'){
@@ -411,7 +413,6 @@ function archiveSubmission(){
 	if(isset($_POST['subid']) && is_numeric($_POST['subid'])){
 		$subId		= $_POST['subid'];
 		$message	= "Entry with id {$formTable->submissionId} and subid $subId succesfully {$action}d";
-		
 
 		if($archive){
 			// add
