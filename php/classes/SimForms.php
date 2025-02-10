@@ -746,6 +746,8 @@ class SimForms{
 	 * Get a singleform submission
 	 *
 	 * @param	int		$submissionId	The id of a submission
+	 *
+	 * @return	object|false			The submission or false if not found
 	 */
 	public function getSubmission($submissionId){
 		global $wpdb;
@@ -759,8 +761,10 @@ class SimForms{
 			$this->submission	= $result[0];
 
 			$this->submission->formresults	= maybe_unserialize($this->submission->formresults);
+
+			return $this->submission;
 		}
 
-		return $this->submission;
+		return false;
 	}
 }
