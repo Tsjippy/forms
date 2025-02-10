@@ -84,7 +84,7 @@ export function cloneNode(originalNode, clear=true){
 
 	newNode.querySelectorAll('select').forEach(select => {
 		//remove any defaults
-		removeDefaultSelect(input);
+		removeDefaultSelect(select);
 
 		select._niceselect = NiceSelect.bind(select,{searchable: true});
 	});
