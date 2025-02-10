@@ -2,14 +2,21 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- return false if submission not found
 
 ### Changed
-- replace spaces with underscores in element names
 
 ### Fixed
 
 ### Updated
+
+## [8.3.0] - 2025-02-10
+
+
+### Added
+- return false if submission not found
+
+### Changed
+- replace spaces with underscores in element names
 
 ## [8.2.9] - 2025-02-10
 
