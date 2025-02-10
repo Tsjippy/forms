@@ -5,6 +5,7 @@
 - return false if submission not found
 
 ### Changed
+- replace spaces with underscores in element names
 
 ### Fixed
 
