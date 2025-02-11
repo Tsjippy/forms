@@ -195,13 +195,8 @@ function moduleFunctions($functionHtml, $moduleSlug){
 	return ob_get_clean();
 }
 
-add_filter('sim_module_updated', __NAMESPACE__.'\moduleUpdated', 10, 3);
-function moduleUpdated($options, $moduleSlug, $oldOptions){
-	//module slug should be the same as grandparent folder name
-	if($moduleSlug != MODULE_SLUG){
-		return $options;
-	}
-
+add_filter('sim_module_forms_after_save', __NAMESPACE__.'\moduleUpdated', 10, 2);
+function moduleUpdated($options, $oldOptions){
 	$simForms = new SimForms();
 	$simForms->createDbTable();
 
