@@ -370,12 +370,6 @@ class SubmitForm extends SimForms{
 		$this->submission->form_id			= $_POST['formid'];
 		
 		$this->getForm($this->submission->form_id);
-
-		//$shouldProceed						= apply_filters('sim_before_saving_formdata', true, $this);
-
-		//if(is_wp_error($shouldProceed)){
-			//return $shouldProceed;
-		//}
 		
 		$this->userId	= 0;
 		if(is_numeric($_POST['userid'])){
@@ -414,6 +408,13 @@ class SubmitForm extends SimForms{
 		unset($this->submission->formresults['userid']);
 			
 		$this->submission->formresults['formurl']			= $_POST['formurl'];
+
+		// add the submission id to the form results
+		if(empty($this->formData->save_in_meta)){
+			//Get the id from db before insert so we can use it in emails and file uploads
+			$this->submission->formresults['id']	= $wpdb->get_var( "SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE (TABLE_NAME = '{$this->submissionTableName}') AND table_schema='$wpdb->dbname'");
+			$this->submission->id					= $this->submission->formresults['id'];
+		}
 
 		// remove empty splitted entries
 		if(isset($this->formData->split)){
@@ -469,10 +470,6 @@ class SubmitForm extends SimForms{
 		if(empty($this->formData->save_in_meta)){
 			$this->submission->formresults['submissiontime']	= $this->submission->timecreated;
 			$this->submission->formresults['edittime']			= $this->submission->timelastedited;
-			
-			//Get the id from db before insert so we can use it in emails and file uploads
-			$this->submission->formresults['id']	= $wpdb->get_var( "SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE (TABLE_NAME = '{$this->submissionTableName}') AND table_schema='$wpdb->dbname'");
-			$this->submission->id					= $this->submission->formresults['id'];
 			
 			//sort arrays
 			foreach($this->submission->formresults as $key=>$result){
