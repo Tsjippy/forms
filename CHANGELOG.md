@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- only remove unnesseray whitespaces, not new lines
 
 ### Updated
+
+## [8.3.3] - 2025-02-12
+
+
+### Fixed
+- only remove unnesseray whitespaces, not new lines
 
 ## [8.3.2] - 2025-02-11
 
