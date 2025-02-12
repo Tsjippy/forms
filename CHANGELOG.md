@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- only remove unnesseray whitespaces, not new lines
 
 ### Updated
 
