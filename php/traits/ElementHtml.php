@@ -683,7 +683,7 @@ trait ElementHtml{
 		$html	= apply_filters('sim-forms-element-html', $html, $element, $this);
 		
 		//remove unnessary whitespaces
-		$html = preg_replace('/\s+/', ' ', $html);
+		$html = preg_replace('/\h+/', ' ', $html);
 		
 		//check if we need to transform a keyword to date
 		preg_match_all('/%([^%;]*)%/i', $html, $matches);

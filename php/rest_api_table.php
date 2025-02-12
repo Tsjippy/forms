@@ -55,7 +55,7 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\saveColumnSettings',
 			'permission_callback' 	=> function(){
 				$formsTable		= new DisplayFormResults();
-				return $formsTable->editRights;
+				return $formsTable->tableEditPermissions;
 			},
 			'args'					=> array(
 				'shortcode_id'		=> array(
@@ -83,7 +83,7 @@ function restApiInitTable() {
 					'id'			=> $_POST['shortcode_id'],
 					'formid'		=> $_POST['formid']
 				));
-				return $formsTable->editRights;
+				return $formsTable->tableEditPermissions;
 			},
 			'args'					=> array(
 				'shortcode_id'		=> array(
@@ -497,7 +497,7 @@ function editValue(){
 		
 	//update an existing entry
 	$elementName 	= sanitize_text_field($_POST['name']);
-	$newValue 		= json_decode(sanitize_text_field(stripslashes($_POST['newvalue'])));
+	$newValue 		= json_decode(sanitize_textarea_field(stripslashes($_POST['newvalue'])));
 
 	$transValue		= $formTable->transformInputData($newValue, $elementName, $formTable->submission->formresults);
 	

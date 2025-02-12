@@ -53,6 +53,8 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$this->enrichColumnSettings();
+
+		$this->loadTableSettings();
 	}
 
 	public function getMetaKeyFormSubmissions($userId=null, $all=false){
@@ -341,7 +343,7 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	function sortSubmissions(&$submissions){
 		// sort if needed
-		if(!$this->sortColumn || $this->sortColumnFound){
+		if(!$this->sortColumn || $this->sortColumnFound  || empty($submissions)){
 			// sorting not needed
 			return;
 		}
@@ -2333,8 +2335,6 @@ class DisplayFormResults extends DisplayForm{
 		if(!is_user_logged_in()){
 			return '';
 		}
-
-		$this->loadTableSettings();
 
 		// first render the table so we now how many results we have
 		ob_start();
