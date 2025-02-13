@@ -62,10 +62,18 @@ class SimForms{
 		//calculate full form rights
 		$object		= get_queried_object();
 		$postAuthor	= 0;
-		if(!empty($object) && empty($object->post_author) && !empty($_REQUEST['post'])){
-			$postAuthor	= get_post($_REQUEST['post'])->post_author;
-		}elseif(!empty($object)){
+		if(!empty($object->post_author)){
 			$postAuthor	= $object->post_author;
+		}elseif(!empty($_REQUEST['post'])){
+			$postAuthor	= get_post($_REQUEST['post'])->post_author;
+		}elseif(!empty($_POST['form_url'])){
+			$postId		= url_to_postid($_POST['form_url']);
+			
+			if($postId){
+				$postAuthor	= get_post($postId)->post_author;
+			}
+		}else{
+			echo '';
 		}
 
 		if(array_intersect(['editor'], $this->userRoles) || $postAuthor == $this->user->ID){
@@ -73,8 +81,6 @@ class SimForms{
 		}else{
 			$this->editRights		= false;
 		}
-
-		wp_enqueue_style('sim_forms_style');
 	}
 
 	/**
@@ -717,6 +723,8 @@ class SimForms{
 		global $wpdb;
 
 		$this->processAtts($atts);
+
+		wp_enqueue_style('sim_forms_style');
 
 		$query				= "SELECT * FROM {$this->elTableName} WHERE `form_id`=";
 

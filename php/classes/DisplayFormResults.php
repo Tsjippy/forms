@@ -1794,12 +1794,18 @@ class DisplayFormResults extends DisplayForm{
 		//check if we have rights on this form
 		if(!isset($this->formEditPermissions) || !$this->formEditPermissions){
 			if(
-				array_intersect((array)$this->userRoles, array_keys((array)$this->formData->full_right_roles))	||
-				(
-					isset($this->tableSettings['full_right_roles']) &&
-					array_intersect((array)$this->userRoles, array_keys((array)$this->tableSettings['full_right_roles']))
+				array_intersect(														// We have full rights to the forms
+					(array)$this->userRoles, 
+					array_keys((array)$this->formData->full_right_roles)
 				)	||
-				$this->editRights
+				(
+					isset($this->tableSettings['full_right_roles']) &&					// we have full rights to the table
+					array_intersect(
+						(array)$this->userRoles, 
+						array_keys((array)$this->tableSettings['full_right_roles'])
+					)
+				)	||
+				$this->editRights														// we have edit rights on the form
 			){
 				$this->formEditPermissions = true;
 			}else{
@@ -1941,7 +1947,7 @@ class DisplayFormResults extends DisplayForm{
 	public function renderTableButtons(){
 		$html	= "<div class='table-buttons-wrapper'>";
 			//Show form properties button if we have form edit permissions
-			if($this->formEditPermissions){
+			if($this->tableEditPermissions){
 				$html	.= "<button class='button small edit_formshortcode_settings'>Edit settings</button>";
 				$html	.= $this->addShortcodeSettingsModal();
 			}

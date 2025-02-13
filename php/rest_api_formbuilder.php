@@ -5,12 +5,9 @@ use stdClass;
 use WP_Error;
 
 function checkPermissions(){
-	$user	= wp_get_current_user();
-	if(in_array('edit_others_posts', array_keys($user->allcaps))){
-		return true;
-	}
+	$forms	= new SimForms();
 
-	return false;
+	return $forms->editRights;
 }
 
 add_action( 'rest_api_init', __NAMESPACE__.'\restApiInitForms');

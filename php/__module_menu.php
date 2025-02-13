@@ -8,13 +8,8 @@ DEFINE(__NAMESPACE__.'\MODULE_SLUG', strtolower(basename(dirname(__DIR__))));
 
 DEFINE(__NAMESPACE__.'\MODULE_PATH', plugin_dir_path(__DIR__));
 
-add_filter('sim_submenu_description', __NAMESPACE__.'\moduleDescription', 10, 2);
+add_filter('sim_submenu_forms_description', __NAMESPACE__.'\moduleDescription', 10, 2);
 function moduleDescription($description, $moduleSlug){
-	//module slug should be the same as the constant
-	if($moduleSlug != MODULE_SLUG)	{
-		return $description;
-	}
-
 	ob_start();
 	$url		= SIM\ADMIN\getDefaultPageLink($moduleSlug, 'forms_pages');
 	if(!empty($url)){
@@ -30,13 +25,8 @@ function moduleDescription($description, $moduleSlug){
 	return $description.ob_get_clean();
 }
 
-add_filter('sim_submenu_options', __NAMESPACE__.'\moduleOptions', 10, 3);
-function moduleOptions($optionsHtml, $moduleSlug, $settings){
-	//module slug should be the same as grandparent folder name
-	if($moduleSlug != MODULE_SLUG){
-		return $optionsHtml;
-	}
-
+add_filter('sim_submenu_forms_options', __NAMESPACE__.'\moduleOptions', 10, 2);
+function moduleOptions($optionsHtml, $settings){
 	ob_start();
 	?>
 	Do you want to use this module also for userdata?
@@ -63,16 +53,11 @@ function moduleOptions($optionsHtml, $moduleSlug, $settings){
 		<?php
 	}
 
-	return ob_get_clean();
+	return $optionsHtml.ob_get_clean();
 }
 
-add_filter('sim_email_settings', __NAMESPACE__.'\emailSettings', 10, 3);
-function emailSettings($optionsHtml, $moduleSlug, $settings){
-	//module slug should be the same as grandparent folder name
-	if($moduleSlug != MODULE_SLUG || !isset($settings['userdata'])){
-		return $optionsHtml;
-	}
-
+add_filter('sim_email_forms_settings', __NAMESPACE__.'\emailSettings', 10, 3);
+function emailSettings($optionsHtml, $settings){
 	ob_start();
 
 	?>
@@ -102,15 +87,11 @@ function emailSettings($optionsHtml, $moduleSlug, $settings){
 
 	$formAdultEmails->printInputs($settings);
 
-	return ob_get_clean();
+	return $optionsHtml.ob_get_clean();
 }
 
-add_filter('sim_module_data', __NAMESPACE__.'\moduleData', 10, 2);
-function moduleData($dataHtml, $moduleSlug){
-	//module slug should be the same as grandparent folder name
-	if($moduleSlug != MODULE_SLUG){
-		return $dataHtml;
-	}
+add_filter('sim_module_forms_data', __NAMESPACE__.'\moduleData');
+function moduleData($dataHtml){
 	$html	= '';
 
 	if(isset($_POST['delete'])){
@@ -168,13 +149,8 @@ function moduleData($dataHtml, $moduleSlug){
 	return $dataHtml.$html;
 }
 
-add_filter('sim_module_functions', __NAMESPACE__.'\moduleFunctions', 10, 2);
-function moduleFunctions($functionHtml, $moduleSlug){
-	//module slug should be the same as grandparent folder name
-	if($moduleSlug != MODULE_SLUG){
-		return $functionHtml;
-	}
-	
+add_filter('sim_module_forms_functions', __NAMESPACE__.'\moduleFunctions');
+function moduleFunctions($functionHtml){
 	ob_start();
 	?>
 	<h4>Form import</h4>
@@ -192,7 +168,7 @@ function moduleFunctions($functionHtml, $moduleSlug){
 	</form>
 
 	<?php
-	return ob_get_clean();
+	return $functionHtml.ob_get_clean();
 }
 
 add_filter('sim_module_forms_after_save', __NAMESPACE__.'\moduleUpdated', 10, 2);
@@ -236,11 +212,8 @@ function postStates( $states, $post ) {
     return $states;
 }
 
-add_action('sim_module_activated', __NAMESPACE__.'\moduleActivated');
-function moduleActivated($moduleSlug){
-	//module slug should be the same as grandparent folder name
-	if($moduleSlug != MODULE_SLUG)	{return;}
-	
+add_action('sim_module_forms_activated', __NAMESPACE__.'\moduleActivated');
+function moduleActivated(){
 	$simForms = new SimForms();
 	$simForms->createDbTable();
 
@@ -250,13 +223,8 @@ function moduleActivated($moduleSlug){
 	scheduleTasks();
 }
 
-add_action('sim_module_deactivated', __NAMESPACE__.'\moduleDeActivated', 10, 2);
-function moduleDeActivated($moduleSlug, $options){
-	//module slug should be the same as grandparent folder name
-	if($moduleSlug != MODULE_SLUG)	{
-		return;
-	}
-
+add_action('sim_module_forms_deactivated', __NAMESPACE__.'\moduleDeActivated');
+function moduleDeActivated($options){
 	foreach($options['forms_pages'] as $page){
 		// Remove the auto created page
 		wp_delete_post($page, true);
