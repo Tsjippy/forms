@@ -76,7 +76,7 @@ class SimForms{
 			echo '';
 		}
 
-		if(array_intersect(['editor'], $this->userRoles) || $postAuthor == $this->user->ID){
+		if(array_intersect(['administrator','editor'], $this->userRoles) || $postAuthor == $this->user->ID){
 			$this->editRights		= true;
 		}else{
 			$this->editRights		= false;
@@ -198,7 +198,7 @@ class SimForms{
 		$this->elementMapper($formId);
 
 		if(!$this->editRights){
-			$editRoles	= ['editor'];
+			$editRoles	= ['administrator','editor'];
 			if(!empty($this->formData->full_right_roles)){
 				foreach((array)$this->formData->full_right_roles as $key=>$role){
 					if(!empty($role)){
