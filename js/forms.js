@@ -56,7 +56,7 @@ export function cloneNode(originalNode, clear=true){
 	let newNode = originalNode.cloneNode(true);
 
 	// remove niceselect drop down from clone
-	newNode.querySelectorAll('.niceselect').forEach(select => select.remove());
+	newNode.querySelectorAll('.nice-select').forEach(dropdown => dropdown.remove());
 	
 	//add tinymce's again
 	originalNode.querySelectorAll('.wp-editor-area').forEach(el =>{

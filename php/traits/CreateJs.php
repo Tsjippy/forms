@@ -315,7 +315,7 @@ trait CreateJs{
                             if($action == 'value'){
                                 $propertyName	                        = $condition['propertyname1'];
                                 if(isset($condition['action_value'])){
-                                    $varName   = '"'.$condition['action_value'].'"';
+                                    $varName   = '"'.do_shortcode($condition['action_value']).'"';
                                 }
                             //retrieve value from another field
                             }else{
