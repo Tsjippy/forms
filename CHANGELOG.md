@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- shortcode in replacement value for forms
 
 ### Changed
 
