@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- shortcode in replacement value for forms
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.3.5] - 2025-02-13
+
+
+### Added
+- shortcode in replacement value for forms
 
 ## [8.3.4] - 2025-02-13
 
