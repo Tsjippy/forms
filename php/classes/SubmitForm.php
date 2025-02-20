@@ -218,7 +218,7 @@ class SubmitForm extends SimForms{
 				$headers[]	= "Reply-To: $from";
 			}
 			
-			$files		= $this->processPlaceholders($email['files']);
+			$files		= trim($this->processPlaceholders($email['files']));
 
 			//Send the mail
 			if($_SERVER['HTTP_HOST'] != 'localhost'){

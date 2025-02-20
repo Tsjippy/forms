@@ -512,6 +512,10 @@ function editValue(){
 	if(isset($formTable->submission->formresults[$elementName])){
 		$oldValue											= $formTable->submission->formresults[$elementName];
 
+		if($oldValue == $newValue){
+			return new WP_Error('sim-forms', "Old value '$oldValue' is the same as the new value!");
+		}
+
 		// Update only one entry in the array
 		if(is_array($oldValue) && is_numeric($subId) && isset($oldValue[$subId])){
 			$temp			= $oldValue;
