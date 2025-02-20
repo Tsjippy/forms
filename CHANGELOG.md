@@ -3,6 +3,7 @@
 
 ### Added
 - administror has admin role by default
+- trim to files array
 
 ### Changed
 
