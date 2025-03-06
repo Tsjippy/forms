@@ -2,15 +2,22 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- administror has admin role by default
-- trim to files array
 
 ### Changed
 
 ### Fixed
-- rare bug in splitted formdata
 
 ### Updated
+
+## [8.3.6] - 2025-03-06
+
+
+### Added
+- administror has admin role by default
+- trim to files array
+
+### Fixed
+- rare bug in splitted formdata
 
 ## [8.3.5] - 2025-02-13
 
