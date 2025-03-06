@@ -8,6 +8,7 @@
 ### Changed
 
 ### Fixed
+- rare bug in splitted formdata
 
 ### Updated
 
