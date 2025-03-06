@@ -472,7 +472,7 @@ class SubmitForm extends SimForms{
 			$this->submission->formresults['edittime']			= $this->submission->timelastedited;
 			
 			//sort arrays
-			foreach($this->submission->formresults as $key=>$result){
+			foreach($this->submission->formresults as $key=>&$result){
 				if(is_array($result)){
 					//check if this a aray of uploaded files
 					if(!is_array(array_values($result)[0]) && str_contains(array_values($result)[0],'wp-content/uploads/')){
@@ -481,7 +481,6 @@ class SubmitForm extends SimForms{
 					}else{
 						//sort the array
 						ksort($result);
-						$this->submission->formresults[$key] = $result;
 					}
 				}
 			}

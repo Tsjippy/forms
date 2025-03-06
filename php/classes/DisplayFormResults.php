@@ -398,6 +398,10 @@ class DisplayFormResults extends DisplayForm{
 	
 			$this->processSplittedData();
 
+			if(empty($this->splittedSubmissions) && !empty($this->submissions)){
+				$this->splittedSubmissions	= $this->submissions;
+			}
+
 			$this->sortSubmissions($this->splittedSubmissions);
 
 			if(empty($this->splittedSubmissions)){
@@ -425,6 +429,10 @@ class DisplayFormResults extends DisplayForm{
 
 		//loop over all submissions
 		foreach($this->submissions as $this->submission){
+			if(empty($this->submission->formresults[$splitElementName])){
+				continue;
+			}
+
 			$this->submission->archivedsubs	= maybe_unserialize($this->submission->archivedsubs);
 
 			// loop over all entries of the split key
