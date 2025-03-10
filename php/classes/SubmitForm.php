@@ -209,9 +209,13 @@ class SubmitForm extends SimForms{
 			$subject	= $this->processPlaceholders($email['subject']);
 			$message	= $this->processPlaceholders($email['message']);
 
-			$headers	= [];
-			if(!empty(trim($email['headers']))){
-				$headers	= explode("\n", trim($email['headers']));
+			$headers	= $email['headers'];
+			if(!is_array($headers)){
+				if(!empty(trim($headers))){
+					$headers	= explode("\n", trim($email['headers']));
+				}else{
+					$headers	= [];
+				}
 			}
 
 			if(!empty($from)){
