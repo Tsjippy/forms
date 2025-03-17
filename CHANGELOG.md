@@ -8,6 +8,7 @@
 ### Fixed
 - bug in email headers
 - multiple atachment to e-mail
+- process user id element
 
 ### Updated
 
