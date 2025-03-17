@@ -385,17 +385,19 @@ class SubmitForm extends SimForms{
 		$this->submission->form_id			= $_POST['formid'];
 		
 		$this->getForm($this->submission->form_id);
+
+		$userIdElementName	= $this->findUserIdElementName();
 		
 		$this->userId	= 0;
-		if(is_numeric($_POST['userid'])){
+		if(is_numeric($_POST[$userIdElementName])){
 			//If we are submitting for someone else and we do not have the right to save the form for someone else
 			if(
 				array_intersect($this->userRoles, $this->submitRoles) === false &&
-				$this->user->ID != $_POST['userid']
+				$this->user->ID != $_POST[$userIdElementName]
 			){
-				return new \WP_Error('Error', 'You do not have permission to save data for user with id '.$_POST['userid']);
+				return new \WP_Error('Error', 'You do not have permission to save data for user with id '.$_POST[$userIdElementName]);
 			}else{
-				$this->userId = $_POST['userid'];
+				$this->userId = $_POST[$userIdElementName];
 			}
 		}
 
@@ -420,7 +422,9 @@ class SubmitForm extends SimForms{
 		//remove the action and the formname
 		unset($this->submission->formresults['formname']);
 		unset($this->submission->formresults['fileupload']);
-		unset($this->submission->formresults['userid']);
+		if($userIdElementName != 'userid'){
+			unset($this->submission->formresults['userid']);
+		}
 			
 		$this->submission->formresults['formurl']			= $_POST['formurl'];
 
