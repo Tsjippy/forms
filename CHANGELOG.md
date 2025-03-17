@@ -6,11 +6,16 @@
 ### Changed
 
 ### Fixed
+
+### Updated
+
+## [8.3.7] - 2025-03-17
+
+
+### Fixed
 - bug in email headers
 - multiple atachment to e-mail
 - process user id element
-
-### Updated
 
 ## [8.3.6] - 2025-03-06
 
