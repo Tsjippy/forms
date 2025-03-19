@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- issue with form attachments
 
 ### Updated
+
+## [8.3.8] - 2025-03-19
+
+
+### Fixed
+- issue with form attachments
 
 ## [8.3.7] - 2025-03-17
 
