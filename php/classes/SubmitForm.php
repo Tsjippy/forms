@@ -223,7 +223,11 @@ class SubmitForm extends SimForms{
 			}
 			
 			if(is_string($email['files'])){
-				$files		= explode(',', trim($this->processPlaceholders($email['files'])));
+				$files		= $this->processPlaceholders($email['files']);
+
+				if(is_string($files)){
+					$files		= explode(',', trim($files));
+				}
 			}
 
 			//Send the mail
