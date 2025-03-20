@@ -135,20 +135,32 @@ async function requestEditElementData(target){
 }
 
 async function addFormElement(target){
+	let wrapper, priority;
 	let form		= target.closest('form');
 
 	let referenceNode		= document.querySelector('.form_elements .clicked');
-	let wrapper				= referenceNode.closest('.form_element_wrapper');
 
 	if(referenceNode == null){
-		window.location.href = window.location.href+'&formbuilder=true';
+		if( !window.location.href.includes('&formbuilder=true')){
+			window.location.href = window.location.href+'&formbuilder=true';
+			
+			return;
+		}
+
+		wrapper				= document.querySelector('.form_elements');
+
+		priority			= 1;
+	}else{
+		wrapper				= referenceNode.closest('.form_element_wrapper');
+
+		priority			= parseInt(wrapper.dataset.priority) + 1;
 	}
 
 	wrapper.insertAdjacentHTML('afterEnd', 
-		`<div class='loadergif_wrapper form_element_wrapper' data-id=-1 data-priority=${parseInt(wrapper.dataset.priority) + 1}><img class='loadergif' src='${sim.loadingGif}' width=50 loading='lazy'>Loading element...</div>`
+		`<div class='loadergif_wrapper form_element_wrapper' data-id=-1 data-priority=${priority}><img class='loadergif' src='${sim.loadingGif}' width=50 loading='lazy'>Loading element...</div>`
 	);
 
-	fixElementNumbering(referenceNode.closest('form'));
+	fixElementNumbering(form);
 
 	let indexes	= {};
 	document.querySelectorAll(`.form_element_wrapper`).forEach(el => {
@@ -179,7 +191,9 @@ async function addFormElement(target){
 
 		Main.displayMessage(response.message);
 
-		referenceNode.classList.remove('clicked');
+		if(referenceNode != null){
+			referenceNode.classList.remove('clicked');
+		}
 	}
 
 	// Remove loaders
@@ -930,6 +944,11 @@ window.addEventListener("click", event => {
 
 	//open the modal to add an element
 	if (target.classList.contains('add_form_element') || target.name == 'createform'){
+		if( !window.location.href.includes('&formbuilder=true')){
+			window.location.href = window.location.href+'&formbuilder=true';
+			
+			return;
+		}
 		showEmptyModal(target);
 	}
 	
@@ -938,7 +957,8 @@ window.addEventListener("click", event => {
 		showCondionalFields(target.dataset.value, target.closest('form'));
 		//if label type is selected, wrap by default
 		if(target.dataset.value == 'label'){
-			target.closest('form').querySelector('[name="formfield[wrap]"]').checked	= true;
+			target.closest('form').querySelector('[name="formfield[wrap]"]').checked		= true;
+			target.closest('form').querySelector('[name="formfield[wrap]"]').defaultChecked	= true
 		}
 	}
 	

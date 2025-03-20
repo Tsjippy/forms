@@ -326,6 +326,7 @@ class FormBuilderForm extends SimForms{
 		include_once( ABSPATH . 'wp-includes/formatting.php');
 
 		$html	= ob_get_clean();
+
 		//close any open html tags
 		return force_balance_tags($html);
 	}
@@ -1276,7 +1277,7 @@ class FormBuilderForm extends SimForms{
 			<div name='defaults' class='elementoption reverse notlabel notbutton notformstep notp notphp notfile notimage shouldhide'>
 				<label class='block'>Specify a default value if desired</label>
 
-				<textarea class="formbuilder" name="formfield[default_value]" list='defaults' rows='1' ><?php if($element != null){echo trim($element->default_value);}?></textarea>
+				<input type='text' class="formbuilder" name="formfield[default_value]" list='defaults' value='<?php if($element != null){echo trim($element->default_value);}?>'>
 
 				<datalist id='defaults'>
 					<?php

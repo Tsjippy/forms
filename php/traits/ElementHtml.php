@@ -864,6 +864,7 @@ trait ElementHtml{
 				$checked	= '';
 			}
 
+			$id	= '';
 			if(!empty($elId)){
 				$id	= trim($elId, "'");
 				$id	= "$id-$key'";

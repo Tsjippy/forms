@@ -39,331 +39,334 @@ trait CreateJs{
         //Loop over all elements to find any conditions
         foreach($this->formElements as $elementIndex=>$element){
             $conditions	= unserialize($element->conditions);
-            //if there are conditions
-            if(is_array($conditions)){
-                //Loop over the conditions
-                foreach($conditions as $conditionIndex=>$condition){
-                    //if there are rules build some javascript
-                    if(is_array($condition['rules'])){
-                        //Open the if statemenet
-                        $lastRuleKey			= array_key_last($condition['rules']);
-                        $fieldCheckIf 		    = "";
-                        $conditionVariables	    = [];
-                        $conditionIf			= '';
-                        $checkForChange         = false;
-                        
-                        //Loop over the rules
-                        foreach($condition['rules'] as $ruleIndex => $rule){
-                            $fieldNumber1	= $ruleIndex * 2  + 1;
-                            $fieldNumber2	= $fieldNumber1 + 1;
-                            $equation		= str_replace(' value', '', $rule['equation']);
-                            
-                            //Get field names of the fields who's value we are checking
-                            if(is_numeric($rule['conditional_field'])){
-                                $conditionalElement		= $this->getElementById($rule['conditional_field']);
-                            }else{
-                                $conditionalElement     = false;
-                            }
-                            
-                            if(!$conditionalElement){
-                                $errors[]   = "Element $element->name has an invalid rule";
 
+            //if there are conditions
+            if(!is_array($conditions)){
+                continue;
+            }
+
+            //Loop over the conditions
+            foreach($conditions as $conditionIndex=>$condition){
+                //if there are rules build some javascript
+                if(is_array($condition['rules'])){
+                    //Open the if statemenet
+                    $lastRuleKey			= array_key_last($condition['rules']);
+                    $fieldCheckIf 		    = "";
+                    $conditionVariables	    = [];
+                    $conditionIf			= '';
+                    $checkForChange         = false;
+                    
+                    //Loop over the rules
+                    foreach($condition['rules'] as $ruleIndex => $rule){
+                        $fieldNumber1	= $ruleIndex * 2  + 1;
+                        $fieldNumber2	= $fieldNumber1 + 1;
+                        $equation		= str_replace(' value', '', $rule['equation']);
+                        
+                        //Get field names of the fields who's value we are checking
+                        if(is_numeric($rule['conditional_field'])){
+                            $conditionalElement		= $this->getElementById($rule['conditional_field']);
+                        }else{
+                            $conditionalElement     = false;
+                        }
+                        
+                        if(!$conditionalElement){
+                            $errors[]   = "Element $element->name has an invalid rule";
+
+                            continue;
+                        }
+
+                        $conditionalFieldName		= $conditionalElement->name;
+                        $propCompare                = 'elName';
+
+                        if(str_contains($conditionalFieldName, '[]')){
+                            $propCompare            = 'el.id';
+                            $conditionalFieldName	= 'E'.$conditionalElement->id;
+                        }elseif(in_array($conditionalElement->type,['radio','checkbox']) && !str_contains($conditionalFieldName, '[]')) {
+                            $conditionalFieldName .= '[]';
+                        }
+
+                        $conditionalFieldType		= $conditionalElement->type;
+
+                        if(is_numeric($rule['conditional_field_2'])){
+                            $conditionalElement2		= $this->getElementById($rule['conditional_field_2']);
+                            if(!$conditionalElement2){
+                                $errors[]   = "Element $element->name has an invalid rule";
                                 continue;
                             }
 
-                            $conditionalFieldName		= $conditionalElement->name;
-                            $propCompare                = 'elName';
-
-                            if(str_contains($conditionalFieldName, '[]')){
+                            $conditionalField2Name	= $conditionalElement2->name;
+                            
+                            if(str_contains($conditionalField2Name, '[]')){
                                 $propCompare            = 'el.id';
-                                $conditionalFieldName	= 'E'.$conditionalElement->id;
-                            }elseif(in_array($conditionalElement->type,['radio','checkbox']) && !str_contains($conditionalFieldName, '[]')) {
-                                $conditionalFieldName .= '[]';
+                                $conditionalField2Name	= 'E'.$conditionalElement2->id;
+                            }elseif(in_array($conditionalElement2->type, ['radio','checkbox']) && !str_contains($conditionalField2Name, '[]')) {
+                                $conditionalField2Name .= '[]';
                             }
-
-                            $conditionalFieldType		= $conditionalElement->type;
-
-                            if(is_numeric($rule['conditional_field_2'])){
-                                $conditionalElement2		= $this->getElementById($rule['conditional_field_2']);
-                                if(!$conditionalElement2){
-                                    $errors[]   = "Element $element->name has an invalid rule";
-                                    continue;
-                                }
-
-                                $conditionalField2Name	= $conditionalElement2->name;
-                                
-                                if(str_contains($conditionalField2Name, '[]')){
-                                    $propCompare            = 'el.id';
-                                    $conditionalField2Name	= 'E'.$conditionalElement2->id;
-                                }elseif(in_array($conditionalElement2->type, ['radio','checkbox']) && !str_contains($conditionalField2Name, '[]')) {
-                                    $conditionalField2Name .= '[]';
-                                }
-                            }
-                            
-                            //Check if we are calculating a value based on two field values
-                            if(($equation == '+' || $equation == '-') && is_numeric($rule['conditional_field_2']) && !empty($rule['equation_2'])){
-                                $calc = true;
-                            }else{
-                                $calc = false;
-                            }
-                            
-                            //make sure we do not include other fields in changed or click rules
-                            if(in_array($equation, ['changed', 'clicked'])){
-                                // do not add the same element name twice
-                                if(!str_contains($fieldCheckIf, $conditionalFieldName)){
-                                    if(!empty($fieldCheckIf)){
-                                        $fieldCheckIf   .= " || ";
-                                    }
-                                    $fieldCheckIf   .= "$propCompare == '$conditionalFieldName'";
-                                }
-                                $checkForChange = true;
-                            }
-                            
-                            //Only allow or statements
-                            if(!$checkForChange || (isset($condition['rules'][$ruleIndex-1]) && $condition['rules'][$ruleIndex-1]['combinator'] == 'OR')){
-                                // do not add the same element name twice
-                                if(!str_contains($fieldCheckIf, "$propCompare == '$conditionalFieldName'")){
-                                    //Write the if statement to check if the current clicked field belongs to this condition
-                                    if(!empty($fieldCheckIf)){
-                                        $fieldCheckIf .= " || ";
-                                    }
-                                    $fieldCheckIf .= "$propCompare == '$conditionalFieldName'";
-                                }
-                                
-                                // do not add the same element name twice
-                                if(!str_contains($fieldCheckIf, "$propCompare == '$conditionalField2Name'")){
-                                    //If there is an extra field to check
-                                    if(is_numeric($rule['conditional_field_2'])){
-                                        $fieldCheckIf .= " || $propCompare == '$conditionalField2Name'";
-                                    }
-                                }
-                            }
-            
-                            //We calculate the sum or difference of two field values if needed.
-                            if($calc){
-                                if($conditionalFieldType == 'date'){
-                                    //Convert date strings to date values then miliseconds to days
-                                    $conditionVariables[]  = "var calculated_value_$ruleIndex = (Date.parse(value_$fieldNumber1) $equation Date.parse(value_$fieldNumber2))/ (1000 * 60 * 60 * 24);";
-                                }else{
-                                    $conditionVariables[]  = "var calculated_value_$ruleIndex = value_$fieldNumber1 $equation value_$fieldNumber2;";
-                                }
-                                $equation = $rule['equation_2'];
-
-                                //compare with calculated value
-                                $compareValue1 = "calculated_value_$ruleIndex";
-                            }else{
-                                //compare with a field value
-                                $compareValue1 = "value_$fieldNumber1";
-                            }
-                                
-                            //compare with the value of another field
-                            if(str_contains($rule['equation'], 'value')){
-                                $compareValue2 = "value_$fieldNumber2";
-                            //compare with a number
-                            }elseif(is_numeric($rule['conditional_value'])){
-                                $compareValue2 = trim($rule['conditional_value']);
-                            //compare with text
-                            }else{
-                                $compareValue2 = "'".strtolower(trim($rule['conditional_value']))."'";
-                            }
-                            
-                            /*
-                                NOW WE KNOW THAT THE CHANGED FIELD BELONGS TO THIS CONDITION
-                                LETS CHECK IF ALL THE VALUES ARE MET AS WELL
-                            */
-                            if(!in_array($equation, ['changed', 'clicked', 'checked', '!checked', 'visible', 'invisible'])){
-                                $conditionVariables[]      = "var value_$fieldNumber1 = FormFunctions.getFieldValue('$conditionalFieldName', form, true, $compareValue2, true);";
-                                
-                                if(is_numeric($rule['conditional_field_2'])){
-                                    $conditionVariables[]  = "var value_$fieldNumber2 = FormFunctions.getFieldValue('$conditionalField2Name', form, true, $compareValue2, true);";
-                                }
-                            }
-                            
-                            if(empty($equation)){
-                                return new \WP_Error('forms', "$element->name has a rule without equation set. Please check");
-                            }elseif($equation == 'checked'){
-                                if(count($condition['rules'])==1){
-                                    $conditionIf .= "el.checked";
-                                }else{
-                                    $conditionIf .= "form.querySelector('[name=\"$conditionalFieldName\"]').checked";
-                                }
-                            }elseif($equation == '!checked'){
-                                if(count($condition['rules'])==1){
-                                    $conditionIf .= "!el.checked";
-                                }else{
-                                    $conditionIf .= "!form.querySelector('[name=\"$conditionalFieldName\"]').checked";
-                                }
-                            }elseif($equation == 'visible'){
-                                $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest('.hidden') == null";
-                            }elseif($equation == 'invisible'){
-                                $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest('.hidden') != null";
-                            }elseif($equation != 'changed' && $equation != 'clicked'){
-                                $conditionIf .= "$compareValue1 $equation $compareValue2";
-                            }elseif($equation == 'changed' || $equation == 'clicked'){
-                                $conditionIf .= "$propCompare == '$conditionalFieldName'";
-                            }
-                            
-                            //If there is another rule, add || or &&
-                            if(
-                                $lastRuleKey != $ruleIndex                                                      &&  // there is a next rule
-                                !empty($conditionIf) 																//there is already preceding code
-                            ){
-                                if(empty($rule['combinator'])){
-                                    $rule['combinator'] = 'AND';
-                                    SIM\printArray("Condition index $conditionIndex of $element->name is missing a combinator. I have set it to 'AND' for now");
-                                }
-                                if($rule['combinator'] == 'AND'){
-                                    $conditionIf .= " && ";
-                                }else{
-                                    $conditionIf .= " || ";
-                                }
-                            }
-                        }
-
-                        $action                             = $condition['action'];
-
-                        //store if statment
-                        $fieldCheckIf = "if($fieldCheckIf){";
-                        if(!isset($checks[$fieldCheckIf])){
-                            $checks[$fieldCheckIf]                                            = [];
-                            $checks[$fieldCheckIf]['variables']                               = [];
-                            $checks[$fieldCheckIf]['actions']                                 = ['querystrings'=>[$action=>[]]];
-                            $checks[$fieldCheckIf]['condition_ifs']                           = [];
-                        }
-                            
-                        //no need for variable in case of a 'changed' condition
-                        if(empty($conditionIf)){
-                            $actionArray   =&  $checks[$fieldCheckIf]['actions'];
-                        }else{
-                            $conditionIf       = "if($conditionIf){";
-                            if(empty($checks[$fieldCheckIf]['condition_ifs'][$conditionIf])){
-                                $array              = [
-                                    'actions'       => ['querystrings'=>[$action=>[]]],
-                                    'variables'     => [],
-                                ];
-                                $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]    = $array;
-                            }
-
-                            foreach($conditionVariables as $variable){
-                                if(!in_array($variable, $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]['variables'])){
-                                    $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]['variables'][]    = $variable;
-                                }
-                            }
-                            
-                            $actionArray   =&  $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]['actions'];
                         }
                         
-                        //show, toggle or hide action for this field
-                        if($action == 'show' || $action == 'hide' || $action == 'toggle'){
-                            if($action == 'show'){
-                                $action = 'remove';
-                            }elseif($action == 'hide'){
-                                $action = 'add';
+                        //Check if we are calculating a value based on two field values
+                        if(($equation == '+' || $equation == '-') && is_numeric($rule['conditional_field_2']) && !empty($rule['equation_2'])){
+                            $calc = true;
+                        }else{
+                            $calc = false;
+                        }
+                        
+                        //make sure we do not include other fields in changed or click rules
+                        if(in_array($equation, ['changed', 'clicked'])){
+                            // do not add the same element name twice
+                            if(!str_contains($fieldCheckIf, $conditionalFieldName)){
+                                if(!empty($fieldCheckIf)){
+                                    $fieldCheckIf   .= " || ";
+                                }
+                                $fieldCheckIf   .= "$propCompare == '$conditionalFieldName'";
                             }
-
-                            if(!is_array($actionArray['querystrings'][$action])){
-                                $actionArray['querystrings'][$action] = [];
+                            $checkForChange = true;
+                        }
+                        
+                        //Only allow or statements
+                        if(!$checkForChange || (isset($condition['rules'][$ruleIndex-1]) && $condition['rules'][$ruleIndex-1]['combinator'] == 'OR')){
+                            // do not add the same element name twice
+                            if(!str_contains($fieldCheckIf, "$propCompare == '$conditionalFieldName'")){
+                                //Write the if statement to check if the current clicked field belongs to this condition
+                                if(!empty($fieldCheckIf)){
+                                    $fieldCheckIf .= " || ";
+                                }
+                                $fieldCheckIf .= "$propCompare == '$conditionalFieldName'";
                             }
                             
-                            $name	= $element->name;
-
-                            //formstep do not have an inputwrapper
-                            if($element->type == 'formstep'){
-                                $actionCode    = "form.querySelector('[name=\"$name\"]').classList.$action('hidden');";
-                                if(!in_array($actionCode, $actionArray)){
-                                    $actionArray[] = $actionCode;
+                            // do not add the same element name twice
+                            if(!str_contains($fieldCheckIf, "$propCompare == '$conditionalField2Name'")){
+                                //If there is an extra field to check
+                                if(is_numeric($rule['conditional_field_2'])){
+                                    $fieldCheckIf .= " || $propCompare == '$conditionalField2Name'";
                                 }
+                            }
+                        }
+        
+                        //We calculate the sum or difference of two field values if needed.
+                        if($calc){
+                            if($conditionalFieldType == 'date'){
+                                //Convert date strings to date values then miliseconds to days
+                                $conditionVariables[]  = "var calculated_value_$ruleIndex = (Date.parse(value_$fieldNumber1) $equation Date.parse(value_$fieldNumber2))/ (1000 * 60 * 60 * 24);";
                             }else{
-                                //only add if there is no wrapping element with the same condition.
-                                $prevElement = $this->formElements[$elementIndex];
-                                if(
-                                    !$prevElement->wrap ||                                                              // this element is not wrapped in the previous one
-                                    !in_array($prevElement, $actionArray['querystrings'][$action])   // or the previous element is not in the action array
-                                ){
-                                    $actionArray['querystrings'][$action][]    = $element;
-                                }
+                                $conditionVariables[]  = "var calculated_value_$ruleIndex = value_$fieldNumber1 $equation value_$fieldNumber2;";
                             }
+                            $equation = $rule['equation_2'];
 
-                            foreach($conditions['copyto'] as $fieldIndex){
-                                if(!is_numeric($fieldIndex)){
-                                    continue;
-                                }
-
-                                //find the element with the right id
-                                $copyToElement	= $this->getElementById($fieldIndex);
-                                if(!$copyToElement){
-                                    $errors[]   = "Element $element->name has an invalid rule";
-                                    continue;
-                                }
-                                
-                                //formstep do not have an inputwrapper
-                                if($copyToElement->type == 'formstep'){
-                                    $actionCode    = "form.querySelector('[name=\"$copyToElement->name\"]').classList.$action('hidden');";
-                                    if(!in_array($actionCode, $actionArray)){
-                                        $actionArray[] = $actionCode;
-                                    }
-                                }else{
-                                    $actionArray['querystrings'][$action][]    = $copyToElement;
-                                }
-                            }
-                        //set property value
-                        }elseif($action == 'property' || $action == 'value'){
-                            //set the attribute value of one field to the value of another field
-                            $selector		= $this->getSelector($element);
+                            //compare with calculated value
+                            $compareValue1 = "calculated_value_$ruleIndex";
+                        }else{
+                            //compare with a field value
+                            $compareValue1 = "value_$fieldNumber1";
+                        }
                             
-                            //fixed prop value
-                            if($action == 'value'){
-                                $propertyName	                        = $condition['propertyname1'];
-                                if(isset($condition['action_value'])){
-                                    $varName   = '"'.do_shortcode($condition['action_value']).'"';
-                                }
-                            //retrieve value from another field
+                        //compare with the value of another field
+                        if(str_contains($rule['equation'], 'value')){
+                            $compareValue2 = "value_$fieldNumber2";
+                        //compare with a number
+                        }elseif(is_numeric($rule['conditional_value'])){
+                            $compareValue2 = trim($rule['conditional_value']);
+                        //compare with text
+                        }else{
+                            $compareValue2 = "'".strtolower(trim($rule['conditional_value']))."'";
+                        }
+                        
+                        /*
+                            NOW WE KNOW THAT THE CHANGED FIELD BELONGS TO THIS CONDITION
+                            LETS CHECK IF ALL THE VALUES ARE MET AS WELL
+                        */
+                        if(!in_array($equation, ['changed', 'clicked', 'checked', '!checked', 'visible', 'invisible'])){
+                            $conditionVariables[]      = "var value_$fieldNumber1 = FormFunctions.getFieldValue('$conditionalFieldName', form, true, $compareValue2, true);";
+                            
+                            if(is_numeric($rule['conditional_field_2'])){
+                                $conditionVariables[]  = "var value_$fieldNumber2 = FormFunctions.getFieldValue('$conditionalField2Name', form, true, $compareValue2, true);";
+                            }
+                        }
+                        
+                        if(empty($equation)){
+                            return new \WP_Error('forms', "$element->name has a rule without equation set. Please check");
+                        }elseif($equation == 'checked'){
+                            if(count($condition['rules'])==1){
+                                $conditionIf .= "el.checked";
                             }else{
-                                $propertyName	= $condition['propertyname'];
-                            
-                                $copyfieldid	= $condition['property_value'];
-                                
-                                //find the element with the right id
-                                $copyElement = $this->getElementById($copyfieldid);
-                                if(!$copyElement){
-                                    $errors[]   = "Element $element->name has an invalid rule";
-                                    continue;
-                                }
-
-                                $copyFieldName	= $copyElement->name;
-                                if(str_contains($copyFieldName, '[]')){
-                                    $propCompare            = 'el.id';
-                                    $copyFieldName	= 'E'.$copyElement->id;
-                                }elseif(in_array($copyElement->type,['radio','checkbox']) && !str_contains($copyFieldName, '[]')) {
-                                    $copyFieldName .= '[]';
-                                }
-                                
-                                $varName = str_replace(['[]', '[', ']'], ['', '_', ''], $copyFieldName);
-
-                                $varCode = "let $varName = FormFunctions.getFieldValue('$copyFieldName', form);";
-                                if(!in_array($varCode, $checks[$fieldCheckIf]['variables'])){
-                                    $checks[$fieldCheckIf]['variables'][] = $varCode;
-                                }
+                                $conditionIf .= "form.querySelector('[name=\"$conditionalFieldName\"]').checked";
                             }
-                            
-                            $addition       = '';
-                            if(!empty($condition['addition'])){
-                                $addition       = $condition['addition'];
-                            }
-                            if($propertyName == 'value'){
-                                $actionCode    = "FormFunctions.changeFieldValue('$selector', $varName, {$this->varName}.processFields, form, $addition);";
-                                if(!in_array($actionCode, $actionArray)){
-                                    $actionArray[] = $actionCode;
-                                }
+                        }elseif($equation == '!checked'){
+                            if(count($condition['rules'])==1){
+                                $conditionIf .= "!el.checked";
                             }else{
-                                $actionCode    = "FormFunctions.changeFieldProperty('$selector', '$propertyName', $varName, {$this->varName}.processFields, form, $addition);";
-                                if(!in_array($actionCode, $actionArray)){
-                                    $actionArray[] = $actionCode;
-                                }
+                                $conditionIf .= "!form.querySelector('[name=\"$conditionalFieldName\"]').checked";
+                            }
+                        }elseif($equation == 'visible'){
+                            $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest('.hidden') == null";
+                        }elseif($equation == 'invisible'){
+                            $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest('.hidden') != null";
+                        }elseif($equation != 'changed' && $equation != 'clicked'){
+                            $conditionIf .= "$compareValue1 $equation $compareValue2";
+                        }elseif($equation == 'changed' || $equation == 'clicked'){
+                            $conditionIf .= "$propCompare == '$conditionalFieldName'";
+                        }
+                        
+                        //If there is another rule, add || or &&
+                        if(
+                            $lastRuleKey != $ruleIndex                                                      &&  // there is a next rule
+                            !empty($conditionIf) 																//there is already preceding code
+                        ){
+                            if(empty($rule['combinator'])){
+                                $rule['combinator'] = 'AND';
+                                SIM\printArray("Condition index $conditionIndex of $element->name is missing a combinator. I have set it to 'AND' for now");
+                            }
+                            if($rule['combinator'] == 'AND'){
+                                $conditionIf .= " && ";
+                            }else{
+                                $conditionIf .= " || ";
+                            }
+                        }
+                    }
+
+                    $action                             = $condition['action'];
+
+                    //store if statment
+                    $fieldCheckIf = "if($fieldCheckIf){";
+                    if(!isset($checks[$fieldCheckIf])){
+                        $checks[$fieldCheckIf]                                            = [];
+                        $checks[$fieldCheckIf]['variables']                               = [];
+                        $checks[$fieldCheckIf]['actions']                                 = ['querystrings'=>[$action=>[]]];
+                        $checks[$fieldCheckIf]['condition_ifs']                           = [];
+                    }
+                        
+                    //no need for variable in case of a 'changed' condition
+                    if(empty($conditionIf)){
+                        $actionArray   =&  $checks[$fieldCheckIf]['actions'];
+                    }else{
+                        $conditionIf       = "if($conditionIf){";
+                        if(empty($checks[$fieldCheckIf]['condition_ifs'][$conditionIf])){
+                            $array              = [
+                                'actions'       => ['querystrings'=>[$action=>[]]],
+                                'variables'     => [],
+                            ];
+                            $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]    = $array;
+                        }
+
+                        foreach($conditionVariables as $variable){
+                            if(!in_array($variable, $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]['variables'])){
+                                $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]['variables'][]    = $variable;
+                            }
+                        }
+                        
+                        $actionArray   =&  $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]['actions'];
+                    }
+                    
+                    //show, toggle or hide action for this field
+                    if($action == 'show' || $action == 'hide' || $action == 'toggle'){
+                        if($action == 'show'){
+                            $action = 'remove';
+                        }elseif($action == 'hide'){
+                            $action = 'add';
+                        }
+
+                        if(!is_array($actionArray['querystrings'][$action])){
+                            $actionArray['querystrings'][$action] = [];
+                        }
+                        
+                        $name	= $element->name;
+
+                        //formstep do not have an inputwrapper
+                        if($element->type == 'formstep'){
+                            $actionCode    = "form.querySelector('[name=\"$name\"]').classList.$action('hidden');";
+                            if(!in_array($actionCode, $actionArray)){
+                                $actionArray[] = $actionCode;
                             }
                         }else{
-                            SIM\printArray("formbuilder.php writing js: missing action: '$action' for condition $conditionIndex of field {$element->name}");
+                            //only add if there is no wrapping element with the same condition.
+                            $prevElement = $this->formElements[$elementIndex];
+                            if(
+                                !$prevElement->wrap ||                                                              // this element is not wrapped in the previous one
+                                !in_array($prevElement, $actionArray['querystrings'][$action])   // or the previous element is not in the action array
+                            ){
+                                $actionArray['querystrings'][$action][]    = $element;
+                            }
                         }
+
+                        foreach($conditions['copyto'] as $fieldIndex){
+                            if(!is_numeric($fieldIndex)){
+                                continue;
+                            }
+
+                            //find the element with the right id
+                            $copyToElement	= $this->getElementById($fieldIndex);
+                            if(!$copyToElement){
+                                $errors[]   = "Element $element->name has an invalid rule";
+                                continue;
+                            }
+                            
+                            //formstep do not have an inputwrapper
+                            if($copyToElement->type == 'formstep'){
+                                $actionCode    = "form.querySelector('[name=\"$copyToElement->name\"]').classList.$action('hidden');";
+                                if(!in_array($actionCode, $actionArray)){
+                                    $actionArray[] = $actionCode;
+                                }
+                            }else{
+                                $actionArray['querystrings'][$action][]    = $copyToElement;
+                            }
+                        }
+                    //set property value
+                    }elseif($action == 'property' || $action == 'value'){
+                        //set the attribute value of one field to the value of another field
+                        $selector		= $this->getSelector($element);
+                        
+                        //fixed prop value
+                        if($action == 'value'){
+                            $propertyName	                        = $condition['propertyname1'];
+                            if(isset($condition['action_value'])){
+                                $varName   = '"'.do_shortcode($condition['action_value']).'"';
+                            }
+                        //retrieve value from another field
+                        }else{
+                            $propertyName	= $condition['propertyname'];
+                        
+                            $copyfieldid	= $condition['property_value'];
+                            
+                            //find the element with the right id
+                            $copyElement = $this->getElementById($copyfieldid);
+                            if(!$copyElement){
+                                $errors[]   = "Element $element->name has an invalid rule";
+                                continue;
+                            }
+
+                            $copyFieldName	= $copyElement->name;
+                            if(str_contains($copyFieldName, '[]')){
+                                $propCompare            = 'el.id';
+                                $copyFieldName	= 'E'.$copyElement->id;
+                            }elseif(in_array($copyElement->type,['radio','checkbox']) && !str_contains($copyFieldName, '[]')) {
+                                $copyFieldName .= '[]';
+                            }
+                            
+                            $varName = str_replace(['[]', '[', ']'], ['', '_', ''], $copyFieldName);
+
+                            $varCode = "let $varName = FormFunctions.getFieldValue('$copyFieldName', form);";
+                            if(!in_array($varCode, $checks[$fieldCheckIf]['variables'])){
+                                $checks[$fieldCheckIf]['variables'][] = $varCode;
+                            }
+                        }
+                        
+                        $addition       = '';
+                        if(!empty($condition['addition'])){
+                            $addition       = $condition['addition'];
+                        }
+                        if($propertyName == 'value'){
+                            $actionCode    = "FormFunctions.changeFieldValue('$selector', $varName, {$this->varName}.processFields, form, $addition);";
+                            if(!in_array($actionCode, $actionArray)){
+                                $actionArray[] = $actionCode;
+                            }
+                        }else{
+                            $actionCode    = "FormFunctions.changeFieldProperty('$selector', '$propertyName', $varName, {$this->varName}.processFields, form, $addition);";
+                            if(!in_array($actionCode, $actionArray)){
+                                $actionArray[] = $actionCode;
+                            }
+                        }
+                    }else{
+                        SIM\printArray("formbuilder.php writing js: missing action: '$action' for condition $conditionIndex of field {$element->name}");
                     }
                 }
             }
@@ -521,7 +524,7 @@ trait CreateJs{
 
         $extraJs    = "// Loop over the element which value is given in the url;\n";
         $extraJs    .= "if(typeof(urlSearchParams) == 'undefined'){\n\twindow.urlSearchParams = new URLSearchParams(window.location.search.replaceAll('&amp;', '&'));\n}\n";
-        $extraJs    .= "Array.from(urlSearchParams).forEach(array => document.querySelectorAll(`[name^='\${array[0]}']`).forEach(el => FormFunctions.changeFieldValue(el, array[1], $this->varName.processFields, el.closest('form'), )));\n\n";
+        $extraJs    .= "Array.from(urlSearchParams).forEach(array => document.querySelectorAll(`[name^='\${array[0]}' i]`).forEach(el => FormFunctions.changeFieldValue(el, array[1], $this->varName.processFields, el.closest('form'), )));\n\n";
         
         $js         .= $extraJs;
         $minifiedJs .= \Garfix\JsMinify\Minifier::minify($extraJs, array('flaggedComments' => false));   
@@ -541,39 +544,34 @@ trait CreateJs{
 
         //write it all to a file
         //$js			= ob_get_clean();
-        if(empty($checks) && empty($extraJs)){
-            //create empty files
-            file_put_contents($this->jsFileName.'.js', '');
-            file_put_contents($this->jsFileName.'.min.js', '');
-        }else{
-            //Create js file
-            file_put_contents($this->jsFileName.'.js', $js);
 
-            //replace long strings for shorter ones
-            $minifiedJs=str_replace(
-                [
-                    "listener",
-                    "processFields",
-                    'value_',
-                    'elName',
-                    "\n"
-                ],
-                [
-                    'q',
-                    'p',
-                    'v_',
-                    'n',
-                    ''
-                ],
-                $minifiedJs
-            );
+        //Create js file
+        file_put_contents($this->jsFileName.'.js', $js);
 
-            $minifiedJs     .= "\n\n".apply_filters('sim_form_extra_js', '', $this, true);
-            // Create minified version
-            //$minifier = new Minify\CSS($js);
-            //$minifier->minify($this->jsFileName.'.min.js');
-            file_put_contents($this->jsFileName.'.min.js', $minifiedJs);
-        }
+        //replace long strings for shorter ones
+        $minifiedJs=str_replace(
+            [
+                "listener",
+                "processFields",
+                'value_',
+                'elName',
+                "\n"
+            ],
+            [
+                'q',
+                'p',
+                'v_',
+                'n',
+                ''
+            ],
+            $minifiedJs
+        );
+
+        $minifiedJs     .= "\n\n".apply_filters('sim_form_extra_js', '', $this, true);
+        // Create minified version
+        //$minifier = new Minify\CSS($js);
+        //$minifier->minify($this->jsFileName.'.min.js');
+        file_put_contents($this->jsFileName.'.min.js', $minifiedJs);
         
         if(!empty($errors)){
             SIM\printArray($errors);

@@ -738,12 +738,19 @@ class SimForms{
 		
 		$formElements 		=  $wpdb->get_results($query);
 
-		if((isset($_REQUEST['formbuilder']) || empty($formElements)) && $this->editRights){
+		if(isset($_REQUEST['formbuilder'])){
 			$formBuilderForm	= new FormBuilderForm($atts);
 
 			return $formBuilderForm->showForm();
 		}elseif(empty($formElements)){
-			return "<div class='warning'>This form has no elements yet.<br>Ask an user with the editor role to start working on it</div>";
+			$html	= "<div class='warning'>This form has no elements yet.<br>";
+			if($this->editRights){
+				$url	= SIM\getCurrentUrl()."&formbuilder=true";
+				$html	.= "<br><a href='$url' class='button small sim'>Start Building the form</a>";
+			}else{
+				$html	.= "Ask an user with the editor role to start working on it";
+			}
+			return $html."</div>";
 		}else{
 			$displayForm	= new DisplayForm($atts);
 			return $displayForm->showForm();
