@@ -126,7 +126,7 @@ export function copyFormInput(originalNode){
 			select._niceselect = NiceSelect.bind(select, {searchable: true});
 		}else{
 			select._niceselect.update();
-			select.nextSibling.querySelector('.current').textContent = 'Select an option';
+			select.nextSibling.querySelectorAll('.current').forEach(el=>el.textContent = 'Select an option');
 		}
 		
 		i++;

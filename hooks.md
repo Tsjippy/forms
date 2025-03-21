@@ -34,3 +34,4 @@
 - sim-table-view-permissions
 
 # Actions
+- do_action('sim-forms-after-email-triggers', $key, $email)

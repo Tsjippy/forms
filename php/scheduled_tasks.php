@@ -84,21 +84,7 @@ function formReminder(){
                         ]
                     );
 
-                    $result = wp_mail($recipient , $subject, $m, $headers);
-
-                    // Find any hyperlinks in the text
-                    preg_match_all('/<a\s+href=(?:"|\')(.*?)(?:"|\')>(.*?)<\/a>/i', $m, $matches);
-
-                    //replace the hyperlinks with plain links
-                    foreach($matches[0] as $index=>$match){
-                        $m  = str_replace($match, $matches[2][$index].': '.str_replace('https://', '', $matches[1][$index]), $m);
-                    }
-
-                    //Send Signal message
-                    SIM\trySendSignal(
-                        html_entity_decode(strip_tags(str_replace(['<br>', '</br>', '<br />', '</p>'], "\n", $m))),
-                        $user->ID
-                    );
+                    wp_mail($recipient , $subject, $m, $headers);
                 }
             }
         }
@@ -143,21 +129,9 @@ function mandatoryFieldsReminder(){
                         }
                         $recipients .= $parent->user_email;
                     }
-                                
-                    //Send Signal message
-                    SIM\trySendSignal(
-                        "Hi $parent->first_name,\nPlease update the personal information of your $childTitle $user->first_name here:\n\n$accountUrl",
-                        $user->ID
-                    );
                 }
             //not a child
-            }else{
-                //Send Signal message
-                SIM\trySendSignal(
-                    "Hi $user->first_name,\nPlease update your personal information here:\n\n$accountUrl",
-                    $user->ID
-                );
-                
+            }else{                
                 //If this not a valid email skip this email
                 if(str_contains($user->user_email,'.empty')){
                     continue;

@@ -782,4 +782,13 @@ class SimForms{
 
 		return false;
 	}
+
+	/**
+     * Add signal data to wp_mail args
+     */
+    public function addFormData($args){
+        $args['formresults'] = $this->submission->formresults;
+
+        return $args;
+    }
 }
