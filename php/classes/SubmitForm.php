@@ -230,27 +230,29 @@ class SubmitForm extends SimForms{
 				}
 			}
 
+			// add the form specific footer filter
+			add_filter('sim_email_footer_url', [$this, 'emailFooter']);
+
+			add_filter('wp_mail', [$this, 'addFormData'], 1);
+
 			//Send the mail
-			if($_SERVER['HTTP_HOST'] != 'localhost'){
-				// add the form specific footer filter
-				add_filter('sim_email_footer_url', [$this, 'emailFooter']);
+			$result = wp_mail($to , $subject, $message, $headers, $files);
 
-				$result = wp_mail($to , $subject, $message, $headers, $files);
+			remove_filter('wp_mail', [$this, 'addFormData'], 1);
 
-				if($result === false){
-					SIM\printArray("Sending the e-mail failed");
-					SIM\printArray([
-						$to,
-						$subject,
-						$message,
-						$headers,
-						$files
-					]);
-				}
-
-				// remove the form specific footer filter
-				remove_filter('sim_email_footer_url', [$this, 'emailFooter']);
+			if($result === false){
+				SIM\printArray("Sending the e-mail failed");
+				SIM\printArray([
+					$to,
+					$subject,
+					$message,
+					$headers,
+					$files
+				]);
 			}
+
+			// remove the form specific footer filter
+			remove_filter('sim_email_footer_url', [$this, 'emailFooter']);
 		}
 	}
 	
