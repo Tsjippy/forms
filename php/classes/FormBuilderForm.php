@@ -815,12 +815,34 @@ class FormBuilderForm extends SimForms{
 											<input type='radio' name='emails[<?php echo $key;?>][emailtrigger]' class='emailtrigger' value='fieldchanged' <?php if($email['emailtrigger'] == 'fieldchanged'){echo 'checked';}?>>
 											A field has changed to a value
 										</label>
-										<br>
+										<div class='conditionalfield-wrapper <?php if($email['emailtrigger'] != 'fieldchanged'){echo 'hidden';}?>'>
+											<label class="formfield formfieldlabel">Field</label>
+											<select name='emails[<?php echo $key;?>][conditionalfield]'>
+												<?php
+												echo $this->inputDropdown( $email['conditionalfield'] );
+												?>
+											</select>
+											
+											<label class="formfield formfieldlabel">
+												Value
+												<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][conditionalvalue]' value="<?php echo $email['conditionalvalue']; ?>" style='width:fit-content;'>
+											</label>
+										</div>
+
+										
 										<label>
 											<input type='radio' name='emails[<?php echo $key;?>][emailtrigger]' class='emailtrigger' value='fieldschanged' <?php if($email['emailtrigger'] == 'fieldschanged'){	echo 'checked';}?>>
 											One or more fields have changed
 										</label>
-										<br>
+										<div class='conditionalfields-wrapper <?php if($email['emailtrigger'] != 'fieldschanged'){echo 'hidden';}?>'>
+											<label class="formfield formfieldlabel">Field(s)</label>
+											<select name='emails[<?php echo $key;?>][conditionalfields][]' multiple='multiple'>
+												<?php
+												echo $this->inputDropdown( $email['conditionalfields'] );
+												?>
+											</select>
+										</div>
+
 										<label>
 											<input type='radio' name='emails[<?php echo $key;?>][emailtrigger]' class='emailtrigger' value='removed' <?php if($email['emailtrigger'] == 'removed'){echo 'checked';}?>>
 											The submission is archived or deleted
@@ -832,29 +854,6 @@ class FormBuilderForm extends SimForms{
 											Do not send this e-mail
 										</label>
 										<br>
-									</div>
-									
-									<div class='conditionalfield-wrapper <?php if($email['emailtrigger'] != 'fieldchanged'){echo 'hidden';}?>'>
-										<label class="formfield formfieldlabel">Field</label>
-										<select name='emails[<?php echo $key;?>][conditionalfield]'>
-											<?php
-											echo $this->inputDropdown( $email['conditionalfield'] );
-											?>
-										</select>
-										
-										<label class="formfield formfieldlabel">
-											Value
-											<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][conditionalvalue]' value="<?php echo $email['conditionalvalue']; ?>" style='width:fit-content;'>
-										</label>
-									</div>
-
-									<div class='conditionalfields-wrapper <?php if($email['emailtrigger'] != 'fieldschanged'){echo 'hidden';}?>'>
-										<label class="formfield formfieldlabel">Field(s)</label>
-										<select name='emails[<?php echo $key;?>][conditionalfields][]' multiple='multiple'>
-											<?php
-											echo $this->inputDropdown( $email['conditionalfields'] );
-											?>
-										</select>
 									</div>
 									
 									<br>
