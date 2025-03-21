@@ -4,11 +4,17 @@
 ### Added
 
 ### Changed
-- removed signal messaging
 
 ### Fixed
 
 ### Updated
+
+## [8.4.0] - 2025-03-21
+
+
+### Changed
+- removed signal messaging
+- add form data to wp_mail args
 
 ## [8.3.9] - 2025-03-20
 
