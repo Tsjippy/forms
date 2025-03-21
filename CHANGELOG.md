@@ -5,6 +5,7 @@
 
 ### Changed
 - removed signal messaging
+- add form data to wp_mail args
 
 ### Fixed
 
