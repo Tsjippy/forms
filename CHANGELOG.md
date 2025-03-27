@@ -9,6 +9,12 @@
 
 ### Updated
 
+## [8.4.2] - 2025-03-27
+
+
+### Added
+- form submit without being logged in
+
 ## [8.4.1] - 2025-03-27
 
 
