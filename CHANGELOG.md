@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- do not show form builder if not loged in
-- issue with values not updated
 
 ### Updated
+
+## [8.4.3] - 2025-03-27
+
+
+### Fixed
+- do not show form builder if not loged in
+- issue with values not updated
 
 ## [8.4.2] - 2025-03-27
 
