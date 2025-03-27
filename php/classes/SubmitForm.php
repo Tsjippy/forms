@@ -432,7 +432,7 @@ class SubmitForm extends SimForms{
 			unset($this->submission->formresults['userid']);
 		}
 			
-		$this->submission->formresults['formurl']			= $_POST['formurl'];
+		$this->submission->formresults['formurl']	= $_POST['formurl'];
 
 		// add the submission id to the form results
 		if(empty($this->formData->save_in_meta)){
@@ -479,6 +479,9 @@ class SubmitForm extends SimForms{
 				}
 			}
 		}
+
+		// Add a security has for submissions from outside
+		$this->submission->formresults['viewhash']		= wp_hash($this->submission->id);
 		
 		$this->submission->formresults 					= apply_filters('sim_before_saving_formdata', $this->submission->formresults, $this);
 

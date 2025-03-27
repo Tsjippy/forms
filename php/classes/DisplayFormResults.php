@@ -522,7 +522,7 @@ class DisplayFormResults extends DisplayForm{
 				}
 
 				// Add the subkey
-				$newSubmission->subId			= $x;
+				$newSubmission->subId			= apply_filters('sim-formresults-split-subid', $x, $newSubmission, $this);
 
 				//add the new submission
 				$this->splittedSubmissions[]	= $newSubmission;
@@ -1104,6 +1104,8 @@ class DisplayFormResults extends DisplayForm{
 				
 				//transform if needed
 				$orgFieldValue	= $value;
+
+				$value 			= apply_filters('sim-form-result-table-value', $value, $columnSetting, $values, $this);
 				$value 			= $this->transformInputData($value, $elementName, (object)$values);
 				
 				//show original email in excel
@@ -2159,6 +2161,14 @@ class DisplayFormResults extends DisplayForm{
 		// get submissions for the current user only
 		if($type == 'own'){
 			$userId	= get_current_user_id();
+
+			if(!$userId){
+				if(!empty($_REQUEST['hash']) && $_REQUEST['hash'] == wp_hash($_REQUEST['id'])){
+					$userId		= $_REQUEST['hash'];
+				}else{
+					return true;
+				}
+			}
 		}
 
 		// Check if we should sort the data
@@ -2347,7 +2357,7 @@ class DisplayFormResults extends DisplayForm{
 	public function showFormresultsTable($split = null, $all = false){
 		//do not show if not logged in
 		if(!is_user_logged_in()){
-			return '';
+			//return '';
 		}
 
 		// first render the table so we now how many results we have

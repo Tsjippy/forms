@@ -4,6 +4,14 @@ use SIM;
 use stdClass;
 use WP_Error;
 
+// Allow rest api urls for non-logged in users
+add_filter('sim_allowed_rest_api_urls', __NAMESPACE__.'\addFormResultUrls');
+function addFormResultUrls($urls){
+    $urls[] = RESTAPIPREFIX.'/forms/edit_value';
+	$urls[] = RESTAPIPREFIX.'/forms/get_input_html';
+
+    return $urls;
+}
 
 add_action( 'rest_api_init', __NAMESPACE__.'\restApiInitTable' );
 function restApiInitTable() {
@@ -510,7 +518,7 @@ function editValue(){
 	$updated		= false;
 
 	if(isset($formTable->submission->formresults[$elementName])){
-		$oldValue											= $formTable->submission->formresults[$elementName];
+		$oldValue			= $formTable->submission->formresults[$elementName];
 
 		if($oldValue == $newValue){
 			return new WP_Error('sim-forms', "Old value '$oldValue' is the same as the new value!");

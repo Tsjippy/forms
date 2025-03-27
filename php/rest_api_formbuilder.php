@@ -4,6 +4,14 @@ use SIM;
 use stdClass;
 use WP_Error;
 
+// Allow rest api urls for non-logged in users
+add_filter('sim_allowed_rest_api_urls', __NAMESPACE__.'\addRestUrls');
+function addRestUrls($urls){
+    $urls[] = RESTAPIPREFIX.'/forms/save_form_input';
+
+    return $urls;
+}
+
 function checkPermissions(){
 	$forms	= new SimForms();
 

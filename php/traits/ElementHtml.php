@@ -106,7 +106,7 @@ trait ElementHtml{
 				if(!empty($this->defaultValues[$defaultKey])){
 					$values['defaults']		= $this->defaultValues[$defaultKey];
 				}else{
-					$values['defaults']		= $defaultKey;
+					//$values['defaults']		= $defaultKey;
 				}
 			}
 		}else{
