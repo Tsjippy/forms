@@ -7,6 +7,7 @@
 
 ### Fixed
 - do not show form builder if not loged in
+- issue with values not updated
 
 ### Updated
 
