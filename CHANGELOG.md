@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- do not show form builder if not loged in
 
 ### Updated
 
