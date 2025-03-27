@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- code reordering
 
 ### Fixed
 
 ### Updated
+
+## [8.4.1] - 2025-03-27
+
+
+### Changed
+- code reordering
 
 ## [8.4.0] - 2025-03-21
 
