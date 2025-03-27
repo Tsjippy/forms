@@ -249,6 +249,10 @@ class FormBuilderForm extends SimForms{
 	 * @param	array	$atts	The attribute array of the WP Shortcode
 	 */
 	public function showForm(){
+		if(!is_user_logged_in()){
+			return false;
+		}
+		
 		// Load js
 		wp_enqueue_script('sim_forms_script');
 

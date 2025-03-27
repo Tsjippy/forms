@@ -738,7 +738,7 @@ class SimForms{
 		
 		$formElements 		=  $wpdb->get_results($query);
 
-		if(isset($_REQUEST['formbuilder'])){
+		if(isset($_REQUEST['formbuilder']) && is_user_logged_in()){
 			$formBuilderForm	= new FormBuilderForm($atts);
 
 			return $formBuilderForm->showForm();
