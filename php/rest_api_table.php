@@ -567,13 +567,13 @@ function editValue(){
 		return new WP_Error('submission-update', 'Could not update the value');
 	}
 
+	$formTable->updateSubmission();
+
 	$message	= apply_filters('sim-forms-submission-updated', $message, $formTable, $elementName, $oldValue, $newValue);
 
 	if(is_wp_error($message)){
 		return ['message' => $message->get_error_message()];
 	}
-
-	$formTable->updateSubmission();
 	
 	//send email if needed
 	$submitForm					= new SubmitForm();

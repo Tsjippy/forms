@@ -234,6 +234,9 @@ async function getInputHtml(target){
 		addFormsTableInputEventListeners(target);
 
 		target.querySelectorAll('.file_upload_wrap').forEach(el=>el.addEventListener('uploadfinished', uploadFinished));
+
+		// show calendar by default
+		target.querySelectorAll('input').forEach(el=>el.showPicker());
 	}else{
 		target.innerHTML	= target.dataset.oldtext;
 		target.classList.remove('active');
