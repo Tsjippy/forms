@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- email on field changed
 
 ### Updated
 
