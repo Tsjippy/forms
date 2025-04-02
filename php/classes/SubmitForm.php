@@ -63,7 +63,7 @@ class SubmitForm extends SimForms{
 			return false;
 		}
 
-		$changedElementId	= $_POST['elementid'];
+		$changedElementId	= $_POST['id'];
 
 		//SIM\printArray($email);
 		//SIM\printArray($trigger);
