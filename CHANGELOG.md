@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- email on field changed
 
 ### Updated
+
+## [8.4.4] - 2025-04-05
+
+
+### Fixed
+- email on field changed
 
 ## [8.4.3] - 2025-03-27
 
