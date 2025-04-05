@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- unserialize form results before filtering them
 
 ### Fixed
 
 ### Updated
+
+## [8.4.5] - 2025-04-05
+
+
+### Changed
+- unserialize form results before filtering them
 
 ## [8.4.4] - 2025-04-05
 
