@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- unserialize form results before filtering them
 
 ### Fixed
 
