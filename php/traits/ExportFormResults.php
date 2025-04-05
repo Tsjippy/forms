@@ -143,10 +143,11 @@ trait ExportFormResults{
 		
 		$header		= array_map('ucfirst', $this->excelContent[0]);
 
-		$title		= $this->formSettings['formname'].' export';
+		$title		= ucfirst($this->formName);
 		if(empty($title)){
-			$title = 'Form export';
+			$title = 'Form';
 		}
+		$title	.= " Results Export";
 
 		//loop over the data to check all cells for their length
 		foreach($this->excelContent as $rowData){

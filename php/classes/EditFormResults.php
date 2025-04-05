@@ -227,7 +227,14 @@ class EditFormResults extends DisplayFormResults{
 		}
 
 		foreach($splitIds as $id){
+			if(!$id){
+				continue;
+			}
+
 			$elementName			= $this->getElementById($id, 'name');
+			if(!$elementName){
+				continue;
+			}
 
 			preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $elementName, $matches);
 
