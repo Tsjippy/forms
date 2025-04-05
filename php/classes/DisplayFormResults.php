@@ -164,6 +164,10 @@ class DisplayFormResults extends DisplayForm{
 			
 		}	
 
+		foreach($results as &$r){
+			$r->formresults	= maybe_unserialize($r->formresults);
+		}
+
 		return apply_filters('sim_retrieved_formdata', $results, $userId, $this);
 	}
 
@@ -264,6 +268,10 @@ class DisplayFormResults extends DisplayForm{
 		// Get results
 		$result	= $wpdb->get_results($query);
 
+		foreach($result as &$r){
+			$r->formresults	= unserialize($r->formresults);
+		}
+
 		$result	= apply_filters('sim_retrieved_formdata', $result, $userId, $this);
 
 		if(is_numeric($userId)){
@@ -282,11 +290,11 @@ class DisplayFormResults extends DisplayForm{
 				if($wpdb->last_error !== ''){
 					SIM\printArray($wpdb->print_error());
 				}else{
-					$result	= apply_filters('sim_retrieved_formdata', $result, $userId, $this);
-
 					foreach($result as &$r){
 						$r->formresults	= unserialize($r->formresults);
 					}
+
+					$result	= apply_filters('sim_retrieved_formdata', $result, $userId, $this);
 				}
 		
 				return $result;
@@ -296,8 +304,6 @@ class DisplayFormResults extends DisplayForm{
 		// unserialize
 		$keptCount		= 0;
 		foreach($result as $index=>&$submission){
-			$submission->formresults	= unserialize($submission->formresults);
-
 			if(
 				is_numeric($userId)									&& 	// We only want results af a particular user
 				(
