@@ -1099,6 +1099,7 @@ class DisplayFormResults extends DisplayForm{
 					if($matches && isset($matches[1])){
 						$name	= $matches[1];
 					}
+					
 					if(!empty($splitNames) && in_array($name, $splitNames)){
 						$subIdString = "data-subid='$subId'";
 					}
