@@ -554,7 +554,7 @@ class SimForms{
 	 */
 	public function findUserIdElementName(){
 		// find the user id element
-		$userIdKey	= false;
+		$userIdKey	= 'userid';
 
 		$result		= $this->getElementByName('user_id');
 
