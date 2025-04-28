@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- bug when ajax returned an error
 
 ### Updated
 
