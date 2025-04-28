@@ -521,6 +521,9 @@ function editValue(){
 		$oldValue			= $formTable->submission->formresults[$elementName];
 
 		if($oldValue == $newValue){
+			if(is_array($oldValue)){
+				$oldValue	= implode(' ', $oldValue);
+			}
 			return new WP_Error('sim-forms', "Old value '$oldValue' is the same as the new value!");
 		}
 

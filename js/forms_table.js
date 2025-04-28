@@ -517,6 +517,11 @@ async function processFormsTableInput(target){
 	
 			Main.displayMessage(response.message.replace('_', ' '));
 		}
+		
+		// Something went wrong restore the old text
+		else{
+			cell.innerHTML = cell.dataset.oldtext;
+		}
 	}else{
 		cell.innerHTML = cell.dataset.oldtext;
 	}
