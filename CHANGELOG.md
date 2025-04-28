@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- bug when ajax returned an error
 
 ### Updated
+
+## [8.4.7] - 2025-04-28
+
+
+### Fixed
+- bug when ajax returned an error
 
 ## [8.4.6] - 2025-04-27
 
