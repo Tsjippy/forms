@@ -98,6 +98,10 @@ function moduleData($dataHtml){
 		$html	.= "<div class='success' style='margin-top:20px;'>Form succesfully deleted</div>";
 	}
 
+	if(isset($_GET['deleteall'])){
+		$html	.= "<div class='success' style='margin-top:20px;'>Empty forms succesfully deleted</div>";
+	}
+
 	$simForms	= new SaveFormSettings();
 	$simForms->getForms();
 
@@ -199,6 +203,18 @@ function moduleActions(){
 	if(isset($_POST['delete']) && is_numeric($_POST['delete'])){
 		$simForms	= new SaveFormSettings();
 		$simForms->deleteForm($_POST['delete']);
+	}
+
+	if(isset($_GET['deleteall'])){
+		$simForms	= new SaveFormSettings();
+
+		global $wpdb;
+
+		$emptyForms	= $wpdb->query("SELECT * FROM {$wpdb->prefix}sim_forms WHERE 'version' = 1 and 'button_text' = NULL");
+
+		foreach($emptyForms as $form){
+			$simForms->deleteForm($form->id);
+		}
 	}
 }
 

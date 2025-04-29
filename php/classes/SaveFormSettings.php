@@ -41,10 +41,15 @@ class SaveFormSettings extends SimForms{
 			$this->getForm($_POST['formid']);
 		}
 
+		$formVersion	= 1;
+		if(is_numeric($this->formData->version)){
+			$formVersion	= $this->formData->version + 1;
+		}
+
 		//Update form version
 		$result = $wpdb->update(
 			$this->tableName,
-			['version'	=> $this->formData->version+1],
+			['version'	=> $formVersion],
 			['id'		=> $this->formData->id],
 		);
 		
