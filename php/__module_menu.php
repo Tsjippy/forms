@@ -210,7 +210,7 @@ function moduleActions(){
 
 		global $wpdb;
 
-		$emptyForms	= $wpdb->query("SELECT * FROM {$wpdb->prefix}sim_forms WHERE 'version' = 1 and 'button_text' = NULL");
+		$emptyForms	= $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_forms WHERE `version` = 1 and `button_text` IS NULL");
 
 		foreach($emptyForms as $form){
 			$simForms->deleteForm($form->id);
