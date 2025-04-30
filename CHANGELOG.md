@@ -7,6 +7,7 @@
 
 ### Fixed
 - issue when form has no version number
+- delete empty forms
 
 ### Updated
 
