@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- issue when form has no version number
-- delete empty forms
 
 ### Updated
+
+## [8.4.8] - 2025-05-08
+
+
+### Fixed
+- issue when form has no version number
+- delete empty forms
 
 ## [8.4.7] - 2025-04-28
 
