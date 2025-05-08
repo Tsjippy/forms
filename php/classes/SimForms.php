@@ -181,7 +181,11 @@ class SimForms{
 
 			// Form does not exist yet
 			if(empty($result)){
-				SIM\printArray("Form does not exist. Query used is '$query'");
+				global $post;
+
+				$url	= get_page_link($post);
+
+				SIM\printArray("Form requested on {$post->post_type} on $url does not exist. Query used is '$query'");
 				$this->insertForm();
 				$this->formData 	=  new \stdClass();
 			}else{
