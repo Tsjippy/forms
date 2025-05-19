@@ -1118,7 +1118,7 @@ class DisplayFormResults extends DisplayForm{
 				//show original email in excel
 				if(gettype($value) == 'string' && str_contains($value, '@')){
 					$excelRow[]		= $orgFieldValue;
-				}elseif(gettype($value) == 'string' && str_contains($value, '<a href=') && str_contains(wp_strip_all_tags($value), 'Link')){
+				}elseif(gettype($value) == 'string' && str_contains($value, '<a href=') && str_contains($value, 'form_upload')){
 					// add the url to excel
 					preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $value, $match);
 
@@ -2301,7 +2301,16 @@ class DisplayFormResults extends DisplayForm{
 					$html	.= "<select onchange=location.href='{$get}'+this.value>";
 						foreach([1000, 500, 200, 100, 50, 40, 20, 10] as $size){
 							$selected	= '';
-							if(isset($_GET['pagesize']) && $_GET['pagesize'] == $size){
+							if(
+								(
+									isset($_GET['pagesize']) && 
+									$_GET['pagesize'] == $size
+								) ||
+								(
+									empty($_GET['pagesize']) && 
+									$size == 100
+								)
+							){
 								$selected	= 'selected';
 							}
 							$html	.= "<option $selected>$size</option>";
