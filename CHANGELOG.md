@@ -7,6 +7,7 @@
 
 ### Fixed
 - attachment export
+- underscore replacement issue
 
 ### Updated
 
