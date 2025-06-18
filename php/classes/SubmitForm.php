@@ -328,7 +328,9 @@ class SubmitForm extends SimForms{
 				}
 
 				//replace the placeholder with the value
-				$replaceValue	= str_replace('_', ' ', $replaceValue);
+				if(!file_exists($replaceValue)){
+					$replaceValue	= str_replace('_', ' ', $replaceValue);
+				}
 
 				// wordpress sometimes adds http:// automatically
 				if($match == 'formurl'){
