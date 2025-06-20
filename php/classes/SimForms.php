@@ -405,6 +405,8 @@ class SimForms{
 	 * @return	object|array|string|false			The element or element property
 	 */
 	public function getElementById($id, $key=''){
+		global $post;
+
 		if(empty($id)){
 			return false;
 		}
@@ -420,7 +422,10 @@ class SimForms{
 		
 		if(!isset($this->formData->elementMapping['id'][$id])){
 			$this->elementMapper(true);
-			SIM\printArray("Element with id $id not found on form {$this->formData->name} with id {$this->formData->id}",false,true);
+
+			$url	= get_page_link($post);
+
+			SIM\printArray("Element with id '$id' not found on form '{$this->formData->name}' with id  '{$this->formData->id}' on page $url", false);
 			return false;
 		}
 		$elementIndex	= $this->formData->elementMapping['id'][$id];
