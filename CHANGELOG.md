@@ -5,6 +5,7 @@
 
 ### Changed
 - url in missing form log
+- form e-mails display
 
 ### Fixed
 - attachment export
