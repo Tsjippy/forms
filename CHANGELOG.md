@@ -7,6 +7,7 @@
 
 ### Fixed
 - initial active e-mail form
+- display submission data when no table settings defined yet
 
 ### Updated
 
