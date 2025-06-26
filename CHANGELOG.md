@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- initial active e-mail form
-- display submission data when no table settings defined yet
 
 ### Updated
+
+## [8.5.0] - 2025-06-26
+
+
+### Fixed
+- initial active e-mail form
+- display submission data when no table settings defined yet
 
 ## [8.4.9] - 2025-06-26
 
