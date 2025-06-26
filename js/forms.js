@@ -114,10 +114,6 @@ export function copyFormInput(originalNode){
 		//Hide the value in the clone
 		if(select.options[previousVal] != undefined){
 			select.options[previousVal].style.display = 'none';
-		}else{
-			console.log(select);
-			console.log(select.options);
-			console.log(previousVal);
 		}
 		
 		//Add nice select
@@ -142,6 +138,22 @@ export function copyFormInput(originalNode){
 		//Add minus button to the second div
 		newNode.querySelector('.buttonwrapper').insertAdjacentHTML('beforeend', html)
 	}	
+
+	// process tab buttons
+	if(originalNode.matches('.tabcontent')){
+		// Hide original
+		originalNode.classList.add('hidden');
+
+		// Add button for the new one
+		let orgButton	= originalNode.closest('.clone_divs_wrapper').querySelector(`.tablink.active`);
+		let newButton	= cloneNode(orgButton);
+
+		// make the org butto inactive
+		orgButton.classList.remove('active');
+
+		//Insert the clone
+		orgButton.parentNode.insertBefore(newButton, orgButton.nextSibling);
+	}
 	
 	//Insert the clone
 	originalNode.parentNode.insertBefore(newNode, originalNode.nextSibling);
@@ -149,21 +161,34 @@ export function copyFormInput(originalNode){
 	return newNode;
 }
 
-export function fixNumbering(cloneDivsWrapper){
-	cloneDivsWrapper.querySelectorAll(':scope > .clone_div').forEach((clone, index)=>{
+export function fixNumbering(wrapper){
+	wrapper.querySelectorAll(':scope > .clone_div').forEach(updateNumbers);
+
+	wrapper.querySelectorAll(':scope > .tablink').forEach(updateNumbers);
+
+	function updateNumbers(clone, index){
 		//Update the new number	
-		//DIV
+
+		// Update the ID
 		if(clone.id != ''){
 			clone.id = clone.id.replace(/[0-9]+(?!.*[0-9])/, index);
 		}
 		
+		// Update the content
+		if(clone.type == 'button' && clone.textContent != ''){
+			clone.textContent 		= clone.textContent.replace(/[0-9]+(?!.*[0-9])/, index + 1);
+
+			clone.dataset.target	= clone.dataset.target.replace(/[0-9]+(?!.*[0-9])/, index);
+		}
+
+		// Update the divid attribute
 		if(clone.dataset.divid  != null){
 			clone.dataset.divid = index;
 		}
 		
 		//Update the title
 		clone.querySelectorAll('h3, h4, legend :first-child').forEach(el => {
-			el.textContent = el.textContent.replace(/[0-9]+(?!.*[0-9])/, index+1);
+			el.textContent = el.textContent.replace(/[0-9]+(?!.*[0-9])/, index + 1);
 		});
 		
 		//Update the legend
@@ -190,7 +215,7 @@ export function fixNumbering(cloneDivsWrapper){
 				}
 			}
 		});
-	})
+	}
 }
 
 export function removeNode(target){
@@ -754,7 +779,7 @@ window.addEventListener('online', function(){
 });
 
 //prevent form submit when offline
-window.addEventListener('offline',function(){
+window.addEventListener('offline', function(){
 	document.querySelectorAll('.form_submit').forEach(btn=>{
 		btn.disabled = true;
 		if(btn.querySelector('.online') == null){
@@ -769,13 +794,38 @@ document.addEventListener('click', function(event) {
 	
 	//add element
 	if(target.matches('.add')){
-		let newNode = copyFormInput(target.closest(".clone_div"));
+		let orgNode	= target.closest(".clone_div");
 
+		let newNode = copyFormInput(orgNode);
+
+		// Fix in nodes
 		fixNumbering(target.closest('.clone_divs_wrapper'));
 
 		//add tinymce's can only be done when node is inserted and id is unique
-		newNode.querySelectorAll('.wp-editor-area').forEach(el =>{
-			window.tinyMCE.execCommand('mceAddEditor',false, el.id);
+		newNode.querySelectorAll('.wp-editor-area').forEach((el, index) =>{
+			// find org node settings
+			let tn = tinymce.get(orgNode.querySelectorAll('.wp-editor-area')[index].id);
+			if(tn != null){
+				let settings	= tn.settings;
+
+				// update the settings for the clone
+				for (const key in settings) {
+					console.log(`${key}: ${settings[key]}`);
+
+					if(typeof(settings[key]) == 'string'){
+						settings[key]	= settings[key].replace(
+							/(.*)([0-9])/, 
+							(match, prefix, nr) => {
+								const newNumber = parseInt(nr) + 1;
+								return prefix + newNumber;
+							}
+						);
+					}
+				}
+
+				tinymce.init(settings);
+				//window.tinyMCE.execCommand('mceAddEditor', false, el.id);
+			}
 		});
 
 		target.remove();
