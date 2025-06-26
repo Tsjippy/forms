@@ -395,6 +395,7 @@ class DisplayFormResults extends DisplayForm{
 			return;
 		}
 
+		SIM\cleanUpNestedArray($this->formData->split);
 		if(empty($this->formData->split)){
 			$this->submissions		= $this->getSubmissions($userId, $submissionId, $all);
 
@@ -885,7 +886,7 @@ class DisplayFormResults extends DisplayForm{
 			return;
 		}
 
-		if(empty($this->formData) || (!empty($this->shortcodeId) && empty($this->shortcodeData))){
+		if(empty($this->formData) || (is_numeric($this->shortcodeId) && empty($this->shortcodeData))){
 			$result	= $this->loadShortcodeData();
 
 			if(is_wp_error($result)){
@@ -1299,6 +1300,10 @@ class DisplayFormResults extends DisplayForm{
 		
 		$this->tableSettings		= (array) maybe_unserialize($this->shortcodeData->table_settings);
 		$this->columnSettings		= (array) maybe_unserialize($this->shortcodeData->column_settings);
+
+		if(empty($this->tableSettings) || empty($this->tableSettings['edit_right_roles'])){
+			$this->tableSettings['edit_right_roles']	= $this->formData->full_right_roles;
+		}
 
 		return true;
 	}
@@ -1719,7 +1724,7 @@ class DisplayFormResults extends DisplayForm{
 							<div class="role_info">
 							<?php
 							foreach($editRoles as $key=>$roleName){
-								if(in_array($key,array_keys((array)$this->tableSettings['edit_right_roles']))){
+								if(in_array($key, array_keys((array)$this->tableSettings['edit_right_roles']))){
 									$checked = 'checked';
 								}else{
 									$checked = '';
@@ -2594,7 +2599,7 @@ class DisplayFormResults extends DisplayForm{
 		global $wpdb;
 		
 		//find any formresults shortcode
-		$pattern = "/\[formresults([^\]]*formname=([a-zA-Z]*)[^\]]*)\]/s";
+		$pattern = "/\[formresults([^\]]*formname=(.*)[^\]]*)\]/s";
 		
 		//if there are matches
 		if(preg_match_all($pattern, $data['post_content'], $matches)) {
@@ -2608,9 +2613,8 @@ class DisplayFormResults extends DisplayForm{
 
 					$this->getForm();
 					
-					$this->insertInDb($this->formData->id);
-					
-					$shortcodeId	= $wpdb->insert_id;
+					$shortcodeId	= $this->insertInDb($this->formData->id);
+
 					$newShortcode	= str_replace('formresults',"formresults id=$shortcodeId", $shortcode);
 					
 					//replace the old shortcode with the new one
