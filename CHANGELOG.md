@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- initial active e-mail form
 
 ### Updated
 
