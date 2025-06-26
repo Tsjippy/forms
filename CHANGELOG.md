@@ -4,13 +4,21 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.4.9] - 2025-06-26
+
+
+### Changed
 - url in missing form log
+- form e-mails display
 
 ### Fixed
 - attachment export
 - underscore replacement issue
-
-### Updated
 
 ## [8.4.8] - 2025-05-08
 
