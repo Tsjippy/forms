@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- activa tinymce
 
 ### Updated
+
+## [8.5.1] - 2025-07-02
+
+
+### Fixed
+- activa tinymce
 
 ## [8.5.0] - 2025-06-26
 
