@@ -113,7 +113,8 @@ async function requestEditElementData(target){
 
 			//activate tiny mce's
 			modal.querySelectorAll('.wp-editor-area').forEach(el =>{
-				window.tinyMCE.execCommand('mceAddEditor',false, el.id);
+				tinymce.execCommand( 'mceRemoveEditor', false, el.id );
+				tinymce.execCommand( 'mceAddEditor', false, el.id );
 			});
 		}
 

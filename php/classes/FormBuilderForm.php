@@ -743,19 +743,20 @@ class FormBuilderForm extends SimForms{
 					
 					<br>
 					<div class='clone_divs_wrapper'>
-							<?php
-								foreach($emails as $key=>$email){
-									$nr		= $key + 1;
-									$active	= '';
-
-									if($key === 0){
-										$active = 'active';
-									}
-
-									echo "<button class='button tablink formbuilderform $active' type='button' id='show_email_$key' data-target='email_$key' style='margin-right:4px;'>E-mail $nr</button>";
-								}
-							?>
 						<?php
+						// Render tab buttons
+						foreach($emails as $key=>$email){
+							$nr		= $key + 1;
+							$active	= '';
+
+							if($key === 0){
+								$active = 'active';
+							}
+
+							echo "<button class='button tablink formbuilderform $active' type='button' id='show_email_$key' data-target='email_$key' style='margin-right:4px;'>E-mail $nr</button>";
+						}
+
+						// Render tab contents
 						foreach($emails as $key=>$email){
 							$hidden	= 'hidden';
 							if($key === 0){
