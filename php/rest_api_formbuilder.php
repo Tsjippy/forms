@@ -346,6 +346,18 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 	return $element->name;
 }
 
+function prepareProperties(&$prop){
+	if(is_array($prop)){
+		foreach($prop as &$p){
+			prepareProperties($p);
+		}
+	}else{
+		$prop 	= wp_kses_post(wp_kses_stripslashes($prop));
+		$prop	= str_replace('\\\\', '\\', $prop);
+		$prop	= str_replace("\\'", "'", $prop);
+	}
+}
+
 // DONE
 function addFormElement(){
 	global $wpdb;
@@ -357,8 +369,13 @@ function addFormElement(){
 	$oldElement	= new stdClass();
 
 	//Store form results if submitted
-	$element			= (object)$_POST["formfield"];
-	$element->options	= str_replace('\\\\', '\\', $element->options);
+	$element			= $_POST["formfield"];
+	foreach($element as &$prop){
+		prepareProperties($prop);
+	}
+
+	$element	= (object)$element;
+
 	if(is_numeric($_POST['element_id'])){
 		$update		= true;
 
@@ -371,13 +388,11 @@ function addFormElement(){
 	
 	if($element->type == 'php'){
 		//we store the functionname in the html variable replace any double \ with a single \
-		$functionName 			= str_replace('\\\\', '\\', $element->functionname);
-		$element->name			= $functionName;
-		$element->functionname	= $functionName;
+		$element->name			= $element->functionname;
 		
 		//only continue if the function exists
-		if ( ! function_exists( $functionName ) ){
-			return new WP_Error('forms', "A function with name $functionName does not exist!");
+		if ( ! function_exists( $element->functionname ) ){
+			return new WP_Error('forms', "A function with name $element->functionname does not exist!");
 		}
 	}
 	
