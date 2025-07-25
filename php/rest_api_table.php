@@ -482,7 +482,7 @@ function getInputHtml(){
 	}elseif(isset($formTable->submission->formresults[str_replace('[]', '', $element->name)])){
 		$curValue	= $formTable->submission->formresults[str_replace('[]', '', $element->name)];
 	}elseif(isset($formTable->submission->formresults[$matches[1]])){
-		if(is_numeric($subId) && isset($formTable->submission->formresults[$matches[1]][$subId][$matches[2]])){
+		if($subId > -1 && isset($formTable->submission->formresults[$matches[1]][$subId][$matches[2]])){
 			$curValue	= $formTable->submission->formresults[$matches[1]][$subId][$matches[2]];
 		}
 	}
@@ -511,7 +511,7 @@ function editValue(){
 	
 	$subId			= $_POST['subid'];
 	// By default -> submission is the splitted submission, we want the original
-	if(is_numeric($subId)){
+	if($subId > -1){
 		$formTable->submission		= $formTable->submissions[0];
 	}
 
@@ -528,7 +528,7 @@ function editValue(){
 		}
 
 		// Update only one entry in the array
-		if(is_array($oldValue) && is_numeric($subId) && isset($oldValue[$subId])){
+		if(is_array($oldValue) && $subId > -1 && isset($oldValue[$subId])){
 			$temp			= $oldValue;
 			$temp[$subId]	= $newValue;
 			$newValue		= $temp;
@@ -537,7 +537,7 @@ function editValue(){
 
 		$updated											= true;
 	// If there is a sub id set and this field is not a main field
-	}elseif(is_numeric($subId)){
+	}elseif($subId > -1){
 		$splitElements				= $formTable->formData->split;
 
 		foreach($splitElements as $index){
