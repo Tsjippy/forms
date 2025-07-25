@@ -4,13 +4,20 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.5.2] - 2025-07-25
+
+
+### Changed
 - niceselect instatiation
 
 ### Fixed
 - content issues
 - issue with non-numeric subId
-
-### Updated
 
 ## [8.5.1] - 2025-07-02
 
