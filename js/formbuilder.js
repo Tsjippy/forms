@@ -81,7 +81,7 @@ async function showEmptyModal(target){
 
 	// Add nice selects
 	modal.querySelectorAll('.condition_select').forEach(function(select){
-		NiceSelect.bind(select,{searchable: true});
+		Main.NiceSelect(select,{searchable: true});
 	});
 }
 
@@ -125,7 +125,7 @@ async function requestEditElementData(target){
 
 		// Add nice selects
 		modal.querySelectorAll('select').forEach(function(select){
-			select._niceselect = NiceSelect.bind(select, {searchable: true, showSelectedItems: true});
+			NiceSelect(select, {searchable: true});
 		});
 		
 		Main.showModal(modal);
@@ -576,7 +576,7 @@ function addOppositeCondition(clone, target){
 	//Set values to opposite
 	clone.querySelectorAll('.element_condition').forEach(function(el){
 		if(el.matches('select:not(.nonice,.swal2-select)')){
-			el._niceselect = NiceSelect.bind(el, {searchable: true});
+			Main.NiceSelect(el, {searchable: true});
 		}
 		
 		if(el.tagName == 'SELECT' && el.classList.contains('equation')){

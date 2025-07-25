@@ -2287,6 +2287,7 @@ class DisplayFormResults extends DisplayForm{
 							$html	.= "<span class='pagenumber $class' data-nr='$x'>$pageNr</span> ";
 						}
 					$html	.= "</span>";
+
 					// Include a next button if we are not on the last page
 					$class = 'hidden';
 					if($this->total > $this->pageSize && $this->currentPage != $pageCount-1){
@@ -2329,7 +2330,6 @@ class DisplayFormResults extends DisplayForm{
 			$allRowsEmpty	= $this->theTable($type, $submissions);
 		echo "</div>";
 			
-
 		$this->printTableFooter();
 		
 		echo ob_get_clean();
