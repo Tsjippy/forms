@@ -8,6 +8,7 @@
 
 ### Fixed
 - content issues
+- issue with non-numeric subId
 
 ### Updated
 
