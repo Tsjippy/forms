@@ -2100,21 +2100,15 @@ class DisplayFormResults extends DisplayForm{
 					$values['id']		= $this->submission->id;
 					$values['userid']	= $this->submission->userid;
 
-					$userIdKey	= false;
-					if(isset($this->submission->formresults['user_id'])){
-						$userIdKey	= 'user_id';
-					}elseif(isset($this->submission->formresults['userid'])){
-						$userIdKey	= 'userid';
-					}
+					$userIdKey	= $this->findUserIdElementName();
 
 					// Skip if needed
 					if($type == 'others' && $values[$userIdKey] == $this->user->ID){
 						continue;
 					}
 
-					$subId				= -1;
-					if(is_numeric($this->submission->subId)){
-						$subId			= $this->submission->subId;
+					$subId				= $this->submission->subId;
+					if($subId > -1){
 						$values['subid']= $this->submission->subId;
 					}
 					

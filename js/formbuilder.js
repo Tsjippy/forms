@@ -125,7 +125,7 @@ async function requestEditElementData(target){
 
 		// Add nice selects
 		modal.querySelectorAll('select').forEach(function(select){
-			NiceSelect(select, {searchable: true});
+			Main.NiceSelect(select, {searchable: true});
 		});
 		
 		Main.showModal(modal);
