@@ -2370,11 +2370,6 @@ class DisplayFormResults extends DisplayForm{
 	 * @return	string|WP_Error			The html or error on failure
 	 */
 	public function showFormresultsTable($split = null, $all = false){
-		//do not show if not logged in
-		if(!is_user_logged_in()){
-			//return '';
-		}
-
 		// first render the table so we now how many results we have
 		ob_start();
 		$allRowsEmpty	= true;
