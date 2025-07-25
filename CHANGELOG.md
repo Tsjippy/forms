@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- niceselect instatiation
 
 ### Fixed
 - content issues
