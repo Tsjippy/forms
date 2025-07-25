@@ -560,8 +560,12 @@ function editValue(){
 			}
 		}
 	}else{
-		$formTable->submission->formresults[$elementName]	= $newValue;
-		$updated											= true;
+		if(is_array($formTable->submission)){
+			SIM\printArray($formTable->submission);
+		}else{
+			$formTable->submission->formresults[$elementName]	= $newValue;
+			$updated											= true;
+		}
 	}
 
 	if($updated){

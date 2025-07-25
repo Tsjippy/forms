@@ -81,7 +81,7 @@ async function showEmptyModal(target){
 
 	// Add nice selects
 	modal.querySelectorAll('.condition_select').forEach(function(select){
-		select._niceselect = NiceSelect.bind(select,{searchable: true});
+		NiceSelect.bind(select,{searchable: true});
 	});
 }
 
@@ -125,7 +125,7 @@ async function requestEditElementData(target){
 
 		// Add nice selects
 		modal.querySelectorAll('select').forEach(function(select){
-			select._niceselect = NiceSelect.bind(select,{searchable: true});
+			select._niceselect = NiceSelect.bind(select, {searchable: true, showSelectedItems: true});
 		});
 		
 		Main.showModal(modal);

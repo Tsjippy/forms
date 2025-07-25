@@ -86,7 +86,7 @@ export function cloneNode(originalNode, clear=true){
 		//remove any defaults
 		removeDefaultSelect(select);
 
-		select._niceselect = NiceSelect.bind(select,{searchable: true});
+		NiceSelect.bind(select,{searchable: true});
 	});
 	
 	return newNode;
@@ -119,7 +119,7 @@ export function copyFormInput(originalNode){
 		//Add nice select
 		if(select._niceselect == undefined){
 			console.error(select);
-			select._niceselect = NiceSelect.bind(select, {searchable: true});
+			NiceSelect.bind(select, {searchable: true});
 		}else{
 			select._niceselect.update();
 			select.nextSibling.querySelectorAll('.current').forEach(el=>el.textContent = 'Select an option');
@@ -701,7 +701,7 @@ async function formbuilderSwitch(target){
 		});
 
 		wrapper.querySelectorAll('select').forEach(function(select){
-			select._niceselect = NiceSelect.bind(select, {searchable: true});
+			NiceSelect.bind(select, {searchable: true});
 		}); */
 	}else{
 		loader.outerHTML	= button;
