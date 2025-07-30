@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- removed must logged in requirement
 
 ### Fixed
 
 ### Updated
+
+## [8.5.3] - 2025-07-30
+
+
+### Changed
+- removed must logged in requirement
 
 ## [8.5.2] - 2025-07-25
 
