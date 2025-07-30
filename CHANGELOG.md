@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- removed must logged in requirement
 
 ### Fixed
 
