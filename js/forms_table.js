@@ -422,7 +422,7 @@ function addFormsTableInputEventListeners(cell){
 		
 	inputs.forEach((inputNode)=>{
 		if(inputNode.type == 'select-one'){
-			Main.NiceSelect(inputNode, {searchable: true});
+			Main.attachNiceSelect(select);
 		}
 		
 		if((inputNode.type != 'radio' && inputNode.type != 'checkbox') || inputs.length == 1){
