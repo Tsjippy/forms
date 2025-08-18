@@ -240,7 +240,7 @@ trait ExportFormResults{
 		}
 
 		$availableWidthForBigColumns	= $pdf->GetPageWidth() -20 - $smallCollCount*$smallCollWidth - array_sum($interColls) - $mediumCollCount * $mediumCollWidth;
-		$bigCollWidth					= $availableWidthForBigColumns / count($bigColls);
+		$bigCollWidth					= $availableWidthForBigColumns / max(count($bigColls), 1);
 
 		//now loop over all columns and set their maximum lengths
 		for ($x = 0; $x <= $colCount-1; $x++) {
