@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- wrapped labels for multi text inputs
 
 ### Updated
 
