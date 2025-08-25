@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- process elements with a default value for conditional logic
 
 ### Changed
 
