@@ -522,10 +522,25 @@ trait CreateJs{
         $js         = "var $this->varName = new function(){".$js."\n};\n\n";
         $minifiedJs = "var $this->varName  = new function(){".$minifiedJs."};";
 
-        $extraJs    = "// Loop over the element which value is given in the url;\n";
+        $extraJs    = "// Loop over the elements whos value is given in the url;\n";
         $extraJs    .= "if(typeof(urlSearchParams) == 'undefined'){\n\twindow.urlSearchParams = new URLSearchParams(window.location.search.replaceAll('&amp;', '&'));\n}\n";
         $extraJs    .= "Array.from(urlSearchParams).forEach(array => document.querySelectorAll(`[name^='\${array[0]}' i]`).forEach(el => FormFunctions.changeFieldValue(el, array[1], $this->varName.processFields, el.closest('form'), )));\n\n";
-        
+        $extraJs    = "// Loop over the elements who have a default value;\n";
+        $extraJs    .= "document.querySelectorAll('form').forEach(form => {Array.from(form.elements).filter(element => {
+        // Exclude elements without a name, as they are typically not submitted
+        if (!element.name) {
+            return false;
+        }
+
+        // Handle specific input types
+        if (element.type === 'checkbox' || element.type === 'radio') {
+            return element.checked;
+        }
+
+        // For other input types, check if the value is not empty
+        return element.value !== '';
+    }).forEach(el => $this->varName.processFields(el))});";
+
         $js         .= $extraJs;
         $minifiedJs .= \Garfix\JsMinify\Minifier::minify($extraJs, array('flaggedComments' => false));   
 
