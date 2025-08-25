@@ -191,6 +191,7 @@ class DisplayForm extends SubmitForm{
 		if(
 			!empty($this->nextElement->multiple) 	&& 	// if next element is a multiple
 			$this->nextElement->type != 'file' 		&& 	// next element is not a file
+			$this->nextElement->type != 'text' 		&& 	// next element is not a text
 			$element->type == 'label'				&& 	// and this is a label
 			!empty($element->wrap)						// and the label is wrapped around the next element
 		){

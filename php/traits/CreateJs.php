@@ -281,7 +281,7 @@ trait CreateJs{
                             //only add if there is no wrapping element with the same condition.
                             $prevElement = $this->formElements[$elementIndex];
                             if(
-                                !$prevElement->wrap ||                                                              // this element is not wrapped in the previous one
+                                !$prevElement->wrap ||                                           // this element is not wrapped in the previous one
                                 !in_array($prevElement, $actionArray['querystrings'][$action])   // or the previous element is not in the action array
                             ){
                                 $actionArray['querystrings'][$action][]    = $element;
