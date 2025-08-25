@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- process elements with a default value for conditional logic
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.5.6] - 2025-08-25
+
+
+### Added
+- process elements with a default value for conditional logic
 
 ## [8.5.5] - 2025-08-25
 
