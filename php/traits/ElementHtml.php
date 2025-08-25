@@ -640,8 +640,22 @@ trait ElementHtml{
 						// container for choices made
 						$html	.= "<ul class='listselectionlist'>";
 							// add previous made inputs
-							foreach($this->getPrevValues($element, true) as $v){
-								$transValue		= $this->transformInputData($v, $element->name, $this->submission->formresults);
+							$preValues	= $this->getPrevValues($element, true);
+
+							if(empty($preValues) && !empty($this->defaultArrayValues[$element->default_value])){
+								$preValues	= $this->defaultArrayValues[$element->default_value];
+
+								if(!is_array($preValues)){
+									$preValues	= [$preValues];
+								}
+							}
+
+							foreach($preValues as $v){
+								if(method_exists($this, 'transformInputData')){
+									$transValue		= $this->transformInputData($v, $element->name, $this->submission->formresults);
+								}else{
+									$transValue		= $v;
+								}
 
 								$html	.= "<li class='listselection'>";
 									$html	.= "<button type='button' class='small remove-list-selection'>";
