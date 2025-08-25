@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- export form error
-- default values
 
 ### Updated
+
+## [8.5.5] - 2025-08-25
+
+
+### Fixed
+- export form error
+- default values
 
 ## [8.5.4] - 2025-08-06
 
