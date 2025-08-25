@@ -103,10 +103,10 @@ trait ElementHtml{
 		if(empty($element->multiple) || in_array($element->type, ['select','checkbox'])){
 			$defaultKey					= $element->default_value;
 			if(!empty($defaultKey)){
-				if(!empty($this->defaultValues[$defaultKey])){
+				if(isset($this->defaultValues[$defaultKey])){
 					$values['defaults']		= $this->defaultValues[$defaultKey];
 				}else{
-					//$values['defaults']		= $defaultKey;
+					$values['defaults']		= $defaultKey;
 				}
 			}
 		}else{
@@ -366,7 +366,6 @@ trait ElementHtml{
 
 				$optionType		= explode('=', $option)[0];
 				$optionValue	= str_replace('\\\\', '\\', explode('=',$option)[1]);
-
 				
 				if($removeMinMax && in_array($optionType, ['min', 'max'])){
 					continue;
@@ -656,7 +655,7 @@ trait ElementHtml{
 
 						// add the text input
 						$html	.= "<div class='multi-text-input-wrapper'>";
-							$html	.= "<$elType id='$elName' class='$elClass datalistinput multiple' $elOptions>";
+							$html	.= "<$elType id='$elName' name='$element->name[]' class='$elClass datalistinput multiple' $elOptions>";
 							$html	.= '<button type="button" class="small add-list-selection hidden">Add</button>';
 						$html	.= "</div>";
 					$html	.= "</div>";
