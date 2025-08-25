@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- multi text input defaults
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.5.8] - 2025-08-25
+
+
+### Added
+- multi text input defaults
 
 ## [8.5.7] - 2025-08-25
 
