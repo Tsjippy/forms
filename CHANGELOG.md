@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- wrapped labels for multi text inputs
 
 ### Updated
+
+## [8.5.7] - 2025-08-25
+
+
+### Fixed
+- wrapped labels for multi text inputs
 
 ## [8.5.6] - 2025-08-25
 
