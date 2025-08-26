@@ -2,14 +2,21 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- multi text input defaults
 
 ### Changed
-- form permission settings redesign
 
 ### Fixed
 
 ### Updated
+
+## [8.5.9] - 2025-08-26
+
+
+### Added
+- multi text input defaults
+
+### Changed
+- form permission settings redesign
 
 ## [8.5.7] - 2025-08-25
 
