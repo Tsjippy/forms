@@ -644,39 +644,44 @@ class FormBuilderForm extends SimForms{
 							?>
 
 							<h4>Select roles with form edit rights</h4>
-							<div class="role_info">
+							<select name='full_right_roles' multiple>
+								<option value=''>---</option>
 								<?php
 								foreach($userRoles as $key=>$roleName){
-									if(!empty($this->formData->full_right_roles[$key])){
-										$checked = 'checked';
+									if(in_array($key, (array)$this->formData->full_right_roles)){
+										$selected = 'selected';
 									}else{
-										$checked = '';
+										$selected = '';
 									}
-									echo "<label class='option-label'>";
-										echo "<input type='checkbox' class='formbuilder formfieldsetting' name='full_right_roles[$key]' value='$roleName' $checked>";
-										echo $roleName;
-									echo"</label><br>";
+									echo "<option value='$key' $selected>$roleName</option>";
 								}
 								?>
-							</div>
+							</select>
 							<br>
-							
-							<div class='submit_others_form_wrapper'>
-								<h4>Select who can submit this form on behalf of someone else</h4>
+							<h4>Select users with form edit rights</h4>
+							<?php
+							echo SIM\userSelect('', true, false, '', 'full_right_roles', [], $this->formData->full_right_roles, [1], 'select', '', true);
+							?>
+
+							<h4>Select roles who can submit the form on behalve of somebody else</h4>
+							<select name='submit_others_form' multiple>
+								<option value=''>---</option>
 								<?php
 								foreach($userRoles as $key=>$roleName){
-									if(!empty($this->formData->submit_others_form[$key])){
-										$checked = 'checked';
+									if(in_array($key, (array)$this->formData->submit_others_form)){
+										$selected = 'selected';
 									}else{
-										$checked = '';
+										$selected = '';
 									}
-									echo "<label class='option-label'>";
-										echo "<input type='checkbox' class='formbuilder formfieldsetting' name='submit_others_form[$key]' value='$roleName' $checked>";
-										echo $roleName;
-									echo"</label><br>";
+									echo "<option value='$key' $selected>$roleName</option>";
 								}
 								?>
-							</div>
+							</select>
+
+							<h4>Select users who can submit the form on behalve of somebody else</h4>
+							<?php
+							echo SIM\userSelect('', true, false, '', 'submit_others_form', [], $this->formData->submit_others_form, [1], 'select', '', true);
+							?>
 						</div>
 					</div>
 				</div>

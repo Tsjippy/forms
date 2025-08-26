@@ -16,4 +16,29 @@ function pluginUpdate($oldVersion){
 
         SIM\printArray("Added column");
     }
+
+    if($oldVersion < '8.5.8'){
+        $simForms->getForms();
+        foreach($simForms->forms as $formData){
+            $fullRightRoles = maybe_unserialize($formData->full_right_roles);
+            if(is_array($fullRightRoles) && !is_numeric(array_keys($fullRightRoles)[0])){
+                $fullRightRoles = array_keys($fullRightRoles);
+            }
+
+            $submitOthersForm = maybe_unserialize($formData->submit_others_form);
+            if(is_array($submitOthersForm) && !is_numeric(array_keys($fullRightRoles)[0])){    
+                $submitOthersForm = array_keys($submitOthersForm);
+            }
+
+            $wpdb->update($simForms->tableName,
+                [
+                    'full_right_roles'		=> maybe_serialize($fullRightRoles),
+                    'submit_others_form'	=> maybe_serialize($submitOthersForm)
+                ],
+                [
+                    'id'		            => $formData->id,
+                ],
+            );
+        }
+    }
 }

@@ -202,16 +202,14 @@ class SimForms{
 		$this->elementMapper($formId);
 
 		if(!$this->editRights){
-			$editRoles	= ['administrator','editor'];
+			$editRoles	= ['administrator', 'editor'];
 			if(!empty($this->formData->full_right_roles)){
-				foreach((array)$this->formData->full_right_roles as $key=>$role){
-					if(!empty($role)){
-						$editRoles[] = $key;
-					}
-				}
+				$editRoles	= (array)$this->formData->full_right_roles;
 			}
+
 			//calculate full form rights
 			$object	= get_queried_object();
+			
 			if(array_intersect($editRoles, (array)$this->userRoles) || (!empty($object) && $object->post_author == $this->user->ID)){
 				$this->editRights		= true;
 			}else{
@@ -220,11 +218,7 @@ class SimForms{
 		}
 
 		if(isset($this->formData->submit_others_form)){
-			foreach((array)$this->formData->submit_others_form as $key=>$role){
-				if(!empty($role)){
-					$this->submitRoles[] = $key;
-				}
-			}
+			$this->submitRoles	= (array)$this->formData->submit_others_form;
 		}
 		
 		if(empty($this->formData->emails)){
