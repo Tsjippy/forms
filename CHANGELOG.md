@@ -5,6 +5,7 @@
 - multi text input defaults
 
 ### Changed
+- form permission settings redesign
 
 ### Fixed
 
