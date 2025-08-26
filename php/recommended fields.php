@@ -46,21 +46,36 @@ function getAllEmptyRequiredElements($userId, $type){
 }
 
 /**
- * Checks if a given set of conditions apply to the current user. Returns true if there is a match
+ * Checks if a given set of conditions applies to the current user. Returns true if there is a match
  *
  * @param	object	$conditions		The element conditions
  * @param	int		$userId			The user id
  * @param	array	$submissions	The submissions to check
  *
- * @return	bool				true if no conditions or the condition apply, false if it does not apply
+ * @return	bool					true if no conditions or the condition apply, false if it does not apply
  */
-function checkConditions($conditions, $userId, $submissions=''){
+function checkIfConditionsAppliesToUser($conditions, $userId, $submissions=''){
 	if(!is_array($conditions)){
 		return true;
 	}
 
 	SIM\cleanUpNestedArray($conditions, true);
 	$skip	= false;
+
+	// Check if the the roles overlap
+	if(isset($conditions['roles'])){
+		// Check if user has one of the roles
+		$user	= get_userdata($userId);
+		if($user){
+			$userRoles	= $user->roles;
+			$intersect	= array_intersect($conditions['roles'], $userRoles);
+			if(!empty($intersect)){
+				// There is at least one overlapping role
+				return true;
+			}
+		}
+		unset($conditions['roles']);
+	}
 
 	foreach($conditions as $check){
 		// get the user value
@@ -125,18 +140,18 @@ function checkConditions($conditions, $userId, $submissions=''){
 
 		// Check the result
 		if($result){
-			$skip = true;
+			$applies = true;
 
-			//break this loop when when already know we should skip this field
+			//break this loop when we already know we should skip this field
 			if(!empty($check['combinator']) && $check['combinator'] == 'or'){
 				break;
 			}
 		}else{
-			$skip = false;
+			$applies = false;
 		}
 	}
 	
-	return !$skip;
+	return $applies;
 }
 
 /**
@@ -163,7 +178,8 @@ function checkElementNeedsInput($elements, $userId){
 	foreach($elements as $element){
 		//check if this element applies to this user
 		$warningCondition	= maybe_unserialize($element->warning_conditions);
-		if(checkConditions($warningCondition, $userId)){
+
+		if(checkIfConditionsAppliesToUser($warningCondition, $userId)){
 			continue;
 		}
 
@@ -318,7 +334,7 @@ function getAllRequiredForms($userId=''){
 
 		if(is_numeric($userId)){
 			// only add if conditions match
-			if(in_array($userId, $usersWithoutSubmission) && checkConditions($conditions, $userId, $submissions)){
+			if(in_array($userId, $usersWithoutSubmission) && !checkIfConditionsAppliesToUser($conditions, $userId, $submissions)){
 				$child				= SIM\isChild($userId);
 				$childName			= '';
 				if($child){
@@ -329,7 +345,7 @@ function getAllRequiredForms($userId=''){
 			}
 		}else{
 			foreach($usersWithoutSubmission as $index=>$userWithoutSubmission){
-				if(!checkConditions($conditions, $userWithoutSubmission, $submissions)){
+				if(checkIfConditionsAppliesToUser($conditions, $userWithoutSubmission, $submissions)){
 					unset($usersWithoutSubmission[$index]);
 				}
 			}

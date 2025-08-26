@@ -1746,15 +1746,20 @@ class FormBuilderForm extends SimForms{
 	 */
 	public function warningConditionsForm($name, $conditions = ''){
 		global $wpdb;
+		global $wp_roles;
 
 		if(empty($conditions) || !is_array($conditions)){
-			$conditions	=[
+			$conditions	= [
 				[
 					"user_meta_key"	=> '',
 					"equation"		=> ''
 				]
 			];
 		}	
+
+		if(!isset($conditions['roles'])){
+			$conditions['roles']	= [];
+		}
 		
 		// get all possible user meta keys, not just the one the current user has
 		$result			= $wpdb->get_results("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}`", ARRAY_N);
@@ -1766,12 +1771,32 @@ class FormBuilderForm extends SimForms{
 
 		$userMetas		= get_user_meta($this->user->ID);
 
+		//Get all available roles
+		$userRoles = $wp_roles->role_names;
+		
+		//Sort the roles
+		asort($userRoles);
+
 		ob_start();
 		?>
 			
-		<label>Do not warn if usermeta with the key</label>
+		<h5>Do not warn</h5>
+		<label>If user has role</label>
+		<select name='<?php echo $name;?>[roles]' multiple>
+			<option value=''>---</option>
+			<?php
+			foreach($userRoles as $key=>$roleName){
+				if(in_array($key, $conditions['roles'])){
+					$selected = 'selected';
+				}else{
+					$selected = '';
+				}
+				echo "<option value='$key' $selected>$roleName</option>";
+			}
+			?>
+		</select>
 		<br>
-
+		<label>Or this user meta evaluation is true</label>
 		<div class="conditions_wrapper" style='width: 90vw;z-index: 9999;position: relative;'>
 			<?php
 			foreach($conditions as $conditionIndex=>$condition){

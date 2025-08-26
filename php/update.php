@@ -17,7 +17,7 @@ function pluginUpdate($oldVersion){
         SIM\printArray("Added column");
     }
 
-    if($oldVersion < '8.5.8'){
+    if($oldVersion < '8.5.9'){
         $simForms->getForms();
         foreach($simForms->forms as $formData){
             $fullRightRoles = maybe_unserialize($formData->full_right_roles);
@@ -26,7 +26,7 @@ function pluginUpdate($oldVersion){
             }
 
             $submitOthersForm = maybe_unserialize($formData->submit_others_form);
-            if(is_array($submitOthersForm) && !is_numeric(array_keys($fullRightRoles)[0])){    
+            if(is_array($submitOthersForm) && !is_numeric(array_keys($submitOthersForm)[0])){    
                 $submitOthersForm = array_keys($submitOthersForm);
             }
 
