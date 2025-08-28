@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- smaller conditional js
 
 ### Fixed
 
 ### Updated
+
+## [8.6.0] - 2025-08-28
+
+
+### Changed
+- smaller conditional js
 
 ## [8.5.9] - 2025-08-26
 
