@@ -6,6 +6,7 @@
 ### Changed
 - smaller conditional js
 - better minification
+- removed duplicated call of extra js filter
 
 ### Fixed
 
