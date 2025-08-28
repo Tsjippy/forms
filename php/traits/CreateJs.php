@@ -31,7 +31,7 @@ trait CreateJs{
     */
     function createJs(){
         $this->formName     = $this->formData->name;
-        $this->varName      = str_replace('-', '', $this->formName);
+        $this->objectName   = strtolower(str_replace('-', '', $this->formName));
 
         $checks = [];
         $errors = [];
@@ -176,10 +176,10 @@ trait CreateJs{
                             LETS CHECK IF ALL THE VALUES ARE MET AS WELL
                         */
                         if(!in_array($equation, ['changed', 'clicked', 'checked', '!checked', 'visible', 'invisible'])){
-                            $conditionVariables[]      = "var value_$fieldNumber1 = this.getFieldValue('$conditionalFieldName', form, true, $compareValue2, true);";
+                            $conditionVariables[]      = "var value_$fieldNumber1 = this.get_field_value('$conditionalFieldName', form, true, $compareValue2, true);";
                             
                             if(is_numeric($rule['conditional_field_2'])){
-                                $conditionVariables[]  = "var value_$fieldNumber2 = this.getFieldValue('$conditionalField2Name', form, true, $compareValue2, true);";
+                                $conditionVariables[]  = "var value_$fieldNumber2 = this.get_field_value('$conditionalField2Name', form, true, $compareValue2, true);";
                             }
                         }
                         
@@ -344,7 +344,7 @@ trait CreateJs{
                             
                             $varName = str_replace(['[]', '[', ']'], ['', '_', ''], $copyFieldName);
 
-                            $varCode = "let $varName = this.getFieldValue('$copyFieldName', form);";
+                            $varCode = "let $varName = this.get_field_value('$copyFieldName', form);";
                             if(!in_array($varCode, $checks[$fieldCheckIf]['variables'])){
                                 $checks[$fieldCheckIf]['variables'][] = $varCode;
                             }
@@ -355,12 +355,12 @@ trait CreateJs{
                             $addition       = $condition['addition'];
                         }
                         if($propertyName == 'value'){
-                            $actionCode    = "this.changeFieldValue('$selector', $varName, {$this->varName}.processFields, form, $addition);";
+                            $actionCode    = "this.change_field_value('$selector', $varName, {$this->objectName}.processFields, form, $addition);";
                             if(!in_array($actionCode, $actionArray)){
                                 $actionArray[] = $actionCode;
                             }
                         }else{
-                            $actionCode    = "this.changeFieldProperty('$selector', '$propertyName', $varName, {$this->varName}.processFields, form, $addition);";
+                            $actionCode    = "this.change_field_property('$selector', '$propertyName', $varName, {$this->objectName}.processFields, form, $addition);";
                             if(!in_array($actionCode, $actionArray)){
                                 $actionArray[] = $actionCode;
                             }
@@ -383,10 +383,10 @@ trait CreateJs{
         $newJs  .= "\n\tforms =               document.querySelectorAll(`[data-formid=\"{$this->formData->id}\"]`);";
 
         // Shorter variable for the form functions
-        $newJs  .= "\n\tgetFieldValue =       FormFunctions.getFieldValue;";
-        $newJs  .= "\n\tchangeFieldValue =    FormFunctions.changeFieldValue;";
-        $newJs  .= "\n\tchangeVisibility =    FormFunctions.changeVisibility;";
-        $newJs  .= "\n\tchangeFieldProperty = FormFunctions.changeFieldProperty;";
+        $newJs  .= "\n\tget_field_value =       FormFunctions.getFieldValue;";
+        $newJs  .= "\n\tchange_field_value =    FormFunctions.changeFieldValue;";
+        $newJs  .= "\n\tchange_visibility =    FormFunctions.changeVisibility;";
+        $newJs  .= "\n\tchange_field_property = FormFunctions.changeFieldProperty;";
 
         $newJs  .= "\n\tprevEl =               '';";
         $newJs  .= "\n\n\tlistener = (event) => {";
@@ -424,7 +424,7 @@ trait CreateJs{
             $newJs  .= "\n\t\t}";
 
             $newJs  .= "\n\n\t\tthis.processFields(el);";
-        $newJs  .= "\n\t}";
+        $newJs  .= "\n\t};";
 
         $js         .= $newJs;
         $minifiedJs .= \Garfix\JsMinify\Minifier::minify($newJs, array('flaggedComments' => false));
@@ -446,7 +446,7 @@ trait CreateJs{
         // Prefill form with meta data
         if(!empty($this->formData->save_in_meta)){
             $tabJs.= "\n\t\t\tform.querySelectorAll(`select, input, textarea`).forEach(";
-                $tabJs.= "\n\t\t\t\tel=>{$this->varName}.processFields(el)";
+                $tabJs.= "\n\t\t\t\tel=>this.processFields(el)";
             $tabJs.= "\n\t\t\t);";
         }
 
@@ -471,7 +471,7 @@ trait CreateJs{
             window.urlSearchParams = new URLSearchParams(window.location.search.replaceAll('&amp;', '&'));
         }
         Array.from(urlSearchParams).forEach(array => {
-            document.querySelectorAll(`[name^='\${array[0]}' i]`).forEach(el => this.changeFieldValue(el, array[1], $this->varName.processFields, el.closest('form')));
+            document.querySelectorAll(`[name^='\${array[0]}' i]`).forEach(el => this.change_field_value(el, array[1], $this->objectName.processFields, el.closest('form')));
         });
 
         // Loop over the elements who have a default value and apply the logic;
@@ -489,7 +489,7 @@ trait CreateJs{
             // For other input types, check if the value is not empty
             return element.value !== '';
         }).forEach(el => this.processFields(el))});
-    }";
+    };";
 
         $js         .= $newJs;
         $minifiedJs .= \Garfix\JsMinify\Minifier::minify($newJs, array('flaggedComments' => false));
@@ -554,18 +554,16 @@ trait CreateJs{
                 }
                 $newJs  .= "\t\t}\n\n";
             }
-        $newJs  .= "\t}";
+        $newJs  .= "\t};";
 
         $js         .= $newJs;
         $minifiedJs .= \Garfix\JsMinify\Minifier::minify($newJs, array('flaggedComments' => false));  
 
         // Put is all in a namespace variable
-        $className  = ucfirst($this->varName);
-        $objectName = strtolower($this->varName);
+        $className  = ucfirst($this->objectName);
 
-        $js         = str_replace($this->varName, $objectName, $js);
-        $js         = "class $className {".$js."\n};\n\nlet $objectName = new $className();\n\n$objectName.init();\n";
-        $minifiedJs = "class $this->varName {".$minifiedJs."};$this->varName.init();\n";
+        $js         = "class $className {".$js."\n};\n\nlet $this->objectName = new $className();\n\n$this->objectName.init();\n";
+        $minifiedJs = "class $className {".$minifiedJs."\n};\n\nlet $this->objectName = new $className();\n\n$this->objectName.init();\n";
 
         /*
         ** EXTERNAL JS
@@ -594,11 +592,11 @@ trait CreateJs{
                 'value_',
                 'elName',
                 "\n",
-                "getFieldValue",
-                "changeFieldValue",
-                "changeVisibility",
-                "changeFieldProperty",
-                "onPageLoad"
+                "get_field_value",
+                "change_field_value",
+                "change_visibility",
+                "change_field_property",
+                "init"
             ],
             [
                 'q',
@@ -610,7 +608,7 @@ trait CreateJs{
                 'cF',
                 'cV',
                 'cP',
-                'oP'
+                'i'
             ],
             $minifiedJs
         );
@@ -648,7 +646,7 @@ trait CreateJs{
                         $actionCode    .= "{$prefix}\t\tif(!el.closest('.inputwrapper').matches('.action-processed')){\n";
                             $actionCode    .= "{$prefix}\t\t\tel.closest('.inputwrapper').classList.add('action-processed');\n";
                             //$actionCode    .= "{$prefix}\t\t\tel.closest('.inputwrapper').classList.$action('hidden');\n";
-                            $actionCode    .= "{$prefix}\t\t\tthis.changeVisibility('$action', el, {$this->varName}.processFields);\n";
+                            $actionCode    .= "{$prefix}\t\t\tthis.change_visibility('$action', el, {$this->objectName}.processFields);\n";
                         $actionCode    .= "{$prefix}\t\t}\n";
                     //$actionCode    .= "{$prefix}\t}catch(e){\n";
                         //$actionCode    .= "{$prefix}\t\tel.classList.$action('hidden');\n";
@@ -659,7 +657,7 @@ trait CreateJs{
             }elseif(count($elements) == 1){
                 $selector       = $this->getSelector($elements[0]);
                 //$actionCode    .= "{$prefix}form.querySelector('$selector').closest('.inputwrapper').classList.$action('hidden');\n";
-                $actionCode    .= "{$prefix}this.changeVisibility('$action', form.querySelector('$selector').closest('.inputwrapper'), {$this->varName}.processFields);\n";
+                $actionCode    .= "{$prefix}this.change_visibility('$action', form.querySelector('$selector').closest('.inputwrapper'), {$this->objectName}.processFields);\n";
             }
         }
 
