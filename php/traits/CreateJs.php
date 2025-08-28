@@ -176,10 +176,10 @@ trait CreateJs{
                             LETS CHECK IF ALL THE VALUES ARE MET AS WELL
                         */
                         if(!in_array($equation, ['changed', 'clicked', 'checked', '!checked', 'visible', 'invisible'])){
-                            $conditionVariables[]      = "var value_$fieldNumber1 = FormFunctions.getFieldValue('$conditionalFieldName', form, true, $compareValue2, true);";
+                            $conditionVariables[]      = "var value_$fieldNumber1 = this.getFieldValue('$conditionalFieldName', form, true, $compareValue2, true);";
                             
                             if(is_numeric($rule['conditional_field_2'])){
-                                $conditionVariables[]  = "var value_$fieldNumber2 = FormFunctions.getFieldValue('$conditionalField2Name', form, true, $compareValue2, true);";
+                                $conditionVariables[]  = "var value_$fieldNumber2 = this.getFieldValue('$conditionalField2Name', form, true, $compareValue2, true);";
                             }
                         }
                         
@@ -344,7 +344,7 @@ trait CreateJs{
                             
                             $varName = str_replace(['[]', '[', ']'], ['', '_', ''], $copyFieldName);
 
-                            $varCode = "let $varName = FormFunctions.getFieldValue('$copyFieldName', form);";
+                            $varCode = "let $varName = this.getFieldValue('$copyFieldName', form);";
                             if(!in_array($varCode, $checks[$fieldCheckIf]['variables'])){
                                 $checks[$fieldCheckIf]['variables'][] = $varCode;
                             }
@@ -355,12 +355,12 @@ trait CreateJs{
                             $addition       = $condition['addition'];
                         }
                         if($propertyName == 'value'){
-                            $actionCode    = "FormFunctions.changeFieldValue('$selector', $varName, {$this->varName}.processFields, form, $addition);";
+                            $actionCode    = "this.changeFieldValue('$selector', $varName, {$this->varName}.processFields, form, $addition);";
                             if(!in_array($actionCode, $actionArray)){
                                 $actionArray[] = $actionCode;
                             }
                         }else{
-                            $actionCode    = "FormFunctions.changeFieldProperty('$selector', '$propertyName', $varName, {$this->varName}.processFields, form, $addition);";
+                            $actionCode    = "this.changeFieldProperty('$selector', '$propertyName', $varName, {$this->varName}.processFields, form, $addition);";
                             if(!in_array($actionCode, $actionArray)){
                                 $actionArray[] = $actionCode;
                             }
@@ -373,48 +373,26 @@ trait CreateJs{
         }
         $js         = "";
         $minifiedJs = "";
-        
-        /*
-        ** DOMContentLoaded JS
-        */
-        
-        $newJs   = "\n\t\tconsole.log('Dynamic $this->formName forms js loaded');";
-        $newJs  .= "\n\tdocument.addEventListener('DOMContentLoaded', function() {";
-            $newJs.= "\n\t\tFormFunctions.tidyMultiInputs();";
-
-            $tabJs  = '';
-                if($this->isMultiStep()){
-                    $tabJs.= "\n\t\t\t//show first tab";
-                    $tabJs.= "\n\t\t\t// Display the current tab// Current tab is set to be the first tab (0)";
-                    $tabJs.= "\n\t\t\tcurrentTab = 0; ";
-                    $tabJs.= "\n\t\t\t// Display the current tab";
-                    $tabJs.= "\n\t\t\tFormFunctions.showTab(currentTab, form); ";
-                }
-                if(!empty($this->formData->save_in_meta)){
-                    $tabJs.= "\n\t\t\tform.querySelectorAll(`select, input, textarea`).forEach(";
-                        $tabJs.= "\n\t\t\t\tel=>{$this->varName}.processFields(el)";
-                    $tabJs.= "\n\t\t\t);";
-                }
-            if(!empty($tabJs)){
-                $newJs.= "\n\t\tlet forms = document.querySelectorAll(`[data-formid=\"{$this->formData->id}\"]`);";
-                $newJs.= "\n\t\tforms.forEach(form=>{";
-                    $newJs.= $tabJs;
-                $newJs.= "\n\t\t});";
-            }
-        $newJs.= "\n\t});";
-
-        $js         .= $newJs;
-        $minifiedJs .= \Garfix\JsMinify\Minifier::minify($newJs, array('flaggedComments' => false));
 
         /*
         ** EVENT LISTENER JS
         */
         $newJs   = '';
-        $newJs  .= "\n\tvar prevEl = '';";
-        $newJs  .= "\n\n\tvar listener = function(event) {";
-            $newJs  .= "\n\t\tvar el			= event.target;";
-            $newJs  .= "\n\t\tform			= el.closest('form');";
-            $newJs  .= "\n\t\tvar elName		= el.getAttribute('name');";
+
+        // Store all forms with this formid in a variable
+        $newJs  .= "\n\tforms =               document.querySelectorAll(`[data-formid=\"{$this->formData->id}\"]`);";
+
+        // Shorter variable for the form functions
+        $newJs  .= "\n\tgetFieldValue =       FormFunctions.getFieldValue;";
+        $newJs  .= "\n\tchangeFieldValue =    FormFunctions.changeFieldValue;";
+        $newJs  .= "\n\tchangeVisibility =    FormFunctions.changeVisibility;";
+        $newJs  .= "\n\tchangeFieldProperty = FormFunctions.changeFieldProperty;";
+
+        $newJs  .= "\n\tprevEl =               '';";
+        $newJs  .= "\n\n\tlistener = (event) => {";
+            $newJs  .= "\n\t\tlet el			= event.target;";
+            $newJs  .= "\n\t\tlet form			= el.closest('form');";
+            $newJs  .= "\n\t\tlet elName		= el.getAttribute('name');";
             $newJs  .= "\n\n\t\tif(elName == '' || elName == undefined){";
                 $newJs  .= "\n\t\t\t//el is a nice select";
                 $newJs  .= "\n\t\t\tif(el.closest('.nice-select-dropdown') != null && el.closest('.inputwrapper') != null){";
@@ -431,24 +409,87 @@ trait CreateJs{
             $newJs  .= "\n\t\t}";
 
             $newJs  .= "\n\n\t\t//prevent duplicate event handling";
-            $newJs  .= "\n\t\tif(el == prevEl){";
+            $newJs  .= "\n\t\tif(el == this.prevEl){";
                 $newJs  .= "\n\t\t\treturn;";
             $newJs  .= "\n\t\t}";
             
-            $newJs  .= "\n\t\tprevEl = el;";
+            $newJs  .= "\n\t\tthis.prevEl = el;";
             $newJs  .= "\n\n\t\t//clear event prevenion after 100 ms";
-            $newJs  .= "\n\t\tsetTimeout(function(){ prevEl = ''; }, 50);";
+            $newJs  .= "\n\t\tsetTimeout(() => { this.prevEl = ''; }, 50);";
 
             $newJs  .= "\n\n\t\tif(elName == 'nextBtn'){";
-                $newJs  .= "\n\t\t\tFormFunctions.nextPrev(1);";
+                $newJs  .= "\n\t\t\tFormFunctions.nextPrev(1, form);";
             $newJs  .= "\n\t\t}else if(elName == 'prevBtn'){";
-                $newJs  .= "\n\t\t\tFormFunctions.nextPrev(-1);";
+                $newJs  .= "\n\t\t\tFormFunctions.nextPrev(-1, form);";
             $newJs  .= "\n\t\t}";
 
-            $newJs  .= "\n\n\t\t{$this->varName}.processFields(el);";
-        $newJs  .= "\n\t};";
-        $newJs  .= "\n\n\twindow.addEventListener('click', listener);";
-        $newJs  .= "\n\twindow.addEventListener('input', listener);";
+            $newJs  .= "\n\n\t\tthis.processFields(el);";
+        $newJs  .= "\n\t}";
+
+        $js         .= $newJs;
+        $minifiedJs .= \Garfix\JsMinify\Minifier::minify($newJs, array('flaggedComments' => false));
+
+        /*
+        ** Initial actions JS
+        */
+        $tabJs  = '';
+
+        // Show the first tab
+        if($this->isMultiStep()){
+            $tabJs.= "\n\t\t\t//show first tab";
+            $tabJs.= "\n\t\t\t// Display the current tab// Current tab is set to be the first tab (0)";
+            $tabJs.= "\n\t\t\tlet currentTab = 0; ";
+            $tabJs.= "\n\t\t\t// Display the current tab";
+            $tabJs.= "\n\t\t\tFormFunctions.showTab(currentTab, form); ";
+        }
+
+        // Prefill form with meta data
+        if(!empty($this->formData->save_in_meta)){
+            $tabJs.= "\n\t\t\tform.querySelectorAll(`select, input, textarea`).forEach(";
+                $tabJs.= "\n\t\t\t\tel=>{$this->varName}.processFields(el)";
+            $tabJs.= "\n\t\t\t);";
+        }
+
+        if(!empty($tabJs)){
+            $tabJs  = "\n\n\t\tthis.forms.forEach(form => {
+                $tabJs
+            });";
+        }
+
+        // Process get variables in the url
+        $newJs    = "\n
+    init = () => {
+        console.log('Dynamic $this->formName forms js loaded');
+
+        window.addEventListener('click', this.listener);
+        window.addEventListener('input', this.listener);
+        
+        FormFunctions.tidyMultiInputs();
+        $tabJs
+        // Loop over the elements who's value is given in the url and set the value;
+        if(typeof(urlSearchParams) == 'undefined'){
+            window.urlSearchParams = new URLSearchParams(window.location.search.replaceAll('&amp;', '&'));
+        }
+        Array.from(urlSearchParams).forEach(array => {
+            document.querySelectorAll(`[name^='\${array[0]}' i]`).forEach(el => this.changeFieldValue(el, array[1], $this->varName.processFields, el.closest('form')));
+        });
+
+        // Loop over the elements who have a default value and apply the logic;
+        this.forms.forEach(form => {Array.from(form.elements).filter(element => {
+            // Exclude elements without a name, as they are typically not submitted
+            if (!element.name) {
+                return false;
+            }
+
+            // Handle specific input types
+            if (element.type === 'checkbox' || element.type === 'radio') {
+                return element.checked;
+            }
+
+            // For other input types, check if the value is not empty
+            return element.value !== '';
+        }).forEach(el => this.processFields(el))});
+    }";
 
         $js         .= $newJs;
         $minifiedJs .= \Garfix\JsMinify\Minifier::minify($newJs, array('flaggedComments' => false));
@@ -457,7 +498,7 @@ trait CreateJs{
         ** MAIN JS
         */
         $newJs   = '';
-        $newJs  .= "\n\n\tthis.processFields    = function(el){";
+        $newJs  .= "\n\n\tprocessFields = (el) => {";
             $newJs  .= "\n\t\tvar elName = el.getAttribute('name');\n";
             $newJs  .= "\n\t\tvar form	= el.closest('form');\n";
             foreach($checks as $if => $check){
@@ -513,36 +554,18 @@ trait CreateJs{
                 }
                 $newJs  .= "\t\t}\n\n";
             }
-        $newJs  .= "\t};";
+        $newJs  .= "\t}";
 
         $js         .= $newJs;
-        $minifiedJs .= \Garfix\JsMinify\Minifier::minify($newJs, array('flaggedComments' => false));
-      
+        $minifiedJs .= \Garfix\JsMinify\Minifier::minify($newJs, array('flaggedComments' => false));  
+
         // Put is all in a namespace variable
-        $js         = "var $this->varName = new function(){".$js."\n};\n\n";
-        $minifiedJs = "var $this->varName  = new function(){".$minifiedJs."};";
+        $className  = ucfirst($this->varName);
+        $objectName = strtolower($this->varName);
 
-        $extraJs    = "// Loop over the elements whos value is given in the url;\n";
-        $extraJs    .= "if(typeof(urlSearchParams) == 'undefined'){\n\twindow.urlSearchParams = new URLSearchParams(window.location.search.replaceAll('&amp;', '&'));\n}\n";
-        $extraJs    .= "Array.from(urlSearchParams).forEach(array => document.querySelectorAll(`[name^='\${array[0]}' i]`).forEach(el => FormFunctions.changeFieldValue(el, array[1], $this->varName.processFields, el.closest('form'), )));\n\n";
-        $extraJs    = "// Loop over the elements who have a default value;\n";
-        $extraJs    .= "document.querySelectorAll('form').forEach(form => {Array.from(form.elements).filter(element => {
-        // Exclude elements without a name, as they are typically not submitted
-        if (!element.name) {
-            return false;
-        }
-
-        // Handle specific input types
-        if (element.type === 'checkbox' || element.type === 'radio') {
-            return element.checked;
-        }
-
-        // For other input types, check if the value is not empty
-        return element.value !== '';
-    }).forEach(el => $this->varName.processFields(el))});";
-
-        $js         .= $extraJs;
-        $minifiedJs .= \Garfix\JsMinify\Minifier::minify($extraJs, array('flaggedComments' => false));   
+        $js         = str_replace($this->varName, $objectName, $js);
+        $js         = "class $className {".$js."\n};\n\nlet $objectName = new $className();\n\n$objectName.init();\n";
+        $minifiedJs = "class $this->varName {".$minifiedJs."};$this->varName.init();\n";
 
         /*
         ** EXTERNAL JS
@@ -564,20 +587,30 @@ trait CreateJs{
         file_put_contents($this->jsFileName.'.js', $js);
 
         //replace long strings for shorter ones
-        $minifiedJs=str_replace(
+        $minifiedJs = str_replace(
             [
                 "listener",
                 "processFields",
                 'value_',
                 'elName',
-                "\n"
+                "\n",
+                "getFieldValue",
+                "changeFieldValue",
+                "changeVisibility",
+                "changeFieldProperty",
+                "onPageLoad"
             ],
             [
                 'q',
                 'p',
                 'v_',
                 'n',
-                ''
+                '',
+                'gF',
+                'cF',
+                'cV',
+                'cP',
+                'oP'
             ],
             $minifiedJs
         );
@@ -594,7 +627,6 @@ trait CreateJs{
 
         return $errors;
     }
-
 
     function buildQuerySelector($queryStrings, $prefix){
         $actionCode    = '';
@@ -616,7 +648,7 @@ trait CreateJs{
                         $actionCode    .= "{$prefix}\t\tif(!el.closest('.inputwrapper').matches('.action-processed')){\n";
                             $actionCode    .= "{$prefix}\t\t\tel.closest('.inputwrapper').classList.add('action-processed');\n";
                             //$actionCode    .= "{$prefix}\t\t\tel.closest('.inputwrapper').classList.$action('hidden');\n";
-                            $actionCode    .= "{$prefix}\t\t\tFormFunctions.changeVisibility('$action', el, {$this->varName}.processFields);\n";
+                            $actionCode    .= "{$prefix}\t\t\tthis.changeVisibility('$action', el, {$this->varName}.processFields);\n";
                         $actionCode    .= "{$prefix}\t\t}\n";
                     //$actionCode    .= "{$prefix}\t}catch(e){\n";
                         //$actionCode    .= "{$prefix}\t\tel.classList.$action('hidden');\n";
@@ -627,7 +659,7 @@ trait CreateJs{
             }elseif(count($elements) == 1){
                 $selector       = $this->getSelector($elements[0]);
                 //$actionCode    .= "{$prefix}form.querySelector('$selector').closest('.inputwrapper').classList.$action('hidden');\n";
-                $actionCode    .= "{$prefix}FormFunctions.changeVisibility('$action', form.querySelector('$selector').closest('.inputwrapper'), {$this->varName}.processFields);\n";
+                $actionCode    .= "{$prefix}this.changeVisibility('$action', form.querySelector('$selector').closest('.inputwrapper'), {$this->varName}.processFields);\n";
             }
         }
 

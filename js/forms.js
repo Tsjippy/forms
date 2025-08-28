@@ -357,7 +357,7 @@ export function showTab(n, form) {
 }
 
 //next form step clicked
-export function nextPrev(n) {
+export function nextPrev(n, form) {
 	// This function will figure out which tab to display
 	let x 				= form.querySelectorAll(".formstep");
 	let stepIndicators	= form.querySelectorAll(".step");
