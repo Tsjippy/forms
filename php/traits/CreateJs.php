@@ -578,9 +578,6 @@ trait CreateJs{
             }
         }
 
-        //write it all to a file
-        //$js			= ob_get_clean();
-
         //Create js file
         file_put_contents($this->jsFileName.'.js', $js);
 
@@ -613,10 +610,12 @@ trait CreateJs{
             $minifiedJs
         );
 
-        $minifiedJs     .= "\n\n".apply_filters('sim_form_extra_js', '', $this, true);
+        if(!empty($extraJs)){
+            $minifiedJs .= "\n\n";
+            $minifiedJs .= $extraJs;
+        }
+
         // Create minified version
-        //$minifier = new Minify\CSS($js);
-        //$minifier->minify($this->jsFileName.'.min.js');
         file_put_contents($this->jsFileName.'.min.js', $minifiedJs);
         
         if(!empty($errors)){
