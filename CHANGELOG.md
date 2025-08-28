@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- smaller conditional js
 
 ### Fixed
 
