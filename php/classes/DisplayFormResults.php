@@ -387,7 +387,7 @@ class DisplayFormResults extends DisplayForm{
 	 * @param	int		$userId			Optional the user id to get the results of. Default null
 	 * @param	int		$submissionId	Optional a specific id. Default null
 	 * @param	bool	$all			Whether to retrieve all submissions or paged
-	 * @param	bool	$force			Whether to retrieve submissions even if alrady done
+	 * @param	bool	$force			Whether to retrieve submissions even if already done
 	 */
 	public function parseSubmissions($userId=null, $submissionId=null, $all=false, $force=false){
 		// no need to this again
