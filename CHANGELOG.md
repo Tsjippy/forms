@@ -5,6 +5,7 @@
 
 ### Changed
 - smaller conditional js
+- better minification
 
 ### Fixed
 
