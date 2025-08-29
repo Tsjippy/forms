@@ -4,13 +4,18 @@
 ### Added
 
 ### Changed
-- smaller conditional js
-- better minification
-- removed duplicated call of extra js filter
 
 ### Fixed
 
 ### Updated
+
+## [8.6.1] - 2025-08-29
+
+
+### Changed
+- smaller conditional js
+- better minification
+- removed duplicated call of extra js filter
 
 ## [8.5.9] - 2025-08-26
 
