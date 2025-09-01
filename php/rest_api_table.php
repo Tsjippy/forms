@@ -402,7 +402,7 @@ function removeSubmission(){
 
 // Archive or unarchive a (sub)submission
 function archiveSubmission(){
-	$formTable	= new EditFormResults();
+	$formTable					= new EditFormResults();
 	$formTable->getForm($_POST['formid']);
 	$formTable->submissionId	= $_POST['submissionid'];
 
@@ -410,7 +410,7 @@ function archiveSubmission(){
 
 	$formTable->submission->archivedsubs	= maybe_unserialize($formTable->submission->archivedsubs);
 
-	$action	= $_POST['action'];
+	$action						= $_POST['action'];
 
 	if($action	== 'archive'){
 		$archive = true;
@@ -419,8 +419,11 @@ function archiveSubmission(){
 	}
 
 	if(isset($_POST['subid']) && is_numeric($_POST['subid'])){
-		$subId		= $_POST['subid'];
-		$message	= "Entry with id {$formTable->submissionId} and subid $subId succesfully {$action}d";
+		// Reset the submission to the un-splitted one
+		$formTable->submission	= $formTable->submissions[0];
+
+		$subId					= $_POST['subid'];
+		$message				= "Entry with id {$formTable->submissionId} and subid $subId succesfully {$action}d";
 
 		if($archive){
 			// add

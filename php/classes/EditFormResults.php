@@ -242,7 +242,7 @@ class EditFormResults extends DisplayFormResults{
 				$elementName	= $matches[1];
 			}
 
-			if(count($this->submission->formresults[$elementName]) > count($this->submission->archivedsubs)){
+			if(isset($this->submission->formresults[$elementName]) && count($this->submission->formresults[$elementName]) > count($this->submission->archivedsubs)){
 				$allArchived = false;
 			}
 		}
