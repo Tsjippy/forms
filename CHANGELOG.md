@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- issue with archiving splitted sub entires
 
 ### Updated
 
