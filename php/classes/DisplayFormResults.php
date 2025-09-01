@@ -894,6 +894,10 @@ class DisplayFormResults extends DisplayForm{
 			}
 
 			$this->getForm($this->shortcodeData->form_id);
+
+			if(empty($this->tableSettings) || empty($this->tableSettings['edit_right_roles'])){
+				$this->tableSettings['edit_right_roles']	= $this->formData->full_right_roles;
+			}
 		}
 
 		$this->enriched	= true;
@@ -1300,10 +1304,6 @@ class DisplayFormResults extends DisplayForm{
 		
 		$this->tableSettings		= (array) maybe_unserialize($this->shortcodeData->table_settings);
 		$this->columnSettings		= (array) maybe_unserialize($this->shortcodeData->column_settings);
-
-		if(empty($this->tableSettings) || empty($this->tableSettings['edit_right_roles'])){
-			$this->tableSettings['edit_right_roles']	= $this->formData->full_right_roles;
-		}
 
 		return true;
 	}
@@ -1837,7 +1837,10 @@ class DisplayFormResults extends DisplayForm{
 		
 		//check if we have rights on this table
 		if(!isset($this->tableEditPermissions) || !$this->tableEditPermissions){
-			if(isset($this->tableSettings['edit_right_roles']) && array_intersect($this->userRoles, array_keys((array)$this->tableSettings['edit_right_roles']))){
+			if(
+				array_intersect($this->userRoles, array_keys((array)$this->tableSettings['edit_right_roles'])) ||
+				in_array($this->userId, (array)$this->tableSettings['edit_right_roles'])
+			){
 				$this->tableEditPermissions = true;
 			}else{
 				$this->tableEditPermissions = false;
@@ -1855,6 +1858,7 @@ class DisplayFormResults extends DisplayForm{
 			)	||
 			!$this->tableEditPermissions							&&
 			!array_intersect($this->userRoles, array_keys((array)$this->tableSettings['view_right_roles'])) &&
+			!in_array($this->userId, (array)$this->tableSettings['view_right_roles']) &&
 			!wp_doing_cron()
 		){
 			$this->tableViewPermissions 	= false;

@@ -20,7 +20,7 @@ function restApiInitTable() {
 		RESTAPIPREFIX.'/forms',
 		'/save_table_prefs',
 		array(
-			'methods' 				=> \WP_REST_Server::EDITABLE,
+			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\saveTablePrefs',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
@@ -40,7 +40,7 @@ function restApiInitTable() {
 		RESTAPIPREFIX.'/forms',
 		'/delete_table_prefs',
 		array(
-			'methods' 				=> \WP_REST_Server::EDITABLE,
+			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\deleteTablePrefs',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
@@ -59,7 +59,7 @@ function restApiInitTable() {
 		RESTAPIPREFIX.'/forms',
 		'/save_column_settings',
 		array(
-			'methods' 				=> \WP_REST_Server::EDITABLE,
+			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\saveColumnSettings',
 			'permission_callback' 	=> function(){
 				$formsTable		= new DisplayFormResults();
@@ -84,7 +84,7 @@ function restApiInitTable() {
 		RESTAPIPREFIX.'/forms',
 		'/save_table_settings',
 		array(
-			'methods' 				=> \WP_REST_Server::EDITABLE,
+			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\saveTableSettings',
 			'permission_callback' 	=> function(){
 				$formsTable		= new DisplayFormResults(array(
@@ -112,7 +112,7 @@ function restApiInitTable() {
 		RESTAPIPREFIX.'/forms',
 		'/remove_submission',
 		array(
-			'methods' 				=> \WP_REST_Server::EDITABLE,
+			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\removeSubmission',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
@@ -131,7 +131,7 @@ function restApiInitTable() {
 		RESTAPIPREFIX.'/forms',
 		'/archive_submission',
 		array(
-			'methods' 				=> \WP_REST_Server::EDITABLE,
+			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\archiveSubmission',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
@@ -156,7 +156,7 @@ function restApiInitTable() {
 		RESTAPIPREFIX.'/forms',
 		'/edit_value',
 		array(
-			'methods' 				=> \WP_REST_Server::EDITABLE,
+			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\editValue',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
@@ -187,7 +187,7 @@ function restApiInitTable() {
 		RESTAPIPREFIX.'/forms',
 		'/get_input_html',
 		array(
-			'methods' 				=> \WP_REST_Server::EDITABLE,
+			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\getInputHtml',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
@@ -215,7 +215,7 @@ function restApiInitTable() {
 		RESTAPIPREFIX.'/forms',
 		'/get_page',
 		array(
-			'methods' 				=> \WP_REST_Server::EDITABLE,
+			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\getPage',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(

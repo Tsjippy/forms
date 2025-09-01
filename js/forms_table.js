@@ -629,6 +629,7 @@ document.addEventListener("click", event=>{
 
 	if(target.name == 'submit_column_setting'){
 		saveColumnSettings(target);
+		event.stopPropagation();
 	}else if(target.name == 'submit_table_setting'){
 		saveTableSettings(target);
 	}else if(target.name == 'form_settings[autoarchive]'){
