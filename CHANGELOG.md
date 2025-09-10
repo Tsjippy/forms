@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.6.2] - 2025-09-10
+
+
+### Changed
 - minimize class calls
 
 ### Fixed
 - issue with archiving splitted sub entires
-
-### Updated
 
 ## [8.6.1] - 2025-08-29
 
