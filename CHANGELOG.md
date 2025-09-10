@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- minimize class calls
 
 ### Fixed
 - issue with archiving splitted sub entires
