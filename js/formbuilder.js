@@ -23,9 +23,9 @@ function clearFormInputs(){
 			if(el.type == "select-one"){
 				FormFunctions.removeDefaultSelect(el);
 				
-				if(el._niceselect != undefined){
-					el._niceselect.clear();
-					el._niceselect.update();
+				if(el._niceSelect != undefined){
+					el._niceSelect.clear();
+					el._niceSelect.update();
 				}
 			}
 		});
@@ -597,8 +597,8 @@ function addOppositeCondition(clone, target){
 			}
 			
 			//reflect changes in niceselect
-			if(el._niceselect != undefined){
-				el._niceselect.update();
+			if(el._niceSelect != undefined){
+				el._niceSelect.update();
 			}
 		}else if(el.type == 'radio' && el.classList.contains('element_condition') && (el.value == 'show' || el.value == 'hide')){
 			if(!el.checked){
