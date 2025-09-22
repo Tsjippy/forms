@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- form builder nice selects
 
 ### Updated
 
