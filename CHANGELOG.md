@@ -5,6 +5,7 @@
 
 ### Changed
 - code changes
+- form exports in seperate file
 
 ### Fixed
 - form builder nice selects
