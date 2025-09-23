@@ -2,13 +2,6 @@
 console.log("Formstable.js loaded");
 
 async function showHiddenColumns(target){
-	//hiden the reset button
-	target.closest('.table-wrapper').querySelector('.reset-col-vis').classList.add('hidden');
-
-	// Show the columns again
-	let table		= target.closest('.form.table-wrapper').querySelector('table');
-	table.querySelectorAll('th.hidden, td.hidden').forEach(el=>el.classList.remove('hidden'));
-
 	// store as preference
 	let formData	= new FormData();
 	formData.append('formid', target.dataset.formid);
@@ -596,13 +589,6 @@ const hideColumn	= async (target) => {
 
 		// Hide the column
 		var table		= cell.closest('table');
-		var tableRows	= table.rows;
-		for (const element of tableRows) {
-			element.cells[cell.cellIndex].classList.add('hidden')
-		}
-
-		//show the reset button
-		cell.closest('.table-wrapper').querySelector('.reset-col-vis').classList.remove('hidden');
 
 		// store as preference
 		var formData	= new FormData();
@@ -613,8 +599,8 @@ const hideColumn	= async (target) => {
 	// Table settings
 	}else{
 		if(target.classList.contains('visible')){
-			target.classList.replace('visible','invisible');
-			target.src	= target.src.replace('visible.png','invisible.png');
+			target.classList.replace('visible', 'invisible');
+			target.src	= target.src.replace('visible.png', 'invisible.png');
 			target.closest('.column_setting_wrapper').querySelector('.visibilitytype').value = 'hide';
 		}else{
 			target.classList.replace('invisible','visible');
@@ -678,15 +664,6 @@ document.addEventListener("click", event=>{
 	if(!target.matches('.copy') && td && !td.matches('.active')){
 		editCellValue(event, td);
 	}
-	
-	//Hide column
-	if(target.classList.contains('visibilityicon')){
-		hideColumn(target);
-	}
-
-	if(target.matches('.reset-col-vis')){
-		showHiddenColumns(target);
-	}
 
 	// If we clicked somewhere and there is an active cell
 	let activeCell	= document.querySelector('td.active');
@@ -699,6 +676,15 @@ document.addEventListener("click", event=>{
 
 	if(target.matches('form .table-permissions-rights-form')){
 		target.closest('div').querySelector('.permission-wrapper').classList.toggle('hidden');
+	}
+
+	//Hide column
+	if(target.classList.contains('visibilityicon')){
+		hideColumn(target);
+	}
+
+	if(target.matches('.reset-col-vis')){
+		showHiddenColumns(target);
 	}
 });
 
