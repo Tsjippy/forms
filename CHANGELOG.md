@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.6.4] - 2025-09-24
+
+
+### Changed
 - loader image
 
 ### Fixed
 - hide loaders
-
-### Updated
 
 ## [8.6.3] - 2025-09-24
 
