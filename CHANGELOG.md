@@ -6,6 +6,7 @@
 ### Changed
 - code changes
 - form exports in seperate file
+- loader image
 
 ### Fixed
 - form builder nice selects
