@@ -67,7 +67,7 @@ async function showEmptyModal(target){
 	
 	modal.querySelector('[name="submit_form_element"]').textContent = modal.querySelector('[name="submit_form_element"]').textContent.replace('Change','Add');
 	
-	modal.querySelector('.element_conditions_wrapper').innerHTML = `<img src="${sim.loadingGif}" style="display:block; margin:0px auto 0px auto;">`;
+	modal.querySelector('.element_conditions_wrapper').innerHTML = sim.loaderHtml;
 	
 	Main.showModal(modal);
 
@@ -157,9 +157,7 @@ async function addFormElement(target){
 		priority			= parseInt(wrapper.dataset.priority) + 1;
 	}
 
-	wrapper.insertAdjacentHTML('afterEnd', 
-		`<div class='loader_wrapper form_element_wrapper' data-id=-1 data-priority=${priority}><img class='loadergif' src='${sim.loadingGif}' width=50 loading='lazy'>Loading element...</div>`
-	);
+	wrapper.insertAdjacentHTML('afterEnd', sim.loaderHtml );
 
 	fixElementNumbering(form);
 
