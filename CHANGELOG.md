@@ -7,6 +7,7 @@
 - loader image
 
 ### Fixed
+- hide loaders
 
 ### Updated
 
