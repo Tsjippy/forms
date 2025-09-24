@@ -4,14 +4,21 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.6.3] - 2025-09-24
+
+
+### Changed
 - code changes
 - form exports in seperate file
 - loader image
 
 ### Fixed
 - form builder nice selects
-
-### Updated
 
 ## [8.6.2] - 2025-09-10
 
