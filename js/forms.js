@@ -19,7 +19,7 @@ async function saveFormInput(target){
 	let response	= await FormSubmit.submitForm(target, 'forms/save_form_input');
 
 	if(response){
-		target.closest('.submit_wrapper').querySelector('.loadergif').classList.add('hidden');
+		target.closest('.submit_wrapper').querySelector('.loader_wrapper').classList.add('hidden');
 
 		Main.displayMessage(response);
 

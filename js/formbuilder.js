@@ -98,7 +98,7 @@ async function requestEditElementData(target){
 
 	let loader			= Main.showLoader(target);
 
-	loader.querySelector('.loadergif').style.margin = '5px 19px 0px 19px';
+	loader.querySelector('.loader').style.margin = '5px 19px 0px 19px';
 	
 	let formData = new FormData();
 	formData.append('elementid', elementId);
@@ -227,9 +227,9 @@ async function removeElement(target){
 	let form			= target.closest('form');
 
 	Main.showLoader(target);
-	let loader			= parent.querySelector('.loadergif');
+	let loader			= parent.querySelector('.loader_wrapper');
 	loader.style.paddingRight = '10px';
-	loader.classList.remove('loadergif');
+	loader.classList.remove('loader_wrapper');
 
 	let formData = new FormData();
 	formData.append('formid', formId);
@@ -302,7 +302,7 @@ async function saveFormSettings(target){
 	let response	= await FormSubmit.submitForm(target, 'forms/save_form_settings');
 
 	if(response){
-		target.closest('.submit_wrapper').querySelector('.loadergif').classList.add('hidden');
+		target.closest('.submit_wrapper').querySelector('.loader_wrapper').classList.add('hidden');
 
 		Main.displayMessage(response);
 	}
@@ -312,7 +312,7 @@ async function saveFormEmails(target){
 	let response	= await FormSubmit.submitForm(target, 'forms/save_form_emails');
 
 	if(response){
-		target.closest('.submit_wrapper').querySelector('.loadergif').classList.add('hidden');
+		target.closest('.submit_wrapper').querySelector('.loader_wrapper').classList.add('hidden');
 
 		Main.displayMessage(response);
 	}
