@@ -228,7 +228,7 @@ class DisplayForm extends SubmitForm{
 			//first part of the form, don't hide
 			}else{
 				$this->isFormStep	= true;
-				$html .= "<img class='formsteploader' src='".SIM\LOADERIMAGEURL."' loading='lazy' >";
+				$html .= SIM\LOADERIMAGE;
 			}
 			
 			$this->formStepCounter	+= 1;

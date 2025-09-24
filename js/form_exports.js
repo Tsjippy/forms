@@ -1,3 +1,4 @@
+import { getFieldValue } from  '../../../plugins/sim-plugin/includes/js/field_value.js';
 
 export function removeDefaultSelect(el){
 	Array.from(el.options).forEach(function(option){
@@ -266,7 +267,7 @@ export function updateMultiStepControls(form){
 export function showTab(n, form) {
 	if(typeof(form) != 'undefined'){
 		if(n == 0){
-			let loader = form.querySelector('.formsteploader');
+			let loader = form.querySelector('.loader_wrapper:not(.hidden)' );
 			//hide loader
 			if(loader != null){
 				loader.classList.add('hidden');
@@ -555,7 +556,6 @@ export function changeFieldValue(selector, value, functionRef, form, addition=''
 			target.value = value;
 		// We did not find a match, empty value
 		}else{
-			console.log('test empty');
 			target.value = '';
 		}
 	}else{

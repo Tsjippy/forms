@@ -158,7 +158,7 @@ async function addFormElement(target){
 	}
 
 	wrapper.insertAdjacentHTML('afterEnd', 
-		`<div class='loadergif_wrapper form_element_wrapper' data-id=-1 data-priority=${priority}><img class='loadergif' src='${sim.loadingGif}' width=50 loading='lazy'>Loading element...</div>`
+		`<div class='loader_wrapper form_element_wrapper' data-id=-1 data-priority=${priority}><img class='loadergif' src='${sim.loadingGif}' width=50 loading='lazy'>Loading element...</div>`
 	);
 
 	fixElementNumbering(form);
@@ -179,7 +179,7 @@ async function addFormElement(target){
 			clearFormInputs();
 			
 			// Replace loader with element
-			document.querySelectorAll(`.loadergif_wrapper`).forEach(el=>el.outerHTML = response.html);
+			document.querySelectorAll(`.loader_wrapper`).forEach(el=>el.outerHTML = response.html);
 
 			//add resize listener
 			form.querySelectorAll('.resizer').forEach(el=>{resizeOb.observe(el);});
@@ -198,7 +198,7 @@ async function addFormElement(target){
 	}
 
 	// Remove loaders
-	document.querySelectorAll(`.loadergif_wrapper`).forEach(el=>el.remove());
+	document.querySelectorAll(`.loader_wrapper`).forEach(el=>el.remove());
 }
 
 async function sendElementSize(el, widthPercentage){
