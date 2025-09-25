@@ -7,6 +7,7 @@
 - js generated loader
 
 ### Fixed
+- conditions form loader
 
 ### Updated
 
