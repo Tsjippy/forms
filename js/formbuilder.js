@@ -67,7 +67,7 @@ async function showEmptyModal(target){
 	
 	modal.querySelector('[name="submit_form_element"]').textContent = modal.querySelector('[name="submit_form_element"]').textContent.replace('Change','Add');
 	
-	Main.showLoader(modal.querySelector('.element_conditions_wrapper'));
+	modal.querySelector('.element_conditions_wrapper').innerHTML = Main.showLoader(null, false, 50, '', true);
 	
 	Main.showModal(modal);
 
