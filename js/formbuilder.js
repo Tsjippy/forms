@@ -67,7 +67,7 @@ async function showEmptyModal(target){
 	
 	modal.querySelector('[name="submit_form_element"]').textContent = modal.querySelector('[name="submit_form_element"]').textContent.replace('Change','Add');
 	
-	modal.querySelector('.element_conditions_wrapper').innerHTML = sim.loaderHtml;
+	Main.showLoader(modal.querySelector('.element_conditions_wrapper'));
 	
 	Main.showModal(modal);
 
@@ -157,7 +157,7 @@ async function addFormElement(target){
 		priority			= parseInt(wrapper.dataset.priority) + 1;
 	}
 
-	wrapper.insertAdjacentHTML('afterEnd', sim.loaderHtml );
+	Main.showLoader(wrapper, false);
 
 	fixElementNumbering(form);
 

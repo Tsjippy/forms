@@ -363,7 +363,7 @@ async function getSortedPage(target){
 	tableWrapper.dataset.sortcol	= sortCol;
 	tableWrapper.dataset.sortdir	= sortDir;
 
-	let loader			= Main.showLoader(table, true, 'Loading sorted data');
+	let loader			= Main.showLoader(table, true, 50, 'Loading sorted data');
 	let formData;
 	if(wrapper.querySelector(".filteroptions") == null){
 		formData		= new FormData();

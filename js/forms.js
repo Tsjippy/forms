@@ -50,7 +50,7 @@ async function formbuilderSwitch(target){
 
 	formData.append('formid', formId);
 
-	let loader	= Main.showLoader(target, false, 'Requesting form...');
+	let loader	= Main.showLoader(target, false, 50, 'Requesting form...');
 	wrapper.innerHTML	= loader.outerHTML;
 
 	let response = await FormSubmit.fetchRestApi('forms/form_builder', formData);
@@ -97,7 +97,7 @@ async function requestNewFormResults(target){
 		formData.append('archived', true);
 	}
 
-	let loader	= Main.showLoader(target, false, 'Requesting form results...');
+	let loader	= Main.showLoader(target, false, 50, 'Requesting form results...');
 	wrapper.innerHTML	= loader.outerHTML;
 
 	let response = await FormSubmit.fetchRestApi('forms/show_form_results', formData);
