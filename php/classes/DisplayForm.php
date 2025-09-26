@@ -129,7 +129,7 @@ class DisplayForm extends SubmitForm{
 			$elementHtml	= $this->prepareElementHtml($element, $index, $elementHtml, $val);
 
 			if($this->prevElement->type == 'multi_start'){
-				$this->multiInputsHtml[$index] = "<div class='clone_div' data-divid='$index' style='display:flex'>";
+				$this->multiInputsHtml[$index] = "<div class='clone-div' data-divid='$index' style='display:flex'>";
 					$this->multiInputsHtml[$index] .= "<div class='multi_input_wrapper'>";
 			}
 						// elements between start and end
@@ -151,7 +151,7 @@ class DisplayForm extends SubmitForm{
 						$this->multiInputsHtml[$index] .= "<button type='button' class='add button' style='flex: 1;'>+</button>";
 						$this->multiInputsHtml[$index] .= "<button type='button' class='remove button' style='flex: 1;'>-</button>";
 					$this->multiInputsHtml[$index] .= "</div>";
-				$this->multiInputsHtml[$index] .= "</div>";//close clone_div
+				$this->multiInputsHtml[$index] .= "</div>";//close clone-div
 			}
 		}
 	}
@@ -276,7 +276,7 @@ class DisplayForm extends SubmitForm{
 
 			//write down all the multi html
 			$name	= str_replace('end', 'start', $element->name);
-				$elementHtml	= "<div class='clone_divs_wrapper' name='$name'>";
+				$elementHtml	= "<div class='clone-divs-wrapper' name='$name'>";
 					foreach($this->multiInputsHtml as $multihtml){
 						$elementHtml .= $multihtml;
 					}
@@ -431,7 +431,7 @@ class DisplayForm extends SubmitForm{
 					if($this->isFormStep){
 						$html	.= "</div>";
 						$html	.= "<div class='multistepcontrols hidden'>";
-							$html	.= "<div class='multistepcontrols_wrapper'>";
+							$html	.= "<div class='multi-step-controls-wrapper'>";
 								$html	.= "<div style='flex:1;'>";
 									$html	.= "<button type='button' class='button' name='prevBtn'>Previous</button>";
 								$html	.= "</div>";

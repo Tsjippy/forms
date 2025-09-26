@@ -17,7 +17,7 @@
 		}
 	}
 
-	.resizer_wrapper{
+	.conditions-info{
 		width:100%;
 		min-width: 220px;
 	
@@ -78,42 +78,42 @@
 		display: inline-block;
 	}
 
-	div.condition_select{
+	div.condition-select{
 		@extend %display-shared
 	}
 
-	.radio_wrapper{
+	.radio-wrapper{
 		@extend %display-shared;
 		padding-top: 10px;
 	}
 
-	.condition_row{
+	.condition-row{
 		margin-top: 30px;
 	}
 
-	.rule_row, 
+	.rule-row, 
 	.action_row{
 		margin-left: 25px;
 	}
 
-	.form_element_wrapper:hover{
+	.form-element-wrapper:hover{
 		background-color: #f7f5004d;
 	}
 
-	.resizer_wrapper{
+	.conditions-info{
 		.hidden:not(.modal,.elname), 
 		.stephidden{
 			background-color: lightgray;
 			display: block !important;
 		}
 		
-		.info_text:not(.conditions){
+		.info-text:not(.conditions){
 			display: block;
 		}
 	}
 
-	.add_element, 
-	.remove_element{
+	.add-element, 
+	.remove-element{
 		margin-left: 10px;
 	}
 
@@ -123,7 +123,7 @@
 		width: 100%;
 	}
 
-	.conditions_info{
+	.conditions-info{
 		color: #bd2919;
 		font-size: xx-large;
 		position: absolute;
@@ -135,14 +135,14 @@
 	}
 }
 
-.formeditbuttons_wrapper,
-.form_element_wrapper
+.form-edit-buttons-wrapper,
+.form-element-wrapper
 {
 	margin: 10px 0px;
 }
 
-.element_conditions,
-.element_conditions_wrapper{
+.element-conditions,
+.element-conditions-wrapper{
 	.nice-select{
 		display: inline-block;
 	}

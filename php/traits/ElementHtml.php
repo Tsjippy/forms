@@ -261,7 +261,7 @@ trait ElementHtml{
 			$elementItemHtml	= $this->prepareElementHtml($element, $index, $elementHtml, $val);
 			
 			//open the clone div
-			$html	= "<div class='clone_div' data-divid='$index'>";
+			$html	= "<div class='clone-div' data-divid='$index'>";
 				//add flex to single multi items, re-add the label for each value
 				$html .= str_replace('%key%', $index+1, $prevLabel);
 				
@@ -284,7 +284,7 @@ trait ElementHtml{
 					$html .= "<button type='button' class='add button' style='flex: 1;'>+</button>";
 					$html .= "<button type='button' class='remove button' style='flex: 1;'>-</button>";
 				$html .= "</div>";
-			$html .= "</div>";//close clone_div
+			$html .= "</div>";//close clone-div
 
 			$this->multiInputsHtml[$index]	= $html;
 		}
@@ -425,9 +425,9 @@ trait ElementHtml{
 			
 			$html = "<div class='infobox' name='{$element->name}'>";
 				$html .= '<div style="float:right">';
-					$html .= '<p class="info_icon"><img draggable="false" role="img" class="emoji" alt="ℹ" src="'.SIM\PICTURESURL.'/info.png" loading="lazy" ></p>';
+					$html .= '<p class="info-icon"><img draggable="false" role="img" class="emoji" alt="ℹ" src="'.SIM\PICTURESURL.'/info.png" loading="lazy" ></p>';
 				$html .= '</div>';
-				$html .= "<span class='info_text'>$content</span>";
+				$html .= "<span class='info-text'>$content</span>";
 			$html .= '</div>';
 		}elseif(in_array($element->type, ['file','image'])){
 			$name		= $element->name;
@@ -679,7 +679,7 @@ trait ElementHtml{
 				
 				if($element->type != 'text'){
 					$this->multiInput($element, $values, $html);
-					$html	= "<div class='clone_divs_wrapper'>";
+					$html	= "<div class='clone-divs-wrapper'>";
 						foreach($this->multiInputsHtml as $h){
 							$html	.= $h;
 						}

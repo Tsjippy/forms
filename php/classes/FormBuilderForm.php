@@ -138,7 +138,7 @@ class FormBuilderForm extends SimForms{
 		}
 
 		//Add form edit controls if needed
-		$html = " <div class='form_element_wrapper' data-id='{$element->id}' data-formid='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
+		$html = " <div class='form-element-wrapper' data-id='{$element->id}' data-formid='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
 			$html 	.= "<span class='movecontrol formfieldbutton' aria-hidden='true'>:::<br><span class='elid$idHidden' style='font-size:xx-small'>$element->id</span></span>";
 			$html 	.= "<div class='resizer_wrapper'>";
 				if($element->type == 'info'){
@@ -224,8 +224,8 @@ class FormBuilderForm extends SimForms{
 								foreach($icons as $icon){
 									$style	= "position: absolute;margin: 0;right: {$right}px;top: 5px;height: 30px;";
 									$html .= "<div class='infobox' style='position: absolute;top: 0;width: 100%;'>";
-										$html .= "<span class='conditions_info formfieldbutton {$icon['class']}' style='right:{$icon['right']}px'>{$icon['content']}</span>";
-										$html .= "<span class='info_text conditions' style='$style'>{$icon['explainer']}</span>";
+										$html .= "<span class='conditions-info formfieldbutton {$icon['class']}' style='right:{$icon['right']}px'>{$icon['content']}</span>";
+										$html .= "<span class='info-text conditions' style='$style'>{$icon['explainer']}</span>";
 									$html .= "</div>";
 								}
 							}
@@ -294,7 +294,7 @@ class FormBuilderForm extends SimForms{
 					<?php
 				}else{
 					?>
-					<div class="formeditbuttons_wrapper">
+					<div class="form-edit-buttons-wrapper">
 						<button name='showid' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element id's</button>
 						<button name='showname' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element name's</button>
 						<button class='button formbuilder-switch-back small'>Show enduser form</button>
@@ -346,14 +346,14 @@ class FormBuilderForm extends SimForms{
 				<span id="modal_close" class="close">&times;</span>
 				
 				<button class="button tablink formbuilderform active"	id="show_element_builder" data-target="element_builder">Form element</button>
-				<button class="button tablink formbuilderform"			id="show_element_conditions" data-target="element_conditions">Element conditions</button>
+				<button class="button tablink formbuilderform"			id="show_element-conditions" data-target="element-conditions">Element conditions</button>
 				
 				<div class="tabcontent" id="element_builder">
 					<?php echo $this->elementBuilderForm();?>
 				</div>
 				
-				<div class="tabcontent hidden" id="element_conditions">
-					<div class="element_conditions_wrapper"></div>
+				<div class="tabcontent hidden" id="element-conditions">
+					<div class="element-conditions-wrapper"></div>
 				</div>
 			</div>
 		</div>
@@ -591,11 +591,11 @@ class FormBuilderForm extends SimForms{
 							<input type='text' name="autoarchive_value" value="<?php echo $this->formData->autoarchive_value;?>">
 							<div class="infobox" name="info" style="min-width: fit-content;">
 								<div style="float:right">
-									<p class="info_icon">
+									<p class="info-icon">
 										<img draggable="false" role="img" class="emoji" alt="ℹ" src="<?php echo SIM\PICTURESURL;?>/info.png" loading='lazy' >
 									</p>
 								</div>
-								<span class="info_text">
+								<span class="info-text">
 									You can use placeholders like '%today%+3days' for a value
 								</span>
 							</div>
@@ -747,7 +747,7 @@ class FormBuilderForm extends SimForms{
 					</select>
 					
 					<br>
-					<div class='clone_divs_wrapper'>
+					<div class='clone-divs-wrapper'>
 						<?php
 						// Render tab buttons
 						foreach($emails as $key=>$email){
@@ -768,7 +768,7 @@ class FormBuilderForm extends SimForms{
 								$hidden = '';
 							}					
 							?>
-							<div class='clone_div tabcontent <?php echo $hidden;?>' id="email_<?php echo $key;?>" data-divid='<?php echo $key;?>'>
+							<div class='clone-div tabcontent <?php echo $hidden;?>' id="email_<?php echo $key;?>" data-divid='<?php echo $key;?>'>
 								<h4 class="formfield" style="margin-top:50px; display:inline-block;">E-mail <?php echo $key+1;?></h4>
 								<button type='button' class='add button' style='flex: 1;'>+</button>
 								<button type='button' class='remove button' style='flex: 1;'>-</button>
@@ -907,7 +907,7 @@ class FormBuilderForm extends SimForms{
 									</div>
 									
 									<div class='emailfromconditional <?php if($email['fromemail'] != 'conditional'){echo 'hidden';}?>'>
-										<div class='clone_divs_wrapper'>
+										<div class='clone-divs-wrapper'>
 											<?php
 											if(!is_array($email['conditionalfromemail'])){
 												$email['conditionalfromemail'] = [
@@ -920,7 +920,7 @@ class FormBuilderForm extends SimForms{
 											}
 											foreach(array_values($email['conditionalfromemail']) as $fromKey=>$fromEmail){
 												?>
-												<div class='clone_div' data-divid='<?php echo $fromKey;?>'>
+												<div class='clone-div' data-divid='<?php echo $fromKey;?>'>
 													<fieldset class='formemailfieldset'>
 														<legend class="formfield buttonwrapper">
 															<span class='text'>Condition <?php echo $fromKey+1;?></span>
@@ -976,7 +976,7 @@ class FormBuilderForm extends SimForms{
 									</div>
 
 									<div class='emailtoconditional <?php if($email['emailto'] != 'conditional'){echo 'hidden';}?>'>
-										<div class='clone_divs_wrapper'>
+										<div class='clone-divs-wrapper'>
 											<?php
 											if(!is_array($email['conditionalemailto'])){
 												$email['conditionalemailto'] = [
@@ -989,7 +989,7 @@ class FormBuilderForm extends SimForms{
 											}
 											foreach($email['conditionalemailto'] as $toKey=>$toEmail){
 												?>
-												<div class='clone_div' data-divid='<?php echo $toKey;?>'>
+												<div class='clone-div' data-divid='<?php echo $toKey;?>'>
 													<fieldset class='formemailfieldset buttonwrapper'>
 														<legend class="formfield">
 															<span class='text'>Condition <?php echo $toKey+1;?></span>
@@ -1463,7 +1463,7 @@ class FormBuilderForm extends SimForms{
 			if(!empty($copyTo['copyto']) && in_array($elementId, $copyTo['copyto'])){
 				$counter++;
 				?>
-				<div class="form_element_wrapper" data-id="<?php echo $el->id;?>" data-formid="<?php echo $this->formData->id;?>">
+				<div class="form-element-wrapper" data-id="<?php echo $el->id;?>" data-formid="<?php echo $this->formData->id;?>">
 					<button type="button" class="edit_form_element button" title="Jump to conditions element">View conditions of '<?php echo $el->name;?>'</button>
 				</div>
 				<?php
@@ -1490,7 +1490,7 @@ class FormBuilderForm extends SimForms{
 		}
 		?>
 		
-		<form action='' method='post' name='add_form_element_conditions_form'>
+		<form action='' method='post' name='add_form_element-conditions_form'>
 			<h3>Form element conditions</h3>
 			<input type='hidden' class='element_condition' name='formid' value='<?php echo $this->formData->id;?>'>
 			
@@ -1504,23 +1504,23 @@ class FormBuilderForm extends SimForms{
 					continue;
 				}
 				?>
-				<div class='condition_row' data-condition_index='<?php echo $conditionIndex;?>'>
+				<div class='condition-row' data-condition_index='<?php echo $conditionIndex;?>'>
 					<span style='font-weight: 600;'>If</span>
 					<br>
 					<?php
 					$lastRuleKey = array_key_last($condition['rules']);
 					foreach($condition['rules'] as $ruleIndex=>$rule){
 						?>
-						<div class='rule_row' data-rule_index='<?php echo $ruleIndex;?>'>
-							<input type='hidden' class='element_condition combinator' name='element_conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][combinator]' value='<?php echo $rule['combinator']; ?>'>
+						<div class='rule-row' data-rule_index='<?php echo $ruleIndex;?>'>
+							<input type='hidden' class='element_condition combinator' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][combinator]' value='<?php echo $rule['combinator']; ?>'>
 						
-							<select class='element_condition condition_select conditional_field' name='element_conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional_field]' required>
+							<select class='element_condition condition-select conditional_field' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional_field]' required>
 								<?php
 									echo $this->inputDropdown($rule['conditional_field'], $elementId);
 								?>
 							</select>
 
-							<select class='element_condition condition_select equation' name='element_conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][equation]' required>
+							<select class='element_condition condition-select equation' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][equation]' required>
 								<?php
 									$optionArray	= [
 										''			=> '---',
@@ -1563,7 +1563,7 @@ class FormBuilderForm extends SimForms{
 							?>
 							
 							<span class='<?php echo $hidden;?> condition_form conditional_field_2'>
-								<select class='element_condition condition_select' name='element_conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional_field_2]'>
+								<select class='element_condition condition-select' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional_field_2]'>
 								<?php
 									echo $this->inputDropdown($rule['conditional_field_2'], $elementId);
 								?>
@@ -1579,7 +1579,7 @@ class FormBuilderForm extends SimForms{
 							?>
 
 							<span class='<?php echo $hidden;?> condition_form equation_2'>
-								<select class='element_condition condition_select' name='element_conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][equation_2]'>
+								<select class='element_condition condition-select' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][equation_2]'>
 									<?php
 										$optionArray	= [
 											''			=> '---',
@@ -1606,7 +1606,7 @@ class FormBuilderForm extends SimForms{
 								$hidden = '';
 							}
 							?>
-							<input  type='text'   class='<?php echo $hidden;?> element_condition condition_form' name='element_conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional_value]' value="<?php echo $rule['conditional_value'];?>">
+							<input  type='text'   class='<?php echo $hidden;?> element_condition condition_form' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional_value]' value="<?php echo $rule['conditional_value'];?>">
 							
 							<button type='button' class='element_condition and_rule condition_form button <?php if(!empty($rule['combinator']) && $rule['combinator'] == 'AND'){echo 'active';}?>'	title='Add a new "AND" rule to this condition'>AND</button>
 							<button type='button' class='element_condition or_rule condition_form button  <?php if(!empty($rule['combinator']) && $rule['combinator'] == 'OR'){echo 'active';}?>'	title='Add a new "OR"  rule to this condition'>OR</button>
@@ -1627,32 +1627,32 @@ class FormBuilderForm extends SimForms{
 					<span style='font-weight: 600;'>then</span><br>
 					
 					<div class='action_row'>
-						<div class='radio_wrapper condition_form'>
+						<div class='radio-wrapper condition_form'>
 							<label>
-								<input type='radio' name='element_conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='show' <?php if($condition['action'] == 'show'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='show' <?php if($condition['action'] == 'show'){echo 'checked';}?> required>
 								Show this element
 							</label><br>
 							
 							<label>
-								<input type='radio' name='element_conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='hide' <?php if($condition['action'] == 'hide'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='hide' <?php if($condition['action'] == 'hide'){echo 'checked';}?> required>
 								Hide this element
 							</label><br>
 							
 							<label>
-								<input type='radio' name='element_conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='toggle' <?php if($condition['action'] == 'toggle'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='toggle' <?php if($condition['action'] == 'toggle'){echo 'checked';}?> required>
 								Toggle this element
 							</label><br>
 							
 							<label>
-								<input type='radio' name='element_conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='value' <?php if($condition['action'] == 'value'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='value' <?php if($condition['action'] == 'value'){echo 'checked';}?> required>
 								Set property
 							</label>
-							<input type="text" list="propertylist" name="element_conditions[<?php echo $conditionIndex;?>][propertyname1]" class='element_condition' placeholder="property name" value="<?php echo $condition['propertyname1'];?>">
+							<input type="text" list="propertylist" name="element-conditions[<?php echo $conditionIndex;?>][propertyname1]" class='element_condition' placeholder="property name" value="<?php echo $condition['propertyname1'];?>">
 							<label> to:</label>
-							<textarea class='element_condition' name="element_conditions[<?php echo $conditionIndex;?>][action_value]" rows='1'><?php echo $condition['action_value'];?></textarea>
+							<textarea class='element_condition' name="element-conditions[<?php echo $conditionIndex;?>][action_value]" rows='1'><?php echo $condition['action_value'];?></textarea>
 							<br>
 							<label>
-								<input type='radio' name='element_conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='property' <?php if($condition['action'] == 'property'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element_condition' value='property' <?php if($condition['action'] == 'property'){echo 'checked';}?> required>
 								Set the
 							</label>
 						
@@ -1662,11 +1662,11 @@ class FormBuilderForm extends SimForms{
 								<option value="max">
 							</datalist>
 							<label>
-								<input type="text" list="propertylist" name="element_conditions[<?php echo $conditionIndex;?>][propertyname]" class='element_condition' placeholder="property name" value="<?php echo $condition['propertyname'];?>">
+								<input type="text" list="propertylist" name="element-conditions[<?php echo $conditionIndex;?>][propertyname]" class='element_condition' placeholder="property name" value="<?php echo $condition['propertyname'];?>">
 								property to the value of
 							</label>
 							
-							<select class='element_condition condition_select' name='element_conditions[<?php echo $conditionIndex;?>][property_value]'>
+							<select class='element_condition condition-select' name='element-conditions[<?php echo $conditionIndex;?>][property_value]'>
 								<?php echo $this->inputDropdown($condition['property_value'], $elementId);?>
 							</select>
 
@@ -1687,7 +1687,7 @@ class FormBuilderForm extends SimForms{
 							}
 							?>
 							<label class='addition <?php echo $hidden;?>'>
-								+ <input type='number' name="element_conditions[<?php echo $conditionIndex;?>][addition]" class='element_condition' value="<?php echo $condition['addition'];?>" style='width: 60px;'>
+								+ <input type='number' name="element-conditions[<?php echo $conditionIndex;?>][addition]" class='element_condition' value="<?php echo $condition['addition'];?>" style='width: 60px;'>
 								<span class='days <?php echo $hidden2;?>'> days</span>
 							</label>
 							<br>
@@ -1723,7 +1723,7 @@ class FormBuilderForm extends SimForms{
 							}
 							
 							echo "<label>";
-								echo "<input type='checkbox' name='element_conditions[copyto][{$element->id}]' value='{$element->id}' $checked>";
+								echo "<input type='checkbox' name='element-conditions[copyto][{$element->id}]' value='{$element->id}' $checked>";
 								echo $name;
 							echo "</label><br>";
 						}
@@ -1804,7 +1804,7 @@ class FormBuilderForm extends SimForms{
 					continue;
 				}
 				?>
-				<div class='warning_conditions element_conditions' data-index='<?php echo $conditionIndex;?>'>
+				<div class='warning_conditions element-conditions' data-index='<?php echo $conditionIndex;?>'>
 					<input type="hidden" class='warning_condition combinator' name="<?php echo $name;?>[<?php echo $conditionIndex;?>][combinator]" value="<?php echo $condition['combinator'];?>">
 
 					<input type="text" class="warning_condition meta_key" name="<?php echo $name;?>[<?php echo $conditionIndex;?>][meta_key]" value="<?php echo $condition['meta_key'];?>" list="meta_key" style="width: fit-content;">

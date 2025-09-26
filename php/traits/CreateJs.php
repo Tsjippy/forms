@@ -380,7 +380,7 @@ trait CreateJs{
         $newJs   = '';
 
         // Store all forms with this formid in a variable
-        $newJs  .= "\n\tforms =               document.querySelectorAll(`[data-formid=\"{$this->formData->id}\"]`);";
+        $newJs  .= "\n\tforms =               document.querySelectorAll(`form[data-formid=\"{$this->formData->id}\"]`);";
 
         // Shorter variable for the form functions
         $newJs  .= "\n\tget_field_value =       FormFunctions.getFieldValue;";

@@ -173,10 +173,10 @@ function restApiInitForms() {
 		)
 	);
 
-	// save_element_conditions
+	// save_element-conditions
 	register_rest_route(
 		RESTAPIPREFIX.'/forms',
-		'/save_element_conditions',
+		'/save_element-conditions',
 		array(
 			'methods' 				=> 'POST',
 			'callback' 				=> 	__NAMESPACE__.'\saveElementConditions',
@@ -581,7 +581,7 @@ function saveElementConditions(){
 	
 	$element 			= $formBuilder->getElementById($elementId);
 	
-	$elementConditions	= $_POST['element_conditions'];
+	$elementConditions	= $_POST['element-conditions'];
 	if(empty($elementConditions)){
 		$element->conditions	= '';
 		

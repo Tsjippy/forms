@@ -148,9 +148,9 @@ async function archiveSubmission(target){
 				if(params.archived == 'true'){
 					let element;
 					if(action == 'archive'){
-						element = row.querySelector(`.loaderwrapper, .archive`);
+						element = row.querySelector(`.loader-wrapper, .archive`);
 					}else{
-						element = row.querySelector(`.loaderwrapper, .unarchive`);
+						element = row.querySelector(`.loader-wrapper, .unarchive`);
 					}
 					changeArchiveButton(element, action);
 				}else{
@@ -164,7 +164,7 @@ async function archiveSubmission(target){
 				
 				// just change the button name
 				if(params.archived == 'true'){
-					let loader = row.querySelector('.loaderwrapper');
+					let loader = row.querySelector('.loader-wrapper');
 					
 					changeArchiveButton(loader, action);
 				}else{
@@ -186,7 +186,7 @@ function changeArchiveButton(element, action){
 		action 	= 'archive';
 		text	= 'Archive';
 	}
-	element.outerHTML = `<button class="${action} button forms_table_action" name="${action}_action" value="${action}">${text}</button>`;
+	element.outerHTML = `<button class="${action} button forms-table-action" name="${action}_action" value="${action}">${text}</button>`;
 }
 
 async function getInputHtml(target){
@@ -226,7 +226,7 @@ async function getInputHtml(target){
 
 		addFormsTableInputEventListeners(target);
 
-		target.querySelectorAll('.file_upload_wrap').forEach(el=>el.addEventListener('uploadfinished', uploadFinished));
+		target.querySelectorAll('.file-upload-wrap').forEach(el=>el.addEventListener('uploadfinished', uploadFinished));
 
 		// show calendar by default
 		target.querySelectorAll('input').forEach(el=>el.showPicker());
@@ -568,10 +568,10 @@ const copyContent = async (target) => {
 
 const editCellValue	= async(event, td) => {
 	let target	= event.target;
-	if( target.matches('td.edit_forms_table')){
+	if( target.matches('td.edit-forms-table')){
 		event.stopPropagation();
 		getInputHtml(target);
-	}else if(td.matches('td.edit_forms_table') && target.tagName != 'INPUT' && target.tagName != 'A' && target.tagName != 'TEXTAREA' && !target.closest('.nice-select') && !target.matches('.button.save')){
+	}else if(td.matches('td.edit-forms-table') && target.tagName != 'INPUT' && target.tagName != 'A' && target.tagName != 'TEXTAREA' && !target.closest('.nice-select') && !target.matches('.button.save')){
 		console.log(target)
 		event.stopPropagation();
 		getInputHtml(target.closest('td'));
@@ -601,11 +601,11 @@ const hideColumn	= async (target) => {
 		if(target.classList.contains('visible')){
 			target.classList.replace('visible', 'invisible');
 			target.src	= target.src.replace('visible.png', 'invisible.png');
-			target.closest('.column_setting_wrapper').querySelector('.visibilitytype').value = 'hide';
+			target.closest('.column-setting-wrapper').querySelector('.visibilitytype').value = 'hide';
 		}else{
 			target.classList.replace('invisible','visible');
 			target.src	= target.src.replace('invisible.png','visible.png');
-			target.closest('.column_setting_wrapper').querySelector('.visibilitytype').value = 'show';
+			target.closest('.column-setting-wrapper').querySelector('.visibilitytype').value = 'show';
 		}
 	}
 }
@@ -620,7 +620,7 @@ document.addEventListener("click", event=>{
 		saveTableSettings(target);
 	}else if(target.name == 'form_settings[autoarchive]'){
 		//show auto archive fields
-		let el = target.closest('.table_rights_wrapper').querySelector('.autoarchivelogic');
+		let el = target.closest('.table-rights-wrapper').querySelector('.autoarchivelogic');
 		if(target.value == '1'){
 			el.classList.remove('hidden');
 		}else{
@@ -642,20 +642,20 @@ document.addEventListener("click", event=>{
 	}
 
 	//Actions
-	if(target.matches('.delete.forms_table_action')){
+	if(target.matches('.delete.forms-table-action')){
 		removeSubmission(target);
 	}
 
-	if(target.matches('.archive.forms_table_action, .unarchive.forms_table_action')){
+	if(target.matches('.archive.forms-table-action, .unarchive.forms-table-action')){
 		archiveSubmission(target);
 	}
 
-	if(target.matches('.print.forms_table_action')){
+	if(target.matches('.print.forms-table-action')){
 		window.location.href = window.location.href.split('?')[0]+"?print=true&table_id="+table.dataset.id+"&submission_id="+table_row.querySelector("[id='id' i]").textContent;
 	}
 	
 	//Open settings modal
-	if(target.classList.contains('edit_formshortcode_settings')){
+	if(target.classList.contains('edit-formshortcode-settings')){
 		Main.showModal(document.querySelector('.modal.form_shortcode_settings'));
 	}
 	
@@ -691,13 +691,13 @@ document.addEventListener("click", event=>{
 document.addEventListener("DOMContentLoaded", function() {
 	
 	if(typeof(Sortable) != 'undefined'){
-		//Make the sortable_column_settings_rows div sortable
+		//Make the sortable-column-settings-rows div sortable
 		let options = {
 			handle: '.movecontrol',
 			animation: 150,
 		};
 
-		document.querySelectorAll('.sortable_column_settings_rows tbody').forEach(el=>{
+		document.querySelectorAll('.sortable-column-settings-rows tbody').forEach(el=>{
 			Sortable.create(el, options);
 		});
 	}

@@ -111,7 +111,7 @@ export function copyFormInput(originalNode){
 		originalNode.classList.add('hidden');
 
 		// Add button for the new one
-		let orgButton	= originalNode.closest('.clone_divs_wrapper').querySelector(`.tablink.active`);
+		let orgButton	= originalNode.closest('.clone-divs-wrapper').querySelector(`.tablink.active`);
 		let newButton	= cloneNode(orgButton);
 
 		// make the org butto inactive
@@ -128,7 +128,7 @@ export function copyFormInput(originalNode){
 }
 
 export function fixNumbering(wrapper){
-	wrapper.querySelectorAll(':scope > .clone_div').forEach(updateNumbers);
+	wrapper.querySelectorAll(':scope > .clone-div').forEach(updateNumbers);
 
 	wrapper.querySelectorAll(':scope > .tablink').forEach(updateNumbers);
 
@@ -185,9 +185,9 @@ export function fixNumbering(wrapper){
 }
 
 export function removeNode(target){
-	let node			= target.closest(".clone_div");
-	let parentNode		= node.closest('.clone_divs_wrapper');
-	let allCloneDivs	= parentNode.querySelectorAll('.clone_div');
+	let node			= target.closest(".clone-div");
+	let parentNode		= node.closest('.clone-divs-wrapper');
+	let allCloneDivs	= parentNode.querySelectorAll('.clone-div');
 	
 	//Check if we are removing the last element
 	if(allCloneDivs[allCloneDivs.length-1] == node){
@@ -204,7 +204,7 @@ export function removeNode(target){
 	node.remove();
 
 	//If there is only one div remaining, remove the remove button
-	if(parentNode.querySelectorAll('.clone_div').length == 1){
+	if(parentNode.querySelectorAll('.clone-div').length == 1){
 		let removeElement = parentNode.querySelector('.remove');
 		removeElement.remove();
 	}
@@ -217,8 +217,8 @@ export function removeNode(target){
  */
 export function tidyMultiInputs(){
 	//remove unnecessary buttons on inputs with multiple values
-	document.querySelectorAll('.clone_divs_wrapper').forEach( function(div){
-		let cloneDivArr	= div.querySelectorAll(':scope > .clone_div');
+	document.querySelectorAll('.clone-divs-wrapper').forEach( function(div){
+		let cloneDivArr	= div.querySelectorAll(':scope > .clone-div');
 		
 		if(cloneDivArr.length == 1){
 			cloneDivArr[0].querySelectorAll('.remove').forEach(el=>el.remove());
@@ -231,7 +231,7 @@ export function tidyMultiInputs(){
 			//remove add button for all but the last
 			if(index != array.length - 1){
 				// Select all add buttons but not the any nested buttons
-				cloneDiv.querySelectorAll('.add:not(:scope .clone_divs_wrapper .add)').forEach(el=>el.remove());
+				cloneDiv.querySelectorAll('.add:not(:scope .clone-divs-wrapper .add)').forEach(el=>el.remove());
 			}
 		})
 	});
@@ -241,7 +241,7 @@ export function updateMultiStepControls(form){
 	// get active formsteps amount
 	let formsteps			= form.querySelectorAll('.formstep');
 	let visibleFormsteps	= form.querySelectorAll('.formstep:not(.hidden)');
-	let stepIndicators		= form.querySelectorAll('.multistepcontrols_wrapper .step');
+	let stepIndicators		= form.querySelectorAll('.multi-step-controls-wrapper .step');
 
 	// show all step circles
 	stepIndicators.forEach(el => el.classList.remove('hidden'));
@@ -256,10 +256,10 @@ export function updateMultiStepControls(form){
 	if(visibleFormsteps[visibleFormsteps.length-1] == activeFormstep){
 		// make the submit button visible
 		form.querySelector('.nextBtn').classList.add('hidden');
-		form.querySelector('.form_submit ').classList.remove('hidden');
+		form.querySelector('.form-submit ').classList.remove('hidden');
 	}else{
 		form.querySelector('.nextBtn').classList.remove('hidden');
-		form.querySelector('.form_submit ').classList.add('hidden');
+		form.querySelector('.form-submit ').classList.add('hidden');
 	}
 }
 	
@@ -267,7 +267,7 @@ export function updateMultiStepControls(form){
 export function showTab(n, form) {
 	if(typeof(form) != 'undefined'){
 		if(n == 0){
-			let loader = form.querySelector('.loader_wrapper:not(.hidden)' );
+			let loader = form.querySelector('.loader-wrapper:not(.hidden)' );
 			//hide loader
 			if(loader != null){
 				loader.classList.add('hidden');
@@ -317,10 +317,10 @@ export function showTab(n, form) {
 
 		if (n == (x.length - 1)) {
 			form.querySelector('[name="nextBtn"]').classList.add('hidden');
-			form.querySelector('.form_submit').classList.remove('hidden');
+			form.querySelector('.form-submit').classList.remove('hidden');
 		} else {
 			form.querySelector('[name="nextBtn"]').classList.remove('hidden');
-			form.querySelector('.form_submit').classList.add('hidden');
+			form.querySelector('.form-submit').classList.add('hidden');
 		}
 	}else{
 		console.log('no form defined');
@@ -349,7 +349,7 @@ export function nextPrev(n, form) {
 				element.closest('div.nice-select') == null && 
 				(
 					element.type != 'file' || 
-					element.closest('.file_upload_wrap').querySelector('.documentpreview input') == null
+					element.closest('.file-upload-wrap').querySelector('.documentpreview input') == null
 				)
 			){
 				element.required	= true;
@@ -435,7 +435,7 @@ export function changeFieldValue(selector, value, functionRef, form, addition=''
 
 	// Check if we are dealing with a multi input field
 	if(target == null){
-		let targets 	= form.querySelectorAll(`.clone_div [name^="${name}" i]`);
+		let targets 	= form.querySelectorAll(`.clone-div [name^="${name}" i]`);
 		if(targets.length === 0){
 			return;
 		}else if(targets.length == 1){
@@ -531,23 +531,23 @@ export function changeFieldValue(selector, value, functionRef, form, addition=''
 		//we found a match
 		if(dataListOption != null){
 			// We found a cloned field, add as many inputs as needed
-			if(target.closest('.clone_div') != null){
+			if(target.closest('.clone-div') != null){
 				// mark the existing ones for deletion, we can delete right now as we need to copy the existing ones first
-				target.closest('.clone_divs_wrapper').querySelectorAll('.clone_div').forEach(el=>el.classList.add('shouldremove'));
+				target.closest('.clone-divs-wrapper').querySelectorAll('.clone-div').forEach(el=>el.classList.add('shouldremove'));
 
 				let clone;
 				dataListOption.value.split(';').forEach(val=>{
-					clone = copyFormInput(target.closest('.clone_div'));
+					clone = copyFormInput(target.closest('.clone-div'));
 
 					clone.classList.remove('shouldremove');
 
 					changeFieldValue(clone.querySelector(target.tagName), val, '', form, '', true);
 				});
 
-				fixNumbering(target.closest('.clone_divs_wrapper'));
+				fixNumbering(target.closest('.clone-divs-wrapper'));
 
 				// delete the old ones
-				target.closest('.clone_divs_wrapper').querySelectorAll('.shouldremove').forEach(el=>el.remove());
+				target.closest('.clone-divs-wrapper').querySelectorAll('.shouldremove').forEach(el=>el.remove());
 			}else{
 				target.value = dataListOption.value;
 			}

@@ -7,7 +7,8 @@
     "formbuilder": "webpack --watch --entry ./formbuilder.js --output-path . --output-filename formbuilder.min.js --progress --mode=production --devtool source-map",
     "formtable": "webpack --watch --entry ./forms_table.js --output-path . --output-filename forms_table.min.js --progress --mode=production --devtool source-map",
     "forms": "webpack --watch --config forms.config.js",
-    "tinymce": "webpack --watch --entry ./tiny_mce.js --output-path . --output-filename tiny_mce.min.js --progress --mode=production --devtool source-map"
+    "tinymce": "webpack --watch --entry ./tiny_mce.js --output-path . --output-filename tiny_mce.min.js --progress --mode=production --devtool source-map",
+    "all": "run-p formbuilder formtable forms tinymce"
   },
   "author": "Ewald Harmsen",
   "license": "ISC",

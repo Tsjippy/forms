@@ -11,7 +11,7 @@ async function saveFormInput(target){
 	// make all inputs required if needed
 	form.querySelectorAll('.required:not(hidden) input, .required:not(hidden) textarea, .required:not(hidden) select').forEach(el=>{
 		// do not make nice select inputs nor file uploads required
-		if(el.closest('div.nice-select') == null && (el.type != 'file' || el.closest('.file_upload_wrap').querySelector('.documentpreview input') == null)){
+		if(el.closest('div.nice-select') == null && (el.type != 'file' || el.closest('.file-upload-wrap').querySelector('.documentpreview input') == null)){
 			el.required	= true;
 		}
 	});
@@ -19,7 +19,7 @@ async function saveFormInput(target){
 	let response	= await FormSubmit.submitForm(target, 'forms/save_form_input');
 
 	if(response){
-		target.closest('.submit_wrapper').querySelector('.loader_wrapper').classList.add('hidden');
+		target.closest('.submit-wrapper').querySelector('.loader-wrapper').classList.add('hidden');
 
 		Main.displayMessage(response);
 
@@ -137,7 +137,7 @@ async function onlyOwnSwitch(target){
 
 //we are online again
 window.addEventListener('online', function(){
-	document.querySelectorAll('.form_submit').forEach(btn=>{
+	document.querySelectorAll('.form-submit').forEach(btn=>{
 		btn.disabled = false
 		btn.querySelectorAll('.offline').forEach(el=>el.remove());
 	});
@@ -145,7 +145,7 @@ window.addEventListener('online', function(){
 
 //prevent form submit when offline
 window.addEventListener('offline', function(){
-	document.querySelectorAll('.form_submit').forEach(btn=>{
+	document.querySelectorAll('.form-submit').forEach(btn=>{
 		btn.disabled = true;
 		if(btn.querySelector('.online') == null){
 			btn.innerHTML = '<div class="online">'+btn.innerHTML+'</div>';
@@ -159,12 +159,12 @@ document.addEventListener('click', function(event) {
 	
 	//add element
 	if(target.matches('.add')){
-		let orgNode	= target.closest(".clone_div");
+		let orgNode	= target.closest(".clone-div");
 
 		let newNode = copyFormInput(orgNode);
 
 		// Fix in nodes
-		fixNumbering(target.closest('.clone_divs_wrapper'));
+		fixNumbering(target.closest('.clone-divs-wrapper'));
 
 		//add tinymce's can only be done when node is inserted and id is unique
 		newNode.querySelectorAll('.wp-editor-area').forEach((el, index) =>{

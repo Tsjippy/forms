@@ -1162,7 +1162,7 @@ class DisplayFormResults extends DisplayForm{
 			
 			//if the user has one of the roles defined for this element
 			if($elementEditRights && $elementName != 'id'){
-				$class	.= ' edit_forms_table';
+				$class	.= ' edit-forms-table';
 				$class	= trim($class);
 				$class	= " class='$class' data-name='$elementName'";
 			}elseif(!empty($class)){
@@ -1253,7 +1253,7 @@ class DisplayFormResults extends DisplayForm{
 				){
 					$action = 'unarchive';
 				}
-				$buttonsHtml[$action]	= "<button class='$action button forms_table_action' name='{$action}_action' value='$action'/>".ucfirst($action)."</button>";
+				$buttonsHtml[$action]	= "<button class='$action button forms-table-action' name='{$action}_action' value='$action'/>".ucfirst($action)."</button>";
 			}
 			$buttonsHtml = apply_filters('sim_form_actions_html', $buttonsHtml, $values, $subId, $this);
 			
@@ -1310,21 +1310,21 @@ class DisplayFormResults extends DisplayForm{
 
 	protected function columnSettingsForm($class, $viewRoles, $editRoles){
 		?>
-		<div class="tabcontent <?php echo $class;?>" id="column_settings_<?php echo $this->shortcodeData->id;?>">
-			<form class="sortable_column_settings_rows">
+		<div class="tabcontent <?php echo $class;?>" id="column-settings-<?php echo $this->shortcodeData->id;?>">
+			<form class="sortable-column-settings-rows">
 				<input type='hidden' class='shortcode_settings' name='shortcode_id'	value='<?php echo $this->shortcodeData->id;?>'>
 				
 				<table class='sim-table' style='display:table'>
-					<thead class="column_setting_wrapper">
+					<thead class="column-setting-wrapper">
 						<tr>
 							<th class="columnheading formfieldbutton">Sort</th>
-							<th class="columnheading column_settings" style="width: 145px;">Field name</th>
-							<th class="columnheading column_settings">Display name</th>
+							<th class="columnheading column-settings" style="width: 145px;">Field name</th>
+							<th class="columnheading column-settings">Display name</th>
 							<th style="width: 30px;"></th>
-							<th class="columnheading column_settings">Display permissions</th>
-							<th class="columnheading column_settings">Edit permissions</th>
-							<th class="columnheading column_settings" style="width: 60px;">Max Width</th>
-							<th class="columnheading column_settings">Copy</th>
+							<th class="columnheading column-settings">Display permissions</th>
+							<th class="columnheading column-settings">Edit permissions</th>
+							<th class="columnheading column-settings" style="width: 60px;">Max Width</th>
+							<th class="columnheading column-settings">Copy</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -1346,19 +1346,19 @@ class DisplayFormResults extends DisplayForm{
 							$icon			= "<img class='visibilityicon $visibility' src='".SIM\PICTURESURL."/$visibility.png' width='20px' loading='lazy' style='min-width:20px;'>";
 							
 							?>
-							<tr class="column_setting_wrapper" data-id="<?php echo $elementIndex;?>">
+							<tr class="column-setting-wrapper" data-id="<?php echo $elementIndex;?>">
 								<input type="hidden" class="visibilitytype" name="column_settings[<?php echo $elementIndex;?>][show]" 		value="<?php echo $columnSetting['show'];?>">
 								<input type="hidden" name="column_settings[<?php echo $elementIndex;?>][name]"	value="<?php echo $columnSetting['name'];?>">
 								<td><span class="movecontrol formfieldbutton" aria-hidden="true">:::</span></td>
-								<td><span class="column_settings" style="margin-right:0px;"><?php echo $columnSetting['name'];?></span></td>
-								<td><input type="text" class="column_settings" name="column_settings[<?php echo $elementIndex;?>][nice_name]" value="<?php echo $niceName;?>" style="margin-right:0px;"></td>
+								<td><span class="column-settings" style="margin-right:0px;"><?php echo $columnSetting['name'];?></span></td>
+								<td><input type="text" class="column-settings" name="column_settings[<?php echo $elementIndex;?>][nice_name]" value="<?php echo $niceName;?>" style="margin-right:0px;"></td>
 								<td><span class="visibilityicon"><?php echo $icon;?></span></td>
 								<?php
 								//only add view permission for numeric elements others are buttons
 								if(is_numeric($elementIndex)){
 									?>
 									<td>
-										<select class='column_settings inline' name='column_settings[<?php echo $elementIndex;?>][view_right_roles][]' multiple='multiple' style="margin-right:0px;">
+										<select class='column-settings inline' name='column_settings[<?php echo $elementIndex;?>][view_right_roles][]' multiple='multiple' style="margin-right:0px;">
 											<?php
 											foreach($viewRoles as $key=>$roleName){
 												if(isset($columnSetting['view_right_roles']) && in_array($key,(array)$columnSetting['view_right_roles'])){
@@ -1374,12 +1374,12 @@ class DisplayFormResults extends DisplayForm{
 									<?php
 								}else{
 									?>
-									<td class='column_settings' style="margin-right:0px;"></td>
+									<td class='column-settings' style="margin-right:0px;"></td>
 									<?php
 								}
 								?>
 								<td>
-									<select class='column_settings inline' name='column_settings[<?php echo $elementIndex;?>][edit_right_roles][]' multiple='multiple' style="margin-right:0px;">
+									<select class='column-settings inline' name='column_settings[<?php echo $elementIndex;?>][edit_right_roles][]' multiple='multiple' style="margin-right:0px;">
 										<?php
 										foreach($editRoles as $key=>$roleName){
 											if(isset($columnSetting['edit_right_roles']) && @in_array($key, (array)$columnSetting['edit_right_roles'])){
@@ -1393,10 +1393,10 @@ class DisplayFormResults extends DisplayForm{
 									</select>
 								</td>
 								<td>
-									<input type="number" class="column_settings" name="column_settings[<?php echo $elementIndex;?>][width]" value="<?php echo $width;?>" placeholder="200" min="100" style="max-width: 80px; margin-right:0px;">px
+									<input type="number" class="column-settings" name="column_settings[<?php echo $elementIndex;?>][width]" value="<?php echo $width;?>" placeholder="200" min="100" style="max-width: 80px; margin-right:0px;">px
 								</td>
 								<td>
-									<input type="checkbox" class="column_settings" name="column_settings[<?php echo $elementIndex;?>][copy]" value="1" <?php if(isset($columnSetting['copy'])){echo 'checked';}?> style="max-width: 40px; margin-right:0px;">
+									<input type="checkbox" class="column-settings" name="column_settings[<?php echo $elementIndex;?>][copy]" value="1" <?php if(isset($columnSetting['copy'])){echo 'checked';}?> style="max-width: 40px; margin-right:0px;">
 								</td>
 							</tr>
 							<?php
@@ -1422,7 +1422,7 @@ class DisplayFormResults extends DisplayForm{
 				<h4>Set the title for the results table</h4>
 				<input type='text' name="table_settings[title]" value='<?php echo $this->tableSettings['title'];?>' style='width:500px;'>
 
-				<div class="table_rights_wrapper">
+				<div class="table-rights-wrapper">
 					<h4>Select the default column the table is sorted on</h4>
 					<select name="table_settings[default_sort]">
 						<?php
@@ -1463,7 +1463,7 @@ class DisplayFormResults extends DisplayForm{
 				<br>
 				<div class="table_filters_wrapper" style='margin-top:10px;'>
 					<h4>Select the fields the table can be filtered on</h4>
-					<table class='clone_divs_wrapper' style='border: none;'>
+					<table class='clone-divs-wrapper' style='border: none;'>
 						<?php
 						$filters	= $this->tableSettings['filter'];
 
@@ -1473,7 +1473,7 @@ class DisplayFormResults extends DisplayForm{
 						}
 
 						foreach($filters as $index=>$filter){
-							echo "<tr class='clone_div' data-divid='$index' style='border: none;'>";
+							echo "<tr class='clone-div' data-divid='$index' style='border: none;'>";
 								echo "<td style='border: none;'>";
 									echo "<select name='table_settings[filter][$index][element]' class='inline'>";
 										foreach($this->columnSettings as $key=>$columnSetting){
@@ -1521,7 +1521,7 @@ class DisplayFormResults extends DisplayForm{
 					</table>
 				</div>
 				
-				<div class="table_rights_wrapper">
+				<div class="table-rights-wrapper">
 					<h4>Select a column which determines if a row should be shown.</h4>
 					<label>
 						The row will be hidden if a cell in this column has no value and the viewer has no right to edit.
@@ -1553,7 +1553,7 @@ class DisplayFormResults extends DisplayForm{
 					</select>
 				</div>
 
-				<div class="table_rights_wrapper">
+				<div class="table-rights-wrapper">
 					<h4>Select which results to display</h4>
 					<select name="table_settings[result_type]">
 						<option value="personal" <?php if($this->tableSettings['result_type'] == 'personal'){echo 'selected';}?>>Only personal</option>
@@ -1567,7 +1567,7 @@ class DisplayFormResults extends DisplayForm{
 
 				</div>
 				
-				<div class="table_rights_wrapper">
+				<div class="table-rights-wrapper">
 					<h4 class="label">Select if you want to view archived results by default</h4>
 					<?php
 					if($this->tableSettings['archived'] == 'true'){
@@ -1589,7 +1589,7 @@ class DisplayFormResults extends DisplayForm{
 				</div>
 				
 				<!-- We can define auto archive field both on table and on form settings-->
-				<div class="table_rights_wrapper">
+				<div class="table-rights-wrapper">
 					<h4 class="label">Auto archive results</h4>
 					<?php
 					if($this->formData->autoarchive){
@@ -1642,11 +1642,11 @@ class DisplayFormResults extends DisplayForm{
 						
 						<div class="infobox" name="info">
 							<div>
-								<p class="info_icon">
+								<p class="info-icon">
 									<img draggable="false" role="img" class="emoji" alt="ℹ" src="<?php echo SIM\PICTURESURL."/info.png";?>" loading='lazy' >
 								</p>
 							</div>
-							<span class="info_text">
+							<span class="info-text">
 								You can use placeholders like '%today%+3days' for a value
 							</span>
 						</div>
@@ -1676,7 +1676,7 @@ class DisplayFormResults extends DisplayForm{
 
 							if(!empty($foundElements)){
 								?>
-								<div class="table_rights_wrapper">
+								<div class="table-rights-wrapper">
 									<h4>Select fields where you want to create seperate rows for</h4>
 									<?php
 
@@ -1699,7 +1699,7 @@ class DisplayFormResults extends DisplayForm{
 								<?php
 							}
 							?>
-						<div class="table_rights_wrapper">
+						<div class="table-rights-wrapper">
 							<h4>Select roles with permission to VIEW the table, finetune it per column on the 'column settings' tab</h4>
 							<div class="role_info">
 							<?php
@@ -1719,7 +1719,7 @@ class DisplayFormResults extends DisplayForm{
 							</div>
 						</div>
 						
-						<div class="table_rights_wrapper">
+						<div class="table-rights-wrapper">
 							<h4>Select roles with permission to edit ALL form submission data</h4>
 							<div class="role_info">
 							<?php
@@ -1788,7 +1788,7 @@ class DisplayFormResults extends DisplayForm{
 			<div class="modal-content" style='max-width:100vw;min-width:90vw;'>
 				<span id="modal_close" class="close">&times;</span>
 				
-				<button id="column_settings" class="button tablink <?php echo $active1;?>" data-target="column_settings_<?php echo $this->shortcodeData->id;?>">Column settings</button>
+				<button id="column-settings" class="button tablink <?php echo $active1;?>" data-target="column-settings_<?php echo $this->shortcodeData->id;?>">Column settings</button>
 				<button id="table_settings" class="button tablink <?php echo $active2;?>" data-target="table_rights_<?php echo $this->shortcodeData->id;?>">Table settings</button>
 				
 				<?php
@@ -1974,7 +1974,7 @@ class DisplayFormResults extends DisplayForm{
 		$html	= "<div class='table-buttons-wrapper'>";
 			//Show form properties button if we have form edit permissions
 			if($this->tableEditPermissions){
-				$html	.= "<button class='button small edit_formshortcode_settings'>Edit settings</button>";
+				$html	.= "<button class='button small edit-formshortcode-settings'>Edit settings</button>";
 				$html	.= $this->addShortcodeSettingsModal();
 			}
 
@@ -2338,7 +2338,7 @@ class DisplayFormResults extends DisplayForm{
 	private function printTableFooter(){
 		?>
 		<div class='sim-table-footer'>
-			<p id="table_remark">Click on any cell with <span class="edit_forms_table">underlined text</span> to edit its contents.<br>Click on any header to sort the column.</p>
+			<p id="table-remark">Click on any cell with <span class="edit-forms-table">underlined text</span> to edit its contents.<br>Click on any header to sort the column.</p>
 			
 			<?php
 			//Add excel export button if allowed
@@ -2408,7 +2408,7 @@ class DisplayFormResults extends DisplayForm{
 		?>
 		<div class='form table-wrapper'>
 			<div class='form table-head'>
-				<h2 class="table_title"><?php echo esc_html($this->tableSettings['title']); ?></h2><br>
+				<h2 class="table-title"><?php echo esc_html($this->tableSettings['title']); ?></h2><br>
 				<?php
 					echo $buttons;
 				?>
