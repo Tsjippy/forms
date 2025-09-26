@@ -4,12 +4,17 @@
 ### Added
 
 ### Changed
-- classnames replace _ with -
-- submit loader
 
 ### Fixed
 
 ### Updated
+
+## [8.6.6] - 2025-09-26
+
+
+### Changed
+- classnames replace _ with -
+- submit loader
 
 ## [8.6.5] - 2025-09-25
 
