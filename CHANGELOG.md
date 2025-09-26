@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- formbuilder layout
 
 ### Updated
+
+## [8.6.7] - 2025-09-26
+
+
+### Fixed
+- formbuilder layout
 
 ## [8.6.6] - 2025-09-26
 
