@@ -387,7 +387,7 @@ function saveTableSettings(){
 }
 
 function removeSubmission(){
-	$formTable	= new EditFormResults();
+	$formTable	= new EditFormResults($_POST);
 
 	$result		= $formTable->deleteSubmission($_POST['submissionid']);
 	
@@ -402,8 +402,7 @@ function removeSubmission(){
 
 // Archive or unarchive a (sub)submission
 function archiveSubmission(){
-	$formTable					= new EditFormResults();
-	$formTable->getForm($_POST['formid']);
+	$formTable					= new EditFormResults($_POST);
 	$formTable->submissionId	= $_POST['submissionid'];
 
 	$formTable->parseSubmissions(null, $formTable->submissionId);

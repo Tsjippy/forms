@@ -60,6 +60,7 @@ async function removeSubmission(target){
 		let table			= target.closest('table');
 
 		let formData = new FormData();
+		formData.append('formid', table.dataset.formid);
 		formData.append('submissionid', submissionId);
 		
 		//display loading gif
