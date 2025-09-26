@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- formbuilder layout
 
 ### Updated
 
