@@ -17,7 +17,7 @@
 		}
 	}
 
-	.conditions-info{
+	.resizer-wrapper{
 		width:100%;
 		min-width: 220px;
 	
@@ -100,7 +100,7 @@
 		background-color: #f7f5004d;
 	}
 
-	.conditions-info{
+	.resizer-wrapper{
 		.hidden:not(.modal,.elname), 
 		.stephidden{
 			background-color: lightgray;

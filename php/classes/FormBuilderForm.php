@@ -140,7 +140,7 @@ class FormBuilderForm extends SimForms{
 		//Add form edit controls if needed
 		$html = " <div class='form-element-wrapper' data-id='{$element->id}' data-formid='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
 			$html 	.= "<span class='movecontrol formfieldbutton' aria-hidden='true'>:::<br><span class='elid$idHidden' style='font-size:xx-small'>$element->id</span></span>";
-			$html 	.= "<div class='resizer_wrapper'>";
+			$html 	.= "<div class='resizer-wrapper'>";
 				if($element->type == 'info'){
 					$html .= "<div class='show inputwrapper$hidden'>";
 				}else{
