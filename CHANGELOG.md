@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- error in deleting submissions
 
 ### Updated
+
+## [8.6.8] - 2025-09-26
+
+
+### Fixed
+- error in deleting submissions
 
 ## [8.6.7] - 2025-09-26
 
