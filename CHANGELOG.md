@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- error in deleting submissions
 
 ### Updated
 
