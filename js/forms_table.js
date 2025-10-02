@@ -680,7 +680,7 @@ document.addEventListener("click", event=>{
 	}
 
 	//Hide column
-	if(target.classList.contains('visibilityicon')){
+	if(target.classList.contains('visibility-icon')){
 		hideColumn(target);
 	}
 

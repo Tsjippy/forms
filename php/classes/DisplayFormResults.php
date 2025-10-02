@@ -1343,7 +1343,7 @@ class DisplayFormResults extends DisplayForm{
 							}else{
 								$visibility	= 'visible';
 							}
-							$icon			= "<img class='visibilityicon $visibility' src='".SIM\PICTURESURL."/$visibility.png' width='20px' loading='lazy' style='min-width:20px;'>";
+							$icon			= "<img class='visibility-icon $visibility' src='".SIM\PICTURESURL."/$visibility.png' width='20px' loading='lazy' style='min-width:20px;'>";
 							
 							?>
 							<tr class="column-setting-wrapper" data-id="<?php echo $elementIndex;?>">
@@ -1352,7 +1352,7 @@ class DisplayFormResults extends DisplayForm{
 								<td><span class="movecontrol formfieldbutton" aria-hidden="true">:::</span></td>
 								<td><span class="column-settings" style="margin-right:0px;"><?php echo $columnSetting['name'];?></span></td>
 								<td><input type="text" class="column-settings" name="column_settings[<?php echo $elementIndex;?>][nice_name]" value="<?php echo $niceName;?>" style="margin-right:0px;"></td>
-								<td><span class="visibilityicon"><?php echo $icon;?></span></td>
+								<td><span class="visibility-icon"><?php echo $icon;?></span></td>
 								<?php
 								//only add view permission for numeric elements others are buttons
 								if(is_numeric($elementIndex)){
@@ -2497,7 +2497,7 @@ class DisplayFormResults extends DisplayForm{
 					if(!empty($this->hiddenColumns[$columnSetting['name']])){
 						$class	.= ' hidden';
 					}
-					$icon			= "<img class='visibilityicon visible' src='".SIM\PICTURESURL."/visible.png' width=20 height=20 loading='lazy' >";
+					$icon			= "<img class='visibility-icon visible' src='".SIM\PICTURESURL."/visible.png' width=20 height=20 loading='lazy' >";
 					
 					//Add a heading for each column
 					$style			= '';
