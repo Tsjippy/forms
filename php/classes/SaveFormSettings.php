@@ -11,6 +11,32 @@ class SaveFormSettings extends SimForms{
 	/**
 	 * Change an existing form element in the db
 	 *
+	 * @param	object|array	$element	The element data
+	 *
+	 * @return	array						The prepared data
+	 */
+	private function prepareElement($element){
+		$element	= (array)$element;
+		ksort($element);
+
+		// remove element without a column in the db
+		foreach(array_diff_key($element, $this->elementTableFormats) as $key => $val){
+			unset($element[$key]);
+		}
+
+		// add missing data
+		foreach(array_diff_key($this->elementTableFormats, $element) as $key => $val){
+			$element[$key]	= '';
+		}
+
+		ksort($element);
+		
+		return $element;
+	}
+
+	/**
+	 * Change an existing form element in the db
+	 *
 	 * @param	object|array	$element	The new element data
 	 *
 	 * @return	true|WP_Error				The result or error on failure
@@ -18,15 +44,19 @@ class SaveFormSettings extends SimForms{
 	public function updateFormElement($element){
 		global $wpdb;
 
-		unset($element->index);
+		$el	= $this->prepareElement($element);
+
+		unset($el['index']);
 		
 		//Update element
 		$wpdb->update(
 			$this->elTableName,
-			(array)$element,
+			$el,
 			array(
 				'id'		=> $element->id,
 			),
+			$this->elementTableFormats,
+			['%d']
 		);
 
 		if($wpdb->last_error !== ''){
@@ -71,10 +101,13 @@ class SaveFormSettings extends SimForms{
 	 */
 	public function insertElement($element){
 		global $wpdb;
+
+		$el	= $this->prepareElement($element);
 		
 		$wpdb->insert(
 			$this->elTableName,
-			(array)$element
+			$el,
+			$this->elementTableFormats
 		);
 
 		return $wpdb->insert_id;

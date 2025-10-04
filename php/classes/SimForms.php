@@ -32,6 +32,9 @@ class SimForms{
 	public $onlyOwn;
 	public $all;
 	public $submission;
+	protected $submissionTableFormats;
+	protected $formTableFormats;
+	protected $elementTableFormats;
 
 	public function __construct(){
 		global $wpdb;
@@ -81,6 +84,85 @@ class SimForms{
 		}else{
 			$this->editRights		= false;
 		}
+
+		$this->tableFormats();
+	}
+
+	/**
+	 * Defines the formats of each column in each table for use in $wpdb->insert and $wpdb->update
+	 */
+	private function tableFormats(){
+		$this->submissionTableFormats	= [
+			'form_id'				=> '%d',	
+			'timecreated'			=> '%s',	
+			'timelastedited'		=> '%s',	
+			'userid'				=> '%d',
+			'formresults'			=> '%s',
+			'archived'				=> '%d',
+			'archivedsubs'			=> '%s'
+		];
+
+		$this->submissionTableFormats	= apply_filters('forms-submission-table-formats', $this->submissionTableFormats, $this);
+
+		$this->formTableFormats			= [
+			'name'					=> '%s',
+			'version'				=> '%s',
+			'button_text'			=> '%s',
+			'succes_message'		=> '%s',
+			'include_id'			=> '%d',
+			'form_name'				=> '%s',
+			'save_in_meta'			=> '%d',
+			'reminder_frequency'	=> '%s',
+			'reminder_amount'		=> '%s',
+			'reminder_period'		=> '%s',
+			'reminder_conditions'	=> '%s',
+			'reminder_startdate'	=> '%s',
+			'form_url'				=> '%s',
+			'form_reset'			=> '%d',
+			'actions'				=> '%s',
+			'autoarchive'			=> '%d',
+			'autoarchive_el'		=> '%d',
+			'autoarchive_value'		=> '%s',
+			'split'					=> '%s',
+			'full_right_roles'		=> '%s',
+			'submit_others_form'	=> '%s',
+			'emails'				=> '%s',
+			'upload_path'			=> '%s'
+		];
+
+		$this->formTableFormats			= apply_filters('forms-form-table-formats', $this->formTableFormats, $this);
+
+		$this->elementTableFormats		= [
+			'form_id'				=> '%d',
+			'type'					=> '%s',
+			'priority'				=> '%d',
+			'width'					=> '%d',
+			'functionname'			=> '%s',
+			'foldername'			=> '%s',
+			'name'					=> '%s',
+			'nicename'				=> '%s',
+			'text'					=> '%s',
+			'html'					=> '%s',
+			'valuelist'				=> '%s',
+			'default_value'			=> '%s',
+			'default_array_value'	=> '%s',
+			'options'				=> '%s',
+			'required'				=> '%d',
+			'mandatory'				=> '%d',
+			'recommended'			=> '%d',
+			'wrap'					=> '%d',
+			'hidden'				=> '%d',
+			'multiple'				=> '%d',
+			'library'				=> '%d',
+			'editimage'				=> '%d',
+		  	'conditions'			=> '%s',
+		];
+
+		$this->elementTableFormats		= apply_filters('forms-element-table-formats', $this->elementTableFormats, $this);
+
+		ksort($this->submissionTableFormats);
+		ksort($this->formTableFormats);
+		ksort($this->elementTableFormats);
 	}
 
 	/**
@@ -748,7 +830,7 @@ class SimForms{
 		}elseif(empty($formElements)){
 			$html	= "<div class='warning'>This form has no elements yet.<br>";
 			if($this->editRights){
-				$url	= SIM\getCurrentUrl()."&formbuilder=true";
+				$url	 = add_query_arg('formbuilder', 'true', SIM\getCurrentUrl());
 				$html	.= "<br><a href='$url' class='button small sim'>Start Building the form</a>";
 			}else{
 				$html	.= "Ask an user with the editor role to start working on it";

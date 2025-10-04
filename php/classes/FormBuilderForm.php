@@ -108,7 +108,7 @@ class FormBuilderForm extends SimForms{
 		$elementHtml = $this->getElementHtml($element);
 		
 		//Check if element needs to be hidden
-		if(!empty($element->hidden)){
+		if(!empty($element->hidden) && $element->hidden == true){
 			$hidden = ' hidden';
 		}else{
 			$hidden = '';
@@ -116,9 +116,9 @@ class FormBuilderForm extends SimForms{
 		
 		//if the current element is required or this is a label and the next element is required
 		if(
-			!empty($element->required)		||
-			!empty($element->mandatory)		||
-			$element->type == 'label'		&&
+			$element->required == true			||
+			$element->mandatory == true			||
+			$element->type == 'label'			&&
 			(
 				$this->nextElement->required	||
 				$this->nextElement->mandatory
@@ -178,7 +178,7 @@ class FormBuilderForm extends SimForms{
 					$html	.= "<span class='elname$hidden' style='font-size:xx-small;'>$element->name</span>";
 					
 					//Add a symbol if this field has conditions or is required
-					if(!empty($element->conditions) || !empty($element->required) || !empty($element->mandatory)){
+					if(!empty($element->conditions) || $element->required == true || $element->mandatory == true){
 							$icons		= [];
 							if(!empty($element->conditions)){
 								$icons[]		= [
@@ -202,7 +202,7 @@ class FormBuilderForm extends SimForms{
 								];
 							}
 
-							if(!empty($element->mandatory)){
+							if($element->mandatory == true){
 								$right			= 20;
 								if(count($icons) == 1){
 									$right	= 50;
@@ -644,7 +644,7 @@ class FormBuilderForm extends SimForms{
 							?>
 
 							<h4>Select roles with form edit rights</h4>
-							<select name='full_right_roles' multiple>
+							<select name='full_right_roles[]' multiple>
 								<option value=''>---</option>
 								<?php
 								foreach($userRoles as $key=>$roleName){
@@ -664,7 +664,7 @@ class FormBuilderForm extends SimForms{
 							?>
 
 							<h4>Select roles who can submit the form on behalve of somebody else</h4>
-							<select name='submit_others_form' multiple>
+							<select name='submit_others_form[]' multiple>
 								<option value=''>---</option>
 								<?php
 								foreach($userRoles as $key=>$roleName){
@@ -1782,7 +1782,7 @@ class FormBuilderForm extends SimForms{
 			
 		<h5>Do not warn</h5>
 		<label>If user has role</label>
-		<select name='<?php echo $name;?>[roles]' multiple>
+		<select name='<?php echo $name;?>[roles][]' multiple>
 			<option value=''>---</option>
 			<?php
 			foreach($userRoles as $key=>$roleName){

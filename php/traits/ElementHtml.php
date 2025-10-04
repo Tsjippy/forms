@@ -147,8 +147,6 @@ trait ElementHtml{
 				
 				$options[$escapedValue]	= $displayName;
 			}
-
-			asort($options);
 		}
 		
 		$defaultArrayKey				= $element->default_array_value;

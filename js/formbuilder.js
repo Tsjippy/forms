@@ -136,14 +136,18 @@ async function requestEditElementData(target){
 }
 
 async function addFormElement(target){
-	let wrapper, priority;
-	let form		= target.closest('form');
+	let wrapper;
+	let form				= target.closest('form');
 
 	let referenceNode		= document.querySelector('.form_elements .clicked');
 
 	if(referenceNode == null){
-		if( !window.location.href.includes('&formbuilder=true')){
-			window.location.href = window.location.href+'&formbuilder=true';
+		if( !window.location.href.includes('formbuilder=true')){
+			let combine	= '&';
+			if( !window.location.href.includes('?')){
+				combine = '?';
+			}
+			window.location.href = window.location.href+combine+'formbuilder=true';
 			
 			return;
 		}
@@ -157,9 +161,13 @@ async function addFormElement(target){
 		priority			= parseInt(wrapper.dataset.priority) + 1;
 	}
 
-	Main.showLoader(wrapper, false);
+	let loader 				= Main.showLoader(wrapper, false);
 
-	fixElementNumbering(form);
+	loader.dataset.priority	= priority;
+	loader.classList.add('form-element-wrapper');
+
+	// make sure all priorities are correct
+	fixElementNumbering(referenceNode.closest('form'));
 
 	let indexes	= {};
 	document.querySelectorAll(`.form-element-wrapper`).forEach(el => {
@@ -182,7 +190,7 @@ async function addFormElement(target){
 			//add resize listener
 			form.querySelectorAll('.resizer').forEach(el=>{resizeOb.observe(el);});
 		}else{
-			//Runs after an element update
+			// Runs after an element update
 			referenceNode.closest('.form-element-wrapper').outerHTML = response.html;
 		}
 
@@ -194,6 +202,8 @@ async function addFormElement(target){
 			referenceNode.classList.remove('clicked');
 		}
 	}
+
+	fixElementNumbering(referenceNode.closest('form'));
 
 	// Remove loaders
 	document.querySelectorAll(`.loader-wrapper`).forEach(el=>el.remove());
@@ -302,8 +312,6 @@ async function saveFormSettings(target){
 	let response	= await FormSubmit.submitForm(target, 'forms/save_form_settings');
 
 	if(response){
-		target.closest('.submit-wrapper').querySelector('.loader-wrapper').classList.add('hidden');
-
 		Main.displayMessage(response);
 	}
 }
@@ -1057,7 +1065,7 @@ window.addEventListener('change', ev=>{
 			}
 
 			//add the new options
-			metaIndexes.split(',').forEach(key=>{
+			metaIndexes.dataset.keys.split(',').forEach(key=>{
 				let opt			= document.createElement('option');
 				opt.value 		= key;
 				datalist.appendChild(opt);

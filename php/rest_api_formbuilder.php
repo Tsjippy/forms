@@ -346,16 +346,18 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 	return $element->name;
 }
 
-function prepareProperties(&$prop){
+function prepareProperties($prop){
 	if(is_array($prop)){
 		foreach($prop as &$p){
-			prepareProperties($p);
+			return prepareProperties($p);
 		}
 	}else{
 		$prop 	= wp_kses_post(wp_kses_stripslashes($prop));
 		$prop	= str_replace('\\\\', '\\', $prop);
 		$prop	= str_replace("\\'", "'", $prop);
 	}
+
+	return $prop;
 }
 
 // DONE
@@ -370,11 +372,25 @@ function addFormElement(){
 
 	//Store form results if submitted
 	$element			= $_POST["formfield"];
-	foreach($element as &$prop){
-		prepareProperties($prop);
-	}
 
 	$element	= (object)$element;
+ 	foreach($element as $prop => $val){
+		if(empty($val)){
+			continue;
+		}
+		
+		$element->$prop = prepareProperties($val);
+
+		if($val == "true"){
+			$val 	= true;
+		}
+
+		if(is_array($val)){
+			$val	= serialize($val);
+		}else{
+			$val	= SIM\deslash($val);
+		}
+	}
 
 	if(is_numeric($_POST['element_id'])){
 		$update		= true;
@@ -421,20 +437,6 @@ function addFormElement(){
 	//Store info text in text column
 	if(in_array($element->type, ['info', 'p'])){
 		$element->text 	= wp_kses_post($element->infotext);
-	}
-	//do not store infotext
-	unset($element->infotext);
-
-	foreach($element as &$val){
-		if($val == "true"){
-			$val=true;
-		}
-
-		if(is_array($val)){
-			$val	= serialize($val);
-		}else{
-			$val	= SIM\deslash($val);
-		}
 	}
 	
 	if($update){
