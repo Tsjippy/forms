@@ -7,6 +7,7 @@
 ### Changed
 - more _ to -
 - make sure db formats are correct
+- cleaner formbuilder interface
 
 ### Fixed
 - insert new elements in right position
