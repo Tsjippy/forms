@@ -7,6 +7,7 @@
 - more _ to -
 
 ### Fixed
+- insert new elements in right position
 
 ### Updated
 
