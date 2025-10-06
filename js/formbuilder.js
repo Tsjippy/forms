@@ -99,6 +99,7 @@ async function requestEditElementData(target){
 	let loader			= Main.showLoader(target);
 
 	loader.querySelector('.loader').style.margin = '5px 19px 0px 19px';
+	loader.classList.add('clicked');
 	
 	let formData = new FormData();
 	formData.append('elementid', elementId);
@@ -177,6 +178,7 @@ async function addFormElement(target, copying=false){
 		let loader 				= Main.showLoader(wrapper, false);
 		loader.dataset.priority	= priority;
 		loader.classList.add('form-element-wrapper');
+		loader.dataset.id		= -1;
 
 		// make sure all priorities are correct
 		fixElementNumbering(referenceNode.closest('form'));
@@ -373,7 +375,8 @@ const resizeOb = new ResizeObserver(function(entries) {
 function showCondionalFields(type, form){
 	hideConditionalfields(form);
 
-	form.querySelectorAll(`.element-option:not(.${type}, .reverse), .element-option.not${type}`).forEach(el=>el.classList.replace('shouldhide', 'hidden'));
+	// hide all elements who do not belong to this type
+	form.querySelectorAll(`.element-option:not(.${type}, .reverse), .element-option.not-${type}`).forEach(el=>el.classList.replace('shouldhide', 'hidden'));
 	form.querySelectorAll(`.element-option.${type}`).forEach(el=>el.classList.replace('hidden', 'shouldhide'));
 
 	// Check if this is a multi answer element

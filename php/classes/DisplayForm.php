@@ -66,7 +66,7 @@ class DisplayForm extends SubmitForm{
 	/**
 	 * Renders the start of a multi wrap group
 	 *
-	 * @param	int		$index		The index index of the copies
+	 * @param	int		$index		The index of the copies
 	 */
 	protected function multiWrapStart($index, $element){
 		$class	= '';
@@ -80,7 +80,8 @@ class DisplayForm extends SubmitForm{
 			}
 
 			$this->tabId	= str_replace(' ', '-', $element->nicename);
-			$class	= "tabcontent $hidden' id='$this->tabId-$index";
+			$id		= $index + 1;
+			$class	= "tabcontent $hidden' id='$this->tabId-$id";
 		}
 
 		$style	= '';
@@ -199,7 +200,7 @@ class DisplayForm extends SubmitForm{
 			}
 
 			// prepare the base html for duplicating
-			$elementHtml	= $this->prepareElementHtml($element, $index, $elementHtml, $val);
+			$newElementHtml	= $this->prepareElementHtml($element, $index, $elementHtml, $val);
 
 			// First element in a multi answer wrapper
 			if($this->prevElement->type == 'multi_start'){
@@ -207,7 +208,7 @@ class DisplayForm extends SubmitForm{
 			}
 			
 			// elements between start and end
-			$this->multiInputsHtml[$index] .= force_balance_tags($elementHtml);
+			$this->multiInputsHtml[$index] .= force_balance_tags($newElementHtml);
 			
 			// Last element in the multi wrap, write the buttons and closing div
 			if($this->nextElement->type == 'multi_end'){
@@ -220,11 +221,12 @@ class DisplayForm extends SubmitForm{
 	 * Build all html for a particular element including edit controls.
 	 *
 	 * @param	object	$element		The element
-	 * @param	int		$key			The key in case of a multi element. Default 0
 	 *
 	 * @return	string					The html
 	 */
-	public function buildHtml($element, $key=0){
+	public function buildHtml($element){
+
+		$elementIndex	= $element->priority - 1;
 
 		if($element->type == 'div_start'){
 			$class		= 'input-wrapper';
@@ -236,14 +238,14 @@ class DisplayForm extends SubmitForm{
 			return "</div>";
 		}
 
-		if(isset($this->formElements[$key-1])){
-			$this->prevElement		= $this->formElements[$key-1];
+		if(isset($this->formElements[$elementIndex -1])){
+			$this->prevElement		= $this->formElements[$elementIndex - 1];
 		}else{
 			$this->prevElement		= '';
 		}
 
-		if(isset($this->formElements[$key+1])){
-			$this->nextElement		= $this->formElements[$key+1];
+		if(isset($this->formElements[$elementIndex + 1])){
+			$this->nextElement		= $this->formElements[$elementIndex + 1];
 		}else{
 			$this->nextElement		= '';
 		}
@@ -263,7 +265,7 @@ class DisplayForm extends SubmitForm{
 		$this->currentElement	= $element;
 				
 		//Set the element width to 85 percent so that the info icon floats next to it
-		if($key != 0 && $prevRenderedElement->type == 'info'){
+		if($elementIndex != 0 && $prevRenderedElement->type == 'info'){
 			$width = 85;
 		//We are dealing with a label which is wrapped around the next element
 		}elseif($element->type == 'label' && !isset($element->wrap) && is_numeric($this->nextElement->width)){
@@ -304,8 +306,8 @@ class DisplayForm extends SubmitForm{
 		if($element->type == 'multi_start'){
 			$this->multiwrap				= true;
 			
-			//we are wrapping so we need to find the max amount of filled in fields
-			$i								= $key + 1;
+			// We are wrapping so we need to find the max amount of filled in fields
+			$i								= $elementIndex + 1;
 			$this->multiWrapValueCount		= 1;
 			$this->multiWrapElementCount	= 0;
 			$this->multiInputsHtml 			= [];
@@ -318,7 +320,12 @@ class DisplayForm extends SubmitForm{
 
 					if(!in_array($type, $this->nonInputs)){
 						//Get the field values and count
-						$valueCount		= count($this->getElementValues($this->formElements[$i]));
+						$values			= $this->getElementValues($this->formElements[$i]);
+						if(empty($values)){
+							$valueCount	= 0;
+						}else{
+							$valueCount		= count(array_values($values)[0]);
+						}
 						
 						if($valueCount > $this->multiWrapValueCount){
 							$this->multiWrapValueCount = $valueCount;
@@ -343,7 +350,7 @@ class DisplayForm extends SubmitForm{
 			$this->multiwrap	= false;
 
 			//write down all the multi html
-			$name	= str_replace('end', 'start', $element->name);
+			$name	= str_replace('_multi_end', '_multi_start', $element->name);
 			$elementHtml	= "<div class='clone-divs-wrapper' name='$name'>";
 				// Tablink buttons
 				if($this->multiWrapElementCount >= $this->minElForTabs){
@@ -507,8 +514,8 @@ class DisplayForm extends SubmitForm{
 					$html	.= "<input type='hidden' name='formid' value='{$this->formData->id}'>";
 					$html	.= "<input type='hidden' name='formurl' value='".SIM\currentUrl(true)."'>";
 					$html	.= "<input type='hidden' name='userid' value='$this->userId'>";
-					foreach($this->formElements as $key=>$element){
-						$html	.= $this->buildHtml($element, $key);
+					foreach($this->formElements as $element){
+						$html	.= $this->buildHtml($element);
 					}
 				
 					//close the last formstep if needed

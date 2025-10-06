@@ -57,7 +57,7 @@ trait ElementHtml{
 		$this->buildDefaultsArray();
 
 		//get the elementName, remove [] and split on remaining [
-		$elementName	= explode('[', trim($element->name, '[]'));
+		$elementNames	= explode('[', trim($element->name, '[]'));
 		
 		//retrieve meta values if needed
 		if(!empty($this->formData->save_in_meta)){
@@ -71,22 +71,22 @@ trait ElementHtml{
 				$this->usermeta	= apply_filters('sim_forms_load_userdata', $this->usermeta, $this->userId);
 			}
 		
-			if(count($elementName) == 1){
+			if(count($elementNames) == 1){
 				//non array name
-				$elementName			= $elementName[0];
+				$elementName			= $elementNames[0];
 				$values['metavalue']	= [];
 				if(isset($this->usermeta[$elementName])){
 					$values['metavalue']	= (array)maybe_unserialize($this->usermeta[$elementName]);
 				}
-			}elseif(!empty($this->usermeta[$elementName[0]])){
+			}elseif(!empty($this->usermeta[$elementNames[0]])){
 				//an array of values, we only want a specific one
-				$values['metavalue']	= (array)maybe_unserialize($this->usermeta[$elementName[0]]);
+				$values['metavalue']	= (array)maybe_unserialize($this->usermeta[$elementNames[0]]);
 				
 
-				unset($elementName[0]);
+				unset($elementNames[0]);
 				//loop over all the subkeys, and store the value until we have our final result
 				$resultFound	= false;
-				foreach($elementName as $v){
+				foreach($elementNames as $v){
 					if(isset($values['metavalue'][$v])){
 						$values['metavalue'] = (array)$values['metavalue'][$v];
 						$resultFound	= true;
@@ -114,11 +114,11 @@ trait ElementHtml{
 		
 		if(!empty($element->default_array_value)){
 			$key					= $element->default_array_value;
-			if(!empty($this->defaultValues[$key]) && is_array($this->defaultValues[$key])){
+			if(!empty($this->defaultArrayValues[$key]) && is_array($this->defaultArrayValues[$key])){
 				if(!empty($values['defaults']) && !is_array($values['defaults'])){
 					$values['defaults']	= [$values['defaults']];
 				}else{
-					$values['defaults']	=[];
+					$values['defaults']	= [];
 				}
 				$values['defaults']		= array_merge($values['defaults'], $this->defaultArrayValues[$key]);
 			}
@@ -222,8 +222,9 @@ trait ElementHtml{
 			$elementHtml	= str_replace('%value%', $value, $elementHtml);
 		}
 
-		if($element->type == 'label'){
-			$nr				= $index+1;
+		// Add the index to the label if we are not displaying it on seperate tabs
+		if($element->type == 'label' && $this->multiWrapElementCount < $this->minElForTabs){
+			$nr				= $index + 1;
 			$elementHtml	= str_replace('</h4>'," $nr</h4>", $elementHtml);
 		}
 
