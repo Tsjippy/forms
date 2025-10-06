@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [8.6.9] - 2025-10-06
+
+
+### Added
 - copy element in form builder
 
 ### Changed
@@ -11,8 +22,6 @@
 
 ### Fixed
 - insert new elements in right position
-
-### Updated
 
 ## [8.6.8] - 2025-09-26
 
