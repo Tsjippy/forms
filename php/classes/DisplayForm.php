@@ -14,6 +14,7 @@ class DisplayForm extends SubmitForm{
 	public $prevElement;
 	public $currentElement;
 	public $usermeta;
+	private $tabId;
 
 	public function __construct($atts=[]){
 		parent::__construct();
@@ -50,13 +51,13 @@ class DisplayForm extends SubmitForm{
 	/**
 	 * Renders the add and remove buttons for a multi-answer group
 	 */
-	protected function renderButtons($element){
+	protected function renderButtons(){
 		ob_start();
 		
 		?>
-		<div class='buttonwrapper' style='margin: auto;'>
-			<button type='button' class='add button' style='flex: 1;'><?php echo $element->start;?></button>
-			<button type='button' class='remove button' style='flex: 1;'><?php echo $element->end;?></button>
+		<div class='button-wrapper' style='margin: auto;'>
+			<button type='button' class='add button' style='flex: 1;max-width: max-content;'><?php echo $this->prevElement->add;?></button>
+			<button type='button' class='remove button' style='flex: 1;max-width: max-content;'><?php echo $this->prevElement->remove;?></button>
 		</div><?php
 
 		return ob_get_clean();
@@ -67,7 +68,7 @@ class DisplayForm extends SubmitForm{
 	 *
 	 * @param	int		$index		The index index of the copies
 	 */
-	protected function multiWrapStart($index){
+	protected function multiWrapStart($index, $element){
 		$class	= '';
 
 		// Wrap in a tab if it is a big one
@@ -78,11 +79,18 @@ class DisplayForm extends SubmitForm{
 				$hidden = '';
 			}
 
-			$class	= "tabcontent $hidden";
+			$this->tabId	= str_replace(' ', '-', $element->nicename);
+			$class	= "tabcontent $hidden' id='$this->tabId-$index";
 		}
 
-		$this->multiInputsHtml[$index]  = "<div class='clone-div $class' data-divid='$index' style='display:flex'>";
-		$this->multiInputsHtml[$index] .= "<div class='multi-input-wrapper'>";
+		$style	= '';
+		if($this->multiWrapElementCount < $this->minElForTabs){
+			$style	= 'style="display:flex;"';
+		}
+
+		$this->multiInputsHtml[$index]   = "<div class='clone-div $class' data-divid='$index' $style>";
+		$this->multiInputsHtml[$index]	.= $this->renderButtons();
+		$this->multiInputsHtml[$index]	.= "<div class='multi-input-wrapper'>";
 	}
 
 	/**
@@ -102,7 +110,7 @@ class DisplayForm extends SubmitForm{
 		$this->multiInputsHtml[$index] .= "</div>"; //close multi-input-wrapper div
 
 		if($this->multiWrapElementCount < $this->minElForTabs){
-			$this->multiInputsHtml[$index] .= $this->renderButtons($element);
+			$this->multiInputsHtml[$index] .= $this->renderButtons();
 		}
 		
 		$this->multiInputsHtml[$index] .= "</div>"; //close clone-div
@@ -115,7 +123,7 @@ class DisplayForm extends SubmitForm{
 	 * @param	int		$width			The width of the elements
 	 */
 	protected function processMultiFields($element, $width){
-		$class	= 'inputwrapper';
+		$class	= 'input-wrapper';
 
 		//Check if element needs to be hidden
 		if(!empty($element->hidden)){
@@ -151,7 +159,7 @@ class DisplayForm extends SubmitForm{
 				if(!empty($element->wrap)){
 					$class	.= ' flex';
 				}
-				$elementHtml .= "<div class='$class' style='width:$width%;'>";
+				$elementHtml = "<div class='$class' style='width:$width%;'>$elementHtml</div>";
 			}
 		}
 		
@@ -195,11 +203,11 @@ class DisplayForm extends SubmitForm{
 
 			// First element in a multi answer wrapper
 			if($this->prevElement->type == 'multi_start'){
-				$this->multiWrapStart($index);
+				$this->multiWrapStart($index, $element);
 			}
 			
 			// elements between start and end
-			$this->multiInputsHtml[$index] .= $elementHtml;
+			$this->multiInputsHtml[$index] .= force_balance_tags($elementHtml);
 			
 			// Last element in the multi wrap, write the buttons and closing div
 			if($this->nextElement->type == 'multi_end'){
@@ -219,7 +227,7 @@ class DisplayForm extends SubmitForm{
 	public function buildHtml($element, $key=0){
 
 		if($element->type == 'div_start'){
-			$class		= 'inputwrapper';
+			$class		= 'input-wrapper';
 			if($element->hidden){
 				$class	.= " hidden";
 			}
@@ -322,23 +330,6 @@ class DisplayForm extends SubmitForm{
 				}
 			}
 
-			// Tablink buttons
-			if($this->multiWrapElementCount >= $this->minElForTabs){
-				for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
-					$active = '';
-
-					if($index === 0){
-						$active = 'active';
-					}
-
-					$html	.= "<button class='button tablink $active' type='button' id='show_{$element->name}-$index}' data-target='{$element->name}-$index' style='margin-right:4px;'>
-						{$element->nicename} $index
-					</button>";
-				}
-
-				$html	.= $this->renderButtons($element);
-			}
-
 			return $html;
 		}
 		
@@ -354,6 +345,21 @@ class DisplayForm extends SubmitForm{
 			//write down all the multi html
 			$name	= str_replace('end', 'start', $element->name);
 			$elementHtml	= "<div class='clone-divs-wrapper' name='$name'>";
+				// Tablink buttons
+				if($this->multiWrapElementCount >= $this->minElForTabs){
+					for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
+						$active = '';
+
+						if($index === 1){
+							$active = 'active';
+						}
+
+						$elementHtml	.= "<button class='button tablink $active' type='button' id='show_{$element->name}-$index' data-target='{$this->tabId}-$index' style='margin-right:4px;'>
+							{$element->nicename} $index
+						</button>";
+					}
+				}
+
 				foreach($this->multiInputsHtml as $multiHtml){
 					$elementHtml .= $multiHtml;
 				}
@@ -370,7 +376,7 @@ class DisplayForm extends SubmitForm{
 		// wrap an element and a folowing field in the same wrapper
 		// so only write a div if the wrap property is not set
 		if(!$this->wrap){
-			$class	= 'inputwrapper';
+			$class	= 'input-wrapper';
 
 			//Check if element needs to be hidden
 			if(!empty($element->hidden)){

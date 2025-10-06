@@ -272,7 +272,7 @@ trait ElementHtml{
 				$html .= str_replace('%key%', $index+1, $prevLabel);
 				
 				//wrap input AND buttons in a flex div
-				$html .= "<div class='buttonwrapper' style='width:100%; display: flex;'>";
+				$html .= "<div class='button-wrapper' style='width:100%; display: flex;'>";
 			
 					//write the element
 					$html .= $elementItemHtml;

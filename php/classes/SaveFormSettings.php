@@ -48,7 +48,8 @@ class SaveFormSettings extends SimForms{
 	public function updateFormElement($element){
 		global $wpdb;
 
-		$oldElement	= $this->getElementById($element->id);
+		$elId		= $element->id;
+		$oldElement	= $this->getElementById($elId);
 
 		$el			= $this->prepareElement($element, $oldElement);
 		
@@ -57,7 +58,7 @@ class SaveFormSettings extends SimForms{
 			$this->elTableName,
 			$el,
 			array(
-				'id'		=> $element->id,
+				'id'		=> $elId,
 			),
 			$this->elementTableFormats,
 			['%d']

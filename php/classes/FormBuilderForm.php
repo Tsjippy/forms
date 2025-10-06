@@ -150,9 +150,9 @@ class FormBuilderForm extends SimForms{
 			$html 	.= "<span class='movecontrol formfieldbutton' aria-hidden='true'>:::<br><span class='elid$idHidden' style='font-size:xx-small'>$element->id</span></span>";
 			$html 	.= "<div class='resizer-wrapper'>";
 				if($element->type == 'info'){
-					$html .= "<div class='show inputwrapper$hidden'>";
+					$html .= "<div class='show input-wrapper$hidden'>";
 				}else{
-					$html .= "<div class='resizer show inputwrapper$hidden' data-widthpercentage='$width' style='width:$width%;'>";
+					$html .= "<div class='resizer show input-wrapper$hidden' data-widthpercentage='$width' style='width:$width%;'>";
 				}
 				
 				if($element->type == 'formstep'){
@@ -934,7 +934,7 @@ class FormBuilderForm extends SimForms{
 												?>
 												<div class='clone-div' data-divid='<?php echo $fromKey;?>'>
 													<fieldset class='formemailfieldset'>
-														<legend class="formfield buttonwrapper">
+														<legend class="formfield button-wrapper">
 															<span class='text'>Condition <?php echo $fromKey+1;?></span>
 															<button type='button' class='add button' style='flex: 1;'>+</button>
 															<button type='button' class='remove button' style='flex: 1;'>-</button>
@@ -1002,7 +1002,7 @@ class FormBuilderForm extends SimForms{
 											foreach($email['conditionalemailto'] as $toKey=>$toEmail){
 												?>
 												<div class='clone-div' data-divid='<?php echo $toKey;?>'>
-													<fieldset class='formemailfieldset buttonwrapper'>
+													<fieldset class='formemailfieldset button-wrapper'>
 														<legend class="formfield">
 															<span class='text'>Condition <?php echo $toKey+1;?></span>
 															<button type='button' class='add button' style='flex: 1;'>+</button>
@@ -1217,7 +1217,7 @@ class FormBuilderForm extends SimForms{
 			<div name='add-text' class='element-option multi_start shouldhide'>
 				<label>
 					<div style='text-align: left;'>Specify the text for the 'add' button</div>
-					<input type="text" class="formbuilder wide" name="formfield[add]" value="<?php if($element != null && $element->add_text != null){echo $element->add_text;}else{echo '+';}?>">
+					<input type="text" class="formbuilder wide" name="formfield[add]" value="<?php if($element != null && $element->add != null){echo $element->add;}else{echo '+';}?>">
 				</label>
 				<br><br>
 			</div>
@@ -1225,7 +1225,7 @@ class FormBuilderForm extends SimForms{
 			<div name='remove-text' class='element-option multi_start shouldhide'>
 				<label>
 					<div style='text-align: left;'>Specify the text for the 'remove' button</div>
-					<input type="text" class="formbuilder wide" name="formfield[remove]" value="<?php if($element != null && $element->remove_text != null){echo $element->remove_text;}else{echo '-';}?>">
+					<input type="text" class="formbuilder wide" name="formfield[remove]" value="<?php if($element != null && $element->remove != null){echo $element->remove;}else{echo '-';}?>">
 				</label>
 				<br><br>
 			</div>

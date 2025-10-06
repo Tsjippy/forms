@@ -99,10 +99,10 @@ export function copyFormInput(originalNode){
  		let html = `<button type="button" class="remove button" style="flex: 1;">-</button>`;
 
 		//Add minus button to the first div
-		originalNode.querySelector('.buttonwrapper').insertAdjacentHTML('beforeend', html);
+		originalNode.querySelector('.button-wrapper').insertAdjacentHTML('beforeend', html);
 
 		//Add minus button to the second div
-		newNode.querySelector('.buttonwrapper').insertAdjacentHTML('beforeend', html)
+		newNode.querySelector('.button-wrapper').insertAdjacentHTML('beforeend', html)
 	}	
 
 	// process tab buttons
@@ -195,8 +195,8 @@ export function removeNode(target){
 		
 		//Move the add button one up
 		let prev = node.previousElementSibling;
-		if(prev.querySelector('.buttonwrapper .add') == null){
-			prev.querySelector('.buttonwrapper').appendChild(addElement);
+		if(prev.querySelector('.button-wrapper .add') == null){
+			prev.querySelector('.button-wrapper').appendChild(addElement);
 		}
 	}
 	
@@ -574,7 +574,7 @@ export function changeFieldValue(selector, value, functionRef, form, addition=''
 }
 
 export function changeVisibility(action, el, functionRef){
-	let wrapper	= el.closest('.inputwrapper');
+	let wrapper	= el.closest('.input-wrapper');
 	if(wrapper == null){
 		wrapper	= el
 	}
