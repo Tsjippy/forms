@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- copy element in form builder
 
 ### Changed
 - more _ to -
