@@ -546,11 +546,11 @@ class FormBuilderForm extends SimForms{
 							}
 							?>
 							<label>
-								<input type="radio" name="autoarchive" value="true" <?php echo $checked1;?>>
+								<input type="radio" name="autoarchive" value="1" <?php echo $checked1;?>>
 								Yes
 							</label>
 							<label>
-								<input type="radio" name="autoarchive" value="false" <?php echo $checked2;?>>
+								<input type="radio" name="autoarchive" value="0" <?php echo $checked2;?>>
 								No
 							</label>
 						</label>
@@ -1251,7 +1251,7 @@ class FormBuilderForm extends SimForms{
 
 			<div name='upload-options' class='element-option hidden file image'>
 				<label>
-					<input type="checkbox" class="formbuilder" name="formfield[library]" value="true" <?php if($element != null && $element->library){echo 'checked';}?>>
+					<input type="checkbox" class="formbuilder" name="formfield[library]" value="1" <?php if($element != null && $element->library){echo 'checked';}?>>
 					Add the <span class='filetype'>file</span> to the library
 				</label>
 				<br><br>
@@ -1271,7 +1271,7 @@ class FormBuilderForm extends SimForms{
 			
 			<div name='wrap' class='element-option reverse not-p not-php not-file not-image not-multi_start not-multi_end shouldhide'>
 				<label>
-					<input type="checkbox" class="formbuilder" name="formfield[wrap]" value="true" <?php if($element != null && $element->wrap){echo 'checked';}?>>
+					<input type="checkbox" class="formbuilder" name="formfield[wrap]" value="1" <?php if($element != null && $element->wrap){echo 'checked';}?>>
 					Group together with next element
 				</label>
 				<br><br>
@@ -1309,7 +1309,7 @@ class FormBuilderForm extends SimForms{
 			
 			<div name='multiple' class='element-option reverse <?php echo $nonInputClasses;?> shouldhide'>
 				<label>
-					<input type="checkbox" class="formbuilder" name="formfield[multiple]" value="true" <?php if($element != null && $element->multiple){echo 'checked';}?>>
+					<input type="checkbox" class="formbuilder" name="formfield[multiple]" value="1" <?php if($element != null && $element->multiple){echo 'checked';}?>>
 					Allow multiple answers
 				</label>
 				<br>
@@ -1379,13 +1379,13 @@ class FormBuilderForm extends SimForms{
 					?>
 					<h3>Warning conditions</h3>
 					<label class="option-label">
-						<input type="checkbox" class="formbuilder" name="formfield[mandatory]" value="true" <?php if($element != null && $element->mandatory){echo 'checked';}?>>
+						<input type="checkbox" class="formbuilder" name="formfield[mandatory]" value="1" <?php if($element != null && $element->mandatory){echo 'checked';}?>>
 						People should be warned by e-mail/signal if they have not filled in this field.
 					</label><br>
 					<br>
 
 					<label class="option-label">
-						<input type="checkbox" class="formbuilder" name="formfield[recommended]" value="true" <?php if($element != null && $element->recommended){echo 'checked';}?>>
+						<input type="checkbox" class="formbuilder" name="formfield[recommended]" value="1" <?php if($element != null && $element->recommended){echo 'checked';}?>>
 						People should be notified on their homepage if they have not filled in this field.
 					</label><br>
 					<br>
@@ -1404,11 +1404,11 @@ class FormBuilderForm extends SimForms{
 				}else{
 					?>
 					<label class="option-label">
-						<input type="checkbox" class="formbuilder" name="formfield[required]" value="true" <?php if($element != null && $element->required){echo 'checked';}?>>
+						<input type="checkbox" class="formbuilder" name="formfield[required]" value="1" <?php if($element != null && $element->required){echo 'checked';}?>>
 						This should be a required field
 					</label><br>
 					<label class="option-label">
-						<input type="checkbox" class="formbuilder" name="formfield[mandatory]" value="true" <?php if($element != null && $element->mandatory){echo 'checked';}?>>
+						<input type="checkbox" class="formbuilder" name="formfield[mandatory]" value="1" <?php if($element != null && $element->mandatory){echo 'checked';}?>>
 						This should be a conditional required field: its only required when visible
 					</label><br>
 					<br>
@@ -1417,7 +1417,7 @@ class FormBuilderForm extends SimForms{
 				?>
 			</div>
 			<label class="option-label element-option not-multi_start not-multi_end shouldhide">
-				<input type="checkbox" class="formbuilder" name="formfield[hidden]" value="true" <?php if($element != null && $element->hidden){echo 'checked';}?>>
+				<input type="checkbox" class="formbuilder" name="formfield[hidden]" value="1" <?php if($element != null && $element->hidden){echo 'checked';}?>>
 				Hidden field
 			</label><br>
 
