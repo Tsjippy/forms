@@ -1,6 +1,7 @@
 <?php
 namespace SIM\FORMS;
 use SIM;
+use WP_Error;
 
 trait ElementHtml{
 	 /**
@@ -101,18 +102,25 @@ trait ElementHtml{
 		
 		//add default values
 		if(empty($element->multiple) || in_array($element->type, ['select','checkbox'])){
-			$defaultKey					= $element->default_value;
-			if(!empty($defaultKey)){
-				if(isset($this->defaultValues[$defaultKey])){
-					$values['defaults']		= $this->defaultValues[$defaultKey];
+			$key					= $element->default_value;
+			if(!empty($key)){
+				if(isset($this->defaultValues[$key])){
+					$values['defaults']		= $this->defaultValues[$key];
 				}else{
-					$values['defaults']		= $defaultKey;
+					$values['defaults']		= $key;
 				}
 			}
-		}else{
-			$defaultKey					= $element->default_array_value;
-			if(!empty($defaultKey) && !empty($this->defaultValues[$defaultKey])){
-				$values['defaults']		= $this->defaultArrayValues[$defaultKey];
+		}
+		
+		if(!empty($element->default_array_value)){
+			$key					= $element->default_array_value;
+			if(!empty($this->defaultValues[$key]) && is_array($this->defaultValues[$key])){
+				if(!empty($values['defaults']) && !is_array($values['defaults'])){
+					$values['defaults']	= [$values['defaults']];
+				}else{
+					$values['defaults']	=[];
+				}
+				$values['defaults']		= array_merge($values['defaults'], $this->defaultArrayValues[$key]);
 			}
 		}
 
@@ -342,7 +350,7 @@ trait ElementHtml{
 	 * @param	mixed	$value			The value of the element
 	 * @param	bool	$removeMinMax	Wheter to ignore min and max values for date elements
 	 *
-	 * @return	string				The html
+	 * @return	string| WP error		The html
 	 */
 	function getElementHtml($element, $value ='', $removeMinMax=false){
 		$html		= '';
@@ -386,7 +394,15 @@ trait ElementHtml{
 				// we are getting the html for an input and that input depends on a datalist
 				if($optionType == 'list'){
 					$datalist	= $this->getElementByName($optionValue);
-					$extraHtml	= $this->getElementHtml($datalist);
+
+					if($datalist == $element){
+						$datalist	= $this->getElementByName($optionValue.'-list');
+						SIM\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
+					}
+
+					if($datalist){
+						$extraHtml	= $this->getElementHtml($datalist);
+					}
 				}
 			}
 		}

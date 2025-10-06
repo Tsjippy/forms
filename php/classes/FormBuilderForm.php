@@ -12,6 +12,7 @@ class FormBuilderForm extends SimForms{
 	public $nextElement;
 	public $prevElement;
 	public $currentElement;
+	protected $inMultiAnswer;
 
 	public function __construct($atts=[]){
 		parent::__construct();
@@ -21,6 +22,8 @@ class FormBuilderForm extends SimForms{
 			$this->getForm();
 			$this->getAllFormElements();
 		}
+
+		$this->inMultiAnswer	= false;
 	}
 
 	/**
@@ -137,8 +140,13 @@ class FormBuilderForm extends SimForms{
 			$marginLeft	= 'margin-left: 30px;';
 		}
 
+		$extraClass		= '';
+		if($this->inMultiAnswer){
+			$extraClass	= 'multi-answer-element';
+		}
+
 		//Add form edit controls if needed
-		$html = " <div class='form-element-wrapper' data-id='{$element->id}' data-formid='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
+		$html = " <div class='form-element-wrapper $extraClass' data-id='{$element->id}' data-formid='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
 			$html 	.= "<span class='movecontrol formfieldbutton' aria-hidden='true'>:::<br><span class='elid$idHidden' style='font-size:xx-small'>$element->id</span></span>";
 			$html 	.= "<div class='resizer-wrapper'>";
 				if($element->type == 'info'){
@@ -154,9 +162,11 @@ class FormBuilderForm extends SimForms{
 				}elseif($element->type == 'multi_start'){
 					$html .= ' ***Multi answer start***';
 					$elementHtml	= '';
+					$this->inMultiAnswer	= true;
 				}elseif($element->type == 'multi_end'){
 					$html .= ' ***Multi answer end***';
 					$elementHtml	= '';
+					$this->inMultiAnswer	= false;
 				}elseif($element->type == 'div_start'){
 					$name			= ucfirst(str_replace('_', ' ', $element->name));
 					$html 			.= " ***$name div container start***";
@@ -235,9 +245,11 @@ class FormBuilderForm extends SimForms{
 					$html .= "<span class='widthpercentage formfieldbutton'></span>";
 				$html .= "</div>";
 			$html .= "</div>";
-			$html .= "<button type='button' class='add_form_element button formfieldbutton' 	title='Add an element after this one'>+</button>";
-			$html .= "<button type='button' class='remove_form_element button formfieldbutton'	title='Remove this element'>-</button>";
-			$html .= "<button type='button' class='edit_form_element button formfieldbutton'	title='Change this element'>Edit</button>";
+			$html .= "<button type='button' class='add-form-element button formfieldbutton' 	title='Add an element after this one'>+</button>";
+			$html .= "<button type='button' class='remove-form-element button formfieldbutton'	title='Remove this element'>-</button>";
+			$html .= "<button type='button' class='edit-form-element button formfieldbutton'	title='Change this element'>Edit</button>";
+			$copy  = "<img class='copy copy-form-element' src='".SIM\pathToUrl(MODULE_PATH.'pictures/copy_white.png')."' loading='lazy'>";
+			$html .= "<button type='button' class='copy-form-element button formfieldbutton'	title='Duplicate this element'>$copy</button>";
 		$html .= "</div>";
 
 		return $html;
@@ -304,7 +316,7 @@ class FormBuilderForm extends SimForms{
 			
 				?>
 				<form action='' method='post' class='sim-form builder'>
-					<div class='form_elements'>
+					<div class='form-elements'>
 						<input type='hidden' name='formid'		value='<?php echo $this->formData->id;?>'>
 
 						<?php
@@ -376,7 +388,7 @@ class FormBuilderForm extends SimForms{
 		?>
 		<div class="element_settings_wrapper">
 			<form action='' method='post' class='sim-form builder'>
-				<div class='form_elements'>
+				<div class='form-elements'>
 					<input type='hidden' class='formbuilder' name='formid'	value='<?php echo $this->formData->id;?>'>
 					
 					<label class="block">
@@ -415,7 +427,7 @@ class FormBuilderForm extends SimForms{
 							$checked = '';
 						}
 						?>
-						<input type='checkbox' class='formbuilder formfieldsetting' name='save_in_meta' value='1' <?php echo $checked;?>>
+						<input type='checkbox' class='formbuilder formfieldsetting' name='save-in-meta' value='1' <?php echo $checked;?>>
 						Save submissions in usermeta table
 					</label>
 					<br>
@@ -686,7 +698,7 @@ class FormBuilderForm extends SimForms{
 					</div>
 				</div>
 				<?php
-				echo SIM\addSaveButton('submit_form_setting',  'Save form settings');
+				echo SIM\addSaveButton('submit-form-setting',  'Save form settings');
 				?>
 			</form>
 			<form method="POST" style='display: inline-block;'>
@@ -710,7 +722,7 @@ class FormBuilderForm extends SimForms{
 		?>
 		<div class="emails_wrapper">
 			<form action='' method='post' class='sim-form builder'>
-				<div class='form_elements'>
+				<div class='form-elements'>
 					<input type='hidden' class='formbuilder' name='formid'	value='<?php echo $this->formData->id;?>'>
 					
 					<label class="formfield formfieldlabel">
@@ -1074,7 +1086,7 @@ class FormBuilderForm extends SimForms{
 					</div>
 				</div>
 				<?php
-				echo SIM\addSaveButton('submit_form_emails','Save form email configuration');
+				echo SIM\addSaveButton('submit-form-emails','Save form email configuration');
 				?>
 			</form>
 		</div>
@@ -1118,7 +1130,7 @@ class FormBuilderForm extends SimForms{
 
 			<input type="hidden" name="formfield[form_id]" value="<?php echo $this->formData->id;?>">
 			
-			<input type="hidden" name="element_id" value="<?php if( $element != null){echo $element->id;}?>">
+			<input type="hidden" name="element-id" value="<?php if( $element != null){echo $element->id;}?>">
 			
 			<input type="hidden" name="insertafter">
 			
@@ -1194,7 +1206,7 @@ class FormBuilderForm extends SimForms{
 			</select>
 			<br>
 			
-			<div name='elementname' class='elementoption wide reverse notlabel notphp notformstep button shouldhide' style='background-color: unset;'>
+			<div name='elementname' class='element-option wide reverse notlabel notphp notformstep button shouldhide' style='background-color: unset;'>
 				<label>
 					<div style='text-align: left;'>Specify a name for the element</div>
 					<input type="text" class="formbuilder wide" name="formfield[name]" value="<?php if($element != null){echo $element->name;}?>">
@@ -1202,7 +1214,23 @@ class FormBuilderForm extends SimForms{
 				<br><br>
 			</div>
 			
-			<div name='functionname' class='elementoption wide hidden php'>
+			<div name='add-text' class='element-option multi_start shouldhide'>
+				<label>
+					<div style='text-align: left;'>Specify the text for the 'add' button</div>
+					<input type="text" class="formbuilder wide" name="formfield[add]" value="<?php if($element != null && $element->add_text != null){echo $element->add_text;}else{echo '+';}?>">
+				</label>
+				<br><br>
+			</div>
+
+			<div name='remove-text' class='element-option multi_start shouldhide'>
+				<label>
+					<div style='text-align: left;'>Specify the text for the 'remove' button</div>
+					<input type="text" class="formbuilder wide" name="formfield[remove]" value="<?php if($element != null && $element->remove_text != null){echo $element->remove_text;}else{echo '-';}?>">
+				</label>
+				<br><br>
+			</div>
+
+			<div name='functionname' class='element-option wide hidden php'>
 				<label>
 					Specify the functionname
 					<input type="text" class="formbuilder wide" name="formfield[functionname]" value="<?php if($element != null){echo $element->functionname;}?>">
@@ -1210,7 +1238,7 @@ class FormBuilderForm extends SimForms{
 				<br><br>
 			</div>
 			
-			<div name='labeltext' class='elementoption label button formstep hidden wide' style='background-color: unset;'>
+			<div name='labeltext' class='element-option label button formstep hidden wide' style='background-color: unset;'>
 				<label>
 					<div style='text-align: left;'>Specify the <span class='elementtype'>label</span> text</div>
 					<input type="text" class="formbuilder wide" name="formfield[text]" value="<?php if($element != null){echo $element->text;}?>">
@@ -1218,7 +1246,7 @@ class FormBuilderForm extends SimForms{
 				<br><br>
 			</div>
 
-			<div name='upload-options' class='elementoption hidden file image'>
+			<div name='upload-options' class='element-option hidden file image'>
 				<label>
 					<input type="checkbox" class="formbuilder" name="formfield[library]" value="true" <?php if($element != null && $element->library){echo 'checked';}?>>
 					Add the <span class='filetype'>file</span> to the library
@@ -1238,7 +1266,7 @@ class FormBuilderForm extends SimForms{
 				</label>
 			</div>
 			
-			<div name='wrap' class='elementoption reverse notp notphp notfile notimage shouldhide'>
+			<div name='wrap' class='element-option reverse notp notphp notfile notimage notmulti_start notmulti_end shouldhide'>
 				<label>
 					<input type="checkbox" class="formbuilder" name="formfield[wrap]" value="true" <?php if($element != null && $element->wrap){echo 'checked';}?>>
 					Group together with next element
@@ -1246,7 +1274,7 @@ class FormBuilderForm extends SimForms{
 				<br><br>
 			</div>
 			
-			<div name='infotext' class='elementoption info p hidden'>
+			<div name='infotext' class='element-option info p hidden'>
 				<label>
 					Specify the text for the <span class='type'>infobox</span>
 					<?php
@@ -1276,7 +1304,7 @@ class FormBuilderForm extends SimForms{
 				<br>
 			</div>
 			
-			<div name='multiple' class='elementoption reverse notlabel notbutton notformstep notp notphp shouldhide'>
+			<div name='multiple' class='element-option reverse notlabel notbutton notformstep notp notphp notmulti_start notmulti_end shouldhide'>
 				<label>
 					<input type="checkbox" class="formbuilder" name="formfield[multiple]" value="true" <?php if($element != null && $element->multiple){echo 'checked';}?>>
 					Allow multiple answers
@@ -1285,7 +1313,7 @@ class FormBuilderForm extends SimForms{
 				<br>
 			</div>
 			
-			<div name='valuelist' class='elementoption datalist radio select checkbox hidden'>
+			<div name='valuelist' class='element-option datalist radio select checkbox hidden'>
 				<label>
 					Specify the values, one per line
 					<textarea class="formbuilder" name="formfield[valuelist]"><?php if($element != null){echo trim($element->valuelist);}?></textarea>
@@ -1293,7 +1321,7 @@ class FormBuilderForm extends SimForms{
 				<br>
 			</div>
 
-			<div name='select_options' class='elementoption datalist radio select checkbox hidden'>
+			<div name='select-options' class='element-option datalist radio select checkbox multi-answer-element hidden'>
 				<label class='block'>Specify an options group if desired</label>
 				<select class="formbuilder" name="formfield[default_array_value]">
 					/*<option value="">---</option>*/
@@ -1312,7 +1340,7 @@ class FormBuilderForm extends SimForms{
 				</select>
 			</div>
 
-			<div name='defaults' class='elementoption reverse notlabel notbutton notformstep notp notphp notfile notimage shouldhide'>
+			<div name='defaults' class='element-option reverse notlabel notbutton notformstep notp notphp notfile notimage notmulti_start notmulti_end shouldhide'>
 				<label class='block'>Specify a default value if desired</label>
 
 				<input type='text' class="formbuilder" name="formfield[default_value]" list='defaults' value='<?php if($element != null){echo trim($element->default_value);}?>'>
@@ -1331,7 +1359,7 @@ class FormBuilderForm extends SimForms{
 			do_action('sim-after-formbuilder-element-options', $element);
 			?>
 			<br>
-			<div name='elementoptions' class='elementoption reverse notlabel notbutton notformstep notp notphp shouldhide'>
+			<div name='element-options' class='element-option reverse notlabel notbutton notformstep notp notphp shouldhide'>
 				<label>
 					Specify any options like styling
 					<textarea class="formbuilder" name="formfield[options]"><?php if($element != null){echo trim($element->options);}?></textarea>
@@ -1347,13 +1375,13 @@ class FormBuilderForm extends SimForms{
 				if($meta){
 					?>
 					<h3>Warning conditions</h3>
-					<label class="option-label">
+					<label class="option-label element-option shouldhide notmulti_start notmulti_end">
 						<input type="checkbox" class="formbuilder" name="formfield[mandatory]" value="true" <?php if($element != null && $element->mandatory){echo 'checked';}?>>
 						People should be warned by e-mail/signal if they have not filled in this field.
 					</label><br>
 					<br>
 
-					<label class="option-label">
+					<label class="option-label element-option shouldhide notmulti_start notmulti_end">
 						<input type="checkbox" class="formbuilder" name="formfield[recommended]" value="true" <?php if($element != null && $element->recommended){echo 'checked';}?>>
 						People should be notified on their homepage if they have not filled in this field.
 					</label><br>
@@ -1372,11 +1400,11 @@ class FormBuilderForm extends SimForms{
 					<?php
 				}else{
 					?>
-					<label class="option-label">
+					<label class="option-label element-option notmulti_start notmulti_end shouldhide">
 						<input type="checkbox" class="formbuilder" name="formfield[required]" value="true" <?php if($element != null && $element->required){echo 'checked';}?>>
 						This should be a required field
 					</label><br>
-					<label class="option-label">
+					<label class="option-label element-option notmulti_start notmulti_end shouldhide">
 						<input type="checkbox" class="formbuilder" name="formfield[mandatory]" value="true" <?php if($element != null && $element->mandatory){echo 'checked';}?>>
 						This should be a conditional required field: its only required when visible
 					</label><br>
@@ -1385,8 +1413,7 @@ class FormBuilderForm extends SimForms{
 				}
 				?>
 			</div>
-			<br>
-			<label class="option-label">
+			<label class="option-label element-option notmulti_start notmulti_end shouldhide">
 				<input type="checkbox" class="formbuilder" name="formfield[hidden]" value="true" <?php if($element != null && $element->hidden){echo 'checked';}?>>
 				Hidden field
 			</label><br>
@@ -1397,7 +1424,7 @@ class FormBuilderForm extends SimForms{
 			}else{
 				$text	= "Change";
 			}
-			echo SIM\addSaveButton('submit_form_element',"$text form element"); ?>
+			echo SIM\addSaveButton('submit-form-element',"$text form element"); ?>
 		</form>
 		<?php
 
@@ -1464,7 +1491,7 @@ class FormBuilderForm extends SimForms{
 				$counter++;
 				?>
 				<div class="form-element-wrapper" data-id="<?php echo $el->id;?>" data-formid="<?php echo $this->formData->id;?>">
-					<button type="button" class="edit_form_element button" title="Jump to conditions element">View conditions of '<?php echo $el->name;?>'</button>
+					<button type="button" class="edit-form-element button" title="Jump to conditions element">View conditions of '<?php echo $el->name;?>'</button>
 				</div>
 				<?php
 			}
@@ -1732,7 +1759,7 @@ class FormBuilderForm extends SimForms{
 				</div>
 			</div>
 			<?php
-			echo SIM\addSaveButton('submit_form_condition','Save conditions'); ?>
+			echo SIM\addSaveButton('submit-form-condition','Save conditions'); ?>
 		</form>
 		<?php
 		return ob_get_clean();

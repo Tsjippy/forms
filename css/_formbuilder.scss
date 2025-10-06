@@ -96,8 +96,14 @@
 		margin-left: 25px;
 	}
 
-	.form-element-wrapper:hover{
-		background-color: #f7f5004d;
+	.form-element-wrapper{
+		img.copy-form-element{
+			min-width:	28px;
+		}
+
+		&:hover{
+			background-color: #f7f5004d;
+		}
 	}
 
 	.resizer-wrapper{

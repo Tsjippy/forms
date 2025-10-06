@@ -8,6 +8,8 @@ class DisplayForm extends SubmitForm{
 
 	public $wrap;
 	public $multiWrapValueCount;
+	public $multiWrapElementCount;
+	public $minElForTabs;
 	public $nextElement;
 	public $prevElement;
 	public $currentElement;
@@ -20,6 +22,7 @@ class DisplayForm extends SubmitForm{
 		$this->wrap						= false;
 		$this->isMultiStepForm			= '';
 		$this->formStepCounter			= 0;
+		$this->minElForTabs				= 6;
 		if(!empty($atts)){
 			$this->processAtts($atts);
 			$this->getForm();
@@ -42,6 +45,67 @@ class DisplayForm extends SubmitForm{
 		){
 			$this->userId	= $_GET['userid'];
 		}
+	}
+
+	/**
+	 * Renders the add and remove buttons for a multi-answer group
+	 */
+	protected function renderButtons($element){
+		ob_start();
+		
+		?>
+		<div class='buttonwrapper' style='margin: auto;'>
+			<button type='button' class='add button' style='flex: 1;'><?php echo $element->start;?></button>
+			<button type='button' class='remove button' style='flex: 1;'><?php echo $element->end;?></button>
+		</div><?php
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Renders the start of a multi wrap group
+	 *
+	 * @param	int		$index		The index index of the copies
+	 */
+	protected function multiWrapStart($index){
+		$class	= '';
+
+		// Wrap in a tab if it is a big one
+		if($this->multiWrapElementCount >= $this->minElForTabs){
+			$hidden	= 'hidden';
+
+			if($index === 0){
+				$hidden = '';
+			}
+
+			$class	= "tabcontent $hidden";
+		}
+
+		$this->multiInputsHtml[$index]  = "<div class='clone-div $class' data-divid='$index' style='display:flex'>";
+		$this->multiInputsHtml[$index] .= "<div class='multi-input-wrapper'>";
+	}
+
+	/**
+	 * All html for closing a multi wrap
+	 */
+	protected function multiWrapEnd($index, $element){
+		//close any label first before adding the buttons
+		if($this->wrap == 'label'){
+			$this->multiInputsHtml[$index] .= "</label>";
+		}
+		
+		//close select
+		if($element->type == 'select'){
+			$this->multiInputsHtml[$index] .= "</select>";
+		}
+
+		$this->multiInputsHtml[$index] .= "</div>"; //close multi-input-wrapper div
+
+		if($this->multiWrapElementCount < $this->minElForTabs){
+			$this->multiInputsHtml[$index] .= $this->renderButtons($element);
+		}
+		
+		$this->multiInputsHtml[$index] .= "</div>"; //close clone-div
 	}
 	
 	/**
@@ -119,45 +183,33 @@ class DisplayForm extends SubmitForm{
 			$this->wrap = $element->type;
 		}
 
-		//create as many inputs as the maximum value found
+		// Create as many clones as the maximum value of one of the elements 
 		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
 			$val	= '';
 			if(!empty($values[$index])){
 				$val	= $values[$index];
 			}
+
 			// prepare the base html for duplicating
 			$elementHtml	= $this->prepareElementHtml($element, $index, $elementHtml, $val);
 
+			// First element in a multi answer wrapper
 			if($this->prevElement->type == 'multi_start'){
-				$this->multiInputsHtml[$index] = "<div class='clone-div' data-divid='$index' style='display:flex'>";
-					$this->multiInputsHtml[$index] .= "<div class='multi_input_wrapper'>";
+				$this->multiWrapStart($index);
 			}
-						// elements between start and end
-						$this->multiInputsHtml[$index] .= $elementHtml;
 			
-			//end, write the buttons and closing div
+			// elements between start and end
+			$this->multiInputsHtml[$index] .= $elementHtml;
+			
+			// Last element in the multi wrap, write the buttons and closing div
 			if($this->nextElement->type == 'multi_end'){
-							//close any label first before adding the buttons
-							if($this->wrap == 'label'){
-								$this->multiInputsHtml[$index] .= "</label>";
-							}
-							
-							//close select
-							if($element->type == 'select'){
-								$this->multiInputsHtml[$index] .= "</select>";
-							}
-					$this->multiInputsHtml[$index] .= "</div>";//close multi_input_wrapper div
-					$this->multiInputsHtml[$index] .= "<div class='buttonwrapper' style='margin: auto;'>";
-						$this->multiInputsHtml[$index] .= "<button type='button' class='add button' style='flex: 1;'>+</button>";
-						$this->multiInputsHtml[$index] .= "<button type='button' class='remove button' style='flex: 1;'>-</button>";
-					$this->multiInputsHtml[$index] .= "</div>";
-				$this->multiInputsHtml[$index] .= "</div>";//close clone-div
+				$this->multiWrapEnd($index, $element);
 			}
 		}
 	}
 
 	/**
-	 * Build all html for a particular elemnt including edit controls.
+	 * Build all html for a particular element including edit controls.
 	 *
 	 * @param	object	$element		The element
 	 * @param	int		$key			The key in case of a multi element. Default 0
@@ -217,6 +269,10 @@ class DisplayForm extends SubmitForm{
 		//Load default values for this element
 		$elementHtml 	= $this->getElementHtml($element);
 
+		if(is_wp_error($elementHtml)){
+			return $elementHtml;
+		}
+
 		$html			= '';
 
 		//write a formstep div
@@ -241,13 +297,17 @@ class DisplayForm extends SubmitForm{
 			$this->multiwrap				= true;
 			
 			//we are wrapping so we need to find the max amount of filled in fields
-			$i								= $key+1;
+			$i								= $key + 1;
 			$this->multiWrapValueCount		= 1;
+			$this->multiWrapElementCount	= 0;
+			$this->multiInputsHtml 			= [];
 
 			//loop over all consequent wrapped elements
 			while(true){
 				$type	= $this->formElements[$i]->type;
 				if($type != 'multi_end' && !empty($this->formElements[$i])){
+					$this->multiWrapElementCount++;
+
 					if(!in_array($type, $this->nonInputs)){
 						//Get the field values and count
 						$valueCount		= count($this->getElementValues($this->formElements[$i]));
@@ -260,6 +320,23 @@ class DisplayForm extends SubmitForm{
 				}else{
 					break;
 				}
+			}
+
+			// Tablink buttons
+			if($this->multiWrapElementCount >= $this->minElForTabs){
+				for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
+					$active = '';
+
+					if($index === 0){
+						$active = 'active';
+					}
+
+					$html	.= "<button class='button tablink $active' type='button' id='show_{$element->name}-$index}' data-target='{$element->name}-$index' style='margin-right:4px;'>
+						{$element->nicename} $index
+					</button>";
+				}
+
+				$html	.= $this->renderButtons($element);
 			}
 
 			return $html;
@@ -276,17 +353,18 @@ class DisplayForm extends SubmitForm{
 
 			//write down all the multi html
 			$name	= str_replace('end', 'start', $element->name);
-				$elementHtml	= "<div class='clone-divs-wrapper' name='$name'>";
-					foreach($this->multiInputsHtml as $multihtml){
-						$elementHtml .= $multihtml;
+			$elementHtml	= "<div class='clone-divs-wrapper' name='$name'>";
+				foreach($this->multiInputsHtml as $multiHtml){
+					$elementHtml .= $multiHtml;
+				}
+				
+				if($this->wrap){
+					if($this->wrap	== 'label'){
+						$elementHtml .= '</label>';
 					}
-					if($this->wrap){
-						if($this->wrap	== 'label'){
-							$elementHtml .= '</label>';
-						}
-						$this->wrap	= false;
-					}
-				$elementHtml	.= '</div>';
+					$this->wrap	= false;
+				}
+			$elementHtml	.= '</div>';
 		}
 		
 		// wrap an element and a folowing field in the same wrapper
@@ -388,7 +466,7 @@ class DisplayForm extends SubmitForm{
 			wp_enqueue_script( "dynamic_{$this->formName}forms", SIM\pathToUrl($jsPath), array('sim_forms_script'), $this->formData->version, true);
 		}
 
-		$html	= apply_filters('sim-forms-before-showing-form', '', $this);
+		$html		= apply_filters('sim-forms-before-showing-form', '', $this);
 
 		$formName	= $this->formData->form_name;
 
@@ -419,7 +497,7 @@ class DisplayForm extends SubmitForm{
 			$html	.=  apply_filters('sim_before_form', '', $this->formName);
 
 			$html	.= "<form action='' method='post' class='sim-form-wrapper' $dataset>";
-				$html	.= "<div class='form_elements'>";
+				$html	.= "<div class='form-elements'>";
 					$html	.= "<input type='hidden' name='formid' value='{$this->formData->id}'>";
 					$html	.= "<input type='hidden' name='formurl' value='".SIM\currentUrl(true)."'>";
 					$html	.= "<input type='hidden' name='userid' value='$this->userId'>";

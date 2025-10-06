@@ -41,4 +41,9 @@ function pluginUpdate($oldVersion){
             );
         }
     }
+
+    if($oldVersion < '8.6.9'){
+        maybe_add_column($simForms->elTableName, 'add', "ALTER TABLE $simForms->elTableName ADD COLUMN `add` LONGTEXT");
+        maybe_add_column($simForms->elTableName, 'remove', "ALTER TABLE $simForms->elTableName ADD COLUMN `remove` LONGTEXT");
+    }
 }

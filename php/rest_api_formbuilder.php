@@ -20,6 +20,34 @@ function checkPermissions(){
 
 add_action( 'rest_api_init', __NAMESPACE__.'\restApiInitForms');
 function restApiInitForms() {
+	// copy element to form
+	register_rest_route(
+		RESTAPIPREFIX.'/forms',
+		'/copy_form_element',
+		array(
+			'methods' 				=> 'POST',
+			'callback' 				=> 	__NAMESPACE__.'\copyFormElement',
+			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
+			'args'					=> array(
+				'elid'		=> array(
+					'required'	=> true,
+					'validate_callback' => function($elementIndex){
+						return is_numeric($elementIndex);
+					}
+				),
+				'formid'		=> array(
+					'required'	=> true,
+					'validate_callback' => function($formId){
+						return is_numeric($formId);
+					}
+				),
+				'order'		=> array(
+					'required'	=> true
+				),
+			)
+		)
+	);
+
 	// add element to form
 	register_rest_route(
 		RESTAPIPREFIX.'/forms',
@@ -32,7 +60,7 @@ function restApiInitForms() {
 				'formfield'		=> array(
 					'required'	=> true
 				),
-				'element_id'		=> array(
+				'element-id'		=> array(
 					'required'	=> true
 				)
 			)
@@ -92,7 +120,7 @@ function restApiInitForms() {
 	// reorder form elements
 	register_rest_route(
 		RESTAPIPREFIX.'/forms',
-		'/reorder_form_elements',
+		'/reorder-form-elements',
 		array(
 			'methods' 				=> 'POST',
 			'callback' 				=> 	__NAMESPACE__.'\reorderFormElements',
@@ -360,8 +388,12 @@ function prepareProperties($prop){
 	return $prop;
 }
 
+function copyFormElement(){
+	return addFormElement(true);
+}
+
 // DONE
-function addFormElement(){
+function addFormElement($copy=false){
 	global $wpdb;
 
 	$simForms	= new SaveFormSettings();
@@ -370,34 +402,46 @@ function addFormElement(){
 	$index		= 0;
 	$oldElement	= new stdClass();
 
-	//Store form results if submitted
-	$element			= $_POST["formfield"];
+	//copy an existing element
+	if($copy === true){
+		$element		= $simForms->getElementById($_POST['elid']);
 
-	$element	= (object)$element;
- 	foreach($element as $prop => $val){
-		if(empty($val)){
-			continue;
-		}
-		
-		$element->$prop = prepareProperties($val);
+		$element->name	= $element->nicename;
+	}
 
-		if($val == "true"){
-			$val 	= true;
-		}
+	// Get element from $_POST
+	else{
+		$element			= $_POST["formfield"];
+		$element			= (object)$element;
 
-		if(is_array($val)){
-			$val	= serialize($val);
-		}else{
-			$val	= SIM\deslash($val);
+		// make sure all data is clean
+		foreach($element as $prop => $val){
+			if(empty($val)){
+				continue;
+			}
+
+			$element->$prop = prepareProperties($val);
+
+			if($val == "true"){
+				$val 	= true;
+			}
+
+			if(is_array($val)){
+				$val	= serialize($val);
+			}else{
+				$val	= SIM\deslash($val);
+			}
 		}
 	}
 
-	if(is_numeric($_POST['element_id'])){
-		$update		= true;
+	if(is_numeric($_POST['element-id'])){
+		$update			= true;
 
-		$oldElement	= $simForms->getElementById($_POST['element_id']);
+		$oldElement		= $simForms->getElementById($_POST['element-id']);
 
-		$element->id	= $_POST['element_id'];
+		$element->id	= $_POST['element-id'];
+
+		//$index			= $oldElement->index;
 	}else{
 		$update	= false;
 	}
@@ -441,7 +485,7 @@ function addFormElement(){
 	
 	if($update){
 		$message								= "Succesfully updated '{$element->name}'";
-		$element->id							= $_POST['element_id'];
+		$element->id							= $_POST['element-id'];
 		$result									= $simForms->updateFormElement($element);
 		if(is_wp_error($result)){
 			return $result;

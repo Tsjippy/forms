@@ -156,6 +156,8 @@ class SimForms{
 			'library'				=> '%d',
 			'editimage'				=> '%d',
 		  	'conditions'			=> '%s',
+			'remove'				=> '%s',
+			'add'					=> '%s',
 		];
 
 		$this->elementTableFormats		= apply_filters('forms-element-table-formats', $this->elementTableFormats, $this);
@@ -451,6 +453,8 @@ class SimForms{
 			editimage boolean default False,
 		  	conditions longtext,
 			warning_conditions longtext,
+			add longtext,
+			remove longtext,
 			PRIMARY KEY  (id)
 		  ) $charsetCollate;";
   
@@ -829,12 +833,12 @@ class SimForms{
 			return $formBuilderForm->showForm();
 		}elseif(empty($formElements)){
 			$html	= "<div class='warning'>This form has no elements yet.<br>";
-			if($this->editRights){
-				$url	 = add_query_arg('formbuilder', 'true', SIM\getCurrentUrl());
-				$html	.= "<br><a href='$url' class='button small sim'>Start Building the form</a>";
-			}else{
-				$html	.= "Ask an user with the editor role to start working on it";
-			}
+				if($this->editRights){
+					$url	 = add_query_arg('formbuilder', 'true', SIM\getCurrentUrl());
+					$html	.= "<br><a href='$url' class='button small sim'>Start Building the form</a>";
+				}else{
+					$html	.= "Ask an user with the editor role to start working on it";
+				}
 			return $html."</div>";
 		}else{
 			$displayForm	= new DisplayForm($atts);

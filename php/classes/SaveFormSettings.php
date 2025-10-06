@@ -15,7 +15,7 @@ class SaveFormSettings extends SimForms{
 	 *
 	 * @return	array						The prepared data
 	 */
-	private function prepareElement($element){
+	private function prepareElement($element, $oldElement=''){
 		$element	= (array)$element;
 		ksort($element);
 
@@ -26,11 +26,15 @@ class SaveFormSettings extends SimForms{
 
 		// add missing data
 		foreach(array_diff_key($this->elementTableFormats, $element) as $key => $val){
-			$element[$key]	= '';
+			if(is_object($oldElement) && isset($oldElement->$key)){
+				$element[$key]	= $oldElement->$key;
+			}else{
+				$element[$key]	= '';
+			}
 		}
 
 		ksort($element);
-		
+
 		return $element;
 	}
 
@@ -44,9 +48,9 @@ class SaveFormSettings extends SimForms{
 	public function updateFormElement($element){
 		global $wpdb;
 
-		$el	= $this->prepareElement($element);
+		$oldElement	= $this->getElementById($element->id);
 
-		unset($el['index']);
+		$el			= $this->prepareElement($element, $oldElement);
 		
 		//Update element
 		$wpdb->update(
@@ -64,7 +68,6 @@ class SaveFormSettings extends SimForms{
 		}
 
 		// Update the element in the formElements array
-		$oldElement								= $this->getElementById($element->id);
 		$this->formElements[$oldElement->index]	= $element;
 
 		if($this->formData == null){
@@ -257,7 +260,7 @@ class SaveFormSettings extends SimForms{
 			'succes_message'		=> isset($settings['succes_message']) 		? $settings['succes_message'] 						: null,
 			'include_id'			=> isset($settings['include_id']) 			? true 												: false,
 			'form_name'				=> isset($settings['form_name']) 			? $settings['form_name'] 							: null,
-			'save_in_meta'			=> isset($settings['save_in_meta']) 		? true 												: false,
+			'save_in_meta'			=> isset($settings['save-in-meta']) 		? true 												: false,
 			'reminder_frequency'	=> isset($settings['reminder_frequency']) 	? $settings['reminder_frequency'] 					: null,
 			'reminder_amount'		=> isset($settings['reminder_amount']) 		? $settings['reminder_amount'] 						: null,
 			'reminder_period'		=> isset($settings['reminder_period']) 		? $settings['reminder_period'] 						: null,

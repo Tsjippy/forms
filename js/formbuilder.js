@@ -6,7 +6,7 @@ console.log("Formbuilder.js loaded");
 function clearFormInputs(){
 	try {
 		//Loop to clear the modalform
-		modal.querySelectorAll('input:not([type=hidden]), select, textarea, [name=insertafter], [name=element_id]').forEach(function(el){
+		modal.querySelectorAll('input:not([type=hidden]), select, textarea, [name=insertafter], [name=element-id]').forEach(function(el){
 			if(el.type == 'checkbox'){
 				el.checked = false;
 			}else{
@@ -65,7 +65,7 @@ async function showEmptyModal(target){
 		modal.querySelector('[name="insertafter"]').value = formElementWrapper.dataset.priority;
 	}
 	
-	modal.querySelector('[name="submit_form_element"]').textContent = modal.querySelector('[name="submit_form_element"]').textContent.replace('Change','Add');
+	modal.querySelector('[name="submit-form-element"]').textContent = modal.querySelector('[name="submit-form-element"]').textContent.replace('Change','Add');
 	
 	modal.querySelector('.element-conditions-wrapper').innerHTML = Main.showLoader(null, false, 50, '', true);
 	
@@ -91,7 +91,7 @@ async function requestEditElementData(target){
 
 	let elementId		= formElementWrapper.dataset.id;
 	let formId			= target.closest('.form-element-wrapper').dataset.formid;
-	modal.querySelector('[name="element_id"]').value = formElementWrapper.dataset.id;
+	modal.querySelector('[name="element-id"]').value = formElementWrapper.dataset.id;
 	modal.originalhtml	= target.outerHTML;
 
 	let editButton		= target.outerHTML;
@@ -135,13 +135,24 @@ async function requestEditElementData(target){
 	}
 }
 
-async function addFormElement(target){
+// Add a new element
+async function addFormElement(target, copying=false){
+	let adding		= true;
+	let editing		= false;
+
+	let form		= target.closest('form');
+	if(form.querySelector('[name="element-id"]').value != ''){
+		editing		= true;
+		adding		= false;
+	}
+	
 	let wrapper;
-	let form				= target.closest('form');
 
-	let referenceNode		= document.querySelector('.form_elements .clicked');
-
+	let referenceNode	= document.querySelector('.form-elements .clicked');
+	
+	// we are adding the first element to the form 
 	if(referenceNode == null){
+		// reload if we are not in the editing screen yet
 		if( !window.location.href.includes('formbuilder=true')){
 			let combine	= '&';
 			if( !window.location.href.includes('?')){
@@ -152,7 +163,7 @@ async function addFormElement(target){
 			return;
 		}
 
-		wrapper				= document.querySelector('.form_elements');
+		wrapper				= document.querySelector('.form-elements');
 
 		priority			= 1;
 	}else{
@@ -161,26 +172,42 @@ async function addFormElement(target){
 		priority			= parseInt(wrapper.dataset.priority) + 1;
 	}
 
-	let loader 				= Main.showLoader(wrapper, false);
+	// Show loader
+	if(!editing){
+		let loader 				= Main.showLoader(wrapper, false);
+		loader.dataset.priority	= priority;
+		loader.classList.add('form-element-wrapper');
 
-	loader.dataset.priority	= priority;
-	loader.classList.add('form-element-wrapper');
+		// make sure all priorities are correct
+		fixElementNumbering(referenceNode.closest('form'));
 
-	// make sure all priorities are correct
-	fixElementNumbering(referenceNode.closest('form'));
+		var indexes	= {};
+		document.querySelectorAll(`.form-element-wrapper`).forEach(el => {
+			indexes[el.dataset.id]	= el.dataset.priority;
+		})
+		
+		indexes						= JSON.stringify(indexes);
+	}
 
-	let indexes	= {};
-	document.querySelectorAll(`.form-element-wrapper`).forEach(el => {
-		indexes[el.dataset.id]	= el.dataset.priority;
-	})
-	
-	indexes			= JSON.stringify(indexes);
+	let response;
+	if(copying){
+		let formData			= new FormData();
+		formData.append('elid', wrapper.dataset.id);
+		formData.append('formid', wrapper.dataset.formid);
+		formData.append('order', indexes);
 
-	let response	= await FormSubmit.submitForm(target, 'forms/add_form_element', indexes);
+		response	= await FormSubmit.fetchRestApi('forms/copy_form_element', formData);
+	}else if(editing){
+		response	= await FormSubmit.submitForm(target, 'forms/add_form_element');
+	}else{
+		response	= await FormSubmit.submitForm(target, 'forms/add_form_element', indexes);
+	}
 
 	if(response){
 		// New Element
-		if(form.querySelector('[name="element_id"]').value == ''){
+		if(editing){
+			referenceNode.closest('.form-element-wrapper').outerHTML = response.html;
+		}else{
 			//First clear any previous input
 			clearFormInputs();
 			
@@ -189,9 +216,6 @@ async function addFormElement(target){
 
 			//add resize listener
 			form.querySelectorAll('.resizer').forEach(el=>{resizeOb.observe(el);});
-		}else{
-			// Runs after an element update
-			referenceNode.closest('.form-element-wrapper').outerHTML = response.html;
 		}
 
 		Main.hideModals();
@@ -202,8 +226,6 @@ async function addFormElement(target){
 			referenceNode.classList.remove('clicked');
 		}
 	}
-
-	fixElementNumbering(referenceNode.closest('form'));
 
 	// Remove loaders
 	document.querySelectorAll(`.loader-wrapper`).forEach(el=>el.remove());
@@ -276,7 +298,7 @@ async function reorderformelements(event){
 		
 		formData.append('indexes', JSON.stringify(indexes));
 		
-		let response	= await FormSubmit.fetchRestApi('forms/reorder_form_elements', formData);
+		let response	= await FormSubmit.fetchRestApi('forms/reorder-form-elements', formData);
 
 		if(response){
 			reorderingBusy = false;
@@ -351,8 +373,13 @@ const resizeOb = new ResizeObserver(function(entries) {
 function showCondionalFields(type, form){
 	hideConditionalfields(form);
 
-	form.querySelectorAll(`.elementoption:not(.${type}, .reverse), .elementoption.not${type}`).forEach(el=>el.classList.replace('shouldhide', 'hidden'));
-	form.querySelectorAll(`.elementoption.${type}`).forEach(el=>el.classList.replace('hidden', 'shouldhide'));
+	form.querySelectorAll(`.element-option:not(.${type}, .reverse), .element-option.not${type}`).forEach(el=>el.classList.replace('shouldhide', 'hidden'));
+	form.querySelectorAll(`.element-option.${type}`).forEach(el=>el.classList.replace('hidden', 'shouldhide'));
+
+	// Check if this is a multi answer element
+	if(document.querySelector(`.clicked`) != null && document.querySelector(`.clicked`).closest(`.form-element-wrapper.multi-answer-element`) != null){
+		form.querySelectorAll(`.element-option.multi-answer-element`).forEach(el=>el.classList.replace('hidden', 'shouldhide'));
+	}
 
 	switch(type) {
 		case 'button':
@@ -389,7 +416,7 @@ function showCondionalFields(type, form){
 }
 
 function hideConditionalfields(form){
-	form.querySelectorAll(`.elementoption.reverse`).forEach(el=>el.classList.replace('hidden', 'shouldhide'));
+	form.querySelectorAll(`.element-option.reverse`).forEach(el=>el.classList.replace('hidden', 'shouldhide'));
 }
 
 function showOrHideIds(target){
@@ -802,14 +829,14 @@ function focusFirst(){
 reorderingBusy = false;
 document.addEventListener("DOMContentLoaded",function() {
 
-	//Make the form_elements div sortable
+	//Make the form-elements div sortable
 	let options = {
 		handle: '.movecontrol',
 		animation: 150,
 		onEnd: reorderformelements
 	};
 	
-	document.querySelectorAll('.form_elements').forEach(el=>{Sortable.create(el, options);});
+	document.querySelectorAll('.form-elements').forEach(el=>{Sortable.create(el, options);});
 	
 	//Listen to resize events on form-element-wrappers
 	document.querySelectorAll('.resizer').forEach(el=>{resizeOb.observe(el);});
@@ -918,14 +945,14 @@ window.addEventListener("click", event => {
 		showOrHideIds(target);
 	}else if (target.name == 'showname'){
 		showOrHideName(target);
-	}else if(target.name == 'submit_form_element'){
+	}else if(target.name == 'submit-form-element'){
 		event.stopPropagation();
 		addFormElement(target);
-	}else if(target.name == 'submit_form_condition'){
+	}else if(target.name == 'submit-form-condition'){
 		saveFormConditions(target);
-	}else if(target.name == 'submit_form_setting'){
+	}else if(target.name == 'submit-form-setting'){
 		saveFormSettings(target);
-	}else if(target.name == 'submit_form_emails'){
+	}else if(target.name == 'submit-form-emails'){
 		saveFormEmails(target);
 	}else if(target.name == 'autoarchive'){
 		let el = target.closest('.formsettings_wrapper').querySelector('.autoarchivelogic');
@@ -934,23 +961,29 @@ window.addEventListener("click", event => {
 		}else{
 			el.classList.add('hidden');
 		}
-	}else if(target.name == 'save_in_meta'){
+	}else if(target.name == 'save-in-meta'){
 		target.closest('.sim-form.builder').querySelector('.recurring-submissions').classList.toggle('hidden');
 	}else if(target.name == 'formfield[mandatory]' && target.checked){
 		target.closest('div').querySelector('[name="formfield[recommended]"]').checked=true;
 	}
 	
 	//request form values via AJAX
-	if (target.classList.contains('edit_form_element')){
+	if (target.classList.contains('edit-form-element')){
 		requestEditElementData(target);
 	}
-	
-	if (target.classList.contains('remove_form_element')){
+
+	if (target.classList.contains('copy-form-element')){
+		target.classList.add('clicked');
+
+		addFormElement(target, true);
+	}
+
+	if (target.classList.contains('remove-form-element')){
 		maybeRemoveElement(target);
 	}
 
 	//open the modal to add an element
-	if (target.classList.contains('add_form_element') || target.name == 'createform'){
+	if (target.classList.contains('add-form-element') || target.name == 'createform'){
 		if( !window.location.href.includes('&formbuilder=true')){
 			window.location.href = window.location.href+'&formbuilder=true';
 			
@@ -962,6 +995,7 @@ window.addEventListener("click", event => {
 	//actions on element type select
 	if (target.closest('.elementtype') != null){
 		showCondionalFields(target.dataset.value, target.closest('form'));
+		
 		//if label type is selected, wrap by default
 		if(target.dataset.value == 'label'){
 			target.closest('form').querySelector('[name="formfield[wrap]"]').checked		= true;
