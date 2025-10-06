@@ -1317,7 +1317,7 @@ class DisplayFormResults extends DisplayForm{
 				<table class='sim-table' style='display:table'>
 					<thead class="column-setting-wrapper">
 						<tr>
-							<th class="columnheading formfieldbutton">Sort</th>
+							<th class="columnheading formfield-button">Sort</th>
 							<th class="columnheading column-settings" style="width: 145px;">Field name</th>
 							<th class="columnheading column-settings">Display name</th>
 							<th style="width: 30px;"></th>
@@ -1349,7 +1349,7 @@ class DisplayFormResults extends DisplayForm{
 							<tr class="column-setting-wrapper" data-id="<?php echo $elementIndex;?>">
 								<input type="hidden" class="visibilitytype" name="column_settings[<?php echo $elementIndex;?>][show]" 		value="<?php echo $columnSetting['show'];?>">
 								<input type="hidden" name="column_settings[<?php echo $elementIndex;?>][name]"	value="<?php echo $columnSetting['name'];?>">
-								<td><span class="movecontrol formfieldbutton" aria-hidden="true">:::</span></td>
+								<td><span class="movecontrol formfield-button" aria-hidden="true">:::</span></td>
 								<td><span class="column-settings" style="margin-right:0px;"><?php echo $columnSetting['name'];?></span></td>
 								<td><input type="text" class="column-settings" name="column_settings[<?php echo $elementIndex;?>][nice_name]" value="<?php echo $niceName;?>" style="margin-right:0px;"></td>
 								<td><span class="visibility-icon"><?php echo $icon;?></span></td>
@@ -1601,18 +1601,18 @@ class DisplayFormResults extends DisplayForm{
 					}
 					?>
 					<label>
-						<input type="radio" name="form_settings[autoarchive]" value="1" <?php echo $checked1;?>>
+						<input type="radio" name="form-settings[autoarchive]" value="1" <?php echo $checked1;?>>
 						Yes
 					</label>
 					<label>
-						<input type="radio" name="form_settings[autoarchive]" value="0" <?php echo $checked2;?>>
+						<input type="radio" name="form-settings[autoarchive]" value="0" <?php echo $checked2;?>>
 						No
 					</label>
 					<br>
 					<br>
-					<div class='autoarchivelogic <?php if($checked1 == ''){echo 'hidden';}?>'>
+					<div class='auto-archive-logic <?php if($checked1 == ''){echo 'hidden';}?>'>
 						Auto archive a (sub) entry when field<br>
-						<select name="form_settings[autoarchive_el]" class='inline' style="margin-right:10px;">
+						<select name="form-settings[autoarchive_el]" class='inline' style="margin-right:10px;">
 							<?php
 							if(empty($this->formData->autoarchive_el)){
 								?><option value='' selected>---</option><?php
@@ -1638,9 +1638,9 @@ class DisplayFormResults extends DisplayForm{
 							?>
 						</select>
 						<label style="margin:0 10px;">equals</label>
-						<input type='text' class='wide' name="form_settings[autoarchive_value]" value="<?php echo $this->formData->autoarchive_value;?>" style='max-width:200px;'>
+						<input type='text' class='wide' name="form-settings[autoarchive_value]" value="<?php echo $this->formData->autoarchive_value;?>" style='max-width:200px;'>
 						
-						<div class="infobox" name="info">
+						<div class="info-box" name="info">
 							<div>
 								<p class="info-icon">
 									<img draggable="false" role="img" class="emoji" alt="ℹ" src="<?php echo SIM\PICTURESURL."/info.png";?>" loading='lazy' >
@@ -1690,7 +1690,7 @@ class DisplayFormResults extends DisplayForm{
 											$checked = '';
 										}
 										echo "<label>";
-											echo "<input type='checkbox' name='form_settings[split][]' value='$id' $checked>   ";
+											echo "<input type='checkbox' name='form-settings[split][]' value='$id' $checked>   ";
 											echo $name;
 										echo "</label><br>";
 									}
@@ -1786,7 +1786,7 @@ class DisplayFormResults extends DisplayForm{
 		<div class="modal form_shortcode_settings hidden">
 			<!-- Modal content -->
 			<div class="modal-content" style='max-width:100vw;min-width:90vw;'>
-				<span id="modal_close" class="close">&times;</span>
+				<span id="modal-close" class="close">&times;</span>
 				
 				<button id="column-settings" class="button tablink <?php echo $active1;?>" data-target="column-settings_<?php echo $this->shortcodeData->id;?>">Column settings</button>
 				<button id="table_settings" class="button tablink <?php echo $active2;?>" data-target="table_rights_<?php echo $this->shortcodeData->id;?>">Table settings</button>
@@ -1946,14 +1946,14 @@ class DisplayFormResults extends DisplayForm{
 				// make sure the name is not the element name but the filtername
 				$elementHtml	= str_replace("name='{$filterElement->name}'", "name='$filterKey'", $elementHtml);
 	
-				$filterOption	.= "<span class='filteroption'>";
+				$filterOption	.= "<span class='filter-option'>";
 					$filterOption	.= "<label>".ucfirst($filterKey).": </label>";
 					$filterOption	.= $elementHtml;
 				$filterOption	.= "</span>";
 			}
 
 			if(!empty($filterOption)){
-				$html	= "<form method='post' class='filteroptions'>";
+				$html	= "<form method='post' class='filter-options'>";
 					$html	.= "<div class='filter-wrapper'>";
 						$html	.= $filterOption;
 						$html	.= "<button class='button' style='height: fit-content;'>Filter</button>";

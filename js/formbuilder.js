@@ -109,8 +109,8 @@ async function requestEditElementData(target){
 
 	if(response){
 		//fill the form after we have clicked the edit button
-		if(modal.querySelector('[name="add_form_element_form"]') != null){
-			modal.querySelector('[name="add_form_element_form"]').innerHTML = response.elementForm;
+		if(modal.querySelector('[name="add-form-element-form"]') != null){
+			modal.querySelector('[name="add-form-element-form"]').innerHTML = response.elementForm;
 
 			//activate tiny mce's
 			modal.querySelectorAll('.wp-editor-area').forEach(el =>{
@@ -119,7 +119,7 @@ async function requestEditElementData(target){
 			});
 		}
 
-		showCondionalFields(modal.querySelector('[name="formfield[type]"]').value, modal.querySelector('[name="add_form_element_form"]'));
+		showCondionalFields(modal.querySelector('[name="formfield[type]"]').value, modal.querySelector('[name="add-form-element-form"]'));
 
 		//fill the element conditions tab
 		modal.querySelector('.element-conditions-wrapper').innerHTML = response.conditionsHtml;
@@ -234,8 +234,8 @@ async function addFormElement(target, copying=false){
 }
 
 async function sendElementSize(el, widthPercentage){
-	if(widthPercentage != el.dataset.widthpercentage && Math.abs(widthPercentage - el.dataset.widthpercentage)>5){
-		el.dataset.widthpercentage = widthPercentage;
+	if(widthPercentage != el.dataset.width_percentage && Math.abs(widthPercentage - el.dataset.width_percentage)>5){
+		el.dataset.width_percentage = widthPercentage;
 		
 		//send new width over AJAX
 		let formData = new FormData();
@@ -359,8 +359,8 @@ const resizeOb = new ResizeObserver(function(entries) {
 		var widthPercentage = Math.round(width/element.parentNode.offsetWidth * 100);
 		
 		//Show percentage on screen
-		let el	= element.querySelector('.widthpercentage');
-		if(widthPercentage <99){
+		let el	= element.querySelector('.width-percentage');
+		if(widthPercentage < 99){
 			el.textContent = widthPercentage + '%';
 		}else if(el != null){
 			el.textContent = '';
@@ -388,10 +388,10 @@ function showCondionalFields(type, form){
 		case 'button':
 		case 'formstep':
 		case 'label':
-			form.querySelector('[name="labeltext"] .elementtype').textContent = type;
+			form.querySelector('[name="label-text"] .element-type').textContent = type;
 			break;
 		case 'info':
-			form.querySelector('[name="infotext"] .type').textContent = 'infobox';
+			form.querySelector('[name="infotext"] .type').textContent = 'info-box';
 			break;
 		case 'hcaptcha':
 		case 'recaptcha':
@@ -610,7 +610,7 @@ function addRuleRow(row){
 
 function addOppositeCondition(clone, target){
 	//Set values to opposite
-	clone.querySelectorAll('.element_condition').forEach(function(el){
+	clone.querySelectorAll('.element-condition').forEach(function(el){
 		if(el.matches('select:not(.nonice,.swal2-select)')){
 			Main.attachNiceSelect(select);
 		}
@@ -636,7 +636,7 @@ function addOppositeCondition(clone, target){
 			if(el._niceSelect != undefined){
 				el._niceSelect.update();
 			}
-		}else if(el.type == 'radio' && el.classList.contains('element_condition') && (el.value == 'show' || el.value == 'hide')){
+		}else if(el.type == 'radio' && el.classList.contains('element-condition') && (el.value == 'show' || el.value == 'hide')){
 			if(!el.checked){
 				el.checked = true;
 			}else{
@@ -786,7 +786,7 @@ function fixRuleNumbering(conditionRow){
 	ruleRows.forEach(ruleRow =>{
 		ruleRow.dataset.rule_index = i;
 		
-		ruleRow.querySelectorAll('.element_condition').forEach(function(el){
+		ruleRow.querySelectorAll('.element-condition').forEach(function(el){
 			//fix numbering
 			if(el.id != undefined){
 				el.id = el.id.replace(/([0-9]+\]\[rules\]\[)[0-9]+/g,"$1"+i);
@@ -806,7 +806,7 @@ function fixConditionNumbering(){
 	for (let i = 0; i < conditionRows.length; i++) {
 		conditionRows[i].dataset.condition_index = i;
 		
-		conditionRows[i].querySelectorAll('.element_condition').forEach(function(el){
+		conditionRows[i].querySelectorAll('.element-condition').forEach(function(el){
 			//fix numbering
 			if(el.id != undefined){
 				el.id = el.id.replace(/[0-9]+(\]\[rules\]\[[0-9]+)/g,i+"$1")
@@ -826,7 +826,7 @@ function focusFirst(){
 	modal.scrollTo(0,0);
 	
 	console.log('scrolling')
-	modal.querySelector('[name="add_form_element_form"] .nice-select').focus();
+	modal.querySelector('[name="add-form-element-form"] .nice-select').focus();
 }
 
 reorderingBusy = false;
@@ -900,7 +900,7 @@ function placeholderSelect(target){
 
 function copyWarningCondition(target){
 	//copy the row
-	let newNode = FormFunctions.cloneNode(target.closest('.warning_conditions'));
+	let newNode = FormFunctions.cloneNode(target.closest('.warning-conditions'));
 
 	target.closest('.conditions_wrapper').insertAdjacentElement('beforeEnd', newNode);
 
@@ -908,13 +908,13 @@ function copyWarningCondition(target){
 	target.classList.add('active');
 
 	//store the value
-	target.closest('.warning_conditions').querySelector('.combinator').value = target.value;
+	target.closest('.warning-conditions').querySelector('.combinator').value = target.value;
 
 	fixWarningConditionNumbering(target.closest('.conditions_wrapper'));
 }
 
 function removeWarningCondition(target){
-	let condition	= target.closest('.warning_conditions');
+	let condition	= target.closest('.warning-conditions');
 
 	// Remove the active class of the previous conditions
 	if(condition.nextElementSibling == null){
@@ -938,7 +938,7 @@ window.addEventListener("click", event => {
 	formElementWrapper		= target.closest('.form-element-wrapper');
 	
 	if(formWrapper != null){
-		modal = formWrapper.querySelector('.add_form_element_modal');
+		modal = formWrapper.querySelector('.add-form-element-modal');
 	}
 	
 	/* ELEMENT ACTIONS */
@@ -958,7 +958,7 @@ window.addEventListener("click", event => {
 	}else if(target.name == 'submit-form-emails'){
 		saveFormEmails(target);
 	}else if(target.name == 'autoarchive'){
-		let el = target.closest('.formsettings_wrapper').querySelector('.autoarchivelogic');
+		let el = target.closest('.formsettings_wrapper').querySelector('.auto-archive-logic');
 		if(target.value == 'true'){
 			el.classList.remove('hidden');
 		}else{
@@ -996,7 +996,7 @@ window.addEventListener("click", event => {
 	}
 	
 	//actions on element type select
-	if (target.closest('.elementtype') != null){
+	if (target.closest('.element-type') != null){
 		showCondionalFields(target.dataset.value, target.closest('form'));
 		
 		//if label type is selected, wrap by default
@@ -1071,7 +1071,7 @@ window.addEventListener("click", event => {
 		placeholderSelect(target);
 	}
 
-	//copy warning_conditions row
+	//copy warning-conditions row
 	if(target.matches('.warn_cond')){
 		copyWarningCondition(target);
 	}
@@ -1091,7 +1091,7 @@ window.addEventListener('change', ev=>{
 		//if this option has a keys data value
 		let metaIndexes	= target.list.querySelector(`[value='${target.value}' i]`);
 		if(metaIndexes != null && metaIndexes.dataset.keys != undefined){
-			parent	= target.closest('.warning_conditions').querySelector('.index_wrapper');
+			parent	= target.closest('.warning-conditions').querySelector('.index_wrapper');
 			//show the data key selector
 			parent.classList.remove('hidden');
 			
@@ -1148,7 +1148,7 @@ window.addEventListener('change', ev=>{
 			}
 		}
 	}else if(target.name != undefined && target.name.includes('[equation')){
-		let warningsConditions	= target.closest('.warning_conditions');
+		let warningsConditions	= target.closest('.warning-conditions');
 
 		if(warningsConditions != null){
 			if( target.value == 'submitted'){
@@ -1161,7 +1161,7 @@ window.addEventListener('change', ev=>{
 });
 
 function fixWarningConditionNumbering(parent){
-	var warningConditions	= parent.querySelectorAll('.warning_conditions');
+	var warningConditions	= parent.querySelectorAll('.warning-conditions');
 	var i = 0;
 	//loop over all rules in the condition
 	warningConditions.forEach(condition =>{

@@ -46,14 +46,14 @@
 		}
 	}
 
-	.widthpercentage{
+	.width-percentage{
 		margin-top: auto;
 		margin-bottom: auto;
 		margin-left: 10px;
 		float: right;
 	}
 
-	.formfieldbutton{
+	.formfield-button{
 		margin-right: 10px;
 		max-width: 60px;
 		flex: 1;
@@ -92,7 +92,7 @@
 	}
 
 	.rule-row, 
-	.action_row{
+	.action-row{
 		margin-left: 25px;
 	}
 
@@ -108,7 +108,7 @@
 
 	.resizer-wrapper{
 		.hidden:not(.modal,.elname), 
-		.stephidden{
+		.step-hidden{
 			background-color: lightgray;
 			display: block !important;
 		}

@@ -45,7 +45,7 @@ class SimForms{
 		$this->submissionTableName		= $wpdb->prefix . 'sim_form_submissions';
 		$this->tableName				= $wpdb->prefix . 'sim_forms';
 		$this->elTableName				= $wpdb->prefix . 'sim_form_elements';
-		$this->nonInputs				= ['label','button','datalist','formstep','info','p','php','multi_start','multi_end','div_start','div_end'];
+		$this->nonInputs				= ['label','button','datalist','formstep','info','p','php','multi_start','multi_end','div-start','div-end'];
 		$this->multiInputsHtml			= [];
 		$this->user 					= wp_get_current_user();
 		$this->userRoles				= $this->user->roles;
@@ -452,7 +452,7 @@ class SimForms{
 			library boolean default False,
 			editimage boolean default False,
 		  	conditions longtext,
-			warning_conditions longtext,
+			warning-conditions longtext,
 			add longtext,
 			remove longtext,
 			PRIMARY KEY  (id)

@@ -294,10 +294,10 @@ async function getNextPage(target){
 
 	let loader			= Main.showLoader(table, false);
 	let formData;
-	if(wrapper.querySelector(".filteroptions") == null){
+	if(wrapper.querySelector(".filter-options") == null){
 		formData		= new FormData();
 	}else{
-		formData		= new FormData(wrapper.querySelector(".filteroptions"));
+		formData		= new FormData(wrapper.querySelector(".filter-options"));
 	}
 
     formData.append('formid', formId);
@@ -366,10 +366,10 @@ async function getSortedPage(target){
 
 	let loader			= Main.showLoader(table, true, 50, 'Loading sorted data');
 	let formData;
-	if(wrapper.querySelector(".filteroptions") == null){
+	if(wrapper.querySelector(".filter-options") == null){
 		formData		= new FormData();
 	}else{
-		formData		= new FormData(wrapper.querySelector(".filteroptions"));
+		formData		= new FormData(wrapper.querySelector(".filter-options"));
 	}
 
     formData.append('formid', formId);
@@ -619,9 +619,9 @@ document.addEventListener("click", event=>{
 		event.stopPropagation();
 	}else if(target.name == 'submit_table_setting'){
 		saveTableSettings(target);
-	}else if(target.name == 'form_settings[autoarchive]'){
+	}else if(target.name == 'form-settings[autoarchive]'){
 		//show auto archive fields
-		let el = target.closest('.table-rights-wrapper').querySelector('.autoarchivelogic');
+		let el = target.closest('.table-rights-wrapper').querySelector('.auto-archive-logic');
 		if(target.value == '1'){
 			el.classList.remove('hidden');
 		}else{

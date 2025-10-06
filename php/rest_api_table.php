@@ -334,7 +334,7 @@ function saveColumnSettings($settings='', $shortcodeId=''){
 function saveTableSettings(){
 	global $wpdb;
 	
-	$tableSettings 	= $_POST['table_settings'];
+	$tableSettings 	= $_POST['table-settings'];
 
 	// Check invalid filter names
 	if(isset($tableSettings['filter'])){
@@ -359,7 +359,7 @@ function saveTableSettings(){
 	);
 	
 	//also update form setings if needed
-	$formSettings = $_POST['form_settings'];
+	$formSettings = $_POST['form-settings'];
 	if(is_array($formSettings) && is_numeric($_POST['formid'])){
 		$formTable->getForm($_POST['formid']);
 		

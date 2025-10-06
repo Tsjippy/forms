@@ -7,11 +7,11 @@
     max-width: 200px;
 }
 
-.autoarchivelogic{
+.auto-archive-logic{
     display: flex;
     width: 100%;
 
-    .infobox{
+    .info-box{
         min-width: fit-content;
     }
 
@@ -24,7 +24,7 @@
     }
 }
 
-.filteroptions{
+.filter-options{
     margin-bottom:10px;
 
     .filter-wrapper{
@@ -33,7 +33,7 @@
         align-items: center;
     }
 
-    .filteroption{
+    .filter-option{
         display: contents;
 
         label{
@@ -59,7 +59,7 @@
         line-height:25px;
 
         .pagenumber{
-            color: $primary_color;
+            color: $primaryColor;
             cursor: pointer;
         }
 
@@ -92,7 +92,7 @@
 
 .edit-forms-table{
     text-decoration: underline;
-    text-decoration-color: $primary_color;
+    text-decoration-color: $primaryColor;
 }
 
 .visibility-icon{

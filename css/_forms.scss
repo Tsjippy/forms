@@ -1,11 +1,11 @@
 @use '../../../plugins/sim-plugin/includes/css/scss/global' as *;
 
 .sim-form-wrapper{
-	.formfieldinput:not(input[type='radio']){
+	.formfield-input:not(input[type='radio']){
 		float:left;
 	}
 	
-	.infobox{
+	.info-box{
 		position: relative;
 		z-index: 2;
 	}
@@ -51,7 +51,7 @@
 
 		/* Mark the steps that are finished and valid: */
 		&.finish {
-			background-color: $secundary_color;
+			background-color: $secundaryColor;
 			opacity: 0.8;
 		}
 	}
@@ -122,11 +122,11 @@
 		}
 	}
 
-	.optionlabel{
+	.option-label{
 		margin-left: 5px;
 	}
 	
-	.labeltext{
+	.label-text{
 		margin-bottom: 5px;
 	}
 	
@@ -171,7 +171,7 @@
 		min-width: 150px;
 	}
 
-	.formfieldlabel{
+	.form-label{
 		width: 100%;
 	}
 
@@ -199,14 +199,14 @@
 .sim-form-wrapper input[type="number"],
 .sim-form-wrapper input[type="url"]
 {
-	&:not(.column-settings, .element_condition){
+	&:not(.column-settings, .element-condition){
 		width: 100%;
 	}
 }
 
 .edit-forms-table{
 	text-decoration: underline;
-	text-decoration-color: $primary_color;
+	text-decoration-color: $primaryColor;
 }
 
 .checkbox-label{

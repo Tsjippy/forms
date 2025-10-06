@@ -252,7 +252,7 @@ export function updateMultiStepControls(form){
 	}
 
 	// check if this is the last visible
-	let activeFormstep		= form.querySelector('.formstep:not(.stephidden)');
+	let activeFormstep		= form.querySelector('.formstep:not(.step-hidden)');
 	if(visibleFormsteps[visibleFormsteps.length-1] == activeFormstep){
 		// make the submit button visible
 		form.querySelector('.nextBtn').classList.add('hidden');
@@ -278,7 +278,7 @@ export function showTab(n, form) {
 		}
 		
 		//hide all formsteps
-		form.querySelectorAll('.formstep:not(.stephidden)').forEach(step=>step.classList.add('stephidden'));
+		form.querySelectorAll('.formstep:not(.step-hidden)').forEach(step=>step.classList.add('step-hidden'));
 		
 		// Show the specified formstep of the form ...
 		let x = form.getElementsByClassName("formstep");
@@ -292,7 +292,7 @@ export function showTab(n, form) {
 		window.scrollTo({ top: y, behavior: 'auto'});
 		
 		//show
-		x[n].classList.remove('stephidden');
+		x[n].classList.remove('step-hidden');
 
 		// This function removes the "active" class of all steps...
 		form.querySelectorAll(".step.active").forEach(el=>{el.classList.remove('active');});
@@ -337,7 +337,7 @@ export function nextPrev(n, form) {
 	let valid			= true;
 
 	// Find the current active tab
-	x.forEach((el, index)=>{if(!el.matches('.stephidden')){currentTab = index}});
+	x.forEach((el, index)=>{if(!el.matches('.step-hidden')){currentTab = index}});
 	
 	//Check validity of this step if going forward
 	if(n>0){

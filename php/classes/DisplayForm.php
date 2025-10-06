@@ -228,13 +228,13 @@ class DisplayForm extends SubmitForm{
 
 		$elementIndex	= $element->priority - 1;
 
-		if($element->type == 'div_start'){
+		if($element->type == 'div-start'){
 			$class		= 'input-wrapper';
 			if($element->hidden){
 				$class	.= " hidden";
 			}
 			return "<div name='$element->name' class='$class'>";
-		}elseif($element->type == 'div_end'){
+		}elseif($element->type == 'div-end'){
 			return "</div>";
 		}
 

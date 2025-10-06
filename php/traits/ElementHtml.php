@@ -422,13 +422,13 @@ trait ElementHtml{
 			}else{
 				$html	= "php function '$functionName' not found";
 			}
-		}elseif($element->type == 'div_start'){
+		}elseif($element->type == 'div-start'){
 			$class		= '';
 			if($element->hidden){
 				$class	= "class='hidden'";
 			}
 			$html 		= "<div name='$element->name' $class>";
-		}elseif($element->type == 'div_end'){
+		}elseif($element->type == 'div-end'){
 			$html 		= "</div>";
 		}elseif(in_array($element->type, ['multi_start','multi_end'])){
 			$html 		= "";
@@ -438,7 +438,7 @@ trait ElementHtml{
 			$content = str_replace('</p>','',$content);
 			$content = SIM\deslash($content);
 			
-			$html = "<div class='infobox' name='{$element->name}'>";
+			$html = "<div class='info-box' name='{$element->name}'>";
 				$html .= '<div style="float:right">';
 					$html .= '<p class="info-icon"><img draggable="false" role="img" class="emoji" alt="ℹ" src="'.SIM\PICTURESURL.'/info.png" loading="lazy" ></p>';
 				$html .= '</div>';
@@ -481,7 +481,7 @@ trait ElementHtml{
 			/*
 				ELEMENT TAG NAME
 			*/
-			if(in_array($element->type, ['formstep', 'info', 'div_start'])){
+			if(in_array($element->type, ['formstep', 'info', 'div-start'])){
 				$elType	= "div";
 			}elseif(in_array($element->type,array_merge($this->nonInputs,['select','textarea']))){
 				$elType	= $element->type;
@@ -518,16 +518,16 @@ trait ElementHtml{
 			$elClass = " formfield";
 			switch($element->type){
 				case 'label':
-					$elClass .= " formfieldlabel";
+					$elClass .= " form-label";
 					break;
 				case 'button':
 					$elClass .= " button";
 					break;
 				case 'formstep':
-					$elClass .= " formstep stephidden";
+					$elClass .= " formstep step-hidden";
 					break;
 				default:
-					$elClass .= " formfieldinput";
+					$elClass .= " formfield-input";
 			}
 			
 			/*
@@ -606,13 +606,13 @@ trait ElementHtml{
 						$elContent = "<h3>{$element->text}</h3>";
 						break;
 					case 'label':
-						$elContent = "<h4 class='labeltext'>{$element->text}</h4>";
+						$elContent = "<h4 class='label-text'>{$element->text}</h4>";
 						break;
 					case 'button':
 						$elContent = $element->text;
 						break;
 					default:
-						$elContent = "<label class='labeltext'>{$element->text}</label>";
+						$elContent = "<label class='label-text'>{$element->text}</label>";
 				}
 			}
 			
@@ -651,9 +651,9 @@ trait ElementHtml{
 					$html	= "<$elType name='$elName' $elId class='$elClass' $elOptions>";
 				}elseif($element->type == 'text'){
 					
-					$html	= "<div class='optionwrapper'>";
+					$html	= "<div class='option-wrapper'>";
 						// container for choices made
-						$html	.= "<ul class='listselectionlist'>";
+						$html	.= "<ul class='list-selection-list'>";
 							// add previous made inputs
 							$preValues	= $this->getPrevValues($element, true);
 
@@ -672,12 +672,12 @@ trait ElementHtml{
 									$transValue		= $v;
 								}
 
-								$html	.= "<li class='listselection'>";
+								$html	.= "<li class='list-selection'>";
 									$html	.= "<button type='button' class='small remove-list-selection'>";
 										$html	.= "<span class='remove-list-selection'>×</span>";
 									$html	.= "</button>";
 									$html	.= "<input type='hidden' name='$element->name[]' value='$v'>";
-									$html	.= "<span class='selectedname'>$transValue</span>";
+									$html	.= "<span class='selected-name'>$transValue</span>";
 								$html	.= "</li>";
 							}
 						$html	.= "</ul>";
