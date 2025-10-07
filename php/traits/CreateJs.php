@@ -380,7 +380,7 @@ trait CreateJs{
         $newJs   = '';
 
         // Store all forms with this form-id in a variable
-        $newJs  .= "\n\tforms =               document.querySelectorAll(`form[data-form-id=\"{$this->formData->id}\"]`);";
+        $newJs  .= "\n\tforms =               document.querySelectorAll(`form[data-form_id=\"{$this->formData->id}\"]`);";
 
         // Shorter variable for the form functions
         $newJs  .= "\n\tget_field_value =       FormFunctions.getFieldValue;";
@@ -503,7 +503,7 @@ trait CreateJs{
             $newJs  .= "\n\t\tvar form	= el.closest('form');\n";
             foreach($checks as $if => $check){
                 // empty if is not allowed
-                if($if == 'if()'){
+                if(str_contains($if, 'if()')){
                     continue;
                 }
                 

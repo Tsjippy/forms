@@ -146,7 +146,7 @@ class FormBuilderForm extends SimForms{
 		}
 
 		//Add form edit controls if needed
-		$html = " <div class='form-element-wrapper $extraClass' data-id='{$element->id}' data-form-id='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
+		$html = " <div class='form-element-wrapper $extraClass' data-id='{$element->id}' data-form_id='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
 			$html 	.= "<span class='movecontrol formfield-button' aria-hidden='true'>:::<br><span class='elid$idHidden' style='font-size:xx-small'>$element->id</span></span>";
 			$html 	.= "<div class='resizer-wrapper'>";
 				if($element->type == 'info'){
@@ -185,7 +185,7 @@ class FormBuilderForm extends SimForms{
 				}
 
 				$html .= $elementHtml;
-					$html	.= "<span class='elname$hidden' style='font-size:xx-small;'>$element->name</span>";
+					$html	.= "<span class='element-name $hidden' style='font-size:xx-small;'>$element->name</span>";
 					
 					//Add a symbol if this field has conditions or is required
 					if(!empty($element->conditions) || $element->required == true || $element->mandatory == true){
@@ -393,29 +393,29 @@ class FormBuilderForm extends SimForms{
 					
 					<label class="block">
 						<h4>Submit button text</h4>
-						<input type='text' class='formbuilder formfieldsetting' name='button-text' value="<?php echo $this->formData->button_text?>">
+						<input type='text' class='formbuilder form-element-setting' name='button-text' value="<?php echo $this->formData->button_text?>">
 					</label>
 					
 					<label class="block">
 						<h4>Succes message</h4>
-						<input type='text' class='formbuilder formfieldsetting' name='succes-message' value="<?php echo $this->formData->succes_message?>">
+						<input type='text' class='formbuilder form-element-setting' name='succes-message' value="<?php echo $this->formData->succes_message?>">
 					</label>
 
 					<label class="block">
 						<h4>Include submission ID in message</h4>
 						<label>
-							<input type='radio' class='formbuilder formfieldsetting' name='include-id' value="1" <?php if(!isset($this->formData->include_id) || $this->formData->include_id){echo 'checked';}?>>
+							<input type='radio' class='formbuilder form-element-setting' name='include-id' value="1" <?php if(!isset($this->formData->include_id) || $this->formData->include_id){echo 'checked';}?>>
 							Yes
 						</label>
 						<label>
-							<input type='radio' class='formbuilder formfieldsetting' name='include-id' value="0" <?php if(isset($this->formData->include_id) && !$this->formData->include_id){echo 'checked';}?>>
+							<input type='radio' class='formbuilder form-element-setting' name='include-id' value="0" <?php if(isset($this->formData->include_id) && !$this->formData->include_id){echo 'checked';}?>>
 							No
 						</label>
 					</label>
 					
 					<label class="block">
 						<h4>Form name</h4>
-						<input type='text' class='formbuilder formfieldsetting' name='form-name' value="<?php echo $this->formData->form_name?>">
+						<input type='text' class='formbuilder form-element-setting' name='form-name' value="<?php echo $this->formData->form_name?>">
 					</label>
 					<br>
 					
@@ -427,7 +427,7 @@ class FormBuilderForm extends SimForms{
 							$checked = '';
 						}
 						?>
-						<input type='checkbox' class='formbuilder formfieldsetting' name='save-in-meta' value='1' <?php echo $checked;?>>
+						<input type='checkbox' class='formbuilder form-element-setting' name='save-in-meta' value='1' <?php echo $checked;?>>
 						Save submissions in usermeta table
 					</label>
 					<br>
@@ -435,7 +435,7 @@ class FormBuilderForm extends SimForms{
 					<div class='recurring-submissions<?php if($this->formData->save_in_meta){ echo ' hidden';}?>'>
 						<h4>Recurring Submissions</h4>
 						Request new form submissions every 
-						<input type='number' name='reminder-frequency' value='<?php echo $this->formData->reminder-frequency;?>' style='max-width: 70px;'>
+						<input type='number' name='reminder-frequency' value='<?php echo $this->formData->reminder_frequency;?>' style='max-width: 70px;'>
 
 						<?php
 							foreach(['years', 'months', 'days'] as $period) {
@@ -480,7 +480,7 @@ class FormBuilderForm extends SimForms{
 						}
 
 						?>
-						<input type='url' class='formbuilder formfieldsetting' name='form-url' value="<?php echo $url?>">
+						<input type='url' class='formbuilder form-element-setting' name='form-url' value="<?php echo $url?>">
 					</label>
 					<br>
 					
@@ -497,7 +497,7 @@ class FormBuilderForm extends SimForms{
 					<label class='block <?php if($hideUploadEl){echo 'hidden';}?>'>
 						<h4>Save form uploads in this subfolder of the uploads folder:<br>
 						If you leave it empty the default form_uploads will be used</h4>
-						<input type='text' class='formbuilder formfieldsetting' name='upload-path' value='<?php echo $this->formData->upload_path;?>'>
+						<input type='text' class='formbuilder form-element-setting' name='upload-path' value='<?php echo $this->formData->upload_path;?>'>
 					</label>
 					<br>
 					
@@ -509,7 +509,7 @@ class FormBuilderForm extends SimForms{
 							$checked = '';
 						}
 						?>
-						<input type='checkbox' class='formbuilder formfieldsetting' name='form-reset' value='1' <?php echo $checked;?>>
+						<input type='checkbox' class='formbuilder form-element-setting' name='form-reset' value='1' <?php echo $checked;?>>
 						Reset form after succesfull submission
 					</label>
 					<br>
@@ -525,7 +525,7 @@ class FormBuilderForm extends SimForms{
 						}
 						?>
 						<label class='option-label'>
-							<input type='checkbox' class='formbuilder formfieldsetting' name='actions[<?php echo $action;?>]' value='<?php echo $action;?>' <?php echo $checked;?>>
+							<input type='checkbox' class='formbuilder form-element-setting' name='actions[<?php echo $action;?>]' value='<?php echo $action;?>' <?php echo $checked;?>>
 							<?php echo ucfirst($action);?>
 						</label><br>
 						<?php
@@ -770,7 +770,7 @@ class FormBuilderForm extends SimForms{
 								$active = 'active';
 							}
 
-							echo "<button class='button tablink formbuilderform $active' type='button' id='show_email_$key' data-target='email_$key' style='margin-right:4px;'>E-mail $nr</button>";
+							echo "<button class='button tablink formbuilderform $active' type='button' id='show-email_$key' data-target='email_$key' style='margin-right:4px;'>E-mail $nr</button>";
 						}
 
 						// Render tab contents
@@ -865,7 +865,7 @@ class FormBuilderForm extends SimForms{
 											
 											<label class="formfield form-label">
 												Value
-												<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][conditionalvalue]' value="<?php echo $email['conditionalvalue']; ?>" style='width:fit-content;'>
+												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditionalvalue]' value="<?php echo $email['conditionalvalue']; ?>" style='width:fit-content;'>
 											</label>
 										</div>
 
@@ -914,7 +914,7 @@ class FormBuilderForm extends SimForms{
 									<div class='emailfromfixed <?php if(!empty($email['fromemail']) && $email['fromemail'] != 'fixed'){echo 'hidden';}?>'>
 										<label class="formfield form-label">
 											From e-mail
-											<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][from]' value="<?php if(empty($email['from'])){echo $defaultFrom;} else{echo $email['from'];} ?>">
+											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][from]' value="<?php if(empty($email['from'])){echo $defaultFrom;} else{echo $email['from'];} ?>">
 										</label>
 									</div>
 									
@@ -947,11 +947,11 @@ class FormBuilderForm extends SimForms{
 														</select>
 														<label class="formfield form-label">
 															equals
-															<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][conditionalfromemail][<?php echo $fromKey;?>][value]' value="<?php echo $fromEmail['value'];?>">
+															<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditionalfromemail][<?php echo $fromKey;?>][value]' value="<?php echo $fromEmail['value'];?>">
 														</label>
 														<label class="formfield form-label">
 															then from e-mail address should be:<br>
-															<input type='email' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][conditionalfromemail][<?php echo $fromKey;?>][email]' value="<?php echo $fromEmail['email'];?>">
+															<input type='email' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditionalfromemail][<?php echo $fromKey;?>][email]' value="<?php echo $fromEmail['email'];?>">
 														</label>
 													</fieldset>
 												</div>
@@ -961,7 +961,7 @@ class FormBuilderForm extends SimForms{
 											<br>
 											<label class="formfield form-label">
 												Else the e-mail will be
-												<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][elsefrom]' value="<?php echo $email['elsefrom']; ?>">
+												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][elsefrom]' value="<?php echo $email['elsefrom']; ?>">
 											</label>
 										</div>
 									</div>
@@ -983,7 +983,7 @@ class FormBuilderForm extends SimForms{
 									<div class='emailtofixed <?php if(!empty($email['emailto']) && $email['emailto'] != 'fixed'){echo 'hidden';}?>'>
 										<label class="formfield form-label">
 											To e-mail
-											<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][to]' value="<?php if(empty($email['to'])){echo '%email%';}else{echo $email['to'];} ?>">
+											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][to]' value="<?php if(empty($email['to'])){echo '%email%';}else{echo $email['to'];} ?>">
 										</label>
 									</div>
 
@@ -1016,11 +1016,11 @@ class FormBuilderForm extends SimForms{
 														</select>
 														<label class="formfield form-label">
 															equals
-															<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][conditionalemailto][<?php echo $toKey;?>][value]' value="<?php echo $toEmail['value'];?>">
+															<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditionalemailto][<?php echo $toKey;?>][value]' value="<?php echo $toEmail['value'];?>">
 														</label>
 														<label class="formfield form-label">
 															then from e-mail address should be:<br>
-															<input type='email' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][conditionalemailto][<?php echo $toKey;?>][email]' value="<?php echo $toEmail['email'];?>">
+															<input type='email' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditionalemailto][<?php echo $toKey;?>][email]' value="<?php echo $toEmail['email'];?>">
 														</label>
 													</fieldset>
 												</div>
@@ -1030,7 +1030,7 @@ class FormBuilderForm extends SimForms{
 											<br>
 											<label class="formfield form-label">
 												Else the e-mail will be
-												<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][elseto]' value="<?php echo $email['elseto']; ?>">
+												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][elseto]' value="<?php echo $email['elseto']; ?>">
 											</label>
 										</div>
 									</div>
@@ -1038,7 +1038,7 @@ class FormBuilderForm extends SimForms{
 									<br>
 									<div class="formfield form-label">
 										<h4>Subject</h4>
-										<input type='text' class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][subject]' value="<?php echo $email['subject']?>">
+										<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][subject]' value="<?php echo $email['subject']?>">
 									</div>
 									
 									<br>
@@ -1065,7 +1065,7 @@ class FormBuilderForm extends SimForms{
 									<br>
 									<div class="formfield form-label">
 										<h4>Additional headers like 'Reply-To'</h4>
-										<textarea class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][headers]'><?php
+										<textarea class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][headers]'><?php
 											echo $email['headers']?>
 										</textarea>
 									</div>
@@ -1074,7 +1074,7 @@ class FormBuilderForm extends SimForms{
 									<div class="formfield form-label">
 										<h4>Attachments</h4>
 										Form values that should be attached to the e-mail
-										<textarea class='formbuilder formfieldsetting' name='emails[<?php echo $key;?>][files]'><?php
+										<textarea class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][files]'><?php
 											echo $email['files']?>
 										</textarea>
 									</div>
@@ -1493,7 +1493,7 @@ class FormBuilderForm extends SimForms{
 			if(!empty($copyTo['copyto']) && in_array($elementId, $copyTo['copyto'])){
 				$counter++;
 				?>
-				<div class="form-element-wrapper" data-id="<?php echo $el->id;?>" data-form-id="<?php echo $this->formData->id;?>">
+				<div class="form-element-wrapper" data-id="<?php echo $el->id;?>" data-form_id="<?php echo $this->formData->id;?>">
 					<button type="button" class="edit-form-element button" title="Jump to conditions element">View conditions of '<?php echo $el->name;?>'</button>
 				</div>
 				<?php

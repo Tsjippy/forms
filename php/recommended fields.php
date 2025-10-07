@@ -177,7 +177,7 @@ function checkElementNeedsInput($elements, $userId){
 	//check which of the fields are not yet filled in
 	foreach($elements as $element){
 		//check if this element applies to this user
-		$warningCondition	= maybe_unserialize($element->warning-conditions);
+		$warningCondition	= maybe_unserialize($element->warning_conditions);
 
 		if(checkIfConditionsAppliesToUser($warningCondition, $userId)){
 			continue;

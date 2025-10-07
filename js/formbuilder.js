@@ -47,10 +47,10 @@ function fixElementNumbering(form){
 async function showEmptyModal(target){
 	target.classList.add('clicked');
 
-	let formId					= target.dataset.form-id;
+	let formId					= target.dataset.form_id;
 	if(formId == undefined){
 		if(target.closest('.form-element-wrapper') != null){
-			formId = target.closest('.form-element-wrapper').dataset.form-id;
+			formId = target.closest('.form-element-wrapper').dataset.form_id;
 		}else{
 			formId = document.querySelector('input[type=hidden][name="form-id"').value;
 		}
@@ -90,7 +90,7 @@ async function requestEditElementData(target){
 	target.classList.add('clicked');
 
 	let elementId		= formElementWrapper.dataset.id;
-	let formId			= target.closest('.form-element-wrapper').dataset.form-id;
+	let formId			= target.closest('.form-element-wrapper').dataset.form_id;
 	modal.querySelector('[name="element-id"]').value = formElementWrapper.dataset.id;
 	modal.originalhtml	= target.outerHTML;
 
@@ -195,7 +195,7 @@ async function addFormElement(target, copying=false){
 	if(copying){
 		let formData			= new FormData();
 		formData.append('elid', wrapper.dataset.id);
-		formData.append('form-id', wrapper.dataset.form-id);
+		formData.append('form-id', wrapper.dataset.form_id);
 		formData.append('order', indexes);
 
 		response	= await FormSubmit.fetchRestApi('forms/copy_form_element', formData);
@@ -239,9 +239,9 @@ async function sendElementSize(el, widthPercentage){
 		
 		//send new width over AJAX
 		let formData = new FormData();
-		formData.append('form-id', el.closest('.form-element-wrapper').dataset.form-id);
+		formData.append('form-id', el.closest('.form-element-wrapper').dataset.form_id);
 		formData.append('elementid', el.closest('.form-element-wrapper').dataset.id);
-		formData.append('new_width', widthPercentage);
+		formData.append('new-width', widthPercentage);
 		
 		let response = await FormSubmit.fetchRestApi('forms/edit_formfield_width', formData);
 
@@ -256,7 +256,7 @@ async function sendElementSize(el, widthPercentage){
 async function removeElement(target){
 	let parent			= target.parentNode;
 	let elementWrapper	= target.closest('.form-element-wrapper');
-	let formId			= elementWrapper.dataset.form-id;
+	let formId			= elementWrapper.dataset.form_id;
 	let elementIndex 	= elementWrapper.dataset.id;
 	let form			= target.closest('form');
 
@@ -290,8 +290,8 @@ async function reorderformelements(event){
 		fixElementNumbering(event.item.closest('form'));
 
 		let formData = new FormData();
-		formData.append('form_id', event.item.dataset.form-id);
-		formData.append('el_id', event.item.dataset.id);
+		formData.append('form-id', event.item.dataset.form_id);
+		formData.append('el-id', event.item.dataset.id);
 
 		let indexes	= {};
 		document.querySelectorAll(`.form-element-wrapper`).forEach(el => {
@@ -451,14 +451,14 @@ function showOrHideName(target){
 	if(target.dataset.action == 'show'){
 		url.searchParams.set('showname', 'true');
 
-		formWrapper.querySelectorAll('.elname.hidden').forEach(el=>el.classList.remove('hidden'));
+		formWrapper.querySelectorAll('.element-name .hidden').forEach(el=>el.classList.remove('hidden'));
 		
 		target.textContent 		= 'Hide names';
 		target.dataset.action	= 'hide';
 	}else{
 		url.searchParams.delete('showid');
 
-		formWrapper.querySelectorAll('.elname:not(.hidden)').forEach(el=>el.classList.add('hidden'));
+		formWrapper.querySelectorAll('.element-name :not(.hidden)').forEach(el=>el.classList.add('hidden'));
 		
 		target.textContent 		= 'Show names';
 		target.dataset.action	= 'show';

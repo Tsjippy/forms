@@ -40,11 +40,11 @@ class DisplayForm extends SubmitForm{
 	protected function getUserId($atts=[]){
 		if(
 			array_intersect($this->userRoles, $this->submitRoles) 	&&	// we have the permission to submit on behalf on someone else
-			!empty(($_GET['userid']))								&&
-			is_numeric($_GET['userid'])								&& // and the userid parameter is set in the url
-			empty($atts['userid'])										// and the user id is not given in the shortcode
+			!empty(($_GET['user-id']))								&&
+			is_numeric($_GET['user-id'])								&& // and the user-id parameter is set in the url
+			empty($atts['user-id'])										// and the user id is not given in the shortcode
 		){
-			$this->userId	= $_GET['userid'];
+			$this->userId	= $_GET['user-id'];
 		}
 	}
 
@@ -361,7 +361,7 @@ class DisplayForm extends SubmitForm{
 							$active = 'active';
 						}
 
-						$elementHtml	.= "<button class='button tablink $active' type='button' id='show_{$element->name}-$index' data-target='{$this->tabId}-$index' style='margin-right:4px;'>
+						$elementHtml	.= "<button class='button tablink $active' type='button' id='show-{$element->name}-$index' data-target='{$this->tabId}-$index' style='margin-right:4px;'>
 							{$element->nicename} $index
 						</button>";
 					}
@@ -488,7 +488,7 @@ class DisplayForm extends SubmitForm{
 			$buttonText	= $this->formData->button_text;
 		}
 
-		$dataset	= "data-form-id='{$this->formData->id}'";
+		$dataset	= "data-form_id='{$this->formData->id}'";
 		if(!empty($this->formData->form_reset)){
 			$dataset .= " data-reset='true'";
 		}
@@ -513,7 +513,7 @@ class DisplayForm extends SubmitForm{
 				$html	.= "<div class='form-elements'>";
 					$html	.= "<input type='hidden' name='form-id' value='{$this->formData->id}'>";
 					$html	.= "<input type='hidden' name='formurl' value='".SIM\currentUrl(true)."'>";
-					$html	.= "<input type='hidden' name='userid' value='$this->userId'>";
+					$html	.= "<input type='hidden' name='user-id' value='$this->userId'>";
 					foreach($this->formElements as $element){
 						$html	.= $this->buildHtml($element);
 					}

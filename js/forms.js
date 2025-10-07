@@ -41,7 +41,7 @@ async function formbuilderSwitch(target){
 		formData.append('formbuilder', true);
 		url.searchParams.set('formbuilder', true);
 
-		formId	= wrapper.querySelector('form.sim-form-wrapper').dataset.form-id;
+		formId	= wrapper.querySelector('form.sim-form-wrapper').dataset.form_id;
 	}else{
 		url.searchParams.delete('formbuilder');
 		formId	= wrapper.querySelector('[name="form-id"]').value;
@@ -78,7 +78,7 @@ async function requestNewFormResults(target){
 	let button		= target.outerHTML;
 
 	let formData 	= new FormData();
-	let formId		= wrapper.querySelector('.sim-table.form-data-table').dataset.form-id;
+	let formId		= wrapper.querySelector('.sim-table.form-data-table').dataset.form_id;
 	let shortcodeId	= wrapper.querySelector('.sim-table.form-data-table').dataset.shortcode_id;
 
 	formData.append('form-id', formId);

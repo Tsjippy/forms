@@ -126,13 +126,13 @@ function restApiInitForms() {
 			'callback' 				=> 	__NAMESPACE__.'\reorderFormElements',
 			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
 			'args'					=> array(
-				'form_id'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
 					}
 				),
-				'el_id'		=> array(
+				'el-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($elementId){
 						return is_numeric($elementId);
@@ -166,7 +166,7 @@ function restApiInitForms() {
 						return is_numeric($elementId);
 					}
 				),
-				'new_width'		=> array(
+				'new-width'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($width){
 						return is_numeric($width);
@@ -576,11 +576,11 @@ function requestFormElement(){
 function reorderFormElements(){
 	$formBuilder			= new SaveFormSettings();
 
-	$formBuilder->formId	= $_POST['form_id'];
+	$formBuilder->formId	= $_POST['form-id'];
 	
 	$newIndexes 			= (array)json_decode(sanitize_text_field(stripslashes($_POST['indexes'])));
 
-	$element				= $formBuilder->getElementById($_POST['el_id']);
+	$element				= $formBuilder->getElementById($_POST['el-id']);
 	
 	$formBuilder->reorderElements($newIndexes, $element);
 	
@@ -594,7 +594,7 @@ function editFormfieldWidth(){
 	$elementId 		= $_POST['elementid'];
 	$element		= $formBuilder->getElementById($elementId);
 	
-	$newwidth 		= $_POST['new_width'];
+	$newwidth 		= $_POST['new-width'];
 	$element->width = min($newwidth,100);
 	
 	$formBuilder->updateFormElement($element);

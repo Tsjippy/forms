@@ -53,16 +53,16 @@ var insertFormShortcodeDialog = {
 //select user
 tinymce.create(
     //form shortcode
-    'tinymce.plugins.insert_form-shortcode',
+    'tinymce.plugins.insert_form_shortcode',
     {
         init:function(editor, url){
-            editor.addCommand('mceInsert_form-shortcode',
+            editor.addCommand('mceInsert_form_shortcode',
                 function(){
                     dialog = editor.windowManager.open(insertFormShortcodeDialog);
                 }
             );
             
-            editor.addButton('insert_form-shortcode',
+            editor.addButton('insert_form_shortcode',
                 {
                     tooltip: 'Create a new form',
                     title:'Insert a new form',
@@ -81,7 +81,7 @@ tinymce.create(
 //Register the plugin
 tinymce.PluginManager.add(
     'insert_form-shortcode',
-    tinymce.plugins.insert_form-shortcode
+    tinymce.plugins.insert_form_shortcode
 )
 
 console.log('Form shortcode tiny_mce.js loaded');

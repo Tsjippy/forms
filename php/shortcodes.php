@@ -103,8 +103,8 @@ function showFormSelector($atts=[]){
             echo "<div id='{$form->name}' class='main-form-wrapper$hidden'>";
                 //only show button if not queried
                 if(!isset($_REQUEST['display'])){
-                    echo "<button class='button tablink$formActive' id='show_{$form->name}_form' data-target='{$form->name}_form'>Show form</button>";
-                    echo "<button class='button formresults tablink$resultActive' id='show_{$form->name}_results' data-target='{$form->name}_results'>Show form results</button>";
+                    echo "<button class='button tablink$formActive' id='show-{$form->name}_form' data-target='{$form->name}_form'>Show form</button>";
+                    echo "<button class='button formresults tablink$resultActive' id='show-{$form->name}_results' data-target='{$form->name}_results'>Show form results</button>";
                 }
 
                  echo "<div id='{$form->name}_form' class='form-wrapper$formVis'>";

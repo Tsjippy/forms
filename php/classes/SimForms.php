@@ -32,9 +32,9 @@ class SimForms{
 	public $onlyOwn;
 	public $all;
 	public $submission;
-	protected $submissionTableFormats;
-	protected $formTableFormats;
-	protected $elementTableFormats;
+	public $submissionTableFormats;
+	public $formTableFormats;
+	public $elementTableFormats;
 
 	public function __construct(){
 		global $wpdb;
@@ -764,7 +764,9 @@ class SimForms{
 			$atts	= shortcode_atts(
 				array(
 					'formname'		=> '',
+					'form-name'		=> '',
 					'userid'		=> '',
+					'user-id'		=> '',
 					'search'		=> '',
 					'shortcode-id'	=> '',
 					'id'			=> '',

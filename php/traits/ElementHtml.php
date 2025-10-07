@@ -372,7 +372,7 @@ trait ElementHtml{
 				$option 		= trim($option);
 
 				$optionType		= explode('=', $option)[0];
-				$optionValue	= str_replace('\\\\', '\\', explode('=',$option)[1]);
+				$optionValue	= str_replace('\\\\', '\\', explode('=', $option)[1]);
 				
 				if($removeMinMax && in_array($optionType, ['min', 'max'])){
 					continue;

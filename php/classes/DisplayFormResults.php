@@ -1711,7 +1711,7 @@ class DisplayFormResults extends DisplayForm{
 								}
 								
 								echo "<label class='option-label'>";
-									echo "<input type='checkbox' class='formbuilder formfieldsetting' name='table-settings[view-right-roles][$key]' value='$roleName' $checked>";
+									echo "<input type='checkbox' class='formbuilder form-element-setting' name='table-settings[view-right-roles][$key]' value='$roleName' $checked>";
 									echo "$roleName";
 								echo "</label><br>";
 							}
@@ -1730,7 +1730,7 @@ class DisplayFormResults extends DisplayForm{
 									$checked = '';
 								}
 								echo "<label class='option-label'>";
-									echo "<input type='checkbox' class='formbuilder formfieldsetting' name='table-settings[edit-right-roles][$key]' value='$roleName' $checked>";
+									echo "<input type='checkbox' class='formbuilder form-element-setting' name='table-settings[edit-right-roles][$key]' value='$roleName' $checked>";
 									echo " $roleName";
 								echo "</label><br>";
 							}
@@ -2009,7 +2009,7 @@ class DisplayFormResults extends DisplayForm{
 			if(empty($this->hiddenColumns)){
 				$hidden	= 'hidden';
 			}
-			$html	.= "<button type='button' class='button small reset-col-vis $hidden' data-form-id='{$this->formData->id}'>Reset visibility</button>";
+			$html	.= "<button type='button' class='button small reset-col-vis $hidden' data-form_id='{$this->formData->id}'>Reset visibility</button>";
 		$html	.= "</div>";
 
 		$html	.= $this->renderFilterForm();
@@ -2090,7 +2090,7 @@ class DisplayFormResults extends DisplayForm{
     			white-space: normal;
 			}
 		</style>
-		<table class='sim-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode_id='<?php echo $this->shortcodeId;?>' data-type='<?php echo $type;?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
+		<table class='sim-table form-data-table' data-form_id='<?php echo $this->formData->id;?>' data-shortcode_id='<?php echo $this->shortcodeId;?>' data-type='<?php echo $type;?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
 			<?php
 			$this->resultTableHead($type);
 			?>
@@ -2417,7 +2417,7 @@ class DisplayFormResults extends DisplayForm{
 			
 			if($allRowsEmpty){
 				?>
-				<table class='sim-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode_id='<?php echo $this->shortcodeId;?>'>
+				<table class='sim-table form-data-table' data-form_id='<?php echo $this->formData->id;?>' data-shortcode_id='<?php echo $this->shortcodeId;?>'>
 					<td>No records found</td>
 				</table>
 				<?php

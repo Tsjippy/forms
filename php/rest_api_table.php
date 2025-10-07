@@ -317,7 +317,7 @@ function saveColumnSettings($settings='', $shortcodeId=''){
 	$formTable	= new DisplayFormResults();
 	$wpdb->update($formTable->shortcodeTable,
 		array(
-			'column-settings'	=> maybe_serialize($settings)
+			'column_settings'	=> maybe_serialize($settings)
 		),
 		array(
 			'id'				=> $shortcodeId,
