@@ -100,19 +100,19 @@ function showFormSelector($atts=[]){
                 $hidden = ' hidden';
             }
 
-            echo "<div id='{$form->name}' class='main_form_wrapper$hidden'>";
+            echo "<div id='{$form->name}' class='main-form-wrapper$hidden'>";
                 //only show button if not queried
                 if(!isset($_REQUEST['display'])){
                     echo "<button class='button tablink$formActive' id='show_{$form->name}_form' data-target='{$form->name}_form'>Show form</button>";
                     echo "<button class='button formresults tablink$resultActive' id='show_{$form->name}_results' data-target='{$form->name}_results'>Show form results</button>";
                 }
 
-                 echo "<div id='{$form->name}_form' class='form_wrapper$formVis'>";
+                 echo "<div id='{$form->name}_form' class='form-wrapper$formVis'>";
                     echo do_shortcode("[formbuilder formname='$form->name']");
                 echo "</div>";
 
                 
-                echo "<div id='{$form->name}_results' class='form_results_wrapper$resultVis'>";
+                echo "<div id='{$form->name}_results' class='form-results-wrapper$resultVis'>";
                     echo do_shortcode("[formresults id=$shortcodeId formname='$form->name']");
                 echo "</div>";
             echo "</div>";

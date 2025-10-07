@@ -72,7 +72,7 @@ class SaveFormSettings extends SimForms{
 		$this->formElements[$oldElement->index]	= $element;
 
 		if($this->formData == null){
-			$this->getForm($_POST['formid']);
+			$this->getForm($_POST['form-id']);
 		}
 
 		$formVersion	= 1;
@@ -257,26 +257,26 @@ class SaveFormSettings extends SimForms{
 		}
 
 		$newSettings	= [
-			'button_text'			=> isset($settings['button_text']) 			? $settings['button_text'] 							: null,
-			'succes_message'		=> isset($settings['succes_message']) 		? $settings['succes_message'] 						: null,
-			'include_id'			=> isset($settings['include_id']) 			? true 												: false,
-			'form_name'				=> isset($settings['form_name']) 			? $settings['form_name'] 							: null,
+			'button_text'			=> isset($settings['button-text']) 			? $settings['button-text'] 							: null,
+			'succes_message'		=> isset($settings['succes-message']) 		? $settings['succes-message'] 						: null,
+			'include_id'			=> isset($settings['include-id']) 			? true 												: false,
+			'form_name'				=> isset($settings['form-name']) 			? $settings['form-name'] 							: null,
 			'save_in_meta'			=> isset($settings['save-in-meta']) 		? true 												: false,
-			'reminder_frequency'	=> isset($settings['reminder_frequency']) 	? $settings['reminder_frequency'] 					: null,
-			'reminder_amount'		=> isset($settings['reminder_amount']) 		? $settings['reminder_amount'] 						: null,
-			'reminder_period'		=> isset($settings['reminder_period']) 		? $settings['reminder_period'] 						: null,
+			'reminder-frequency'	=> isset($settings['reminder-frequency']) 	? $settings['reminder-frequency'] 					: null,
+			'reminder_amount'		=> isset($settings['reminder-amount']) 		? $settings['reminder-amount'] 						: null,
+			'reminder_period'		=> isset($settings['reminder-period']) 		? $settings['reminder-period'] 						: null,
 			'reminder_conditions'	=> isset($settings['reminder_conditions']) 	? maybe_serialize($settings['reminder_conditions']) : null,
-			'reminder_startdate'	=> isset($settings['reminder_startdate']) 	? $settings['reminder_startdate'] 					: null,
-			'form_url'				=> isset($settings['form_url']) 			? $settings['form_url'] 							: null,
-			'form_reset'			=> isset($settings['form_reset']) 			? true 												: false,
+			'reminder_startdate'	=> isset($settings['reminder-startdate']) 	? $settings['reminder-startdate'] 					: null,
+			'form_url'				=> isset($settings['form-url']) 			? $settings['form-url'] 							: null,
+			'form_reset'			=> isset($settings['form-reset']) 			? true 												: false,
 			'actions'				=> isset($settings['actions']) 				? maybe_serialize($settings['actions']) 			: null,
 			'autoarchive'			=> isset($settings['autoarchive']) 			? true 												: false,
-			'autoarchive_el'		=> isset($settings['autoarchive_el']) 		? $settings['autoarchive_el'] 						: null,
-			'autoarchive_value'		=> isset($settings['autoarchive_value']) 	? $settings['autoarchive_value'] 					: null,
+			'autoarchive_el'		=> isset($settings['autoarchive-el']) 		? $settings['autoarchive-el'] 						: null,
+			'autoarchive_value'		=> isset($settings['autoarchive-value']) 	? $settings['autoarchive-value'] 					: null,
 			'split'					=> isset($settings['split']) 				? maybe_serialize($settings['split'])				: null,
-			'full_right_roles'		=> isset($settings['full_right_roles']) 	? maybe_serialize($settings['full_right_roles'])	: null,
-			'submit_others_form'	=> isset($settings['submit_others_form']) 	? maybe_serialize($settings['submit_others_form'])	: null,
-			'upload_path'			=> isset($settings['upload_path']) 			? $settings['upload_path'] 							: null
+			'full_right_roles'		=> isset($settings['full-right-roles']) 	? maybe_serialize($settings['full-right-roles'])	: null,
+			'submit_others_form'	=> isset($settings['submit-others-form']) 	? maybe_serialize($settings['submit-others-form'])	: null,
+			'upload_path'			=> isset($settings['upload-path']) 			? $settings['upload-path'] 							: null
 		];
 
 		$newSettings	= apply_filters('sim-forms-before-saving-settings', $newSettings, $this, $formId);

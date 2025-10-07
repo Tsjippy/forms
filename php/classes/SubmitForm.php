@@ -390,7 +390,7 @@ class SubmitForm extends SimForms{
 
 		$this->submission					= new \stdClass();
 
-		$this->submission->form_id			= $_POST['formid'];
+		$this->submission->form_id			= $_POST['form-id'];
 		
 		$this->getForm($this->submission->form_id);
 
@@ -533,7 +533,7 @@ class SubmitForm extends SimForms{
 		//save to user meta
 		}else{
 			unset($this->submission->formresults['formurl']);
-			unset($this->submission->formresults['formid']);
+			unset($this->submission->formresults['form-id']);
 			unset($this->submission->formresults['_wpnonce']);
 			
 			//get user data as array

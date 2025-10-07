@@ -47,12 +47,12 @@ function fixElementNumbering(form){
 async function showEmptyModal(target){
 	target.classList.add('clicked');
 
-	let formId					= target.dataset.formid;
+	let formId					= target.dataset.form-id;
 	if(formId == undefined){
 		if(target.closest('.form-element-wrapper') != null){
-			formId = target.closest('.form-element-wrapper').dataset.formid;
+			formId = target.closest('.form-element-wrapper').dataset.form-id;
 		}else{
-			formId = document.querySelector('input[type=hidden][name="formid"').value;
+			formId = document.querySelector('input[type=hidden][name="form-id"').value;
 		}
 	}
 	
@@ -73,7 +73,7 @@ async function showEmptyModal(target){
 
 	var formData = new FormData();
 	formData.append('elementid', '-1');
-	formData.append('formid', formId);
+	formData.append('form-id', formId);
 	var response = await FormSubmit.fetchRestApi('forms/request_form_conditions_html', formData);
 
 	//fill the element conditions tab
@@ -90,7 +90,7 @@ async function requestEditElementData(target){
 	target.classList.add('clicked');
 
 	let elementId		= formElementWrapper.dataset.id;
-	let formId			= target.closest('.form-element-wrapper').dataset.formid;
+	let formId			= target.closest('.form-element-wrapper').dataset.form-id;
 	modal.querySelector('[name="element-id"]').value = formElementWrapper.dataset.id;
 	modal.originalhtml	= target.outerHTML;
 
@@ -103,7 +103,7 @@ async function requestEditElementData(target){
 	
 	let formData = new FormData();
 	formData.append('elementid', elementId);
-	formData.append('formid', formId);
+	formData.append('form-id', formId);
 	
 	let response = await FormSubmit.fetchRestApi('forms/request_form_element', formData);
 
@@ -195,7 +195,7 @@ async function addFormElement(target, copying=false){
 	if(copying){
 		let formData			= new FormData();
 		formData.append('elid', wrapper.dataset.id);
-		formData.append('formid', wrapper.dataset.formid);
+		formData.append('form-id', wrapper.dataset.form-id);
 		formData.append('order', indexes);
 
 		response	= await FormSubmit.fetchRestApi('forms/copy_form_element', formData);
@@ -239,7 +239,7 @@ async function sendElementSize(el, widthPercentage){
 		
 		//send new width over AJAX
 		let formData = new FormData();
-		formData.append('formid', el.closest('.form-element-wrapper').dataset.formid);
+		formData.append('form-id', el.closest('.form-element-wrapper').dataset.form-id);
 		formData.append('elementid', el.closest('.form-element-wrapper').dataset.id);
 		formData.append('new_width', widthPercentage);
 		
@@ -256,7 +256,7 @@ async function sendElementSize(el, widthPercentage){
 async function removeElement(target){
 	let parent			= target.parentNode;
 	let elementWrapper	= target.closest('.form-element-wrapper');
-	let formId			= elementWrapper.dataset.formid;
+	let formId			= elementWrapper.dataset.form-id;
 	let elementIndex 	= elementWrapper.dataset.id;
 	let form			= target.closest('form');
 
@@ -266,7 +266,7 @@ async function removeElement(target){
 	loader.classList.remove('loader-wrapper');
 
 	let formData = new FormData();
-	formData.append('formid', formId);
+	formData.append('form-id', formId);
 
 	formData.append('elementindex', elementIndex);
 	
@@ -290,7 +290,7 @@ async function reorderformelements(event){
 		fixElementNumbering(event.item.closest('form'));
 
 		let formData = new FormData();
-		formData.append('form_id', event.item.dataset.formid);
+		formData.append('form_id', event.item.dataset.form-id);
 		formData.append('el_id', event.item.dataset.id);
 
 		let indexes	= {};
@@ -495,24 +495,24 @@ function maybeRemoveElement(target){
 
 function showOrHideConditionFields(target){
 	//show default conditional field
-	target.closest('.rule-row').querySelector('[name*="conditional_value"]').classList.remove('hidden');
+	target.closest('.rule-row').querySelector('[name*="conditional-value"]').classList.remove('hidden');
 	
 	//hide extra fields
-	target.closest('.rule-row').querySelectorAll('.equation_2, .conditional_field_2').forEach(function(el){
+	target.closest('.rule-row').querySelectorAll('.equation-2, .conditional-field-2').forEach(function(el){
 		el.classList.add('hidden');
 	});
 	
 	//show both extra fields
 	if(target.dataset.value == '-' || target.dataset.value == '+'){
-		target.closest('.rule-row').querySelectorAll('.equation_2, .conditional_field_2').forEach(function(el){
+		target.closest('.rule-row').querySelectorAll('.equation-2, .conditional-field-2').forEach(function(el){
 			el.classList.remove('hidden');
 		});
 	//show extra conditional field
 	}else if(target.dataset.value != undefined && target.dataset.value.includes('value')){
-		target.closest('.rule-row').querySelector('.conditional_field_2').classList.remove('hidden');
+		target.closest('.rule-row').querySelector('.conditional-field-2').classList.remove('hidden');
 
 		//hide normal conditional value field
-		target.closest('.rule-row').querySelector('[name*="conditional_value"]').classList.add('hidden');
+		target.closest('.rule-row').querySelector('[name*="conditional-value"]').classList.add('hidden');
 	}else if(target.dataset.value != undefined && (
 			target.dataset.value.includes('changed') || 
 			target.dataset.value.includes('clicked') ||
@@ -520,7 +520,7 @@ function showOrHideConditionFields(target){
 			target.dataset.value.includes('invisible') ||
 			target.dataset.value.includes('checked')
 	)){
-		target.closest('.rule-row').querySelector('[name*="conditional_value"]').classList.add('hidden');
+		target.closest('.rule-row').querySelector('[name*="conditional-value"]').classList.add('hidden');
 	}
 }
 
@@ -902,7 +902,7 @@ function copyWarningCondition(target){
 	//copy the row
 	let newNode = FormFunctions.cloneNode(target.closest('.warning-conditions'));
 
-	target.closest('.conditions_wrapper').insertAdjacentElement('beforeEnd', newNode);
+	target.closest('.conditions-wrapper').insertAdjacentElement('beforeEnd', newNode);
 
 	//add the active class
 	target.classList.add('active');
@@ -910,7 +910,7 @@ function copyWarningCondition(target){
 	//store the value
 	target.closest('.warning-conditions').querySelector('.combinator').value = target.value;
 
-	fixWarningConditionNumbering(target.closest('.conditions_wrapper'));
+	fixWarningConditionNumbering(target.closest('.conditions-wrapper'));
 }
 
 function removeWarningCondition(target){
@@ -927,7 +927,7 @@ function removeWarningCondition(target){
 	// remove the condition
 	condition.remove();
 
-	fixWarningConditionNumbering(target.closest('.conditions_wrapper'));
+	fixWarningConditionNumbering(target.closest('.conditions-wrapper'));
 }
 
 //Catch click events
@@ -958,7 +958,7 @@ window.addEventListener("click", event => {
 	}else if(target.name == 'submit-form-emails'){
 		saveFormEmails(target);
 	}else if(target.name == 'autoarchive'){
-		let el = target.closest('.formsettings_wrapper').querySelector('.auto-archive-logic');
+		let el = target.closest('.formsettings-wrapper').querySelector('.auto-archive-logic');
 		if(target.value == 'true'){
 			el.classList.remove('hidden');
 		}else{
@@ -1013,17 +1013,17 @@ window.addEventListener("click", event => {
 	}
 	
 	//add new conditions_rule
-	if (target.classList.contains('and_rule') || target.classList.contains('or_rule')){
+	if (target.classList.contains('and-rule') || target.classList.contains('or-rule')){
 		addConditionRule(target);
 	}
 	
 	//add new condition row
-	if (target.classList.contains('add_condition')){
+	if (target.classList.contains('add-condition')){
 		addCondition(target);
 	}
 	
 	//remove  condition row
-	if (target.classList.contains('remove_condition')){
+	if (target.classList.contains('remove-condition')){
 		removeConditionRule(target);
 	}
 	
@@ -1072,11 +1072,11 @@ window.addEventListener("click", event => {
 	}
 
 	//copy warning-conditions row
-	if(target.matches('.warn_cond')){
+	if(target.matches('.warn-cond')){
 		copyWarningCondition(target);
 	}
 
-	if(target.matches('.remove_warn_cond')){
+	if(target.matches('.remove-warn-cond')){
 		removeWarningCondition(target)
 	}
 
@@ -1091,12 +1091,12 @@ window.addEventListener('change', ev=>{
 		//if this option has a keys data value
 		let metaIndexes	= target.list.querySelector(`[value='${target.value}' i]`);
 		if(metaIndexes != null && metaIndexes.dataset.keys != undefined){
-			parent	= target.closest('.warning-conditions').querySelector('.index_wrapper');
+			parent	= target.closest('.warning-conditions').querySelector('.index-wrapper');
 			//show the data key selector
 			parent.classList.remove('hidden');
 			
 			//remove all options and add new ones
-			let datalist	= parent.querySelector('.meta_key_index_list');
+			let datalist	= parent.querySelector('.meta-key-index-list');
 			for(let i=1; i<datalist.options.length; i++) {
 				datalist.options[i].remove();
 			}
@@ -1108,7 +1108,7 @@ window.addEventListener('change', ev=>{
 				datalist.appendChild(opt);
 			});
 		}
-	}else if(target.matches(".condition-row [name*='[property_value]']")){
+	}else if(target.matches(".condition-row [name*='[property-value]']")){
 		let selectedElement	= document.querySelector(`.form-element-wrapper[data-id="${target.value}"]`);
 		if(selectedElement == null){
 			return;
@@ -1118,16 +1118,16 @@ window.addEventListener('change', ev=>{
 
 		// if select element is of number type
 		if(selectedElementType == 'number'){
-			target.closest('.condition_form').querySelectorAll('.addition.hidden').forEach(el=>el.classList.remove('hidden'));
+			target.closest('.condition-form').querySelectorAll('.addition.hidden').forEach(el=>el.classList.remove('hidden'));
 		}else{
-			target.closest('.condition_form').querySelectorAll('.addition:not(.hidden)').forEach(el=>el.classList.add('hidden'));
+			target.closest('.condition-form').querySelectorAll('.addition:not(.hidden)').forEach(el=>el.classList.add('hidden'));
 		}
 		
 		// if select element is of date type
 		if(selectedElementType == 'date'){
-			target.closest('.condition_form').querySelectorAll('.addition .days.hidden').forEach(el=>el.classList.remove('hidden'));
+			target.closest('.condition-form').querySelectorAll('.addition .days.hidden').forEach(el=>el.classList.remove('hidden'));
 		}else{
-			target.closest('.condition_form').querySelectorAll('.addition .days:not(.hidden)').forEach(el=>el.classList.add('hidden'));
+			target.closest('.condition-form').querySelectorAll('.addition .days:not(.hidden)').forEach(el=>el.classList.add('hidden'));
 		}
 	}else if(target.matches("[name*='[submittedtrigger][equation]']")){
 		let parent	= target.closest('.submitted-trigger-type');
@@ -1152,9 +1152,9 @@ window.addEventListener('change', ev=>{
 
 		if(warningsConditions != null){
 			if( target.value == 'submitted'){
-				warningsConditions.querySelector(`[name*='[conditional_value]']`).classList.add('hidden');
+				warningsConditions.querySelector(`[name*='[conditional-value]']`).classList.add('hidden');
 			}else{
-				warningsConditions.querySelector(`[name*='[conditional_value]']`).classList.remove('hidden');
+				warningsConditions.querySelector(`[name*='[conditional-value]']`).classList.remove('hidden');
 			}
 		}
 	}
@@ -1167,7 +1167,7 @@ function fixWarningConditionNumbering(parent){
 	warningConditions.forEach(condition =>{
 		condition.dataset.index = i;
 		
-		condition.querySelectorAll('.warning_condition').forEach(function(el){
+		condition.querySelectorAll('.warning-condition').forEach(function(el){
 			//fix numbering
 			if(el.name != undefined){
 				el.name	= el.name.replace(/([0-9])+/g,i);

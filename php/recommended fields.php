@@ -81,9 +81,9 @@ function checkIfConditionsAppliesToUser($conditions, $userId, $submissions=''){
 		// get the user value
 		$value		= get_user_meta($userId, $check['meta_key'], true);
 
-		if(!empty($check['meta_key_index'])){
-			if(isset($value[trim($check['meta_key_index'])])){
-				$value		= $value[trim($check['meta_key_index'])];
+		if(!empty($check['meta-key-index'])){
+			if(isset($value[trim($check['meta-key-index'])])){
+				$value		= $value[trim($check['meta-key-index'])];
 			}else{
 				$value		= '';
 			}
@@ -95,9 +95,9 @@ function checkIfConditionsAppliesToUser($conditions, $userId, $submissions=''){
 
 		// Get the compare value
 		$checkValue	= '';
-		if(isset($check['conditional_value'])){
-			$checkValue			= $check['conditional_value'];
-			$conditionalValue	= strtotime($check['conditional_value']);
+		if(isset($check['conditional-value'])){
+			$checkValue			= $check['conditional-value'];
+			$conditionalValue	= strtotime($check['conditional-value']);
 			if($conditionalValue && Date('Y', $conditionalValue) < 2200){
 				$checkValue	= Date('Y-m-d', $conditionalValue);
 			}
@@ -177,7 +177,7 @@ function checkElementNeedsInput($elements, $userId){
 	//check which of the fields are not yet filled in
 	foreach($elements as $element){
 		//check if this element applies to this user
-		$warningCondition	= maybe_unserialize($element->warning_conditions);
+		$warningCondition	= maybe_unserialize($element->warning-conditions);
 
 		if(checkIfConditionsAppliesToUser($warningCondition, $userId)){
 			continue;

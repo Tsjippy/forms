@@ -19,8 +19,8 @@ class EditFormResults extends DisplayFormResults{
 		if(!is_numeric($submissionId)){
 			if(is_numeric($this->submissionId)){
 				$submissionId	= $this->submissionId;
-			}elseif(is_numeric($_POST['submissionid'])){
-				$submissionId	= $_POST['submissionid'];
+			}elseif(is_numeric($_POST['submission-id'])){
+				$submissionId	= $_POST['submission-id'];
 			}else{
 				SIM\printArray('No submission id found');
 				return false;

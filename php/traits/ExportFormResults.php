@@ -19,7 +19,7 @@ trait ExportFormResults{
 		foreach($this->columnSettings as $setting){
 			// If the name is found in the hidden columns, add the header index to the exclusion array
 			if(!empty($hiddenColumns[$setting['name']])){
-				$excludeIndexes[]	= array_search($setting['nice_name'], $header);
+				$excludeIndexes[]	= array_search($setting['nice-name'], $header);
 			}
 		}
 
@@ -33,11 +33,11 @@ trait ExportFormResults{
 		}
 
 		// There is a custom sort column defined
-		if(is_numeric($this->tableSettings['default_sort'])){
-			$sortElementId		= $this->tableSettings['default_sort'];
+		if(is_numeric($this->tableSettings['default-sort'])){
+			$sortElementId		= $this->tableSettings['default-sort'];
 			$sortElement		= $this->getElementById($sortElementId);
 			$sortElementType	= $sortElement->type;
-			$sortColumnName		= $this->columnSettings[$sortElementId]['nice_name'];
+			$sortColumnName		= $this->columnSettings[$sortElementId]['nice-name'];
 			$sortCol			= array_search($sortColumnName, $this->excelContent[0]);
 
 			// Sort

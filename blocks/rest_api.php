@@ -7,7 +7,7 @@ function restApiInit() {
 	// add element to form
 	register_rest_route(
 		RESTAPIPREFIX.'/forms',
-		'/form_selector',
+		'/form-selector',
 		array(
 			'methods' 				=> 'GET',
 			'callback' 				=> 	__NAMESPACE__.'\showFormSelector',
@@ -56,7 +56,7 @@ function restApiInit() {
 			'methods' 				=> 'POST,GET',
 			'callback' 				=> 	function(){
 				$displayFormResults	= new DisplayFormResults();
-				return $displayFormResults->insertInDb($_REQUEST['formid']);
+				return $displayFormResults->insertInDb($_REQUEST['form-id']);
 			},
 			'permission_callback' 	=> '__return_true',
 		)
@@ -89,8 +89,8 @@ function showFormBuilder($attributes){
 		$isRest	= true;
 		if(!empty($_REQUEST['formname'])){
 			$attributes = ['formname' => $_REQUEST['formname']];
-		}elseif(!empty($_REQUEST['formid'])){
-			$attributes = ['formid' => $_REQUEST['formid']];
+		}elseif(!empty($_REQUEST['form-id'])){
+			$attributes = ['form-id' => $_REQUEST['form-id']];
 		}else{
 			return false;
 		}
@@ -142,10 +142,10 @@ function showFormBuilder($attributes){
 function showFormResults($attributes){
 
  	if($attributes instanceof \WP_REST_Request){
-		if(!empty($_REQUEST['formid'])){
+		if(!empty($_REQUEST['form-id'])){
 			$attributes = [
-				'formid' 		=> $_REQUEST['formid'],
-				'shortcodeid'	=> $_REQUEST['shortcodeid']
+				'form-id' 		=> $_REQUEST['form-id'],
+				'shortcode-id'	=> $_REQUEST['shortcode-id']
 			];
 
 			if(isset($_REQUEST['archived'])){
@@ -162,7 +162,7 @@ function showFormResults($attributes){
 		}else{
 			return false;
 		}
-	}elseif(!isset($attributes['formid'])){
+	}elseif(!isset($attributes['form-id'])){
 		return false;
 	}
 

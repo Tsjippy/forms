@@ -63,8 +63,8 @@ trait CreateJs{
                         $equation		= str_replace(' value', '', $rule['equation']);
                         
                         //Get field names of the fields who's value we are checking
-                        if(is_numeric($rule['conditional_field'])){
-                            $conditionalElement		= $this->getElementById($rule['conditional_field']);
+                        if(is_numeric($rule['conditional-field'])){
+                            $conditionalElement		= $this->getElementById($rule['conditional-field']);
                         }else{
                             $conditionalElement     = false;
                         }
@@ -87,8 +87,8 @@ trait CreateJs{
 
                         $conditionalFieldType		= $conditionalElement->type;
 
-                        if(is_numeric($rule['conditional_field_2'])){
-                            $conditionalElement2		= $this->getElementById($rule['conditional_field_2']);
+                        if(is_numeric($rule['conditional-field-2'])){
+                            $conditionalElement2		= $this->getElementById($rule['conditional-field-2']);
                             if(!$conditionalElement2){
                                 $errors[]   = "Element $element->name has an invalid rule";
                                 continue;
@@ -105,7 +105,7 @@ trait CreateJs{
                         }
                         
                         //Check if we are calculating a value based on two field values
-                        if(($equation == '+' || $equation == '-') && is_numeric($rule['conditional_field_2']) && !empty($rule['equation_2'])){
+                        if(($equation == '+' || $equation == '-') && is_numeric($rule['conditional-field-2']) && !empty($rule['equation-2'])){
                             $calc = true;
                         }else{
                             $calc = false;
@@ -137,7 +137,7 @@ trait CreateJs{
                             // do not add the same element name twice
                             if(!str_contains($fieldCheckIf, "$propCompare == '$conditionalField2Name'")){
                                 //If there is an extra field to check
-                                if(is_numeric($rule['conditional_field_2'])){
+                                if(is_numeric($rule['conditional-field-2'])){
                                     $fieldCheckIf .= " || $propCompare == '$conditionalField2Name'";
                                 }
                             }
@@ -151,7 +151,7 @@ trait CreateJs{
                             }else{
                                 $conditionVariables[]  = "var calculated_value_$ruleIndex = value_$fieldNumber1 $equation value_$fieldNumber2;";
                             }
-                            $equation = $rule['equation_2'];
+                            $equation = $rule['equation-2'];
 
                             //compare with calculated value
                             $compareValue1 = "calculated_value_$ruleIndex";
@@ -164,11 +164,11 @@ trait CreateJs{
                         if(str_contains($rule['equation'], 'value')){
                             $compareValue2 = "value_$fieldNumber2";
                         //compare with a number
-                        }elseif(is_numeric($rule['conditional_value'])){
-                            $compareValue2 = trim($rule['conditional_value']);
+                        }elseif(is_numeric($rule['conditional-value'])){
+                            $compareValue2 = trim($rule['conditional-value']);
                         //compare with text
                         }else{
-                            $compareValue2 = "'".strtolower(trim($rule['conditional_value']))."'";
+                            $compareValue2 = "'".strtolower(trim($rule['conditional-value']))."'";
                         }
                         
                         /*
@@ -178,7 +178,7 @@ trait CreateJs{
                         if(!in_array($equation, ['changed', 'clicked', 'checked', '!checked', 'visible', 'invisible'])){
                             $conditionVariables[]      = "var value_$fieldNumber1 = this.get_field_value('$conditionalFieldName', form, true, $compareValue2, true);";
                             
-                            if(is_numeric($rule['conditional_field_2'])){
+                            if(is_numeric($rule['conditional-field-2'])){
                                 $conditionVariables[]  = "var value_$fieldNumber2 = this.get_field_value('$conditionalField2Name', form, true, $compareValue2, true);";
                             }
                         }
@@ -318,14 +318,14 @@ trait CreateJs{
                         //fixed prop value
                         if($action == 'value'){
                             $propertyName	                        = $condition['propertyname1'];
-                            if(isset($condition['action_value'])){
+                            if(isset($condition['action-value'])){
                                 $varName   = '"'.do_shortcode($condition['action_value']).'"';
                             }
                         //retrieve value from another field
                         }else{
                             $propertyName	= $condition['propertyname'];
                         
-                            $copyfieldid	= $condition['property_value'];
+                            $copyfieldid	= $condition['property-value'];
                             
                             //find the element with the right id
                             $copyElement = $this->getElementById($copyfieldid);
@@ -379,8 +379,8 @@ trait CreateJs{
         */
         $newJs   = '';
 
-        // Store all forms with this formid in a variable
-        $newJs  .= "\n\tforms =               document.querySelectorAll(`form[data-formid=\"{$this->formData->id}\"]`);";
+        // Store all forms with this form-id in a variable
+        $newJs  .= "\n\tforms =               document.querySelectorAll(`form[data-form-id=\"{$this->formData->id}\"]`);";
 
         // Shorter variable for the form functions
         $newJs  .= "\n\tget_field_value =       FormFunctions.getFieldValue;";

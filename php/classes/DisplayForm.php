@@ -203,7 +203,7 @@ class DisplayForm extends SubmitForm{
 			$newElementHtml	= $this->prepareElementHtml($element, $index, $elementHtml, $val);
 
 			// First element in a multi answer wrapper
-			if($this->prevElement->type == 'multi_start'){
+			if($this->prevElement->type == 'multi-start'){
 				$this->multiWrapStart($index, $element);
 			}
 			
@@ -211,7 +211,7 @@ class DisplayForm extends SubmitForm{
 			$this->multiInputsHtml[$index] .= force_balance_tags($newElementHtml);
 			
 			// Last element in the multi wrap, write the buttons and closing div
-			if($this->nextElement->type == 'multi_end'){
+			if($this->nextElement->type == 'multi-end'){
 				$this->multiWrapEnd($index, $element);
 			}
 		}
@@ -303,7 +303,7 @@ class DisplayForm extends SubmitForm{
 			return $html;
 		}
 
-		if($element->type == 'multi_start'){
+		if($element->type == 'multi-start'){
 			$this->multiwrap				= true;
 			
 			// We are wrapping so we need to find the max amount of filled in fields
@@ -315,7 +315,7 @@ class DisplayForm extends SubmitForm{
 			//loop over all consequent wrapped elements
 			while(true){
 				$type	= $this->formElements[$i]->type;
-				if($type != 'multi_end' && !empty($this->formElements[$i])){
+				if($type != 'multi-end' && !empty($this->formElements[$i])){
 					$this->multiWrapElementCount++;
 
 					if(!in_array($type, $this->nonInputs)){
@@ -340,17 +340,17 @@ class DisplayForm extends SubmitForm{
 			return $html;
 		}
 		
-		if($this->multiwrap && $element->type != 'multi_start' && $element->type != 'multi_end'){
+		if($this->multiwrap && $element->type != 'multi-start' && $element->type != 'multi-end'){
 			$this->processMultiFields($element, $width);
 
 			return $html;
 		}
 
-		if($element->type == 'multi_end'){
+		if($element->type == 'multi-end'){
 			$this->multiwrap	= false;
 
 			//write down all the multi html
-			$name	= str_replace('_multi_end', '_multi_start', $element->name);
+			$name	= str_replace('_multi-end', '_multi-start', $element->name);
 			$elementHtml	= "<div class='clone-divs-wrapper' name='$name'>";
 				// Tablink buttons
 				if($this->multiWrapElementCount >= $this->minElForTabs){
@@ -488,7 +488,7 @@ class DisplayForm extends SubmitForm{
 			$buttonText	= $this->formData->button_text;
 		}
 
-		$dataset	= "data-formid='{$this->formData->id}'";
+		$dataset	= "data-form-id='{$this->formData->id}'";
 		if(!empty($this->formData->form_reset)){
 			$dataset .= " data-reset='true'";
 		}
@@ -511,7 +511,7 @@ class DisplayForm extends SubmitForm{
 
 			$html	.= "<form action='' method='post' class='sim-form-wrapper' $dataset>";
 				$html	.= "<div class='form-elements'>";
-					$html	.= "<input type='hidden' name='formid' value='{$this->formData->id}'>";
+					$html	.= "<input type='hidden' name='form-id' value='{$this->formData->id}'>";
 					$html	.= "<input type='hidden' name='formurl' value='".SIM\currentUrl(true)."'>";
 					$html	.= "<input type='hidden' name='userid' value='$this->userId'>";
 					foreach($this->formElements as $element){
@@ -536,14 +536,14 @@ class DisplayForm extends SubmitForm{
 							
 								$html	.= "<div style='flex:1;'>";
 									$html	.= "<button type='button' class='button nextBtn' name='nextBtn'>Next</button>";
-									$html	.= SIM\addSaveButton('submit_form', $buttonText, 'hidden');
+									$html	.= SIM\addSaveButton('submit-form', $buttonText, 'hidden');
 								$html	.= "</div>";
 							$html	.= "</div>";
 						$html	.= "</div>";
 					}
 
 					if(!$this->isFormStep && !empty($this->formElements)){
-						$html	.= SIM\addSaveButton('submit_form', $buttonText);
+						$html	.= SIM\addSaveButton('submit-form', $buttonText);
 					}
 				$html	.= "</div>";
 			$html	.= "</form>";

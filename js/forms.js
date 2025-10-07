@@ -41,14 +41,14 @@ async function formbuilderSwitch(target){
 		formData.append('formbuilder', true);
 		url.searchParams.set('formbuilder', true);
 
-		formId	= wrapper.querySelector('form.sim-form-wrapper').dataset.formid;
+		formId	= wrapper.querySelector('form.sim-form-wrapper').dataset.form-id;
 	}else{
 		url.searchParams.delete('formbuilder');
-		formId	= wrapper.querySelector('[name="formid"]').value;
+		formId	= wrapper.querySelector('[name="form-id"]').value;
 	}
 	window.history.pushState({}, '', url);
 
-	formData.append('formid', formId);
+	formData.append('form-id', formId);
 
 	let loader	= Main.showLoader(target, false, 50, 'Requesting form...');
 	wrapper.innerHTML	= loader.outerHTML;
@@ -78,11 +78,11 @@ async function requestNewFormResults(target){
 	let button		= target.outerHTML;
 
 	let formData 	= new FormData();
-	let formId		= wrapper.querySelector('.sim-table.form-data-table').dataset.formid;
-	let shortcodeId	= wrapper.querySelector('.sim-table.form-data-table').dataset.shortcodeid;
+	let formId		= wrapper.querySelector('.sim-table.form-data-table').dataset.form-id;
+	let shortcodeId	= wrapper.querySelector('.sim-table.form-data-table').dataset.shortcode_id;
 
-	formData.append('formid', formId);
-	formData.append('shortcode_id', shortcodeId);
+	formData.append('form-id', formId);
+	formData.append('shortcode-id', shortcodeId);
 
 	const url 		= new URL(window.location);
 	if(url.searchParams.get('onlyown')){
@@ -202,7 +202,7 @@ document.addEventListener('click', function(event) {
 		removeNode(target);
 	}
 
-	if(target.matches('.sim-form-wrapper [name="submit_form"]')){
+	if(target.matches('.sim-form-wrapper [name="submit-form"]')){
 		event.stopPropagation();
 		
 		saveFormInput(target);

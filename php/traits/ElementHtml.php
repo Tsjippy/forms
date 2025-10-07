@@ -430,7 +430,7 @@ trait ElementHtml{
 			$html 		= "<div name='$element->name' $class>";
 		}elseif($element->type == 'div-end'){
 			$html 		= "</div>";
-		}elseif(in_array($element->type, ['multi_start','multi_end'])){
+		}elseif(in_array($element->type, ['multi-start','multi-end'])){
 			$html 		= "";
 		}elseif(in_array($element->type, ['info'])){
 			//remove any paragraphs
@@ -820,7 +820,7 @@ trait ElementHtml{
 	 */
 	public function checkboxesHtml($element, $value, $values, $elType, $elName, $elClass, $elOptions){
 		$options	= $this->getElementOptions($element);
-		$html		= "<div class='checkbox_options_group formfield'>";
+		$html		= "<div class='checkbox-options-group formfield'>";
 		
 		// get all the default options and make them lowercase
 		$lowValues	= [];

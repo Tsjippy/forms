@@ -45,7 +45,7 @@ class SimForms{
 		$this->submissionTableName		= $wpdb->prefix . 'sim_form_submissions';
 		$this->tableName				= $wpdb->prefix . 'sim_forms';
 		$this->elTableName				= $wpdb->prefix . 'sim_form_elements';
-		$this->nonInputs				= ['label','button','datalist','formstep','info','p','php','multi_start','multi_end','div-start','div-end'];
+		$this->nonInputs				= ['label','button','datalist','formstep','info','p','php','multi-start','multi-end','div-start','div-end'];
 		$this->multiInputsHtml			= [];
 		$this->user 					= wp_get_current_user();
 		$this->userRoles				= $this->user->roles;
@@ -69,8 +69,8 @@ class SimForms{
 			$postAuthor	= $object->post_author;
 		}elseif(!empty($_REQUEST['post'])){
 			$postAuthor	= get_post($_REQUEST['post'])->post_author;
-		}elseif(!empty($_POST['form_url'])){
-			$postId		= url_to_postid($_POST['form_url']);
+		}elseif(!empty($_POST['form-url'])){
+			$postId		= url_to_postid($_POST['form-url']);
 			
 			if($postId){
 				$postAuthor	= get_post($postId)->post_author;
@@ -371,7 +371,7 @@ class SimForms{
 			$this->names[]			= $form->name;
 		}
 		
-		$html = "<select name='form_selector'>";
+		$html = "<select name='form-selector'>";
 			$html .= "<option value=''>---</option>";
 			foreach ($this->names as $name){
 				$html .= "<option value='$name'>$name</option>";
@@ -766,9 +766,9 @@ class SimForms{
 					'formname'		=> '',
 					'userid'		=> '',
 					'search'		=> '',
-					'shortcodeid'	=> '',
+					'shortcode-id'	=> '',
 					'id'			=> '',
-					'formid'		=> '',
+					'form-id'		=> '',
 					'onlyown'		=> false,
 					'archived'		=> false,
 					'all'			=> false,
@@ -777,11 +777,11 @@ class SimForms{
 			);
 			
 			$this->formName 	= strtolower(sanitize_text_field($atts['formname']));
-			$this->formId		= sanitize_text_field($atts['formid']);
+			$this->formId		= sanitize_text_field($atts['form-id']);
 
 			$this->getForm();
 
-			$this->shortcodeId	= $atts['shortcodeid'];
+			$this->shortcodeId	= $atts['shortcode-id'];
 			if(empty($this->shortcodeId)){
 				$this->shortcodeId	= $atts['id'];
 			}

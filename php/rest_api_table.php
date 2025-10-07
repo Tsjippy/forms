@@ -24,13 +24,13 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\saveTablePrefs',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
 					}
 				),
-				'column_name'	=> array('required'	=> true),
+				'column-name'	=> array('required'	=> true),
 			)
 		)
 	);
@@ -44,7 +44,7 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\deleteTablePrefs',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -66,13 +66,13 @@ function restApiInitTable() {
 				return $formsTable->tableEditPermissions;
 			},
 			'args'					=> array(
-				'shortcode_id'		=> array(
+				'shortcode-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($shortcodeId){
 						return is_numeric($shortcodeId);
 					}
 				),
-				'column_settings'		=> array(
+				'column-settings'		=> array(
 					'required'	=> true,
 				),
 			)
@@ -88,19 +88,19 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\saveTableSettings',
 			'permission_callback' 	=> function(){
 				$formsTable		= new DisplayFormResults(array(
-					'id'			=> $_POST['shortcode_id'],
-					'formid'		=> $_POST['formid']
+					'id'			=> $_POST['shortcode-id'],
+					'form-id'		=> $_POST['form-id']
 				));
 				return $formsTable->tableEditPermissions;
 			},
 			'args'					=> array(
-				'shortcode_id'		=> array(
+				'shortcode-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($shortcodeId){
 						return is_numeric($shortcodeId);
 					}
 				),
-				'table_settings'		=> array(
+				'table-settings'		=> array(
 					'required'	=> true,
 				),
 			)
@@ -116,7 +116,7 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\removeSubmission',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'submissionid'		=> array(
+				'submission-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($submissionId){
 						return is_numeric($submissionId);
@@ -135,13 +135,13 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\archiveSubmission',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
 					}
 				),
-				'submissionid'		=> array(
+				'submission-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($submissionId){
 						return is_numeric($submissionId);
@@ -160,13 +160,13 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\editValue',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
 					}
 				),
-				'submissionid'		=> array(
+				'submission-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($submissionId){
 						return is_numeric($submissionId);
@@ -175,7 +175,7 @@ function restApiInitTable() {
 				'name'		=> array(
 					'required'	=> true,
 				),
-				'newvalue'		=> array(
+				'new-value'		=> array(
 					'required'	=> true,
 				),
 			)
@@ -191,7 +191,7 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\getInputHtml',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -200,7 +200,7 @@ function restApiInitTable() {
 				'id'		=> array(
 					'required'	=> true,
 				),
-				'submissionid'		=> array(
+				'submission-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($submissionId){
 						return is_numeric($submissionId);
@@ -219,13 +219,13 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\getPage',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
 					}
 				),
-				'pagenumber'		=> array(
+				'page-number'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($submissionId){
 						return is_numeric($submissionId);
@@ -238,9 +238,9 @@ function restApiInitTable() {
 
 function getPage(){
 	$displayFormResults		= new DisplayFormResults([
-		'formid' 		=> $_POST['formid'],
+		'form-id' 		=> $_POST['form-id'],
 		'search'		=> $_POST['search'],
-		'shortcodeid'	=> $_POST['shortcode_id'],
+		'shortcode-id'	=> $_POST['shortcode-id'],
 		'onlyOwn'		=> $_POST['onlyown'],
 		'archived'		=> $_POST['archived']
 	]);
@@ -252,14 +252,14 @@ function getPage(){
 
 function saveTablePrefs( \WP_REST_Request $request ) {
 	if (is_user_logged_in()) {
-		$columnName					= $request['column_name'];
+		$columnName					= $request['column-name'];
 
 		$userId						= get_current_user_id();
-		$hiddenColumns				= (array)get_user_meta($userId, 'hidden_columns_'.$request['formid'], true);
+		$hiddenColumns				= (array)get_user_meta($userId, 'hidden_columns_'.$request['form-id'], true);
 
 		$hiddenColumns[$columnName]	= 'hidden';
 
-		update_user_meta($userId, 'hidden_columns_'.$request['formid'], $hiddenColumns);
+		update_user_meta($userId, 'hidden_columns_'.$request['form-id'], $hiddenColumns);
 
 		return 'Succesfully updated column settings';
 	}else{
@@ -270,7 +270,7 @@ function saveTablePrefs( \WP_REST_Request $request ) {
 function deleteTablePrefs( \WP_REST_Request $request ) {
 	if (is_user_logged_in()) {
 		$userId		= get_current_user_id();
-		delete_user_meta($userId, 'hidden_columns_'.$request['formid']);
+		delete_user_meta($userId, 'hidden_columns_'.$request['form-id']);
 
 		return 'Succesfully reset column visibility';
 	}else{
@@ -284,8 +284,8 @@ function saveColumnSettings($settings='', $shortcodeId=''){
 	if($settings instanceof \WP_REST_Request){
 		$params			= $settings->get_params();
 
-		$settings 		= $params['column_settings'];
-		$shortcodeId 	= $params['shortcode_id'];
+		$settings 		= $params['column-settings'];
+		$shortcodeId 	= $params['shortcode-id'];
 	}
 	
 	//copy edit right roles to view right roles
@@ -303,21 +303,21 @@ function saveColumnSettings($settings='', $shortcodeId=''){
 		}
 		
 		//if there are edit rights defined
-		if(!empty($setting['edit_right_roles'])){
+		if(!empty($setting['edit-right-roles'])){
 			//create view array if it does not exist
-			if(!is_array($setting['view_right_roles'])){
-				$setting['view_right_roles'] = [];
+			if(!is_array($setting['view-right-roles'])){
+				$setting['view-right-roles'] = [];
 			}
 			
 			//merge and save
-			$setting['view_right_roles'] = array_merge($setting['view_right_roles'], $setting['edit_right_roles']);
+			$setting['view-right-roles'] = array_merge($setting['view-right-roles'], $setting['edit-right-roles']);
 		}
 	}
 	
 	$formTable	= new DisplayFormResults();
 	$wpdb->update($formTable->shortcodeTable,
 		array(
-			'column_settings'	=> maybe_serialize($settings)
+			'column-settings'	=> maybe_serialize($settings)
 		),
 		array(
 			'id'				=> $shortcodeId,
@@ -354,14 +354,14 @@ function saveTableSettings(){
 			'table_settings'=> maybe_serialize($tableSettings)
 		),
 		array(
-			'id'			=> $_POST['shortcode_id'],
+			'id'			=> $_POST['shortcode-id'],
 		),
 	);
 	
 	//also update form setings if needed
 	$formSettings = $_POST['form-settings'];
-	if(is_array($formSettings) && is_numeric($_POST['formid'])){
-		$formTable->getForm($_POST['formid']);
+	if(is_array($formSettings) && is_numeric($_POST['form-id'])){
+		$formTable->getForm($_POST['form-id']);
 		
 		//update existing
 		foreach($formSettings as $key=>&$value){
@@ -389,21 +389,21 @@ function saveTableSettings(){
 function removeSubmission(){
 	$formTable	= new EditFormResults($_POST);
 
-	$result		= $formTable->deleteSubmission($_POST['submissionid']);
+	$result		= $formTable->deleteSubmission($_POST['submission-id']);
 	
 	if(is_wp_error($result)){
 		return $result;
 	}
 
-	do_action('sim-forms-entry-removed', $formTable, $_POST['submissionid']);
+	do_action('sim-forms-entry-removed', $formTable, $_POST['submission-id']);
 
-	return "Entry with id {$_POST['submissionid']} succesfully removed";
+	return "Entry with id {$_POST['submission-id']} succesfully removed";
 }
 
 // Archive or unarchive a (sub)submission
 function archiveSubmission(){
 	$formTable					= new EditFormResults($_POST);
-	$formTable->submissionId	= $_POST['submissionid'];
+	$formTable->submissionId	= $_POST['submission-id'];
 
 	$formTable->parseSubmissions(null, $formTable->submissionId);
 
@@ -455,9 +455,9 @@ function archiveSubmission(){
 function getInputHtml(){
 	$formTable		= new DisplayFormResults();
 
-	$formTable->getForm($_POST['formid']);
+	$formTable->getForm($_POST['form-id']);
 
-	$formTable->getSubmission($_POST['submissionid']);
+	$formTable->getSubmission($_POST['submission-id']);
 
 	$elementId		= sanitize_text_field($_POST['id']);
 
@@ -500,14 +500,14 @@ function getInputHtml(){
 function editValue(){
 	$formTable	= new EditFormResults();
 		
-	$formTable->getForm($_POST['formid']);
-	$formTable->submissionId	= $_POST['submissionid'];
+	$formTable->getForm($_POST['form-id']);
+	$formTable->submissionId	= $_POST['submission-id'];
 	
 	$formTable->parseSubmissions(null, $formTable->submissionId);
 		
 	//update an existing entry
 	$elementName 	= sanitize_text_field($_POST['name']);
-	$newValue 		= json_decode(sanitize_textarea_field(stripslashes($_POST['newvalue'])));
+	$newValue 		= json_decode(sanitize_textarea_field(stripslashes($_POST['new-value'])));
 
 	$transValue		= $formTable->transformInputData($newValue, $elementName, $formTable->submission->formresults);
 	
@@ -586,7 +586,7 @@ function editValue(){
 	
 	//send email if needed
 	$submitForm					= new SubmitForm();
-	$submitForm->getForm($_POST['formid']);
+	$submitForm->getForm($_POST['form-id']);
 	$submitForm->submission		= $formTable->submission;
 	$submitForm->sendEmail('fieldchanged');
 	$submitForm->sendEmail('fieldschanged');
@@ -594,6 +594,6 @@ function editValue(){
 	//send message back to js
 	return [
 		'message'			=> $message,
-		'newvalue'			=> $transValue,
+		'new-value'			=> $transValue,
 	];
 }

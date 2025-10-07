@@ -35,7 +35,7 @@ function restApiInitForms() {
 						return is_numeric($elementIndex);
 					}
 				),
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -82,7 +82,7 @@ function restApiInitForms() {
 						return is_numeric($elementIndex);
 					}
 				),
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -101,7 +101,7 @@ function restApiInitForms() {
 			'callback' 				=> 	__NAMESPACE__.'\requestFormElement',
 			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -154,7 +154,7 @@ function restApiInitForms() {
 			'callback' 				=> 	__NAMESPACE__.'\editFormfieldWidth',
 			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -185,7 +185,7 @@ function restApiInitForms() {
 			'callback' 				=> 	__NAMESPACE__.'\requestFormConditionsHtml',
 			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -210,7 +210,7 @@ function restApiInitForms() {
 			'callback' 				=> 	__NAMESPACE__.'\saveElementConditions',
 			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -235,7 +235,7 @@ function restApiInitForms() {
 			'callback' 				=> 	__NAMESPACE__.'\saveFormSettings',
 			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -257,7 +257,7 @@ function restApiInitForms() {
 			},
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -276,7 +276,7 @@ function restApiInitForms() {
 			'callback' 				=> 	__NAMESPACE__.'\saveFormEmails',
 			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
 			'args'					=> array(
-				'formid'		=> array(
+				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
@@ -337,7 +337,7 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 	$simForms->createJs();
 
 	// Update column settings
-	$displayFormResults	= new DisplayFormResults(['formid'=>$simForms->formData->id]);
+	$displayFormResults	= new DisplayFormResults(['form-id'=>$simForms->formData->id]);
 
 	$query						= "SELECT * FROM {$displayFormResults->shortcodeTable} WHERE form_id= '{$simForms->formData->id}'";
 	foreach($wpdb->get_results($query) as $data){
@@ -397,7 +397,7 @@ function addFormElement($copy=false){
 	global $wpdb;
 
 	$simForms	= new SaveFormSettings();
-	$simForms->getForm($_POST['formid']);
+	$simForms->getForm($_POST['form-id']);
 
 	$index		= 0;
 	$oldElement	= new stdClass();
@@ -513,7 +513,7 @@ function addFormElement($copy=false){
 	}
 		
 	$formBuilderForm	= new FormBuilderForm();
-	$formBuilderForm->getForm($_POST['formid']);
+	$formBuilderForm->getForm($_POST['form-id']);
 
 	$html = $formBuilderForm->buildHtml($element, $index);
 	
@@ -538,7 +538,7 @@ function removeElement(){
 
 	// Fix priorities
 	// Get all elements of this form
-	$formBuilder->getAllFormElements('priority', $_POST['formid']);
+	$formBuilder->getAllFormElements('priority', $_POST['form-id']);
 	
 	//Loop over all elements and give them the new priority
 	foreach($formBuilder->formElements as $key=>$el){
@@ -557,7 +557,7 @@ function removeElement(){
 function requestFormElement(){
 	$formBuilderForm				= new FormBuilderForm();
 	
-	$formId 				= $_POST['formid'];
+	$formId 				= $_POST['form-id'];
 	$elementId 				= $_POST['elementid'];
 	
 	$formBuilderForm->getForm($formId);
@@ -608,7 +608,7 @@ function requestFormConditionsHtml(){
 
 	$elementID = $_POST['elementid'];
 	
-	$formBuilder->getForm($_POST['formid']);
+	$formBuilder->getForm($_POST['form-id']);
 	
 	return $formBuilder->elementConditionsForm($elementID);
 }
@@ -621,7 +621,7 @@ function saveElementConditions(){
 	if(!$elementId){
 		return new \WP_Error('forms', "First save the element before adding conditions to it");
 	}
-	$formId				= $_POST['formid'];
+	$formId				= $_POST['form-id'];
 	
 	$formBuilder->getForm($formId);
 	
@@ -659,16 +659,16 @@ function saveFormSettings(){
 	
 	$formSettings 			= $_POST;
 	unset($formSettings['_wpnonce']);
-	unset($formSettings['formid']);
+	unset($formSettings['form-id']);
 
 	$formBuilder->formName	= $formSettings['form_name'];
 	
 	//remove double slashes
 	$formSettings['upload_path']	= str_replace('\\\\', '\\', $formSettings['upload_path']);
 	
-	$formBuilder->maybeInsertForm($_POST['formid']);
+	$formBuilder->maybeInsertForm($_POST['form-id']);
 	
-	$result	= $formBuilder->updateFormSettings($_POST['formid'], $formSettings);
+	$result	= $formBuilder->updateFormSettings($_POST['form-id'], $formSettings);
 	
 	if(is_wp_error($result)){
 		return $result;
@@ -682,7 +682,7 @@ function saveFormEmails(){
 		
 	global $wpdb;
 	
-	$formBuilder->getForm($_POST['formid']);
+	$formBuilder->getForm($_POST['form-id']);
 	
 	$formEmails = $_POST['emails'];
 	
@@ -696,7 +696,7 @@ function saveFormEmails(){
 			'emails'	=> maybe_serialize($formEmails)
 		),
 		array(
-			'id'		=> $_POST['formid'],
+			'id'		=> $_POST['form-id'],
 		),
 	);
 	

@@ -28,6 +28,7 @@ class ComposerStaticInitac9283759b012c924fc8100001ff8c27
         ),
         'C' => 
         array (
+            'Composer\\Pcre\\' => 14,
             'Complex\\' => 8,
         ),
     );
@@ -43,8 +44,8 @@ class ComposerStaticInitac9283759b012c924fc8100001ff8c27
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -61,6 +62,10 @@ class ComposerStaticInitac9283759b012c924fc8100001ff8c27
         'Garfix\\' => 
         array (
             0 => __DIR__ . '/..' . '/garfix/js-minify/src',
+        ),
+        'Composer\\Pcre\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/pcre/src',
         ),
         'Complex\\' => 
         array (

@@ -316,7 +316,7 @@
 
 ### Fixed
 - form conditions
-- loop when no multi_end element
+- loop when no multi-end element
 
 ## [8.2.4] - 2025-02-03
 

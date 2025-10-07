@@ -4,7 +4,7 @@ console.log("Formstable.js loaded");
 async function showHiddenColumns(target){
 	// store as preference
 	let formData	= new FormData();
-	formData.append('formid', target.dataset.formid);
+	formData.append('form-id', target.dataset.form-id);
 
 	let response	= await FormSubmit.fetchRestApi('forms/delete_table_prefs', formData);
 
@@ -24,7 +24,7 @@ async function saveColumnSettings(target){
 }
 
 async function saveTableSettings(target){
-	let response = await FormSubmit.submitForm(target, 'forms/save_table_settings');
+	let response = await FormSubmit.submitForm(target, 'forms/save_table-settings');
 
 	if(response){
 		Main.displayMessage(response);
@@ -60,8 +60,8 @@ async function removeSubmission(target){
 		let table			= target.closest('table');
 
 		let formData = new FormData();
-		formData.append('formid', table.dataset.formid);
-		formData.append('submissionid', submissionId);
+		formData.append('form-id', table.dataset.form-id);
+		formData.append('submission-id', submissionId);
 		
 		//display loading gif
 		Main.showLoader(target);
@@ -85,8 +85,8 @@ async function archiveSubmission(target){
 	let response;
 
 	let formData 		= new FormData();
-	formData.append('formid', table.dataset.formid);
-	formData.append('submissionid', submissionId);
+	formData.append('form-id', table.dataset.form-id);
+	formData.append('submission-id', submissionId);
 	formData.append('action', action);
 	
 	// Ask whether to archive one piece or the whole
@@ -187,7 +187,7 @@ function changeArchiveButton(element, action){
 		action 	= 'archive';
 		text	= 'Archive';
 	}
-	element.outerHTML = `<button class="${action} button forms-table-action" name="${action}_action" value="${action}">${text}</button>`;
+	element.outerHTML = `<button class="${action} button forms-table-action" name="${action}-action" value="${action}">${text}</button>`;
 }
 
 async function getInputHtml(target){
@@ -203,7 +203,7 @@ async function getInputHtml(target){
 	// There can only be one active cell per page
 	target.classList.add('active');
 
-	let formId			= table.dataset.formid;
+	let formId			= table.dataset.form-id;
     let submissionId	= target.closest('tr').dataset.id;
 	let data			= target.dataset;
 	let oldText			= target.textContent;
@@ -213,8 +213,8 @@ async function getInputHtml(target){
 	target.dataset.oldtext	 	= oldText;
 
 	let formData = new FormData();
-    formData.append('formid', formId);
-    formData.append('submissionid', submissionId);
+    formData.append('form-id', formId);
+    formData.append('submission-id', submissionId);
 
 	for( var d in data){
 		formData.append(d, data[d]);
@@ -251,7 +251,7 @@ function updatePageNav(navWrapper, pageNr){
 	}
 
 	// hide next button
-	if(pageNr == navWrapper.querySelectorAll('.pagenumber').length -1){
+	if(pageNr == navWrapper.querySelectorAll('.page-number').length -1){
 		navWrapper.querySelector('.next').classList.add('hidden');
 	}else{
 		navWrapper.querySelector('.next').classList.remove('hidden');
@@ -290,7 +290,7 @@ async function getNextPage(target){
 	}
 
 	// request page over ajax
-	let formId			= table.dataset.formid;
+	let formId			= table.dataset.form-id;
 
 	let loader			= Main.showLoader(table, false);
 	let formData;
@@ -300,9 +300,9 @@ async function getNextPage(target){
 		formData		= new FormData(wrapper.querySelector(".filter-options"));
 	}
 
-    formData.append('formid', formId);
-    formData.append('pagenumber', page);
-	formData.append('shortcode_id', table.dataset.shortcodeid);
+    formData.append('form-id', formId);
+    formData.append('page-number', page);
+	formData.append('shortcode-id', table.dataset.shortcode_id);
     formData.append('type', table.dataset.type);
 
 	let params = new Proxy(new URLSearchParams(window.location.search), {
@@ -357,7 +357,7 @@ async function getSortedPage(target){
 	updatePageNav(navWrapper, 0);
 
 	let table			= tableWrapper.querySelector('.form-data-table:not(.hidden)');
-	let formId			= table.dataset.formid;
+	let formId			= table.dataset.form-id;
 	let sortCol			= target.id;
 	let sortDir			= target.classList.contains('desc') ? 'DESC' : 'ASC';
 
@@ -372,9 +372,9 @@ async function getSortedPage(target){
 		formData		= new FormData(wrapper.querySelector(".filter-options"));
 	}
 
-    formData.append('formid', formId);
-    formData.append('pagenumber', 0);
-	formData.append('shortcode_id', table.dataset.shortcodeid);
+    formData.append('form-id', formId);
+    formData.append('page-number', 0);
+	formData.append('shortcode-id', table.dataset.shortcode_id);
     formData.append('type', table.dataset.type);
 
 	let params = new Proxy(new URLSearchParams(window.location.search), {
@@ -454,16 +454,16 @@ async function processFormsTableInput(target){
 	setTimeout(function(){ running = false;}, 500);	
 
 	let table			= target.closest('table');
-	let formId			= table.dataset.formid;
+	let formId			= table.dataset.form-id;
 	let submissionId	= target.closest('tr').dataset.id;
 	let cell			= target.closest('td');
 	cell.classList.remove('active');
     let data			= cell.dataset;
 	let value			= FormFunctions.getFieldValue(target, cell, false);
-	let shortcodeid		= '';
+	let shortcodeId		= '';
 
-	if(target.closest('[data-shortcodeid]') != null){
-		shortcodeid	= target.closest('[data-shortcodeid]').dataset.shortcodeid;
+	if(target.closest('[data-shortcode_id]') != null){
+		shortcodeId	= target.closest('[data-shortcode_id]').dataset.shortcode_id;
 	}
 
 	//Only update when needed
@@ -472,23 +472,23 @@ async function processFormsTableInput(target){
 		
 		// Submit new value and receive the filtered value back
 		let formData = new FormData();
-		formData.append('formid', formId);
-		formData.append('submissionid', submissionId);
+		formData.append('form-id', formId);
+		formData.append('submission-id', submissionId);
 
 		for(d in data){
 			formData.append(d, data[d]);
 		}
-		formData.append('newvalue', JSON.stringify(value));
+		formData.append('new-value', JSON.stringify(value));
 
-		if(shortcodeid != ''){
-			formData.append('shortcode_id', shortcodeid);
+		if(shortcodeId != ''){
+			formData.append('shortcode-id', shortcodeId);
 		}
 		
 		let response	= await FormSubmit.fetchRestApi('forms/edit_value', formData);
 	
 		if(response){
 			console.log(response)
-			let newValue = response.newvalue;
+			let newValue = response.new-value;
 			
 			if(typeof(newValue) == 'string'){
 				newValue.replace('_', ' ');
@@ -593,8 +593,8 @@ const hideColumn	= async (target) => {
 
 		// store as preference
 		var formData	= new FormData();
-		formData.append('formid', table.dataset.formid);
-		formData.append('column_name', cell.id);
+		formData.append('form-id', table.dataset.form-id);
+		formData.append('column-name', cell.id);
 		
 		await FormSubmit.fetchRestApi('forms/save_table_prefs', formData);
 	// Table settings
@@ -627,7 +627,7 @@ document.addEventListener("click", event=>{
 		}else{
 			el.classList.add('hidden');
 		}
-	}else if(target.closest('.form-result-navigation') != null && (target.matches('.next') || target.matches('.prev') || target.matches('.pagenumber'))){
+	}else if(target.closest('.form-result-navigation') != null && (target.matches('.next') || target.matches('.prev') || target.matches('.page-number'))){
 		getNextPage(target);
 		event.stopPropagation();
 	}
@@ -657,7 +657,7 @@ document.addEventListener("click", event=>{
 	
 	//Open settings modal
 	if(target.classList.contains('edit-formshortcode-settings')){
-		Main.showModal(document.querySelector('.modal.form_shortcode_settings'));
+		Main.showModal(document.querySelector('.modal.form-shortcode-settings'));
 	}
 	
 	//Edit data
@@ -712,7 +712,7 @@ document.addEventListener('change', event=>{
 	let target = event.target;
 
 	if(target.id == 'sim-forms-selector'){
-		document.querySelectorAll('.main_form_wrapper').forEach(el=>{
+		document.querySelectorAll('.main-form-wrapper').forEach(el=>{
 			el.classList.add('hidden');
 		});
 

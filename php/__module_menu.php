@@ -40,13 +40,13 @@ function moduleOptions($optionsHtml, $settings){
 		?>
 		<br>
 		<br>
-		<label for="reminder_freq">
+		<label for="reminder-freq">
 			How often should people be reminded of remaining form fields to fill?
 		</label>
 		<br>
-		<select name="reminder_freq">
+		<select name="reminder-freq">
 			<?php
-			SIM\ADMIN\recurrenceSelector($settings['reminder_freq']);
+			SIM\ADMIN\recurrenceSelector($settings['reminder-freq']);
 			?>
 		</select>
 
