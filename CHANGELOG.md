@@ -7,6 +7,7 @@
 
 ### Fixed
 - store boolean values
+- bugs
 
 ### Updated
 

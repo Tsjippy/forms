@@ -36,8 +36,7 @@ function formReminder(){
     $simForms   = new SubmitForm();
 
     foreach(getAllRequiredForms() as $formId=>$userIds){
-        $simForms->getForm($formId);
-        $emails = $simForms->formData->emails;
+        $emails = $simForms->getEmailSettings($formId);
 		
 		foreach($emails as $mail){
             if($mail['email-trigger'] == 'shouldsubmit'){
