@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- data attribute names
 
 ### Fixed
 - store boolean values
