@@ -35,6 +35,7 @@ class SimForms{
 	public $submissionTableFormats;
 	public $formTableFormats;
 	public $elementTableFormats;
+	public $emailSettings;
 
 	public function __construct(){
 		global $wpdb;
@@ -126,7 +127,6 @@ class SimForms{
 			'split'					=> '%s',
 			'full_right_roles'		=> '%s',
 			'submit_others_form'	=> '%s',
-			'emails'				=> '%s',
 			'upload_path'			=> '%s'
 		];
 
@@ -431,7 +431,6 @@ class SimForms{
 			split text,
 			full_right_roles LONGTEXT,
 			submit_others_form LONGTEXT,
-			emails LONGTEXT,
 			upload_path LONGTEXT,
 			PRIMARY KEY  (id)
 		) $charsetCollate;";
