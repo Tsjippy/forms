@@ -716,7 +716,8 @@ class FormBuilderForm extends SimForms{
 	 * Form to setup form e-mails
 	 */
 	public function formEmailsForm(){
-		$emails 		= $this->formData->emails;
+		$this->getEmailSettings();
+		$emails 		= $this->emailSettings;
 		$defaultFrom	=  get_option( 'admin_email' );
 
 		?>
