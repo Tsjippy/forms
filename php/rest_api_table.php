@@ -284,41 +284,37 @@ function saveColumnSettings($settings='', $shortcodeId=''){
 	if($settings instanceof \WP_REST_Request){
 		$params			= $settings->get_params();
 
-		$settings 		= $params['column-settings'];
+		$columnSettings 		= $params['column-settings'];
 		$shortcodeId 	= $params['shortcode-id'];
 	}
-	
-	//copy edit right roles to view right roles
-	if(empty($settings)){
-		return new \WP_Error('forms', 'No settings provided');
-	}
 
-	if(empty($shortcodeId)){
-		return new \WP_Error('forms', 'No shortcode id provided');
-	}
-
-	foreach($settings as &$setting){
-		if(!is_array($setting)){
+	foreach($columnSettings as &$column){
+		if(!is_array($column)){
 			continue;
 		}
 		
 		//if there are edit rights defined
-		if(!empty($setting['edit-right-roles'])){
+		if(!empty($column['edit-right-roles'])){
 			//create view array if it does not exist
-			if(!is_array($setting['view-right-roles'])){
-				$setting['view-right-roles'] = [];
+			if(!is_array($column['view-right-roles'])){
+				$column['view-right-roles'] = [];
 			}
 			
-			//merge and save
-			$setting['view-right-roles'] = array_merge($setting['view-right-roles'], $setting['edit-right-roles']);
+			// edit right automatically have view rights
+			$column['view-right-roles'] = array_merge($setting['view-right-roles'], $setting['edit-right-roles']);
+		}
+		
+		foreach($column as $index => $setting){
+			unset($column[$index]);
+			
+			$column[str_replace('-', '_', $index)] = maybe_serialize($setting);
 		}
 	}
 	
 	$formTable	= new DisplayFormResults();
-	$wpdb->update($formTable->shortcodeTable,
-		array(
-			'column_settings'	=> maybe_serialize($settings)
-		),
+	$wpdb->update(
+		$formTable->shortcodeColumnSettingsTable,
+		$columnSettings,
 		array(
 			'id'				=> $shortcodeId,
 		),
