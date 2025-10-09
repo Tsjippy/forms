@@ -29,7 +29,7 @@ function restApiInitForms() {
 			'callback' 				=> 	__NAMESPACE__.'\copyFormElement',
 			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
 			'args'					=> array(
-				'elid'		=> array(
+				'element_id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($elementIndex){
 						return is_numeric($elementIndex);
@@ -404,7 +404,7 @@ function addFormElement($copy=false){
 
 	//copy an existing element
 	if($copy === true){
-		$element		= $simForms->getElementById($_POST['elid']);
+		$element		= $simForms->getElementById($_POST['element_id']);
 
 		$element->name	= $element->nicename;
 	}
@@ -691,7 +691,7 @@ function saveFormEmails(){
 	}
 	
 	$formBuilder->maybeInsertForm();
-	$wpdb->update($formBuilder->tableName,
+	$wpdb->update($formBuilder->formEmailTable,
 		array(
 			'emails'	=> maybe_serialize($formEmails)
 		),

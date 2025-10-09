@@ -40,7 +40,7 @@ function formReminder(){
         $emails = $simForms->formData->emails;
 		
 		foreach($emails as $mail){
-            if($mail['emailtrigger'] == 'shouldsubmit'){
+            if($mail['email-trigger'] == 'shouldsubmit'){
 
                 $from       = $mail['from'];
 

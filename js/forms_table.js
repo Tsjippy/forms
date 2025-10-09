@@ -4,7 +4,7 @@ console.log("Formstable.js loaded");
 async function showHiddenColumns(target){
 	// store as preference
 	let formData	= new FormData();
-	formData.append('form-id', target.dataset.form_id);
+	formData.append('form-id', target.dataset.formId);
 
 	let response	= await FormSubmit.fetchRestApi('forms/delete_table_prefs', formData);
 
@@ -60,7 +60,7 @@ async function removeSubmission(target){
 		let table			= target.closest('table');
 
 		let formData = new FormData();
-		formData.append('form-id', table.dataset.form_id);
+		formData.append('form-id', table.dataset.formId);
 		formData.append('submission-id', submissionId);
 		
 		//display loading gif
@@ -85,7 +85,7 @@ async function archiveSubmission(target){
 	let response;
 
 	let formData 		= new FormData();
-	formData.append('form-id', table.dataset.form_id);
+	formData.append('form-id', table.dataset.formId);
 	formData.append('submission-id', submissionId);
 	formData.append('action', action);
 	
@@ -203,7 +203,7 @@ async function getInputHtml(target){
 	// There can only be one active cell per page
 	target.classList.add('active');
 
-	let formId			= table.dataset.form_id;
+	let formId			= table.dataset.formId;
     let submissionId	= target.closest('tr').dataset.id;
 	let data			= target.dataset;
 	let oldText			= target.textContent;
@@ -290,7 +290,7 @@ async function getNextPage(target){
 	}
 
 	// request page over ajax
-	let formId			= table.dataset.form_id;
+	let formId			= table.dataset.formId;
 
 	let loader			= Main.showLoader(table, false);
 	let formData;
@@ -302,7 +302,7 @@ async function getNextPage(target){
 
     formData.append('form-id', formId);
     formData.append('page-number', page);
-	formData.append('shortcode-id', table.dataset.shortcode_id);
+	formData.append('shortcode-id', table.dataset.shortcodeId);
     formData.append('type', table.dataset.type);
 
 	let params = new Proxy(new URLSearchParams(window.location.search), {
@@ -357,7 +357,7 @@ async function getSortedPage(target){
 	updatePageNav(navWrapper, 0);
 
 	let table			= tableWrapper.querySelector('.form-data-table:not(.hidden)');
-	let formId			= table.dataset.form_id;
+	let formId			= table.dataset.formId;
 	let sortCol			= target.id;
 	let sortDir			= target.classList.contains('desc') ? 'DESC' : 'ASC';
 
@@ -374,7 +374,7 @@ async function getSortedPage(target){
 
     formData.append('form-id', formId);
     formData.append('page-number', 0);
-	formData.append('shortcode-id', table.dataset.shortcode_id);
+	formData.append('shortcode-id', table.dataset.shortcodeId);
     formData.append('type', table.dataset.type);
 
 	let params = new Proxy(new URLSearchParams(window.location.search), {
@@ -454,7 +454,7 @@ async function processFormsTableInput(target){
 	setTimeout(function(){ running = false;}, 500);	
 
 	let table			= target.closest('table');
-	let formId			= table.dataset.form_id;
+	let formId			= table.dataset.formId;
 	let submissionId	= target.closest('tr').dataset.id;
 	let cell			= target.closest('td');
 	cell.classList.remove('active');
@@ -463,7 +463,7 @@ async function processFormsTableInput(target){
 	let shortcodeId		= '';
 
 	if(target.closest('[data-shortcode_id]') != null){
-		shortcodeId	= target.closest('[data-shortcode_id]').dataset.shortcode_id;
+		shortcodeId	= target.closest('[data-shortcode_id]').dataset.shortcodeId;
 	}
 
 	//Only update when needed
@@ -593,7 +593,7 @@ const hideColumn	= async (target) => {
 
 		// store as preference
 		var formData	= new FormData();
-		formData.append('form-id', table.dataset.form_id);
+		formData.append('form-id', table.dataset.formId);
 		formData.append('column-name', cell.id);
 		
 		await FormSubmit.fetchRestApi('forms/save_table_prefs', formData);

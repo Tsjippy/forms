@@ -50,6 +50,122 @@ function pluginUpdate($oldVersion){
     }
 
     if($oldVersion < '8.7.0'){
+        $simForms->createDbTables();
+
+        // Shortcode data
+        $shortcodes   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_form_shortcodes");
+        foreach($shortcodes as &$shortcode){
+            $tableSettings  = maybe_unserialize($shortcode->table_settings);
+
+            if(!empty($tableSettings)){
+                $data = [
+                    'shortcode_id'			=> $shortcode->id,
+                    'form_id'				=> $shortcode->form_id,
+                    'title' 				=> $tableSettings['title'],
+                    'default_sort'			=> $tableSettings['default_sort'],	
+                    'sort_direction'		=> $tableSettings['sort-direction'],
+                    'filter'				=> maybe_serialize($tableSettings['filter']),	
+                    'hide_row'				=> $tableSettings['hiderow'],
+                    'result_type'			=> $tableSettings['result_type'],
+                    'split_table'			=> $tableSettings['split-table'] == 'yes',
+                    'archived'				=> $tableSettings['archived'] == 'true',
+                    'view_right_roles'		=> maybe_serialize($tableSettings['view_right_roles']),
+                    'edit_right_roles'		=> maybe_serialize($tableSettings['edit_right_roles'])
+                ];
+                $wpdb->insert($simForms->shortcodeTableSettingsTable, $data, $formBuilder->shortcodeTableSettingsFormats);
+            }
+
+            $columnSettings  = maybe_unserialize($shortcode->column_settings);
+
+            if(!empty($columnSettings)){
+                foreach($columnSettings as $elId => $columnSetting){
+                    if(empty($columnSetting)){
+                        continue;
+                    }
+
+                    $data = [
+                        'shortcode_id'		=> $shortcode->id,
+                        'form_id'			=> $shortcode->form_id,
+                        'element_id'		=> $elId,
+                        'show'				=> $columnSetting['show'] != 'hide',
+                        'name'				=> $columnSetting['name'],
+                        'nice_name'			=> $columnSetting['nice_name'],
+                        'view_right_roles'	=> maybe_serialize($columnSetting['view_right_roles']),
+                        'edit_right_roles'	=> maybe_serialize($columnSetting['edit_right_roles']),
+                    ];
+                    $wpdb->insert($simForms->shortcodeColumnSettingsTable, $data, $formBuilder->shortcodeTableColumnFormats);
+                }
+            }
+        }
+        
+        // remimder conditions
+        $forms   = $wpdb->get_results("SELECT * FROM $simForms->tableName WHERE `reminder_conditions` IS NOT NULL");
+        foreach($forms as &$form){
+            $reminders  = maybe_unserialize($form->reminder_conditions);
+
+            foreach($reminders as &$reminder){
+                foreach($reminder as $index => $value){
+                    if(is_array($value)){
+                        foreach($value as $i => $v){
+                            $newIndex   = str_replace('_', '-', $i);
+
+                            unset($value[$i]);
+                            
+                            $value[$newIndex]   = $v;
+                        }
+                    }
+
+                    $newIndex   = str_replace('_', '-', $index);
+
+                    unset($reminder[$index]);
+                            
+                    $reminder[$newIndex]   = $value;
+                }
+            }
+
+            $wpdb->update($simForms->tableName,
+                [
+                    'reminder_conditions'		=> maybe_serialize($reminders)
+                ],
+                [
+                    'id'		            => $form->id,
+                ],
+            );
+        }
+
+        $forms   = $wpdb->get_results("SELECT * FROM $simForms->tableName WHERE `emails` IS NOT NULL");
+        foreach($forms as $form){
+            $emails  = maybe_unserialize($form->emails);
+
+            foreach($emails as &$email){
+                if(!isset($email['emailtrigger'])){
+                    continue;
+                }
+
+                $data = [
+                    "form_id"               => $form->id,
+                    "email_trigger"         => $email['emailtrigger'],
+                    "submitted_trigger"     => $email['submittedtrigger'],
+                    "conditional_field"     => $email['conditionalfield'],
+                    "conditional_value"     => $email['conditionalvalue'],
+                    "from_email"            => $email['fromemail'],
+                    "from"                  => $email['from'],
+                    "conditional_from_email"=> $email['conditionalfromemail'],
+                    "else_from"             => $email['elsefrom'],
+                    "email_to"              => $email['emailto'],
+                    "to"                    => $email['to'],
+                    "else_to"               => $email['elseto'],
+                    "conditional_email_to"  => $email['conditionalemailto'],
+                    "subject"               => $email['subject'],
+                    "message"               => $email['message'],
+                    "headers"               => $email['headers'],
+                    "files"                 => $email['files'],
+                ];
+
+                $wpdb->insert($simForms->formEmailTable, $data, $formBuilder->formEmailTableFormats);
+            }
+        }
+        
         $elements   = $wpdb->get_results("SELECT * FROM $simForms->elTableName WHERE `conditions` IS NOT NULL");
 
         foreach($elements as $element){

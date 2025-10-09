@@ -51,11 +51,11 @@ class SubmitForm extends SimForms{
 	 */
 	private function checkEmailConditions($email, $trigger){
 		if(
-			$email['emailtrigger']	!= $trigger && 					// trigger of the e-mail does not match the trigger exactly
+			$email['email-trigger']	!= $trigger && 					// trigger of the e-mail does not match the trigger exactly
 			(
-				$email['emailtrigger']	!= 'submittedcond' ||		// trigger of the e-mail is not submittedcond
+				$email['email-trigger']	!= 'submittedcond' ||		// trigger of the e-mail is not submittedcond
 				(
-					$email['emailtrigger']	== 'submittedcond' &&	// trigger of the e-mail is submittedcond
+					$email['email-trigger']	== 'submittedcond' &&	// trigger of the e-mail is submittedcond
 					$trigger				!= 'submitted'			// the trigger is not submitted
 				)
 			)
@@ -72,7 +72,7 @@ class SubmitForm extends SimForms{
 		if( $trigger == 'fieldchanged' ){
 
 			// the changed element is not the conditional element)
-			if($changedElementId != $email['conditionalfield']){
+			if($changedElementId != $email['conditional-field']){
 				return false;
 			}
 
@@ -86,7 +86,7 @@ class SubmitForm extends SimForms{
 			$formValue 		= strtolower($formValue);
 
 			// get the compare value
-			$compareValue	= strtolower($email['conditionalvalue']);
+			$compareValue	= strtolower($email['conditional-value']);
 
 			//do not proceed if there is no match
 			if($formValue != $compareValue && $formValue != str_replace(' ', '_', $compareValue)){
@@ -94,16 +94,16 @@ class SubmitForm extends SimForms{
 			}
 		}elseif(
 			$trigger == 'fieldschanged'									&&		// an element has been changed
-			!in_array($changedElementId, $email['conditionalfields'])			// and the element is not in the conditional fields array
+			!in_array($changedElementId, $email['conditional-fields'])			// and the element is not in the conditional fields array
 		){
 			return false;
-		}elseif($trigger == 'submitted' && $email['emailtrigger'] == 'submittedcond'){	// check if the submit condition is matched
-			if(!is_array($email['submittedtrigger'])){
+		}elseif($trigger == 'submitted' && $email['email-trigger'] == 'submittedcond'){	// check if the submit condition is matched
+			if(!is_array($email['submitted-trigger'])){
 				return false;
 			}
 
 			// get element and the form result of that element
-			$element	= $this->getElementById($email['submittedtrigger']['element']);
+			$element	= $this->getElementById($email['submitted-trigger']['element']);
 			if(empty($this->submission->formresults[$element->name])){
 				$elValue	= '';
 			}else{
@@ -111,11 +111,11 @@ class SubmitForm extends SimForms{
 			}
 			
 			// get the value to compare with
-			if(is_numeric($email['submittedtrigger']['valueelement'])){
-				$compareElement	= $this->getElementById($email['submittedtrigger']['valueelement']);
+			if(is_numeric($email['submitted-trigger']['value-element'])){
+				$compareElement	= $this->getElementById($email['submitted-trigger']['value-element']);
 				$compareElValue	= $this->submission->formresults[$compareElement->name];
 			}else{
-				$compareElValue	= $email['submittedtrigger']['value'];
+				$compareElValue	= $email['submitted-trigger']['value'];
 			}
 
 			if(is_array($elValue)){
@@ -127,7 +127,7 @@ class SubmitForm extends SimForms{
 			}
 
 			// Do the comparisson, do not proceed if no match
-			if(!version_compare($elValue, $compareElValue, $email['submittedtrigger']['equation'])){
+			if(!version_compare($elValue, $compareElValue, $email['submitted-trigger']['equation'])){
 				return false;
 			}
 		}
@@ -151,13 +151,13 @@ class SubmitForm extends SimForms{
 			
 			$from	= '';
 			//Send e-mail from conditional e-mail adress
-			if($email['fromemail'] == 'conditional'){
-				$from 	= $this->findConditionalEmail($email['conditionalfromemail']);
+			if($email['from-email'] == 'conditional'){
+				$from 	= $this->findConditionalEmail($email['conditional-from-email']);
 
 				if(!$from){
-					$from	= $email['elsefrom'];
+					$from	= $email['else-from'];
 				}
-			}elseif($email['fromemail'] == 'fixed'){
+			}elseif($email['from-email'] == 'fixed'){
 				$from	= $this->processPlaceholders($email['from']);
 			}
 
@@ -166,13 +166,13 @@ class SubmitForm extends SimForms{
 			}
 							
 			$to		= '';
-			if($email['emailto'] == 'conditional'){
-				$to = $this->findConditionalEmail($email['conditionalemailto']);
+			if($email['email-to'] == 'conditional'){
+				$to = $this->findConditionalEmail($email['conditional-email-to']);
 
 				if(!$to){
-					$to	= $email['elseto'];
+					$to	= $email['else-to'];
 				}
-			}elseif($email['emailto'] == 'fixed'){
+			}elseif($email['email-to'] == 'fixed'){
 				$to		= $this->processPlaceholders($email['to']);
 
 				// if no e-mail found, find any numbers and assume they are user ids

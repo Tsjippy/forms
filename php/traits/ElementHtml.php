@@ -268,7 +268,7 @@ trait ElementHtml{
 			$elementItemHtml	= $this->prepareElementHtml($element, $index, $elementHtml, $val);
 			
 			//open the clone div
-			$html	= "<div class='clone-div' data-divid='$index'>";
+			$html	= "<div class='clone-div' data-div-id='$index'>";
 				//add flex to single multi items, re-add the label for each value
 				$html .= str_replace('%key%', $index+1, $prevLabel);
 				

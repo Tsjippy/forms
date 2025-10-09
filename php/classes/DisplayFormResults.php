@@ -1053,12 +1053,12 @@ class DisplayFormResults extends DisplayForm{
 			
 			//if this row has no value in this column remove the row
 			if(
-				!empty($this->tableSettings['hiderow']) &&												// There is a column defined
-				$columnSetting['name'] == $this->tableSettings['hiderow'] && 							// We are currently checking a cell in that column
+				!empty($this->tableSettings['hide-row']) &&												// There is a column defined
+				$columnSetting['name'] == $this->tableSettings['hide-row'] && 							// We are currently checking a cell in that column
 				(
 					(
-						empty($values[$this->tableSettings['hiderow']]) && 								// The cell has no value
-						empty($values[trim($this->tableSettings['hiderow'], '[]')])						// also check the name without []
+						empty($values[$this->tableSettings['hide-row']]) && 								// The cell has no value
+						empty($values[trim($this->tableSettings['hide-row'], '[]')])						// also check the name without []
 					)
 				) && 									
 				!array_intersect($this->userRoles, (array)$columnSetting['edit-right-roles'])	&&		// And we have no right to edit this specific column
@@ -1414,7 +1414,7 @@ class DisplayFormResults extends DisplayForm{
 
 	protected function tableSettingsForm($class, $viewRoles, $editRoles){
 		?>
-		<div class="tabcontent <?php echo $class;?>" id="table_rights_<?php echo $this->shortcodeData->id;?>">
+		<div class="tabcontent <?php echo $class;?>" id="table-rights-<?php echo $this->shortcodeData->id;?>">
 			<form>
 				<input type='hidden' class='shortcode-settings' name='shortcode-id'	value='<?php echo $this->shortcodeData->id;?>'>
 				<input type='hidden' class='shortcode-settings' name='form-id'		value='<?php echo $this->formData->id;?>'>
@@ -1473,7 +1473,7 @@ class DisplayFormResults extends DisplayForm{
 						}
 
 						foreach($filters as $index=>$filter){
-							echo "<tr class='clone-div' data-divid='$index' style='border: none;'>";
+							echo "<tr class='clone-div' data-div-id='$index' style='border: none;'>";
 								echo "<td style='border: none;'>";
 									echo "<select name='table-settings[filter][$index][element]' class='inline'>";
 										foreach($this->columnSettings as $key=>$columnSetting){
@@ -1526,9 +1526,9 @@ class DisplayFormResults extends DisplayForm{
 					<label>
 						The row will be hidden if a cell in this column has no value and the viewer has no right to edit.
 					</label>
-					<select name="table-settings[hiderow]">
+					<select name="table-settings[hide-row]">
 					<?php
-					if($this->tableSettings['hiderow'] == ''){
+					if($this->tableSettings['hide-row'] == ''){
 						?><option value='' selected>---</option><?php
 					}else{
 						?><option value=''>---</option><?php
@@ -1542,7 +1542,7 @@ class DisplayFormResults extends DisplayForm{
 						$name = $columnSetting['nice-name'];
 						
 						//Check which option is the selected one
-						if($this->tableSettings['hiderow'] == $columnSetting['name']){
+						if($this->tableSettings['hide-row'] == $columnSetting['name']){
 							$selected = 'selected="selected"';
 						}else{
 							$selected = '';
@@ -1561,7 +1561,7 @@ class DisplayFormResults extends DisplayForm{
 					</select>
 					<br>
 					<label>
-						<input type='checkbox' name='table-settings[split-table]' value='yes' <?php if(isset($this->tableSettings['split-table']) && $this->tableSettings['split-table'] == 'yes'){echo 'checked';}?>>
+						<input type='checkbox' name='table-settings[split-table]' value='yes' <?php if(isset($this->tableSettings['split-table']) && $this->tableSettings['split-table']){echo 'checked';}?>>
 						Split the results in own entries and others entries
 					</label>
 
@@ -1579,11 +1579,11 @@ class DisplayFormResults extends DisplayForm{
 					}
 					?>
 					<label>
-						<input type="radio" name="table-settings[archived]" value="true" <?php echo $checked1;?>>
+						<input type="radio" name="table-settings[archived]" value="1" <?php echo $checked1;?>>
 						Yes
 					</label>
 					<label>
-						<input type="radio" name="table-settings[archived]" value="false" <?php echo $checked2;?>>
+						<input type="radio" name="table-settings[archived]" value="0" <?php echo $checked2;?>>
 						No
 					</label>
 				</div>
@@ -1788,8 +1788,8 @@ class DisplayFormResults extends DisplayForm{
 			<div class="modal-content" style='max-width:100vw;min-width:90vw;'>
 				<span id="modal-close" class="close">&times;</span>
 				
-				<button id="column-settings" class="button tablink <?php echo $active1;?>" data-target="column-settings_<?php echo $this->shortcodeData->id;?>">Column settings</button>
-				<button id="table-settings" class="button tablink <?php echo $active2;?>" data-target="table_rights_<?php echo $this->shortcodeData->id;?>">Table settings</button>
+				<button id="column-settings" class="button tablink <?php echo $active1;?>" data-target="column-settings-<?php echo $this->shortcodeData->id;?>">Column settings</button>
+				<button id="table-settings" class="button tablink <?php echo $active2;?>" data-target="table-rights-<?php echo $this->shortcodeData->id;?>">Table settings</button>
 				
 				<?php
 				$this->columnSettingsForm($class1, $viewRoles, $editRoles);
@@ -1838,7 +1838,7 @@ class DisplayFormResults extends DisplayForm{
 		//check if we have rights on this table
 		if(!isset($this->tableEditPermissions) || !$this->tableEditPermissions){
 			if(
-				array_intersect($this->userRoles, array_keys((array)$this->tableSettings['edit-right-roles'])) ||
+				array_intersect($this->userRoles, (array)$this->tableSettings['edit-right-roles']) ||
 				in_array($this->userId, (array)$this->tableSettings['edit-right-roles'])
 			){
 				$this->tableEditPermissions = true;
@@ -2571,9 +2571,9 @@ class DisplayFormResults extends DisplayForm{
 
 		//add new row in db
 		$wpdb->insert(
-			$this->shortcodeTable,
+			$this->shortcodeTableSettingsTable,
 			array(
-				'table_settings'	=> '',
+				'shortcode_id'		=> '',
 				'form_id'			=> $formId,
 			)
 		);

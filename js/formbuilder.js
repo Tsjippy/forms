@@ -47,10 +47,10 @@ function fixElementNumbering(form){
 async function showEmptyModal(target){
 	target.classList.add('clicked');
 
-	let formId					= target.dataset.form_id;
+	let formId					= target.dataset.formId;
 	if(formId == undefined){
 		if(target.closest('.form-element-wrapper') != null){
-			formId = target.closest('.form-element-wrapper').dataset.form_id;
+			formId = target.closest('.form-element-wrapper').dataset.formId;
 		}else{
 			formId = document.querySelector('input[type=hidden][name="form-id"').value;
 		}
@@ -90,7 +90,7 @@ async function requestEditElementData(target){
 	target.classList.add('clicked');
 
 	let elementId		= formElementWrapper.dataset.id;
-	let formId			= target.closest('.form-element-wrapper').dataset.form_id;
+	let formId			= target.closest('.form-element-wrapper').dataset.formId;
 	modal.querySelector('[name="element-id"]').value = formElementWrapper.dataset.id;
 	modal.originalhtml	= target.outerHTML;
 
@@ -194,8 +194,8 @@ async function addFormElement(target, copying=false){
 	let response;
 	if(copying){
 		let formData			= new FormData();
-		formData.append('elid', wrapper.dataset.id);
-		formData.append('form-id', wrapper.dataset.form_id);
+		formData.append('element_id', wrapper.dataset.id);
+		formData.append('form-id', wrapper.dataset.formId);
 		formData.append('order', indexes);
 
 		response	= await FormSubmit.fetchRestApi('forms/copy_form_element', formData);
@@ -234,12 +234,12 @@ async function addFormElement(target, copying=false){
 }
 
 async function sendElementSize(el, widthPercentage){
-	if(widthPercentage != el.dataset.width_percentage && Math.abs(widthPercentage - el.dataset.width_percentage)>5){
-		el.dataset.width_percentage = widthPercentage;
+	if(widthPercentage != el.dataset.widthPercentage && Math.abs(widthPercentage - el.dataset.widthPercentage)>5){
+		el.dataset.widthPercentage = widthPercentage;
 		
 		//send new width over AJAX
 		let formData = new FormData();
-		formData.append('form-id', el.closest('.form-element-wrapper').dataset.form_id);
+		formData.append('form-id', el.closest('.form-element-wrapper').dataset.formId);
 		formData.append('elementid', el.closest('.form-element-wrapper').dataset.id);
 		formData.append('new-width', widthPercentage);
 		
@@ -256,7 +256,7 @@ async function sendElementSize(el, widthPercentage){
 async function removeElement(target){
 	let parent			= target.parentNode;
 	let elementWrapper	= target.closest('.form-element-wrapper');
-	let formId			= elementWrapper.dataset.form_id;
+	let formId			= elementWrapper.dataset.formId;
 	let elementIndex 	= elementWrapper.dataset.id;
 	let form			= target.closest('form');
 
@@ -290,7 +290,7 @@ async function reorderformelements(event){
 		fixElementNumbering(event.item.closest('form'));
 
 		let formData = new FormData();
-		formData.append('form-id', event.item.dataset.form_id);
+		formData.append('form-id', event.item.dataset.formId);
 		formData.append('el-id', event.item.dataset.id);
 
 		let indexes	= {};
@@ -429,14 +429,14 @@ function showOrHideIds(target){
 	if(target.dataset.action == 'show'){
 		url.searchParams.set('showid', 'true');
 
-		formWrapper.querySelectorAll('.elid.hidden').forEach(el=>el.classList.remove('hidden'));
+		formWrapper.querySelectorAll('.element_id.hidden').forEach(el=>el.classList.remove('hidden'));
 		
 		target.textContent 		= 'Hide ids';
 		target.dataset.action	= 'hide';
 	}else{
 		url.searchParams.delete('showid');
 
-		formWrapper.querySelectorAll('.elid:not(.hidden)').forEach(el=>el.classList.add('hidden'));
+		formWrapper.querySelectorAll('.element_id:not(.hidden)').forEach(el=>el.classList.add('hidden'));
 		
 		target.textContent 		= 'Show ids';
 		target.dataset.action	= 'show';
@@ -533,7 +533,7 @@ async function addConditionRule(target){
 		(
 			activeButton == null && 													// there is no active button
 			condition.querySelectorAll('.rule-row').length > 1 && 						// but there are more than one rules
-			row.dataset.rule_index != condition.querySelectorAll('.rule-row').length -1	// and this is not the last rule
+			row.dataset.ruleIndex != condition.querySelectorAll('.rule-row').length -1	// and this is not the last rule
 		) ||
 		(
 			activeButton != null && 				// there is an active button
@@ -599,9 +599,9 @@ function addRuleRow(row){
 	//Insert a new rule row
 	let clone		= FormFunctions.cloneNode(row);
 	
-	let cloneIndex	= parseInt(row.dataset.rule_index) + 1;
+	let cloneIndex	= parseInt(row.dataset.ruleIndex) + 1;
 
-	clone.dataset.rule_index = cloneIndex;
+	clone.dataset.ruleIndex = cloneIndex;
 
 	row.parentNode.insertBefore(clone, row.nextSibling);
 	
@@ -659,9 +659,9 @@ function addCondition(target){
 		clone = FormFunctions.cloneNode(row);
 	}
 	
-	let cloneIndex	= parseInt(row.dataset.condition_index) + 1;
+	let cloneIndex	= parseInt(row.dataset.conditionIndex) + 1;
 
-	clone.dataset.condition_index = cloneIndex;
+	clone.dataset.conditionIndex = cloneIndex;
 	
 	if(!target.classList.contains('opposite')){
 		clone.querySelectorAll('.active').forEach(function(el){
@@ -683,7 +683,7 @@ function addCondition(target){
 		let ruleCount = clone.querySelectorAll('.rule-row').length;
 		clone.querySelectorAll('.rule-row').forEach(function(ruleRow){
 			//only keep the last rule (as that one has the + button)
-			if(ruleRow.dataset.rule_index != ruleCount - 1){
+			if(ruleRow.dataset.ruleIndex != ruleCount - 1){
 				ruleRow.remove();
 			}else{
 				fixRuleNumbering(ruleRow.closest('.condition-row'));
@@ -731,7 +731,7 @@ function removeConditionRule(target){
 				let ruleRow		= target.closest('.rule-row');
 				
 				//get the current row index
-				let ruleRowIndex	= parseInt(ruleRow.dataset.rule_index);
+				let ruleRowIndex	= parseInt(ruleRow.dataset.ruleIndex);
 				
 				//Get previous row
 				let prevRow		= conditionRow.querySelector('[data-rule_index="'+(ruleRowIndex - 1)+'"]');
@@ -784,7 +784,7 @@ function fixRuleNumbering(conditionRow){
 	
 	//loop over all rules in the condition
 	ruleRows.forEach(ruleRow =>{
-		ruleRow.dataset.rule_index = i;
+		ruleRow.dataset.ruleIndex = i;
 		
 		ruleRow.querySelectorAll('.element-condition').forEach(function(el){
 			//fix numbering
@@ -804,7 +804,7 @@ function fixRuleNumbering(conditionRow){
 function fixConditionNumbering(){
 	let conditionRows	= modal.querySelectorAll('.element-conditions-wrapper .condition-row');
 	for (let i = 0; i < conditionRows.length; i++) {
-		conditionRows[i].dataset.condition_index = i;
+		conditionRows[i].dataset.conditionIndex = i;
 		
 		conditionRows[i].querySelectorAll('.element-condition').forEach(function(el){
 			//fix numbering
@@ -859,8 +859,8 @@ function fromEmailClicked(target){
 }
 
 function toEmailClicked(target){
-	let div1 = target.closest('.clone-div').querySelector('.emailtofixed');
-	let div2 = target.closest('.clone-div').querySelector('.emailtoconditional');
+	let div1 = target.closest('.clone-div').querySelector('.email-tofixed');
+	let div2 = target.closest('.clone-div').querySelector('.email-toconditional');
 
 	if(target.value == 'fixed'){
 		div1.classList.remove('hidden');
@@ -1036,15 +1036,15 @@ window.addEventListener("click", event => {
 		}
 	}
 	
-	if(target.classList.contains('emailtrigger')){
-		let el = target.closest('.clone-div').querySelector('.conditionalfield-wrapper');
+	if(target.classList.contains('email-trigger')){
+		let el = target.closest('.clone-div').querySelector('.conditional-field-wrapper');
 		if(target.value == 'fieldchanged'){
 			el.classList.remove('hidden');
 		}else{
 			el.classList.add('hidden');
 		}
 
-		el = target.closest('.clone-div').querySelector('.conditionalfields-wrapper');
+		el = target.closest('.clone-div').querySelector('.conditional-fields-wrapper');
 		if(target.value == 'fieldschanged'){
 			el.classList.remove('hidden');
 		}else{
@@ -1059,11 +1059,11 @@ window.addEventListener("click", event => {
 		}
 	}
 	
-	if(target.classList.contains('fromemail')){
+	if(target.classList.contains('from-email')){
 		fromEmailClicked(target);
 	}
 	
-	if(target.classList.contains('emailto')){
+	if(target.classList.contains('email-to')){
 		toEmailClicked(target);
 	}
 	
@@ -1129,7 +1129,7 @@ window.addEventListener('change', ev=>{
 		}else{
 			target.closest('.condition-form').querySelectorAll('.addition .days:not(.hidden)').forEach(el=>el.classList.add('hidden'));
 		}
-	}else if(target.matches("[name*='[submittedtrigger][equation]']")){
+	}else if(target.matches("[name*='[submitted-trigger][equation]']")){
 		let parent	= target.closest('.submitted-trigger-type');
 		let static	= parent.querySelector('.staticvalue');
 		let dynamic	= parent.querySelector('div.dynamicvalue');

@@ -178,7 +178,7 @@ function moduleFunctions($functionHtml){
 add_filter('sim_module_forms_after_save', __NAMESPACE__.'\moduleUpdated', 10, 2);
 function moduleUpdated($options, $oldOptions){
 	$simForms = new SimForms();
-	$simForms->createDbTable();
+	$simForms->createDbTables();
 
 	// Create frontend posting page
 	$options	= SIM\ADMIN\createDefaultPage($options, 'forms_pages', 'Form selector', '[formselector]', $oldOptions);
@@ -231,7 +231,7 @@ function postStates( $states, $post ) {
 add_action('sim_module_forms_activated', __NAMESPACE__.'\moduleActivated');
 function moduleActivated(){
 	$simForms = new SimForms();
-	$simForms->createDbTable();
+	$simForms->createDbTables();
 
 	$formTable = new DisplayFormResults();
 	$formTable->createDbShortcodeTable();

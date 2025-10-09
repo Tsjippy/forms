@@ -89,7 +89,7 @@ class DisplayForm extends SubmitForm{
 			$style	= 'style="display:flex;"';
 		}
 
-		$this->multiInputsHtml[$index]   = "<div class='clone-div $class' data-divid='$index' $style>";
+		$this->multiInputsHtml[$index]   = "<div class='clone-div $class' data-div-id='$index' $style>";
 		$this->multiInputsHtml[$index]	.= $this->renderButtons();
 		$this->multiInputsHtml[$index]	.= "<div class='multi-input-wrapper'>";
 	}

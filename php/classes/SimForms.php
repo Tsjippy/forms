@@ -34,33 +34,42 @@ class SimForms{
 	public $submission;
 	public $submissionTableFormats;
 	public $formTableFormats;
+	public $formEmailTable;
+	public $formEmailTableFormats;
+	public $shortcodeTableSettingsTable;
+	public $shortcodeTableSettingsFormats;
+	public $shortcodeColumnSettingsTable;
+	public $shortcodeTableColumnFormats;
 	public $elementTableFormats;
 
 	public function __construct(){
 		global $wpdb;
 
-		$this->isFormStep				= false;
-		$this->isMultiStepForm			= '';
-		$this->formStepCounter			= 0;
-		$this->submissionTableName		= $wpdb->prefix . 'sim_form_submissions';
-		$this->tableName				= $wpdb->prefix . 'sim_forms';
-		$this->elTableName				= $wpdb->prefix . 'sim_form_elements';
-		$this->nonInputs				= ['label','button','datalist','formstep','info','p','php','multi-start','multi-end','div-start','div-end'];
-		$this->multiInputsHtml			= [];
-		$this->user 					= wp_get_current_user();
-		$this->userRoles				= $this->user->roles;
-		$this->userId					= $this->user->ID;
+		$this->isFormStep					= false;
+		$this->isMultiStepForm				= '';
+		$this->formStepCounter				= 0;
+		$this->submissionTableName			= $wpdb->prefix . 'sim_form_submissions';
+		$this->tableName					= $wpdb->prefix . 'sim_forms';
+		$this->elTableName					= $wpdb->prefix . 'sim_form_elements';
+		$this->formEmailTable				= $wpdb->prefix . 'sim_form_emails';
+		$this->shortcodeColumnSettingsTable	= $wpdb->prefix . 'sim_form_shortcode_column_settings';
+		$this->shortcodeTableSettingsTable	= $wpdb->prefix . 'sim_form_shortcode_table_settings';
+		$this->nonInputs					= ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi-start', 'multi-end', 'div-start', 'div-end'];
+		$this->multiInputsHtml				= [];
+		$this->user 						= wp_get_current_user();
+		$this->userRoles					= $this->user->roles;
+		$this->userId						= $this->user->ID;
 		if(isset($_REQUEST['all'])){
-			$this->pageSize				= 99999;
+			$this->pageSize					= 99999;
 		}elseif(isset($_REQUEST['pagesize']) && is_numeric($_REQUEST['pagesize'])){
-			$this->pageSize				= $_REQUEST['pagesize'];
+			$this->pageSize					= $_REQUEST['pagesize'];
 		}else{
-			$this->pageSize				= 100;
+			$this->pageSize					= 100;
 		}
 
-		$this->multiwrap				= '';
-		$this->submitRoles				= [];
-		$this->showArchived				= false;
+		$this->multiwrap					= '';
+		$this->submitRoles					= [];
+		$this->showArchived					= false;
 
 		//calculate full form rights
 		$object		= get_queried_object();
@@ -92,17 +101,6 @@ class SimForms{
 	 * Defines the formats of each column in each table for use in $wpdb->insert and $wpdb->update
 	 */
 	private function tableFormats(){
-		$this->submissionTableFormats	= [
-			'form_id'				=> '%d',	
-			'timecreated'			=> '%s',	
-			'timelastedited'		=> '%s',	
-			'userid'				=> '%d',
-			'formresults'			=> '%s',
-			'archived'				=> '%d',
-			'archivedsubs'			=> '%s'
-		];
-
-		$this->submissionTableFormats	= apply_filters('forms-submission-table-formats', $this->submissionTableFormats, $this);
 
 		$this->formTableFormats			= [
 			'name'					=> '%s',
@@ -162,9 +160,231 @@ class SimForms{
 
 		$this->elementTableFormats		= apply_filters('forms-element-table-formats', $this->elementTableFormats, $this);
 
+		$this->formEmailTableFormats	= [
+			'form_id'				=> '%d',	
+			'email_trigger'			=> '%s',	
+			'submitted_trigger'		=> '%s',	
+			'conditional_field'		=> '%s',
+			'conditional_value'		=> '%s',
+			'from_email'			=> '%s',
+			'from'					=> '%s',
+			'conditional_from_email'=> '%s',
+			'else_from'				=> '%s',
+			'email_to'				=> '%s',
+			'to'					=> '%s',
+			'conditional_email_to'	=> '%s',
+			'else_to'				=> '%s',
+			'subject'				=> '%s',
+			'message'				=> '%s',
+			'headers'				=> '%s',
+			'files'					=> '%s'
+		];
+
+		$this->formEmailTableFormats	= apply_filters('forms-submission-table-formats', $this->formEmailTableFormats, $this);
+
+		$this->submissionTableFormats	= [
+			'form_id'				=> '%d',	
+			'timecreated'			=> '%s',	
+			'timelastedited'		=> '%s',	
+			'userid'				=> '%d',
+			'formresults'			=> '%s',
+			'archived'				=> '%d',
+			'archivedsubs'			=> '%s'
+		];
+
+		$this->submissionTableFormats	= apply_filters('forms-submission-table-formats', $this->submissionTableFormats, $this);
+
+		$this->shortcodeTableSettingsFormats	= [
+			'shortcode_id'			=> '%d',
+			'form_id'				=> '%d',
+			'title' 				=> '%s',
+			'default_sort'			=> '%s',	
+			'sort_direction'		=> '%s',
+			'filter'				=> '%s',	
+			'hide_row'				=> '%d',
+			'result_type'			=> '%s',
+			'split_table'			=> '%s',
+			'archived'				=> '%d',
+			'view_right_roles'		=> '%s',
+			'edit_right_roles'		=> '%s'
+		];
+
+		$this->shortcodeTableSettingsFormats	= apply_filters('forms-submission-table-formats', $this->shortcodeTableSettingsFormats, $this);
+
+		$this->shortcodeTableColumnFormats	= [
+			'shortcode_id'			=> '%d',
+			'form_id'				=> '%d',
+			'element_id'			=> '%d',
+			'show'					=> '%d',	
+			'name'					=> '%s',	
+			'nice_name'				=> '%s',	
+			'view_right_roles'		=> '%s',
+			'edit_right_roles'		=> '%s'
+		];
+
+		$this->shortcodeTableColumnFormats	= apply_filters('forms-submission-table-formats', $this->shortcodeTableColumnFormats, $this);
+
 		ksort($this->submissionTableFormats);
 		ksort($this->formTableFormats);
 		ksort($this->elementTableFormats);
+		ksort($this->formEmailTableFormats);
+		ksort($this->shortcodeTableSettingsFormats);
+		ksort($this->shortcodeTableColumnFormats);
+	}
+	
+	/**
+	 * Creates the tables for this module
+	 */
+	public function createDbTables(){
+		if ( !function_exists( 'maybe_create_table' ) ) {
+			require_once ABSPATH . '/wp-admin/install-helper.php';
+		}
+
+		add_option( "forms_db_version", "1.0" );
+		
+		//only create db if it does not exist
+		global $wpdb;
+		$charsetCollate = $wpdb->get_charset_collate();
+
+		//Main table
+		$sql = "CREATE TABLE {$this->tableName} (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			name tinytext NOT NULL,
+			version text NOT NULL,
+			button_text text,
+			succes_message text,
+			include_id boolean,
+			formname text,
+			save_in_meta boolean,
+			reminder_frequency text,
+			reminder_amount text,
+			reminder_period text,
+			reminder_startdate date,
+			reminder_conditions LONGTEXT,
+			form_url text,
+			form_reset boolean,
+			actions text,
+			autoarchive boolean,
+			autoarchive_el integer,
+			autoarchive_value text,
+			split text,
+			full_right_roles LONGTEXT,
+			submit_others_form LONGTEXT,
+			emails LONGTEXT,
+			upload_path LONGTEXT,
+			PRIMARY KEY  (id)
+		) $charsetCollate;";
+
+		maybe_create_table($this->tableName, $sql );
+
+		// Form element table
+		$sql = "CREATE TABLE {$this->elTableName} (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			form_id int NOT NULL,
+			type text NOT NULL,
+			priority int,
+			width int default 100,
+			functionname text,
+			foldername text,
+			name text,
+			nicename text,
+			text text,
+			html text,
+			valuelist text,
+			default_value text,
+			default_array_value text,
+			options text,
+			required boolean default False,
+			mandatory boolean default False,
+			recommended boolean default False,
+			wrap boolean default False,
+			hidden boolean default False,
+			multiple boolean default False,
+			library boolean default False,
+			editimage boolean default False,
+		  	conditions longtext,
+			warning-conditions longtext,
+			add longtext,
+			remove longtext,
+			PRIMARY KEY  (id)
+		  ) $charsetCollate;";
+  
+		maybe_create_table($this->elTableName, $sql );
+
+		// form e-mails table
+		$sql = "CREATE TABLE {$this->formEmailTable} (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			form_id int NOT NULL,
+			email_trigger tinytext,
+			submitted_trigger tinytext,
+			conditional_field tinytext,
+			conditional_value tinytext,
+			from_email tinytext,
+			`from` tinytext,
+			conditional_from_email longtext,
+			else_from tinytext,
+			email_to tinytext,
+			`to` tinytext,
+			conditional_email_to longtext,
+			else_to tinytext,
+			subject longtext,
+			message longtext,
+			headers longtext,
+			files longtext,
+			PRIMARY KEY  (id)
+		) $charsetCollate;";
+
+		maybe_create_table($this->formEmailTable, $sql );
+
+		// shortcodeTableSettings table
+		$sql = "CREATE TABLE {$this->shortcodeTableSettingsTable} (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			form_id int NOT NULL,
+			title tinytext,
+			default_sort tinytext,
+			sort_direction tinytext,
+			filter longtext,
+			hide_row tinytext,
+			result_type tinytext,
+			split_table int,
+			archived int,
+			`view_right_roles` longtext,
+			edit_right_roles longtext,
+			PRIMARY KEY  (id)
+		) $charsetCollate;";
+
+		maybe_create_table($this->shortcodeTableSettingsTable, $sql );
+
+		// shortcode Column Settings table
+		$sql = "CREATE TABLE {$this->shortcodeColumnSettingsTable} (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			shortcode_id int NOT NULL,
+			form_id int NOT NULL,
+			element_id int,
+			`show` int,
+			name tinytext,
+			nice_name tinytext,
+			view_right_roles longtext,
+			edit_right_roles longtext,
+			PRIMARY KEY  (id)
+		) $charsetCollate;";
+
+		maybe_create_table($this->shortcodeColumnSettingsTable, $sql );
+
+		//submission table
+		$sql = "CREATE TABLE {$this->submissionTableName} (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			form_id	int NOT NULL,
+			timecreated datetime DEFAULT NULL,
+			timelastedited datetime DEFAULT NULL,
+			userid mediumint(9) NOT NULL,
+			formresults longtext NOT NULL,
+			archived BOOLEAN,
+			archivedsubs tinytext,
+			PRIMARY KEY  (id)
+		) $charsetCollate;";
+
+		maybe_create_table($this->submissionTableName, $sql );
 	}
 
 	/**
@@ -379,101 +599,6 @@ class SimForms{
 		$html .= "</select>";
 		
 		return $html;
-	}
-	
-	/**
-	 * Creates the tables for this module
-	 */
-	public function createDbTable(){
-		if ( !function_exists( 'maybe_create_table' ) ) {
-			require_once ABSPATH . '/wp-admin/install-helper.php';
-		}
-
-		add_option( "forms_db_version", "1.0" );
-		
-		//only create db if it does not exist
-		global $wpdb;
-		$charsetCollate = $wpdb->get_charset_collate();
-
-		//Main table
-		$sql = "CREATE TABLE {$this->tableName} (
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			name tinytext NOT NULL,
-			version text NOT NULL,
-			button_text text,
-			succes_message text,
-			include_id boolean,
-			formname text,
-			save_in_meta boolean,
-			reminder_frequency text,
-			reminder_amount text,
-			reminder_period text,
-			reminder_startdate date,
-			reminder_conditions LONGTEXT,
-			form_url text,
-			form_reset boolean,
-			actions text,
-			autoarchive boolean,
-			autoarchive_el integer,
-			autoarchive_value text,
-			split text,
-			full_right_roles LONGTEXT,
-			submit_others_form LONGTEXT,
-			emails LONGTEXT,
-			upload_path LONGTEXT,
-			PRIMARY KEY  (id)
-		) $charsetCollate;";
-
-		maybe_create_table($this->tableName, $sql );
-
-		// Form element table
-		$sql = "CREATE TABLE {$this->elTableName} (
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			form_id int NOT NULL,
-			type text NOT NULL,
-			priority int,
-			width int default 100,
-			functionname text,
-			foldername text,
-			name text,
-			nicename text,
-			text text,
-			html text,
-			valuelist text,
-			default_value text,
-			default_array_value text,
-			options text,
-			required boolean default False,
-			mandatory boolean default False,
-			recommended boolean default False,
-			wrap boolean default False,
-			hidden boolean default False,
-			multiple boolean default False,
-			library boolean default False,
-			editimage boolean default False,
-		  	conditions longtext,
-			warning-conditions longtext,
-			add longtext,
-			remove longtext,
-			PRIMARY KEY  (id)
-		  ) $charsetCollate;";
-  
-		maybe_create_table($this->elTableName, $sql );
-
-		//submission table
-		$sql = "CREATE TABLE {$this->submissionTableName} (
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			form_id	int NOT NULL,
-			timecreated datetime DEFAULT NULL,
-			timelastedited datetime DEFAULT NULL,
-			userid mediumint(9) NOT NULL,
-			formresults longtext NOT NULL,
-			archived BOOLEAN,
-			archivedsubs tinytext,
-			PRIMARY KEY  (id)
-		) $charsetCollate;";
-
-		maybe_create_table($this->submissionTableName, $sql );
 	}
 	
 	/**
