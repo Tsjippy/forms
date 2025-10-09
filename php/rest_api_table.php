@@ -280,7 +280,9 @@ function deleteTablePrefs( \WP_REST_Request $request ) {
 
 function saveColumnSettings($settings='', $shortcodeId=''){
 	global $wpdb;
-
+	
+	$formTable	= new DisplayFormResults();
+	
 	if($settings instanceof \WP_REST_Request){
 		$params			= $settings->get_params();
 
@@ -288,7 +290,7 @@ function saveColumnSettings($settings='', $shortcodeId=''){
 		$shortcodeId 	= $params['shortcode-id'];
 	}
 
-	foreach($columnSettings as &$column){
+	foreach($columnSettings as $column){
 		if(!is_array($column)){
 			continue;
 		}
@@ -304,25 +306,22 @@ function saveColumnSettings($settings='', $shortcodeId=''){
 			$column['view-right-roles'] = array_merge($setting['view-right-roles'], $setting['edit-right-roles']);
 		}
 		
-		foreach($column as $index => $setting){
-			unset($column[$index]);
-			
-			$column[str_replace('-', '_', $index)] = maybe_serialize($setting);
+	 $column =	$formTable->prepareDbData($column);
+		
+		$wpdb->update(
+			$formTable->shortcodeColumnSettingsTable,
+			$column,
+			array(
+				'id'				=> $columnId,
+			),
+		);
+		
+		if($wpdb->last_error !== ''){
+			return new \WP_Error('db error', $wpdb->print_error());
 		}
 	}
 	
-	$formTable	= new DisplayFormResults();
-	$wpdb->update(
-		$formTable->shortcodeColumnSettingsTable,
-		$columnSettings,
-		array(
-			'id'				=> $shortcodeId,
-		),
-	);
 	
-	if($wpdb->last_error !== ''){
-		return new \WP_Error('db error', $wpdb->print_error());
-	}
 
 	return "Succesfully saved your column settings";
 }
@@ -344,11 +343,11 @@ function saveTableSettings(){
 	//update table settings
 	$formTable		= new DisplayFormResults();
 	
+	$tableSettings = formTable->prepareDbData($tableSettings);
+	
 	$wpdb->update(
 		$formTable->shortcodeTable,
-		array(
-			'table_settings'=> maybe_serialize($tableSettings)
-		),
+		$tableSettings,
 		array(
 			'id'			=> $_POST['shortcode-id'],
 		),
@@ -360,11 +359,7 @@ function saveTableSettings(){
 		$formTable->getForm($_POST['form-id']);
 		
 		//update existing
-		foreach($formSettings as $key=>&$value){
-			if(is_array($value)){
-				$value	= serialize($value);
-			}
-		}
+		$formSettings = $formTable->prepareDbData($formSettings);
 		
 		//save in db
 		$wpdb->update($formTable->tableName,
