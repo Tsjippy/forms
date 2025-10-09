@@ -305,19 +305,6 @@ class SimForms{
 			$this->submitRoles	= (array)$this->formData->submit_others_form;
 		}
 		
-		if(empty($this->formData->emails)){
-			$emails[0]["from"]		= "";
-			$emails[0]["to"]			= "";
-			$emails[0]["subject"]	= "";
-			$emails[0]["message"]	= "";
-			$emails[0]["headers"]	= "";
-			$emails[0]["files"]		= "";
-
-			$this->formData->emails = $emails;
-		}else{
-			$this->formData->emails = maybe_unserialize($this->formData->emails);
-		}
-		
 		if($wpdb->last_error !== ''){
 			SIM\printArray($wpdb->print_error());
 		}
@@ -327,6 +314,31 @@ class SimForms{
 		return true;
 	}
 
+ /**
+	* Retrieves e-mail settings from the database
+	*/
+	public function getEmailSettings(){
+		global $wpdb;
+		
+		$query = "select * from $this->formEmailsTable where form_id=$this->formData->id";
+		
+		$this->emailSettings				= $wpdb->get_results($query);
+		
+		foreach($this->emailSettings as &$email){
+			$email = maybe_unserialize($email);
+		}
+		
+		if(empty($this->emailSettings)){
+			$emails[0]["from"]		= "";
+			$emails[0]["to"]			= "";
+			$emails[0]["subject"]	= "";
+			$emails[0]["message"]	= "";
+			$emails[0]["headers"]	= "";
+			$emails[0]["files"]		= "";
+
+			$this->emailSettings = $emails;
+		}
+	}
 	/**
 	 * Creates the element mappers to find elements based on id, name or type
 	 *
