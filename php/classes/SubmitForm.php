@@ -141,9 +141,9 @@ class SubmitForm extends SimForms{
 	 * @param	string	$trigger	One of 'submitted' or 'fieldchanged'. Default submitted
 	 */
 	public function sendEmail($trigger='submitted'){
-		$emails = $this->formData->emails;
+		$this->getEmailSettings();
 		
-		foreach($emails as $key=>$email){
+		foreach($this->emailSettings as $key=>$email){
 
 			if(!$this->checkEmailConditions($email, $trigger)){
 				continue;
