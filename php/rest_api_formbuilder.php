@@ -688,10 +688,8 @@ function saveFormEmails(){
 	
 	foreach($formEmails as $index=>$email){
 		$formEmails[$index]['message'] = SIM\deslash($email['message']);
-	}
-	
-	$formBuilder->maybeInsertForm();
-	$wpdb->update($formBuilder->tableName,
+		
+		$wpdb->update($formBuilder->formTableName,
 		array(
 			'emails'	=> maybe_serialize($formEmails)
 		),
@@ -699,6 +697,10 @@ function saveFormEmails(){
 			'id'		=> $_POST['form-id'],
 		),
 	);
+	}
+	
+	$formBuilder->maybeInsertForm();
+	
 	
 	if($wpdb->last_error !== ''){
 		return new \WP_Error('error',$wpdb->print_error());
