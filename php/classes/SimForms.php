@@ -1118,4 +1118,16 @@ class SimForms{
 
         return $args;
     }
+	/**
+	* prepares an indexed array for storages in db
+	
+	*/
+	public function prepareDbData($data){
+		foreach($data as $index => $value){
+			unset($data[$index]);
+			
+			$data[str_replace('-', '_', $index)] = maybe_serialize($value);
+		}
+		
+		return $data;
 }

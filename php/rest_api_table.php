@@ -280,53 +280,47 @@ function deleteTablePrefs( \WP_REST_Request $request ) {
 
 function saveColumnSettings($settings='', $shortcodeId=''){
 	global $wpdb;
-
+	
+	$formTable	= new DisplayFormResults();
+	
 	if($settings instanceof \WP_REST_Request){
 		$params			= $settings->get_params();
 
-		$settings 		= $params['column-settings'];
+		$columnSettings 		= $params['column-settings'];
 		$shortcodeId 	= $params['shortcode-id'];
 	}
-	
-	//copy edit right roles to view right roles
-	if(empty($settings)){
-		return new \WP_Error('forms', 'No settings provided');
-	}
 
-	if(empty($shortcodeId)){
-		return new \WP_Error('forms', 'No shortcode id provided');
-	}
-
-	foreach($settings as &$setting){
-		if(!is_array($setting)){
+	foreach($columnSettings as $column){
+		if(!is_array($column)){
 			continue;
 		}
 		
 		//if there are edit rights defined
 		if(!empty($setting->edit_right_roles)){
 			//create view array if it does not exist
-			if(!is_array($setting->view_right_roles)){
-				$setting->view_right_roles = [];
+			if(!is_array($column->view_right_roles)){
+				$column->view_right_roles = [];
 			}
 			
 			//merge and save
 			$setting->view_right_roles = array_merge($setting->view_right_roles, $setting->edit_right_roles);
+		
+	 	$column =	$formTable->prepareDbData($column);
+		
+		$wpdb->update(
+			$formTable->shortcodeColumnSettingsTable,
+			$column,
+			array(
+				'id'				=> $columnId,
+			),
+		);
+		
+		if($wpdb->last_error !== ''){
+			return new \WP_Error('db error', $wpdb->print_error());
 		}
 	}
 	
-	$formTable	= new DisplayFormResults();
-	$wpdb->update($formTable->shortcodeTable,
-		array(
-			'column_settings'	=> maybe_serialize($settings)
-		),
-		array(
-			'id'				=> $shortcodeId,
-		),
-	);
 	
-	if($wpdb->last_error !== ''){
-		return new \WP_Error('db error', $wpdb->print_error());
-	}
 
 	return "Succesfully saved your column settings";
 }
@@ -348,11 +342,11 @@ function saveTableSettings(){
 	//update table settings
 	$formTable		= new DisplayFormResults();
 	
+	$tableSettings = formTable->prepareDbData($tableSettings);
+	
 	$wpdb->update(
 		$formTable->shortcodeTable,
-		array(
-			'table_settings'=> maybe_serialize($tableSettings)
-		),
+		$tableSettings,
 		array(
 			'id'			=> $_POST['shortcode-id'],
 		),
@@ -364,11 +358,7 @@ function saveTableSettings(){
 		$formTable->getForm($_POST['form-id']);
 		
 		//update existing
-		foreach($formSettings as $key=>&$value){
-			if(is_array($value)){
-				$value	= serialize($value);
-			}
-		}
+		$formSettings = $formTable->prepareDbData($formSettings);
 		
 		//save in db
 		$wpdb->update($formTable->tableName,
