@@ -303,14 +303,14 @@ function saveColumnSettings($settings='', $shortcodeId=''){
 		}
 		
 		//if there are edit rights defined
-		if(!empty($setting['edit-right-roles'])){
+		if(!empty($setting->edit_right_roles)){
 			//create view array if it does not exist
-			if(!is_array($setting['view-right-roles'])){
-				$setting['view-right-roles'] = [];
+			if(!is_array($setting->view_right_roles)){
+				$setting->view_right_roles = [];
 			}
 			
 			//merge and save
-			$setting['view-right-roles'] = array_merge($setting['view-right-roles'], $setting['edit-right-roles']);
+			$setting->view_right_roles = array_merge($setting->view_right_roles, $setting->edit_right_roles);
 		}
 	}
 	
@@ -337,8 +337,8 @@ function saveTableSettings(){
 	$tableSettings 	= $_POST['table-settings'];
 
 	// Check invalid filter names
-	if(isset($tableSettings['filter'])){
-		foreach($tableSettings['filter'] as $filter){
+	if(isset($tableSettings->filter)){
+		foreach($tableSettings->filter as $filter){
 			if(in_array($filter['name'], ['accept-charset', 'action', 'autocomplete', 'enctype', 'method', 'name', 'novalidate', 'rel', 'target'])){
 				return new WP_Error('forms', "Invalid filter name '{$filter['name']}', use a different one");
 			}

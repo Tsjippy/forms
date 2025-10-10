@@ -36,8 +36,8 @@ class SimForms{
 	public $formTableFormats;
 	public $formEmailTable;
 	public $formEmailTableFormats;
-	public $shortcodeTableSettingsTable;
-	public $shortcodeTableSettingsFormats;
+	public $shortcodeTable;
+	public $shortcodeTableFormats;
 	public $shortcodeColumnSettingsTable;
 	public $shortcodeTableColumnFormats;
 	public $elementTableFormats;
@@ -54,7 +54,7 @@ class SimForms{
 		$this->elTableName					= $wpdb->prefix . 'sim_form_elements';
 		$this->formEmailTable				= $wpdb->prefix . 'sim_form_emails';
 		$this->shortcodeColumnSettingsTable	= $wpdb->prefix . 'sim_form_shortcode_column_settings';
-		$this->shortcodeTableSettingsTable	= $wpdb->prefix . 'sim_form_shortcode_table_settings';
+		$this->shortcodeTable				= $wpdb->prefix . 'sim_form_shortcodes';
 		$this->nonInputs					= ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi-start', 'multi-end', 'div-start', 'div-end'];
 		$this->multiInputsHtml				= [];
 		$this->user 						= wp_get_current_user();
@@ -164,7 +164,8 @@ class SimForms{
 			'form_id'				=> '%d',	
 			'email_trigger'			=> '%s',	
 			'submitted_trigger'		=> '%s',	
-			'conditional_field'		=> '%s',
+			'conditional_field'		=> '%s',	
+			'conditional_fields'	=> '%s',
 			'conditional_value'		=> '%s',
 			'from_email'			=> '%s',
 			'from'					=> '%s',
@@ -194,8 +195,7 @@ class SimForms{
 
 		$this->submissionTableFormats	= apply_filters('forms-submission-table-formats', $this->submissionTableFormats, $this);
 
-		$this->shortcodeTableSettingsFormats	= [
-			'shortcode_id'			=> '%d',
+		$this->shortcodeTableFormats	= [
 			'form_id'				=> '%d',
 			'title' 				=> '%s',
 			'default_sort'			=> '%s',	
@@ -209,7 +209,7 @@ class SimForms{
 			'edit_right_roles'		=> '%s'
 		];
 
-		$this->shortcodeTableSettingsFormats	= apply_filters('forms-submission-table-formats', $this->shortcodeTableSettingsFormats, $this);
+		$this->shortcodeTableFormats	= apply_filters('forms-submission-table-formats', $this->shortcodeTableFormats, $this);
 
 		$this->shortcodeTableColumnFormats	= [
 			'shortcode_id'			=> '%d',
@@ -228,7 +228,7 @@ class SimForms{
 		ksort($this->formTableFormats);
 		ksort($this->elementTableFormats);
 		ksort($this->formEmailTableFormats);
-		ksort($this->shortcodeTableSettingsFormats);
+		ksort($this->shortcodeTableFormats);
 		ksort($this->shortcodeTableColumnFormats);
 	}
 	
@@ -318,6 +318,7 @@ class SimForms{
 			email_trigger tinytext,
 			submitted_trigger tinytext,
 			conditional_field tinytext,
+			conditional_fields longtext,
 			conditional_value tinytext,
 			from_email tinytext,
 			`from` tinytext,
@@ -337,7 +338,7 @@ class SimForms{
 		maybe_create_table($this->formEmailTable, $sql );
 
 		// shortcodeTableSettings table
-		$sql = "CREATE TABLE {$this->shortcodeTableSettingsTable} (
+		$sql = "CREATE TABLE {$this->shortcodeTable} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			form_id int NOT NULL,
 			title tinytext,
@@ -346,14 +347,14 @@ class SimForms{
 			filter longtext,
 			hide_row tinytext,
 			result_type tinytext,
-			split_table int,
-			archived int,
+			split_table boolean,
+			archived boolean,
 			`view_right_roles` longtext,
 			edit_right_roles longtext,
 			PRIMARY KEY  (id)
 		) $charsetCollate;";
 
-		maybe_create_table($this->shortcodeTableSettingsTable, $sql );
+		maybe_create_table($this->shortcodeTable, $sql );
 
 		// shortcode Column Settings table
 		$sql = "CREATE TABLE {$this->shortcodeColumnSettingsTable} (
@@ -361,7 +362,7 @@ class SimForms{
 			shortcode_id int NOT NULL,
 			form_id int NOT NULL,
 			element_id int,
-			`show` int,
+			`show` boolean,
 			name tinytext,
 			nice_name tinytext,
 			view_right_roles longtext,
@@ -534,18 +535,20 @@ class SimForms{
 		return true;
 	}
 
- /**
+ 	/**
 	* Retrieves e-mail settings from the database
 	*/
 	public function getEmailSettings(){
 		global $wpdb;
 		
-		$query = "select * from $this->formEmailsTable where form_id=$this->formData->id";
+		$query = "select * from $this->formEmailTable where form_id={$this->formData->id}";
 		
 		$this->emailSettings				= $wpdb->get_results($query);
-		
-		foreach($this->emailSettings as &$email){
-			$email = maybe_unserialize($email);
+
+		foreach($this->emailSettings as &$emailSetting){
+			foreach($emailSetting as &$setting){
+				$setting	= maybe_unserialize($setting);
+			}
 		}
 		
 		if(empty($this->emailSettings)){
@@ -559,6 +562,7 @@ class SimForms{
 			$this->emailSettings = $emails;
 		}
 	}
+
 	/**
 	 * Creates the element mappers to find elements based on id, name or type
 	 *

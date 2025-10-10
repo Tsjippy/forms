@@ -291,9 +291,9 @@ class FormBuilderForm extends SimForms{
 			$this->addElementModal();
 
 			?>
-			<button class="button tablink formbuilderform<?php if(!empty($this->formElements)){echo ' active';}?>"	id="show-element-form" data-target="element-form">Form elements</button>
-			<button class="button tablink formbuilderform<?php if(empty($this->formElements)){echo ' active';}?>"	id="show-form-settings" data-target="form-settings">Form settings</button>
-			<button class="button tablink formbuilderform"															id="show-form-emails" data-target="form-emails">Form emails</button>
+			<button class="button tablink formbuilder-form<?php if(!empty($this->formElements)){echo ' active';}?>"	id="show-element-form" data-target="element-form">Form elements</button>
+			<button class="button tablink formbuilder-form<?php if(empty($this->formElements)){echo ' active';}?>"	id="show-form-settings" data-target="form-settings">Form settings</button>
+			<button class="button tablink formbuilder-form"															id="show-form-emails" data-target="form-emails">Form emails</button>
 			
 			<div class="tabcontent<?php if(empty($this->formElements)){echo ' hidden';}?>" id="element-form">
 				<?php
@@ -357,8 +357,8 @@ class FormBuilderForm extends SimForms{
 			<div class="modal-content" style='max-width:90%; width:max-content;'>
 				<span id="modal-close" class="close">&times;</span>
 				
-				<button class="button tablink formbuilderform active"	id="show-element-builder" data-target="element-builder">Form element</button>
-				<button class="button tablink formbuilderform"			id="show-element-conditions" data-target="element-conditions">Element conditions</button>
+				<button class="button tablink formbuilder-form active"	id="show-element-builder" data-target="element-builder">Form element</button>
+				<button class="button tablink formbuilder-form"			id="show-element-conditions" data-target="element-conditions">Element conditions</button>
 				
 				<div class="tabcontent" id="element-builder">
 					<?php echo $this->elementBuilderForm();?>
@@ -718,7 +718,7 @@ class FormBuilderForm extends SimForms{
 	public function formEmailsForm(){
 		$this->getEmailSettings();
 		$emails 		= $this->emailSettings;
-		$defaultFrom	=  get_option( 'admin_email' );
+		$defaultFrom	= get_option( 'admin_email' );
 
 		?>
 		<div class="emails-wrapper">
@@ -763,7 +763,7 @@ class FormBuilderForm extends SimForms{
 					<div class='clone-divs-wrapper'>
 						<?php
 						// Render tab buttons
-						foreach($emails as $key=>$email){
+						foreach($emails as $key => $email){
 							$nr		= $key + 1;
 							$active	= '';
 
@@ -771,11 +771,13 @@ class FormBuilderForm extends SimForms{
 								$active = 'active';
 							}
 
-							echo "<button class='button tablink formbuilderform $active' type='button' id='show-email_$key' data-target='email_$key' style='margin-right:4px;'>E-mail $nr</button>";
+							echo "<button class='button tablink formbuilder-form $active' type='button' id='show-email-$key' data-target='email-$key' style='margin-right:4px;'>E-mail $nr</button>";
 						}
 
 						// Render tab contents
-						foreach($emails as $key=>$email){
+						foreach($emails as $key => $email){
+							$email 	= (object) $email;
+
 							$hidden	= 'hidden';
 							if($key === 0){
 								$hidden = '';
@@ -786,30 +788,33 @@ class FormBuilderForm extends SimForms{
 								<button type='button' class='add button' style='flex: 1;'>+</button>
 								<button type='button' class='remove button' style='flex: 1;'>-</button>
 								<div style='width:100%;'>
+									<input type='hidden' name='emails[<?php echo $key;?>][form-id]' value='<?php echo $email->id;?>'>
+									<input type='hidden' name='emails[<?php echo $key;?>][email-id]' value='<?php echo $email->form_id;?>'>
+
 									<div class="formfield form-label" style="margin-top:10px;">
 										<h4>Trigger</h4>
 										Send e-mail when:<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='submitted' <?php if($email['email-trigger'] == 'submitted'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='submitted' <?php if($email->email_trigger == 'submitted'){echo 'checked';}?>>
 											The form is submitted
 										</label><br>
 
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='shouldsubmit' <?php if($email['email-trigger'] == 'shouldsubmit'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='shouldsubmit' <?php if($email->email_trigger == 'shouldsubmit'){echo 'checked';}?>>
 											The form is due for submission
 										</label><br>
 
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='submittedcond' <?php if($email['email-trigger'] == 'submittedcond'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='submittedcond' <?php if($email->email_trigger == 'submittedcond'){echo 'checked';}?>>
 											The form is submitted and meets a condition
 										</label><br>
 
-										<div class='submitted-type <?php if($email['email-trigger'] != 'submittedcond'){echo 'hidden';}?>'>
+										<div class='submitted-type <?php if($email->email_trigger != 'submittedcond'){echo 'hidden';}?>'>
 											<div class='submitted-trigger-type'>
 												Element 
 												<select class='' name='emails[<?php echo $key;?>][submitted-trigger][element]'>
 													<?php
-													echo $this->inputDropdown($emails[$key]['submitted-trigger']['element'], "emails[$key][submitted-trigger']['element']");
+													echo $this->inputDropdown($email->submitted_trigger['element'], "emails[$key][submitted-trigger']['element']");
 													?>
 												</select>
 
@@ -829,8 +834,8 @@ class FormBuilderForm extends SimForms{
 															'< value'	=> 'smaller than the value of'
 														];
 
-														foreach($optionArray as $option=>$optionLabel){
-															if($emails[$key]['submitted-trigger']['equation'] == $option){
+														foreach($optionArray as $option => $optionLabel){
+															if($email->submitted_trigger['equation'] == $option){
 																$selected	= 'selected="selected"';
 															}else{
 																$selected	= '';
@@ -840,59 +845,59 @@ class FormBuilderForm extends SimForms{
 													?>
 												</select>
 
-												<label class='staticvalue <?php if(empty($emails[$key]['submitted-trigger']['equation']) || !in_array($emails[$key]['submitted-trigger']['equation'], ['==', '!=', '>', '<'])){echo 'hidden';}?>'>
-													<input type='text' name='emails[<?php echo $key;?>][submitted-trigger][value]' value="<?php echo $emails[$key]['submitted-trigger']['value'];?>" style='width: auto;'>
+												<label class='staticvalue <?php if(empty($email->submitted_trigger['equation']) || !in_array($email->submitted_trigger['equation'], ['==', '!=', '>', '<'])){echo 'hidden';}?>'>
+													<input type='text' name='emails[<?php echo $key;?>][submitted-trigger][value]' value="<?php echo $email->submitted_trigger['value'];?>" style='width: auto;'>
 												</label>
 
-												<select class='dynamicvalue <?php if(empty($emails[$key]['submitted-trigger']['equation']) || in_array($emails[$key]['submitted-trigger']['equation'], ['==', '!=', '>', '<', 'checked', '!checked'])){echo 'hidden';}?>' name='emails[<?php echo $key;?>][submitted-trigger][value-element]'>
+												<select class='dynamicvalue <?php if(empty($email->submitted_trigger['equation']) || in_array($email->submitted_trigger['equation'], ['==', '!=', '>', '<', 'checked', '!checked'])){echo 'hidden';}?>' name='emails[<?php echo $key;?>][submitted-trigger][value-element]'>
 													<?php
-														echo $this->inputDropdown($emails[$key]['submitted-trigger']['value-element'], "emails[$key][submitted-trigger][value-element]");
+														echo $this->inputDropdown($email->submitted_trigger['value-element'], "emails[$key][submitted-trigger][value-element]");
 													?>
 												</select>
 											</div>
 										</div>
 
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='fieldchanged' <?php if($email['email-trigger'] == 'fieldchanged'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='fieldchanged' <?php if($email->email_trigger == 'fieldchanged'){echo 'checked';}?>>
 											A field has changed to a value
 										</label>
-										<div class='conditional-field-wrapper <?php if($email['email-trigger'] != 'fieldchanged'){echo 'hidden';}?>'>
+										<div class='conditional-field-wrapper <?php if($email->email_trigger != 'fieldchanged'){echo 'hidden';}?>'>
 											<label class="formfield form-label">Field</label>
 											<select name='emails[<?php echo $key;?>][conditional-field]'>
 												<?php
-												echo $this->inputDropdown( $email['conditional-field'] );
+												echo $this->inputDropdown( $email->conditional_field );
 												?>
 											</select>
 											
 											<label class="formfield form-label">
 												Value
-												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditional-value]' value="<?php echo $email['conditional-value']; ?>" style='width:fit-content;'>
+												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditional-value]' value="<?php echo $email->conditional_value; ?>" style='width:fit-content;'>
 											</label>
 										</div>
 
 										<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='fieldschanged' <?php if($email['email-trigger'] == 'fieldschanged'){	echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='fieldschanged' <?php if($email->email_trigger == 'fieldschanged'){	echo 'checked';}?>>
 											One or more fields have changed
 										</label>
-										<div class='conditional-fields-wrapper <?php if($email['email-trigger'] != 'fieldschanged'){echo 'hidden';}?>'>
+										<div class='conditional-fields-wrapper <?php if($email->email_trigger != 'fieldschanged'){echo 'hidden';}?>'>
 											<label class="formfield form-label">Field(s)</label>
 											<select name='emails[<?php echo $key;?>][conditional-fields][]' multiple='multiple'>
 												<?php
-												echo $this->inputDropdown( $email['conditional-fields'] );
+												echo $this->inputDropdown( $email->conditional_fields );
 												?>
 											</select>
 										</div>
 
 										<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='removed' <?php if($email['email-trigger'] == 'removed'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='removed' <?php if($email->email_trigger == 'removed'){echo 'checked';}?>>
 											The submission is archived or deleted
 										</label>
 										<br>
 										<?php do_action('sim-forms-after-email-triggers', $key, $email);?>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='disabled' <?php if($email['email-trigger'] == 'disabled'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='disabled' <?php if($email->email_trigger == 'disabled'){echo 'checked';}?>>
 											Do not send this e-mail
 										</label>
 										<br>
@@ -903,27 +908,27 @@ class FormBuilderForm extends SimForms{
 										<h4>Sender address</h4>
 										Sender e-mail should be:<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][from-email]' class='from-email' value='fixed' <?php if(empty($email['from-email']) || $email['from-email'] == 'fixed'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][from-email]' class='from-email' value='fixed' <?php if(empty($email->from_email) || $email->from_email == 'fixed'){echo 'checked';}?>>
 											Fixed e-mail adress
 										</label><br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][from-email]' class='from-email' value='conditional' <?php if($email['from-email'] == 'conditional'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][from-email]' class='from-email' value='conditional' <?php if($email->from_email == 'conditional'){echo 'checked';}?>>
 											Conditional e-mail adress
 										</label><br>
 									</div>
 									
-									<div class='emailfromfixed <?php if(!empty($email['from-email']) && $email['from-email'] != 'fixed'){echo 'hidden';}?>'>
+									<div class='emailfromfixed <?php if(!empty($email->from_email) && $email->from_email != 'fixed'){echo 'hidden';}?>'>
 										<label class="formfield form-label">
 											From e-mail
-											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][from]' value="<?php if(empty($email['from'])){echo $defaultFrom;} else{echo $email['from'];} ?>">
+											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][from]' value="<?php if(empty($email->from)){echo $defaultFrom;} else{echo $email->from;} ?>">
 										</label>
 									</div>
 									
-									<div class='emailfromconditional <?php if($email['from-email'] != 'conditional'){echo 'hidden';}?>'>
+									<div class='emailfromconditional <?php if($email->from_email != 'conditional'){echo 'hidden';}?>'>
 										<div class='clone-divs-wrapper'>
 											<?php
-											if(!is_array($email['conditional-from-email'])){
-												$email['conditional-from-email'] = [
+											if(!is_array($email->conditional_from_email)){
+												$email->conditional_from_email = [
 													[
 														'fieldid'	=> '',
 														'value'		=> '',
@@ -931,7 +936,7 @@ class FormBuilderForm extends SimForms{
 													]
 												];
 											}
-											foreach(array_values($email['conditional-from-email']) as $fromKey=>$fromEmail){
+											foreach(array_values($email->conditional_from_email) as $fromKey => $fromEmail){
 												?>
 												<div class='clone-div' data-div-id='<?php echo $fromKey;?>'>
 													<fieldset class='form-email-fieldset'>
@@ -962,7 +967,7 @@ class FormBuilderForm extends SimForms{
 											<br>
 											<label class="formfield form-label">
 												Else the e-mail will be
-												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][else-from]' value="<?php echo $email['else-from']; ?>">
+												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][else-from]' value="<?php echo $email->else_from; ?>">
 											</label>
 										</div>
 									</div>
@@ -972,27 +977,27 @@ class FormBuilderForm extends SimForms{
 									<div class="formfield tofieldlabel">
 										Recipient e-mail should be:<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-to]' class='email-to' value='fixed' <?php if(empty($email['email-to']) || $email['email-to'] == 'fixed'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][email-to]' class='email-to' value='fixed' <?php if(empty($email->email_to) || $email->email_to == 'fixed'){echo 'checked';}?>>
 											Fixed e-mail adress
 										</label><br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-to]' class='email-to' value='conditional' <?php if($email['email-to'] == 'conditional'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo $key;?>][email-to]' class='email-to' value='conditional' <?php if($email->email_to == 'conditional'){echo 'checked';}?>>
 											Conditional e-mail adress
 										</label><br>
 									</div>
 									<br>
-									<div class='email-tofixed <?php if(!empty($email['email-to']) && $email['email-to'] != 'fixed'){echo 'hidden';}?>'>
+									<div class='email-tofixed <?php if(!empty($email->email_to) && $email->email_to != 'fixed'){echo 'hidden';}?>'>
 										<label class="formfield form-label">
 											To e-mail
-											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][to]' value="<?php if(empty($email['to'])){echo '%email%';}else{echo $email['to'];} ?>">
+											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][to]' value="<?php if(empty($email->to)){echo '%email%';}else{echo $email->to;} ?>">
 										</label>
 									</div>
 
-									<div class='email-toconditional <?php if($email['email-to'] != 'conditional'){echo 'hidden';}?>'>
+									<div class='email-toconditional <?php if($email->email_to != 'conditional'){echo 'hidden';}?>'>
 										<div class='clone-divs-wrapper'>
 											<?php
-											if(!is_array($email['conditional-email-to'])){
-												$email['conditional-email-to'] = [
+											if(!is_array($email->conditional_email_to)){
+												$email->conditional_email_to = [
 													[
 														'fieldid'	=> '',
 														'value'		=> '',
@@ -1000,7 +1005,7 @@ class FormBuilderForm extends SimForms{
 													]
 												];
 											}
-											foreach($email['conditional-email-to'] as $toKey=>$toEmail){
+											foreach($email->conditional_email_to as $toKey=>$toEmail){
 												?>
 												<div class='clone-div' data-div-id='<?php echo $toKey;?>'>
 													<fieldset class='form-email-fieldset button-wrapper'>
@@ -1031,7 +1036,7 @@ class FormBuilderForm extends SimForms{
 											<br>
 											<label class="formfield form-label">
 												Else the e-mail will be
-												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][else-to]' value="<?php echo $email['else-to']; ?>">
+												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][else-to]' value="<?php echo $email->else_to; ?>">
 											</label>
 										</div>
 									</div>
@@ -1039,7 +1044,7 @@ class FormBuilderForm extends SimForms{
 									<br>
 									<div class="formfield form-label">
 										<h4>Subject</h4>
-										<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][subject]' value="<?php echo $email['subject']?>">
+										<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][subject]' value="<?php echo $email->subject?>">
 									</div>
 									
 									<br>
@@ -1056,7 +1061,7 @@ class FormBuilderForm extends SimForms{
 										);
 									
 										echo wp_editor(
-											$email['message'],
+											$email->message,
 											"{$this->formName}_email_message_$key",
 											$settings
 										);
@@ -1067,7 +1072,7 @@ class FormBuilderForm extends SimForms{
 									<div class="formfield form-label">
 										<h4>Additional headers like 'Reply-To'</h4>
 										<textarea class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][headers]'><?php
-											echo $email['headers']?>
+											echo $email->headers?>
 										</textarea>
 									</div>
 									
@@ -1076,7 +1081,7 @@ class FormBuilderForm extends SimForms{
 										<h4>Attachments</h4>
 										Form values that should be attached to the e-mail
 										<textarea class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][files]'><?php
-											echo $email['files']?>
+											echo $email->files?>
 										</textarea>
 									</div>
 								</div>

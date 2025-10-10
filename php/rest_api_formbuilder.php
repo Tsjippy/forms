@@ -686,17 +686,32 @@ function saveFormEmails(){
 	
 	$formEmails = $_POST['emails'];
 	
-	foreach($formEmails as $index=>$email){
-		$formEmails[$index]['message'] = SIM\deslash($email['message']);
+	foreach($formEmails as $index => &$email){
+		foreach($email as $key => $val){
+			if($val == "true"){
+				$val 	= true;
+			}
+
+			if(is_array($val)){
+				$val	= serialize($val);
+			}else{
+				$val	= trim(SIM\deslash($val));
+			}
+
+			unset($email[$key]);
+			$email[str_replace('-', '_', $key)]	= $val;
+		}
 		
-		$wpdb->update($formBuilder->formTableName,
-		array(
-			'emails'	=> maybe_serialize($formEmails)
-		),
-		array(
-			'id'		=> $_POST['form-id'],
-		),
-	);
+		$emailId	= $email['email_id'];
+		unset($email['email_id']);
+		
+		$wpdb->update(
+			$formBuilder->formEmailTable,
+			$email,
+			array(
+				'id'		=> $emailId,
+			),
+		);
 	}
 	
 	$formBuilder->maybeInsertForm();

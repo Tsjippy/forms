@@ -19,8 +19,6 @@ async function saveFormInput(target){
 	let response	= await FormSubmit.submitForm(target, 'forms/save_form_input');
 
 	if(response){
-		target.closest('.submit-wrapper').querySelector('.loader-wrapper').classList.add('hidden');
-
 		Main.displayMessage(response);
 
 		if(form.dataset.reset == 'true'){

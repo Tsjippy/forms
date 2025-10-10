@@ -33,8 +33,8 @@ trait ExportFormResults{
 		}
 
 		// There is a custom sort column defined
-		if(is_numeric($this->tableSettings['default-sort'])){
-			$sortElementId		= $this->tableSettings['default-sort'];
+		if(is_numeric($this->tableSettings->default_sort)){
+			$sortElementId		= $this->tableSettings->default_sort;
 			$sortElement		= $this->getElementById($sortElementId);
 			$sortElementType	= $sortElement->type;
 			$sortColumnName		= $this->columnSettings[$sortElementId]['nice-name'];

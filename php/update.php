@@ -54,12 +54,22 @@ function pluginUpdate($oldVersion){
 
         // Shortcode data
         $shortcodes   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_form_shortcodes");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'title', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `title` tinytext");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'default_sort', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `default_sort` tinytext");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'sort_direction', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `sort_direction` tinytext");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'filter', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `filter` longtext");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'hide_row', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `hide_row` tinytext");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'result_type', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `result_type` tinytext");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'split_table', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `split_table` boolean");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'archived', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `archived` boolean");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'view_right_roles', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `view_right_roles` longtext");
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'edit_right_roles', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `edit_right_roles` longtext");
+        
         foreach($shortcodes as &$shortcode){
             $tableSettings  = maybe_unserialize($shortcode->table_settings);
 
             if(!empty($tableSettings)){
                 $data = [
-                    'shortcode_id'			=> $shortcode->id,
                     'form_id'				=> $shortcode->form_id,
                     'title' 				=> $tableSettings['title'],
                     'default_sort'			=> $tableSettings['default_sort'],	
@@ -72,7 +82,14 @@ function pluginUpdate($oldVersion){
                     'view_right_roles'		=> maybe_serialize($tableSettings['view_right_roles']),
                     'edit_right_roles'		=> maybe_serialize($tableSettings['edit_right_roles'])
                 ];
-                $wpdb->insert($simForms->shortcodeTableSettingsTable, $data, $formBuilder->shortcodeTableSettingsFormats);
+
+                ksort($data);
+                $wpdb->update(
+                    $simForms->shortcodeTable, 
+                    $data, 
+                    ['id' => $shortcode->id],
+                    $simForms->shortcodeTableFormats
+                );
             }
 
             $columnSettings  = maybe_unserialize($shortcode->column_settings);
@@ -93,7 +110,7 @@ function pluginUpdate($oldVersion){
                         'view_right_roles'	=> maybe_serialize($columnSetting['view_right_roles']),
                         'edit_right_roles'	=> maybe_serialize($columnSetting['edit_right_roles']),
                     ];
-                    $wpdb->insert($simForms->shortcodeColumnSettingsTable, $data, $formBuilder->shortcodeTableColumnFormats);
+                    $wpdb->insert($simForms->shortcodeColumnSettingsTable, $data, $simForms->shortcodeTableColumnFormats);
                 }
             }
         }
@@ -145,21 +162,22 @@ function pluginUpdate($oldVersion){
                 $data = [
                     "form_id"               => $form->id,
                     "email_trigger"         => $email['emailtrigger'],
-                    "submitted_trigger"     => $email['submittedtrigger'],
-                    "conditional_field"     => $email['conditionalfield'],
+                    "submitted_trigger"     => maybe_serialize($email['submittedtrigger']),
+                    "conditional_field"     => maybe_serialize($email['conditionalfield']),
+                    "conditional_fields"    => maybe_serialize($email['conditionalfields']),
                     "conditional_value"     => $email['conditionalvalue'],
                     "from_email"            => $email['fromemail'],
                     "from"                  => $email['from'],
-                    "conditional_from_email"=> $email['conditionalfromemail'],
+                    "conditional_from_email"=> maybe_serialize($email['conditionalfromemail']),
                     "else_from"             => $email['elsefrom'],
                     "email_to"              => $email['emailto'],
                     "to"                    => $email['to'],
                     "else_to"               => $email['elseto'],
-                    "conditional_email_to"  => $email['conditionalemailto'],
+                    "conditional_email_to"  => maybe_serialize($email['conditionalemailto']),
                     "subject"               => $email['subject'],
                     "message"               => $email['message'],
-                    "headers"               => $email['headers'],
-                    "files"                 => $email['files'],
+                    "headers"               => maybe_serialize($email['headers']),
+                    "files"                 => maybe_serialize($email['files']),
                 ];
 
                 $wpdb->insert($simForms->formEmailTable, $data, $formBuilder->formEmailTableFormats);
@@ -215,5 +233,5 @@ function pluginUpdate($oldVersion){
 }
 
 add_action('init', function(){
-    pluginUpdate('8.6.9');
+    //pluginUpdate('8.6.9');
 });

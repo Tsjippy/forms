@@ -357,7 +357,7 @@ class DisplayFormResults extends DisplayForm{
 		$sortElement	= $this->getElementByName($this->sortColumn);
 
 		if(empty($sortElement)){
-			$defaultSortElement	= $this->tableSettings['default-sort'];
+			$defaultSortElement	= $this->tableSettings->default_sort;
 			$sortElement		= $this->getElementById($defaultSortElement);
 		}
 
@@ -738,11 +738,11 @@ class DisplayFormResults extends DisplayForm{
 			//check if it was already added a previous time
 			$alreadyInSettings = false;
 			foreach($this->columnSettings as $el){
-				if(!is_array($el)){
+				if(!is_object($el)){
 					continue;
 				}
 				
-				if($el['name'] == $name){
+				if($el->name == $name){
 					$alreadyInSettings = true;
 					break;
 				}
@@ -759,8 +759,8 @@ class DisplayFormResults extends DisplayForm{
 
 		if(isset($this->columnSettings[$element->id])){
 			$show			= $this->columnSettings[$element->id]['show'];
-			$editRightRoles	= $this->columnSettings[$element->id]['edit-right-roles'];
-			$viewRightRoles = $this->columnSettings[$element->id]['view-right-roles'];
+			$editRightRoles	= $this->columnSettings[$element->id]->edit_right_roles;
+			$viewRightRoles = $this->columnSettings[$element->id]->view_right_roles;
 		}
 
 		$this->columnSettings[$element->id] = [
@@ -895,8 +895,8 @@ class DisplayFormResults extends DisplayForm{
 
 			$this->getForm($this->shortcodeData->form_id);
 
-			if(empty($this->tableSettings) || empty($this->tableSettings['edit-right-roles'])){
-				$this->tableSettings['edit-right-roles']	= $this->formData->full_right_roles;
+			if(empty($this->tableSettings) || empty($this->tableSettings->edit_right_roles)){
+				$this->tableSettings->edit_right_roles	= $this->formData->full_right_roles;
 			}
 		}
 
@@ -913,11 +913,11 @@ class DisplayFormResults extends DisplayForm{
 			if(!isset($this->columnSettings[$element->id])){
 				$this->addColumnSetting($element);
 			}else{
-				if(!isset($this->columnSettings[$element->id]['edit-right-roles'])){
-					$this->columnSettings[$element->id]['edit-right-roles']	= [];
+				if(!isset($this->columnSettings[$element->id]->edit_right_roles)){
+					$this->columnSettings[$element->id]->edit_right_roles	= [];
 				}
-				if(!isset($this->columnSettings[$element->id]['view-right-roles'])){
-					$this->columnSettings[$element->id]['view-right-roles']	= [];
+				if(!isset($this->columnSettings[$element->id]->view_right_roles)){
+					$this->columnSettings[$element->id]->view_right_roles	= [];
 				}
 			}
 		}
@@ -951,18 +951,18 @@ class DisplayFormResults extends DisplayForm{
 		
 		$names	= [];
 		//put hidden columns on the end and do not show same names twice
-		foreach($this->columnSettings as $key=>$setting){
-			if(!is_array($setting)){
+		foreach($this->columnSettings as $key => $setting){
+			if(!is_object($setting)){
 				continue;
 			}
-			if(in_array($setting['name'], $names)){
+			if(in_array($setting->name, $names)){
 				//remove the duplicate element: same name but different id
 				unset($this->columnSettings[$key]);
 			}
 
-			$names[]	= $setting['name'];
+			$names[]	= $setting->name;
 
-			if($setting['show'] == 'hide'){
+			if(!$setting->show){
 				
 				//remove the element
 				unset($this->columnSettings[$key]);
@@ -1008,7 +1008,9 @@ class DisplayFormResults extends DisplayForm{
 
 		$rowHasContents	= false;
 
-		foreach($this->columnSettings as $id=>$columnSetting){
+		foreach($this->columnSettings as $id => $columnSetting){
+			$columnSetting	= (object) $columnSetting;
+
 			if(!is_array($columnSetting)){
 				continue;
 			}
@@ -1018,16 +1020,16 @@ class DisplayFormResults extends DisplayForm{
 			$orgFieldValue	= $value;
 
 			//If the column is hidden, do not show this cell
-			if($columnSetting['show'] == 'hide' || !is_numeric($id)){
+			if(!$columnSetting->show || !is_numeric($id)){
 				continue;
 			}
 
-			if(!isset($columnSetting['view-right-roles'])){
-				$columnSetting['view-right-roles']	= [];
+			if(!isset($columnSetting->view_right_roles)){
+				$columnSetting->view_right_roles	= [];
 			}
 
-			if(!isset($columnSetting['edit-right-roles'])){
-				$columnSetting['edit-right-roles']	= [];
+			if(!isset($columnSetting->edit_right_roles)){
+				$columnSetting->edit_right_roles	= [];
 			}
 			
 			//if we lack view permission, do not show this cell
@@ -1036,15 +1038,15 @@ class DisplayFormResults extends DisplayForm{
 					!$ownEntry ||
 					(																						//not our own entry
 						$ownEntry &&																		//or it is our own
-						!in_array('own', (array)$columnSetting['view-right-roles'])							//but we are not allowed to see it
+						!in_array('own', (array)$columnSetting->view_right_roles)							//but we are not allowed to see it
 					)
 				)	&&
 				!$this->tableEditPermissions &&															//no permission to edit the table and
-				!empty($columnSetting['view-right-roles']) && 											// there are view right permissions defined
-				!array_intersect($this->userRoles, $columnSetting['view-right-roles'])			// and we do not have the view right role
+				!empty($columnSetting->view_right_roles) && 											// there are view right permissions defined
+				!array_intersect($this->userRoles, $columnSetting->view_right_roles)			// and we do not have the view right role
 			){
 				//later on there will be a row with data in this column
-				if($this->ownData && in_array('own', $columnSetting['view-right-roles'])){
+				if($this->ownData && in_array('own', $columnSetting->view_right_roles)){
 					$value = 'X';
 				}else{
 					continue;
@@ -1053,24 +1055,24 @@ class DisplayFormResults extends DisplayForm{
 			
 			//if this row has no value in this column remove the row
 			if(
-				!empty($this->tableSettings['hide-row']) &&												// There is a column defined
-				$columnSetting['name'] == $this->tableSettings['hide-row'] && 							// We are currently checking a cell in that column
+				!empty($this->tableSettings->hide_row) &&												// There is a column defined
+				$columnSetting->name == $this->tableSettings->hide_row && 							// We are currently checking a cell in that column
 				(
 					(
-						empty($values[$this->tableSettings['hide-row']]) && 								// The cell has no value
-						empty($values[trim($this->tableSettings['hide-row'], '[]')])						// also check the name without []
+						empty($values[$this->tableSettings->hide_row]) && 								// The cell has no value
+						empty($values[trim($this->tableSettings->hide_row, '[]')])						// also check the name without []
 					)
 				) && 									
-				!array_intersect($this->userRoles, (array)$columnSetting['edit-right-roles'])	&&		// And we have no right to edit this specific column
+				!array_intersect($this->userRoles, (array)$columnSetting->edit_right_roles)	&&		// And we have no right to edit this specific column
 				!$this->tableEditPermissions															// and we have no right to edit all table data
 			){
 				return '';
 			}
 
 			if(
-				in_array('own', $columnSetting['edit-right-roles']) &&
+				in_array('own', $columnSetting->edit_right_roles) &&
 				$ownEntry ||
-				array_intersect($this->userRoles, $columnSetting['edit-right-roles']) ||
+				array_intersect($this->userRoles, $columnSetting->edit_right_roles) ||
 				$this->tableEditPermissions
 			){
 				$elementEditRights = true;
@@ -1081,8 +1083,8 @@ class DisplayFormResults extends DisplayForm{
 			/*
 					Write the content to the cell, convert to something if needed
 			*/
-			$elementName 	= str_replace('[]', '', $columnSetting['name']);
-			$class 			= $columnSetting['name'];
+			$elementName 	= str_replace('[]', '', $columnSetting->name);
+			$class 			= $columnSetting->name;
 
 			//add field value if we are allowed to see it
 			if($value != 'X'){
@@ -1152,11 +1154,11 @@ class DisplayFormResults extends DisplayForm{
 				$class .= ' sticky';
 			}
 
-			if(!empty($this->hiddenColumns[$columnSetting['name']])){
+			if(!empty($this->hiddenColumns[$columnSetting->name])){
 				$class	.= ' hidden';
 			}
 
-			if(isset($columnSetting['copy'])){
+			if(isset($columnSetting->copy)){
 				$class	.= ' copy-wrapper';
 			}
 			
@@ -1185,8 +1187,8 @@ class DisplayFormResults extends DisplayForm{
 			}
 
 			$style			= '';
-			if(!empty($columnSetting['width'])){
-				$style	= "style='max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;'";
+			if(!empty($columnSetting->width)){
+				$style	= "style='max-width:{$columnSetting->width}px;width:{$columnSetting->width}px;min-width:{$columnSetting->width}px;text-wrap: balance;'";
 			}
 
 			if(!$element){
@@ -1199,7 +1201,7 @@ class DisplayFormResults extends DisplayForm{
 
 			// Add a copy option to the value
 			$copy	= "";
-			if(isset($columnSetting['copy'])){
+			if(isset($columnSetting->copy)){
 				$copy	= "<img class='copy' src='".SIM\pathToUrl(MODULE_PATH.'/pictures/copy.png')."' width='20' height='20' loading='lazy' title='Click to copy cell contents'>";
 			}
 			
@@ -1262,7 +1264,7 @@ class DisplayFormResults extends DisplayForm{
 				if(
 					$this->tableEditPermissions || 																		//if we are allowed to do all actions
 					$values['userid'] == $this->user->ID || 															//or this is our own entry
-					(isset($this->columnSettings[$action]['edit-right-roles']) && array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit-right-roles']))		//or we have permission for this specific button
+					(isset($this->columnSettings[$action]->edit_right_roles) && array_intersect($this->userRoles, (array)$this->columnSettings[$action]->edit_right_roles))		//or we have permission for this specific button
 				){
 					$buttons .= $button;
 				}
@@ -1299,11 +1301,21 @@ class DisplayFormResults extends DisplayForm{
 		}
 		
 		$query						= "SELECT * FROM {$this->shortcodeTable} WHERE id= '{$this->shortcodeId}'";
-		
-		$this->shortcodeData 		= $wpdb->get_results($query)[0];
-		
-		$this->tableSettings		= (array) maybe_unserialize($this->shortcodeData->table_settings);
-		$this->columnSettings		= (array) maybe_unserialize($this->shortcodeData->column_settings);
+		$this->tableSettings 		= $wpdb->get_results($query)[0];
+		foreach($this->tableSettings as $key => &$value){
+			$value	= maybe_unserialize($value);
+		}
+
+		$this->columnSettings		= [];
+		$query						= "SELECT * FROM {$this->shortcodeColumnSettingsTable} WHERE shortcode_id= '{$this->shortcodeId}'";
+		$results 					= $wpdb->get_results($query);
+		foreach($results as $setting){
+			foreach($setting as $key => &$value){
+				$value	= maybe_unserialize($value);
+			}
+
+			$this->columnSettings[$setting->element_id] = $setting;
+		}
 
 		return true;
 	}
@@ -1330,15 +1342,15 @@ class DisplayFormResults extends DisplayForm{
 					<tbody>
 						<?php
 						foreach ($this->columnSettings as $elementIndex=>$columnSetting){
-							if(!isset($columnSetting['name'])){
+							if(!isset($columnSetting->name)){
 								continue;
 							}
 
-							$niceName	= $columnSetting['nice-name'];
+							$niceName	= $columnSetting->nice_name;
 
-							$width		= $columnSetting['width'];
+							$width		= $columnSetting->width;
 							
-							if($columnSetting['show'] == 'hide'){
+							if(!$columnSetting->show){
 								$visibility	= 'invisible';
 							}else{
 								$visibility	= 'visible';
@@ -1347,10 +1359,10 @@ class DisplayFormResults extends DisplayForm{
 							
 							?>
 							<tr class="column-setting-wrapper" data-id="<?php echo $elementIndex;?>">
-								<input type="hidden" class="visibilitytype" name="column-settings[<?php echo $elementIndex;?>][show]" 		value="<?php echo $columnSetting['show'];?>">
-								<input type="hidden" name="column-settings[<?php echo $elementIndex;?>][name]"	value="<?php echo $columnSetting['name'];?>">
+								<input type="hidden" class="visibilitytype" name="column-settings[<?php echo $elementIndex;?>][show]" 		value="<?php echo $columnSetting->show;?>">
+								<input type="hidden" name="column-settings[<?php echo $elementIndex;?>][name]"	value="<?php echo $columnSetting->name;?>">
 								<td><span class="movecontrol formfield-button" aria-hidden="true">:::</span></td>
-								<td><span class="column-settings" style="margin-right:0px;"><?php echo $columnSetting['name'];?></span></td>
+								<td><span class="column-settings" style="margin-right:0px;"><?php echo $columnSetting->name;?></span></td>
 								<td><input type="text" class="column-settings" name="column-settings[<?php echo $elementIndex;?>][nice-name]" value="<?php echo $niceName;?>" style="margin-right:0px;"></td>
 								<td><span class="visibility-icon"><?php echo $icon;?></span></td>
 								<?php
@@ -1361,7 +1373,7 @@ class DisplayFormResults extends DisplayForm{
 										<select class='column-settings inline' name='column-settings[<?php echo $elementIndex;?>][view-right-roles][]' multiple='multiple' style="margin-right:0px;">
 											<?php
 											foreach($viewRoles as $key=>$roleName){
-												if(isset($columnSetting['view-right-roles']) && in_array($key,(array)$columnSetting['view-right-roles'])){
+												if(isset($columnSetting->view_right_roles) && in_array($key,(array)$columnSetting->view_right_roles)){
 													$selected = 'selected="selected"';
 												}else{
 													$selected = '';
@@ -1382,7 +1394,7 @@ class DisplayFormResults extends DisplayForm{
 									<select class='column-settings inline' name='column-settings[<?php echo $elementIndex;?>][edit-right-roles][]' multiple='multiple' style="margin-right:0px;">
 										<?php
 										foreach($editRoles as $key=>$roleName){
-											if(isset($columnSetting['edit-right-roles']) && @in_array($key, (array)$columnSetting['edit-right-roles'])){
+											if(isset($columnSetting->edit_right_roles) && @in_array($key, (array)$columnSetting->edit_right_roles)){
 												$selected = 'selected="selected"';
 											}else{
 												$selected = '';
@@ -1396,7 +1408,7 @@ class DisplayFormResults extends DisplayForm{
 									<input type="number" class="column-settings" name="column-settings[<?php echo $elementIndex;?>][width]" value="<?php echo $width;?>" placeholder="200" min="100" style="max-width: 80px; margin-right:0px;">px
 								</td>
 								<td>
-									<input type="checkbox" class="column-settings" name="column-settings[<?php echo $elementIndex;?>][copy]" value="1" <?php if(isset($columnSetting['copy'])){echo 'checked';}?> style="max-width: 40px; margin-right:0px;">
+									<input type="checkbox" class="column-settings" name="column-settings[<?php echo $elementIndex;?>][copy]" value="1" <?php if(isset($columnSetting->copy)){echo 'checked';}?> style="max-width: 40px; margin-right:0px;">
 								</td>
 							</tr>
 							<?php
@@ -1420,27 +1432,27 @@ class DisplayFormResults extends DisplayForm{
 				<input type='hidden' class='shortcode-settings' name='form-id'		value='<?php echo $this->formData->id;?>'>
 				
 				<h4>Set the title for the results table</h4>
-				<input type='text' name="table-settings[title]" value='<?php echo $this->tableSettings['title'];?>' style='width:500px;'>
+				<input type='text' name="table-settings[title]" value='<?php echo $this->tableSettings->title;?>' style='width:500px;'>
 
 				<div class="table-rights-wrapper">
 					<h4>Select the default column the table is sorted on</h4>
 					<select name="table-settings[default-sort]">
 						<?php
-						if($this->tableSettings['default-sort'] == ''){
+						if($this->tableSettings->default_sort == ''){
 							?><option value='' selected>---</option><?php
 						}else{
 							?><option value=''>---</option><?php
 						}
 						
 						foreach($this->columnSettings as $key=>$columnSetting){
-							if(!is_array($columnSetting)){
+							if(!is_object($columnSetting)){
 								continue;
 							}
 
-							$name = $columnSetting['nice-name'];
+							$name = $columnSetting->nice_name;
 							
 							//Check which option is the selected one
-							if($this->tableSettings['default-sort'] != '' && $this->tableSettings['default-sort'] == $key){
+							if($this->tableSettings->default_sort != '' && $this->tableSettings->default_sort == $key){
 								$selected = 'selected="selected"';
 							}else{
 								$selected = '';
@@ -1452,11 +1464,11 @@ class DisplayFormResults extends DisplayForm{
 
 					<h4>Select the sort direction</h4>
 					<label>
-						<input type='radio' name='table-settings[sort-direction]' id='sort-direction' value='asc' <?php if($this->tableSettings['sort-direction'] == 'asc'){echo 'checked';}?>>
+						<input type='radio' name='table-settings[sort-direction]' id='sort-direction' value='asc' <?php if($this->tableSettings->sort_direction == 'asc'){echo 'checked';}?>>
 						Ascending
 					</label>
 					<label>
-						<input type='radio' name='table-settings[sort-direction]' id='sort-direction' value='dsc' <?php if($this->tableSettings['sort-direction'] == 'dsc'){echo 'checked';}?>>
+						<input type='radio' name='table-settings[sort-direction]' id='sort-direction' value='dsc' <?php if($this->tableSettings->sort_direction == 'dsc'){echo 'checked';}?>>
 						Decending
 					</label>
 				</div>
@@ -1465,10 +1477,10 @@ class DisplayFormResults extends DisplayForm{
 					<h4>Select the fields the table can be filtered on</h4>
 					<table class='clone-divs-wrapper' style='border: none;'>
 						<?php
-						$filters	= $this->tableSettings['filter'];
+						$filters	= $this->tableSettings->filter;
 
-						if(!is_array($this->tableSettings['filter'])){
-							$this->tableSettings['filter']	= [];
+						if(!is_array($this->tableSettings->filter)){
+							$this->tableSettings->filter	= [];
 							$filters	= [''];
 						}
 
@@ -1478,14 +1490,14 @@ class DisplayFormResults extends DisplayForm{
 									echo "<select name='table-settings[filter][$index][element]' class='inline'>";
 										foreach($this->columnSettings as $key=>$columnSetting){
 
-											if(!is_array($columnSetting)){
+											if(!is_object($columnSetting)){
 												continue;
 											}
 
-											$name = $columnSetting['nice-name'];
+											$name = $columnSetting->nice_name;
 											
 											//Check which option is the selected one
-											if($this->tableSettings['filter'][$index]['element'] == $key){
+											if($this->tableSettings->filter[$index]['element'] == $key){
 												$selected = 'selected="selected"';
 											}else{
 												$selected = '';
@@ -1499,7 +1511,7 @@ class DisplayFormResults extends DisplayForm{
 									echo "   filter type";
 									echo "<select name='table-settings[filter][$index][type]' class='inline'>";
 										foreach(['>=', '<', '==', 'like'] as $type){
-											if($this->tableSettings['filter'][$index]['type'] == $type){
+											if($this->tableSettings->filter[$index]['type'] == $type){
 												$selected = 'selected="selected"';
 											}else{
 												$selected = '';
@@ -1511,7 +1523,7 @@ class DisplayFormResults extends DisplayForm{
 
 								echo "<td style='border: none;'>";
 									echo "   Filter name  ";
-									echo "<input name='table-settings[filter][$index][name]' value='{$this->tableSettings['filter'][$index]['name']}'>";
+									echo "<input name='table-settings[filter][$index][name]' value='{$this->tableSettings->filter[$index]['name']}'>";
 								echo "</td>";
 								echo "<td style='border: none;'><button type='button' class='add button'>+</button></td>";
 								echo "<td style='border: none;'><button type='button' class='remove button'>-</button></td>";
@@ -1528,26 +1540,26 @@ class DisplayFormResults extends DisplayForm{
 					</label>
 					<select name="table-settings[hide-row]">
 					<?php
-					if($this->tableSettings['hide-row'] == ''){
+					if($this->tableSettings->hide_row == ''){
 						?><option value='' selected>---</option><?php
 					}else{
 						?><option value=''>---</option><?php
 					}
 					
 					foreach($this->columnSettings as $key=>$columnSetting){
-						if(!is_array($columnSetting)){
+						if(!is_object($columnSetting)){
 							continue;
 						}
 
-						$name = $columnSetting['nice-name'];
+						$name = $columnSetting->nice_name;
 						
 						//Check which option is the selected one
-						if($this->tableSettings['hide-row'] == $columnSetting['name']){
+						if($this->tableSettings->hide_row == $columnSetting->name){
 							$selected = 'selected="selected"';
 						}else{
 							$selected = '';
 						}
-						echo "<option value='{$columnSetting['name']}' $selected>$name</option>";
+						echo "<option value='{$columnSetting->name}' $selected>$name</option>";
 					}
 					?>
 					</select>
@@ -1556,12 +1568,12 @@ class DisplayFormResults extends DisplayForm{
 				<div class="table-rights-wrapper">
 					<h4>Select which results to display</h4>
 					<select name="table-settings[result-type]">
-						<option value="personal" <?php if($this->tableSettings['result-type'] == 'personal'){echo 'selected';}?>>Only personal</option>
-						<option value="all" <?php if($this->tableSettings['result-type'] == 'all'){echo 'selected';}?>>All the viewer has permission for</option>
+						<option value="personal" <?php if($this->tableSettings->result_type == 'personal'){echo 'selected';}?>>Only personal</option>
+						<option value="all" <?php if($this->tableSettings->result_type == 'all'){echo 'selected';}?>>All the viewer has permission for</option>
 					</select>
 					<br>
 					<label>
-						<input type='checkbox' name='table-settings[split-table]' value='yes' <?php if(isset($this->tableSettings['split-table']) && $this->tableSettings['split-table']){echo 'checked';}?>>
+						<input type='checkbox' name='table-settings[split-table]' value='yes' <?php if(isset($this->tableSettings->split_table) && $this->tableSettings->split_table){echo 'checked';}?>>
 						Split the results in own entries and others entries
 					</label>
 
@@ -1570,7 +1582,7 @@ class DisplayFormResults extends DisplayForm{
 				<div class="table-rights-wrapper">
 					<h4 class="label">Select if you want to view archived results by default</h4>
 					<?php
-					if($this->tableSettings['archived'] == 'true'){
+					if($this->tableSettings->archived == 'true'){
 						$checked1	= 'checked';
 						$checked2	= '';
 					}else{
@@ -1621,11 +1633,11 @@ class DisplayFormResults extends DisplayForm{
 							}
 							
 							foreach($this->columnSettings as $key=>$columnSetting){
-								if(!is_array($columnSetting)){
+								if(!is_object($columnSetting)){
 									continue;
 								}
 
-								$name = $columnSetting['nice-name'];
+								$name = $columnSetting->nice_name;
 								
 								//Check which option is the selected one
 								if($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key){
@@ -1704,7 +1716,7 @@ class DisplayFormResults extends DisplayForm{
 							<div class="role-info">
 							<?php
 							foreach($viewRoles as $key=>$roleName){
-								if(in_array($key,array_keys((array)$this->tableSettings['view-right-roles']))){
+								if(in_array($key,array_keys((array)$this->tableSettings->view_right_roles))){
 									$checked = 'checked';
 								}else{
 									$checked = '';
@@ -1724,7 +1736,7 @@ class DisplayFormResults extends DisplayForm{
 							<div class="role-info">
 							<?php
 							foreach($editRoles as $key=>$roleName){
-								if(in_array($key, array_keys((array)$this->tableSettings['edit-right-roles']))){
+								if(in_array($key, array_keys((array)$this->tableSettings->edit_right_roles))){
 									$checked = 'checked';
 								}else{
 									$checked = '';
@@ -1807,7 +1819,7 @@ class DisplayFormResults extends DisplayForm{
 	 * Processed the table settings
 	 */
 	protected function loadTableSettings(){		
-		if((isset($this->tableSettings['archived']) && $this->tableSettings['archived'] == 'true') || $this->showArchived){
+		if($this->tableSettings->archived || $this->showArchived){
 			$this->showArchived = true;
 		}else{
 			$this->showArchived = false;
@@ -1821,10 +1833,10 @@ class DisplayFormResults extends DisplayForm{
 					array_keys((array)$this->formData->full_right_roles)
 				)	||
 				(
-					isset($this->tableSettings['full_right_roles']) &&					// we have full rights to the table
+					isset($this->tableSettings->full_right_roles) &&					// we have full rights to the table
 					array_intersect(
 						(array)$this->userRoles, 
-						array_keys((array)$this->tableSettings['full_right_roles'])
+						array_keys((array)$this->tableSettings->full_right_roles)
 					)
 				)	||
 				$this->editRights														// we have edit rights on the form
@@ -1838,8 +1850,8 @@ class DisplayFormResults extends DisplayForm{
 		//check if we have rights on this table
 		if(!isset($this->tableEditPermissions) || !$this->tableEditPermissions){
 			if(
-				array_intersect($this->userRoles, (array)$this->tableSettings['edit-right-roles']) ||
-				in_array($this->userId, (array)$this->tableSettings['edit-right-roles'])
+				array_intersect($this->userRoles, (array)$this->tableSettings->edit_right_roles) ||
+				in_array($this->userId, (array)$this->tableSettings->edit_right_roles)
 			){
 				$this->tableEditPermissions = true;
 			}else{
@@ -1853,12 +1865,12 @@ class DisplayFormResults extends DisplayForm{
 		if(
 			$this->onlyOwn											||
 			(
-				$this->tableSettings['result-type'] == 'personal'	&&
+				$this->tableSettings->result_type == 'personal'	&&
 				!$this->all
 			)	||
 			!$this->tableEditPermissions							&&
-			!array_intersect($this->userRoles, array_keys((array)$this->tableSettings['view-right-roles'])) &&
-			!in_array($this->userId, (array)$this->tableSettings['view-right-roles']) &&
+			!array_intersect($this->userRoles, array_keys((array)$this->tableSettings->view_right_roles)) &&
+			!in_array($this->userId, (array)$this->tableSettings->view_right_roles) &&
 			!wp_doing_cron()
 		){
 			$this->tableViewPermissions 	= false;
@@ -1876,7 +1888,7 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	function filterSubmissions($submissions){
 		$filteredCount	= 0;
-		foreach($this->tableSettings['filter'] as $filter){
+		foreach($this->tableSettings->filter as $filter){
 			$filterElement	= $this->getElementById($filter['element']);
 			$filterValue	= '';
 			$filterKey		= strtolower($filter['name']);
@@ -1926,9 +1938,9 @@ class DisplayFormResults extends DisplayForm{
 	protected function renderFilterForm(){
 		$html	= '';
 
-		if(!empty($this->tableSettings['filter'])){
+		if(!empty($this->tableSettings->filter)){
 			$filterOption	= '';
-			foreach($this->tableSettings['filter'] as $filter){
+			foreach($this->tableSettings->filter as $filter){
 				$filterElement	= $this->getElementById($filter['element']);
 				$filterValue	= '';
 				$filterKey		= strtolower($filter['name']);
@@ -1989,7 +2001,7 @@ class DisplayFormResults extends DisplayForm{
 			if(
 				$this->tableViewPermissions &&
 				$this->onlyOwn || 
-				( $this->tableSettings['result-type'] == 'personal' && !$this->all)
+				( $this->tableSettings->result_type == 'personal' && !$this->all)
 			){
 				$html	.= "<button class='button sim small onlyown-switch-all'>Show all entries</button>";
 			}elseif(
@@ -1997,7 +2009,7 @@ class DisplayFormResults extends DisplayForm{
 				(
 					!$this->onlyOwn	||
 					$this->all		||
-					$this->tableSettings['result-type'] != 'personal'
+					$this->tableSettings->result_type != 'personal'
 				)
 			){
 				$html	.= "<button class='button sim small onlyown-switch-on'>Show only my own entries</button>";
@@ -2104,18 +2116,20 @@ class DisplayFormResults extends DisplayForm{
 					$values['id']		= $this->submission->id;
 					$values['userid']	= $this->submission->userid;
 
-					$userIdKey	= $this->findUserIdElementName();
+					$userIdKey			= $this->findUserIdElementName();
 
 					// Skip if needed
 					if($type == 'others' && $values[$userIdKey] == $this->user->ID){
 						continue;
 					}
 
-					$subId				= $this->submission->subId;
-					if($subId > -1){
-						$values['subid']= $this->submission->subId;
+					if(isset($this->submission->subId)){
+						$subId				= $this->submission->subId;
+						if($subId > -1){
+							$values['subid']= $this->submission->subId;
+						}
 					}
-					
+						
 					if($this->writeTableRow($values, $subId)){
 						// this row has contents
 						$allRowsEmpty	= false;
@@ -2182,11 +2196,11 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		// Check if we should sort the data
-		if($this->tableSettings['default-sort'] || isset($_REQUEST['sortcol'])){
+		if($this->tableSettings->default_sort || isset($_REQUEST['sortcol'])){
 			if(isset($_REQUEST['sortcol'])){
 				$this->sortColumn	= $_REQUEST['sortcol'];
 			}else{
-				$defaultSortElement	= $this->tableSettings['default-sort'];
+				$defaultSortElement	= $this->tableSettings->default_sort;
 				$sortElement		= $this->getElementById($defaultSortElement);
 
 				if($sortElement){
@@ -2202,8 +2216,8 @@ class DisplayFormResults extends DisplayForm{
 			$this->sortDirection	= $_REQUEST['sortdir'];
 		}
 
-		if(isset($this->tableSettings['sort-direction'])){
-			$this->sortDirection	= strtoupper($this->tableSettings['sort-direction']);
+		if(isset($this->tableSettings->sort_direction)){
+			$this->sortDirection	= strtoupper($this->tableSettings->sort_direction);
 		}
 
 		if(isset($_REQUEST['export_pfd']) || isset($_REQUEST['export-xls'])){
@@ -2380,8 +2394,7 @@ class DisplayFormResults extends DisplayForm{
 		if(
 			(
 				$split === null	&&									// we should use the table settings
-				isset($this->tableSettings['split-table']) && 		// split-table is defined
-				$this->tableSettings['split-table'] == 'yes'		// and we should split						
+				$this->tableSettings->split_table					// and we should split						
 			) ||
 			$split == true											// we should always split
 		){
@@ -2408,7 +2421,7 @@ class DisplayFormResults extends DisplayForm{
 		?>
 		<div class='form table-wrapper'>
 			<div class='form table-head'>
-				<h2 class="table-title"><?php echo esc_html($this->tableSettings['title']); ?></h2><br>
+				<h2 class="table-title"><?php echo esc_html($this->tableSettings->title); ?></h2><br>
 				<?php
 					echo $buttons;
 				?>
@@ -2456,56 +2469,54 @@ class DisplayFormResults extends DisplayForm{
 				<?php
 
 				//add normal fields
-				foreach($this->columnSettings as $settingId=>$columnSetting){
-					if(!is_array($columnSetting)){
-						$columnSetting	= [];
-					}
+				foreach($this->columnSettings as $elementId => $columnSetting){
+					$columnSetting	= (object) $columnSetting;
 					
-					if(!isset($columnSetting['view-right-roles'])){
-						$columnSetting['view-right-roles']	= [];
+					if(!isset($columnSetting->view_right_roles)){
+						$columnSetting->view_right_roles	= [];
 					}
 
 					if(
-						!is_numeric($settingId)				||
-						$columnSetting['show'] == 'hide'	||												//hidden column
+						!is_numeric($elementId)				||
+						!$columnSetting->show				||												//hidden column
 						(
 							!$this->ownData				|| 													//The table does not contain data of our own
 							(
 								$this->ownData			&& 													//or it does contain our own data but
-								!in_array('own', $columnSetting['view-right-roles'])						//we are not allowed to see it
+								!in_array('own', $columnSetting->view_right_roles)							//we are not allowed to see it
 							)
 						) &&
 						!$this->tableEditPermissions 				&&										//no permission to edit the table and
-						!empty($columnSetting['view-right-roles']) 	&& 										// there are view right permissions defined
-						!array_intersect($this->userRoles, $columnSetting['view-right-roles'])				// and we do not have the view right role and
+						!empty($columnSetting->view_right_roles) 	&& 										// there are view right permissions defined
+						!array_intersect($this->userRoles, $columnSetting->view_right_roles)				// and we do not have the view right role and
 					){
 						continue;
 					}
 					
-					$niceName			= $columnSetting['nice-name'];
+					$niceName			= $columnSetting->nice_name;
 					
-					if($this->tableSettings['default-sort']	== $settingId){
+					if($this->tableSettings->default_sort	== $elementId){
 						$class	= "defaultsort";
 					}else{
 						$class	= "";
 					}
 
-					if($this->sortColumn == $columnSetting['name']){
+					if($this->sortColumn == $columnSetting->name){
 						$class	= strtolower($this->sortDirection). ' defaultsort';
 					}
 
-					if(!empty($this->hiddenColumns[$columnSetting['name']])){
+					if(!empty($this->hiddenColumns[$columnSetting->name])){
 						$class	.= ' hidden';
 					}
 					$icon			= "<img class='visibility-icon visible' src='".SIM\PICTURESURL."/visible.png' width=20 height=20 loading='lazy' >";
 					
 					//Add a heading for each column
 					$style			= '';
-					if(!empty($columnSetting['width'])){
-						$style	= "style='max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;'";
+					if(!empty($columnSetting->width)){
+						$style	= "style='max-width:{$columnSetting->width}px;width:{$columnSetting->width}px;min-width:{$columnSetting->width}px;text-wrap: balance;'";
 					}
 
-					echo "<th class='$class' id='{$columnSetting['name']}' data-nicename='$niceName' $style>$niceName $icon</th>";
+					echo "<th class='$class' id='{$columnSetting->name}' data-nicename='$niceName' $style>$niceName $icon</th>";
 					
 					$excelRow[]	= $niceName;
 				}
@@ -2527,7 +2538,7 @@ class DisplayFormResults extends DisplayForm{
 				}else{
 					foreach($actions as $action){
 						//we have permission for this specific button
-						if(isset($this->columnSettings[$action]['edit-right-roles']) && array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit-right-roles'])){
+						if(isset($this->columnSettings[$action]->edit_right_roles) && array_intersect($this->userRoles, (array)$this->columnSettings[$action]->edit_right_roles)){
 							$addHeading	= true;
 						}elseif($type != 'others'){
 							//Loop over all submissions to see if the current user has permission for them
@@ -2571,9 +2582,8 @@ class DisplayFormResults extends DisplayForm{
 
 		//add new row in db
 		$wpdb->insert(
-			$this->shortcodeTableSettingsTable,
+			$this->shortcodeTable,
 			array(
-				'shortcode_id'		=> '',
 				'form_id'			=> $formId,
 			)
 		);

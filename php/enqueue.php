@@ -79,24 +79,20 @@ function afterInsertPost($postId, $post){
         }
     }
 
-    if($hasFormbuilderShortcode || has_shortcode($post->post_content, 'formselector') || has_block('sim/formbuilder', $post)){
-        if(!is_array($Modules[MODULE_SLUG]['formbuilder_pages'])){
-            $Modules[MODULE_SLUG]['formbuilder_pages']    = [$postId];
-        }elseif(!in_array($postId, $Modules[MODULE_SLUG]['formbuilder_pages'])){
-            $Modules[MODULE_SLUG]['formbuilder_pages'][]  = $postId;
-        }
+    if($hasFormbuilderShortcode || has_shortcode($post->post_content, 'formselector') || has_block('sim/formbuilder', $post)){       
+        $pages  = SIM\getModuleOption(MODULE_SLUG, 'formbuilder-pages', false);
 
-        update_option('sim_modules', $Modules);
+        $pages[]  = $postId;
+
+        SIM\updateModuleOptions(MODULE_SLUG, $pages, 'formbuilder-pages');
     }
 
     if(has_shortcode($post->post_content, 'formresults') || has_shortcode($post->post_content, 'formselector')){
-        if(!is_array($Modules[MODULE_SLUG]['formtable_pages'])){
-            $Modules[MODULE_SLUG]['formtable_pages']    = [$postId];
-        }elseif(!in_array($postId, $Modules[MODULE_SLUG]['formtable_pages'])){
-            $Modules[MODULE_SLUG]['formtable_pages'][]  = $postId;
-        }
+        $pages  = SIM\getModuleOption(MODULE_SLUG, 'formtable-pages', false);
 
-        update_option('sim_modules', $Modules);
+        $pages[]  = $postId;
+
+        SIM\updateModuleOptions(MODULE_SLUG, $pages, 'formtable-pages');
     }
 }
 
