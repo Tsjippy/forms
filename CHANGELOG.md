@@ -9,6 +9,7 @@
 ### Fixed
 - store boolean values
 - bugs
+- form submit bug
 
 ### Updated
 
