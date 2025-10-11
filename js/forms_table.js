@@ -24,7 +24,7 @@ async function saveColumnSettings(target){
 }
 
 async function saveTableSettings(target){
-	let response = await FormSubmit.submitForm(target, 'forms/save_table-settings');
+	let response = await FormSubmit.submitForm(target, 'forms/save_table_settings');
 
 	if(response){
 		Main.displayMessage(response);
@@ -146,7 +146,7 @@ async function archiveSubmission(target){
 				row.dispatchEvent(event);
 
 				// just change the button name
-				if(params.archived == 'true'){
+				if(params.archived){
 					let element;
 					if(action == 'archive'){
 						element = row.querySelector(`.loader-wrapper, .archive`);
@@ -164,7 +164,7 @@ async function archiveSubmission(target){
 				row.dispatchEvent(event);
 				
 				// just change the button name
-				if(params.archived == 'true'){
+				if(params.archived){
 					let loader = row.querySelector('.loader-wrapper');
 					
 					changeArchiveButton(loader, action);
@@ -316,14 +316,14 @@ async function getNextPage(target){
 		archived	= true;
 	}
 
-	let onlyown;
-	if(params['onlyown'] == null){
-		onlyown	= false;
+	let onlyOwn;
+	if(params['onlyOwn'] == null){
+		onlyOwn	= false;
 	}else{
-		onlyown	= true;
+		onlyOwn	= true;
 	}
 	formData.append('archived', archived);
-	formData.append('onlyown', onlyown);
+	formData.append('only-own', onlyOwn);
 	
 	if(tableWrapper.dataset.sortcol){
 		formData.append('sortcol', tableWrapper.dataset.sortcol);
@@ -388,14 +388,14 @@ async function getSortedPage(target){
 		archived	= true;
 	}
 
-	let onlyown;
-	if(params['onlyown'] == null){
-		onlyown	= false;
+	let onlyOwn;
+	if(params['onlyOwn'] == null){
+		onlyOwn	= false;
 	}else{
-		onlyown	= true;
+		onlyOwn	= true;
 	}
 	formData.append('archived', archived);
-	formData.append('onlyown', onlyown);
+	formData.append('only-own', onlyOwn);
 	formData.append('sortcol', sortCol);
 	formData.append('sortdir', sortDir);
 
@@ -602,11 +602,11 @@ const hideColumn	= async (target) => {
 		if(target.classList.contains('visible')){
 			target.classList.replace('visible', 'invisible');
 			target.src	= target.src.replace('visible.png', 'invisible.png');
-			target.closest('.column-setting-wrapper').querySelector('.visibilitytype').value = 'hide';
+			target.closest('.column-setting-wrapper').querySelector('.visibility-type').value = 0;
 		}else{
 			target.classList.replace('invisible','visible');
 			target.src	= target.src.replace('invisible.png','visible.png');
-			target.closest('.column-setting-wrapper').querySelector('.visibilitytype').value = 'show';
+			target.closest('.column-setting-wrapper').querySelector('.visibility-type').value = 1;
 		}
 	}
 }

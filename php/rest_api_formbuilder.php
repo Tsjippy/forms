@@ -29,7 +29,7 @@ function restApiInitForms() {
 			'callback' 				=> 	__NAMESPACE__.'\copyFormElement',
 			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
 			'args'					=> array(
-				'element_id'		=> array(
+				'element-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($elementIndex){
 						return is_numeric($elementIndex);
@@ -404,7 +404,7 @@ function addFormElement($copy=false){
 
 	//copy an existing element
 	if($copy === true){
-		$element		= $simForms->getElementById($_POST['element_id']);
+		$element		= $simForms->getElementById($_POST['element-id']);
 
 		$element->name	= $element->nicename;
 	}
@@ -678,48 +678,44 @@ function saveFormSettings(){
 
 // DONE
 function saveFormEmails(){
-	$formBuilder	= new SaveFormSettings();
-		
 	global $wpdb;
 	
+	$formBuilder	= new SaveFormSettings();
 	$formBuilder->getForm($_POST['form-id']);
 	
-	$formEmails = $_POST['emails'];
+	$formEmails 	= $_POST['emails'];
+
+	// Remove deleted emails
+	$existingEmails	= $wpdb->get_col("SELECT id FROM {$formBuilder->formEmailTable} WHERE form_id = {$_POST['form-id']}");
+	$emailsToKeep	= array_column($formEmails, 'email-id');
+	$emailsToDelete	= array_diff($existingEmails, $emailsToKeep);
+	if(!empty($emailsToDelete)){
+		$idsToDelete	= implode(',', $emailsToDelete);
+		$wpdb->query("DELETE FROM {$formBuilder->formEmailTable} WHERE id IN ($idsToDelete)");
+	}	
 	
+	// Update each email
 	foreach($formEmails as $index => &$email){
-		foreach($email as $key => $val){
-			if($val == "true"){
-				$val 	= true;
-			}
-
-			if(is_array($val)){
-				$val	= serialize($val);
-			}else{
-				$val	= trim(SIM\deslash($val));
-			}
-
-			unset($email[$key]);
-			$email[str_replace('-', '_', $key)]	= $val;
-		}
+		$email	= $formBuilder->prepareDbData($email, $formBuilder->formEmailTableFormats);
 		
 		$emailId	= $email['email_id'];
 		unset($email['email_id']);
-		
+
+		$email['message']	= trim(SIM\deslash($email['message']));
+
 		$wpdb->update(
 			$formBuilder->formEmailTable,
 			$email,
 			array(
 				'id'		=> $emailId,
 			),
+			$formBuilder->formEmailTableFormats
 		);
+
+		if($wpdb->last_error !== ''){
+			return new \WP_Error('error',$wpdb->print_error());
+		}
 	}
 	
-	$formBuilder->maybeInsertForm();
-	
-	
-	if($wpdb->last_error !== ''){
-		return new \WP_Error('error',$wpdb->print_error());
-	}else{
-		return "Succesfully saved your form e-mail configuration";
-	}
+	return "Succesfully saved your form e-mail configuration";
 }

@@ -233,9 +233,6 @@ function moduleActivated(){
 	$simForms = new SimForms();
 	$simForms->createDbTables();
 
-	$formTable = new DisplayFormResults();
-	$formTable->createDbShortcodeTable();
-
 	scheduleTasks();
 }
 

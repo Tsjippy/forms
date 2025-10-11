@@ -131,7 +131,7 @@ class FormBuilderForm extends SimForms{
 		}
 		
 		$idHidden	= ' hidden';
-		if(isset($_REQUEST['showid'])){
+		if(isset($_REQUEST['show-id'])){
 			$idHidden	= '';
 		}
 
@@ -147,7 +147,7 @@ class FormBuilderForm extends SimForms{
 
 		//Add form edit controls if needed
 		$html = " <div class='form-element-wrapper $extraClass' data-id='{$element->id}' data-form_id='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
-			$html 	.= "<span class='movecontrol formfield-button' aria-hidden='true'>:::<br><span class='element_id$idHidden' style='font-size:xx-small'>$element->id</span></span>";
+			$html 	.= "<span class='movecontrol formfield-button' aria-hidden=1>:::<br><span class='element-id$idHidden' style='font-size:xx-small'>$element->id</span></span>";
 			$html 	.= "<div class='resizer-wrapper'>";
 				if($element->type == 'info'){
 					$html .= "<div class='show input-wrapper$hidden'>";
@@ -180,7 +180,7 @@ class FormBuilderForm extends SimForms{
 				}
 				
 				$hidden	= ' hidden';
-				if(isset($_REQUEST['showname'])){
+				if(isset($_REQUEST['show-name'])){
 					$hidden	= '';
 				}
 
@@ -307,8 +307,8 @@ class FormBuilderForm extends SimForms{
 				}else{
 					?>
 					<div class="form-edit-buttons-wrapper">
-						<button name='showid' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element id's</button>
-						<button name='showname' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element name's</button>
+						<button name='show-id' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element id's</button>
+						<button name='show-name' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element name's</button>
 						<button class='button formbuilder-switch-back small'>Show enduser form</button>
 					</div>
 					<?php
@@ -788,8 +788,8 @@ class FormBuilderForm extends SimForms{
 								<button type='button' class='add button' style='flex: 1;'>+</button>
 								<button type='button' class='remove button' style='flex: 1;'>-</button>
 								<div style='width:100%;'>
-									<input type='hidden' name='emails[<?php echo $key;?>][form-id]' value='<?php echo $email->id;?>'>
-									<input type='hidden' name='emails[<?php echo $key;?>][email-id]' value='<?php echo $email->form_id;?>'>
+									<input type='hidden' name='emails[<?php echo $key;?>][email-id]' value='<?php echo $email->id;?>'>
+									<input type='hidden' name='emails[<?php echo $key;?>][form-id]' value='<?php echo $email->form_id;?>'>
 
 									<div class="formfield form-label" style="margin-top:10px;">
 										<h4>Trigger</h4>
@@ -1131,7 +1131,7 @@ class FormBuilderForm extends SimForms{
 			const numericElements	= <?php echo json_encode($numericElements); ?>;
 			const dateElements		= <?php echo json_encode($dateElements); ?>;
 		</script>
-		<form action="" method="post" name="add-form-element-form" class="form-element-form sim-form" data-addempty=true>
+		<form action="" method="post" name="add-form-element-form" class="form-element-form sim-form" data-add-empty=1>
 			<div style="display: none;" class="error"></div>
 			<h4><?php echo $heading;?></h4><br>
 

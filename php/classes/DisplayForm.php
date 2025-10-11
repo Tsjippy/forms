@@ -490,10 +490,10 @@ class DisplayForm extends SubmitForm{
 
 		$dataset	= "data-form_id='{$this->formData->id}'";
 		if(!empty($this->formData->form_reset)){
-			$dataset .= " data-reset='true'";
+			$dataset .= " data-reset=1";
 		}
 		if(!empty($this->formData->save_in_meta)){
-			$dataset .= " data-addempty='true'";
+			$dataset .= " data-add-empty=1";
 		}
 
 		$html	.= '<div class="sim-form-wrapper">';

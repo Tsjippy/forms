@@ -213,8 +213,8 @@ class SimForms{
 
 		$this->shortcodeTableColumnFormats	= [
 			'shortcode_id'			=> '%d',
-			'form_id'				=> '%d',
 			'element_id'			=> '%d',
+			'width'					=> '%d',
 			'show'					=> '%d',	
 			'name'					=> '%s',	
 			'nice_name'				=> '%s',	
@@ -360,7 +360,7 @@ class SimForms{
 		$sql = "CREATE TABLE {$this->shortcodeColumnSettingsTable} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			shortcode_id int NOT NULL,
-			form_id int NOT NULL,
+			width int,
 			element_id int,
 			`show` boolean,
 			name tinytext,
@@ -1004,29 +1004,49 @@ class SimForms{
 					'userid'		=> '',
 					'user-id'		=> '',
 					'search'		=> '',
+					'shortcodeid'	=> '',
 					'shortcode-id'	=> '',
 					'id'			=> '',
+					'formid'		=> '',
 					'form-id'		=> '',
+					'only-own'		=> false,
 					'onlyown'		=> false,
 					'archived'		=> false,
 					'all'			=> false,
 				),
 				$atts
 			);
-			
-			$this->formName 	= strtolower(sanitize_text_field($atts['formname']));
-			$this->formId		= sanitize_text_field($atts['form-id']);
 
-			$this->getForm();
+			if(empty($atts['form-name'])){
+				$atts['form-name']	= $atts['formname'];
+			}
+
+			if(empty($atts['user-id'])){
+				$atts['user-id']	= $atts['userid'];
+			}
+
+			if(empty($atts['shortcode-id'])){
+				$atts['shortcode-id']	= $atts['shortcodeid'];
+			}
+
+			if(empty($atts['form-id'])){
+				$atts['form-id']	= $atts['formid'];
+			}
+
+			if(empty($atts['only-own'])){
+				$atts['only-own']	= $atts['onlyown'];
+			}
 
 			$this->shortcodeId	= $atts['shortcode-id'];
 			if(empty($this->shortcodeId)){
 				$this->shortcodeId	= $atts['id'];
 			}
-			$this->onlyOwn		= $atts['onlyown'];
-			if(isset($_GET['onlyown'])){
-				$this->onlyOwn	= $_GET['onlyown'];
+
+			$this->onlyOwn		= $atts['only-own'];
+			if(isset($_GET['only-own'])){
+				$this->onlyOwn	= $_GET['only-own'];
 			}
+
 			$this->all			= $atts['all'];
 			$this->showArchived	= $atts['archived'];
 			if(isset($_GET['archived'])){
@@ -1037,9 +1057,14 @@ class SimForms{
 				$this->all	= $_GET['all'];
 			}
 			
-			if(!empty($atts['userid']) && is_numeric($atts['userid'])){
-				$this->userId	= $atts['userid'];
+			if(!empty($atts['user-id']) && is_numeric($atts['user-id'])){
+				$this->userId	= $atts['user-id'];
 			}
+
+			$this->formName 	= strtolower(sanitize_text_field($atts['form-name']));
+			$this->formId		= sanitize_text_field($atts['form-id']);
+
+			$this->getForm();
 		}
 	}
 
@@ -1072,7 +1097,7 @@ class SimForms{
 		}elseif(empty($formElements)){
 			$html	= "<div class='warning'>This form has no elements yet.<br>";
 				if($this->editRights){
-					$url	 = add_query_arg('formbuilder', 'true', SIM\getCurrentUrl());
+					$url	 = add_query_arg('formbuilder', 1, SIM\getCurrentUrl());
 					$html	.= "<br><a href='$url' class='button small sim'>Start Building the form</a>";
 				}else{
 					$html	.= "Ask an user with the editor role to start working on it";
@@ -1118,16 +1143,45 @@ class SimForms{
 
         return $args;
     }
+
 	/**
-	* prepares an indexed array for storages in db
-	
-	*/
-	public function prepareDbData($data){
+	 * Prepares an data for storages in db
+	 * 
+	 * @param 	object|array	$data		The data to be stored
+	 * @param	array			$formats	The format the data should follow
+	 * @param	object|array	$prevData	The previous value
+	 * 
+	 * @return	array						Tha data ready for db injection
+	 */
+	public function prepareDbData($data, $formats, $prevData=[]){
+		$data		= (array)$data;
+		$prevData	= (array)$prevData;
+
+		// Fix indexes
 		foreach($data as $index => $value){
 			unset($data[$index]);
 			
 			$data[str_replace('-', '_', $index)] = maybe_serialize($value);
 		}
+
+		// Remove data without a column in the db
+		foreach(array_diff_key($data, $formats) as $key => $val){
+			unset($element[$key]);
+		}
+
+		// Add missing data
+		foreach(array_diff_key($formats, $data) as $key => $val){
+			if(isset($prevData[$key])){
+				$data[$key]	= $prevData[$key];
+			}elseif($formats[$key] == '%d'){
+				$data[$key]	= 0;
+			}else{
+				$data[$key]	= '';
+			}
+		}
+
+		ksort($data);
 		
 		return $data;
+	}
 }

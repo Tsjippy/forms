@@ -199,6 +199,36 @@ export function removeNode(target){
 			prev.querySelector('.button-wrapper').appendChild(addElement);
 		}
 	}
+
+	// check if we need to remove a corresponding tab button
+	if(node.matches('.tabcontent')){
+		let buttonToRemove	= parentNode.querySelector(`.tablink[data-target="${node.id}"]`);
+		if(buttonToRemove != null){
+			//if the button is active, make the previous one active
+			if(buttonToRemove.classList.contains('active')){
+				let prevButton	= buttonToRemove.previousElementSibling;
+				if(prevButton != null){
+					prevButton.classList.add('active');
+					
+					//show the corresponding tab
+					Main.displayTab(prevButton);
+				}else{
+					//try the next one
+					let nextButton	= buttonToRemove.nextElementSibling;
+					if(nextButton != null){
+						nextButton.classList.add('active');
+						
+						//show the corresponding tab
+						Main.displayTab(nextButton);
+					}
+				}
+			}
+			
+			//remove the button
+			buttonToRemove.remove();
+		}
+	}
+
 	
 	//Remove the node
 	node.remove();

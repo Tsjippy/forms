@@ -2,8 +2,8 @@
 namespace SIM\FORMS;
 use SIM;
 
-add_action('sim_forms_module_update', __NAMESPACE__.'\pluginUpdate');
-function pluginUpdate($oldVersion){
+add_action('sim_forms_module_update', __NAMESPACE__.'\moduleUpdate');
+function moduleUpdate($oldVersion){
     global $wpdb;
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -53,7 +53,7 @@ function pluginUpdate($oldVersion){
         $simForms->createDbTables();
 
         // Shortcode data
-        $shortcodes   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_form_shortcodes");
+        /* $shortcodes   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_form_shortcodes");
         maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'title', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `title` tinytext");
         maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'default_sort', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `default_sort` tinytext");
         maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'sort_direction', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `sort_direction` tinytext");
@@ -79,8 +79,8 @@ function pluginUpdate($oldVersion){
                     'result_type'			=> $tableSettings['result_type'],
                     'split_table'			=> $tableSettings['split-table'] == 'yes',
                     'archived'				=> $tableSettings['archived'] == 'true',
-                    'view_right_roles'		=> maybe_serialize($tableSettings['view_right_roles']),
-                    'edit_right_roles'		=> maybe_serialize($tableSettings['edit_right_roles'])
+                    'view_right_roles'		=> maybe_serialize(array_keys($tableSettings['view_right_roles'])),
+                    'edit_right_roles'		=> maybe_serialize(array_keys($tableSettings['edit_right_roles']))
                 ];
 
                 ksort($data);
@@ -102,7 +102,6 @@ function pluginUpdate($oldVersion){
 
                     $data = [
                         'shortcode_id'		=> $shortcode->id,
-                        'form_id'			=> $shortcode->form_id,
                         'element_id'		=> $elId,
                         'show'				=> $columnSetting['show'] != 'hide',
                         'name'				=> $columnSetting['name'],
@@ -113,7 +112,7 @@ function pluginUpdate($oldVersion){
                     $wpdb->insert($simForms->shortcodeColumnSettingsTable, $data, $simForms->shortcodeTableColumnFormats);
                 }
             }
-        }
+        } */
         
         // remimder conditions
         $forms   = $wpdb->get_results("SELECT * FROM $simForms->tableName WHERE `reminder_conditions` IS NOT NULL");
@@ -201,11 +200,9 @@ function pluginUpdate($oldVersion){
                                     $rule[$newIndex]    = $v;
                                 }
                             }
-
-
                         }
                     }
-
+                    
                     $newIndex   = str_replace('_', '-', $index, $count);
 
                     if($count > 0){
@@ -217,21 +214,21 @@ function pluginUpdate($oldVersion){
             }
 
             $element->conditions    = maybe_serialize($conditions);
-
-            $el    = (array)$element;
             $wpdb->update(
                 $simForms->elTableName,
-                $el,
+                [
+                    'conditions'   => $element->conditions,
+                ],
                 array(
                     'id'		=> $element->id,
-                ),
-                $simForms->elementTableFormats,
-                ['%d']
+                )
             );
         }
     }
 }
 
 add_action('init', function(){
-    //pluginUpdate('8.6.9');
+    //moduleUpdate('8.6.9');
+    //SIM\BOOKINGS\moduleUpdate('8.4.0');
+    //SIM\afterPluginUpdate('1.1.1');
 });

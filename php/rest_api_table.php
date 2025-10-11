@@ -62,7 +62,7 @@ function restApiInitTable() {
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\saveColumnSettings',
 			'permission_callback' 	=> function(){
-				$formsTable		= new DisplayFormResults();
+				$formsTable		= new DisplayFormResults($_POST);
 				return $formsTable->tableEditPermissions;
 			},
 			'args'					=> array(
@@ -87,10 +87,7 @@ function restApiInitTable() {
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\saveTableSettings',
 			'permission_callback' 	=> function(){
-				$formsTable		= new DisplayFormResults(array(
-					'id'			=> $_POST['shortcode-id'],
-					'form-id'		=> $_POST['form-id']
-				));
+				$formsTable		= new DisplayFormResults($_POST);
 				return $formsTable->tableEditPermissions;
 			},
 			'args'					=> array(
@@ -237,13 +234,7 @@ function restApiInitTable() {
 }
 
 function getPage(){
-	$displayFormResults		= new DisplayFormResults([
-		'form-id' 		=> $_POST['form-id'],
-		'search'		=> $_POST['search'],
-		'shortcode-id'	=> $_POST['shortcode-id'],
-		'onlyOwn'		=> $_POST['onlyown'],
-		'archived'		=> $_POST['archived']
-	]);
+	$displayFormResults		= new DisplayFormResults($_POST);
 
 	$displayFormResults->loadShortcodeData();
 
@@ -281,47 +272,54 @@ function deleteTablePrefs( \WP_REST_Request $request ) {
 function saveColumnSettings($settings='', $shortcodeId=''){
 	global $wpdb;
 	
-	$formTable	= new DisplayFormResults();
+	$simForms	= new SimForms($_POST);
 	
 	if($settings instanceof \WP_REST_Request){
 		$params			= $settings->get_params();
 
 		$columnSettings 		= $params['column-settings'];
-		$shortcodeId 	= $params['shortcode-id'];
 	}
 
-	foreach($columnSettings as $column){
+	foreach($columnSettings as $elementId => $column){
 		if(!is_array($column)){
 			continue;
 		}
+
+		$column['element_id']	= $elementId;
+		$column['shortcode_id']	= $_POST['shortcode-id'];
 		
 		//if there are edit rights defined
-		if(!empty($setting->edit_right_roles)){
+		if(!empty($column['edit_right_roles'])){
 			//create view array if it does not exist
-			if(!is_array($column->view_right_roles)){
-				$column->view_right_roles = [];
+			if(!is_array($column['view_right_roles'])){
+				$column['view_right_roles'] = [];
 			}
 			
 			//merge and save
-			$setting->view_right_roles = array_merge($setting->view_right_roles, $setting->edit_right_roles);
-		
-	 	$column =	$formTable->prepareDbData($column);
+			$column['view_right_roles'] = array_merge($column['view_right_roles'], $column['edit_right_roles']);
+		}
+
+	 	$column =	$simForms->prepareDbData($column, $simForms->shortcodeTableColumnFormats);
 		
 		$wpdb->update(
-			$formTable->shortcodeColumnSettingsTable,
+			$simForms->shortcodeColumnSettingsTable,
 			$column,
 			array(
-				'id'				=> $columnId,
+				'id' => $column['column_id'],
 			),
+			$simForms->shortcodeTableColumnFormats
 		);
+
+		// Nothing got updated, maybe we should create instead of update
+		if($wpdb->rows_affected === false){
+
+		}
 		
 		if($wpdb->last_error !== ''){
 			return new \WP_Error('db error', $wpdb->print_error());
 		}
 	}
 	
-	
-
 	return "Succesfully saved your column settings";
 }
 
@@ -340,32 +338,34 @@ function saveTableSettings(){
 	}
 
 	//update table settings
-	$formTable		= new DisplayFormResults();
+	$simForms	= new SimForms($_POST);
 	
-	$tableSettings = formTable->prepareDbData($tableSettings);
+	$tableSettings = $simForms->prepareDbData($tableSettings, $simForms->shortcodeTableFormats);
 	
 	$wpdb->update(
-		$formTable->shortcodeTable,
+		$simForms->shortcodeTable,
 		$tableSettings,
 		array(
 			'id'			=> $_POST['shortcode-id'],
 		),
+		$simForms->shortcodeTableFormats
 	);
 	
 	//also update form setings if needed
 	$formSettings = $_POST['form-settings'];
 	if(is_array($formSettings) && is_numeric($_POST['form-id'])){
-		$formTable->getForm($_POST['form-id']);
+		$simForms->getForm($_POST['form-id']);
 		
 		//update existing
-		$formSettings = $formTable->prepareDbData($formSettings);
+		$formSettings = $simForms->prepareDbData($formSettings, $simForms->formTableFormats);
 		
 		//save in db
-		$wpdb->update($formTable->tableName,
+		$wpdb->update($simForms->tableName,
 			$formSettings,
 			array(
-				'id'		=> $formTable->formData->id,
+				'id'		=> $simForms->formData->id,
 			),
+			$simForms->formTableFormats
 		);
 	}
 	

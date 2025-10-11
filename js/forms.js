@@ -21,7 +21,7 @@ async function saveFormInput(target){
 	if(response){
 		Main.displayMessage(response);
 
-		if(form.dataset.reset == 'true'){
+		if(form.dataset.reset){
 			FormSubmit.formReset(form);
 		}
 	}
@@ -83,8 +83,8 @@ async function requestNewFormResults(target){
 	formData.append('shortcode-id', shortcodeId);
 
 	const url 		= new URL(window.location);
-	if(url.searchParams.get('onlyown')){
-		formData.append('onlyown', true);
+	if(url.searchParams.get('only-own')){
+		formData.append('only-own', true);
 	}
 
 	if(url.searchParams.get('all')){
@@ -121,12 +121,12 @@ async function archivedEntriesSwitch(target){
 
 async function onlyOwnSwitch(target){
 	const url 		= new URL(window.location);
-	if(target.matches('.onlyown-switch-on')){
-		url.searchParams.set('onlyown', true);
+	if(target.matches('.only-own-switch-on')){
+		url.searchParams.set('only-own', true);
 		url.searchParams.delete('all', true);
 	}else{
 		url.searchParams.set('all', true);
-		url.searchParams.delete('onlyown');
+		url.searchParams.delete('only-own');
 	}
 	window.history.pushState({}, '', url);
 
@@ -214,7 +214,7 @@ document.addEventListener('click', function(event) {
 		archivedEntriesSwitch(target);
 	}
 
-	if(target.matches('.onlyown-switch-all') || target.matches('.onlyown-switch-on')){
+	if(target.matches('.only-own-switch-all') || target.matches('.only-own-switch-on')){
 		onlyOwnSwitch(target);
 	}
 });

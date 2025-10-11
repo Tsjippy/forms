@@ -152,8 +152,8 @@ function showFormResults($attributes){
 				$attributes['archived']	= $_REQUEST['archived'];
 			}
 
-			if(isset($_REQUEST['onlyown'])){
-				$attributes['onlyOwn']	= $_REQUEST['onlyown'];
+			if(isset($_REQUEST['only-own'])){
+				$attributes['onlyOwn']	= $_REQUEST['only-own'];
 			}
 
 			if(isset($_REQUEST['all'])){

@@ -194,7 +194,7 @@ async function addFormElement(target, copying=false){
 	let response;
 	if(copying){
 		let formData			= new FormData();
-		formData.append('element_id', wrapper.dataset.id);
+		formData.append('element-id', wrapper.dataset.id);
 		formData.append('form-id', wrapper.dataset.formId);
 		formData.append('order', indexes);
 
@@ -344,8 +344,6 @@ async function saveFormEmails(target){
 	let response	= await FormSubmit.submitForm(target, 'forms/save_form_emails');
 
 	if(response){
-		target.closest('.submit-wrapper').querySelector('.loader-wrapper').classList.add('hidden');
-
 		Main.displayMessage(response);
 	}
 }
@@ -427,16 +425,16 @@ function showOrHideIds(target){
 	const url 		= new URL(window.location);
 
 	if(target.dataset.action == 'show'){
-		url.searchParams.set('showid', 'true');
+		url.searchParams.set('show-id', 1);
 
-		formWrapper.querySelectorAll('.element_id.hidden').forEach(el=>el.classList.remove('hidden'));
+		formWrapper.querySelectorAll('.element-id.hidden').forEach(el=>el.classList.remove('hidden'));
 		
 		target.textContent 		= 'Hide ids';
 		target.dataset.action	= 'hide';
 	}else{
-		url.searchParams.delete('showid');
+		url.searchParams.delete('show-id');
 
-		formWrapper.querySelectorAll('.element_id:not(.hidden)').forEach(el=>el.classList.add('hidden'));
+		formWrapper.querySelectorAll('.element-id:not(.hidden)').forEach(el=>el.classList.add('hidden'));
 		
 		target.textContent 		= 'Show ids';
 		target.dataset.action	= 'show';
@@ -449,16 +447,16 @@ function showOrHideName(target){
 	const url 		= new URL(window.location);
 
 	if(target.dataset.action == 'show'){
-		url.searchParams.set('showname', 'true');
+		url.searchParams.set('show-name', 1);
 
-		formWrapper.querySelectorAll('.element-name .hidden').forEach(el=>el.classList.remove('hidden'));
+		formWrapper.querySelectorAll('.element-name.hidden').forEach(el=>el.classList.remove('hidden'));
 		
 		target.textContent 		= 'Hide names';
 		target.dataset.action	= 'hide';
 	}else{
-		url.searchParams.delete('showid');
+		url.searchParams.delete('show-id');
 
-		formWrapper.querySelectorAll('.element-name :not(.hidden)').forEach(el=>el.classList.add('hidden'));
+		formWrapper.querySelectorAll('.element-name:not(.hidden)').forEach(el=>el.classList.add('hidden'));
 		
 		target.textContent 		= 'Show names';
 		target.dataset.action	= 'show';
@@ -944,9 +942,9 @@ window.addEventListener("click", event => {
 	/* ELEMENT ACTIONS */
 	
 	//Show form edit controls
-	if (target.name == 'showid'){
+	if (target.name == 'show-id'){
 		showOrHideIds(target);
-	}else if (target.name == 'showname'){
+	}else if (target.name == 'show-name'){
 		showOrHideName(target);
 	}else if(target.name == 'submit-form-element'){
 		event.stopPropagation();
@@ -959,7 +957,7 @@ window.addEventListener("click", event => {
 		saveFormEmails(target);
 	}else if(target.name == 'autoarchive'){
 		let el = target.closest('.formsettings-wrapper').querySelector('.auto-archive-logic');
-		if(target.value == 'true'){
+		if(target.value == 1){
 			el.classList.remove('hidden');
 		}else{
 			el.classList.add('hidden');
