@@ -11,7 +11,7 @@ DEFINE(__NAMESPACE__.'\MODULE_PATH', plugin_dir_path(__DIR__));
 add_filter('sim_submenu_forms_description', __NAMESPACE__.'\moduleDescription', 10, 2);
 function moduleDescription($description, $moduleSlug){
 	ob_start();
-	$url		= SIM\ADMIN\getDefaultPageLink($moduleSlug, 'forms_pages');
+	$url		= SIM\ADMIN\getDefaultPageLink($moduleSlug, 'forms-pages');
 	if(!empty($url)){
 		?>
 		<p>
@@ -181,7 +181,7 @@ function moduleUpdated($options, $oldOptions){
 	$simForms->createDbTables();
 
 	// Create frontend posting page
-	$options	= SIM\ADMIN\createDefaultPage($options, 'forms_pages', 'Form selector', '[formselector]', $oldOptions);
+	$options	= SIM\ADMIN\createDefaultPage($options, 'forms-pages', 'Form selector', '[formselector]', $oldOptions);
 
 	scheduleTasks();
 
@@ -221,7 +221,7 @@ function moduleActions(){
 add_filter('display_post_states', __NAMESPACE__.'\postStates', 10, 2);
 function postStates( $states, $post ) {
     
-    if (is_array(SIM\getModuleOption(MODULE_SLUG, 'forms_pages')) && in_array($post->ID, SIM\getModuleOption(MODULE_SLUG, 'forms_pages', false))) {
+    if (is_array(SIM\getModuleOption(MODULE_SLUG, 'forms-pages')) && in_array($post->ID, SIM\getModuleOption(MODULE_SLUG, 'forms-pages', false))) {
         $states[] = __('Form selector page');
     }
 
@@ -238,7 +238,7 @@ function moduleActivated(){
 
 add_action('sim_module_forms_deactivated', __NAMESPACE__.'\moduleDeActivated');
 function moduleDeActivated($options){
-	foreach($options['forms_pages'] as $page){
+	foreach($options['forms-pages'] as $page){
 		// Remove the auto created page
 		wp_delete_post($page, true);
 	}
