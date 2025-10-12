@@ -8,6 +8,257 @@ use WP_Error;
 class SaveFormSettings extends SimForms{
 	use CreateJs;
 
+	protected $tableFormats;
+
+	public function __construct(){
+		parent::__construct();
+
+		$this->tableFormats();
+	}
+
+	/**
+	 * Defines the formats of each column in each table for use in $wpdb->insert and $wpdb->update
+	 */
+	private function tableFormats(){
+		// Form Settings
+		$formats			= [
+			'name'					=> '%s',
+			'version'				=> '%s',
+			'button_text'			=> '%s',
+			'succes_message'		=> '%s',
+			'include_id'			=> '%d',
+			'form_name'				=> '%s',
+			'save_in_meta'			=> '%d',
+			'reminder_frequency'	=> '%s',
+			'reminder_amount'		=> '%s',
+			'reminder_period'		=> '%s',
+			'reminder_conditions'	=> '%s',
+			'reminder_startdate'	=> '%s',
+			'form_url'				=> '%s',
+			'form_reset'			=> '%d',
+			'actions'				=> '%s',
+			'autoarchive'			=> '%d',
+			'autoarchive_el'		=> '%d',
+			'autoarchive_value'		=> '%s',
+			'split'					=> '%s',
+			'full_right_roles'		=> '%s',
+			'submit_others_form'	=> '%s',
+			'upload_path'			=> '%s'
+		];
+
+		$this->tableFormats[$this->tableName]			= apply_filters('forms-form-table-formats', $formats, $this);
+
+		// Form Elements
+		$formats		= [
+			'form_id'				=> '%d',
+			'type'					=> '%s',
+			'priority'				=> '%d',
+			'width'					=> '%d',
+			'functionname'			=> '%s',
+			'foldername'			=> '%s',
+			'name'					=> '%s',
+			'nicename'				=> '%s',
+			'text'					=> '%s',
+			'html'					=> '%s',
+			'valuelist'				=> '%s',
+			'default_value'			=> '%s',
+			'default_array_value'	=> '%s',
+			'options'				=> '%s',
+			'required'				=> '%d',
+			'mandatory'				=> '%d',
+			'recommended'			=> '%d',
+			'wrap'					=> '%d',
+			'hidden'				=> '%d',
+			'multiple'				=> '%d',
+			'library'				=> '%d',
+			'editimage'				=> '%d',
+		  	'conditions'			=> '%s',
+			'remove'				=> '%s',
+			'add'					=> '%s',
+		];
+
+		$this->tableFormats[$this->elTableName]		= apply_filters('forms-element-table-formats', $formats, $this);
+
+		// Form Emails
+		$formats	= [
+			'form_id'				=> '%d',	
+			'email_trigger'			=> '%s',	
+			'submitted_trigger'		=> '%s',	
+			'conditional_field'		=> '%s',	
+			'conditional_fields'	=> '%s',
+			'conditional_value'		=> '%s',
+			'from_email'			=> '%s',
+			'from'					=> '%s',
+			'conditional_from_email'=> '%s',
+			'else_from'				=> '%s',
+			'email_to'				=> '%s',
+			'to'					=> '%s',
+			'conditional_email_to'	=> '%s',
+			'else_to'				=> '%s',
+			'subject'				=> '%s',
+			'message'				=> '%s',
+			'headers'				=> '%s',
+			'files'					=> '%s'
+		];
+
+		$this->tableFormats[$this->formEmailTable]	= apply_filters('forms-email-table-formats', $formats, $this);
+
+		// Form Submissions
+		$formats	= [
+			'form_id'				=> '%d',	
+			'timecreated'			=> '%s',	
+			'timelastedited'		=> '%s',	
+			'userid'				=> '%d',
+			'formresults'			=> '%s',
+			'archived'				=> '%d',
+			'archivedsubs'			=> '%s'
+		];
+
+		$this->tableFormats[$this->submissionTableName]	= apply_filters('forms-submission-table-formats', $formats, $this);
+
+		// Table Settings
+		$formats	= [
+			'form_id'				=> '%d',
+			'title' 				=> '%s',
+			'default_sort'			=> '%s',	
+			'sort_direction'		=> '%s',
+			'filter'				=> '%s',	
+			'hide_row'				=> '%d',
+			'result_type'			=> '%s',
+			'split_table'			=> '%s',
+			'archived'				=> '%d',
+			'view_right_roles'		=> '%s',
+			'edit_right_roles'		=> '%s'
+		];
+
+		$this->tableFormats[$this->shortcodeTable]	= apply_filters('forms-submission-table-formats', $formats, $this);
+
+		// Column Settings
+		$formats	= [
+			'shortcode_id'			=> '%d',
+			'element_id'			=> '%d',
+			'width'					=> '%d',
+			'show'					=> '%d',	
+			'name'					=> '%s',	
+			'nice_name'				=> '%s',	
+			'view_right_roles'		=> '%s',
+			'edit_right_roles'		=> '%s'
+		];
+
+		$this->tableFormats[$this->shortcodeColumnSettingsTable]	= apply_filters('forms-submission-table-formats', $formats, $this);
+
+		// Sort formats by key to make sure they are in the same order as the data
+		foreach($this->tableFormats as &$format){
+			ksort($format);
+		}
+	}
+
+	/**
+	 * Prepares an data for storages in db
+	 * 
+	 * @param 	object|array	$data		The data to be stored
+	 * @param	array			$formats	The format the data should follow
+	 * @param	array			$where		The where clause for updates
+	 * @param	array			$whereFormat The format of the where clause
+	 * 
+	 * @return	array						The data ready for db injection
+	 */
+	public function insertOrUpdateData($table, &$data, $where=[], $whereFormat=['%d']){
+		global $wpdb;
+
+		$shouldObject	= false;
+		if(is_object($data)){
+			$data			= (array)$data;
+			$shouldObject	= true;
+		}
+
+		// fix possible where indexes
+		foreach($where as &$val){
+			if(!is_string($val) ){
+				continue;
+			}
+
+			if(!is_numeric($val) && !empty($data[$val])){
+				$val	= $data[$val];
+				continue;
+			}
+
+			$newVal	= str_replace('_', '-', $val);
+			if(!is_numeric($val) && !empty($data[$newVal])){
+				$val	= $data[$newVal];
+			}
+		}
+
+		$formats	= $this->tableFormats[$table];
+
+		// Fix indexes
+		foreach($data as $index => $value){
+			unset($data[$index]);
+			
+			$data[str_replace('-', '_', $index)] = maybe_serialize($value);
+		}
+
+		// Remove data without a column in the db
+		foreach(array_diff_key($data, $formats) as $key => $val){
+			unset($data[$key]);
+		}
+
+		// Remove unnecesary formats
+		foreach(array_diff_key($formats, $data) as $key => $val){
+			unset($formats[$key]);	
+		}
+
+		ksort($data);
+
+		if(empty($where)){
+			$wpdb->insert(
+				$table,
+				$data,
+				$formats
+			);
+
+			$result	= $wpdb->insert_id;
+		}else{
+			//Update element
+			$wpdb->update(
+				$table,
+				$data,
+				$where,
+				$formats,
+				$whereFormat
+			);
+
+			$result	= $wpdb->rows_affected;
+		}
+
+		// Nothing got updated, maybe we should create instead of update
+		if($wpdb->rows_affected == false){
+			// check if this already exists
+			$wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE ".implode('=%s AND ', array_keys($where))."=%s", array_values($where)));
+			
+			if($wpdb->num_rows === 0){
+				// Insert instead
+				$wpdb->insert(
+					$table,
+					$data,
+					$formats
+				);
+
+				$result	= $wpdb->insert_id;
+			}
+		}
+
+		if($shouldObject){
+			$data	= (object)$data;
+		}
+		
+		if($wpdb->last_error !== ''){
+			return new WP_Error('forms', $wpdb->last_error);
+		}
+
+		return $result;
+	}
+
 	/**
 	 * Change an existing form element in the db
 	 *
@@ -21,25 +272,10 @@ class SaveFormSettings extends SimForms{
 		$elId		= $element->id;
 		$oldElement	= $this->getElementById($elId);
 
-		$el			= $this->prepareDbData($element, $this->elementTableFormats, $oldElement);
-		
-		//Update element
-		$wpdb->update(
-			$this->elTableName,
-			$el,
-			array(
-				'id'		=> $elId,
-			),
-			$this->elementTableFormats,
-			['%d']
-		);
-
-		if($wpdb->last_error !== ''){
-			return new WP_Error('forms', $wpdb->last_error);
-		}
+		$this->insertOrUpdateData($this->elTableName, $element, ['id' => $elId]);
 
 		// Update the element in the formElements array
-		$this->formElements[$oldElement->index]	= $element;
+		$this->formElements[$oldElement->index]	= (object)$element;
 
 		if($this->formData == null){
 			$this->getForm($_POST['form-id']);
@@ -74,17 +310,9 @@ class SaveFormSettings extends SimForms{
 	 * @return	int							The new element id
 	 */
 	public function insertElement($element){
-		global $wpdb;
+		$id	= $this->insertOrUpdateData($this->elTableName, $element);
 
-		$el	= $this->prepareDbData($element, $this->elementTableFormats);
-		
-		$wpdb->insert(
-			$this->elTableName,
-			$el,
-			$this->elementTableFormats
-		);
-
-		return $wpdb->insert_id;
+		return $id;
 	}
 
 	/**
@@ -226,42 +454,53 @@ class SaveFormSettings extends SimForms{
 			return new \WP_Error('Error', 'Please supply the form settings');
 		}
 
-		$newSettings	= [
-			'button_text'			=> isset($settings['button-text']) 			? $settings['button-text'] 							: null,
-			'succes_message'		=> isset($settings['succes-message']) 		? $settings['succes-message'] 						: null,
-			'include_id'			=> isset($settings['include-id']) 			? true 												: false,
-			'form_name'				=> isset($settings['form-name']) 			? $settings['form-name'] 							: null,
-			'save_in_meta'			=> isset($settings['save-in-meta']) 		? true 												: false,
-			'reminder_frequency'	=> isset($settings['reminder-frequency']) 	? $settings['reminder-frequency'] 					: null,
-			'reminder_amount'		=> isset($settings['reminder-amount']) 		? $settings['reminder-amount'] 						: null,
-			'reminder_period'		=> isset($settings['reminder-period']) 		? $settings['reminder-period'] 						: null,
-			'reminder_conditions'	=> isset($settings['reminder_conditions']) 	? maybe_serialize($settings['reminder_conditions']) : null,
-			'reminder_startdate'	=> isset($settings['reminder-startdate']) 	? $settings['reminder-startdate'] 					: null,
-			'form_url'				=> isset($settings['form-url']) 			? $settings['form-url'] 							: null,
-			'form_reset'			=> isset($settings['form-reset']) 			? true 												: false,
-			'actions'				=> isset($settings['actions']) 				? maybe_serialize($settings['actions']) 			: null,
-			'autoarchive'			=> isset($settings['autoarchive']) 			? true 												: false,
-			'autoarchive_el'		=> isset($settings['autoarchive-el']) 		? $settings['autoarchive-el'] 						: null,
-			'autoarchive_value'		=> isset($settings['autoarchive-value']) 	? $settings['autoarchive-value'] 					: null,
-			'split'					=> isset($settings['split']) 				? maybe_serialize($settings['split'])				: null,
-			'full_right_roles'		=> isset($settings['full-right-roles']) 	? maybe_serialize($settings['full-right-roles'])	: null,
-			'submit_others_form'	=> isset($settings['submit-others-form']) 	? maybe_serialize($settings['submit-others-form'])	: null,
-			'upload_path'			=> isset($settings['upload-path']) 			? $settings['upload-path'] 							: null
-		];
+		$settings	= apply_filters('sim-forms-before-saving-settings', $settings, $this, $formId);
 
-		$newSettings	= apply_filters('sim-forms-before-saving-settings', $newSettings, $this, $formId);
-
-		$wpdb->update($this->tableName,
-			$newSettings,
-			array(
-				'id'		=> $formId,
-			),
-		);
-		
-		if($wpdb->last_error !== ''){
-			return new \WP_Error('Error', $wpdb->print_error());
+		$result	= $this->insertOrUpdateData($this->tableName, $settings, ['id' => $formId]);
+		if(is_wp_error($result)){
+			return $result;
 		}
 
+		return true;
+	}
+
+	/**
+	 * Saves the column settings for a table shortcode
+	 * @param	array		$settings		The column settings to be saved
+	 * @param	int|string	$shortcodeId	The id of the shortcode these settings belong
+	 * @return	true|WP_Error				The result or error on failure
+	 */
+	public function saveColumnSettings($settings=[], $shortcodeId=''){
+		foreach($settings as $elementId => $column){
+			if(!is_array($column)){
+				continue;
+			}
+
+			$column['element_id']	= $elementId;
+			if(empty($column['shortcode_id']) && is_numeric($shortcodeId)){
+				$column['shortcode_id']	= $shortcodeId;
+			}elseif(empty($column['shortcode_id']) && isset($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])){
+				$column['shortcode_id']	= $_POST['shortcode-id'];
+			}
+			
+			//if there are edit rights defined
+			if(!empty($column['edit_right_roles'])){
+				//create view array if it does not exist
+				if(!is_array($column['view_right_roles'])){
+					$column['view_right_roles'] = [];
+				}
+				
+				//merge and save
+				$column['view_right_roles'] = array_merge($column['view_right_roles'], $column['edit_right_roles']);
+			}
+
+			$result	= $this->insertOrUpdateData($this->shortcodeColumnSettingsTable, $column, ['id' => 'column_id']);
+
+			if(is_wp_error($result)){
+				return $result;
+			}
+		}
+		
 		return true;
 	}
 }

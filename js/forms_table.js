@@ -462,8 +462,8 @@ async function processFormsTableInput(target){
 	let value			= FormFunctions.getFieldValue(target, cell, false);
 	let shortcodeId		= '';
 
-	if(target.closest('[data-shortcode_id]') != null){
-		shortcodeId	= target.closest('[data-shortcode_id]').dataset.shortcodeId;
+	if(target.closest('[data-shortcode-id]') != null){
+		shortcodeId	= target.closest('[data-shortcode-id]').dataset.shortcodeId;
 	}
 
 	//Only update when needed
@@ -602,11 +602,11 @@ const hideColumn	= async (target) => {
 		if(target.classList.contains('visible')){
 			target.classList.replace('visible', 'invisible');
 			target.src	= target.src.replace('visible.png', 'invisible.png');
-			target.closest('.column-setting-wrapper').querySelector('.visibility-type').value = 0;
+			target.closest('td').querySelector('input').value = 0;
 		}else{
 			target.classList.replace('invisible','visible');
 			target.src	= target.src.replace('invisible.png','visible.png');
-			target.closest('.column-setting-wrapper').querySelector('.visibility-type').value = 1;
+			target.closest('td').querySelector('input').value = 1;
 		}
 	}
 }

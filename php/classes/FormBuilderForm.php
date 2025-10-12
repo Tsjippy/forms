@@ -146,13 +146,13 @@ class FormBuilderForm extends SimForms{
 		}
 
 		//Add form edit controls if needed
-		$html = " <div class='form-element-wrapper $extraClass' data-id='{$element->id}' data-form_id='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
+		$html = " <div class='form-element-wrapper $extraClass' data-id='{$element->id}' data-form-id='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
 			$html 	.= "<span class='movecontrol formfield-button' aria-hidden=1>:::<br><span class='element-id$idHidden' style='font-size:xx-small'>$element->id</span></span>";
 			$html 	.= "<div class='resizer-wrapper'>";
 				if($element->type == 'info'){
 					$html .= "<div class='show input-wrapper$hidden'>";
 				}else{
-					$html .= "<div class='resizer show input-wrapper$hidden' data-width_percentage='$width' style='width:$width%;'>";
+					$html .= "<div class='resizer show input-wrapper$hidden' data-width-percentage='$width' style='width:$width%;'>";
 				}
 				
 				if($element->type == 'formstep'){
@@ -1005,7 +1005,8 @@ class FormBuilderForm extends SimForms{
 													]
 												];
 											}
-											foreach($email->conditional_email_to as $toKey=>$toEmail){
+											
+											foreach($email->conditional_email_to as $toKey => $toEmail){
 												?>
 												<div class='clone-div' data-div-id='<?php echo $toKey;?>'>
 													<fieldset class='form-email-fieldset button-wrapper'>
@@ -1499,7 +1500,7 @@ class FormBuilderForm extends SimForms{
 			if(!empty($copyTo['copyto']) && in_array($elementId, $copyTo['copyto'])){
 				$counter++;
 				?>
-				<div class="form-element-wrapper" data-id="<?php echo $el->id;?>" data-form_id="<?php echo $this->formData->id;?>">
+				<div class="form-element-wrapper" data-id="<?php echo $el->id;?>" data-form-id="<?php echo $this->formData->id;?>">
 					<button type="button" class="edit-form-element button" title="Jump to conditions element">View conditions of '<?php echo $el->name;?>'</button>
 				</div>
 				<?php
@@ -1540,14 +1541,14 @@ class FormBuilderForm extends SimForms{
 					continue;
 				}
 				?>
-				<div class='condition-row' data-condition_index='<?php echo $conditionIndex;?>'>
+				<div class='condition-row' data-condition-index='<?php echo $conditionIndex;?>'>
 					<span style='font-weight: 600;'>If</span>
 					<br>
 					<?php
 					$lastRuleKey = array_key_last($condition['rules']);
 					foreach($condition['rules'] as $ruleIndex=>$rule){
 						?>
-						<div class='rule-row' data-rule_index='<?php echo $ruleIndex;?>'>
+						<div class='rule-row' data-rule-index='<?php echo $ruleIndex;?>'>
 							<input type='hidden' class='element-condition combinator' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][combinator]' value='<?php echo $rule['combinator']; ?>'>
 						
 							<select class='element-condition condition-select conditional-field' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional-field]' required>

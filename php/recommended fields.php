@@ -191,55 +191,57 @@ function checkElementNeedsInput($elements, $userId){
 			$value = SIM\getMetaArrayValue($userId, $name, $value);
 		}
 
-		if(empty($value)){
-			//get form url
-			if(isset($formUrls[$element->form_id])){
-				$formUrl			= $formUrls[$element->form_id];
-			}else{
-				$query				= "SELECT * FROM {$simForms->tableName} WHERE `id`={$element->form_id}";
-				$form				= $wpdb->get_results($query)[0];
-				$formUrl			= $form->form_url;
+		if(!empty($value)){
+			continue;
+		}
 
-				//save in cache
-				$formUrls[$element->form_id]	= $formUrl;
+		//get form url
+		if(isset($formUrls[$element->form_id])){
+			$formUrl			= $formUrls[$element->form_id];
+		}else{
+			$query				= "SELECT * FROM {$simForms->tableName} WHERE `id`={$element->form_id}";
+			$form				= $wpdb->get_results($query)[0];
+			$formUrl			= $form->form_url;
+
+			//save in cache
+			$formUrls[$element->form_id]	= $formUrl;
+		}
+
+		// Do not add if no form url given
+		if(empty($formUrl)){
+			continue;
+		}
+
+		parse_str(parse_url($formUrl, PHP_URL_QUERY), $params);
+
+		//Show a nice name
+		$name	= str_replace(['[]', '_'], ['', ' '], $element->nicename);
+		$name	= ucfirst(str_replace(['[', ']'], [': ',''], $name));
+
+		$baseUrl	= explode('main-tab=', $_SERVER['REQUEST_URI'])[0];
+		$mainTab	= $params['main-tab'];
+		if($child){
+			$name 		.= " for $childName";
+			$mainTab	 = strtolower($childName);
+			$formUrl	 = str_replace($params['main-tab'], $mainTab, $formUrl);
+		}
+		
+		// If the url has no hash or we are not on the same url
+		if(
+			!isset($_GET['userid']) && (
+				empty($params['main-tab']) || 
+				!str_contains($formUrl, $baseUrl)
+			)
+		){
+			$html .= "<li><a href='$formUrl#{$element->name}'>$name</a></li>";
+		}else{
+			//We are on the same page, just change the hash
+			$secondTab	= '';
+			$names		= explode('[', $element->name);
+			if(count($names) > 1){
+				$secondTab	= $names[0];
 			}
-
-			// Do not add if no form url given
-			if(empty($formUrl)){
-				continue;
-			}
-
-			parse_str(parse_url($formUrl, PHP_URL_QUERY), $params);
-
-			//Show a nice name
-			$name	= str_replace(['[]', '_'], ['', ' '], $element->nicename);
-			$name	= ucfirst(str_replace(['[', ']'], [': ',''], $name));
-
-			$baseUrl	= explode('main_tab=', $_SERVER['REQUEST_URI'])[0];
-			$mainTab	= $params['main_tab'];
-			if($child){
-				$name 		.= " for $childName";
-				$mainTab	 = strtolower($childName);
-				$formUrl	 = str_replace($params['main_tab'], $mainTab, $formUrl);
-			}
-			
-			// If the url has no hash or we are not on the same url
-			if(
-				!isset($_GET['userid']) && (
-					empty($params['main_tab']) || 
-					!str_contains($formUrl, $baseUrl)
-				)
-			){
-				$html .= "<li><a href='$formUrl#{$element->name}'>$name</a></li>";
-			}else{
-				//We are on the same page, just change the hash
-				$secondTab	= '';
-				$names		= explode('[', $element->name);
-				if(count($names) > 1){
-					$secondTab	= $names[0];
-				}
-				$html .= "<li><a onclick='Main.changeUrl(this, `$secondTab`)' data-param-val='$mainTab' data-hash={$element->name} style='cursor:pointer'>$name</a></li>";
-			}
+			$html .= "<li><a onclick='Main.changeUrl(this, `$secondTab`)' data-param-val='$mainTab' data-hash={$element->name} style='cursor:pointer'>$name</a></li>";
 		}
 	}
 }

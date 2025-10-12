@@ -488,7 +488,7 @@ class DisplayForm extends SubmitForm{
 			$buttonText	= $this->formData->button_text;
 		}
 
-		$dataset	= "data-form_id='{$this->formData->id}'";
+		$dataset	= "data-form-id='{$this->formData->id}'";
 		if(!empty($this->formData->form_reset)){
 			$dataset .= " data-reset=1";
 		}

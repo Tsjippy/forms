@@ -675,59 +675,41 @@ class DisplayFormResults extends DisplayForm{
 		return $output;
 	}
 	
+	protected function findSplittedElementName($element){
+		// Do not continue if no split is defined
+		if(empty($this->formData->split)){
+			return $element;
+		}
+
+		//find the keyword followed by one or more numbers between [] followed by a  keyword between []
+		$pattern	= "/.*?\[[0-9]+\]\[([^\]]+)\]/i";
+
+		// The element does not match the pattern
+		if( !preg_match($pattern, $element->name, $matches)){
+			return $element;
+		}
+		
+		//replace the name
+		$element->name			= $matches[1];
+		$element->nice_Name		= ucfirst($element->name);
+		
+		return $element;
+	}
+
 	/**
 	 * Adds a new column setting for a new element
 	 *
 	 * @param object	$element	the element to check if column settings exists for
+	 * 
+	 * @return false|array			false if no column setting was added, array of column settings if added
 	 */
 	public function addColumnSetting($element){
 		//do not show non-input elements
 		if(in_array($element->type, $this->nonInputs)){
-			return;
+			return false;
 		}
 
-		//If we should split an entry, define a regex patterns
-		if(!empty($this->formData->split)){
-			//find the keyword followed by one or more numbers between [] followed by a  keyword between []
-			$pattern	= "/.*?\[[0-9]+\]\[([^\]]+)\]/i";
-			$processed	= [];		}
-
-		$name		= $element->name;
-		$niceName	= $element->nicename;
-
-		//Do not show elements that will be splitted needed for split fields with this pattern name[X]name
-		//Execute the regex
-		if(!empty($this->formData->split) && preg_match($pattern, $element->name, $matches)){
-			//We found a keyword, check if we already got the same one
-			if(in_array($matches[1], $processed)){
-				//do not show this element
-				return;
-			}
-
-			//Add to the processed array
-			$processed[]	= $matches[1];
-			
-			//replace the name
-			$name			= $matches[1];
-			$niceName		= ucfirst($name);
-			
-			//check if it was already added a previous time
-			$alreadyInSettings = false;
-			foreach($this->columnSettings as $el){
-				if(!is_array($el)){
-					continue;
-				}
-				
-				if($el['name'] == $name){
-					$alreadyInSettings = true;
-					break;
-				}
-			}
-
-			if($alreadyInSettings){
-				return;
-			}
-		}
+		$element	= $this->findSplittedElementName($element);
 
 		$editRightRoles	= [];
 		$viewRightRoles	= [];
@@ -740,8 +722,8 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$this->columnSettings[$element->id] = [
-			'name'				=> $name,
-			'nice-name'			=> $niceName,
+			'name'				=> $element->name,
+			'nice-name'			=> $element->niceName,
 			'show'				=> $show,
 			'edit_right_roles'	=> $editRightRoles,
 			'view_right_roles'	=> $viewRightRoles
@@ -757,6 +739,7 @@ class DisplayFormResults extends DisplayForm{
 		$this->formData->elementMapping['name'][$element->name][] 	= count($this->formElements)-1;
 		$this->formData->elementMapping['type'][$element->type][] 	= count($this->formElements)-1;
 		
+		return $this->columnSettings[$element->id];
 	}
 
 	/**
@@ -827,7 +810,7 @@ class DisplayFormResults extends DisplayForm{
 		$this->elementMapper();
 
 		// add column settings as elements
-		foreach($this->columnSettings as $key=>$setting){
+		foreach($this->columnSettings as $key => $setting){
 			if(!is_array($setting)){
 				continue;
 			}
@@ -1288,7 +1271,18 @@ class DisplayFormResults extends DisplayForm{
 		$this->columnSettings		= [];
 		$query						= "SELECT * FROM {$this->shortcodeColumnSettingsTable} WHERE shortcode_id = '{$this->shortcodeId}'";
 		$results 					= $wpdb->get_results($query, ARRAY_A);
+
 		foreach($results as $setting){
+			// do not add if the element does not exist anymore
+			if(
+				is_numeric($setting['element_id']) && 
+				$setting['element_id']	> -1 &&
+				!isset($this->formData->elementMapping['id'][$setting['element_id']])
+			){
+				continue;
+			}
+
+			//unserialize the values
 			foreach($setting as &$value){
 				$value	= maybe_unserialize($value);
 			}
@@ -1339,12 +1333,24 @@ class DisplayFormResults extends DisplayForm{
 							?>
 							<tr class="column-setting-wrapper" data-element-id="<?php echo $elementIndex;?>">
 								<input type="hidden" name="column-settings[<?php echo $elementIndex;?>][column-id]"	value="<?php echo $columnSetting['id'];?>">
-								<input type="hidden" name="column-settings[<?php echo $elementIndex;?>][show]" 		value="<?php echo $columnSetting['show'];?>">
 								<input type="hidden" name="column-settings[<?php echo $elementIndex;?>][name]"		value="<?php echo $columnSetting['name'];?>">
-								<td><span class="movecontrol formfield-button" aria-hidden="true">:::</span></td>
-								<td><span class="column-settings" style="margin-right:0px;"><?php echo $columnSetting['name'];?></span></td>
-								<td><input type="text" class="column-settings" name="column-settings[<?php echo $elementIndex;?>][nice-name]" value="<?php echo $niceName;?>" style="margin-right:0px;"></td>
-								<td><span class="visibility-icon"><?php echo $icon;?></span></td>
+								<td>
+									<span class="movecontrol formfield-button" aria-hidden="true">:::</span>
+								</td>
+								<td>
+									<span class="column-settings" style="margin-right:0px;">
+										<?php echo $columnSetting['name'];?>
+									</span>
+								</td>
+								<td>
+									<input type="text" class="column-settings" name="column-settings[<?php echo $elementIndex;?>][nice-name]" value="<?php echo $niceName;?>" style="margin-right:0px;">
+								</td>
+								<td>
+									<input type="hidden" name="column-settings[<?php echo $elementIndex;?>][show]" value="<?php echo $columnSetting['show'];?>">
+									<span class="visibility-icon">
+										<?php echo $icon;?>
+									</span>
+								</td>
 								<?php
 								//only add view permission for numeric elements others are buttons
 								if(is_numeric($elementIndex)){
@@ -2001,7 +2007,7 @@ class DisplayFormResults extends DisplayForm{
 			if(empty($this->hiddenColumns)){
 				$hidden	= 'hidden';
 			}
-			$html	.= "<button type='button' class='button small reset-col-vis $hidden' data-form_id='{$this->formData->id}'>Reset visibility</button>";
+			$html	.= "<button type='button' class='button small reset-col-vis $hidden' data-form-id='{$this->formData->id}'>Reset visibility</button>";
 		$html	.= "</div>";
 
 		$html	.= $this->renderFilterForm();
@@ -2085,7 +2091,7 @@ class DisplayFormResults extends DisplayForm{
     			white-space: normal;
 			}
 		</style>
-		<table class='sim-table form-data-table' data-form_id='<?php echo $this->formData->id;?>' data-shortcode_id='<?php echo $this->shortcodeId;?>' data-type='<?php echo $type;?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
+		<table class='sim-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>' data-type='<?php echo $type;?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
 			<?php
 			$this->resultTableHead($type);
 			?>
@@ -2414,7 +2420,7 @@ class DisplayFormResults extends DisplayForm{
 			
 			if($allRowsEmpty){
 				?>
-				<table class='sim-table form-data-table' data-form_id='<?php echo $this->formData->id;?>' data-shortcode_id='<?php echo $this->shortcodeId;?>'>
+				<table class='sim-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>'>
 					<td>No records found</td>
 				</table>
 				<?php

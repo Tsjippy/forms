@@ -8,9 +8,6 @@ class SimForms{
 	public $isFormStep;
 	public $isMultiStepForm;
 	public $formStepCounter;
-	public $submissionTableName;
-	public $tableName;
-	public $elTableName;
 	public $nonInputs;
 	public $multiInputsHtml;
 	public $user;
@@ -32,15 +29,12 @@ class SimForms{
 	public $onlyOwn;
 	public $all;
 	public $submission;
-	public $submissionTableFormats;
-	public $formTableFormats;
+	public $tableName;
+	public $elTableName;
+	public $submissionTableName;
 	public $formEmailTable;
-	public $formEmailTableFormats;
 	public $shortcodeTable;
-	public $shortcodeTableFormats;
 	public $shortcodeColumnSettingsTable;
-	public $shortcodeTableColumnFormats;
-	public $elementTableFormats;
 	public $emailSettings;
 
 	public function __construct(){
@@ -55,7 +49,7 @@ class SimForms{
 		$this->formEmailTable				= $wpdb->prefix . 'sim_form_emails';
 		$this->shortcodeColumnSettingsTable	= $wpdb->prefix . 'sim_form_shortcode_column_settings';
 		$this->shortcodeTable				= $wpdb->prefix . 'sim_form_shortcodes';
-		$this->nonInputs					= ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi-start', 'multi-end', 'div-start', 'div-end'];
+		$this->nonInputs					= ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi_start', 'multi_end', 'div_start', 'div_end'];
 		$this->multiInputsHtml				= [];
 		$this->user 						= wp_get_current_user();
 		$this->userRoles					= $this->user->roles;
@@ -94,142 +88,6 @@ class SimForms{
 		}else{
 			$this->editRights		= false;
 		}
-
-		$this->tableFormats();
-	}
-
-	/**
-	 * Defines the formats of each column in each table for use in $wpdb->insert and $wpdb->update
-	 */
-	private function tableFormats(){
-
-		$this->formTableFormats			= [
-			'name'					=> '%s',
-			'version'				=> '%s',
-			'button_text'			=> '%s',
-			'succes_message'		=> '%s',
-			'include_id'			=> '%d',
-			'form_name'				=> '%s',
-			'save_in_meta'			=> '%d',
-			'reminder_frequency'	=> '%s',
-			'reminder_amount'		=> '%s',
-			'reminder_period'		=> '%s',
-			'reminder_conditions'	=> '%s',
-			'reminder_startdate'	=> '%s',
-			'form_url'				=> '%s',
-			'form_reset'			=> '%d',
-			'actions'				=> '%s',
-			'autoarchive'			=> '%d',
-			'autoarchive_el'		=> '%d',
-			'autoarchive_value'		=> '%s',
-			'split'					=> '%s',
-			'full_right_roles'		=> '%s',
-			'submit_others_form'	=> '%s',
-			'upload_path'			=> '%s'
-		];
-
-		$this->formTableFormats			= apply_filters('forms-form-table-formats', $this->formTableFormats, $this);
-
-		$this->elementTableFormats		= [
-			'form_id'				=> '%d',
-			'type'					=> '%s',
-			'priority'				=> '%d',
-			'width'					=> '%d',
-			'functionname'			=> '%s',
-			'foldername'			=> '%s',
-			'name'					=> '%s',
-			'nicename'				=> '%s',
-			'text'					=> '%s',
-			'html'					=> '%s',
-			'valuelist'				=> '%s',
-			'default_value'			=> '%s',
-			'default_array_value'	=> '%s',
-			'options'				=> '%s',
-			'required'				=> '%d',
-			'mandatory'				=> '%d',
-			'recommended'			=> '%d',
-			'wrap'					=> '%d',
-			'hidden'				=> '%d',
-			'multiple'				=> '%d',
-			'library'				=> '%d',
-			'editimage'				=> '%d',
-		  	'conditions'			=> '%s',
-			'remove'				=> '%s',
-			'add'					=> '%s',
-		];
-
-		$this->elementTableFormats		= apply_filters('forms-element-table-formats', $this->elementTableFormats, $this);
-
-		$this->formEmailTableFormats	= [
-			'form_id'				=> '%d',	
-			'email_trigger'			=> '%s',	
-			'submitted_trigger'		=> '%s',	
-			'conditional_field'		=> '%s',	
-			'conditional_fields'	=> '%s',
-			'conditional_value'		=> '%s',
-			'from_email'			=> '%s',
-			'from'					=> '%s',
-			'conditional_from_email'=> '%s',
-			'else_from'				=> '%s',
-			'email_to'				=> '%s',
-			'to'					=> '%s',
-			'conditional_email_to'	=> '%s',
-			'else_to'				=> '%s',
-			'subject'				=> '%s',
-			'message'				=> '%s',
-			'headers'				=> '%s',
-			'files'					=> '%s'
-		];
-
-		$this->formEmailTableFormats	= apply_filters('forms-submission-table-formats', $this->formEmailTableFormats, $this);
-
-		$this->submissionTableFormats	= [
-			'form_id'				=> '%d',	
-			'timecreated'			=> '%s',	
-			'timelastedited'		=> '%s',	
-			'userid'				=> '%d',
-			'formresults'			=> '%s',
-			'archived'				=> '%d',
-			'archivedsubs'			=> '%s'
-		];
-
-		$this->submissionTableFormats	= apply_filters('forms-submission-table-formats', $this->submissionTableFormats, $this);
-
-		$this->shortcodeTableFormats	= [
-			'form_id'				=> '%d',
-			'title' 				=> '%s',
-			'default_sort'			=> '%s',	
-			'sort_direction'		=> '%s',
-			'filter'				=> '%s',	
-			'hide_row'				=> '%d',
-			'result_type'			=> '%s',
-			'split_table'			=> '%s',
-			'archived'				=> '%d',
-			'view_right_roles'		=> '%s',
-			'edit_right_roles'		=> '%s'
-		];
-
-		$this->shortcodeTableFormats	= apply_filters('forms-submission-table-formats', $this->shortcodeTableFormats, $this);
-
-		$this->shortcodeTableColumnFormats	= [
-			'shortcode_id'			=> '%d',
-			'element_id'			=> '%d',
-			'width'					=> '%d',
-			'show'					=> '%d',	
-			'name'					=> '%s',	
-			'nice_name'				=> '%s',	
-			'view_right_roles'		=> '%s',
-			'edit_right_roles'		=> '%s'
-		];
-
-		$this->shortcodeTableColumnFormats	= apply_filters('forms-submission-table-formats', $this->shortcodeTableColumnFormats, $this);
-
-		ksort($this->submissionTableFormats);
-		ksort($this->formTableFormats);
-		ksort($this->elementTableFormats);
-		ksort($this->formEmailTableFormats);
-		ksort($this->shortcodeTableFormats);
-		ksort($this->shortcodeTableColumnFormats);
 	}
 	
 	/**
@@ -1143,45 +1001,4 @@ class SimForms{
 
         return $args;
     }
-
-	/**
-	 * Prepares an data for storages in db
-	 * 
-	 * @param 	object|array	$data		The data to be stored
-	 * @param	array			$formats	The format the data should follow
-	 * @param	object|array	$prevData	The previous value
-	 * 
-	 * @return	array						Tha data ready for db injection
-	 */
-	public function prepareDbData($data, $formats, $prevData=[]){
-		$data		= (array)$data;
-		$prevData	= (array)$prevData;
-
-		// Fix indexes
-		foreach($data as $index => $value){
-			unset($data[$index]);
-			
-			$data[str_replace('-', '_', $index)] = maybe_serialize($value);
-		}
-
-		// Remove data without a column in the db
-		foreach(array_diff_key($data, $formats) as $key => $val){
-			unset($element[$key]);
-		}
-
-		// Add missing data
-		foreach(array_diff_key($formats, $data) as $key => $val){
-			if(isset($prevData[$key])){
-				$data[$key]	= $prevData[$key];
-			}elseif($formats[$key] == '%d'){
-				$data[$key]	= 0;
-			}else{
-				$data[$key]	= '';
-			}
-		}
-
-		ksort($data);
-		
-		return $data;
-	}
 }

@@ -224,6 +224,49 @@ function moduleUpdate($oldVersion){
                 )
             );
         }
+
+        // warning conditions
+        $elements   = $wpdb->get_results("SELECT * FROM $simForms->elTableName WHERE `warning_conditions` IS NOT NULL and `warning_conditions` <> ''");
+
+        foreach($elements as $element){
+            $conditions = maybe_unserialize($element->warning_conditions);
+
+            foreach($conditions as &$condition){
+                foreach($condition as $index => $value){
+                    if(is_array($value)){
+                        foreach($value as &$rule){
+                            foreach($rule as $i => $v){
+                                $newIndex   = str_replace('_', '-', $i, $c);
+
+                                if($c > 0){
+                                    unset($rule[$i]);
+                                    $rule[$newIndex]    = $v;
+                                }
+                            }
+                        }
+                    }
+                    
+                    $newIndex   = str_replace('_', '-', $index, $count);
+
+                    if($count > 0){
+                        unset($condition[$index]);
+                    }
+
+                    $condition[$newIndex]   = $value;
+                }
+            }
+
+            $element->warning_conditions    = maybe_serialize($conditions);
+            $wpdb->update(
+                $simForms->elTableName,
+                [
+                    'warning_conditions'   => $element->warning_conditions,
+                ],
+                array(
+                    'id'		=> $element->id,
+                )
+            );
+        }
     }
 }
 

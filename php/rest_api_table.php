@@ -269,55 +269,19 @@ function deleteTablePrefs( \WP_REST_Request $request ) {
 	}
 }
 
-function saveColumnSettings($settings='', $shortcodeId=''){
-	global $wpdb;
-	
-	$simForms	= new SimForms($_POST);
+function saveColumnSettings($settings=[], $shortcodeId=''){
+	$simForms	= new SaveFormSettings($_POST);
 	
 	if($settings instanceof \WP_REST_Request){
 		$params			= $settings->get_params();
 
-		$columnSettings 		= $params['column-settings'];
+		$settings 		= $params['column-settings'];
 	}
 
-	foreach($columnSettings as $elementId => $column){
-		if(!is_array($column)){
-			continue;
-		}
+	$result = $simForms->saveColumnSettings($settings, $shortcodeId);
 
-		$column['element_id']	= $elementId;
-		$column['shortcode_id']	= $_POST['shortcode-id'];
-		
-		//if there are edit rights defined
-		if(!empty($column['edit_right_roles'])){
-			//create view array if it does not exist
-			if(!is_array($column['view_right_roles'])){
-				$column['view_right_roles'] = [];
-			}
-			
-			//merge and save
-			$column['view_right_roles'] = array_merge($column['view_right_roles'], $column['edit_right_roles']);
-		}
-
-	 	$column =	$simForms->prepareDbData($column, $simForms->shortcodeTableColumnFormats);
-		
-		$wpdb->update(
-			$simForms->shortcodeColumnSettingsTable,
-			$column,
-			array(
-				'id' => $column['column_id'],
-			),
-			$simForms->shortcodeTableColumnFormats
-		);
-
-		// Nothing got updated, maybe we should create instead of update
-		if($wpdb->rows_affected === false){
-
-		}
-		
-		if($wpdb->last_error !== ''){
-			return new \WP_Error('db error', $wpdb->print_error());
-		}
+	if(is_wp_error($result)){
+		return $result;
 	}
 	
 	return "Succesfully saved your column settings";
@@ -338,18 +302,13 @@ function saveTableSettings(){
 	}
 
 	//update table settings
-	$simForms	= new SimForms($_POST);
+	$simForms	= new SaveFormSettings($_POST);
 	
-	$tableSettings = $simForms->prepareDbData($tableSettings, $simForms->shortcodeTableFormats);
-	
-	$wpdb->update(
-		$simForms->shortcodeTable,
-		$tableSettings,
-		array(
-			'id'			=> $_POST['shortcode-id'],
-		),
-		$simForms->shortcodeTableFormats
-	);
+	$result = $simForms->insertOrUpdateData($simForms->shortcodeTable, $tableSettings, ['id' => $_POST['shortcode-id']]);
+
+	if(is_wp_error($result)){
+		return $result;
+	}
 	
 	//also update form setings if needed
 	$formSettings = $_POST['form-settings'];
@@ -357,20 +316,11 @@ function saveTableSettings(){
 		$simForms->getForm($_POST['form-id']);
 		
 		//update existing
-		$formSettings = $simForms->prepareDbData($formSettings, $simForms->formTableFormats);
-		
-		//save in db
-		$wpdb->update($simForms->tableName,
-			$formSettings,
-			array(
-				'id'		=> $simForms->formData->id,
-			),
-			$simForms->formTableFormats
-		);
-	}
-	
-	if($wpdb->last_error !== ''){
-		return new \WP_Error('db error', $wpdb->print_error());
+		$result = $simForms->insertOrUpdateData($simForms->tableName, $formSettings, ['id' => $simForms->formData->id]);
+
+		if(is_wp_error($result)){
+			return $result;
+		}
 	}
 	
 	return "Succesfully saved your table settings";

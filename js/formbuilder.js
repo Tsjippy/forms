@@ -102,7 +102,7 @@ async function requestEditElementData(target){
 	loader.classList.add('clicked');
 	
 	let formData = new FormData();
-	formData.append('elementid', elementId);
+	formData.append('element-id', elementId);
 	formData.append('form-id', formId);
 	
 	let response = await FormSubmit.fetchRestApi('forms/request_form_element', formData);
@@ -732,11 +732,11 @@ function removeConditionRule(target){
 				let ruleRowIndex	= parseInt(ruleRow.dataset.ruleIndex);
 				
 				//Get previous row
-				let prevRow		= conditionRow.querySelector('[data-rule_index="'+(ruleRowIndex - 1)+'"]');
+				let prevRow		= conditionRow.querySelector('[data-rule-index="'+(ruleRowIndex - 1)+'"]');
 				
 				if(prevRow != null){
 					//remove the active class from row above if there is no row after this one
-					if(conditionRow.querySelector(`[data-rule_index="${ruleRowIndex + 1}"]`) == null){
+					if(conditionRow.querySelector(`[data-rule-index="${ruleRowIndex + 1}"]`) == null){
 						prevRow.querySelectorAll('.active').forEach(el=>el.classList.remove('active'));
 					}
 					
@@ -985,8 +985,12 @@ window.addEventListener("click", event => {
 
 	//open the modal to add an element
 	if (target.classList.contains('add-form-element') || target.name == 'createform'){
-		if( !window.location.href.includes('&formbuilder=true')){
-			window.location.href = window.location.href+'&formbuilder=true';
+		if( !window.location.href.includes('formbuilder=true')){
+			let combine	= '&';
+			if( !window.location.href.includes('?')){
+				combine = '?';
+			}
+			window.location.href = window.location.href+combine+'formbuilder=true';
 			
 			return;
 		}

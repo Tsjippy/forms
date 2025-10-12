@@ -107,7 +107,7 @@ function restApiInitForms() {
 						return is_numeric($formId);
 					}
 				),
-				'elementid'		=> array(
+				'element-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($elementId){
 						return is_numeric($elementId);
@@ -292,6 +292,8 @@ function restApiInitForms() {
 }
 
 function getUniqueName($element, $update, $oldElement, $simForms){
+	global $wpdb;
+
 	// Remove any ' from the name, replace white space with _ as php does this automatically in post
 	$element->name	= str_replace(["\\'", " "], ['', "_"], $element->name);
 
@@ -299,15 +301,14 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 	$element->name	= end(explode('\\', $element->name));
 
 	if(
-		str_contains($element->name, '[]') || 
+		str_contains($element->name, '[]') 										||  // Doesn't need to be unique 
 		(
-			$update && $oldElement->name == $element->name && 
+			$update && $oldElement->name == $element->name && 						// Name didn't change
 			count($simForms->getElementByName($element->name, '', false)) == 1)
 		){
+
 		return $element->name;
 	}
-
-	global $wpdb;
 
 	$elementName = $element->name;
 	
@@ -318,6 +319,7 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 		
 		$elementName = "{$element->name}_$i";
 	}
+
 	//update the name
 	if($i != ''){
 		$element->name .= "_$i";
@@ -328,24 +330,30 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 		return $element->name;
 	}
 
+	// Update the name in the form elements array
 	foreach($simForms->formElements as &$el){
 		if($el->id == $element->id){
 			$el->name	= $element->name;
+			break;
 		}
 	}
+
 	// update js
 	$simForms->createJs();
 
 	// Update column settings
-	$displayFormResults	= new DisplayFormResults(['form-id'=>$simForms->formData->id]);
+	$displayFormResults	= new DisplayFormResults(['form-id' => $simForms->formData->id]);
 
-	$query						= "SELECT * FROM {$displayFormResults->shortcodeTable} WHERE form_id= '{$simForms->formData->id}'";
+	$query						= "SELECT * FROM {$displayFormResults->shortcodeTable} WHERE form_id = '{$simForms->formData->id}'";
 	foreach($wpdb->get_results($query) as $data){
-		$displayFormResults->shortcodeId	= $data->id;
-		$displayFormResults->loadShortcodeData();
-		$displayFormResults->addColumnSetting($element);
+		//$displayFormResults->shortcodeId	= $data->id;
+		//$displayFormResults->loadShortcodeData();
+		$columnSettings	= $displayFormResults->addColumnSetting($element);
+		if($columnSettings === false){
+			continue;
+		}
 
-		saveColumnSettings($displayFormResults->columnSettings, $displayFormResults->shortcodeId);
+		saveColumnSettings($columnSettings, $displayFormResults->shortcodeId);
 	}
 
 	// Update submission data
@@ -558,7 +566,7 @@ function requestFormElement(){
 	$formBuilderForm				= new FormBuilderForm();
 	
 	$formId 				= $_POST['form-id'];
-	$elementId 				= $_POST['elementid'];
+	$elementId 				= $_POST['element-id'];
 	
 	$formBuilderForm->getForm($formId);
 	
@@ -695,25 +703,13 @@ function saveFormEmails(){
 	}	
 	
 	// Update each email
-	foreach($formEmails as $index => &$email){
-		$email	= $formBuilder->prepareDbData($email, $formBuilder->formEmailTableFormats);
-		
-		$emailId	= $email['email_id'];
-		unset($email['email_id']);
-
+	foreach($formEmails as &$email){
 		$email['message']	= trim(SIM\deslash($email['message']));
 
-		$wpdb->update(
-			$formBuilder->formEmailTable,
-			$email,
-			array(
-				'id'		=> $emailId,
-			),
-			$formBuilder->formEmailTableFormats
-		);
-
-		if($wpdb->last_error !== ''){
-			return new \WP_Error('error',$wpdb->print_error());
+		$result	= $formBuilder->insertOrUpdateData($formBuilder->formEmailTable, $email, ['id' => $email['email-id']]);
+		
+		if(is_wp_error($result)){
+			return $result;
 		}
 	}
 	
