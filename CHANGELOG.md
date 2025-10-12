@@ -5,6 +5,7 @@
 
 ### Changed
 - data attribute names
+- dataset names
 
 ### Fixed
 - store boolean values
