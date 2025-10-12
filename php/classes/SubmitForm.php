@@ -64,9 +64,6 @@ class SubmitForm extends SimForms{
 		}
 
 		$changedElementId	= $_POST['id'];
-
-		//SIM\printArray($email);
-		//SIM\printArray($trigger);
 		
 		// check if a certain element is changed to a certain value
 		if( $trigger == 'fieldchanged' ){
@@ -143,7 +140,8 @@ class SubmitForm extends SimForms{
 	public function sendEmail($trigger='submitted'){
 		$this->getEmailSettings();
 		
-		foreach($this->emailSettings as $key=>$email){
+		foreach($this->emailSettings as $key => $email){
+			$email	= (object)$email;
 
 			if(!$this->checkEmailConditions($email, $trigger)){
 				continue;
@@ -152,7 +150,7 @@ class SubmitForm extends SimForms{
 			$from	= '';
 			//Send e-mail from conditional e-mail adress
 			if($email->from_email == 'conditional'){
-				$from 	= $this->findConditionalEmail($email['conditional-from-email']);
+				$from 	= $this->findConditionalEmail($email->conditional_from_email);
 
 				if(!$from){
 					$from	= $email->else_from;
@@ -167,7 +165,7 @@ class SubmitForm extends SimForms{
 							
 			$to		= '';
 			if($email->email_to == 'conditional'){
-				$to = $this->findConditionalEmail($email['conditional-email-to']);
+				$to = $this->findConditionalEmail($email->conditional_email_to);
 
 				if(!$to){
 					$to	= $email->else_to;
