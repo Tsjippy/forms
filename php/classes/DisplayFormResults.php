@@ -1297,7 +1297,7 @@ class DisplayFormResults extends DisplayForm{
 		?>
 		<div class="tabcontent <?php echo $class;?>" id="column-settings-<?php echo $this->shortcodeId;?>">
 			<form class="sortable-column-settings-rows">
-				<input type='hidden' class='shortcode-settings' name='shortcode-id'	value='<?php echo $this->shortcodeId;?>'>
+				<input type='hidden' class='no-reset' class='shortcode-settings' name='shortcode-id'	value='<?php echo $this->shortcodeId;?>'>
 				
 				<table class='sim-table' style='display:table'>
 					<thead class="column-setting-wrapper">
@@ -1332,8 +1332,8 @@ class DisplayFormResults extends DisplayForm{
 							
 							?>
 							<tr class="column-setting-wrapper" data-element-id="<?php echo $elementIndex;?>">
-								<input type="hidden" name="column-settings[<?php echo $elementIndex;?>][column-id]"	value="<?php echo $columnSetting['id'];?>">
-								<input type="hidden" name="column-settings[<?php echo $elementIndex;?>][name]"		value="<?php echo $columnSetting['name'];?>">
+								<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][column-id]"	value="<?php echo $columnSetting['id'];?>">
+								<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][name]"		value="<?php echo $columnSetting['name'];?>">
 								<td>
 									<span class="movecontrol formfield-button" aria-hidden="true">:::</span>
 								</td>
@@ -1346,7 +1346,7 @@ class DisplayFormResults extends DisplayForm{
 									<input type="text" class="column-settings" name="column-settings[<?php echo $elementIndex;?>][nice-name]" value="<?php echo $niceName;?>" style="margin-right:0px;">
 								</td>
 								<td>
-									<input type="hidden" name="column-settings[<?php echo $elementIndex;?>][show]" value="<?php echo $columnSetting['show'];?>">
+									<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][show]" value="<?php echo $columnSetting['show'];?>">
 									<span class="visibility-icon">
 										<?php echo $icon;?>
 									</span>
@@ -1414,8 +1414,8 @@ class DisplayFormResults extends DisplayForm{
 		?>
 		<div class="tabcontent <?php echo $class;?>" id="table-rights-<?php echo $this->shortcodeId;?>">
 			<form>
-				<input type='hidden' class='shortcode-settings' name='shortcode-id'	value='<?php echo $this->shortcodeId;?>'>
-				<input type='hidden' class='shortcode-settings' name='form-id'		value='<?php echo $this->formData->id;?>'>
+				<input type='hidden' class='no-reset' class='shortcode-settings' name='shortcode-id'	value='<?php echo $this->shortcodeId;?>'>
+				<input type='hidden' class='no-reset' class='shortcode-settings' name='form-id'		value='<?php echo $this->formData->id;?>'>
 				
 				<h4>Set the title for the results table</h4>
 				<input type='text' name="table-settings[title]" value='<?php echo $this->tableSettings->title;?>' style='width:500px;'>

@@ -42,7 +42,7 @@ export function cloneNode(originalNode, clear=true){
 		newNode.querySelectorAll('input,select,textarea').forEach(input => {
 			if(input.type == 'checkbox' || input.type == 'radio'){
 				input.checked = false;
-			}else if(input.type != 'hidden'){
+			}else if(!input.matches('.no-reset') ){
 				input.value = "";
 			}
 			

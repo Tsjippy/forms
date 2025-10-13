@@ -676,7 +676,7 @@ trait ElementHtml{
 									$html	.= "<button type='button' class='small remove-list-selection'>";
 										$html	.= "<span class='remove-list-selection'>×</span>";
 									$html	.= "</button>";
-									$html	.= "<input type='hidden' name='$element->name[]' value='$v'>";
+									$html	.= "<input type='hidden' class='no-reset' name='$element->name[]' value='$v'>";
 									$html	.= "<span class='selected-name'>$transValue</span>";
 								$html	.= "</li>";
 							}

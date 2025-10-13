@@ -317,7 +317,7 @@ class FormBuilderForm extends SimForms{
 				?>
 				<form action='' method='post' class='sim-form builder'>
 					<div class='form-elements'>
-						<input type='hidden' name='form-id'		value='<?php echo $this->formData->id;?>'>
+						<input type='hidden' class='no-reset' name='form-id'		value='<?php echo $this->formData->id;?>'>
 
 						<?php
 						foreach($this->formElements as $key=>$element){
@@ -389,7 +389,7 @@ class FormBuilderForm extends SimForms{
 		<div class="element-settings-wrapper">
 			<form action='' method='post' class='sim-form builder'>
 				<div class='form-elements'>
-					<input type='hidden' class='formbuilder' name='form-id'	value='<?php echo $this->formData->id;?>'>
+					<input type='hidden' class='no-reset' class='formbuilder' name='form-id'	value='<?php echo $this->formData->id;?>'>
 					
 					<label class="block">
 						<h4>Submit button text</h4>
@@ -705,7 +705,7 @@ class FormBuilderForm extends SimForms{
 				<button type='submit' class='button' name="export-form" value='<?php echo $this->formData->id;?>'>Export this form</button>
 			</form>
 			<form method="POST" style='display: inline-block;'>
-				<input type="hidden" name="page-id" value='<?php echo get_the_ID();?>'>
+				<input type="hidden" class="no-reset" name="page-id" value='<?php echo get_the_ID();?>'>
 				<button type='submit' class='button' name="delete-form" value='<?php echo $this->formData->id;?>'>Delete this form</button>
 			</form>
 		</div>
@@ -724,7 +724,7 @@ class FormBuilderForm extends SimForms{
 		<div class="emails-wrapper">
 			<form action='' method='post' class='sim-form builder'>
 				<div class='form-elements'>
-					<input type='hidden' class='formbuilder' name='form-id'	value='<?php echo $this->formData->id;?>'>
+					<input type='hidden' class='no-reset' class='formbuilder' name='form-id'	value='<?php echo $this->formData->id;?>'>
 					
 					<label class="formfield form-label">
 						Define any e-mails you want to send.<br>
@@ -788,8 +788,8 @@ class FormBuilderForm extends SimForms{
 								<button type='button' class='add button' style='flex: 1;'>+</button>
 								<button type='button' class='remove button' style='flex: 1;'>-</button>
 								<div style='width:100%;'>
-									<input type='hidden' name='emails[<?php echo $key;?>][email-id]' value='<?php echo $email->id;?>'>
-									<input type='hidden' name='emails[<?php echo $key;?>][form-id]' value='<?php echo $email->form_id;?>'>
+									<input type='hidden' class='no-reset' name='emails[<?php echo $key;?>][email-id]' value='<?php echo $email->id;?>'>
+									<input type='hidden' class='no-reset' name='emails[<?php echo $key;?>][form-id]' value='<?php echo $email->form_id;?>'>
 
 									<div class="formfield form-label" style="margin-top:10px;">
 										<h4>Trigger</h4>
@@ -1136,15 +1136,15 @@ class FormBuilderForm extends SimForms{
 			<div style="display: none;" class="error"></div>
 			<h4><?php echo $heading;?></h4><br>
 
-			<input type="hidden" name="form-id" value="<?php echo $this->formData->id;?>">
+			<input type="hidden" class="no-reset" name="form-id" value="<?php echo $this->formData->id;?>">
 
-			<input type="hidden" name="formfield[form-id]" value="<?php echo $this->formData->id;?>">
+			<input type="hidden" class="no-reset" name="formfield[form-id]" value="<?php echo $this->formData->id;?>">
 			
-			<input type="hidden" name="element-id" value="<?php if( $element != null){echo $element->id;}?>">
+			<input type="hidden" class="no-reset" name="element-id" value="<?php if( $element != null){echo $element->id;}?>">
 			
-			<input type="hidden" name="insertafter">
+			<input type="hidden" class="no-reset" name="insertafter">
 			
-			<input type="hidden" name="formfield[width]" value="100">
+			<input type="hidden" class="no-reset" name="formfield[width]" value="100">
 			
 			<label>Element type</label><br>
 			<select class="formbuilder element-type " name="formfield[type]" required>
@@ -1529,9 +1529,9 @@ class FormBuilderForm extends SimForms{
 		
 		<form action='' method='post' name='add-form-element-conditions-form'>
 			<h3>Form element conditions</h3>
-			<input type='hidden' class='element-condition' name='form-id' value='<?php echo $this->formData->id;?>'>
+			<input type='hidden' class='no-reset' class='element-condition' name='form-id' value='<?php echo $this->formData->id;?>'>
 			
-			<input type='hidden' class='element-condition' name='elementid' value='<?php echo $elementId;?>'>
+			<input type='hidden' class='no-reset' class='element-condition' name='elementid' value='<?php echo $elementId;?>'>
 
 			<?php
 			// get the last numeric array key
@@ -1549,7 +1549,7 @@ class FormBuilderForm extends SimForms{
 					foreach($condition['rules'] as $ruleIndex=>$rule){
 						?>
 						<div class='rule-row' data-rule-index='<?php echo $ruleIndex;?>'>
-							<input type='hidden' class='element-condition combinator' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][combinator]' value='<?php echo $rule['combinator']; ?>'>
+							<input type='hidden' class='no-reset' class='element-condition combinator' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][combinator]' value='<?php echo $rule['combinator']; ?>'>
 						
 							<select class='element-condition condition-select conditional-field' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional-field]' required>
 								<?php
@@ -1842,7 +1842,7 @@ class FormBuilderForm extends SimForms{
 				}
 				?>
 				<div class='warning-conditions element-conditions' data-index='<?php echo $conditionIndex;?>'>
-					<input type="hidden" class='warning-condition combinator' name="<?php echo $name;?>[<?php echo $conditionIndex;?>][combinator]" value="<?php echo $condition['combinator'];?>">
+					<input type="hidden" class="no-reset" class='warning-condition combinator' name="<?php echo $name;?>[<?php echo $conditionIndex;?>][combinator]" value="<?php echo $condition['combinator'];?>">
 
 					<input type="text" class="warning-condition meta-key" name="<?php echo $name;?>[<?php echo $conditionIndex;?>][meta-key]" value="<?php echo $condition['meta-key'];?>" list="meta-key" style="width: fit-content;">
 					<datalist id="meta-key">

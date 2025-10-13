@@ -385,7 +385,7 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 function prepareProperties($prop){
 	if(is_array($prop)){
 		foreach($prop as &$p){
-			return prepareProperties($p);
+			prepareProperties($p);
 		}
 	}else{
 		$prop 	= wp_kses_post(wp_kses_stripslashes($prop));
