@@ -4,6 +4,15 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.7.0] - 2025-10-13
+
+
+### Changed
 - data attribute names
 - dataset names
 
@@ -11,8 +20,6 @@
 - store boolean values
 - bugs
 - form submit bug
-
-### Updated
 
 ## [8.6.9] - 2025-10-06
 
