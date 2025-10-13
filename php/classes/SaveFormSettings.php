@@ -131,7 +131,7 @@ class SaveFormSettings extends SimForms{
 			'edit_right_roles'		=> '%s'
 		];
 
-		$this->tableFormats[$this->shortcodeTable]	= apply_filters('forms-submission-table-formats', $formats, $this);
+		$this->tableFormats[$this->shortcodeTable]	= apply_filters('forms-shortcode-table-formats', $formats, $this);
 
 		// Column Settings
 		$formats	= [
@@ -145,7 +145,7 @@ class SaveFormSettings extends SimForms{
 			'edit_right_roles'		=> '%s'
 		];
 
-		$this->tableFormats[$this->shortcodeColumnSettingsTable]	= apply_filters('forms-submission-table-formats', $formats, $this);
+		$this->tableFormats[$this->shortcodeColumnSettingsTable]	= apply_filters('forms-shortcode-settings-table-formats', $formats, $this);
 
 		// Sort formats by key to make sure they are in the same order as the data
 		foreach($this->tableFormats as &$format){
