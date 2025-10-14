@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- non inputs
 
 ### Updated
 
