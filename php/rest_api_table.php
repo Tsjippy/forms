@@ -287,9 +287,7 @@ function saveColumnSettings($settings=[], $shortcodeId=''){
 	return "Succesfully saved your column settings";
 }
 
-function saveTableSettings(){
-	global $wpdb;
-	
+function saveTableSettings(){	
 	$tableSettings 	= $_POST['table-settings'];
 
 	// Check invalid filter names

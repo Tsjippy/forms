@@ -445,9 +445,9 @@ function addFormElement($copy=false){
 	if(is_numeric($_POST['element-id'])){
 		$update			= true;
 
-		$oldElement		= $simForms->getElementById($_POST['element-id']);
-
 		$element->id	= $_POST['element-id'];
+
+		$oldElement		= $simForms->getElementById($element->id);
 
 		//$index			= $oldElement->index;
 	}else{
@@ -493,7 +493,6 @@ function addFormElement($copy=false){
 	
 	if($update){
 		$message								= "Succesfully updated '{$element->name}'";
-		$element->id							= $_POST['element-id'];
 		$result									= $simForms->updateFormElement($element);
 		if(is_wp_error($result)){
 			return $result;

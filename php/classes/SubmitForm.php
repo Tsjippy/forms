@@ -392,10 +392,10 @@ class SubmitForm extends SimForms{
 		
 		$this->getForm($this->submission->form_id);
 
-		$userIdElementName	= $this->findUserIdElementName();
+		$userIdElementName					= $this->findUserIdElementName();
 		
-		$this->userId	= 0;
-		if(is_numeric($_POST[$userIdElementName])){
+		$this->userId	= $this->user->ID;
+		if(isset($_POST[$userIdElementName]) && is_numeric($_POST[$userIdElementName])){
 			//If we are submitting for someone else and we do not have the right to save the form for someone else
 			if(
 				array_intersect($this->userRoles, $this->submitRoles) === false &&

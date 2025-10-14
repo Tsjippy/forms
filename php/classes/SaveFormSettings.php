@@ -188,6 +188,7 @@ class SaveFormSettings extends SimForms{
 				$val	= $data[$newVal];
 			}
 		}
+		unset($val);
 
 		$formats	= $this->tableFormats[$table];
 

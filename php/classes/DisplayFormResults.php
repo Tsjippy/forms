@@ -1262,7 +1262,7 @@ class DisplayFormResults extends DisplayForm{
 			}
 		}
 		
-		$query						= "SELECT * FROM {$this->shortcodeTable} WHERE id= '{$this->shortcodeId}'";
+		$query						= "SELECT * FROM {$this->shortcodeTable} WHERE id = '{$this->shortcodeId}'";
 		$this->tableSettings 		= $wpdb->get_results($query)[0];
 		foreach($this->tableSettings as $key => &$value){
 			$value	= maybe_unserialize($value);
