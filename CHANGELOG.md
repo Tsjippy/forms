@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- non inputs
 
 ### Updated
+
+## [8.7.1] - 2025-10-14
+
+
+### Fixed
+- non inputs
 
 ## [8.7.0] - 2025-10-13
 
