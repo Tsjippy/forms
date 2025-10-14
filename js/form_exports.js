@@ -301,10 +301,10 @@ export function showTab(n, form) {
 			//hide loader
 			if(loader != null){
 				loader.classList.add('hidden');
-			
-				//show form controls
-				form.querySelector('.multistepcontrols').classList.remove('hidden');
 			}
+
+			//show form controls
+			form.querySelector('.multi-step-controls.hidden').classList.remove('hidden');
 		}
 		
 		//hide all formsteps

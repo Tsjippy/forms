@@ -71,8 +71,16 @@ class DisplayForm extends SubmitForm{
 	protected function multiWrapStart($index, $element){
 		$class	= '';
 
-		// Wrap in a tab if it is a big one
-		if($this->multiWrapElementCount >= $this->minElForTabs){
+		// this clone-div should also be a formstep
+		if($this->clonableFormStep){
+			$class .= ' formstep';	
+
+			// make sure we increase the formstep counter
+			$this->formStepCounter	+= 1;
+		}
+
+		// Wrap in a tab if it is a big one but not if it is a clonable formstep
+		elseif($this->multiWrapElementCount >= $this->minElForTabs){
 			$hidden	= 'hidden';
 
 			if($index === 0){
@@ -84,13 +92,21 @@ class DisplayForm extends SubmitForm{
 			$class	= "tabcontent $hidden' id='$this->tabId-$id";
 		}
 
+		
+
 		$style	= '';
 		if($this->multiWrapElementCount < $this->minElForTabs){
 			$style	= 'style="display:flex;"';
 		}
 
 		$this->multiInputsHtml[$index]   = "<div class='clone-div $class' data-div-id='$index' $style>";
+
+		// Get the the element of two elements before this one, which should be the multi-start element
+		// and use the text as a title for this group
+		$this->multiInputsHtml[$index]   .= "<h3>{$this->formElements[$this->currentElement->priority - 3]->text}</h3>";
+		
 		$this->multiInputsHtml[$index]	.= $this->renderButtons();
+		
 		$this->multiInputsHtml[$index]	.= "<div class='multi-input-wrapper'>";
 	}
 
@@ -218,6 +234,32 @@ class DisplayForm extends SubmitForm{
 	}
 
 	/**
+	 * Checks if this is a clonable formstep, meaning a multi_start - multi-end group wrapped inside a formstep
+	 */
+	protected function isClonableFormStep(){
+		$this->clonableFormStep	= false;
+
+		if(
+			$this->nextElement->type == 'multi-start' && 
+			$this->currentElement->type == 'formstep'
+		){
+			// loop until we find the multi-end
+			$x	= $this->currentElement->priority; // this is the index of the next element, which is the multi-start
+			while(true){
+				$x++;
+				// This is the multi end
+				if($this->formElements[$x]->type == 'multi-end'){
+					// only if the next element is a formstep we have a clonable formstep
+					if($this->formElements[$x + 1]->type == 'formstep'){
+						$this->clonableFormStep	= true;
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Build all html for a particular element including edit controls.
 	 *
 	 * @param	object	$element		The element
@@ -288,12 +330,26 @@ class DisplayForm extends SubmitForm{
 		//write a formstep div
 		if($element->type == 'formstep'){
 			$html	= '';
+
 			//if there is already a formstep written close that one first
 			if($this->isFormStep){
-				$html .= "</div>";
-			//first part of the form, don't hide
+				// but not if this was a clonable formstep
+				// as that one is already closed
+				if(!$this->clonableFormStep){
+					$html .= "</div>";
+				}
 			}else{
-				$this->isFormStep	= true;
+				$this->isFormStep		= true;
+			}
+
+			// do not write any html if this is a clonable formstep
+			$this->isClonableFormStep();
+			if($this->clonableFormStep){
+				return $html;
+			}
+
+			// First step of the form
+			if(!$this->isFormStep){
 				$html .= SIM\LOADERIMAGE;
 			}
 			
@@ -315,6 +371,7 @@ class DisplayForm extends SubmitForm{
 			//loop over all consequent wrapped elements
 			while(true){
 				$type	= $this->formElements[$i]->type;
+
 				if($type != 'multi-end' && !empty($this->formElements[$i])){
 					$this->multiWrapElementCount++;
 
@@ -351,9 +408,13 @@ class DisplayForm extends SubmitForm{
 
 			//write down all the multi html
 			$name	= str_replace('_multi-end', '_multi-start', $element->name);
+
 			$elementHtml	= "<div class='clone-divs-wrapper' name='$name'>";
+			if(!$this->clonableFormStep){
+				$elementHtml .= $this->renderButtons();
+
 				// Tablink buttons
-				if($this->multiWrapElementCount >= $this->minElForTabs){
+				if($this->multiWrapElementCount >= $this->minElForTabs ){
 					for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
 						$active = '';
 
@@ -366,17 +427,19 @@ class DisplayForm extends SubmitForm{
 						</button>";
 					}
 				}
+			}
 
-				foreach($this->multiInputsHtml as $multiHtml){
-					$elementHtml .= $multiHtml;
+			foreach($this->multiInputsHtml as $multiHtml){
+				$elementHtml .= $multiHtml;
+			}
+			
+			if($this->wrap){
+				if($this->wrap	== 'label'){
+					$elementHtml .= '</label>';
 				}
-				
-				if($this->wrap){
-					if($this->wrap	== 'label'){
-						$elementHtml .= '</label>';
-					}
-					$this->wrap	= false;
-				}
+				$this->wrap	= false;
+			}
+			
 			$elementHtml	.= '</div>';
 		}
 		
@@ -521,7 +584,7 @@ class DisplayForm extends SubmitForm{
 					//close the last formstep if needed
 					if($this->isFormStep){
 						$html	.= "</div>";
-						$html	.= "<div class='multistepcontrols hidden'>";
+						$html	.= "<div class='multi-step-controls hidden'>";
 							$html	.= "<div class='multi-step-controls-wrapper'>";
 								$html	.= "<div style='flex:1;'>";
 									$html	.= "<button type='button' class='button' name='prevBtn'>Previous</button>";

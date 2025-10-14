@@ -7,6 +7,7 @@ class SimForms{
 	
 	public $isFormStep;
 	public $isMultiStepForm;
+	protected $clonableFormStep;
 	public $formStepCounter;
 	public $nonInputs;
 	public $multiInputsHtml;
