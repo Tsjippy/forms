@@ -271,9 +271,3 @@ function moduleUpdate($oldVersion){
         }
     }
 }
-
-add_action('init', function(){
-    //moduleUpdate('8.6.9');
-    //SIM\BOOKINGS\moduleUpdate('8.4.0');
-    //SIM\afterPluginUpdate('1.1.1');
-});
