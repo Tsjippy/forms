@@ -1423,7 +1423,7 @@ class FormBuilderForm extends SimForms{
 				}
 				?>
 			</div>
-			<label class="option-label element-option not-multi-start not-multi-end shouldhide">
+			<label class="option-label element-option not-multi-start not-multi-end reverse shouldhide">
 				<input type="checkbox" class="formbuilder" name="formfield[hidden]" value="1" <?php if($element != null && $element->hidden){echo 'checked';}?>>
 				Hidden field
 			</label><br>
