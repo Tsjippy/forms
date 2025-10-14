@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- user id value
 
 ### Updated
+
+## [8.7.2] - 2025-10-14
+
+
+### Fixed
+- user id value
 
 ## [8.7.1] - 2025-10-14
 
