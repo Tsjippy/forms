@@ -49,7 +49,7 @@ class SimForms{
 		$this->formEmailTable				= $wpdb->prefix . 'sim_form_emails';
 		$this->shortcodeColumnSettingsTable	= $wpdb->prefix . 'sim_form_shortcode_column_settings';
 		$this->shortcodeTable				= $wpdb->prefix . 'sim_form_shortcodes';
-		$this->nonInputs					= ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi_start', 'multi_end', 'div_start', 'div_end'];
+		$this->nonInputs					= ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi-start', 'multi-end', 'div-start', 'div-end'];
 		$this->multiInputsHtml				= [];
 		$this->user 						= wp_get_current_user();
 		$this->userRoles					= $this->user->roles;

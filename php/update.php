@@ -53,7 +53,7 @@ function moduleUpdate($oldVersion){
         $simForms->createDbTables();
 
         // Shortcode data
-        /* $shortcodes   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_form_shortcodes");
+        $shortcodes   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_form_shortcodes");
         maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'title', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `title` tinytext");
         maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'default_sort', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `default_sort` tinytext");
         maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'sort_direction', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `sort_direction` tinytext");
@@ -87,8 +87,7 @@ function moduleUpdate($oldVersion){
                 $wpdb->update(
                     $simForms->shortcodeTable, 
                     $data, 
-                    ['id' => $shortcode->id],
-                    $simForms->shortcodeTableFormats
+                    ['id' => $shortcode->id]
                 );
             }
 
@@ -109,38 +108,43 @@ function moduleUpdate($oldVersion){
                         'view_right_roles'	=> maybe_serialize($columnSetting['view_right_roles']),
                         'edit_right_roles'	=> maybe_serialize($columnSetting['edit_right_roles']),
                     ];
-                    $wpdb->insert($simForms->shortcodeColumnSettingsTable, $data, $simForms->shortcodeTableColumnFormats);
+                    $wpdb->insert($simForms->shortcodeColumnSettingsTable, $data);
                 }
             }
-        } */
+        }
         
         // remimder conditions
-        $forms   = $wpdb->get_results("SELECT * FROM $simForms->tableName WHERE `reminder_conditions` IS NOT NULL");
-        foreach($forms as &$form){
+        $forms   = $wpdb->get_results("SELECT * FROM $simForms->tableName");
+        foreach($forms as $form){
             $reminders  = maybe_unserialize($form->reminder_conditions);
 
             foreach($reminders as &$reminder){
-                foreach($reminder as $index => $value){
+                foreach($reminder as $i => $value){
                     if(is_array($value)){
-                        foreach($value as $i => $v){
-                            $newIndex   = str_replace('_', '-', $i);
+                        foreach($value as $key => $v){
+                            $newIndex   = str_replace('_', '-', $key);
 
-                            unset($value[$i]);
+                            unset($reminder[$i][$key]);
                             
-                            $value[$newIndex]   = $v;
+                            $reminder[$i][$newIndex]   = $v;
                         }
+
+                        $value = $reminder[$i];
                     }
 
-                    $newIndex   = str_replace('_', '-', $index);
+                    $newIndex   = str_replace('_', '-', $i);
 
-                    unset($reminder[$index]);
+                    unset($reminder[$i]);
                             
                     $reminder[$newIndex]   = $value;
                 }
             }
 
+            $version    = $form->version + 1;
+
             $wpdb->update($simForms->tableName,
                 [
+                    'version'                   => $version,
                     'reminder_conditions'		=> maybe_serialize($reminders)
                 ],
                 [
@@ -183,89 +187,87 @@ function moduleUpdate($oldVersion){
             }
         }
         
-        $elements   = $wpdb->get_results("SELECT * FROM $simForms->elTableName WHERE `conditions` IS NOT NULL");
+        $elements   = $wpdb->get_results("SELECT * FROM $simForms->elTableName");
 
         foreach($elements as $element){
+
+            $element->type  = str_replace('_', '-', $element->type);
+
+            // conditions
             $conditions = maybe_unserialize($element->conditions);
 
             foreach($conditions as &$condition){
                 foreach($condition as $index => $value){
                     if(is_array($value)){
-                        foreach($value as &$rule){
-                            foreach($rule as $i => $v){
-                                $newIndex   = str_replace('_', '-', $i, $c);
+                        foreach($value as $i => $rule){
+                            foreach($rule as $key => $v){
+                                $newIndex   = str_replace('_', '-', $key);
 
-                                if($c > 0){
-                                    unset($rule[$i]);
-                                    $rule[$newIndex]    = $v;
-                                }
+                                unset($condition[$index][$i][$key]);
+                                $condition[$index][$i][$newIndex] = $v;
                             }
                         }
+
+                        $value  = $condition[$index];
                     }
                     
-                    $newIndex   = str_replace('_', '-', $index, $count);
+                    $newIndex   = str_replace('_', '-', $index);
 
-                    if($count > 0){
-                        unset($condition[$index]);
-                    }
+                    $newIndex   = str_replace('propertyname', 'property-name', $newIndex);
+
+                    unset($condition[$index]);
 
                     $condition[$newIndex]   = $value;
                 }
             }
 
             $element->conditions    = maybe_serialize($conditions);
-            $wpdb->update(
-                $simForms->elTableName,
-                [
-                    'conditions'   => $element->conditions,
-                ],
-                array(
-                    'id'		=> $element->id,
-                )
-            );
-        }
 
-        // warning conditions
-        $elements   = $wpdb->get_results("SELECT * FROM $simForms->elTableName WHERE `warning_conditions` IS NOT NULL and `warning_conditions` <> ''");
-
-        foreach($elements as $element){
+            // warning conditions
             $conditions = maybe_unserialize($element->warning_conditions);
 
             foreach($conditions as &$condition){
                 foreach($condition as $index => $value){
                     if(is_array($value)){
-                        foreach($value as &$rule){
-                            foreach($rule as $i => $v){
-                                $newIndex   = str_replace('_', '-', $i, $c);
+                        foreach($value as $i => $rule){
+                            foreach($rule as $key => $v){
+                                $newIndex   = str_replace('_', '-', $i);
 
-                                if($c > 0){
-                                    unset($rule[$i]);
-                                    $rule[$newIndex]    = $v;
-                                }
+                                unset($condition[$index][$i][$key]);
+                                $condition[$index][$i][$newIndex] = $v;
                             }
                         }
+
+                        $value  = $condition[$index];
                     }
                     
-                    $newIndex   = str_replace('_', '-', $index, $count);
-
-                    if($count > 0){
-                        unset($condition[$index]);
-                    }
+                    $newIndex   = str_replace('_', '-', $index);
+                    unset($condition[$index]);
 
                     $condition[$newIndex]   = $value;
                 }
             }
 
             $element->warning_conditions    = maybe_serialize($conditions);
+
+            $element    = (array)$element;
+
             $wpdb->update(
                 $simForms->elTableName,
-                [
-                    'warning_conditions'   => $element->warning_conditions,
-                ],
+                $element,
                 array(
-                    'id'		=> $element->id,
+                    'id'		=> $element['id'],
                 )
             );
+        }
+     
+        $path	= plugin_dir_path(__DIR__)."js/dynamic";
+        if (is_dir($path)) {
+            $files = glob($path . '/*'); // Get all files and directories in the path
+
+            foreach ($files as $file) {
+                unlink($file);
+            }
         }
     }
 }

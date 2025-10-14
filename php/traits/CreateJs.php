@@ -317,13 +317,13 @@ trait CreateJs{
                         
                         //fixed prop value
                         if($action == 'value'){
-                            $propertyName	                        = $condition['propertyname1'];
+                            $propertyName	                        = $condition['property-name1'];
                             if(isset($condition['action-value'])){
                                 $varName   = '"'.do_shortcode($condition['action_value']).'"';
                             }
                         //retrieve value from another field
                         }else{
-                            $propertyName	= $condition['propertyname'];
+                            $propertyName	= $condition['property-name'];
                         
                             $copyfieldid	= $condition['property-value'];
                             

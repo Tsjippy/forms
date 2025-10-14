@@ -1684,7 +1684,7 @@ class FormBuilderForm extends SimForms{
 								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element-condition' value='value' <?php if($condition['action'] == 'value'){echo 'checked';}?> required>
 								Set property
 							</label>
-							<input type="text" list="propertylist" name="element-conditions[<?php echo $conditionIndex;?>][propertyname1]" class='element-condition' placeholder="property name" value="<?php echo $condition['propertyname1'];?>">
+							<input type="text" list="propertylist" name="element-conditions[<?php echo $conditionIndex;?>][property-name1]" class='element-condition' placeholder="property name" value="<?php echo $condition['property-name1'];?>">
 							<label> to:</label>
 							<textarea class='element-condition' name="element-conditions[<?php echo $conditionIndex;?>][action-value]" rows='1'><?php echo $condition['action-value'];?></textarea>
 							<br>
@@ -1699,7 +1699,7 @@ class FormBuilderForm extends SimForms{
 								<option value="max">
 							</datalist>
 							<label>
-								<input type="text" list="propertylist" name="element-conditions[<?php echo $conditionIndex;?>][propertyname]" class='element-condition' placeholder="property name" value="<?php echo $condition['propertyname'];?>">
+								<input type="text" list="propertylist" name="element-conditions[<?php echo $conditionIndex;?>][property-name]" class='element-condition' placeholder="property name" value="<?php echo $condition['property-name'];?>">
 								property to the value of
 							</label>
 							
