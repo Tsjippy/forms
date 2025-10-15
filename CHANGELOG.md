@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- do not add names to non-input elements
 
 ### Fixed
 
