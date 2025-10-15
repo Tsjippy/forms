@@ -117,6 +117,22 @@ export function copyFormInput(originalNode){
 		//Insert the clone
 		orgButton.parentNode.insertBefore(newButton, orgButton.nextSibling);
 	}
+
+	// Process tablinks
+	if(originalNode.matches('.tabcontent')){
+		// hide the new clone
+		newNode.classList.add('step-hidden');
+
+		// Update the formstep controls
+		let form		= node.closest('form');
+		if(form != null && form.querySelector('.multi-step-controls-wrapper') != null){
+			updateMultiStepControls(form);
+		}
+
+		let text	= originalNode.querySelector('.add.button').textContent.replace('Add ', '');
+
+		Main.displayMessage(`Succesfully added a new ${text}<br>Click 'Next' to see it.`);
+	}
 	
 	//Insert the clone
 	originalNode.parentNode.insertBefore(newNode, originalNode.nextSibling);
