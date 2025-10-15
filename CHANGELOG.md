@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- bug when clonable formstep is the last of a form
 
 ### Updated
 
