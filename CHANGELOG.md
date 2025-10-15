@@ -3,6 +3,7 @@
 
 ### Added
 - support for clonable formsteps
+- support for clonable formsteps
 
 ### Changed
 
