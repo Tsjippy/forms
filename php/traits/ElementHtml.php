@@ -166,28 +166,50 @@ trait ElementHtml{
 		return $options;
 	}
 
+	/**
+	 * Changes the element html to accomodate multiple values
+	 * Adds an index to the name and id and adds the value of the current index
+	 * 
+	 * @param	object			$element		The current element
+	 * @param	int				$index			The current iteration index of the element
+	 * @param	string			$elementHtml	The rendered element html so far
+	 * @param	string|array	$value			The value to add
+	 * 
+	 * @return	string							The updated HTML
+	 */
 	function prepareElementHtml($element, $index, $elementHtml, $value){
 		if($value === null){
 			$value = '';
 		}
+
+		// make sure we add the [] after the index
+		$elementHtml		= str_replace('[]', '', $elementHtml, $replaced);
+		$indexString 		= "[$index]";
+		if($replaced){
+			$indexString	.= "[]";
+		}
+
 		//Add the key to the fields name
-		$elementHtml	= preg_replace("/(name='.*?)'/i", "\${1}[$index]'", $elementHtml);
+		$elementHtml	= preg_replace("/(name='.*?)'/i", "\${1}$indexString'", $elementHtml);
+
+		// Add the key to the id
+		$elementHtml	= preg_replace("/(id='.*?)'/i", "\${1}[$index]'", $elementHtml);
 					
 		//we are dealing with a select, add options
 		if($element->type == 'select'){
 			$elementHtml .= "<option value=''>---</option>";
 			$options	= $this->getElementOptions($element);
-			foreach($options as $option_key=>$option){
-				if(strtolower($value) == strtolower($option_key) || strtolower($value) == strtolower($option)){
+			foreach($options as $optionKey => $option){
+				if(strtolower($value) == strtolower($optionKey) || strtolower($value) == strtolower($option)){
 					$selected	= 'selected="selected"';
 				}else{
 					$selected	= '';
 				}
-				$elementHtml .= "<option value='$option_key' $selected>$option</option>";
+				$elementHtml .= "<option value='$optionKey' $selected>$option</option>";
 			}
 
 			$elementHtml  .= "</select>";
-		}elseif(in_array($element->type, ['radio','checkbox'])){
+		}elseif(in_array($element->type, ['radio', 'checkbox'])){
 			$options	= $this->getElementOptions($element);
 
 			//make key and value lowercase
@@ -195,16 +217,17 @@ trait ElementHtml{
 				$item 	= strtolower($item);
 				$key 	= strtolower($key);
 			});
-			foreach($options as $option_key=>$option){
+
+			foreach($options as $optionKey => $option){
 				$found = false;
 
 				if(is_array($value)){
 					foreach($value as $v){
-						if(strtolower($v) == $option_key || strtolower($v) == $option){
+						if(strtolower($v) == $optionKey || strtolower($v) == $option){
 							$found 	= true;
 						}
 					}
-				}elseif(strtolower($value) == $option_key || strtolower($value) == $option){
+				}elseif(strtolower($value) == $optionKey || strtolower($value) == $option){
 					$found 	= true;
 				}
 				

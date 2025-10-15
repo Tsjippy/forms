@@ -421,23 +421,17 @@ export function nextPrev(n, form) {
 	x.forEach((el, index)=>{if(!el.matches('.step-hidden')){currentTab = index}});
 	
 	//Check validity of this step if going forward
-	if(n>0){
+	if( n > 0){
+		// Prepare the elements on this tab
+		FormSubmit.prepareForValidation(x[currentTab]);
+
 		// Report validity of each required field
-		let elements	= x[currentTab].querySelectorAll('.required:not(.hidden) input, .required:not(.hidden) textarea, .required:not(.hidden) select');
+		let elements	= x[currentTab].querySelectorAll('input[required], textarea[required], select[required]');
 		for(const element of elements) {
-			if(
-				element.closest('.hidden')	== null	&&
-				element.closest('div.nice-select') == null && 
-				(
-					element.type != 'file' || 
-					element.closest('.file-upload-wrap').querySelector('.documentpreview input') == null
-				)
-			){
-				element.required	= true;
-				valid				= element.reportValidity();
-				if(!valid){
-					break;
-				}
+			element.required	= true;
+			valid				= element.reportValidity();
+			if(!valid){
+				break;
 			}
 		}
 
