@@ -47,6 +47,8 @@
 		/* Mark the active step: */
 		&.active {
 			opacity: 1;
+			height: 18px;
+			width: 18px;
 		}
 
 		/* Mark the steps that are finished and valid: */

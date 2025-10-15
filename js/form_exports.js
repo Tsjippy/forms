@@ -95,12 +95,6 @@ export function copyFormInput(originalNode){
 		
 		i++;
 	});
-	
-	//Add remove buttons if they are not there
-	if(originalNode.querySelector('.remove') == null){
-		console.error('adding remove button failed');
-		console.error(originalNode);
-	}	
 
 	// process tab buttons
 	if(originalNode.matches('.tabcontent')){
@@ -117,33 +111,31 @@ export function copyFormInput(originalNode){
 		//Insert the clone
 		orgButton.parentNode.insertBefore(newButton, orgButton.nextSibling);
 	}
+	
+	//Insert the clone
+	originalNode.parentNode.insertBefore(newNode, originalNode.nextSibling);
 
-	// Process tablinks
-	if(originalNode.matches('.tabcontent')){
+	// Process formsteps
+	if(originalNode.matches('.formstep')){
 		// hide the new clone
 		newNode.classList.add('step-hidden');
 
 		// Update the formstep controls
-		let form		= node.closest('form');
+		let form		= originalNode.closest('form');
 		if(form != null && form.querySelector('.multi-step-controls-wrapper') != null){
 			updateMultiStepControls(form);
 		}
 
 		let text	= originalNode.querySelector('.add.button').textContent.replace('Add ', '');
 
-		Main.displayMessage(`Succesfully added a new ${text}<br>Click 'Next' to see it.`);
+		Main.displayMessage(`Succesfully added an extra ${text}<br>Its added as the next page.`);
 	}
-	
-	//Insert the clone
-	originalNode.parentNode.insertBefore(newNode, originalNode.nextSibling);
 	
 	return newNode;
 }
 
 export function fixNumbering(wrapper){
-	wrapper.querySelectorAll(':scope > .clone-div').forEach(updateNumbers);
-
-	wrapper.querySelectorAll(':scope > .tablink').forEach(updateNumbers);
+	wrapper.querySelectorAll(':scope > .clone-div, :scope > .tablink').forEach(updateNumbers);
 
 	function updateNumbers(clone, index){
 		//Update the new number	
@@ -328,9 +320,17 @@ export function updateMultiStepControls(form){
 		stepIndicators[x].classList.add('hidden');
 	}
 
+	// Add some step circles if needed
+	for(let x = stepIndicators.length; x < formsteps.length; x++){
+		let step	= document.createElement('span');
+		step.classList.add('step');
+
+		form.querySelectorAll(`.step-wrapper`).forEach(el => el.appendChild(step));
+	}
+
 	// check if this is the last visible
-	let activeFormstep		= form.querySelector('.formstep:not(.step-hidden)');
-	if(visibleFormsteps[visibleFormsteps.length-1] == activeFormstep){
+	let currentFormstep		= form.querySelector('.formstep:not(.step-hidden)');
+	if(visibleFormsteps[visibleFormsteps.length-1] == currentFormstep){
 		// make the submit button visible
 		form.querySelector('.next-button').classList.add('hidden');
 		form.querySelector('.form-submit ').classList.remove('hidden');

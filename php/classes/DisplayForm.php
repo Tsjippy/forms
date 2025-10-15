@@ -591,7 +591,7 @@ class DisplayForm extends SubmitForm{
 								$html	.= "</div>";
 								
 								//Circles which indicates the steps of the form:
-								$html	.= "<div style='flex:1;text-align:center;margin:auto;'>";
+								$html	.= "<div class='step-wrapper' style='flex:1;text-align:center;margin:auto;'>";
 									for ($x = 1; $x <= $this->formStepCounter; $x++) {
 										$html	.= "<span class='step'></span>";
 									}
