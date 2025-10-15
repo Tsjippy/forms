@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- table permission per user
 
 ### Changed
 - scroll to modal top
