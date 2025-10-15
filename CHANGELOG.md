@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- issue with a multi element withing in a multi wrapper
 
 ### Updated
 
