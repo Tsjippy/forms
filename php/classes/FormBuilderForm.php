@@ -659,7 +659,7 @@ class FormBuilderForm extends SimForms{
 							<select name='full-right-roles[]' multiple>
 								<option value=''>---</option>
 								<?php
-								foreach($userRoles as $key=>$roleName){
+								foreach($userRoles as $key => $roleName){
 									if(in_array($key, (array)$this->formData->full_right_roles)){
 										$selected = 'selected';
 									}else{
