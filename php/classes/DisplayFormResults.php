@@ -1320,6 +1320,9 @@ class DisplayFormResults extends DisplayForm{
 							}
 
 							$niceName	= $columnSetting['nice_name'];
+							if(empty($niceName)){
+								$niceName = ucfirst(str_replace('_', ' ', $columnSetting['name']));
+							}
 
 							$width		= empty($columnSetting['width']) ? 200 : $columnSetting['width'];
 							
