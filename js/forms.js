@@ -1,7 +1,7 @@
 import { addStyles } from '../../../plugins/sim-plugin/includes/js/imports.js';
-import { removeDefaultSelect, cloneNode, copyFormInput, fixNumbering, removeNode, tidyMultiInputs, updateMultiStepControls, showTab, nextPrev, changeFieldValue, changeVisibility, changeFieldProperty } from './form_exports.js';
+import { removeDefaultSelect, cloneNode, copyFormInput, fixNumbering, removeNode, tidyMultiInputs, updateMultiStepControls, showFormStep, nextPrev, changeFieldValue, changeVisibility, changeFieldProperty } from './form_exports.js';
 import { getFieldValue } from  '../../../plugins/sim-plugin/includes/js/field_value.js';
-export { getFieldValue, removeDefaultSelect, cloneNode, copyFormInput, fixNumbering, removeNode, tidyMultiInputs, updateMultiStepControls, showTab, nextPrev, changeFieldValue, changeVisibility, changeFieldProperty };
+export { getFieldValue, removeDefaultSelect, cloneNode, copyFormInput, fixNumbering, removeNode, tidyMultiInputs, updateMultiStepControls, showFormStep, nextPrev, changeFieldValue, changeVisibility, changeFieldProperty };
 
 console.log('Forms.js is loaded');
 

@@ -417,9 +417,9 @@ trait CreateJs{
             $newJs  .= "\n\n\t\t//clear event prevenion after 100 ms";
             $newJs  .= "\n\t\tsetTimeout(() => { this.prevEl = ''; }, 50);";
 
-            $newJs  .= "\n\n\t\tif(elName == 'nextBtn'){";
+            $newJs  .= "\n\n\t\tif(elName == 'next-button'){";
                 $newJs  .= "\n\t\t\tFormFunctions.nextPrev(1, form);";
-            $newJs  .= "\n\t\t}else if(elName == 'prevBtn'){";
+            $newJs  .= "\n\t\t}else if(elName == 'previous-button'){";
                 $newJs  .= "\n\t\t\tFormFunctions.nextPrev(-1, form);";
             $newJs  .= "\n\t\t}";
 
@@ -440,7 +440,7 @@ trait CreateJs{
             $tabJs.= "\n\t\t\t// Display the current tab// Current tab is set to be the first tab (0)";
             $tabJs.= "\n\t\t\tlet currentTab = 0; ";
             $tabJs.= "\n\t\t\t// Display the current tab";
-            $tabJs.= "\n\t\t\tFormFunctions.showTab(currentTab, form); ";
+            $tabJs.= "\n\t\t\tFormFunctions.showFormStep(currentTab, form); ";
         }
 
         // Prefill form with meta data

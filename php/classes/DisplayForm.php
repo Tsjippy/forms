@@ -587,7 +587,7 @@ class DisplayForm extends SubmitForm{
 						$html	.= "<div class='multi-step-controls hidden'>";
 							$html	.= "<div class='multi-step-controls-wrapper'>";
 								$html	.= "<div style='flex:1;'>";
-									$html	.= "<button type='button' class='button' name='prevBtn'>Previous</button>";
+									$html	.= "<button type='button' class='button' name='previous-button'>Previous</button>";
 								$html	.= "</div>";
 								
 								//Circles which indicates the steps of the form:
@@ -598,7 +598,7 @@ class DisplayForm extends SubmitForm{
 								$html	.= "</div>";
 							
 								$html	.= "<div style='flex:1;'>";
-									$html	.= "<button type='button' class='button nextBtn' name='nextBtn'>Next</button>";
+									$html	.= "<button type='button' class='button next-button' name='next-button'>Next</button>";
 									$html	.= SIM\addSaveButton('submit-form', $buttonText, 'hidden');
 								$html	.= "</div>";
 							$html	.= "</div>";

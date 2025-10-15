@@ -65,6 +65,8 @@ export function cloneNode(originalNode, clear=true){
 }
 
 export function copyFormInput(originalNode){
+	originalNode.querySelectorAll('.remove.hidden').forEach( el => el.classList.remove('hidden'));
+
 	let newNode = cloneNode(originalNode);
 	
 	//update the data index
@@ -95,14 +97,9 @@ export function copyFormInput(originalNode){
 	});
 	
 	//Add remove buttons if they are not there
-	if(originalNode.querySelector('.remove') == null && newNode.querySelector('.remove') == null){
- 		let html = `<button type="button" class="remove button" style="flex: 1;">-</button>`;
-
-		//Add minus button to the first div
-		originalNode.querySelector('.button-wrapper').insertAdjacentHTML('beforeend', html);
-
-		//Add minus button to the second div
-		newNode.querySelector('.button-wrapper').insertAdjacentHTML('beforeend', html)
+	if(originalNode.querySelector('.remove') == null){
+		console.error('adding remove button failed');
+		console.error(originalNode);
 	}	
 
 	// process tab buttons
@@ -148,8 +145,8 @@ export function fixNumbering(wrapper){
 		}
 
 		// Update the divid attribute
-		if(clone.dataset.divid  != null){
-			clone.dataset.divid = index;
+		if(clone.dataset.divId  != null){
+			clone.dataset.divId = index;
 		}
 		
 		//Update the title
@@ -170,6 +167,7 @@ export function fixNumbering(wrapper){
 				if(input.id != '' && input.id != undefined){
 					input.id = input.id.replace(/[0-9]+(?!.*[0-9])/, index);
 				}
+
 				//Update the name
 				if(input.name != '' && input.name != undefined){
 					input.name = input.name.replace(/[0-9]+(?!.*[0-9])/, index);
@@ -204,6 +202,7 @@ export function removeNode(target){
 	if(node.matches('.tabcontent')){
 		let buttonToRemove	= parentNode.querySelector(`.tablink[data-target="${node.id}"]`);
 		if(buttonToRemove != null){
+
 			//if the button is active, make the previous one active
 			if(buttonToRemove.classList.contains('active')){
 				let prevButton	= buttonToRemove.previousElementSibling;
@@ -229,14 +228,46 @@ export function removeNode(target){
 		}
 	}
 
-	
+	// Check if this is a formstep
+	if(node.matches('.formstep')){
+		let newFormstep	= null;
+
+		// if there is a next clonable formstep, show that one
+		let nextFormstep	= parentNode.querySelector(`.formstep[data-div-id='${parseInt(node.dataset.divId) + 1}']`);
+		if(nextFormstep != null){			
+			newFormstep	= nextFormstep;
+		}else{
+			//try the previous one
+			let prevFormstep	= parentNode.querySelector(`.formstep[data-div-id='${parseInt(node.dataset.divId) - 1}']`);
+			if(prevFormstep != null){
+				newFormstep	= prevFormstep;
+			}
+		}
+
+		if(newFormstep != null){
+			//check if we need to update the multi step controls
+			let form		= node.closest('form');
+			if(form != null && form.querySelector('.multi-step-controls-wrapper') != null){
+				updateMultiStepControls(form);
+
+				// find the next visible formstep index
+				form.querySelectorAll('.formstep').forEach((formstep, index) =>{
+					if(formstep == newFormstep){
+						//show the next visible formstep
+						showFormStep(index, form);
+					}
+				});
+			}
+		}
+	}
+
 	//Remove the node
 	node.remove();
 
-	//If there is only one div remaining, remove the remove button
+	//If there is only one div remaining, hide the remove button
 	if(parentNode.querySelectorAll('.clone-div').length == 1){
 		let removeElement = parentNode.querySelector('.remove');
-		removeElement.remove();
+		removeElement.classList.add('hidden');
 	}
 
 	fixNumbering(parentNode)
@@ -256,7 +287,7 @@ export function tidyMultiInputs(){
 		
 		cloneDivArr.forEach(function(cloneDiv, index, array){
 			//update dataset
-			cloneDiv.dataset.divid = index;
+			cloneDiv.dataset.divId = index;
 			
 			//remove add button for all but the last
 			if(index != array.length - 1){
@@ -285,16 +316,20 @@ export function updateMultiStepControls(form){
 	let activeFormstep		= form.querySelector('.formstep:not(.step-hidden)');
 	if(visibleFormsteps[visibleFormsteps.length-1] == activeFormstep){
 		// make the submit button visible
-		form.querySelector('.nextBtn').classList.add('hidden');
+		form.querySelector('.next-button').classList.add('hidden');
 		form.querySelector('.form-submit ').classList.remove('hidden');
 	}else{
-		form.querySelector('.nextBtn').classList.remove('hidden');
+		form.querySelector('.next-button').classList.remove('hidden');
 		form.querySelector('.form-submit ').classList.add('hidden');
 	}
 }
 	
-//show a next form step
-export function showTab(n, form) {
+/** 
+ * show a next form step
+ * @param {number} n - the form step index to show
+ * @param {Element} form - the form contaning the form steps
+ */
+export function showFormStep(n, form) {
 	if(typeof(form) != 'undefined'){
 		if(n == 0){
 			let loader = form.querySelector('.loader-wrapper:not(.hidden)' );
@@ -340,16 +375,16 @@ export function showTab(n, form) {
 
 		// ... and fix the Previous/Next buttons:
 		if (n == 0) {
-			form.querySelector('[name="prevBtn"]').classList.add('hidden');
+			form.querySelector('[name="previous-button"]').classList.add('hidden');
 		} else {
-			form.querySelector('[name="prevBtn"]').classList.remove('hidden');
+			form.querySelector('[name="previous-button"]').classList.remove('hidden');
 		}
 
 		if (n == (x.length - 1)) {
-			form.querySelector('[name="nextBtn"]').classList.add('hidden');
+			form.querySelector('[name="next-button"]').classList.add('hidden');
 			form.querySelector('.form-submit').classList.remove('hidden');
 		} else {
-			form.querySelector('[name="nextBtn"]').classList.remove('hidden');
+			form.querySelector('[name="next-button"]').classList.remove('hidden');
 			form.querySelector('.form-submit').classList.add('hidden');
 		}
 	}else{
@@ -425,7 +460,7 @@ export function nextPrev(n, form) {
 		return false;
 	}
 	// Otherwise, display the correct tab:
-	showTab(currentTab,form);
+	showFormStep(currentTab, form);
 
 	return true;
 }
