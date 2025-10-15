@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- scroll to modal top
 
 ### Fixed
 - copying of info elements
