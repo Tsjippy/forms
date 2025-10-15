@@ -1142,7 +1142,7 @@ class FormBuilderForm extends SimForms{
 			
 			<input type="hidden" class="no-reset" name="element-id" value="<?php if( $element != null){echo $element->id;}?>">
 			
-			<input type="hidden" class="no-reset" name="insertafter">
+			<input type="hidden" class="no-reset" name="insert-after">
 			
 			<input type="hidden" class="no-reset" name="formfield[width]" value="100">
 			

@@ -448,9 +448,10 @@ function addFormElement($copy=false){
 		}
 	}
 
+	$update	= false;
 	if(is_numeric($_POST['element-id'])){
-		if(!$copy){
-			$update			= true;
+		if($copy !== true){
+			$update		= true;
 		}
 
 		$element->id	= $_POST['element-id'];
@@ -458,8 +459,6 @@ function addFormElement($copy=false){
 		$oldElement		= $simForms->getElementById($element->id);
 
 		//$index			= $oldElement->index;
-	}else{
-		$update	= false;
 	}
 	
 	if($element->type == 'php'){
@@ -507,10 +506,10 @@ function addFormElement($copy=false){
 		}
 	}else{
 		$message								= "Succesfully added '{$element->name}' to this form";
-		if(!is_numeric($_POST['insertafter'])){
+		if(!is_numeric($_POST['insert-after'])){
 			$element->priority	= $wpdb->get_var( "SELECT COUNT(`id`) FROM `{$simForms->elTableName}` WHERE `form_id`={$element->form_id}") +1;
 		}else{
-			$element->priority	= $_POST['insertafter'] + 1;
+			$element->priority	= $_POST['insert-after'] + 1;
 		}
 
 		$element->id	= $simForms->insertElement($element);

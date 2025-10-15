@@ -6,7 +6,7 @@ console.log("Formbuilder.js loaded");
 function clearFormInputs(){
 	try {
 		//Loop to clear the modalform
-		modal.querySelectorAll('input:not([type=hidden]), select, textarea, [name=insertafter], [name=element-id]').forEach(function(el){
+		modal.querySelectorAll('input:not([type=hidden]), select, textarea, [name=insert-after], [name=element-id]').forEach(function(el){
 			if(el.type == 'checkbox'){
 				el.checked = false;
 			}else{
@@ -62,7 +62,7 @@ async function showEmptyModal(target){
 	modal.querySelectorAll(".shouldhide").forEach(el=>el.classList.replace('shouldhide', 'hidden'))
 	
 	if(formElementWrapper != null){
-		modal.querySelector('[name="insertafter"]').value = formElementWrapper.dataset.priority;
+		modal.querySelector('[name="insert-after"]').value = formElementWrapper.dataset.priority;
 	}
 	
 	modal.querySelector('[name="submit-form-element"]').textContent = modal.querySelector('[name="submit-form-element"]').textContent.replace('Change','Add');
@@ -70,6 +70,9 @@ async function showEmptyModal(target){
 	modal.querySelector('.element-conditions-wrapper').innerHTML = Main.showLoader(null, false, 50, '', true);
 	
 	Main.showModal(modal);
+
+	// Scroll to top of the modal
+	modal.querySelector(`[name='formfield[type]']`).scrollIntoView({block: "center"});
 
 	var formData = new FormData();
 	formData.append('elementid', '-1');
@@ -130,6 +133,9 @@ async function requestEditElementData(target){
 		});
 		
 		Main.showModal(modal);
+
+		// Scroll to top of the modal
+		modal.querySelector(`[name='formfield[type]']`).scrollIntoView({block: "center"});
 		
 		//show edit button again
 		loader.outerHTML	= editButton;
@@ -199,6 +205,7 @@ async function addFormElement(target, copying=false){
 		formData.append('element-id', wrapper.dataset.id);
 		formData.append('form-id', wrapper.dataset.formId);
 		formData.append('order', indexes);
+		formData.append('insert-after', formElementWrapper.dataset.priority);
 
 		response	= await FormSubmit.fetchRestApi('forms/copy_form_element', formData);
 	}else if(editing){
