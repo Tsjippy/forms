@@ -2,15 +2,20 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- support for clonable formsteps
-- support for clonable formsteps
-- extra form step circles if needed
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.7.3] - 2025-10-15
+
+
+### Added
+- support for clonable formsteps
+- support for clonable formsteps
+- extra form step circles if needed
 
 ## [8.7.2] - 2025-10-14
 
