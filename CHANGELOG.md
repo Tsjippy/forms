@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [8.7.4] - 2025-10-15
+
+
+### Added
 - table permission per user
 
 ### Changed
@@ -9,8 +20,6 @@
 
 ### Fixed
 - copying of info elements
-
-### Updated
 
 ## [8.7.3] - 2025-10-15
 
