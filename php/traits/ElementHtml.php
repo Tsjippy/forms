@@ -521,6 +521,12 @@ trait ElementHtml{
 			if(in_array($element->type, ['radio','checkbox']) && !str_contains($elName, '[]')) {
 				$elName .= '[]';
 			}
+			$nameString	= "name='$elName'" ;
+
+			// No need for a name if not an input
+			if(in_array($element->type, $this->nonInputs)){
+				$nameString	= '';
+			}
 			
 			/*
 				ELEMENT ID
@@ -712,7 +718,7 @@ trait ElementHtml{
 						$html	.= "</div>";
 					$html	.= "</div>";
 				}else{
-					$html	= "<$elType name='$elName' $elId class='$elClass' $elOptions value='%value%'>$elContent$elClose";
+					$html	= "<$elType $nameString $elId class='$elClass' $elOptions value='%value%'>$elContent$elClose";
 				}
 				
 				if($element->type != 'text'){
@@ -724,7 +730,7 @@ trait ElementHtml{
 					$html	.= '</div>';
 				}
 			}elseif(empty($html)){
-				$html	= "<$elType  name='$elName' $elId class='$elClass' $elOptions $elValue>$elContent$elClose";
+				$html	= "<$elType $nameString $elId class='$elClass' $elOptions $elValue>$elContent$elClose";
 			}
 		}
 

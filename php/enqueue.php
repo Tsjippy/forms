@@ -110,7 +110,7 @@ function registerScripts(){
     wp_register_script('sim_forms_table_script', SIM\pathToUrl(MODULE_PATH.'js/forms_table.js'), array('sim_forms_script', 'sim_table_script'), MODULE_VERSION, true);
 
     if(is_numeric(get_the_ID())){
-        $formBuilderPages   = SIM\getModuleOption(MODULE_SLUG, 'formbuilder_pages');
+        $formBuilderPages   = SIM\getModuleOption(MODULE_SLUG, 'formbuilder-pages');
         if(is_array($formBuilderPages) && in_array(get_the_ID(), $formBuilderPages)){
             wp_enqueue_style('sim_forms_style');
         }

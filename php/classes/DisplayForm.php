@@ -140,7 +140,7 @@ class DisplayForm extends SubmitForm{
 	 * @param	int		$width			The width of the elements
 	 */
 	protected function processMultiFields($element, $width){
-		$class	= 'input-wrapper';
+		$class	= '';
 
 		//Check if element needs to be hidden
 		if(!empty($element->hidden)){
@@ -162,12 +162,9 @@ class DisplayForm extends SubmitForm{
 
 		$elementHtml = $this->getElementHtml($element);
 		
-		//close the label element after the field element
+		// close the wrapping element after the last wrapped element
 		if($this->wrap && !$element->wrap){
-			$elementHtml .= "</div>";
-			if($this->wrap == 'label'){
-				$elementHtml .= "</label>";
-			}
+			$elementHtml .= "</$this->wrap>";
 			$this->wrap = false;
 		}elseif(!$this->wrap){
 			if($element->type == 'info'){
@@ -176,10 +173,27 @@ class DisplayForm extends SubmitForm{
 				if(!empty($element->wrap)){
 					$class	.= ' flex';
 				}
-				$elementHtml = "<div class='$class' style='width:$width%;'>$elementHtml</div>";
+
+				// input wrapper
+				$elementHtml = "<div class='input-wrapper$class' style='width:$width%;'>$elementHtml";
 			}
 		}
 		
+		// Determine if we should wrap
+		if(
+			!$this->wrap											&&			// We are currently not wrapping
+			$element->wrap											&& 			// we should wrap around next element
+			is_object($this->nextElement)							&& 			// and there is a next element
+			!in_array($this->nextElement->type, ['select','php','formstep'])	// and the next element type is not a select or php element
+		){
+			$this->wrap = $element->type;
+		}
+
+		// Close the input wrapper div if we are not wrapping
+		if(!$this->wrap){
+			$elementHtml .= "</div>";
+		}
+
 		if(in_array($element->type, $this->nonInputs)){
 			//Get the field values of the next element as this does not have any
 			$values		= $this->getElementValues($this->nextElement);
@@ -196,16 +210,6 @@ class DisplayForm extends SubmitForm{
 			if(!empty($values['metavalue'])){
 				$values		= array_values((array)$values['metavalue']);
 			}
-		}
-		
-		// Determine if we should wrap
-		if(
-			!$this->wrap											&&			// We are currently not wrapping
-			$element->wrap											&& 			// we should wrap around next element
-			is_object($this->nextElement)							&& 			// and there is a next element
-			!in_array($this->nextElement->type, ['select','php','formstep'])	// and the next element type is not a select or php element
-		){
-			$this->wrap = $element->type;
 		}
 
 		// Create as many clones as the maximum value of one of the elements 
@@ -224,7 +228,7 @@ class DisplayForm extends SubmitForm{
 			}
 			
 			// elements between start and end
-			$this->multiInputsHtml[$index] .= force_balance_tags($newElementHtml);
+			$this->multiInputsHtml[$index] .= $newElementHtml;
 			
 			// Last element in the multi wrap, write the buttons and closing div
 			if($this->nextElement->type == 'multi-end'){
