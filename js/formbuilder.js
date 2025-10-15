@@ -142,9 +142,11 @@ async function addFormElement(target, copying=false){
 	let editing		= false;
 
 	let form		= target.closest('form');
-	if(form.querySelector('[name="element-id"]').value != ''){
-		editing		= true;
-		adding		= false;
+	if(!copying){
+		if(form.querySelector('[name="element-id"]').value != ''){
+			editing		= true;
+			adding		= false;
+		}
 	}
 	
 	let wrapper;

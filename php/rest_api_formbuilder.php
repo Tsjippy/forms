@@ -300,12 +300,16 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 	// Make sure we only are working on the name
 	$element->name	= end(explode('\\', $element->name));
 
+	$elements		= $simForms->getElementByName($element->name, '', false);
 	if(
-		str_contains($element->name, '[]') 										||  // Doesn't need to be unique 
+		str_contains($element->name, '[]') 	||  	// Doesn't need to be unique 
 		(
-			$update && $oldElement->name == $element->name && 						// Name didn't change
-			count($simForms->getElementByName($element->name, '', false)) == 1)
-		){
+			$update && 
+			$oldElement->name == $element->name && 	// Name didn't change
+			$elements &&
+			count($elements) == 1
+		)
+	){
 
 		return $element->name;
 	}
@@ -412,9 +416,11 @@ function addFormElement($copy=false){
 
 	//copy an existing element
 	if($copy === true){
-		$element		= $simForms->getElementById($_POST['element-id']);
+		$element			= $simForms->getElementById($_POST['element-id']);
 
-		$element->name	= $element->nicename;
+		$element->name		= $element->nicename;
+
+		$element->infotext	= $element->text;
 	}
 
 	// Get element from $_POST
@@ -443,7 +449,9 @@ function addFormElement($copy=false){
 	}
 
 	if(is_numeric($_POST['element-id'])){
-		$update			= true;
+		if(!$copy){
+			$update			= true;
+		}
 
 		$element->id	= $_POST['element-id'];
 
