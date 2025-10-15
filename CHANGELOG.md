@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- copying of info elements
 
 ### Updated
 
