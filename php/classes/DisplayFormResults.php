@@ -348,7 +348,7 @@ class DisplayFormResults extends DisplayForm{
 	 *
 	 * @param	array	$submissions	Array of submissions past by reference
 	 */
-	function sortSubmissions(&$submissions){
+	public function sortSubmissions(&$submissions){
 		// sort if needed
 		if(!$this->sortColumn || $this->sortColumnFound  || empty($submissions)){
 			// sorting not needed
@@ -1699,41 +1699,48 @@ class DisplayFormResults extends DisplayForm{
 							?>
 						<div class="table-rights-wrapper">
 							<h4>Select roles with permission to VIEW the table, finetune it per column on the 'column settings' tab</h4>
-							<div class="role-info">
-							<?php
-							foreach($viewRoles as $key => $roleName){
-								if(in_array($key,array_keys((array)$this->tableSettings->view_right_roles))){
-									$checked = 'checked';
-								}else{
-									$checked = '';
+							
+							<select name='table-settings[view-right-roles][]' multiple>
+								<option value=''>---</option>
+								<?php
+								foreach($viewRoles as $key=>$roleName){
+									if(in_array($key, (array)$this->tableSettings->view_right_roles)){
+										$selected = 'selected';
+									}else{
+										$selected = '';
+									}
+									echo "<option value='$key' $selected>$roleName</option>";
 								}
-								
-								echo "<label class='option-label'>";
-									echo "<input type='checkbox' class='formbuilder form-element-setting' name='table-settings[view-right-roles][$key]' value='$roleName' $checked>";
-									echo "$roleName";
-								echo "</label><br>";
-							}
+								?>
+							</select>
+
+							<br>
+							<h4>Select users with permission to VIEW the table</h4>
+							<?php
+							echo SIM\userSelect('', true, false, '', "table-settings[view-right-roles][]", [], $this->tableSettings->view_right_roles, [1], 'select', '', true);
 							?>
-							</div>
-						</div>
-						
-						<div class="table-rights-wrapper">
+
 							<h4>Select roles with permission to edit ALL form submission data</h4>
-							<div class="role-info">
-							<?php
-							foreach($editRoles as $key=>$roleName){
-								if(in_array($key, array_keys((array)$this->tableSettings->edit_right_roles))){
-									$checked = 'checked';
-								}else{
-									$checked = '';
+
+							<select name='table-settings[edit-right-roles][]' multiple>
+								<option value=''>---</option>
+								<?php
+								foreach($viewRoles as $key => $roleName){
+									if(in_array($key, (array)$this->tableSettings->edit_right_roles)){
+										$selected = 'selected';
+									}else{
+										$selected = '';
+									}
+									echo "<option value='$key' $selected>$roleName</option>";
 								}
-								echo "<label class='option-label'>";
-									echo "<input type='checkbox' class='formbuilder form-element-setting' name='table-settings[edit-right-roles][$key]' value='$roleName' $checked>";
-									echo " $roleName";
-								echo "</label><br>";
-							}
+								?>
+							</select>
+
+							<br>
+							<h4>Select users with permission to EDIT the table</h4>
+							<?php
+							echo SIM\userSelect('', true, false, '', "table-settings[edit-right-roles][]", [], $this->tableSettings->edit_right_roles, [1], 'select', '', true);
 							?>
-							</div>
 						</div>
 					</div>
 				</div>

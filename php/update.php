@@ -270,4 +270,43 @@ function moduleUpdate($oldVersion){
             }
         }
     }
+
+    if($oldVersion < '8.7.4'){
+        $query						= "SELECT * FROM {$simForms->shortcodeTable}";
+		$shortcodes 		        = $wpdb->get_results($query);
+
+        foreach($shortcodes as $tableSettings){
+            foreach($tableSettings as $key => &$value){
+                $value	= maybe_unserialize($value);
+            }
+
+            if(is_array($tableSettings->view_right_roles) && !is_numeric(array_keys($tableSettings->view_right_roles)[0])){
+                $tableSettings->view_right_roles    = array_keys($tableSettings->view_right_roles);
+            }
+
+            if(is_array($tableSettings->edit_right_roles) && !is_numeric(array_keys($tableSettings->edit_right_roles)[0])){
+                $tableSettings->edit_right_roles    = array_keys($tableSettings->edit_right_roles);
+            }
+
+
+            foreach($tableSettings as $key => &$value){
+                $value	= maybe_serialize($value);
+            }
+
+            $tableSettings  = (array)$tableSettings;
+            $wpdb->update(
+                $simForms->shortcodeTable,
+                $tableSettings,
+                array(
+                    'id'		=> $tableSettings['id'],
+                )
+            );
+
+            $wpdb->rows_affected;
+        }
+    }
 }
+
+add_action('init', function(){
+    moduleUpdate('8.7.3');
+});
