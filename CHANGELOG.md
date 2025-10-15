@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- issue with a multi element withing in a multi wrapper
 
 ### Updated
+
+## [8.7.5] - 2025-10-15
+
+
+### Fixed
+- issue with a multi element withing in a multi wrapper
 
 ## [8.7.4] - 2025-10-15
 
