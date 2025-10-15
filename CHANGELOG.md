@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- do not add names to non-input elements
 
 ### Fixed
 
 ### Updated
+
+## [8.7.6] - 2025-10-15
+
+
+### Changed
+- do not add names to non-input elements
 
 ## [8.7.5] - 2025-10-15
 
