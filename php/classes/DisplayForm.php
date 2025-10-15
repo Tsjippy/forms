@@ -254,7 +254,10 @@ class DisplayForm extends SubmitForm{
 				// This is the multi end
 				if($this->formElements[$x]->type == 'multi-end'){
 					// only if the next element is a formstep we have a clonable formstep
-					if($this->formElements[$x + 1]->type == 'formstep'){
+					if(
+						empty($this->formElements[$x + 1]) ||				// this is the last element of the form
+						$this->formElements[$x + 1]->type == 'formstep'		// the next element is a formstep
+					){
 						$this->clonableFormStep	= true;
 					}
 					break;
