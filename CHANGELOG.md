@@ -4,6 +4,7 @@
 ### Added
 - support for clonable formsteps
 - support for clonable formsteps
+- extra form step circles if needed
 
 ### Changed
 
