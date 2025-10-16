@@ -622,7 +622,23 @@ class FormBuilderForm extends SimForms{
 							<?php
 							// Splitted fields
 							$foundElements = [];
-							foreach($this->formElements as $key=>$element){
+							foreach($this->formElements as $key => $element){
+								if($element->type == 'multi-start'){
+									$nextKey	= $key;
+									while(true){
+										$nextKey++;
+										$nextElement	= $this->formElements[$nextKey];
+
+										if(!in_array($nextElement->type, $this->nonInputs)){
+											$foundElements[$nextElement->id] = $nextElement->name;
+										}
+
+										if($nextElement->type == 'multi-end'){
+											break;
+										}
+									}
+								}
+
 								$pattern = "/([^\[]+)\[[0-9]*\]/i";
 								
 								if(preg_match($pattern, $element->name, $matches)){

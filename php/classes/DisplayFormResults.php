@@ -396,7 +396,6 @@ class DisplayFormResults extends DisplayForm{
 			return;
 		}
 
-		SIM\cleanUpNestedArray($this->formData->split);
 		if(empty($this->formData->split)){
 			$this->submissions		= $this->getSubmissions($userId, $submissionId, $all);
 
@@ -503,7 +502,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 	}
 
-	public function splitSubmission($splitElementName){
+	public function splitSubmission(){
 		$splitNames	= [];
 		foreach($this->formData->split as $id){
 			$splitNames[] = str_replace('[]', '', $this->getElementById($id, 'name'));
@@ -511,21 +510,30 @@ class DisplayFormResults extends DisplayForm{
 
 		//loop over all submissions
 		foreach($this->submissions as $this->submission){
-			if(!is_array($this->submission->formresults[$splitElementName])){
-				continue;
-			}
-
 			// check how many entries we should make
-			$count	= count($this->submission->formresults[$splitElementName]);
+			$count	= 1;
+			foreach($splitNames as $splitName){
+				if(!is_array($this->submission->formresults[$splitName])){
+					$this->submission->formresults[$splitName]	= [$this->submission->formresults[$splitName]];
+				}
+
+				$c	= count($this->submission->formresults[$splitName]);
+
+				if($c > $count){
+					$count	= $c;
+				}
+			}
 
 			// loop over
 			for($x = 0; $x < $count; $x++){
 				// create a new submission
 				$newSubmission	= clone $this->submission;
 
-				foreach($splitNames as $name){
-					if(is_array($newSubmission->formresults[$name]) && isset($newSubmission->formresults[$name][$x])){
-						$newSubmission->formresults[$name]	= $newSubmission->formresults[$name][$x];
+				foreach($splitNames as $splitName){
+					if(isset($newSubmission->formresults[$splitName][$x])){
+						$newSubmission->formresults[$splitName]	= $newSubmission->formresults[$splitName][$x];
+					}else{
+						$newSubmission->formresults[$splitName]	= '';
 					}
 				}
 
@@ -565,8 +573,7 @@ class DisplayFormResults extends DisplayForm{
 			$splitElementName	= $matches[1];
 			$this->splitArrayedSubmission($splitElementName);
 		}else{
-			$splitElementName	= str_replace('[]', '', $splitElementName);
-			$this->splitSubmission($splitElementName);
+			$this->splitSubmission();
 		}
 	}
 	
@@ -797,7 +804,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 		
 		//also add the subid
-		if(!isset($this->columnSettings[-1]) && !empty($this->formData->split)){
+		if(!isset($this->columnSettings[-5]) && !empty($this->formData->split)){
 			$this->columnSettings[-5] = [
 				'name'				=> 'subid',
 				'nice-name'			=> 'Sub-Id',

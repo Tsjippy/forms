@@ -300,6 +300,12 @@ function getUniqueName($element, $update, $oldElement, $simForms){
 	// Make sure we only are working on the name
 	$element->name	= end(explode('\\', $element->name));
 
+	// Make lowercase
+	$element->name	= strtolower($element->name);
+
+	// Remove ending _
+	$element->name	= trim($element->name, ' \n\r\t\v\0_');
+
 	$elements		= $simForms->getElementByName($element->name, '', false);
 	if(
 		str_contains($element->name, '[]') 	||  	// Doesn't need to be unique 
