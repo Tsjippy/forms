@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- form reminder e-mails
 
 ### Updated
 
