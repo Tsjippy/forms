@@ -1648,16 +1648,9 @@ class DisplayFormResults extends DisplayForm{
 						<label style="margin:0 10px;">equals</label>
 						<input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo $this->formData->autoarchive_value;?>" style='max-width:200px;'>
 						
-						<div class="info-box" name="info">
-							<div>
-								<p class="info-icon">
-									<img draggable="false" role="img" class="emoji" alt="ℹ" src="<?php echo SIM\PICTURESURL."/info.png";?>" loading='lazy' >
-								</p>
-							</div>
-							<span class="info-text">
-								You can use placeholders like '%today%+3days' for a value
-							</span>
-						</div>
+						<?php
+						echo $this->infoBoxHtml('info', "You can use placeholders like '%today%+3days' for a value");
+						?>
 					</div>
 				</div>
 
@@ -1956,7 +1949,7 @@ class DisplayFormResults extends DisplayForm{
 					$filterValue	= $_POST[$filterKey];
 				}
 	
-				$elementHtml	= $this->getElementHtml($filterElement, $filterValue, true);
+				$elementHtml	= $this->getElementHtml($filterElement, $filterValue);
 				
 				// make sure the name is not the element name but the filtername
 				$elementHtml	= str_replace("name='{$filterElement->name}'", "name='$filterKey'", $elementHtml);

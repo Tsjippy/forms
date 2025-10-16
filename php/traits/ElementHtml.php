@@ -36,7 +36,7 @@ trait ElementHtml{
 	}
     
 	/**
-	 * Get the values of an element
+	 * Gets the prefilled values of an element
 	 *
 	 * @param	object	$element		The element
 	 *
@@ -367,397 +367,406 @@ trait ElementHtml{
 
 		return $prevValues;
 	}
+
 	/**
-	 * Gets the html of form element
-	 *
-	 * @param	object	$element		The element
-	 * @param	mixed	$value			The value of the element
-	 * @param	bool	$removeMinMax	Wheter to ignore min and max values for date elements
-	 *
-	 * @return	string| WP error		The html
+	 * Processes the options for an element
 	 */
-	function getElementHtml($element, $value ='', $removeMinMax=false){
-		$html		= '';
-		$extraHtml	= '';
-		$elClass	= '';
-		$elOptions	= '';
-
+	protected function processElementOptions($element, &$elClass, &$elOptions, &$extraHtml){
 		/*
-			ELEMENT OPTIONS
+			BUTTON TYPE
 		*/
-		if(!empty($element->options)){
-			//Store options in an array
-			$options	= explode("\n", trim($element->options));
+		if($element->type == 'button'){
+			$elOptions	.= " type='button'";
+		}
+
+		if(empty($element->options)){
+			return;
+		}
+
+		$removeMin	= false;
+
+		// do not have min values in a form table to allow to edit values for the past
+		if(get_class() == 'SIM\FORMS\DisplayFormResults'){
+			$removeMin	= true;
+		}
+
+		//Store options in an array
+		$options	= explode("\n", trim($element->options));
+		
+		//Loop over the options array
+		foreach($options as $option){
+			//Remove starting or ending spaces and make it lowercase
+			$option 		= trim($option);
+
+			$optionType		= explode('=', $option)[0];
+			$optionValue	= str_replace('\\\\', '\\', explode('=', $option)[1]);
 			
-			//Loop over the options array
-			foreach($options as $option){
-				//Remove starting or ending spaces and make it lowercase
-				$option 		= trim($option);
+			if($removeMin && in_array($optionType, ['min', 'max'])){
+				continue;
+			}
 
-				$optionType		= explode('=', $option)[0];
-				$optionValue	= str_replace('\\\\', '\\', explode('=', $option)[1]);
-				
-				if($removeMinMax && in_array($optionType, ['min', 'max'])){
-					continue;
+			if($optionType == 'class'){
+				$elClass .= " $optionValue";
+			}else{
+				//remove any leading "
+				$optionValue	= trim($optionValue, '\'"');
+
+				if($element->type == 'date' && in_array($optionType, ['min', 'max', 'value']) && strtotime($optionValue)){
+					$optionValue	= Date('Y-m-d', strtotime($optionValue));
 				}
 
-				if($optionType == 'class'){
-					$elClass .= " $optionValue";
-				}else{
-					//remove any leading "
-					$optionValue	= trim($optionValue, '\'"');
+				//Write the corrected option as html
+				$elOptions	.= " $optionType=\"$optionValue\"";
+			}
+			
+			// we are getting the html for an input and that input depends on a datalist
+			if($optionType == 'list'){
+				$datalist	= $this->getElementByName($optionValue);
 
-					if($element->type == 'date' && in_array($optionType, ['min', 'max', 'value']) && strtotime($optionValue)){
-						$optionValue	= Date('Y-m-d', strtotime($optionValue));
-					}
-
-					//Write the corrected option as html
-					$elOptions	.= " $optionType=\"$optionValue\"";
+				if($datalist == $element){
+					$datalist	= $this->getElementByName($optionValue.'-list');
+					SIM\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
 				}
-				
-				// we are getting the html for an input and that input depends on a datalist
-				if($optionType == 'list'){
-					$datalist	= $this->getElementByName($optionValue);
 
-					if($datalist == $element){
-						$datalist	= $this->getElementByName($optionValue.'-list');
-						SIM\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
-					}
-
-					if($datalist){
-						$extraHtml	= $this->getElementHtml($datalist);
-					}
+				if($datalist){
+					$extraHtml	.= $this->getElementHtml($datalist);
 				}
 			}
 		}
+	}
 
-		$elValue	= "";
+	/**
+	 * Returns the html for an info element
+	 */
+	public function infoBoxHtml($text){
+		//remove any paragraphs
+		$content = str_replace(['<p>', '</p>'], '', $text);
+		$content = SIM\deslash($content);
 		
-		if($element->type == 'p'){
-			$html = wp_kses_post($element->text);
-			$html = "<div name='{$element->name}'>".SIM\deslash($html)."</div>";
-		}elseif($element->type == 'php'){
-			//we store the functionname in the html variable replace any double \ with a single \
-			$functionName 						= str_replace('\\\\','\\',$element->functionname);
-			//only continue if the function exists
-			if (function_exists( $functionName ) ){
-				$html	= $functionName($this->userId);
+		ob_start();
+		?>
+		<div class='info-box'>
+			<div style="float:right">
+				<p class="info-icon">
+					<img draggable="false" role="img" class="emoji" alt="ℹ" src="<?php echo SIM\PICTURESURL.'/info.png';?>" loading="lazy" >
+				</p>
+			</div>
+			<span class='info-text'>
+				<?php echo $content;?>
+			</span>
+		</div>
+
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Gets the html for a file or image element
+	 */
+	protected function uploaderHtml($element, $elOptions){
+		$name		= $element->name;
+			
+		// Element setting
+		if(!empty($element->foldername)){
+			if(str_contains($element->foldername, "private/")){
+				$targetDir	= $element->foldername;
 			}else{
-				$html	= "php function '$functionName' not found";
+				$targetDir	= "private/".$element->foldername;
 			}
-		}elseif($element->type == 'div-start'){
-			$class		= '';
-			if($element->hidden){
-				$class	= "class='hidden'";
+		}
+
+		// Form setting
+		if(empty($targetDir)){
+			$targetDir = $this->formData->upload_path;
+		}
+
+		// Default setting
+		if(empty($targetDir)){
+			$targetDir = 'form_uploads/'.$this->formData->form_name;
+		}
+
+		if(empty($this->formData->save_in_meta)){
+			$library	= false;
+			$metakey	= '';
+			$userId		= '';
+		}else{
+			$library	= $element->library;
+			$metakey	= $name;
+			$userId		= $this->userId;
+		}
+		//Load js
+		$uploader = new SIM\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false);
+		
+		return $uploader->getUploadHtml($name, $targetDir, $element->multiple, $elOptions, $element->editimage);
+	}
+
+	/**
+	 * Determines the tag type of an element
+	 */
+	protected function getTagType($element){
+		$tagType	= "input type='{$element->type}'";
+
+		if(in_array($element->type, ['formstep', 'info', 'div-start'])){
+			$tagType	= "div";
+		}elseif(in_array($element->type, array_merge($this->nonInputs, ['select', 'textarea']))){
+			$tagType	= $element->type;
+		}
+
+		return $tagType;
+	}
+
+	/**
+	 * Determines the element name
+	 */
+	protected function getElementNameForHtml($element){
+		// [] not yet added to name
+		if(in_array($element->type, ['radio','checkbox']) && !str_contains($element->name, '[]')) {
+			$element->name .= '[]';
+		}
+
+		$nameString	= "name='$element->name'" ;
+
+		// No need for a name if not an input
+		if(in_array($element->type, $this->nonInputs)){
+			$nameString	= '';
+		}
+
+		return $nameString;
+	}
+
+	/**
+	 * Get element Id
+	 */
+	protected function getElementId($element){
+		$elId	= "";
+
+		//datalist needs an id to work as well as mandatory elements for use in anchor links
+		if($element->type == 'datalist' || $element->mandatory || $element->recommended){
+			$elId	= "id='$element->name'";
+		}
+
+		if(str_contains($element->name, '[]')){
+			$elId	= "id='E$element->id'";
+		}
+
+		return $elId;
+	}
+
+	/**
+	 * Gets the class string for an element
+	 */
+	protected function getElementClass($element){
+		$elClass = " formfield";
+
+		switch($element->type){
+			case 'label':
+				$elClass .= " form-label";
+				break;
+			case 'button':
+				$elClass .= " button";
+				break;
+			case 'formstep':
+				$elClass .= " formstep step-hidden";
+				break;
+			default:
+				$elClass .= " formfield-input";
+		}
+
+		return $elClass;
+	}
+
+	/**
+	 * Gets the element value
+	 */
+	protected function getElementValueForHtml($element, &$requestedValue, &$defaultValues, &$val){
+		if(in_array($element->type, $this->nonInputs)){
+			return '';
+		}
+
+		$valueString	= '';
+
+		// The requested value is a value of a previous submission, find previous submitted values if not provided to the function
+		if(empty($requestedValue)){
+			$requestedValue	= $this->getPrevValues($element);
+		}
+
+		$defaultValues	= $this->getElementValues($element);
+
+		// Write a placeholder value for multi elements
+		if($this->multiwrap || !empty($element->multiple)){
+			if(str_contains($element->type, 'input')){
+				$valueString	= "value='%value%'";
 			}
-			$html 		= "<div name='$element->name' $class>";
-		}elseif($element->type == 'div-end'){
-			$html 		= "</div>";
-		}elseif(in_array($element->type, ['multi-start','multi-end'])){
-			$html 		= "";
-		}elseif(in_array($element->type, ['info'])){
-			//remove any paragraphs
-			$content = str_replace('<p>','',$element->text);
-			$content = str_replace('</p>','',$content);
-			$content = SIM\deslash($content);
-			
-			$html = "<div class='info-box' name='{$element->name}'>";
-				$html .= '<div style="float:right">';
-					$html .= '<p class="info-icon"><img draggable="false" role="img" class="emoji" alt="ℹ" src="'.SIM\PICTURESURL.'/info.png" loading="lazy" ></p>';
-				$html .= '</div>';
-				$html .= "<span class='info-text'>$content</span>";
-			$html .= '</div>';
-		}elseif(in_array($element->type, ['file','image'])){
-			$name		= $element->name;
-			
-			// Element setting
-			if(!empty($element->foldername)){
-				if(str_contains($element->foldername, "private/")){
-					$targetDir	= $element->foldername;
-				}else{
-					$targetDir	= "private/".$element->foldername;
+
+			return $valueString;
+		}
+		
+
+		if(!empty($defaultValues) || !empty($requestedValue)){
+			$val	= $requestedValue;
+
+			if(empty($requestedValue)){
+				//this is an input and there is a value for it
+				if(!empty($defaultValues['defaults']) && (empty($this->formData->save_in_meta) || empty($defaultValues['metavalue']))){
+					$val		= array_values((array)$defaultValues['defaults'])[0];
+				}elseif(!empty($defaultValues['metavalue'])){
+					$elIndex	= 0;
+					if(str_contains($element->name, '[]')){
+						// Check if there are multiple elements with the same name
+						$elements	= $this->getElementByName($element->name, '', false);
+
+						foreach($elements as $elIndex=>$el){
+							if($el->id == $element->id){
+								break;
+							}
+						}
+					}
+
+					$val		= array_values((array)$defaultValues['metavalue'])[$elIndex];
 				}
 			}
-			// Form setting
-			if(empty($targetDir)){
-				$targetDir = $this->formData->upload_path;
-			}
-			// Default setting
-			if(empty($targetDir)){
-				$targetDir = 'form_uploads/'.$this->formData->form_name;
-			}
 
-			if(empty($this->formData->save_in_meta)){
-				$library	= false;
-				$metakey	= '';
-				$userId		= '';
-			}else{
-				$library	= $element->library;
-				$metakey	= $name;
-				$userId		= $this->userId;
-			}
-			//Load js
-			$uploader = new SIM\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false);
-			
-			$html = $uploader->getUploadHtml($name, $targetDir, $element->multiple, $elOptions, $element->editimage);
-		}else{
-			/*
-				ELEMENT TAG NAME
-			*/
-			if(in_array($element->type, ['formstep', 'info', 'div-start'])){
-				$elType	= "div";
-			}elseif(in_array($element->type,array_merge($this->nonInputs,['select','textarea']))){
-				$elType	= $element->type;
-			}else{
-				$elType	= "input type='{$element->type}'";
-			}
-			
-			 /*
-				ELEMENT NAME
-			 */
-			//Get the field name, make it lowercase and replace any spaces with an underscore
-			$elName	= $element->name;
-			// [] not yet added to name
-			if(in_array($element->type, ['radio','checkbox']) && !str_contains($elName, '[]')) {
-				$elName .= '[]';
-			}
-			$nameString	= "name='$elName'" ;
+			if(
+				str_contains($element->type, 'input') && 
+				!empty($val) && 
+				!in_array($element->type, ['radio', 'checkbox'])
+			){
+				if(is_array($val)){
+					$val	= array_values($val)[0];
+				}
 
-			// No need for a name if not an input
-			if(in_array($element->type, $this->nonInputs)){
-				$nameString	= '';
+				$valueString	= "value='$val'";
 			}
-			
-			/*
-				ELEMENT ID
-			*/
-			$elId	= "";
-			//datalist needs an id to work as well as mandatory elements for use in anchor links
-			if($element->type == 'datalist' || $element->mandatory || $element->recommended){
-				$elId	= "id='$elName'";
-			}
+		}
 
-			if(str_contains($elName, '[]')){
-				$elId	= "id='E$element->id'";
+		return $valueString;
+	}
+
+	/**
+	 * Get the tag content of an element, i.e. the conten between the openening and closing tag
+	 */
+	protected function getTagContent($element, $requestedValue, $val, $values, $elClass, $elOptions, &$html){
+		$tagContent	= '';
+
+		if($element->type == 'textarea'){
+			if(!empty($requestedValue)){
+				if(is_array($requestedValue)){
+					$requestedValue	= array_values($requestedValue)[0];
+				}
+
+				$tagContent = $requestedValue;
+			}elseif(!empty($val)){
+				if(is_array($val)){
+					$val	= array_values($val)[0];
+				}
+				$tagContent = $val;
 			}
-			
-			/*
-				ELEMENT CLASS
-			*/
-			$elClass = " formfield";
+		}elseif(!empty($element->text)){
 			switch($element->type){
+				case 'formstep':
+					$tagContent = "<h3>{$element->text}</h3>";
+					break;
 				case 'label':
-					$elClass .= " form-label";
+					$tagContent = "<h4 class='label-text'>{$element->text}</h4>";
 					break;
 				case 'button':
-					$elClass .= " button";
-					break;
-				case 'formstep':
-					$elClass .= " formstep step-hidden";
+					$tagContent = $element->text;
 					break;
 				default:
-					$elClass .= " formfield-input";
+					$tagContent = "<label class='label-text'>{$element->text}</label>";
 			}
-			
-			/*
-				BUTTON TYPE
-			*/
-			if($element->type == 'button'){
-				$elOptions	.= " type='button'";
-			}
+		}
+		
+		switch($element->type){
+			case 'select':
+				$tagContent .= $this->selectOptionsHtml($element, $requestedValue, $values);
+				break;
+			case 'datalist':
+				$tagContent .= $this->datalistOptionsHtml($element);
+				break;
+			case 'radio':
+			case 'checkbox':
+				$html .= $this->checkboxesHtml($element, $requestedValue, $values, $element->type, $element->name, $elClass, $elOptions);
+				break;
+			default:
+				$tagContent .= "";
+		}
 
-			/*
-				ELEMENT VALUE
-			*/				
-			if(empty($value)){
-				$value	= $this->getPrevValues($element);
-			}
+		return $tagContent;
+	}
 
-			$values	= $this->getElementValues($element);
-			if($this->multiwrap || !empty($element->multiple)){
-				if(str_contains($elType, 'input')){
-					$elValue	= "value='%value%'";
-				}
-			}elseif(!empty($values) || !empty($value)){
-				$val	= $value;
-				if(empty($value)){
-					//this is an input and there is a value for it
-					if(!empty($values['defaults']) && (empty($this->formData->save_in_meta) || empty($values['metavalue']))){
-						$val		= array_values((array)$values['defaults'])[0];
-					}elseif(!empty($values['metavalue'])){
-						$elIndex	= 0;
-						if(str_contains($element->name, '[]')){
-							// Check if there are multiple elements with the same name
-							$elements	= $this->getElementByName($element->name, '', false);
+	protected function getMultiTextInputHtml($element, $elId, $elClass, $elOptions){
+		// add previous made inputs
+		$preValues	= $this->getPrevValues($element, true);
 
-							foreach($elements as $elIndex=>$el){
-								if($el->id == $element->id){
-									break;
-								}
-							}
-						}
+		if(empty($preValues) && !empty($this->defaultArrayValues[$element->default_value])){
+			$preValues	= $this->defaultArrayValues[$element->default_value];
 
-						$val		= array_values((array)$values['metavalue'])[$elIndex];
-					}
-				}
-
-				if(
-					str_contains($elType, 'input') && 
-					!empty($val) && 
-					!in_array($elType, ['radio', 'checkbox'])
-				){
-					if(is_array($val)){
-						$val	= array_values($val)[0];
-					}
-					$elValue	= "value='$val'";
-				}
-			}
-
-			/*
-				ELEMENT TAG CONTENTS
-			*/
-			$elContent = "";
-			if($element->type == 'textarea'){
-				if(!empty($value)){
-					if(is_array($value)){
-						$value	= array_values($value)[0];
-					}
-					$elContent = $value;
-				}elseif(!empty($val)){
-					if(is_array($val)){
-						$val	= array_values($val)[0];
-					}
-					$elContent = $val;
-				}
-			}elseif(!empty($element->text)){
-				switch($element->type){
-					case 'formstep':
-						$elContent = "<h3>{$element->text}</h3>";
-						break;
-					case 'label':
-						$elContent = "<h4 class='label-text'>{$element->text}</h4>";
-						break;
-					case 'button':
-						$elContent = $element->text;
-						break;
-					default:
-						$elContent = "<label class='label-text'>{$element->text}</label>";
-				}
-			}
-			
-			switch($element->type){
-				case 'select':
-					$elContent .= $this->selectOptionsHtml($element, $value, $values);
-					break;
-				case 'datalist':
-					$elContent .= $this->datalistOptionsHtml($element);
-					break;
-				case 'radio':
-				case 'checkbox':
-					$html .= $this->checkboxesHtml($element, $value, $values, $elType, $elName, $elClass, $elOptions);
-					break;
-				default:
-					$elContent .= "";
-			}
-			
-			//close the field
-			if(in_array($element->type, ['select', 'textarea', 'button', 'datalist'])){
-				$elClose	= "</{$element->type}>";
-			}else{
-				$elClose	= "";
-			}
-			
-			//only close a label field if it is not wrapped
-			if($element->type == 'label' && empty($element->wrap)){
-				$elClose	= "</label>";
-			}
-			
-			/*
-				ELEMENT MULTIPLE
-			*/
-			if(!empty($element->multiple)){
-				if($element->type == 'select'){
-					$html	= "<$elType name='$elName' $elId class='$elClass' $elOptions>";
-				}elseif($element->type == 'text'){
-					
-					$html	= "<div class='option-wrapper'>";
-						// container for choices made
-						$html	.= "<ul class='list-selection-list'>";
-							// add previous made inputs
-							$preValues	= $this->getPrevValues($element, true);
-
-							if(empty($preValues) && !empty($this->defaultArrayValues[$element->default_value])){
-								$preValues	= $this->defaultArrayValues[$element->default_value];
-
-								if(!is_array($preValues)){
-									$preValues	= [$preValues];
-								}
-							}
-
-							foreach($preValues as $v){
-								if(method_exists($this, 'transformInputData')){
-									$transValue		= $this->transformInputData($v, $element->name, $this->submission->formresults);
-								}else{
-									$transValue		= $v;
-								}
-
-								$html	.= "<li class='list-selection'>";
-									$html	.= "<button type='button' class='small remove-list-selection'>";
-										$html	.= "<span class='remove-list-selection'>×</span>";
-									$html	.= "</button>";
-									$html	.= "<input type='hidden' class='no-reset' name='$element->name[]' value='$v'>";
-									$html	.= "<span class='selected-name'>$transValue</span>";
-								$html	.= "</li>";
-							}
-						$html	.= "</ul>";
-
-						// add the text input
-						$html	.= "<div class='multi-text-input-wrapper'>";
-							$html	.= "<$elType id='$elName' name='$element->name[]' class='$elClass datalistinput multiple' $elOptions>";
-							$html	.= '<button type="button" class="small add-list-selection hidden">Add</button>';
-						$html	.= "</div>";
-					$html	.= "</div>";
-				}else{
-					$html	= "<$elType $nameString $elId class='$elClass' $elOptions value='%value%'>$elContent$elClose";
-				}
-				
-				if($element->type != 'text'){
-					$this->multiInput($element, $values, $html);
-					$html	= "<div class='clone-divs-wrapper'>";
-						foreach($this->multiInputsHtml as $h){
-							$html	.= $h;
-						}
-					$html	.= '</div>';
-				}
-			}elseif(empty($html)){
-				$html	= "<$elType $nameString $elId class='$elClass' $elOptions $elValue>$elContent$elClose";
+			if(!is_array($preValues)){
+				$preValues	= [$preValues];
 			}
 		}
 
-		$html	= $extraHtml.$html;
-
-		// filter the element html
-		$html	= apply_filters('sim-forms-element-html', $html, $element, $this);
-		
-		//remove unnessary whitespaces
-		$html = preg_replace('/\h+/', ' ', $html);
-		
-		//check if we need to transform a keyword to date
-		preg_match_all('/%([^%;]*)%/i', $html, $matches);
-		foreach($matches[1] as $key=>$keyword){
-			$keyword = str_replace('_',' ', $keyword);
-			
-			//If the keyword is a valid date keyword
-			if(!empty(strtotime($keyword))){
-				//convert to date
-				$dateString = date("Y-m-d", strtotime($keyword));
-				
-				//update form element
-				$html = str_replace($matches[0][$key], $dateString, $html);
-			}
+		$elName	= $element->name;
+		if(!str_contains($elName, '[]')){
+			$elName	.= '[]';
 		}
 
-		return apply_filters('sim-form-element-html', $html, $element, $this);
+		$html	= "<div class='option-wrapper'>";
+			// container for choices made
+			$html	.= "<ul class='list-selection-list'>";
+				foreach($preValues as $v){
+					if(method_exists($this, 'transformInputData')){
+						$transValue		= $this->transformInputData($v, $element->name, $this->submission->formresults);
+					}else{
+						$transValue		= $v;
+					}
+
+					$html	.= "<li class='list-selection'>";
+						$html	.= "<button type='button' class='small remove-list-selection'>";
+							$html	.= "<span class='remove-list-selection'>×</span>";
+						$html	.= "</button>";
+						$html	.= "<input type='hidden' class='no-reset' name='$elName' value='$v'>";
+						$html	.= "<span class='selected-name'>$transValue</span>";
+					$html	.= "</li>";
+				}
+			$html	.= "</ul>";
+
+			// add the text input
+			$html	.= "<div class='multi-text-input-wrapper'>";
+				$html	.= "<input type='text' $elId name='$element->name[]' class='$elClass datalistinput multiple' $elOptions>";
+				$html	.= '<button type="button" class="small add-list-selection hidden">Add</button>';
+			$html	.= "</div>";
+		$html	.= "</div>";
+
+		return $html;
+	}
+
+	/**
+	 * Gets the html for elements with multiple instances
+	 */
+	protected function getMultiElementHtml($element, $elId, $elClass, $elOptions, $elType, $nameString, $elContent, $elClose, $values){
+		if(empty($element->multiple)){
+			return '';
+		}
+
+		if($element->type == 'select'){
+			$html	= "<$element->type name='$element->name' $elId class='$elClass' $elOptions>";
+		}elseif($element->type == 'text'){
+			return $this->getMultiTextInputHtml($element, $elId, $elClass, $elOptions);
+		}else{
+			$html	= "<$elType $nameString $elId class='$elClass' $elOptions value='%value%'>$elContent$elClose";
+		}
+		
+		$this->multiInput($element, $values, $html);
+
+		$html	= "<div class='clone-divs-wrapper'>";
+			foreach($this->multiInputsHtml as $h){
+				$html	.= $h;
+			}
+		$html	.= '</div>';
+
+		return $html;
 	}
 
 	/**
@@ -765,12 +774,12 @@ trait ElementHtml{
 	 * Returns all the options of a select element
 	 *
 	 * @param	object	$element		The element to get the options for
-	 * @param	mixed	$value			The value of the element
+	 * @param	mixed	$requestedValue			The value of the element
 	 * @param	array	$values			The default values for the element
 	 * 
 	 * @return	string			The html
 	 */
-	public function selectOptionsHtml($element, $value, $values){
+	public function selectOptionsHtml($element, $requestedValue, $values){
 		$elContent	= "<option value=''>---</option>";
 		$options	= $this->getElementOptions($element);
 
@@ -779,13 +788,13 @@ trait ElementHtml{
 			$selValues	= array_map('strtolower', (array)$values['metavalue']);
 		}
 
-		if(!empty($value)){
-			if(is_array($value)){
-				foreach($value as $v){
+		if(!empty($requestedValue)){
+			if(is_array($requestedValue)){
+				foreach($requestedValue as $v){
 					$selValues[] = strtolower($v);
 				}
 			}else{
-				$selValues[] = strtolower($value);
+				$selValues[] = strtolower($requestedValue);
 			}
 		}
 
@@ -840,14 +849,14 @@ trait ElementHtml{
 	 * @param	object	$element		The element to get the options for
 	 * @param	mixed	$value			The value of the element
 	 * @param	array	$values			The default values for the element
-	 * @param	string	$elType			The element type
+	 * @param	string	$elType			The element type either checkbox or radio
 	 * @param	string	$elName			The element name
 	 * @param	string	$elClass		Classes for the elements
 	 * @param	string	$elOptions		The options for the elements
 	 * 
 	 * @return	string			The html
 	 */
-	public function checkboxesHtml($element, $value, $values, $elType, $elName, $elClass, $elOptions){
+	public function checkboxesHtml($element, $requestedValue, $values, $elType, $elName, $elClass, $elOptions){
 		$options	= $this->getElementOptions($element);
 		$html		= "<div class='checkbox-options-group formfield'>";
 		
@@ -877,9 +886,9 @@ trait ElementHtml{
 			}
 		}
 
-		if(!empty($value)){
-			if(is_array($value)){
-				foreach($value as $v){
+		if(!empty($requestedValue)){
+			if(is_array($requestedValue)){
+				foreach($requestedValue as $v){
 					if(is_array($v)){
 						foreach($v as $av){
 							if(is_array($av)){
@@ -895,7 +904,7 @@ trait ElementHtml{
 					}
 				}
 			}else{
-				$lowValues[] = strtolower($value);
+				$lowValues[] = strtolower($requestedValue);
 			}
 		}
 
@@ -939,6 +948,108 @@ trait ElementHtml{
 		$html .= "</div>";
 
 		return $html;
+	}
+
+	/**
+	 * Gets the html of form element
+	 *
+	 * @param	object	$element			The element
+	 * @param	mixed	$requestedValue		The value the element should have
+	 *
+	 * @return	string| WP error		The html
+	 */
+	public function getElementHtml($element, $requestedValue =''){
+		$html			= '';
+		$extraHtml		= '';
+		$elClass		= '';
+		$elOptions		= '';
+		$defaultValues	= [];
+
+		$this->processElementOptions($element, $elClass, $elOptions, $extraHtml);
+		
+		if($element->type == 'p'){
+			$html = wp_kses_post($element->text);
+			$html = "<div name='{$element->name}'>".SIM\deslash($html)."</div>";
+		}elseif($element->type == 'php'){
+			//we store the functionname in the html variable replace any double \ with a single \
+			$functionName 	= str_replace('\\\\', '\\', $element->functionname);
+			//only continue if the function exists
+			if (function_exists( $functionName ) ){
+				$html		= $functionName($this->userId);
+			}else{
+				$html		= "php function '$functionName' not found";
+			}
+		}elseif($element->type == 'div-start'){
+			$class		= '';
+			if($element->hidden){
+				$class	= "class='hidden'";
+			}
+			$html 		= "<div name='$element->name' $class>";
+		}elseif($element->type == 'div-end'){
+			$html 		= "</div>";
+		}elseif(in_array($element->type, ['multi-start','multi-end'])){
+			$html 		= "";
+		}elseif(in_array($element->type, ['info'])){
+			$html	.= $this->infoBoxHtml($element->text);
+		}elseif(in_array($element->type, ['file','image'])){
+			$html	.= $this->uploaderHtml;
+		}else{
+			$elType			= $this->getTagType($element);
+
+			$nameString 	= $this->getElementNameForHtml($element);			
+
+			$elId			= $this->getElementId($element);
+			
+			$elClass		= $this->getElementClass($element);
+
+			$valueString	= $this->getElementValueForHtml($element, $requestedValue, $defaultValues, $val);			
+			
+			$elContent 		= $this->getTagContent($element, $requestedValue, $val, $defaultValues, $elClass, $elOptions, $html);			
+			
+			//close the html
+			if(in_array($element->type, ['select', 'textarea', 'button', 'datalist'])){
+				$elClose	= "</{$element->type}>";
+			}
+			
+			//only close a label field if it is not wrapped
+			elseif($element->type == 'label' && empty($element->wrap)){
+				$elClose	= "</label>";
+			}
+			else{
+				$elClose	= "";
+			}		
+			
+			$html			.= $this->getMultiElementHtml($element, $elId, $elClass, $elOptions, $elType, $nameString, $elContent, $elClose, $defaultValues);
+
+			if(empty($html)){
+				$html	= "<$elType $nameString $elId class='$elClass' $elOptions $valueString>$elContent$elClose";
+			}
+		}
+
+		$html	= $extraHtml.$html;
+
+		// filter the element html
+		$html	= apply_filters('sim-forms-element-html', $html, $element, $this);
+		
+		//remove unnessary whitespaces
+		$html = preg_replace('/\h+/', ' ', $html);
+		
+		//check if we need to transform a keyword to date
+		preg_match_all('/%([^%;]*)%/i', $html, $matches);
+		foreach($matches[1] as $key => $keyword){
+			$keyword = str_replace('_',' ', $keyword);
+			
+			//If the keyword is a valid date keyword
+			if(!empty(strtotime($keyword))){
+				//convert to date
+				$dateString = date("Y-m-d", strtotime($keyword));
+				
+				//update form element
+				$html = str_replace($matches[0][$key], $dateString, $html);
+			}
+		}
+
+		return apply_filters('sim-form-element-html', $html, $element, $this);
 	}
 }
 

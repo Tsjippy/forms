@@ -63,7 +63,7 @@ class SimForms{
 			$this->pageSize					= 100;
 		}
 
-		$this->multiwrap					= '';
+		$this->multiwrap					= false;
 		$this->submitRoles					= [];
 		$this->showArchived					= false;
 
@@ -400,6 +400,10 @@ class SimForms{
 	*/
 	public function getEmailSettings(){
 		global $wpdb;
+
+		if(empty($this->formData)){
+			return new WP_Error('forms', "no form is loaded");
+		}
 		
 		$query = "select * from $this->formEmailTable where form_id={$this->formData->id}";
 		
@@ -413,7 +417,7 @@ class SimForms{
 		
 		if(empty($this->emailSettings)){
 			$emails[0]["from"]		= "";
-			$emails[0]["to"]			= "";
+			$emails[0]["to"]		= "";
 			$emails[0]["subject"]	= "";
 			$emails[0]["message"]	= "";
 			$emails[0]["headers"]	= "";

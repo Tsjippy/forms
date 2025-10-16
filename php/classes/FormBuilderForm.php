@@ -601,16 +601,10 @@ class FormBuilderForm extends SimForms{
 							</select>
 							<label style="margin:0 10px;">equals</label>
 							<input type='text' name="autoarchive-value" value="<?php echo $this->formData->autoarchive_value;?>">
-							<div class="info-box" name="info" style="min-width: fit-content;">
-								<div style="float:right">
-									<p class="info-icon">
-										<img draggable="false" role="img" class="emoji" alt="ℹ" src="<?php echo SIM\PICTURESURL;?>/info.png" loading='lazy' >
-									</p>
-								</div>
-								<span class="info-text">
-									You can use placeholders like '%today%+3days' for a value
-								</span>
-							</div>
+
+							<?php
+							echo $this->infoBoxHtml("You can use placeholders like '%today%+3days' for a value");
+							?>
 						</div>
 					</div>
 

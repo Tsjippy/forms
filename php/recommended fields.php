@@ -263,7 +263,7 @@ function getAllRequiredForms($userId=''){
 
 	$date				= date('Y-m-d');
 
-	$query				= "SELECT * FROM {$simForms->tableName} WHERE reminder_frequency <> '' AND reminder_period <> '' AND reminder_startdate <> '' AND reminder_startdate < '$date'";
+	$query				= "SELECT * FROM {$simForms->tableName} WHERE reminder_frequency <> '' AND reminder_period <> '' AND reminder_startdate <> '' AND reminder_startdate <= '$date'";
 
 	$forms				= $wpdb->get_results($query);
 

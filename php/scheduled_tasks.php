@@ -35,56 +35,59 @@ function formReminder(){
     // Also send a reminder for any mandatory forms
     $simForms   = new SubmitForm();
 
-    foreach(getAllRequiredForms() as $formId=>$userIds){
-        $emails = $simForms->getEmailSettings($formId);
+    foreach(getAllRequiredForms() as $formId => $userIds){
+        $simForms->getForm($formId);
+
+        $simForms->getEmailSettings();
 		
-		foreach($emails as $mail){
-            if($mail['email-trigger'] == 'shouldsubmit'){
+		foreach($simForms->emailSettings as $mail){
+            if($mail['email-trigger'] != 'shouldsubmit'){
+                continue;
+            }
 
-                $from       = $mail['from'];
+            $from       = $mail['from'];
 
-                $to         = $mail['to'];
+            $to         = $mail['to'];
 
-                $subject    = $mail['subject'];
+            $subject    = $mail['subject'];
 
-                $message    = $mail['message'];
+            $message    = $mail['message'];
 
-                $headers	= [];
+            $headers	= [];
 
-                if(!empty(trim($mail['headers']))){
-                    $headers	= explode("\n", trim($mail['headers']));
-                }
+            if(!empty(trim($mail['headers']))){
+                $headers	= explode("\n", trim($mail['headers']));
+            }
 
-                // Send an e-mail to each user
-                foreach($userIds as $userId){
-                    $user   = get_userdata($userId);
+            // Send an e-mail to each user
+            foreach($userIds as $userId){
+                $user   = get_userdata($userId);
 
-                    if(!empty($from)){
-                        if(str_contains($from, '%')){
-                            $headers[]	= "Reply-To: ". $user->user_email;
-                        }else{
-                            $headers[]	= "Reply-To: $from";
-                        }
-                    }
-
-                    if(str_contains($to, '%')){
-                        $recipient  = $user->user_email; 
+                if(!empty($from)){
+                    if(str_contains($from, '%')){
+                        $headers[]	= "Reply-To: ". $user->user_email;
                     }else{
-                        $recipient  = $to;
+                        $headers[]	= "Reply-To: $from";
                     }
-
-                    $m      = "Hi $user->first_name,<br><br>";
-                    $m      .= $simForms->processPlaceholders(
-                        $message,
-                        [
-                            'formurl'   => $simForms->formData->form_url,
-                            'name'      => $user->first_name,
-                            'email'     => $user->user_email,
-                        ]
-                    );
-
-                    wp_mail($recipient , $subject, $m, $headers);
                 }
+
+                if(str_contains($to, '%')){
+                    $recipient  = $user->user_email; 
+                }else{
+                    $recipient  = $to;
+                }
+
+                $m      = "Hi $user->first_name,<br><br>";
+                $m      .= $simForms->processPlaceholders(
+                    $message,
+                    [
+                        'formurl'   => $simForms->formData->form_url,
+                        'name'      => $user->first_name,
+                        'email'     => $user->user_email,
+                    ]
+                );
+
+                wp_mail($recipient , $subject, $m, $headers);
             }
         }
     }
