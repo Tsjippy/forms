@@ -6,9 +6,15 @@
 ### Changed
 
 ### Fixed
-- bug
 
 ### Updated
+
+## [8.7.8] - 2025-10-16
+
+
+### Fixed
+- bug
+- bug in updating table values
 
 ## [8.7.7] - 2025-10-16
 
