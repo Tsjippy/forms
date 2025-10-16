@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- order result table columns
 
 ### Updated
 
