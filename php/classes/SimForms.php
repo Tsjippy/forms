@@ -355,7 +355,7 @@ class SimForms{
 			}else{
 				$this->formData 					=  (object)$result[0];
 				$this->formData->actions			= maybe_unserialize($this->formData->actions);
-				$this->formData->split				= array_filter(maybe_unserialize($this->formData->split));
+				$this->formData->split				= maybe_unserialize($this->formData->split);
 				$this->formData->full_right_roles	= maybe_unserialize($this->formData->full_right_roles);
 				$this->formData->submit_others_form	= maybe_unserialize($this->formData->submit_others_form);				
 				
