@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- support for splitting on multi wrap elements
 
 ### Changed
 
