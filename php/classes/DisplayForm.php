@@ -619,6 +619,6 @@ class DisplayForm extends SubmitForm{
 			$html	.= "</form>";
 		$html	.= "</div>";
 
-		return $html;
+		return force_balance_tags($html);
 	}
 }
