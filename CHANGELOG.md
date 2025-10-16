@@ -7,6 +7,7 @@
 
 ### Fixed
 - bug
+- bug in updating table values
 
 ### Updated
 
