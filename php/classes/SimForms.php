@@ -224,6 +224,7 @@ class SimForms{
 			`show` boolean,
 			name tinytext,
 			nice_name tinytext,
+			`priority` int,
 			view_right_roles longtext,
 			edit_right_roles longtext,
 			PRIMARY KEY  (id)

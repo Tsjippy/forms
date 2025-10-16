@@ -305,4 +305,8 @@ function moduleUpdate($oldVersion){
             $wpdb->rows_affected;
         }
     }
+
+    if($oldVersion < '8.7.8'){
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcode_column_settings", 'priority', "ALTER TABLE {$wpdb->prefix}sim_form_shortcode_column_settings ADD COLUMN `priority` int");
+    }
 }

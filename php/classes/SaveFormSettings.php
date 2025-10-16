@@ -140,7 +140,8 @@ class SaveFormSettings extends SimForms{
 			'width'					=> '%d',
 			'show'					=> '%d',	
 			'name'					=> '%s',	
-			'nice_name'				=> '%s',	
+			'nice_name'				=> '%s',
+			'priority'				=> '%d',	
 			'view_right_roles'		=> '%s',
 			'edit_right_roles'		=> '%s'
 		];
@@ -472,10 +473,14 @@ class SaveFormSettings extends SimForms{
 	 * @return	true|WP_Error				The result or error on failure
 	 */
 	public function saveColumnSettings($settings=[], $shortcodeId=''){
+		$priority	= 0;
 		foreach($settings as $elementId => $column){
 			if(!is_array($column)){
 				continue;
 			}
+
+			$priority++;
+			$column['priority']	= $priority;
 
 			$column['element_id']	= $elementId;
 			if(empty($column['shortcode_id']) && is_numeric($shortcodeId)){

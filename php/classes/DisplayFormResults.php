@@ -1276,7 +1276,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$this->columnSettings		= [];
-		$query						= "SELECT * FROM {$this->shortcodeColumnSettingsTable} WHERE shortcode_id = '{$this->shortcodeId}'";
+		$query						= "SELECT * FROM {$this->shortcodeColumnSettingsTable} WHERE shortcode_id = '{$this->shortcodeId}' ORDER BY `priority` ASC";
 		$results 					= $wpdb->get_results($query, ARRAY_A);
 
 		foreach($results as $setting){
