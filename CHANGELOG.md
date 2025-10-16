@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- order result table columns
 
 ### Updated
+
+## [8.7.9] - 2025-10-16
+
+
+### Fixed
+- order result table columns
 
 ## [8.7.8] - 2025-10-16
 
