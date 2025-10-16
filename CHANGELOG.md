@@ -2,15 +2,22 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- support for splitting on multi wrap elements
 
 ### Changed
 
 ### Fixed
-- bug when clonable formstep is the last of a form
-- make sure form html is balanced
 
 ### Updated
+
+## [8.7.7] - 2025-10-16
+
+
+### Added
+- support for splitting on multi wrap elements
+
+### Fixed
+- bug when clonable formstep is the last of a form
+- make sure form html is balanced
 
 ## [8.7.6] - 2025-10-15
 
