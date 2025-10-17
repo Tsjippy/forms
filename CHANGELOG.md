@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.8.0] - 2025-10-17
+
+
+### Changed
 - code changes to make it simpler to maintain
 
 ### Fixed
 - form reminder e-mails
-
-### Updated
 
 ## [8.7.9] - 2025-10-16
 
