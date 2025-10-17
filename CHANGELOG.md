@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- code changes to make it simpler to maintain
 
 ### Fixed
 - form reminder e-mails
