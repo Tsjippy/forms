@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- show index in condition form when set
 
 ### Updated
 
