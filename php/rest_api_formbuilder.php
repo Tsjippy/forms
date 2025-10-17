@@ -291,107 +291,6 @@ function restApiInitForms() {
 	);
 }
 
-function getUniqueName($element, $update, $oldElement, $simForms){
-	global $wpdb;
-
-	// Remove any ' from the name, replace white space with _ as php does this automatically in post
-	$element->name	= str_replace(["\\'", " "], ['', "_"], $element->name);
-
-	// Make sure we only are working on the name
-	$element->name	= end(explode('\\', $element->name));
-
-	// Make lowercase
-	$element->name	= strtolower($element->name);
-
-	// Remove ending _
-	$element->name	= trim($element->name, ' \n\r\t\v\0_');
-
-	$elements		= $simForms->getElementByName($element->name, '', false);
-	if(
-		str_contains($element->name, '[]') 	||  	// Doesn't need to be unique 
-		(
-			$update && 
-			$oldElement->name == $element->name && 	// Name didn't change
-			$elements &&
-			count($elements) == 1
-		)
-	){
-
-		return $element->name;
-	}
-
-	$elementName = $element->name;
-	
-	$i = '';
-	// getElementByName returns false when no match found
-	while($simForms->getElementByName($elementName)){
-		$i++;
-		
-		$elementName = "{$element->name}_$i";
-	}
-
-	//update the name
-	if($i != ''){
-		$element->name .= "_$i";
-	}
-
-	// only update previous submissions when an update of the name of existing element took place
-	if(!$update){
-		return $element->name;
-	}
-
-	// Update the name in the form elements array
-	foreach($simForms->formElements as &$el){
-		if($el->id == $element->id){
-			$el->name	= $element->name;
-			break;
-		}
-	}
-
-	// update js
-	$simForms->createJs();
-
-	// Update column settings
-	$displayFormResults	= new DisplayFormResults(['form-id' => $simForms->formData->id]);
-
-	$query						= "SELECT * FROM {$displayFormResults->shortcodeTable} WHERE form_id = '{$simForms->formData->id}'";
-	foreach($wpdb->get_results($query) as $data){
-		//$displayFormResults->shortcodeId	= $data->id;
-		//$displayFormResults->loadShortcodeData();
-		$columnSettings	= $displayFormResults->addColumnSetting($element);
-		if($columnSettings === false){
-			continue;
-		}
-
-		saveColumnSettings($columnSettings, $displayFormResults->shortcodeId);
-	}
-
-	// Update submission data
-	$displayFormResults->showArchived	= true;
-	$displayFormResults->getForm($simForms->formData->id);
-	$displayFormResults->parseSubmissions(null, null, true);
-
-	$submitForm	= new SubmitForm();
-
-	foreach($displayFormResults->submissions as $submission){
-		if(isset($submission->formresults[$oldElement->name])){
-			$submission->formresults[$element->name]	= $submission->formresults[$oldElement->name];
-			unset($submission->formresults[$oldElement->name]);
-		}
-		$wpdb->update(
-			$submitForm->submissionTableName,
-			array(
-				'formresults'	=> maybe_serialize($submission->formresults),
-			),
-			array(
-				'id'			=> $submission->id
-			)
-			);
-	}
-
-	return $element->name;
-}
-
 function prepareProperties($prop){
 	if(is_array($prop)){
 		foreach($prop as &$p){
@@ -494,7 +393,7 @@ function addFormElement($copy=false){
 	}
 	
 	//Give an unique name
-	$element->name		= getUniqueName($element, $update, $oldElement, $simForms);
+	$element->name		= $simForms->getUniqueName($element, $update, $oldElement, $simForms);
 	if(is_wp_error($element->name)){
 		return $element->name;
 	}
@@ -653,7 +552,7 @@ function saveElementConditions(){
 		
 		$message = "Succesfully removed all conditions for {$element->name}";
 	}else{
-		$element->conditions 	= serialize($elementConditions);
+		$element->conditions 	= $elementConditions;
 		
 		$message 				= "Succesfully updated conditions for {$element->name}";
 	}
@@ -697,32 +596,16 @@ function saveFormSettings(){
 }
 
 // DONE
-function saveFormEmails(){
-	global $wpdb;
-	
+function saveFormEmails(){	
 	$formBuilder	= new SaveFormSettings();
 	$formBuilder->getForm($_POST['form-id']);
 	
 	$formEmails 	= $_POST['emails'];
 
-	// Remove deleted emails
-	$existingEmails	= $wpdb->get_col("SELECT id FROM {$formBuilder->formEmailTable} WHERE form_id = {$_POST['form-id']}");
-	$emailsToKeep	= array_column($formEmails, 'email-id');
-	$emailsToDelete	= array_diff($existingEmails, $emailsToKeep);
-	if(!empty($emailsToDelete)){
-		$idsToDelete	= implode(',', $emailsToDelete);
-		$wpdb->query("DELETE FROM {$formBuilder->formEmailTable} WHERE id IN ($idsToDelete)");
-	}	
-	
-	// Update each email
-	foreach($formEmails as &$email){
-		$email['message']	= trim(SIM\deslash($email['message']));
+	$result			= $formBuilder->saveFormEmails($formEmails, $_POST['form-id'] );
 
-		$result	= $formBuilder->insertOrUpdateData($formBuilder->formEmailTable, $email, ['id' => $email['email-id']]);
-		
-		if(is_wp_error($result)){
-			return $result;
-		}
+	if(is_wp_error($result)){
+		return $result;
 	}
 	
 	return "Succesfully saved your form e-mail configuration";

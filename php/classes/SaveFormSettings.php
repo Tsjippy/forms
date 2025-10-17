@@ -154,6 +154,107 @@ class SaveFormSettings extends SimForms{
 		}
 	}
 
+	public function getUniqueName($element, $update, $oldElement){
+		global $wpdb;
+
+		// Remove any ' from the name, replace white space with _ as php does this automatically in post
+		$element->name	= str_replace(["\\'", " "], ['', "_"], $element->name);
+
+		// Make sure we only are working on the name
+		$element->name	= end(explode('\\', $element->name));
+
+		// Make lowercase
+		$element->name	= strtolower($element->name);
+
+		// Remove ending _
+		$element->name	= trim($element->name, ' \n\r\t\v\0_');
+
+		$elements		= $this->getElementByName($element->name, '', false);
+		if(
+			str_contains($element->name, '[]') 	||  	// Doesn't need to be unique 
+			(
+				$update && 
+				$oldElement->name == $element->name && 	// Name didn't change
+				$elements &&
+				count($elements) == 1
+			)
+		){
+
+			return $element->name;
+		}
+
+		$elementName = $element->name;
+		
+		$i = '';
+		// getElementByName returns false when no match found
+		while($this->getElementByName($elementName)){
+			$i++;
+			
+			$elementName = "{$element->name}_$i";
+		}
+
+		//update the name
+		if($i != ''){
+			$element->name .= "_$i";
+		}
+
+		// only update previous submissions when an update of the name of existing element took place
+		if(!$update){
+			return $element->name;
+		}
+
+		// Update the name in the form elements array
+		foreach($this->formElements as &$el){
+			if($el->id == $element->id){
+				$el->name	= $element->name;
+				break;
+			}
+		}
+
+		// update js
+		$this->createJs();
+
+		// Update column settings
+		$displayFormResults	= new DisplayFormResults(['form-id' => $this->formData->id]);
+
+		$query						= "SELECT * FROM {$displayFormResults->shortcodeTable} WHERE form_id = '{$this->formData->id}'";
+		foreach($wpdb->get_results($query) as $data){
+			//$displayFormResults->shortcodeId	= $data->id;
+			//$displayFormResults->loadShortcodeData();
+			$columnSettings	= $displayFormResults->addColumnSetting($element);
+			if($columnSettings === false){
+				continue;
+			}
+
+			saveColumnSettings($columnSettings, $displayFormResults->shortcodeId);
+		}
+
+		// Update submission data
+		$displayFormResults->showArchived	= true;
+		$displayFormResults->getForm($this->formData->id);
+		$displayFormResults->parseSubmissions(null, null, true);
+
+		$submitForm	= new SubmitForm();
+
+		foreach($displayFormResults->submissions as $submission){
+			if(isset($submission->formresults[$oldElement->name])){
+				$submission->formresults[$element->name]	= $submission->formresults[$oldElement->name];
+				unset($submission->formresults[$oldElement->name]);
+			}
+			$wpdb->update(
+				$submitForm->submissionTableName,
+				array(
+					'formresults'	=> maybe_serialize($submission->formresults),
+				),
+				array(
+					'id'			=> $submission->id
+				)
+				);
+		}
+
+		return $element->name;
+	}
+
 	/**
 	 * Prepares an data for storages in db
 	 * 
@@ -508,5 +609,49 @@ class SaveFormSettings extends SimForms{
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Updates the form e-mails in the db
+	 */
+	public function saveFormEmails($formEmails, $formId){
+		global $wpdb;
+
+		// Remove deleted emails
+		$existingEmails	= $wpdb->get_col("SELECT id FROM {$this->formEmailTable} WHERE form_id = $formId");
+
+		$emailsToKeep	= array_column($formEmails, 'email-id');
+
+		$emailsToDelete	= array_diff($existingEmails, $emailsToKeep);
+
+		// Remove any deleted e-mails
+		if(!empty($emailsToDelete)){
+			$idsToDelete	= implode(',', $emailsToDelete);
+
+			$wpdb->query("DELETE FROM {$this->formEmailTable} WHERE id IN ($idsToDelete)");
+		}	
+		
+		// Update each email
+		foreach($formEmails as $email){
+			$email['form_id']	= $formId;
+			$email['message']	= trim(SIM\deslash($email['message']));
+
+			$where				= [];
+
+			// Its an update to an existing one
+			if(!empty($email['email-id'])){
+				$where			= [
+					'id' => $email['email-id']
+				];
+			}
+
+			$result	= $this->insertOrUpdateData($this->formEmailTable, $email, $where);
+
+			if(is_wp_error($result)){
+				return $result;
+			}
+		}
+
+		return $result;
 	}
 }

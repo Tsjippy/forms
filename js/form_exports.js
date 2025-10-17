@@ -75,7 +75,7 @@ export function copyFormInput(originalNode){
 	})
 	
 	//Clear contents of any document preview divs.
-	newNode.querySelectorAll('.documentpreview').forEach(function(previewDiv){
+	newNode.querySelectorAll('.document-preview').forEach(function(previewDiv){
 		previewDiv.innerHTML = '';
 	});
 

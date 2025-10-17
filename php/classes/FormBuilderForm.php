@@ -12,10 +12,13 @@ class FormBuilderForm extends SimForms{
 	public $nextElement;
 	public $prevElement;
 	public $currentElement;
+	public $elementHtmlBuilder;
 	protected $inMultiAnswer;
 
 	public function __construct($atts=[]){
 		parent::__construct();
+
+		$this->elementHtmlBuilder	= new ElementHtmlBuilder($this);
 
 		if(!empty($atts)){
 			$this->processAtts($atts);
@@ -108,7 +111,7 @@ class FormBuilderForm extends SimForms{
 		}
 
 		//Load default values for this element
-		$elementHtml = $this->getElementHtml($element);
+		$elementHtml = $this->elementHtmlBuilder->getElementHtml($element);
 		
 		//Check if element needs to be hidden
 		if(!empty($element->hidden) && $element->hidden == true){
@@ -1501,7 +1504,7 @@ class FormBuilderForm extends SimForms{
 			$element->conditions = [$dummyFieldCondition];
 		}
 		
-		$conditions = maybe_unserialize($element->conditions);
+		$conditions = $element->conditions;
 		
 		ob_start();
 		$counter = 0;
@@ -1516,7 +1519,8 @@ class FormBuilderForm extends SimForms{
 				<?php
 			}
 		}
-		if($counter>0){
+
+		if($counter > 0){
 			$jumbButtonHtml =  ob_get_clean();
 			if($counter==1){
 				$counter	= 'another element';
@@ -2065,7 +2069,6 @@ class FormBuilderForm extends SimForms{
 			$update	= false;
 
 			if(!empty($element->conditions)){
-				$element->conditions	= unserialize($element->conditions);
 				foreach($element->conditions as $key=>&$condition){
 					if($key	=== 'copyto'){
 						foreach($condition as $k=>$copyId){

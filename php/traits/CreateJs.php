@@ -38,7 +38,7 @@ trait CreateJs{
 
         //Loop over all elements to find any conditions
         foreach($this->formElements as $elementIndex=>$element){
-            $conditions	= unserialize($element->conditions);
+            $conditions	= $element->conditions;
 
             //if there are conditions
             if(!is_array($conditions)){

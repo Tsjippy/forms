@@ -41,6 +41,8 @@ class DisplayFormResults extends DisplayForm{
 		// call parent constructor
 		parent::__construct($atts);
 
+		$this->elementHtmlBuilder		= new ElementHtmlBuilder($this);
+
 		wp_enqueue_style('sim_formtable_style');
 
 		$this->user->partnerId			= SIM\hasPartner($this->user->ID);
@@ -575,111 +577,6 @@ class DisplayFormResults extends DisplayForm{
 		}else{
 			$this->splitSubmission();
 		}
-	}
-	
-	/**
-	 * Transforms a given string to hyperlinks or other formats
-	 *
-	 * @param 	string	$string			the string to convert
-	 * @param	string	$elementName	The name of the element the string value belongs to
-	 * @param	object	$submission		The submission this string belongs to
-	 *
-	 * @return	string					The transformed string
-	 */
-	public function transformInputData($string, $elementName, $submission){
-		if(empty($string)){
-			return $string;
-		}
-		
-		//convert arrays to strings
-		if(is_array($string)){
-			$output = '';
-
-			foreach($string as $sub){
-				if(!empty($output)){
-					$output .= "<br>";
-				}
-				$output .= $this->transformInputData($sub, $elementName, $submission);
-			}
-			return $output;
-		}
-		
-		$output		= $string;
-		//open mail programm on click on email
-		if (str_contains($string, '@')) {
-			$name		= '';
-			if(isset($submission->name)){
-				$name	= "Hi $submission->name,";
-			}elseif(isset($submission->your_name)){
-				$name	= "Hi $submission->your_name,";
-			}elseif(isset($submission->first_name)){
-				$name	= "Hi $submission->first_name,";
-			}
-			$output 	= "<a href='mailto:$string?subject=Regarding your {$this->formData->name} with id $submission->id&body={$name}'>$string</a>";
-		//Convert link to clickable link if not already
-		}elseif(
-			(
-				str_contains($string, 'https://')	||
-				str_contains($string, 'http://')	||
-				str_contains($string, '/form_uploads/')
-			) &&
-			!str_contains($string, 'href') &&
-			!str_contains($string, '<img')
-		) {
-			$url	= str_replace(['https://', 'http://'], '', SITEURL);
-			if(!str_contains($string, $url)){
-				$string		= SITEURL."/$string";
-			}
-
-			$text	= "Link";
-
-			if(getimagesize(SIM\urlToPath($string)) !== false) {
-				$text	= "<img src='$string' alt='form_upload' style='width:150px;' loading='lazy'>";
-			}
-			$output		= "<a href='$string'>$text</a>";
-		// Convert phonenumber to signal link
-		}elseif(gettype($string) == 'string' && $string[0] == '+'){
-			$numbers		= explode(" ", $string);
-			$output			= '';
-			$signalNumber	= '';
-
-			$userIdKey	= false;
-			if(isset($submission->user_id)){
-				$userIdKey	= 'user_id';
-			}elseif(isset($submission->userid)){
-				$userIdKey	= 'userid';
-			}
-
-			if($userIdKey){
-				$signalNumber	= get_user_meta($submission->$userIdKey, 'signal_number', true);
-			}
-
-			foreach($numbers as $number){
-				if($userIdKey && $number == $signalNumber){
-					$output	.= "<a href='https://signal.me/#p/$number'>$number</a><br>";
-				}else{
-					$output	.= "<a href='https://api.whatsapp.com/send?phone=$number&text=Regarding%20your%20submission%20of%20{$this->formData->form_name}%20with%20id%20$submission->id'>$number</a><br>";
-				}
-			}
-		//display dates in a nice way
-		}elseif(strtotime($string) && Date('Y', strtotime($string)) < 2200 && Date('Y', strtotime($string)) > 1900){
-			$date		= date_parse($string);
-
-			//Only transform if everything is there
-			if($date['year'] && $date['month'] && $date['day']){
-				$format		= get_option('date_format');
-
-				//include time if needed
-				if($date['hour'] && $date['minute']){
-					$format	.= ' '.get_option('time_format');
-				}
-
-				$output		= date($format, strtotime($string));
-			}
-		}
-	
-		$output = apply_filters('sim_transform_formtable_data', $output, $elementName);
-		return $output;
 	}
 	
 	protected function findSplittedElementName($element){
@@ -1949,7 +1846,7 @@ class DisplayFormResults extends DisplayForm{
 					$filterValue	= $_POST[$filterKey];
 				}
 	
-				$elementHtml	= $this->getElementHtml($filterElement, $filterValue);
+				$elementHtml	= $this->elementHtmlBuilder->getElementHtml($filterElement, $filterValue);
 				
 				// make sure the name is not the element name but the filtername
 				$elementHtml	= str_replace("name='{$filterElement->name}'", "name='$filterKey'", $elementHtml);

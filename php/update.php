@@ -194,7 +194,7 @@ function moduleUpdate($oldVersion){
             $element->type  = str_replace('_', '-', $element->type);
 
             // conditions
-            $conditions = maybe_unserialize($element->conditions);
+            $conditions = $element->conditions;
 
             foreach($conditions as &$condition){
                 foreach($condition as $index => $value){

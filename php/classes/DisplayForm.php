@@ -15,12 +15,20 @@ class DisplayForm extends SubmitForm{
 	public $currentElement;
 	public $usermeta;
 	private $tabId;
+	public $elementHtmlBuilder;
+	public $nonWrappable;
 
 	public function __construct($atts=[]){
 		parent::__construct();
 
 		$this->isFormStep				= false;
 		$this->wrap						= false;
+		$this->nonWrappable				= [
+			'select',
+			'file',
+			'image',
+			'php'
+		];
 		$this->isMultiStepForm			= '';
 		$this->formStepCounter			= 0;
 		$this->minElForTabs				= 6;
@@ -31,6 +39,8 @@ class DisplayForm extends SubmitForm{
 
 			$this->getUserId($atts);
 		}
+
+		$this->elementHtmlBuilder		= new ElementHtmlBuilder($this);
 	}
 
 	/**
@@ -53,11 +63,21 @@ class DisplayForm extends SubmitForm{
 	 */
 	protected function renderButtons(){
 		ob_start();
+
+		$addText	= '+';
+		if(!empty($this->prevElement) && !empty($this->prevElement->add)){
+			$addText	= $this->prevElement->add;
+		}
+
+		$removeText	= '-';
+		if(!empty($this->prevElement) && !empty($this->prevElement->remove)){
+			$removeText	= $this->prevElement->remove;
+		}
 		
 		?>
 		<div class='button-wrapper' style='margin: auto;'>
-			<button type='button' class='add button' style='flex: 1;max-width: max-content;'><?php echo $this->prevElement->add;?></button>
-			<button type='button' class='remove button' style='flex: 1;max-width: max-content;'><?php echo $this->prevElement->remove;?></button>
+			<button type='button' class='add button' style='flex: 1;max-width: max-content;'><?php echo $addText;?></button>
+			<button type='button' class='remove button' style='flex: 1;max-width: max-content;'><?php echo $removeText;?></button>
 		</div><?php
 
 		return ob_get_clean();
@@ -160,7 +180,7 @@ class DisplayForm extends SubmitForm{
 			$class .= ' required';
 		}
 
-		$elementHtml = $this->getElementHtml($element);
+		$elementHtml = $this->elementHtmlBuilder->getElementHtml($element);
 		
 		// close the wrapping element after the last wrapped element
 		if($this->wrap && !$element->wrap){
@@ -212,6 +232,8 @@ class DisplayForm extends SubmitForm{
 			}
 		}
 
+		$this->elementHtmlBuilder->html	= $elementHtml;
+
 		// Create as many clones as the maximum value of one of the elements 
 		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
 			$val	= '';
@@ -220,7 +242,7 @@ class DisplayForm extends SubmitForm{
 			}
 
 			// prepare the base html for duplicating
-			$newElementHtml	= $this->prepareElementHtml($element, $index, $elementHtml, $val);
+			$newElementHtml	= $this->elementHtmlBuilder->prepareElementHtml($index, $val);
 
 			// First element in a multi answer wrapper
 			if($this->prevElement->type == 'multi-start'){
@@ -300,11 +322,11 @@ class DisplayForm extends SubmitForm{
 		}
 
 		if(
-			!empty($this->nextElement->multiple) 	&& 	// if next element is a multiple
-			$this->nextElement->type != 'file' 		&& 	// next element is not a file
-			$this->nextElement->type != 'text' 		&& 	// next element is not a text
-			$element->type == 'label'				&& 	// and this is a label
-			!empty($element->wrap)						// and the label is wrapped around the next element
+			!empty($this->nextElement->multiple) 							&& 	// if next element is a multiple
+			!in_array($this->nextElement->type, $this->nonWrappable) 		&& 	// next element is wrappable
+			$this->nextElement->type != 'text' 								&& 	// next element is not a text
+			$element->type == 'label'										&& 	// and this is a label
+			!empty($element->wrap)												// and the label is wrapped around the next element
 		){
 			return;
 		}
@@ -326,7 +348,7 @@ class DisplayForm extends SubmitForm{
 		}
 
 		//Load default values for this element
-		$elementHtml 	= $this->getElementHtml($element);
+		$elementHtml 	= $this->elementHtmlBuilder->getElementHtml($element);
 
 		if(is_wp_error($elementHtml)){
 			return $elementHtml;
@@ -379,26 +401,28 @@ class DisplayForm extends SubmitForm{
 			while(true){
 				$type	= $this->formElements[$i]->type;
 
-				if($type != 'multi-end' && !empty($this->formElements[$i])){
-					$this->multiWrapElementCount++;
-
-					if(!in_array($type, $this->nonInputs)){
-						//Get the field values and count
-						$values			= $this->getElementValues($this->formElements[$i]);
-						if(empty($values)){
-							$valueCount	= 0;
-						}else{
-							$valueCount		= count(array_values($values)[0]);
-						}
-						
-						if($valueCount > $this->multiWrapValueCount){
-							$this->multiWrapValueCount = $valueCount;
-						}
-					}
-					$i++;
-				}else{
+				// Loop till we reach a multi-end element or the end of the form
+				if($type == 'multi-end' || !empty($this->formElements[$i])){
 					break;
 				}
+
+				$this->multiWrapElementCount++;
+
+				if(!in_array($type, $this->nonInputs)){
+					//Get the field values and count
+					$values			= $this->getElementValues($this->formElements[$i]);
+
+					if(empty($values)){
+						$valueCount	= 0;
+					}else{
+						$valueCount		= count(array_values($values)[0]);
+					}
+					
+					if($valueCount > $this->multiWrapValueCount){
+						$this->multiWrapValueCount = $valueCount;
+					}
+				}
+				$i++;
 			}
 
 			return $html;
@@ -493,7 +517,7 @@ class DisplayForm extends SubmitForm{
 			!in_array($this->nextElement->type, ['php','formstep'])			// and the next element type is not a select or php element
 		){
 			//end a label if the next element is a select
-			if($element->type == 'label' && in_array($this->nextElement->type, ['php','select'])){
+			if($element->type == 'label' && in_array($this->nextElement->type, $this->nonWrappable)){
 				$html .= "</label></div>";
 			}else{
 				$this->wrap = $element->type;

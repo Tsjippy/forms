@@ -853,7 +853,14 @@ class SimForms{
 			$query .= " ORDER BY {$this->elTableName}.`$sortCol` ASC";
 		}
 
-		$this->formElements 		=  apply_filters('sim-forms-elements', $wpdb->get_results($query), $this, false);
+		$elements	= $wpdb->get_results($query);
+		foreach($elements as &$element){
+			if(!empty($element->conditions)){
+				$element->conditions	= maybe_unserialize($element->conditions);
+			}
+		}
+
+		$this->formElements 		=  apply_filters('sim-forms-elements', $elements, $this, false);
 	}
 
 	/**

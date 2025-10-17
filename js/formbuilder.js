@@ -1098,7 +1098,7 @@ window.addEventListener("click", event => {
 
 window.addEventListener('change', ev=>{
 	let target	= ev.target;
-	if(target.matches('.meta_key')){
+	if(target.matches('.meta-key')){
 		//if this option has a keys data value
 		let metaIndexes	= target.list.querySelector(`[value='${target.value}' i]`);
 		if(metaIndexes != null && metaIndexes.dataset.keys != undefined){
