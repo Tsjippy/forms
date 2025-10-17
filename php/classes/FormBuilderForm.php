@@ -1850,9 +1850,14 @@ class FormBuilderForm extends SimForms{
 		<label>Or this user meta evaluation is true</label>
 		<div class="conditions-wrapper" style='width: 90vw;z-index: 9999;position: relative;'>
 			<?php
-			foreach($conditions as $conditionIndex=>$condition){
+			foreach($conditions as $conditionIndex => $condition){
 				if(!is_numeric($conditionIndex)){
 					continue;
+				}
+
+				$arrayKeys	= [];
+				if(!empty($condition['meta-key']) && !empty($userMetaKeys[$condition['meta-key']])){
+					$arrayKeys	= maybe_unserialize($userMetaKeys[$condition['meta-key']][0]);
 				}
 				?>
 				<div class='warning-conditions element-conditions' data-index='<?php echo $conditionIndex;?>'>
@@ -1880,10 +1885,7 @@ class FormBuilderForm extends SimForms{
 						?>
 					</datalist>
 
-					<?php
-						$arrayKeys	= maybe_unserialize($userMetaKeys[$condition['meta_key']][0]);
-					?>
-					<span class="index-wrapper <?php if(!is_array($arrayKeys)){echo 'hidden';}?>">
+					<span class="index-wrapper <?php if(empty($condition['meta-key-index'])){echo 'hidden';}?>">
 						<span>and index</span>
 						<input type="text" class="warning-condition meta-key-index" name='<?php echo $name;?>[<?php echo $conditionIndex;?>][meta-key-index]' value="<?php echo $condition['meta-key-index'];?>" list="meta-key-index[<?php echo $conditionIndex;?>]" style="width: fit-content;">
 						<datalist class="meta-key-index-list warning-condition" id="meta-key-index[<?php echo $conditionIndex;?>]">
