@@ -717,20 +717,34 @@ class FormBuilderForm extends SimForms{
 								</label>
 								<?php
 							}
+							
+							$min='';
+							$max='';
+							if(!empty(this->formData->reminder_frequency) && !empty($this->formData->reminder_period)){
+								$min = 'min="'.date("Y-m-d", strtotime("-{$this->formData->reminder_frequency} {$this->formData->reminder_period}")).'"';
+								$max = 'max="'.date("Y-m-d", strtotime("+{$this->formData->reminder_frequency} {$this->formData->reminder_period}")).'"';
+							}
 						?>
 
 						<br>
 						<label>
-							How many times should people be reminded?
-							<input type="number" name='reminder-amount' value='<?php echo $this->formData->reminder_amount;?>' style='width: 70px;'>
+							Allow Submissions Within This Date Window<br>
+							From <input type="date" name='reminder-window-start' value='<?php echo $this->formData->reminder_window_start;?>' $minstyle='width: 70px;'>
+						 To <input type="date" name='reminder-window-end' value='<?php echo $this->formData->reminder_window_end;?>' $max style='width: 70px;'>
 						</label>
 
 						<div class='<?php if($this->formData->save_in_meta){ echo 'hidden';}?>'>
 							<label>
 								Start reminding from 
-								<input type='date' name='reminder-startdate' value='<?php echo $this->formData->reminder_startdate;?>'>
+								<input type='date' name='reminder-startdate' value='<?php echo $this->formData->reminder_startdate;?>' <?php echo "$min $max";>?>
 							</label>
 						</div>
+						
+						<br>
+						<label>
+							How many times should people be reminded?
+							<input type="number" name='reminder-amount' value='<?php echo $this->formData->reminder_amount;?>' style='width: 70px;'>
+						</label>
 
 						<?php echo $this->warningConditionsForm('reminder_conditions', maybe_unserialize($this->formData->reminder_conditions));?>
 					</div>
