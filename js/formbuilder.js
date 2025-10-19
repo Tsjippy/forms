@@ -7,6 +7,9 @@ function updateReminderMinMax(target){
 	let form = target.closest('form');
 	let frequency = form.querySelector();
 	let periodType = form.querySelector();
+	let windowStart = form.querySelector();
+	let windowEnd = form.querySelector();
+	let reminderStart = form.querySelector();
 	let min = new Date();
 	let max = clone min;
 	
@@ -24,9 +27,12 @@ function updateReminderMinMax(target){
 		max.setDay(`${curDay} + ${ 7 * frequency}`);
 	}
 	
+	windowMin.min = min;
+	windowMin.max = max;
+	windowMax.min = min;
+	windowMax.max = max;
 	
-	
-	
+	reminderStart.min = min;
 	}
 	
 function clearFormInputs(){
