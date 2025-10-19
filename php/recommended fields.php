@@ -304,7 +304,7 @@ function getAllRequiredForms($userId=''){
 		}
 
 		// get all submissions created after the threshold
-		$query			= "SELECT * FROM {$simForms->submissionTableName} WHERE form_id=$form->id AND timecreated > '$threshold'";
+		$query			= "SELECT * FROM {$simForms->submissionTableName} WHERE form_id=$form->id AND timecreated >= '$threshold'";
 
 		$submissions	= $wpdb->get_results($query);
 

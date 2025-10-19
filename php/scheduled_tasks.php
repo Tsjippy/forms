@@ -41,29 +41,31 @@ function formReminder(){
         $simForms->getEmailSettings();
 		
 		foreach($simForms->emailSettings as $mail){
-            if($mail['email-trigger'] != 'shouldsubmit'){
+            $mail   = (object)$mail;
+
+            if($mail->email_trigger != 'shouldsubmit'){
                 continue;
             }
 
-            $from       = $mail['from'];
+            $from       = $mail->from;
 
-            $to         = $mail['to'];
+            $to         = $mail->to;
 
-            $subject    = $mail['subject'];
+            $subject    = $mail->subject;
 
-            $message    = $mail['message'];
+            $message    = $mail->message;
 
             $headers	= [];
 
-            if(!empty(trim($mail['headers']))){
-                $headers	= explode("\n", trim($mail['headers']));
+            if(!empty(trim($mail->headers))){
+                $headers	= explode("\n", trim($mail->headers));
             }
 
             // Send an e-mail to each user
             foreach($userIds as $userId){
                 $user   = get_userdata($userId);
 
-                if(!empty($from)){
+                if(!empty($from) && !str_contains($mail->headers, 'Reply-To:')){
                     if(str_contains($from, '%')){
                         $headers[]	= "Reply-To: ". $user->user_email;
                     }else{
@@ -77,8 +79,8 @@ function formReminder(){
                     $recipient  = $to;
                 }
 
-                $m      = "Hi $user->first_name,<br><br>";
-                $m      .= $simForms->processPlaceholders(
+                $msg      = "Hi $user->first_name,<br><br>";
+                $msg      .= $simForms->processPlaceholders(
                     $message,
                     [
                         'formurl'   => $simForms->formData->form_url,
@@ -87,7 +89,7 @@ function formReminder(){
                     ]
                 );
 
-                wp_mail($recipient , $subject, $m, $headers);
+                wp_mail($recipient , $subject, $msg, $headers);
             }
         }
     }
