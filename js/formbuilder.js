@@ -3,6 +3,32 @@ var reorderingBusy, formWrapper, formElementWrapper, modal;
 console.log("Formbuilder.js loaded");
 
 /* FUNCTIONS */
+function updateReminderMinMax(target){
+	let form = target.closest('form');
+	let frequency = form.querySelector();
+	let periodType = form.querySelector();
+	let min = new Date();
+	let max = clone min;
+	
+	if(periodType == 'year'){
+		let curYear = min.getFullYear();
+		min.setFullYear(`${curYear} - ${frequency}`);
+		max.setFullYear(`${curYear} + ${frequency}`);
+	}else if(periodType == 'month'){
+		let curMonth = min.getMonth();
+		min.setMonth(`${curMonth} - ${frequency}`);
+		max.setMonth(`${curMonth} + ${frequency}`);
+	}else if(periodType == 'week'){
+		let curDay = min.getDay();
+		min.setDay(`${curDay} - ${ 7 * frequency}`);
+		max.setDay(`${curDay} + ${ 7 * frequency}`);
+	}
+	
+	
+	
+	
+	}
+	
 function clearFormInputs(){
 	try {
 		//Loop to clear the modalform
