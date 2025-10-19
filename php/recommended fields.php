@@ -326,11 +326,7 @@ function getAllRequiredForms($userId=''){
 		}
 
 		// now check which users are missing
-		$users 		= get_users( array( 'fields' => array( 'ID' ) ) );
-		$userIds	= [];
-		foreach($users as $user){
-			$userIds[]	= $user->ID;
-		}
+		$userIds 		= get_users( [ 'fields' => 'ID' ] );
 
 		$usersWithoutSubmission	= array_diff($userIds, $usersWithSubmission);
 
