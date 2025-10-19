@@ -7,6 +7,7 @@
 
 ### Fixed
 - show index in condition form when set
+-  is an object
 
 ### Updated
 
