@@ -13,6 +13,8 @@ function moduleUpdate($oldVersion){
 
     $simForms = new SimForms();
 
+    $simForms->createDbTables();
+
     if($oldVersion < '8.2.1'){
         maybe_add_column($simForms->tableName, 'reminder_amount', "ALTER TABLE $simForms->tableName ADD COLUMN `reminder_amount` LONGTEXT");
 
@@ -50,8 +52,6 @@ function moduleUpdate($oldVersion){
     }
 
     if($oldVersion < '8.7.0'){
-        $simForms->createDbTables();
-
         // Shortcode data
         $shortcodes   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_form_shortcodes");
         maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'title', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `title` tinytext");
@@ -309,4 +309,30 @@ function moduleUpdate($oldVersion){
     if($oldVersion < '8.7.8'){
         maybe_add_column("{$wpdb->prefix}sim_form_shortcode_column_settings", 'priority', "ALTER TABLE {$wpdb->prefix}sim_form_shortcode_column_settings ADD COLUMN `priority` int");
     }
+
+    if($oldVersion < '8.8.1'){
+        $simForms->getForms();
+        foreach($simForms->forms as $formData){
+            $data = array_filter([
+                'frequency'		=> $formData->reminder_frequency,
+                'amount'		=> $formData->reminder_amount,
+                'period'		=> $formData->reminder_period,
+                'startdate'		=> $formData->reminder_startdate,
+                'window_start'	=> '',
+                'window_end'	=> '',
+                'conditions'	=> maybe_serialize($formData->reminder_conditions),
+            ]);
+
+            $formData->reminder_conditions  = maybe_unserialize($formData->reminder_conditions);
+            SIM\cleanUpNestedArray( $formData->reminder_conditions );
+
+            if(!empty($data)){
+                $wpdb->insert($simForms->formReminderTable, $data);
+            }
+        }
+    }
 }
+
+add_action('init', function(){
+    moduleUpdate('8.8.0');
+});

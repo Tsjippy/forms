@@ -31,6 +31,7 @@ class SimForms{
 	public $all;
 	public $submission;
 	public $tableName;
+	public $formReminderTable;
 	public $elTableName;
 	public $submissionTableName;
 	public $formEmailTable;
@@ -46,6 +47,7 @@ class SimForms{
 		$this->formStepCounter				= 0;
 		$this->submissionTableName			= $wpdb->prefix . 'sim_form_submissions';
 		$this->tableName					= $wpdb->prefix . 'sim_forms';
+		$this->formReminderTable			= $wpdb->prefix . 'sim_form_reminders';
 		$this->elTableName					= $wpdb->prefix . 'sim_form_elements';
 		$this->formEmailTable				= $wpdb->prefix . 'sim_form_emails';
 		$this->shortcodeColumnSettingsTable	= $wpdb->prefix . 'sim_form_shortcode_column_settings';
@@ -90,7 +92,7 @@ class SimForms{
 			$this->editRights		= false;
 		}
 	}
-	
+
 	/**
 	 * Creates the tables for this module
 	 */
@@ -135,6 +137,22 @@ class SimForms{
 		) $charsetCollate;";
 
 		maybe_create_table($this->tableName, $sql );
+
+		// Form Reminders Table
+		$sql = "CREATE TABLE {$this->formReminderTable} (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			frequency text,
+			amount text,
+			period text,
+			startdate date,
+			window_start date,
+			window_end date,
+			conditions LONGTEXT,
+
+			PRIMARY KEY  (id)
+		) $charsetCollate;";
+
+		maybe_create_table($this->formReminderTable, $sql );
 
 		// Form element table
 		$sql = "CREATE TABLE {$this->elTableName} (
@@ -479,101 +497,6 @@ class SimForms{
 		$html .= "</select>";
 		
 		return $html;
-	}
-	
-	/**
-	 * Creates the tables for this module
-	 */
-	public function createDbTable(){
-		if ( !function_exists( 'maybe_create_table' ) ) {
-			require_once ABSPATH . '/wp-admin/install-helper.php';
-		}
-
-		add_option( "forms_db_version", "1.0" );
-		
-		//only create db if it does not exist
-		global $wpdb;
-		$charsetCollate = $wpdb->get_charset_collate();
-
-		//Main table
-		$sql = "CREATE TABLE {$this->tableName} (
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			name tinytext NOT NULL,
-			version text NOT NULL,
-			button_text text,
-			succes_message text,
-			include_id boolean,
-			formname text,
-			save_in_meta boolean,
-			reminder_frequency text,
-			reminder_amount text,
-			reminder_period text,
-			reminder_startdate date,
-			reminder_conditions LONGTEXT,
-			form_url text,
-			form_reset boolean,
-			actions text,
-			autoarchive boolean,
-			autoarchive_el integer,
-			autoarchive_value text,
-			split text,
-			full_right_roles LONGTEXT,
-			submit_others_form LONGTEXT,
-			emails LONGTEXT,
-			upload_path LONGTEXT,
-			PRIMARY KEY  (id)
-		) $charsetCollate;";
-
-		maybe_create_table($this->tableName, $sql );
-
-		// Form element table
-		$sql = "CREATE TABLE {$this->elTableName} (
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			form_id int NOT NULL,
-			type text NOT NULL,
-			priority int,
-			width int default 100,
-			functionname text,
-			foldername text,
-			name text,
-			nicename text,
-			text text,
-			html text,
-			valuelist text,
-			default_value text,
-			default_array_value text,
-			options text,
-			required boolean default False,
-			mandatory boolean default False,
-			recommended boolean default False,
-			wrap boolean default False,
-			hidden boolean default False,
-			multiple boolean default False,
-			library boolean default False,
-			editimage boolean default False,
-		  	conditions longtext,
-			warning-conditions longtext,
-			add longtext,
-			remove longtext,
-			PRIMARY KEY  (id)
-		  ) $charsetCollate;";
-  
-		maybe_create_table($this->elTableName, $sql );
-
-		//submission table
-		$sql = "CREATE TABLE {$this->submissionTableName} (
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			form_id	int NOT NULL,
-			timecreated datetime DEFAULT NULL,
-			timelastedited datetime DEFAULT NULL,
-			userid mediumint(9) NOT NULL,
-			formresults longtext NOT NULL,
-			archived BOOLEAN,
-			archivedsubs tinytext,
-			PRIMARY KEY  (id)
-		) $charsetCollate;";
-
-		maybe_create_table($this->submissionTableName, $sql );
 	}
 	
 	/**

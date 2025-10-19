@@ -296,6 +296,7 @@ class FormBuilderForm extends SimForms{
 			?>
 			<button class="button tablink formbuilder-form<?php if(!empty($this->formElements)){echo ' active';}?>"	id="show-element-form" data-target="element-form">Form elements</button>
 			<button class="button tablink formbuilder-form<?php if(empty($this->formElements)){echo ' active';}?>"	id="show-form-settings" data-target="form-settings">Form settings</button>
+			<button class="button tablink formbuilder-form"															id="show-form-reminders" data-target="form-reminders">Form reminders</button>
 			<button class="button tablink formbuilder-form"															id="show-form-emails" data-target="form-emails">Form emails</button>
 			
 			<div class="tabcontent<?php if(empty($this->formElements)){echo ' hidden';}?>" id="element-form">
@@ -692,66 +693,232 @@ class FormBuilderForm extends SimForms{
 	}
 	
 	/**
-	*
+	* Form to specify form reminders
 	*/
 	public function formRemindersForm(){
 		?>
-			<form action='' method='post' class='sim-form builder'>
+		<form action='' method='post' class='sim-form builder' style='margin-top:10px;'>
+			Enable From reminders
+			<label class="switch">
+				<input type="checkbox" name="enable" <?php if(!empty($this->formReminders)){echo 'checked';}?>>
+				<span class="slider round"></span>
+			</label>
+			<br>
+			<br>
+
+			<div class='form-reminders-wrapper <?php if(empty($this->formReminders)){echo 'hidden';}?>'>
 				<div class='recurring-submissions<?php if($this->formData->save_in_meta){ echo ' hidden';}?>'>
+					<label>
 						<h4>Recurring Submissions</h4>
 						Request new form submissions every 
 						<input type='number' name='reminder-frequency' value='<?php echo $this->formData->reminder_frequency;?>' style='max-width: 70px;'>
+					</label>
 
-						<?php
-							foreach(['years', 'months', 'days'] as $period) {
-								if(isset($this->formData->reminder_period) && $this->formData->reminder_period == $period){
-									$checked = 'checked';	
-								}else{
-									$checked = '';
-								}
-
-								?>
-								<label>
-									<input type='radio' name='reminder-period' id='reminder-period' value='<?php echo $period;?>' <?php echo $checked;?>>
-									<?php echo $period;?>
-								</label>
-								<?php
+					<?php
+						foreach(['years', 'months', 'days'] as $period) {
+							if(isset($this->formData->reminder_period) && $this->formData->reminder_period == $period){
+								$checked = 'checked';	
+							}else{
+								$checked = '';
 							}
-							
-							$min='';
-							$max='';
-							if(!empty(this->formData->reminder_frequency) && !empty($this->formData->reminder_period)){
-								$min = 'min="'.date("Y-m-d", strtotime("-{$this->formData->reminder_frequency} {$this->formData->reminder_period}")).'"';
-								$max = 'max="'.date("Y-m-d", strtotime("+{$this->formData->reminder_frequency} {$this->formData->reminder_period}")).'"';
-							}
-						?>
 
-						<br>
-						<label>
-							Allow Submissions Within This Date Window<br>
-							From <input type="date" name='reminder-window-start' value='<?php echo $this->formData->reminder_window_start;?>' $minstyle='width: 70px;'>
-						 To <input type="date" name='reminder-window-end' value='<?php echo $this->formData->reminder_window_end;?>' $max style='width: 70px;'>
-						</label>
-
-						<div class='<?php if($this->formData->save_in_meta){ echo 'hidden';}?>'>
+							?>
 							<label>
-								Start reminding from 
-								<input type='date' name='reminder-startdate' value='<?php echo $this->formData->reminder_startdate;?>' <?php echo "$min $max";>?>
+								<input type='radio' name='reminder-period' id='reminder-period' value='<?php echo $period;?>' <?php echo $checked;?>>
+								<?php echo $period;?>
 							</label>
-						</div>
+							<?php
+						}
 						
-						<br>
-						<label>
-							How many times should people be reminded?
-							<input type="number" name='reminder-amount' value='<?php echo $this->formData->reminder_amount;?>' style='width: 70px;'>
-						</label>
+						$min='';
+						$max='';
+						if(!empty($this->formData->reminder_frequency) && !empty($this->formData->reminder_period)){
+							// Selected data can not lie in a previous window
+							$min = 'min="'.date("Y-m-d", strtotime("-{$this->formData->reminder_frequency} {$this->formData->reminder_period} + 1 day")).'"';
+							
+							// Selected date cannot be in the newxt window
+							$max = 'max="'.date("Y-m-d", strtotime("+{$this->formData->reminder_frequency} {$this->formData->reminder_period} - 1 day")).'"';
+						}
+					?>
 
-						<?php echo $this->warningConditionsForm('reminder_conditions', maybe_unserialize($this->formData->reminder_conditions));?>
-					</div>
-				<?php
-				echo SIM\addSaveButton('submit-form-reminders',  'Save form reminders');
+					<br>
+					<label>
+						<h4>Date Window</h4>
+						Allow Submissions Within This Date Window<br>
+						From <input type="date" name='reminder-window-start' value='<?php echo $this->formData->reminder_window_start;?>' <?php echo $min;?> >
+						To <input type="date" name='reminder-window-end' value='<?php echo $this->formData->reminder_window_end;?>' <?php echo $max;?> >
+					</label>				
+				</div>
+
+				<label>
+					<h4>Start reminding from </h4>
+					
+					<input type='date' name='reminder-startdate' value='<?php echo $this->formData->reminder_startdate;?>' <?php echo "$min $max";?>>
+				</label>
+
+				<br>
+				<label>
+					<h4>Reminder Amount</h4>
+					How many times should people be reminded?<br>
+					Leave empty for unlimited.<br>
+					Once every week for <input type="number" name='reminder-amount' value='<?php echo $this->formData->reminder_amount;?>' style='width: 70px;'> weeks.
+				</label>
+
+				<h4>Warning Exclusions</h4>
+				<?php echo $this->warningConditionsForm('reminder_conditions', maybe_unserialize($this->formData->reminder_conditions));?>
+			</div>
+			
+			<?php
+			echo SIM\addSaveButton('submit-form-reminders',  'Save form reminders');
+			?>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Form to add warning conditions to an element
+	 *
+	 * @param	string	$name			The basename for the form conditions inputs.
+	 * @param	int		$conditions		The existing conditions
+	 */
+	public function warningConditionsForm($name, $conditions = ''){
+		global $wpdb;
+		global $wp_roles;
+
+		if(empty($conditions) || !is_array($conditions)){
+			$conditions	= [
+				[
+					"user_meta_key"	=> '',
+					"equation"		=> ''
+				]
+			];
+		}	
+
+		if(!isset($conditions['roles'])){
+			$conditions['roles']	= [];
+		}
+		
+		// get all possible user meta keys, not just the one the current user has
+		$result			= $wpdb->get_results("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}`", ARRAY_N);
+		$userMetaKeys	= [];
+		foreach($result as $metaKey){
+			$userMetaKeys[]	= $metaKey[0];
+		}
+		sort($userMetaKeys, SORT_STRING | SORT_FLAG_CASE);
+
+		$userMetas		= get_user_meta($this->user->ID);
+
+		//Get all available roles
+		$userRoles = $wp_roles->role_names;
+		
+		//Sort the roles
+		asort($userRoles);
+
+		ob_start();
+		?>
+			
+		<h5>Do not warn</h5>
+		<label>If user has role</label>
+		<select name='<?php echo $name;?>[roles][]' multiple>
+			<option value=''>---</option>
+			<?php
+			foreach($userRoles as $key=>$roleName){
+				if(in_array($key, $conditions['roles'])){
+					$selected = 'selected';
+				}else{
+					$selected = '';
+				}
+				echo "<option value='$key' $selected>$roleName</option>";
+			}
+			?>
+		</select>
+		<br>
+		<label>Or this user meta evaluation is true</label>
+		<div class="conditions-wrapper" style='width: 90vw;z-index: 9999;position: relative;'>
+			<?php
+			foreach($conditions as $conditionIndex => $condition){
+				if(!is_numeric($conditionIndex)){
+					continue;
+				}
+
+				$arrayKeys	= [];
+				if(!empty($condition['meta-key']) && !empty($userMetaKeys[$condition['meta-key']])){
+					$arrayKeys	= maybe_unserialize($userMetaKeys[$condition['meta-key']][0]);
+				}
 				?>
-				</form>
+				<div class='warning-conditions element-conditions' data-index='<?php echo $conditionIndex;?>'>
+					<input type="hidden" class="no-reset" class='warning-condition combinator' name="<?php echo $name;?>[<?php echo $conditionIndex;?>][combinator]" value="<?php echo $condition['combinator'];?>">
+
+					<input type="text" class="warning-condition meta-key" name="<?php echo $name;?>[<?php echo $conditionIndex;?>][meta-key]" value="<?php echo $condition['meta-key'];?>" list="meta-key" style="width: fit-content;">
+					<datalist id="meta-key">
+						<?php
+						foreach($userMetaKeys as $key){
+							if(isset($userMetas[$key])){
+								$value	= $userMetas[$key][0];
+							}else{
+								$value	= $wpdb->get_var("SELECT `meta_value` FROM `{$wpdb->usermeta}` WHERE meta_key = '$key'");
+							}
+							// Check if array, store array keys
+							$value 	= maybe_unserialize($value);
+							$data	= '';
+							if(is_array($value)){
+								$keys	= implode(',', array_keys($value));
+								$data	= "data-keys=$keys";
+							}
+							echo "<option value='$key' $data>";
+						}
+
+						?>
+					</datalist>
+
+					<span class="index-wrapper <?php if(empty($condition['meta-key-index'])){echo 'hidden';}?>">
+						<span>and index</span>
+						<input type="text" class="warning-condition meta-key-index" name='<?php echo $name;?>[<?php echo $conditionIndex;?>][meta-key-index]' value="<?php echo $condition['meta-key-index'];?>" list="meta-key-index[<?php echo $conditionIndex;?>]" style="width: fit-content;">
+						<datalist class="meta-key-index-list warning-condition" id="meta-key-index[<?php echo $conditionIndex;?>]">
+							<?php
+							if(is_array($arrayKeys)){
+								foreach(array_keys($arrayKeys) as $key){
+									echo esc_html("<option value='$key'>");
+								}
+							}
+							?>
+						</datalist>
+					</span>
+					
+					<select class="warning-condition inline" name='<?php echo $name;?>[<?php echo $conditionIndex;?>][equation]'>
+						<?php
+						$optionArray	= [
+							''			=> '---',
+							'=='		=> 'equals',
+							'!='		=> 'is not',
+							'>'			=> 'greather than',
+							'<'			=> 'smaller than',
+							'submitted'	=> 'has submitted',
+						];
+						foreach($optionArray as $option=>$optionLabel){
+							if($condition['equation'] == $option){
+								$selected	= 'selected=selected';
+							}else{
+								$selected	= '';
+							}
+							echo "<option value='$option' $selected>$optionLabel</option>";
+						}
+						?>
+					</select>
+					<input  type='text'   class='warning-condition' name='<?php echo $name;?>[<?php echo $conditionIndex;?>][conditional-value]' value="<?php echo $condition['conditional-value'];?>" style="width: fit-content;">
+					
+					<button type='button' class='warn-cond button <?php if(!empty($condition['combinator']) && $condition['combinator'] == 'and'){echo 'active';}?>'	title='Add a new "AND" rule' value="and">AND</button>
+					<button type='button' class='warn-cond button  <?php if(!empty($condition['combinator']) && $condition['combinator'] == 'or'){echo 'active';}?>'	title='Add a new "OR"  rule' value="or">OR</button>
+					<button type='button' class='remove-warn-cond  button' title='Remove rule'>-</button>
+
+					<br>
+				</div>
+				<?php
+			}
+			?>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 		
 	/**
@@ -1814,152 +1981,6 @@ class FormBuilderForm extends SimForms{
 			<?php
 			echo SIM\addSaveButton('submit-form-condition','Save conditions'); ?>
 		</form>
-		<?php
-		return ob_get_clean();
-	}
-
-	/**
-	 * Form to add warning conditions to an element
-	 *
-	 * @param	string	$name			The basename for the form conditions inputs.
-	 * @param	int		$conditions		The existing conditions
-	 */
-	public function warningConditionsForm($name, $conditions = ''){
-		global $wpdb;
-		global $wp_roles;
-
-		if(empty($conditions) || !is_array($conditions)){
-			$conditions	= [
-				[
-					"user_meta_key"	=> '',
-					"equation"		=> ''
-				]
-			];
-		}	
-
-		if(!isset($conditions['roles'])){
-			$conditions['roles']	= [];
-		}
-		
-		// get all possible user meta keys, not just the one the current user has
-		$result			= $wpdb->get_results("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}`", ARRAY_N);
-		$userMetaKeys	= [];
-		foreach($result as $metaKey){
-			$userMetaKeys[]	= $metaKey[0];
-		}
-		sort($userMetaKeys, SORT_STRING | SORT_FLAG_CASE);
-
-		$userMetas		= get_user_meta($this->user->ID);
-
-		//Get all available roles
-		$userRoles = $wp_roles->role_names;
-		
-		//Sort the roles
-		asort($userRoles);
-
-		ob_start();
-		?>
-			
-		<h5>Do not warn</h5>
-		<label>If user has role</label>
-		<select name='<?php echo $name;?>[roles][]' multiple>
-			<option value=''>---</option>
-			<?php
-			foreach($userRoles as $key=>$roleName){
-				if(in_array($key, $conditions['roles'])){
-					$selected = 'selected';
-				}else{
-					$selected = '';
-				}
-				echo "<option value='$key' $selected>$roleName</option>";
-			}
-			?>
-		</select>
-		<br>
-		<label>Or this user meta evaluation is true</label>
-		<div class="conditions-wrapper" style='width: 90vw;z-index: 9999;position: relative;'>
-			<?php
-			foreach($conditions as $conditionIndex => $condition){
-				if(!is_numeric($conditionIndex)){
-					continue;
-				}
-
-				$arrayKeys	= [];
-				if(!empty($condition['meta-key']) && !empty($userMetaKeys[$condition['meta-key']])){
-					$arrayKeys	= maybe_unserialize($userMetaKeys[$condition['meta-key']][0]);
-				}
-				?>
-				<div class='warning-conditions element-conditions' data-index='<?php echo $conditionIndex;?>'>
-					<input type="hidden" class="no-reset" class='warning-condition combinator' name="<?php echo $name;?>[<?php echo $conditionIndex;?>][combinator]" value="<?php echo $condition['combinator'];?>">
-
-					<input type="text" class="warning-condition meta-key" name="<?php echo $name;?>[<?php echo $conditionIndex;?>][meta-key]" value="<?php echo $condition['meta-key'];?>" list="meta-key" style="width: fit-content;">
-					<datalist id="meta-key">
-						<?php
-						foreach($userMetaKeys as $key){
-							if(isset($userMetas[$key])){
-								$value	= $userMetas[$key][0];
-							}else{
-								$value	= $wpdb->get_var("SELECT `meta_value` FROM `{$wpdb->usermeta}` WHERE meta_key = '$key'");
-							}
-							// Check if array, store array keys
-							$value 	= maybe_unserialize($value);
-							$data	= '';
-							if(is_array($value)){
-								$keys	= implode(',', array_keys($value));
-								$data	= "data-keys=$keys";
-							}
-							echo "<option value='$key' $data>";
-						}
-
-						?>
-					</datalist>
-
-					<span class="index-wrapper <?php if(empty($condition['meta-key-index'])){echo 'hidden';}?>">
-						<span>and index</span>
-						<input type="text" class="warning-condition meta-key-index" name='<?php echo $name;?>[<?php echo $conditionIndex;?>][meta-key-index]' value="<?php echo $condition['meta-key-index'];?>" list="meta-key-index[<?php echo $conditionIndex;?>]" style="width: fit-content;">
-						<datalist class="meta-key-index-list warning-condition" id="meta-key-index[<?php echo $conditionIndex;?>]">
-							<?php
-							if(is_array($arrayKeys)){
-								foreach(array_keys($arrayKeys) as $key){
-									echo esc_html("<option value='$key'>");
-								}
-							}
-							?>
-						</datalist>
-					</span>
-					
-					<select class="warning-condition inline" name='<?php echo $name;?>[<?php echo $conditionIndex;?>][equation]'>
-						<?php
-						$optionArray	= [
-							''			=> '---',
-							'=='		=> 'equals',
-							'!='		=> 'is not',
-							'>'			=> 'greather than',
-							'<'			=> 'smaller than',
-							'submitted'	=> 'has submitted',
-						];
-						foreach($optionArray as $option=>$optionLabel){
-							if($condition['equation'] == $option){
-								$selected	= 'selected=selected';
-							}else{
-								$selected	= '';
-							}
-							echo "<option value='$option' $selected>$optionLabel</option>";
-						}
-						?>
-					</select>
-					<input  type='text'   class='warning-condition' name='<?php echo $name;?>[<?php echo $conditionIndex;?>][conditional-value]' value="<?php echo $condition['conditional-value'];?>" style="width: fit-content;">
-					
-					<button type='button' class='warn-cond button <?php if(!empty($condition['combinator']) && $condition['combinator'] == 'and'){echo 'active';}?>'	title='Add a new "AND" rule' value="and">AND</button>
-					<button type='button' class='warn-cond button  <?php if(!empty($condition['combinator']) && $condition['combinator'] == 'or'){echo 'active';}?>'	title='Add a new "OR"  rule' value="or">OR</button>
-					<button type='button' class='remove-warn-cond  button' title='Remove rule'>-</button>
-
-					<br>
-				</div>
-				<?php
-			}
-			?>
-		</div>
 		<?php
 		return ob_get_clean();
 	}
