@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- hide fields if needed
 
 ### Fixed
 
