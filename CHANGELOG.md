@@ -7,6 +7,7 @@
 - make recurring form submissions optional
 
 ### Fixed
+- check for empty arrays in conditions
 
 ### Updated
 
