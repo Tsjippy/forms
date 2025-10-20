@@ -702,7 +702,7 @@ class FormBuilderForm extends SimForms{
 		<form action='' method='post' class='sim-form builder' style='margin-top:10px;'>
 			<input type='hidden' name='form-id' value='<?php echo $this->formData->id;?>'>
 
-			Enable From reminders
+			Enable Form Reminders
 			<label class="switch">
 				<input type="checkbox" name="enable" <?php if(!empty($this->formReminder)){echo 'checked';}?>>
 				<span class="slider round"></span>

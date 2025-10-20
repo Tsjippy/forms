@@ -79,7 +79,7 @@ function checkIfConditionsAppliesToUser($conditions, $userId, $submissions=''){
 
 	foreach($conditions as $check){
 		// get the user value
-		$value		= get_user_meta($userId, $check['meta_key'], true);
+		$value		= get_user_meta($userId, $check['meta-key'], true);
 
 		if(!empty($check['meta-key-index'])){
 			if(isset($value[trim($check['meta-key-index'])])){
@@ -119,6 +119,7 @@ function checkIfConditionsAppliesToUser($conditions, $userId, $submissions=''){
 				break;
 			case 'submitted':
 				$result	= false;
+
 				// check if the given userid has submitted the form already 
 				foreach($submissions as $submission){
 					if(is_array($value)){
@@ -261,54 +262,71 @@ function getAllRequiredForms($userId=''){
 
 	$simForms			= new SimForms();
 
+	// Get the forms that have stardate in the past
 	$date				= date('Y-m-d');
 
-	$query				= "SELECT * FROM {$simForms->tableName} WHERE reminder_frequency <> '' AND reminder_period <> '' AND reminder_startdate <> '' AND reminder_startdate <= '$date'";
+	$query				= "SELECT * FROM {$simForms->formReminderTable} WHERE reminder_startdate <= '$date'";
 
-	$forms				= $wpdb->get_results($query);
+	$formReminders		= $wpdb->get_results($query);
 
-	foreach($forms as $form){
-		$simForms->formData	= $form;
+	foreach($formReminders as $formReminder){
+		$formReminder->conditions	= maybe_unserialize($formReminder->conditions);
+
+		$form	= $simForms->getForm($formReminder->form_id);
+
+		$form	= $simForms->formData;
 
 		// get the start day of the week
-		$day = date('D', strtotime($form->reminder_startdate));
+		$day = date('D', strtotime($formReminder->reminder_startdate));
 
 		// only do it once a week
 		if(date('D') != $day){
 			continue;
 		}
 
-		$conditions		= maybe_unserialize($form->reminder_conditions);
-
-		// Check last submission date for this user for this form
-		$interval 		= \DateInterval::createFromDateString("$form->reminder_frequency $form->reminder_period");  // the interval between submissions
+		// Get the re-submission intervals since the start
+		$interval 		= \DateInterval::createFromDateString("$formReminder->frequency $formReminder->period");  	// the interval between submissions
 		$daterange 		= new \DatePeriod(																			// the date range between startdate and today with the specified interval 
-			date_create($form->reminder_startdate), 
+			date_create($formReminder->reminder_startdate), 
 			$interval , 
 			new \DateTime('now'),
 			false
 		);
 
-		// find the last date of the daterange, this is the date closest to today
-		$threshold		= $daterange->getEndDate()->format('Y-m-d');
+		// Get the current interval
+		$currentReminderStart		= $daterange->getEndDate()->format('Y-m-d');
 		foreach($daterange as $date1){
-			$threshold = $date1->format('Y-m-d');
+			$currentReminderStart = $date1->format('Y-m-d');
 		}
 
-		// Do not continue if already count is set
+		// Do not continue if we already have notified the maximum amount
 		if(
-			!empty($form->reminder_amount) &&											// There is an max amount set in weeks
-			strtotime("+ $form->reminder_amount weeks", strtotime($threshold)) < time()	// we are passed the amount
+			!empty($formReminder->reminder_amount) &&														// There is an max amount set in weeks
+			strtotime("+ $formReminder->reminder_amount $formReminder->reminder_period", strtotime($currentReminderStart)) < time()	// we are passed the amount
 		){
 			continue;
 		}
 
-		// get all submissions created after the threshold
-		$query			= "SELECT * FROM {$simForms->submissionTableName} WHERE form_id=$form->id AND timecreated >= '$threshold'";
+		// calculate the start of the current window
+		$daterange 		= new \DatePeriod(																			// the date range between startdate and today with the specified interval 
+			date_create($formReminder->window_start), 
+			$interval , 
+			new \DateTime('now'),
+			false
+		);
+
+		// Get the current interval
+		$currentIntervalStart		= $daterange->getEndDate()->format('Y-m-d');
+		foreach($daterange as $date1){
+			$currentIntervalStart = $date1->format('Y-m-d');
+		}
+
+		// Get all submissions created inside the current submission window
+		$query			= "SELECT * FROM {$simForms->submissionTableName} WHERE form_id=$form->id AND timecreated >= '$currentIntervalStart'";
 
 		$submissions	= $wpdb->get_results($query);
 
-		// get all the users who have submitted the form after the threshold date
+		// get all the users who have submitted the form after the currentIntervalStart date
 		$userIdElementName		= $simForms->findUserIdElementName();
 		if(is_wp_error($userIdElementName)){
 			return $userIdElementName;
@@ -328,7 +346,9 @@ function getAllRequiredForms($userId=''){
 		// now check which users are missing
 		$userIds 		= get_users( [ 'fields' => 'ID' ] );
 
-		$usersWithoutSubmission	= array_diff($userIds, $usersWithSubmission);
+		$usersWithoutSubmission	= array_diff($userIds, $usersWithSubmission);		
+
+		$conditions		= maybe_unserialize($formReminder->conditions);
 
 		if(is_numeric($userId)){
 			// only add if conditions match
@@ -342,7 +362,7 @@ function getAllRequiredForms($userId=''){
 				$html .= "<li><a href='$form->form_url'>$form->form_name$childName</a></li>";
 			}
 		}else{
-			foreach($usersWithoutSubmission as $index=>$userWithoutSubmission){
+			foreach($usersWithoutSubmission as $index => $userWithoutSubmission){
 				if(checkIfConditionsAppliesToUser($conditions, $userWithoutSubmission, $submissions)){
 					unset($usersWithoutSubmission[$index]);
 				}
