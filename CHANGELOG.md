@@ -6,6 +6,7 @@
 
 ### Changed
 - form reminders in seperate table
+- adjusted form reminder logic
 
 ### Fixed
 - show index in condition form when set
