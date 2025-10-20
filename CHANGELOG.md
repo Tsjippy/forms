@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- form reminder settings form
 
 ### Changed
 - form reminders in seperate table
