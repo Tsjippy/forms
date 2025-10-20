@@ -710,12 +710,18 @@ class FormBuilderForm extends SimForms{
 			<br>
 			<br>
 
+			<label <?php if(empty($this->formReminder)){echo 'hidden';}?>>
+				<h4>Recurring Submissions</h4>
+				Request new form submissions every 
+				<input type='number' name='frequency' value='<?php echo $this->formReminder->frequency;?>' style='max-width: 70px;' >
+			</label>
+			
 			<div class='form-reminders-wrapper <?php if(empty($this->formReminder)){echo 'hidden';}?>'>
 				<div class='recurring-submissions<?php if($this->formData->save_in_meta){ echo ' hidden';}?>'>
 					<label>
 						<h4>Recurring Submissions</h4>
 						Request new form submissions every 
-						<input type='number' name='frequency' value='<?php echo $this->formReminder->frequency;?>' style='max-width: 70px;' required>
+						<input type='number' name='frequency' value='<?php echo $this->formReminder->frequency;?>' style='max-width: 70px;' >
 					</label>
 
 					<?php
@@ -749,8 +755,8 @@ class FormBuilderForm extends SimForms{
 					<label>
 						<h4>Date Window</h4>
 						Allow Submissions Within This Date Window<br>
-						From <input type="date" name='window-start' value='<?php echo $this->formReminder->window_start;?>' <?php echo $min;?> required>
-						To <input type="date" name='window-end' value='<?php echo $this->formReminder->window_end;?>' <?php echo $max;?> required>
+						From <input type="date" name='window-start' value='<?php echo $this->formReminder->window_start;?>' <?php echo $min;?> >
+						To <input type="date" name='window-end' value='<?php echo $this->formReminder->window_end;?>' <?php echo $max;?> >
 					</label>				
 				</div>
 
@@ -781,7 +787,7 @@ class FormBuilderForm extends SimForms{
 				<br>
 				<label>
 					<h4>Start reminding from </h4>
-					<input type='date' name='reminder-startdate' value='<?php echo $this->formReminder->reminder_startdate;?>' <?php echo "$min $max";?> required>
+					<input type='date' name='reminder-startdate' value='<?php echo $this->formReminder->reminder_startdate;?>' <?php echo "$min $max";?> >
 				</label>
 
 				<h4>Warning Exclusions</h4>

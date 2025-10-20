@@ -1263,6 +1263,14 @@ window.addEventListener('change', ev=>{
 	}else if(target.matches(`.frequency, #period, [name="window-start"], [name="window-end"], [name="reminder-startdate"], #reminder-period, [name="reminder-amount"]`)){
 		updateReminderMinMax(target);
 	}
+
+	if(target.matches(`.frequency`)){
+		if(target.value == ''){
+			target.closest(`.recurring-submissions`).classList.add('hidden');
+		}else{
+			target.closest(`.recurring-submissions`).classList.remove('hidden');
+		}
+	}
 });
 
 function fixWarningConditionNumbering(parent){
