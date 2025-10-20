@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- hide fields if needed
 
 ### Fixed
 
 ### Updated
+
+## [8.8.2] - 2025-10-20
+
+
+### Changed
+- hide fields if needed
 
 ## [8.8.1] - 2025-10-20
 
