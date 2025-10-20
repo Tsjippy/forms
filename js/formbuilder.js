@@ -41,8 +41,8 @@ function updateReminderMinMax(target){
 		maxAmount	= 4 * frequency - 1;
 	}else if(periodType == 'days'){
 		let curDay = min.getDay();
-		min.setDay(curDay - frequency);
-		max.setDay(curDay + frequency);
+		min.setDate(curDay - frequency);
+		max.setDate(curDay + frequency);
 
 		maxAmount	= 1 * frequency - 1;
 	}
@@ -77,7 +77,7 @@ function updateReminderMinMax(target){
 		// Max value for the reminder start date
 		max 				= windowEnd.valueAsDate;
 		let curDay 			= max.getDay();
-		max.setDay(curDay - reminderPeriod);
+		max.setDate(curDay - reminderPeriod);
 
 		reminderStart.max	= max;
 	}
@@ -423,6 +423,14 @@ async function saveFormConditions(target){
 
 async function saveFormSettings(target){
 	let response	= await FormSubmit.submitForm(target, 'forms/save_form_settings');
+
+	if(response){
+		Main.displayMessage(response);
+	}
+}
+
+async function saveFormReminder(target){
+	let response	= await FormSubmit.submitForm(target, 'forms/save_form_reminder');
 
 	if(response){
 		Main.displayMessage(response);
@@ -1042,6 +1050,8 @@ window.addEventListener("click", event => {
 		saveFormConditions(target);
 	}else if(target.name == 'submit-form-setting'){
 		saveFormSettings(target);
+	}else if(target.name == 'submit-form-reminder'){
+		saveFormReminder(target);
 	}else if(target.name == 'submit-form-emails'){
 		saveFormEmails(target);
 	}else if(target.name == 'autoarchive'){

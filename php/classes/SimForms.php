@@ -1,6 +1,7 @@
 <?php
 namespace SIM\FORMS;
 use SIM;
+use stdClass;
 use WP_Error;
 
 class SimForms{
@@ -143,10 +144,10 @@ class SimForms{
 		$sql = "CREATE TABLE {$this->formReminderTable} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			form_id int,
-			frequency text,
+			frequency int,
 			period text,
 			reminder_startdate date,
-			reminder_amount text,
+			reminder_amount int,
 			reminder_period text,
 			window_start date,
 			window_end date,
@@ -420,22 +421,29 @@ class SimForms{
 	 * Gets the form reminders from the db
 	 * @param	int	$formId		the form id for which to get the reminders
 	 */
-	public function getFormReminders($formId=''){
+	public function getFormReminder($formId=''){
 		global $wpdb;
 
 		if(empty($formId)){
 			$formId	= $this->formData->id;
 		}
+		$this->formReminder	= new stdClass();
 		
 		$query = "select * from $this->formReminderTable where form_id={$formId}";
 		
-		$this->formReminder	= $wpdb->get_results($query);
+		$results	= $wpdb->get_results($query);
 
-		foreach($this->formReminder as &$setting){
-			$setting	= maybe_unserialize($setting);
+		if(empty($results)){
+			return;
 		}
 
-		return $this->formReminder;
+		$this->formReminder	= $results[0];
+
+		foreach($this->formReminder as &$formReminder){
+			foreach($formReminder as &$setting){
+				$setting	= maybe_unserialize($setting);
+			}
+		}
 	}
 
  	/**

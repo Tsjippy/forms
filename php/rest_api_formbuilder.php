@@ -245,6 +245,25 @@ function restApiInitForms() {
 		)
 	);
 
+	// save_form_reminder
+	register_rest_route(
+		RESTAPIPREFIX.'/forms',
+		'/save_form_reminder',
+		array(
+			'methods' 				=> 'POST',
+			'callback' 				=> 	__NAMESPACE__.'\saveFormReminder',
+			'permission_callback' 	=> __NAMESPACE__.'\checkPermissions',
+			'args'					=> array(
+				'form-id'		=> array(
+					'required'	=> true,
+					'validate_callback' => function($formId){
+						return is_numeric($formId);
+					}
+				)
+			)
+		)
+	);
+
 	// save_form_input
 	register_rest_route(
 		RESTAPIPREFIX.'/forms',
@@ -593,6 +612,20 @@ function saveFormSettings(){
 		return $result;
 	}
 	return "Succesfully saved your form settings";
+}
+
+function saveFormReminder(){
+	$formBuilder			= new SaveFormSettings();
+	
+	$formReminder 			= $_POST;
+	unset($formReminder['_wpnonce']);
+	
+	$result	= $formBuilder->updateFormReminder($_POST['form-id'], $formReminder);
+	
+	if(is_wp_error($result)){
+		return $result;
+	}
+	return "Succesfully saved your form reminder settings";
 }
 
 // DONE

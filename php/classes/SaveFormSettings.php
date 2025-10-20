@@ -48,6 +48,21 @@ class SaveFormSettings extends SimForms{
 
 		$this->tableFormats[$this->tableName]			= apply_filters('forms-form-table-formats', $formats, $this);
 
+		// From Reminder Settings
+		$formats			= [
+			'form_id'				=> '%d',
+			'frequency'				=> '%d',
+			'period'				=> '%s',
+			'reminder_startdate'	=> '%s',
+			'reminder_amount'		=> '%d',
+			'reminder_period'		=> '%s',
+			'window_start'			=> '%s',
+			'window_end'			=> '%s',
+			'conditions'			=> '%s'
+		];
+
+		$this->tableFormats[$this->formReminderTable]			= apply_filters('forms-form-reminder-formats', $formats, $this);
+
 		// Form Elements
 		$formats		= [
 			'form_id'				=> '%d',
@@ -560,6 +575,30 @@ class SaveFormSettings extends SimForms{
 		$settings	= apply_filters('sim-forms-before-saving-settings', $settings, $this, $formId);
 
 		$result	= $this->insertOrUpdateData($this->tableName, $settings, ['id' => $formId]);
+		if(is_wp_error($result)){
+			return $result;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Stores the form reminder settings in the db
+	 */
+	public function updateFormReminder($formId='', $settings){
+		if(empty($formId)){
+			if(!empty($this->formData->id)){
+				$formId	= $this->formData->id;
+			}else{
+				return new \WP_Error('Error', 'Please supply a form id');
+			}
+		}
+
+		if(empty($settings)){
+			return new \WP_Error('Error', 'Please supply the form settings');
+		}
+
+		$result	= $this->insertOrUpdateData($this->formReminderTable, $settings, ['form_id' => $formId]);
 		if(is_wp_error($result)){
 			return $result;
 		}
