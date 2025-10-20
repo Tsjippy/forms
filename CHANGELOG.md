@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- form reminders in seperate table
 
 ### Fixed
 - show index in condition form when set
