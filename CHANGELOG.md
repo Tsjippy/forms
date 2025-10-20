@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- make recurring form submissions optional
 
 ### Fixed
 
