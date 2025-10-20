@@ -86,7 +86,7 @@ trait ExportFormResults{
 			//loop over the cells
 			foreach ($row as $cell) {
 				if(is_array($cell)){
-					SIM\cleanUpNestedArray($cell);
+					$cell	= SIM\cleanUpNestedArray($cell);
 					$cell	= implode(',', $cell);
 				} 
 				/* 

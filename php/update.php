@@ -313,20 +313,23 @@ function moduleUpdate($oldVersion){
     if($oldVersion < '8.8.1'){
         $simForms->getForms();
         foreach($simForms->forms as $formData){
-            $data = array_filter([
-                'frequency'		=> $formData->reminder_frequency,
-                'amount'		=> $formData->reminder_amount,
-                'period'		=> $formData->reminder_period,
-                'startdate'		=> $formData->reminder_startdate,
-                'window_start'	=> '',
-                'window_end'	=> '',
-                'conditions'	=> maybe_serialize($formData->reminder_conditions),
-            ]);
 
             $formData->reminder_conditions  = maybe_unserialize($formData->reminder_conditions);
-            SIM\cleanUpNestedArray( $formData->reminder_conditions );
+            $formData->reminder_conditions  = SIM\cleanUpNestedArray( $formData->reminder_conditions );
+            
+            $data = array_filter([
+                'frequency'		        => $formData->reminder_frequency,
+                'period'		        => $formData->reminder_period,
+                'window_start'	        => '',
+                'window_end'	        => '',
+                'reminder_amount'		=> $formData->reminder_amount,
+                'reminder_startdate'	=> $formData->reminder_startdate,
+                'conditions'	        => empty($formData->reminder_conditions) ? null : maybe_serialize($formData->reminder_conditions),
+            ]);
 
             if(!empty($data)){
+                $data['form_id']            = $formData->id;
+                $data['reminder_period']    = 'weeks';
                 $wpdb->insert($simForms->formReminderTable, $data);
             }
         }
@@ -334,5 +337,5 @@ function moduleUpdate($oldVersion){
 }
 
 add_action('init', function(){
-    moduleUpdate('8.8.0');
+    //moduleUpdate('8.8.0');
 });

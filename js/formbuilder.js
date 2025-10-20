@@ -3,37 +3,85 @@ var reorderingBusy, formWrapper, formElementWrapper, modal;
 console.log("Formbuilder.js loaded");
 
 /* FUNCTIONS */
+
+/**
+ * Sets the min and max values of the window date inputs and the max of the reminder amount input
+ * @param {*} target 
+ * @returns 
+ */
 function updateReminderMinMax(target){
-	let form = target.closest('form');
-	let frequency = form.querySelector();
-	let periodType = form.querySelector();
-	let windowStart = form.querySelector();
-	let windowEnd = form.querySelector();
-	let reminderStart = form.querySelector();
-	let min = new Date();
-	let max = clone min;
+	let form 				= target.closest('form');
+	let frequency 			= form.querySelector(`[name="frequency"]`);
+	let periodType 			= form.querySelector(`#period:checked`);
+	let windowStart 		= form.querySelector(`[name="window-start"]`);
+	let windowEnd 			= form.querySelector(`[name="window-end"]`);
+	let reminderStart		= form.querySelector(`[name="reminder-startdate"]`);
+	let reminderAmount		= form.querySelector(`[name="reminder-amount"]`);
+
+	// these two should have a value
+	if(frequency == null || frequency.value == '' || periodType == null){
+		return;
+	}
+	frequency				= +frequency.value;
+	periodType				= periodType.value;
+	let min 				= new Date();
+	let max 				= new Date();
+	let maxAmount;
 	
-	if(periodType == 'year'){
+	if(periodType == 'years'){
 		let curYear = min.getFullYear();
-		min.setFullYear(`${curYear} - ${frequency}`);
-		max.setFullYear(`${curYear} + ${frequency}`);
-	}else if(periodType == 'month'){
+		min.setFullYear(curYear - frequency);
+		max.setFullYear(curYear + frequency);
+
+		maxAmount	= 52 * frequency - 2;
+	}else if(periodType == 'months'){
 		let curMonth = min.getMonth();
-		min.setMonth(`${curMonth} - ${frequency}`);
-		max.setMonth(`${curMonth} + ${frequency}`);
-	}else if(periodType == 'week'){
+		min.setMonth(curMonth - frequency);
+		max.setMonth(curMonth + frequency);
+		maxAmount	= 4 * frequency - 1;
+	}else if(periodType == 'days'){
 		let curDay = min.getDay();
-		min.setDay(`${curDay} - ${ 7 * frequency}`);
-		max.setDay(`${curDay} + ${ 7 * frequency}`);
+		min.setDay(curDay - frequency);
+		max.setDay(curDay + frequency);
+
+		maxAmount	= 1 * frequency - 1;
 	}
+
+	min	= min.toLocaleDateString('en-CA');
+	max	= max.toLocaleDateString('en-CA');
 	
-	windowMin.min = min;
-	windowMin.max = max;
-	windowMax.min = min;
-	windowMax.max = max;
-	
-	reminderStart.min = min;
+	windowStart.min = min;
+	windowStart.max = max;
+	windowEnd.min = min;
+	windowEnd.max = max;
+
+	// Max value for the reminder amount
+	reminderAmount.max	= maxAmount;
+
+	if( windowStart.value != '' ){
+		reminderStart.min	= windowStart.value;
 	}
+
+	if(
+		reminderAmount.value != '' && 
+		form.querySelector(`#reminder-period:checked`) != null && 
+		windowStart.value != '' &&
+		windowEnd.value != ''
+	){
+		let reminderPeriod		= (parseInt(reminderAmount.value) + 1);
+		let reminderPeriodType	= form.querySelector(`#reminder-period:checked`).value;
+		if(reminderPeriodType == 'week'){
+			reminderPeriod		= reminderPeriod * 7;
+		}
+
+		// Max value for the reminder start date
+		max 				= windowEnd.valueAsDate;
+		let curDay 			= max.getDay();
+		max.setDay(curDay - reminderPeriod);
+
+		reminderStart.max	= max;
+	}
+}
 	
 function clearFormInputs(){
 	try {
@@ -1200,6 +1248,10 @@ window.addEventListener('change', ev=>{
 				warningsConditions.querySelector(`[name*='[conditional-value]']`).classList.remove('hidden');
 			}
 		}
+	}else if(target.matches(`.switch [name='enable']`)){
+		target.closest(`form`).querySelector(`.form-reminders-wrapper`).classList.toggle('hidden');
+	}else if(target.matches(`.frequency, #period, [name="window-start"], [name="window-end"], [name="reminder-startdate"], #reminder-period, [name="reminder-amount"]`)){
+		updateReminderMinMax(target);
 	}
 });
 

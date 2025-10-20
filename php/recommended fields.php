@@ -59,7 +59,7 @@ function checkIfConditionsAppliesToUser($conditions, $userId, $submissions=''){
 		return true;
 	}
 
-	SIM\cleanUpNestedArray($conditions, true);
+	$conditions	= SIM\cleanUpNestedArray($conditions);
 	$skip	= false;
 
 	// Check if the the roles overlap

@@ -541,7 +541,7 @@ class SubmitForm extends SimForms{
 
 				//remove empty elements from the array
 				if(is_array($result)){
-					SIM\cleanUpNestedArray($result);
+					$result	= SIM\cleanUpNestedArray($result);
 
 					//check if we should only update one entry of the array
 					$el	= $this->getElementByName($key.'['.array_keys($result)[0].']');

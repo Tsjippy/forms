@@ -38,6 +38,7 @@ class SimForms{
 	public $shortcodeTable;
 	public $shortcodeColumnSettingsTable;
 	public $emailSettings;
+	public $formReminder;
 
 	public function __construct(){
 		global $wpdb;
@@ -141,10 +142,12 @@ class SimForms{
 		// Form Reminders Table
 		$sql = "CREATE TABLE {$this->formReminderTable} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			form_id int,
 			frequency text,
-			amount text,
 			period text,
-			startdate date,
+			reminder_startdate date,
+			reminder_amount text,
+			reminder_period text,
 			window_start date,
 			window_end date,
 			conditions LONGTEXT,
@@ -411,6 +414,28 @@ class SimForms{
 		$this->jsFileName	= plugin_dir_path(__DIR__)."../js/dynamic/{$this->formData->name}forms";
 
 		return true;
+	}
+
+	/**
+	 * Gets the form reminders from the db
+	 * @param	int	$formId		the form id for which to get the reminders
+	 */
+	public function getFormReminders($formId=''){
+		global $wpdb;
+
+		if(empty($formId)){
+			$formId	= $this->formData->id;
+		}
+		
+		$query = "select * from $this->formReminderTable where form_id={$formId}";
+		
+		$this->formReminder	= $wpdb->get_results($query);
+
+		foreach($this->formReminder as &$setting){
+			$setting	= maybe_unserialize($setting);
+		}
+
+		return $this->formReminder;
 	}
 
  	/**

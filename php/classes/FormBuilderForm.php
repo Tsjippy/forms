@@ -14,6 +14,7 @@ class FormBuilderForm extends SimForms{
 	public $currentElement;
 	public $elementHtmlBuilder;
 	protected $inMultiAnswer;
+	public $reminders;
 
 	public function __construct($atts=[]){
 		parent::__construct();
@@ -696,6 +697,7 @@ class FormBuilderForm extends SimForms{
 	* Form to specify form reminders
 	*/
 	public function formRemindersForm(){
+		$this->getFormReminders();
 		?>
 		<form action='' method='post' class='sim-form builder' style='margin-top:10px;'>
 			Enable From reminders
@@ -711,12 +713,12 @@ class FormBuilderForm extends SimForms{
 					<label>
 						<h4>Recurring Submissions</h4>
 						Request new form submissions every 
-						<input type='number' name='reminder-frequency' value='<?php echo $this->formData->reminder_frequency;?>' style='max-width: 70px;'>
+						<input type='number' name='frequency' value='<?php echo $this->reminders->frequency;?>' style='max-width: 70px;'>
 					</label>
 
 					<?php
 						foreach(['years', 'months', 'days'] as $period) {
-							if(isset($this->formData->reminder_period) && $this->formData->reminder_period == $period){
+							if(isset($this->reminders->period) && $this->reminders->period == $period){
 								$checked = 'checked';	
 							}else{
 								$checked = '';
@@ -724,7 +726,7 @@ class FormBuilderForm extends SimForms{
 
 							?>
 							<label>
-								<input type='radio' name='reminder-period' id='reminder-period' value='<?php echo $period;?>' <?php echo $checked;?>>
+								<input type='radio' name='period' id='period' value='<?php echo $period;?>' <?php echo $checked;?>>
 								<?php echo $period;?>
 							</label>
 							<?php
@@ -732,12 +734,12 @@ class FormBuilderForm extends SimForms{
 						
 						$min='';
 						$max='';
-						if(!empty($this->formData->reminder_frequency) && !empty($this->formData->reminder_period)){
-							// Selected data can not lie in a previous window
-							$min = 'min="'.date("Y-m-d", strtotime("-{$this->formData->reminder_frequency} {$this->formData->reminder_period} + 1 day")).'"';
+						if(!empty($this->reminders->frequency) && !empty($this->reminders->period)){
+							// Selected data can not be in a previous window
+							$min = 'min="'.date("Y-m-d", strtotime("-{$this->reminders->frequency} {$this->reminders->period} + 1 day")).'"';
 							
 							// Selected date cannot be in the newxt window
-							$max = 'max="'.date("Y-m-d", strtotime("+{$this->formData->reminder_frequency} {$this->formData->reminder_period} - 1 day")).'"';
+							$max = 'max="'.date("Y-m-d", strtotime("+{$this->reminders->frequency} {$this->reminders->period} - 1 day")).'"';
 						}
 					?>
 
@@ -745,29 +747,45 @@ class FormBuilderForm extends SimForms{
 					<label>
 						<h4>Date Window</h4>
 						Allow Submissions Within This Date Window<br>
-						From <input type="date" name='reminder-window-start' value='<?php echo $this->formData->reminder_window_start;?>' <?php echo $min;?> >
-						To <input type="date" name='reminder-window-end' value='<?php echo $this->formData->reminder_window_end;?>' <?php echo $max;?> >
+						From <input type="date" name='window-start' value='<?php echo $this->reminders->window_start;?>' <?php echo $min;?> >
+						To <input type="date" name='window-end' value='<?php echo $this->reminders->window_end;?>' <?php echo $max;?> >
 					</label>				
 				</div>
 
 				<label>
-					<h4>Start reminding from </h4>
-					
-					<input type='date' name='reminder-startdate' value='<?php echo $this->formData->reminder_startdate;?>' <?php echo "$min $max";?>>
-				</label>
-
-				<br>
-				<label>
 					<h4>Reminder Amount</h4>
 					How many times should people be reminded?<br>
 					Leave empty for unlimited.<br>
-					Once every week for <input type="number" name='reminder-amount' value='<?php echo $this->formData->reminder_amount;?>' style='width: 70px;'> weeks.
+					Once every 
+					<?php
+					foreach(['week', 'day'] as $period) {
+						if(isset($this->reminders->reminder_period) && $this->reminders->reminder_period == $period){
+							$checked = 'checked';	
+						}else{
+							$checked = '';
+						}
+
+						?>
+						<label>
+							<input type='radio' name='reminder-period' id='reminder-period' value='<?php echo $period;?>' <?php echo $checked;?>>
+							<?php echo $period;?>
+						</label>
+						<?php
+					}
+					?>
+					for <input type="number" name='reminder-amount' value='<?php echo $this->reminders->reminder_amount;?>' style='width: 70px;'>
+				</label>
+				times.
+				<br>
+				<label>
+					<h4>Start reminding from </h4>
+					<input type='date' name='reminder-startdate' value='<?php echo $this->formData->reminder_startdate;?>' <?php echo "$min $max";?>>
 				</label>
 
 				<h4>Warning Exclusions</h4>
 				<?php echo $this->warningConditionsForm('reminder_conditions', maybe_unserialize($this->formData->reminder_conditions));?>
 			</div>
-			
+
 			<?php
 			echo SIM\addSaveButton('submit-form-reminders',  'Save form reminders');
 			?>
@@ -816,9 +834,7 @@ class FormBuilderForm extends SimForms{
 
 		ob_start();
 		?>
-			
-		<h5>Do not warn</h5>
-		<label>If user has role</label>
+		<label>Do not warn if user has role</label>
 		<select name='<?php echo $name;?>[roles][]' multiple>
 			<option value=''>---</option>
 			<?php
