@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [8.8.1] - 2025-10-20
+
+
+### Added
 - form reminder settings form
 
 ### Changed
@@ -11,8 +22,6 @@
 ### Fixed
 - show index in condition form when set
 -  is an object
-
-### Updated
 
 ## [8.8.0] - 2025-10-17
 
