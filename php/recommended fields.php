@@ -32,10 +32,6 @@ function getAllEmptyRequiredElements($userId, $type){
 		$html	.= checkElementNeedsInput($elements, $userId);
 	}
 
-	if($type == 'mandatory' || $type == 'all'){
-		$html	.= getAllRequiredForms($userId);
-	}
-
 	if(!empty($html)){
 		$html	= "<ul>$html</ul>";
 	}
