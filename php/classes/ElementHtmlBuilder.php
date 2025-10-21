@@ -137,13 +137,17 @@ class ElementHtmlBuilder extends SimForms{
 	 * 
 	 * @return	string							The updated HTML
 	 */
-	function prepareElementHtml($index, $value){
+	function prepareElementHtml($index, $value, $baseHtml=''){
 		if($value === null){
 			$value = '';
 		}
 
+		if(empty($baseHtml)){
+			$baseHtml	= $this->html;
+		}
+
 		// make sure we add the [] after the index
-		$elementHtml		= str_replace('[]', '', $this->html, $replaceCount);
+		$elementHtml		= str_replace('[]', '', $baseHtml, $replaceCount);
 		$indexString 		= "[$index]";
 		if($replaceCount){
 			$indexString	.= "[]";
@@ -261,7 +265,7 @@ class ElementHtmlBuilder extends SimForms{
 				$val	= $values[$index];
 			}
 
-			$elementItemHtml	= $initialHtml.$this->prepareElementHtml($index, $val);
+			$elementItemHtml	= $initialHtml.$this->prepareElementHtml($index, $val, $initialHtml);
 			
 			//open the clone div
 			$html	= "<div class='clone-div' data-div-id='$index'>";
