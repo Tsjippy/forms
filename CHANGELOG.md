@@ -8,6 +8,7 @@
 
 ### Fixed
 - check for empty arrays in conditions
+- multi input valuaes
 
 ### Updated
 
