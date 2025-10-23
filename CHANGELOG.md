@@ -11,6 +11,7 @@
 ### Fixed
 - check for empty arrays in conditions
 - multi input valuaes
+- bug in result view permissions
 
 ### Updated
 
