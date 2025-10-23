@@ -439,10 +439,8 @@ class SimForms{
 
 		$this->formReminder	= $results[0];
 
-		foreach($this->formReminder as &$formReminder){
-			foreach($formReminder as &$setting){
-				$setting	= maybe_unserialize($setting);
-			}
+		foreach($this->formReminder as &$setting){
+			$setting	= maybe_unserialize($setting);
 		}
 	}
 

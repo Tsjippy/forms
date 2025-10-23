@@ -698,12 +698,34 @@ class FormBuilderForm extends SimForms{
 	*/
 	public function formReminderForm(){
 		$this->getFormReminder();
+
+		/**
+		 * Show a warning when no e-mail is set
+		 */
+		$this->getEmailSettings();
+
+		$triggerFound = false;
+		foreach($this->emailSettings as $setting){
+			if($setting['email_trigger'] == 'shouldsubmit'){
+				$triggerFound	= true;
+				break;
+			}
+		}
+
+		if(!$triggerFound){
+			?>
+			<div class='warning'>
+				If you define form reminders you should also define an e-mail with the 'The form is due for submission' trigger
+			</div>
+			<?php
+		}
+
 		?>
 		<form action='' method='post' class='sim-form builder' style='margin-top:10px;'>
 			<input type='hidden' name='form-id' value='<?php echo $this->formData->id;?>'>
 
 			<?php
-			// recurring submission can oonly happen with forms that are not saved in meta
+			// recurring submission can only happen with forms that are not saved in meta
 			if(empty($this->formData->save_in_meta)){
 
 				?>

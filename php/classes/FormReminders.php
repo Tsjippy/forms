@@ -706,8 +706,21 @@ class FormReminders extends SimForms{
             }
         }
 
-        foreach($this->getAllFormRemindersForToday(false) as $userId => $html){
-            $this->sendEmail($userId, $html);
+        foreach($this->getAllFormRemindersForToday(false) as $userId => $forms){
+            foreach($forms as $formId => $html){
+                // Load the form data for this form
+                foreach($this->metaForms[$today] as $formDetails){
+                    if($formDetails['form']->id == $formId){
+                        $this->formData = $formDetails['form'];
+                        break;
+                    }
+                }
+
+                // Load the e-mail settings for this form
+                $this->getEmailSettings();
+
+                $this->sendEmail($userId, $html);
+            }
         }
     }
 
@@ -752,6 +765,10 @@ class FormReminders extends SimForms{
                 $recipient  = $user->user_email; 
             }else{
                 $recipient  = $to;
+            }
+
+            if(!empty($html) && !str_contains($message, '%reminders%')){
+                $message .= '%reminders%';
             }
 
             $msg      = $this->processPlaceholders(
