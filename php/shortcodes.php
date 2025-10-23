@@ -147,7 +147,8 @@ function missingFormFields($atts){
 
 	$html	= '';
 
-    $fieldHtml = getAllEmptyRequiredElements(get_current_user_id(), $a['type']);
+    $forms      = new FormReminders();
+    $fieldHtml  = $forms->getReminderHtml(get_current_user_id(), $a['type']);
 	
 	if (!empty($fieldHtml)){
 		$html .=  '<div id=recommendations style="margin-top:20px;">';

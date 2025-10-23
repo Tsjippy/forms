@@ -253,93 +253,6 @@ class SubmitForm extends SimForms{
 			remove_filter('sim_email_footer_url', [$this, 'emailFooter']);
 		}
 	}
-	
-	/**
-	 * Replaces placeholder with the value
-	 *
-	 * @param	string	$string			The string to check for placeholders
-	 * @param	array	$replaceValues	An indexed array where the index is the keyword and the value the keyword should be replaced with. Default empty, in that case form results are used.
-	 *
-	 * @return	string					The filtered string
-	 */
-	public function processPlaceholders($string, $replaceValues=''){
-		if(empty($string)){
-			return $string;
-		}
-
-		if(!empty($this->submission->formresults)){
-			if(empty($replaceValues)){
-				$replaceValues = $this->submission->formresults;
-			}
-
-			if(empty($this->submission->formresults['submissiondate'])){
-				$this->submission->formresults['submissiondate']	= date('d F y', strtotime($this->submission->formresults['submissiontime']));
-				$this->submission->formresults['editdate']			= date('d F y', strtotime($this->submission->formresults['edittime']));
-			}
-			
-			if(isset($_REQUEST['subid']) && empty($this->submission->formresults['subid'])){
-				$this->submission->formresults['subid']	= $_REQUEST['subid'];
-			}
-		}
-
-		$pattern = '/%([^%;]*)%/i';
-		//Execute the regex
-		preg_match_all($pattern, $string, $matches);
-		
-		//loop over the results
-		foreach($matches[1] as $match){
-			$replaceValue	= $replaceValues[$match];
-
-			// Empty
-			if(empty($replaceValue)){
-				$replaceValue	= apply_filters('sim-forms-transform-empty', $replaceValue, $this, $match);
-				if(empty($replaceValue)){
-					//remove the placeholder, there is no value
-					$string = str_replace("%$match%", '', $string);
-
-					// mention it in the log
-					SIM\printArray("No value found for transform value '%$match%' on form '{$this->formData->name}' with id {$this->formData->id}");
-				}
-				$string 		= str_replace("%$match%", $replaceValue, $string);
-			}
-			
-			// Valid file(s)
-			elseif(
-				is_array($replaceValue)									&&	// the form results are an array
-				file_exists( ABSPATH.array_values($replaceValue)[0])		// and the first entry is a valid file
-			){
-				// add the ABSPATH to the file paths
-				$string = array_map(function($value){
-					return ABSPATH.$value;
-				}, $replaceValue);
-			}
-			
-			else{
-				if(is_array($replaceValue) && count($replaceValue) == 1){
-					$replaceValue	= array_values($replaceValue)[0];
-				}
-
-				if(is_array($replaceValue)){
-					$replaceValue	= apply_filters('sim-forms-transform-array', implode(',', $replaceValue), $replaceValue, $this, $match);
-				}elseif(preg_match('/^(\d{4}-\d{2}-\d{2})$/', $replaceValue, $matches)){
-					$replaceValue	= date(get_option('date_format'), strtotime((string)$matches[1]));
-				}
-
-				//replace the placeholder with the value
-				if(!file_exists($replaceValue)){
-					$replaceValue	= str_replace('_', ' ', $replaceValue);
-				}
-
-				// wordpress sometimes adds http:// automatically
-				if($match == 'formurl'){
-					$string 		= str_replace("http://%$match%", $replaceValue, $string);
-				}
-				$string 		= str_replace("%$match%", $replaceValue, $string);
-			}
-		}
-		
-		return $string;
-	}
 
 	/**
 	 * Rename any existing files to include the form id.
@@ -594,6 +507,8 @@ class SubmitForm extends SimForms{
 		}
 
 		$message	= apply_filters('sim_after_saving_formdata', $message, $this);
+
+		do_action('sim-after-form-submit', $this);
 
 		return $message;
 	}

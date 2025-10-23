@@ -702,56 +702,64 @@ class FormBuilderForm extends SimForms{
 		<form action='' method='post' class='sim-form builder' style='margin-top:10px;'>
 			<input type='hidden' name='form-id' value='<?php echo $this->formData->id;?>'>
 
-			Enable Recurring Form Submissions
-			<label class="switch">
-				<input type="checkbox" name="enable" <?php if(!empty($this->formReminder->frequency)){echo 'checked';}?>>
-				<span class="slider round"></span>
-			</label>
-			<br>
-			<br>
-			
-			<div class='recurring-submissions <?php if(empty($this->formReminder->frequency)){echo 'hidden';}?>'>
-				<label>
-					<h4>Recurring Submissions</h4>
-					Request new form submissions every 
-					<input type='number' name='frequency' value='<?php echo $this->formReminder->frequency;?>' style='max-width: 70px;' >
-				</label>
+			<?php
+			// recurring submission can oonly happen with forms that are not saved in meta
+			if(empty($this->formData->save_in_meta)){
 
-				<?php
-					foreach(['years', 'months', 'days'] as $period) {
-						if(isset($this->formReminder->period) && $this->formReminder->period == $period){
-							$checked = 'checked';	
-						}else{
-							$checked = '';
-						}
-
-						?>
-						<label>
-							<input type='radio' name='period' id='period' value='<?php echo $period;?>' <?php echo $checked;?>>
-							<?php echo $period;?>
-						</label>
-						<?php
-					}
-					
-					$min='';
-					$max='';
-					if(!empty($this->formReminder->frequency) && !empty($this->formReminder->period)){
-						// Selected data can not be in a previous window
-						$min = 'min="'.date("Y-m-d", strtotime("-{$this->formReminder->frequency} {$this->formReminder->period} + 1 day")).'"';
-						
-						// Selected date cannot be in the newxt window
-						$max = 'max="'.date("Y-m-d", strtotime("+{$this->formReminder->frequency} {$this->formReminder->period} - 1 day")).'"';
-					}
 				?>
-
+				Enable Recurring Form Submissions
+				<label class="switch">
+					<input type="checkbox" name="enable" <?php if(!empty($this->formReminder->frequency)){echo 'checked';}?>>
+					<span class="slider round"></span>
+				</label>
 				<br>
-				<label>
-					<h4>Date Window</h4>
-					Allow Submissions Within This Date Window<br>
-					From <input type="date" name='window-start' value='<?php echo $this->formReminder->window_start;?>' <?php echo $min;?> >
-					To <input type="date" name='window-end' value='<?php echo $this->formReminder->window_end;?>' <?php echo $max;?> >
-				</label>				
-			</div>
+				<br>
+				
+				<div class='recurring-submissions <?php if(empty($this->formReminder->frequency)){echo 'hidden';}?>'>
+					<label>
+						<h4>Recurring Submissions</h4>
+						Request new form submissions every 
+						<input type='number' name='frequency' value='<?php echo $this->formReminder->frequency;?>' style='max-width: 70px;' >
+					</label>
+
+					<?php
+						foreach(['years', 'months', 'days'] as $period) {
+							if(isset($this->formReminder->period) && $this->formReminder->period == $period){
+								$checked = 'checked';	
+							}else{
+								$checked = '';
+							}
+
+							?>
+							<label>
+								<input type='radio' name='period' id='period' value='<?php echo $period;?>' <?php echo $checked;?>>
+								<?php echo $period;?>
+							</label>
+							<?php
+						}
+						
+						$min='';
+						$max='';
+						if(!empty($this->formReminder->frequency) && !empty($this->formReminder->period)){
+							// Selected data can not be in a previous window
+							$min = 'min="'.date("Y-m-d", strtotime("-{$this->formReminder->frequency} {$this->formReminder->period} + 1 day")).'"';
+							
+							// Selected date cannot be in the newxt window
+							$max = 'max="'.date("Y-m-d", strtotime("+{$this->formReminder->frequency} {$this->formReminder->period} - 1 day")).'"';
+						}
+					?>
+
+					<br>
+					<label>
+						<h4>Date Window</h4>
+						Allow Submissions Within This Date Window<br>
+						From <input type="date" name='window-start' value='<?php echo $this->formReminder->window_start;?>' <?php echo $min;?> >
+						To <input type="date" name='window-end' value='<?php echo $this->formReminder->window_end;?>' <?php echo $max;?> >
+					</label>				
+				</div>
+			<?php
+			}
+			?>
 
 			<label>
 				<h4>Reminder Amount</h4>

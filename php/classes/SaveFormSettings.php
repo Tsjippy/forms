@@ -558,8 +558,6 @@ class SaveFormSettings extends SimForms{
 	 * Update form settings
 	 */
 	public function updateFormSettings($formId='', $settings=''){
-		global $wpdb;
-
 		if(empty($formId)){
 			if(!empty($this->formData->id)){
 				$formId	= $this->formData->id;
@@ -602,6 +600,8 @@ class SaveFormSettings extends SimForms{
 		if(is_wp_error($result)){
 			return $result;
 		}
+
+		do_action('sim-after-form-reminder-save', $settings, $this);
 
 		return true;
 	}

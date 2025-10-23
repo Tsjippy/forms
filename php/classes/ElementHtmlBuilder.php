@@ -265,7 +265,7 @@ class ElementHtmlBuilder extends SimForms{
 				$val	= $values[$index];
 			}
 
-			$elementItemHtml	= $initialHtml.$this->prepareElementHtml($index, $val, $initialHtml);
+			$elementItemHtml	= $this->prepareElementHtml($index, $val, $initialHtml);
 			
 			//open the clone div
 			$html	= "<div class='clone-div' data-div-id='$index'>";

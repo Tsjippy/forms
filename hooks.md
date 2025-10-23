@@ -1,5 +1,5 @@
 # FILTERS
-- apply_filters("sim_{$type}_elements_filter", $elements, $userId);
+- apply_filters("sim_{$type}_elements_filter", $elements);
 - apply_filters("sim_{$type}_html_filter", $html, $userId);
 - apply_filters('sim-forms-submission-updated', $message, $formTable, $elementName, $oldValue, $newValue);
 - apply_filters('sim-forms-before-showing-form', '', $this);

@@ -11,7 +11,8 @@ function loginRedirect($redirect, $requestedRedirect, $user){
     }
 
     // Get mandatory or recommended fields
-    $fieldList   = getAllEmptyRequiredElements($user->ID, 'all');
+    $forms      = new FormReminders();
+    $fieldList  = $forms->getUserFormReminders($user->ID, 'all');
 
     //redirect to account page to fill in required fields
     if (!empty($fieldList)){
