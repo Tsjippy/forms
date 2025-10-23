@@ -1762,7 +1762,7 @@ class DisplayFormResults extends DisplayForm{
 				!$this->all
 			)	||
 			!$this->tableEditPermissions							&&
-			!array_intersect($this->userRoles, array_keys((array)$this->tableSettings->view_right_roles)) &&
+			!array_intersect($this->userRoles, (array)$this->tableSettings->view_right_roles) &&
 			!in_array($this->userId, (array)$this->tableSettings->view_right_roles) &&
 			!wp_doing_cron()
 		){
@@ -2063,7 +2063,7 @@ class DisplayFormResults extends DisplayForm{
 			!$this->tableViewPermissions || 
 			isset($_REQUEST['only-own']) && $_REQUEST['only-own']
 		){
-			// we do not have permission to view someoneelses submissions
+			// we do not have permission to view someone elses submissions
 			if($type == 'others'){
 				return true;
 			}
