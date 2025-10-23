@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- warning when having form reminders without defined e-mail
 
 ### Changed
 - make recurring form submissions optional
