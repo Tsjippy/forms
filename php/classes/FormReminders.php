@@ -456,7 +456,6 @@ class FormReminders extends SimForms{
      */
     public function getAllFormRemindersForToday($includeMandatoryForms=true){
         $today  = date('D');
-        $today  = 'Wed';
 
         $reminders  = [];
 
@@ -685,7 +684,6 @@ class FormReminders extends SimForms{
      */
     public function sendFormReminders(){
         $today  = date('D');
-        $today  = 'Wed';
 
         // Send e-mails for forms to be submitted
         foreach($this->defaultForms[$today] as $formDetails){

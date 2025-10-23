@@ -402,7 +402,7 @@ class DisplayForm extends SubmitForm{
 				$type	= $this->formElements[$i]->type;
 
 				// Loop till we reach a multi-end element or the end of the form
-				if($type == 'multi-end' || !empty($this->formElements[$i])){
+				if($type == 'multi-end' || empty($this->formElements[$i])){
 					break;
 				}
 
@@ -412,10 +412,16 @@ class DisplayForm extends SubmitForm{
 					//Get the field values and count
 					$values			= $this->getElementValues($this->formElements[$i]);
 
-					if(empty($values)){
+					if(empty($values) || !is_array(array_values($values)[0])){
 						$valueCount	= 0;
 					}else{
 						$valueCount		= count(array_values($values)[0]);
+
+						// Do not count the valuelist values
+						if(!empty($this->formElements[$i]->valuelist)){
+							$elementValues	= explode("\n", $this->formElements[$i]->valuelist);
+							$valueCount	= $valueCount - count($elementValues);
+						}
 					}
 					
 					if($valueCount > $this->multiWrapValueCount){

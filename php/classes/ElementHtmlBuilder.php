@@ -465,7 +465,7 @@ class ElementHtmlBuilder extends SimForms{
 		}
 
 		// Write a placeholder value for multi elements
-		if($this->multiwrap || !empty($this->element->multiple)){
+		if($this->parentInstance->multiwrap || !empty($this->element->multiple)){
 			if(str_contains($this->tagType, 'input')){
 				$this->valueHtml	= "value='%value%'";
 			}

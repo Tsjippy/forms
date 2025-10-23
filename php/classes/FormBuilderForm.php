@@ -706,7 +706,9 @@ class FormBuilderForm extends SimForms{
 
 		$triggerFound = false;
 		foreach($this->emailSettings as $setting){
-			if($setting['email_trigger'] == 'shouldsubmit'){
+			$setting = (object)$setting;
+
+			if($setting->email_trigger == 'shouldsubmit'){
 				$triggerFound	= true;
 				break;
 			}

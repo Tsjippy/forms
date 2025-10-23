@@ -1,6 +1,13 @@
 @use '../../../plugins/sim-plugin/includes/css/scss/global' as *;
 
 .sim-form-wrapper{
+	input:disabled {
+		border: none;
+		padding: 0;
+		font-weight: bold;
+		font-size: inherit;
+	}
+
 	.formfield-input:not(input[type='radio']){
 		float:left;
 	}
