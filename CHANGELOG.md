@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [8.8.3] - 2025-10-23
+
+
+### Added
 - warning when having form reminders without defined e-mail
 
 ### Changed
@@ -13,8 +24,6 @@
 - multi input valuaes
 - bug in result view permissions
 - multielement wrap with radios in it
-
-### Updated
 
 ## [8.8.2] - 2025-10-20
 
