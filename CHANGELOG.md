@@ -12,6 +12,7 @@
 - check for empty arrays in conditions
 - multi input valuaes
 - bug in result view permissions
+- multielement wrap with radios in it
 
 ### Updated
 
