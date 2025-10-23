@@ -5,6 +5,7 @@
 
 ### Changed
 - make recurring form submissions optional
+- meta form reminders now possible
 
 ### Fixed
 - check for empty arrays in conditions
