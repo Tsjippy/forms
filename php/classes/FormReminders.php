@@ -620,7 +620,9 @@ class FormReminders extends SimForms{
 
         $formUrl    = $this->formData->form_url;
 
-        $text       = "Fill in the {$this->formData->name} form";
+        $formName   = str_replace(['-', '_'], ' ', $this->formData->name);
+
+        $text       = "Fill in the $formName form";
         if(!empty($childName)){
             $text   .= " for $childName";
         }
