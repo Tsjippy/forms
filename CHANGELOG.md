@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- replace _ with space
 
 ### Fixed
 
 ### Updated
+
+## [8.8.4] - 2025-10-25
+
+
+### Changed
+- replace _ with space
 
 ## [8.8.3] - 2025-10-23
 
