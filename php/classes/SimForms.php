@@ -566,6 +566,10 @@ class SimForms{
 		$elementIndex	= $this->formData->elementMapping['id'][$id];
 					
 		$element		= $this->formElements[$elementIndex];
+		if(empty($element)){
+			return false;
+		}
+		
 		$element->index	= $elementIndex;
 		
 		if(empty($key)){
