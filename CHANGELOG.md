@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- removed form reset option
 
 ### Fixed
 
