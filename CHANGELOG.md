@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- potential bug when no element found
 
 ### Updated
+
+## [8.8.5] - 2025-10-27
+
+
+### Fixed
+- potential bug when no element found
 
 ## [8.8.4] - 2025-10-25
 
