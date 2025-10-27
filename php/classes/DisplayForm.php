@@ -589,10 +589,12 @@ class DisplayForm extends SubmitForm{
 		}
 
 		$dataset	= "data-form-id='{$this->formData->id}'";
-		if(!empty($this->formData->form_reset)){
+
+		// Reset a form when not saving to meta
+		if(empty($this->formData->save_in_meta)){
 			$dataset .= " data-reset=1";
-		}
-		if(!empty($this->formData->save_in_meta)){
+		}else{
+			// make sure empty checkboxes show up in form results
 			$dataset .= " data-add-empty=1";
 		}
 

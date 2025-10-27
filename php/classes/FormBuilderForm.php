@@ -471,19 +471,6 @@ class FormBuilderForm extends SimForms{
 						<input type='text' class='formbuilder form-element-setting' name='upload-path' value='<?php echo $this->formData->upload_path;?>'>
 					</label>
 					<br>
-					
-					<label>
-						<?php
-						if($this->formData->form_reset){
-							$checked = 'checked';
-						}else{
-							$checked = '';
-						}
-						?>
-						<input type='checkbox' class='formbuilder form-element-setting' name='form-reset' value='1' <?php echo $checked;?>>
-						Reset form after succesfull submission
-					</label>
-					<br>
 						
 					<h4>Available actions</h4>
 					<?php

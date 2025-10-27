@@ -35,7 +35,6 @@ class SaveFormSettings extends SimForms{
 			'reminder_conditions'	=> '%s',
 			'reminder_startdate'	=> '%s',
 			'form_url'				=> '%s',
-			'form_reset'			=> '%d',
 			'actions'				=> '%s',
 			'autoarchive'			=> '%d',
 			'autoarchive_el'		=> '%d',

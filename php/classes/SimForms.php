@@ -125,7 +125,6 @@ class SimForms{
 			reminder_startdate date,
 			reminder_conditions LONGTEXT,
 			form_url text,
-			form_reset boolean,
 			actions text,
 			autoarchive boolean,
 			autoarchive_el integer,
