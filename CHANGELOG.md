@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- filter for form results table
 
 ### Changed
 - removed form reset option
