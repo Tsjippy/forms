@@ -188,12 +188,6 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\getInputHtml',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'form-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($formId){
-						return is_numeric($formId);
-					}
-				),
 				'id'		=> array(
 					'required'	=> true,
 				),
@@ -393,9 +387,10 @@ function archiveSubmission(){
 function getInputHtml(){
 	$formTable		= new DisplayFormResults();
 
-	$formTable->getForm($_POST['form-id']);
-
 	$formTable->getSubmission($_POST['submission-id']);
+
+	// Get the form id from the submission and load tge form
+	$formTable->getForm($formTable->submission->form_id);
 
 	$elementId		= sanitize_text_field($_POST['id']);
 

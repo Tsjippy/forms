@@ -37,8 +37,8 @@ trait CreateJs{
         $errors = [];
 
         //Loop over all elements to find any conditions
-        foreach($this->formElements as $elementIndex=>$element){
-            $conditions	= $element->conditions;
+        foreach($this->formElements as $elementIndex => $element){
+            $conditions	= maybe_unserialize($element->conditions);
 
             //if there are conditions
             if(!is_array($conditions)){
@@ -46,7 +46,7 @@ trait CreateJs{
             }
 
             //Loop over the conditions
-            foreach($conditions as $conditionIndex=>$condition){
+            foreach($conditions as $conditionIndex => $condition){
                 //if there are rules build some javascript
                 if(is_array($condition['rules'])){
                     //Open the if statemenet
@@ -319,7 +319,7 @@ trait CreateJs{
                         if($action == 'value'){
                             $propertyName	                        = $condition['property-name1'];
                             if(isset($condition['action-value'])){
-                                $varName   = '"'.do_shortcode($condition['action_value']).'"';
+                                $varName   = '"'.do_shortcode($condition['action-value']).'"';
                             }
                         //retrieve value from another field
                         }else{

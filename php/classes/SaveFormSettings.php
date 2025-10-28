@@ -391,6 +391,8 @@ class SaveFormSettings extends SimForms{
 
 		$this->insertOrUpdateData($this->elTableName, $element, ['id' => $elId]);
 
+		$element->id	= $elId;
+
 		// Update the element in the formElements array
 		$this->formElements[$oldElement->index]	= (object)$element;
 
