@@ -334,8 +334,14 @@ function moduleUpdate($oldVersion){
             }
         }
     }
+
+    if($oldVersion < '8.8.6'){
+        foreach(['form_reset', 'reminder_frequency', 'reminder_period', 'reminder_conditions', 'reminder_amount', 'reminder_startdate'] as $columnName){
+            maybe_drop_column( $simForms->tableName, $columnName, "ALTER TABLE $simForms->tableName DROP COLUMN $columnName");
+        }
+    }
 }
 
 add_action('init', function(){
-    //moduleUpdate('8.8.0');
+//    moduleUpdate('8.8.7');
 });
