@@ -2350,7 +2350,9 @@ class DisplayFormResults extends DisplayForm{
 			echo $this->exportPdf();
 		}
 		
-		return ob_get_clean();
+		$html	= ob_get_clean();
+		
+		return apply_filters('sim-forms-form-results-html', $html, $this);
 	}
 
 	/**
