@@ -5,6 +5,7 @@
 
 ### Changed
 - removed form reset option
+- remove db columns on update
 
 ### Fixed
 
