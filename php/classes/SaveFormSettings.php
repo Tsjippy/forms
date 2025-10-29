@@ -311,8 +311,12 @@ class SaveFormSettings extends SimForms{
 		// Fix indexes
 		foreach($data as $index => $value){
 			unset($data[$index]);
+
+			if(!empty($value)){
+				$value	= maybe_serialize($value);
+			}
 			
-			$data[str_replace('-', '_', $index)] = maybe_serialize($value);
+			$data[str_replace('-', '_', $index)] = $value;
 		}
 
 		// Remove data without a column in the db
@@ -362,6 +366,13 @@ class SaveFormSettings extends SimForms{
 				);
 
 				$result	= $wpdb->insert_id;
+			}
+		}
+
+		// unserialize again
+		foreach($data as $index => &$value){
+			if(!empty($value)){
+				$value	= maybe_unserialize($value);
 			}
 		}
 
