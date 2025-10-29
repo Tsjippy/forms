@@ -9,6 +9,7 @@
 - remove db columns on update
 
 ### Fixed
+- creating dynamic js conditions with shortcodes
 
 ### Updated
 
