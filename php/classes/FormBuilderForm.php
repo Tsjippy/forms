@@ -15,6 +15,7 @@ class FormBuilderForm extends SimForms{
 	public $elementHtmlBuilder;
 	protected $inMultiAnswer;
 	public $reminders;
+	public $usermeta;
 
 	public function __construct($atts=[]){
 		parent::__construct();

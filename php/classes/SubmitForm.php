@@ -449,7 +449,7 @@ class SubmitForm extends SimForms{
 			
 			//get user data as array
 			$userData		= (array)get_userdata($this->userId)->data;
-			foreach($this->submission->formresults as $key=>&$result){
+			foreach($this->submission->formresults as $key => &$result){
 				$subKey	= false;
 
 				//remove empty elements from the array
@@ -474,6 +474,7 @@ class SubmitForm extends SimForms{
 					}
 				//update user meta
 				}else{
+					// update an indexed value
 					if($subKey){
 						$curValue	= get_user_meta($this->userId, $key, true);
 						if(empty($result)){

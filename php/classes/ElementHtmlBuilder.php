@@ -29,6 +29,7 @@ class ElementHtmlBuilder extends SimForms{
 	private $prependHtml;
 	public $formData;
 	public $formElements;
+	public $usermeta;
 
     public function __construct($parentInstance){
 		parent::__construct();
@@ -375,7 +376,7 @@ class ElementHtmlBuilder extends SimForms{
 			$userId		= $this->userId;
 		}
 		//Load js
-		$uploader 		= new SIM\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false);
+		$uploader 		= new SIM\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey]);
 		
 		$this->html		= $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $this->optionsHtml, $this->element->editimage);
 	}
