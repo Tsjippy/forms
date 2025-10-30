@@ -1646,7 +1646,7 @@ class FormBuilderForm extends SimForms{
 						if($element == null){
 							$conditions	= '';
 						}else{
-							$conditions = maybe_unserialize($element->warning-conditions);
+							$conditions = $element->warning_conditions;
 						}
 						echo $this->warningConditionsForm('formfield[warning-conditions]', $conditions);
 						?>

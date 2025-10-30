@@ -865,7 +865,7 @@ class ElementHtmlBuilder extends SimForms{
 			$this->html 		= "";
 		}elseif(in_array($this->element->type, ['info'])){
 			$this->html	.= $this->infoBoxHtml($this->element->text);
-		}elseif(in_array($this->element->type, ['file','image'])){
+		}elseif(in_array($this->element->type, ['file', 'image'])){
 			$this->uploaderHtml();
 		}else{
 			$this->getTagType();

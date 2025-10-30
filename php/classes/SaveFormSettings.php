@@ -181,7 +181,7 @@ class SaveFormSettings extends SimForms{
 		$element->name	= strtolower($element->name);
 
 		// Remove ending _
-		$element->name	= trim($element->name, ' \n\r\t\v\0_');
+		$element->name	= trim($element->name, " \n\r\t\v\0_");
 
 		$elements		= $this->getElementByName($element->name, '', false);
 		if(

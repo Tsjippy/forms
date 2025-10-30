@@ -45,7 +45,8 @@ class DisplayFormResults extends DisplayForm{
 
 		wp_enqueue_style('sim_formtable_style');
 
-		$this->user->partnerId			= SIM\hasPartner($this->user->ID);
+		$family							= new SIM\FAMILY\Family();
+		$this->user->partnerId			= $family->getPartner($this->user->ID);
 
 		//Get personal visibility
 		$this->hiddenColumns			= get_user_meta($this->user->ID, 'hidden_columns_'.$this->formData->id, true);

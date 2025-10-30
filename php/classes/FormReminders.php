@@ -455,8 +455,8 @@ class FormReminders extends SimForms{
      * @return string|array 			Returns html links to forms who are due for submission if a userid is given, an array of form => [userids] otherwise
      */
     public function getAllFormRemindersForToday($includeMandatoryForms=true){
-        $today  = date('D');
-
+        $today      = date('D');
+	    $family	    = new SIM\FAMILY\Family();
         $reminders  = [];
 
         // Form element reminders
@@ -473,7 +473,7 @@ class FormReminders extends SimForms{
                 $this->getForm($formId);
 
                 foreach($userIds as $userId){
-                    $child				= SIM\isChild($userId);
+                    $child				= $family->isChild($userId);
                     $childName          = '';
                     if($child){
                         $childName		= get_userdata($userId)->first_name;
@@ -508,7 +508,7 @@ class FormReminders extends SimForms{
 
                 foreach($this->reminders['defaultforms'] as $formId => $userIds){
                     foreach($userIds as $userId){
-                        $child				= SIM\isChild($userId);
+                        $child				= $family->isChild($userId);
                         $childName          = '';
                         if($child){
                             $childName		= get_userdata($userId)->first_name;
@@ -640,8 +640,9 @@ class FormReminders extends SimForms{
         if(empty($this->userReminders[$userId])){
             return '';
         }
-
-        $child				= SIM\isChild($userId);
+        
+	    $family	            = new SIM\FAMILY\Family();
+        $child				= $family->isChild($userId);
         $childName          = '';
         if($child){
             $childName		= get_userdata($userId)->first_name;
