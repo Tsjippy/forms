@@ -319,10 +319,13 @@ class FormReminders extends SimForms{
             // get the user value
             $value		= get_user_meta($userId, $check['meta-key'], true);
 
-            if(isset($value[trim($check['meta-key-index'])])){
-                $value		= $value[trim($check['meta-key-index'])];
-            }else{
-                $value		= '';
+            $metaIndex  = trim($check['meta-key-index']);
+            if(!empty($metaIndex)){
+                if(!empty($value[$metaIndex])){
+                    $value		= $value[$metaIndex];
+                }else{
+                    $value		= '';
+                }
             }
 
             if(is_array($value)){

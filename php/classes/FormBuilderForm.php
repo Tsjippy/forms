@@ -837,11 +837,8 @@ class FormBuilderForm extends SimForms{
 		}
 		
 		// get all possible user meta keys, not just the one the current user has
-		$result			= $wpdb->get_results("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}`", ARRAY_N);
-		$userMetaKeys	= [];
-		foreach($result as $metaKey){
-			$userMetaKeys[]	= $metaKey[0];
-		}
+		$userMetaKeys	= apply_filters('sim-forms-user-meta-keys', $wpdb->get_col("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}` ORDER BY `meta_key` ASC"));
+		
 		sort($userMetaKeys, SORT_STRING | SORT_FLAG_CASE);
 
 		$userMetas		= get_user_meta($this->user->ID);
