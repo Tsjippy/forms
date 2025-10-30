@@ -10,6 +10,7 @@
 
 ### Fixed
 - creating dynamic js conditions with shortcodes
+- do not serialize empty data
 
 ### Updated
 
