@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [8.8.6] - 2025-10-30
+
+
+### Added
 - filter for form results table
 
 ### Changed
@@ -15,8 +26,6 @@
 - do not serialize empty data
 - bug when retrieving meta formdate for other user
 - bug when retrieving non indexed meta value
-
-### Updated
 
 ## [8.8.5] - 2025-10-27
 
