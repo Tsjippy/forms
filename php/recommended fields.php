@@ -5,19 +5,15 @@ use SIM;
 add_filter('sim_mandatory_html_filter', __NAMESPACE__.'\addChildFields', 10, 3);
 function addChildFields($html, $userId, $object){
 	// Add warnings for child fields
-	$family = get_user_meta($userId, "family", true);
-	
-	//User has children
-	if (isset($family["children"])){
+	$family = new SIM\FAMILY\Family();
 
-		// Loop over children
-		foreach($family["children"] as $child){
-			$userData = get_userdata($child);
-			// Valid user account
-			if ($userData){
-				// Add html for each field as well
-				$html	.= $object->getReminderHtml($child, 'mandatory');
-			}
+	// Loop over children
+	foreach($family->getChildren($userId) as $child){
+		$userData = get_userdata($child);
+		// Valid user account
+		if ($userData){
+			// Add html for each field as well
+			$html	.= $object->getReminderHtml($child, 'mandatory');
 		}
 	}
 

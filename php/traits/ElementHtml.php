@@ -14,10 +14,13 @@ trait ElementHtml{
 		}
 
 		if(empty($this->formName)){
-			$this->formName	= $this->formData->name;
+			$this->formName			= $this->formData->name;
 		}
 
 		$this->defaultValues		= (array)$this->user->data;
+		if($this->userId != $this->user->ID){
+			$this->defaultValues		= (array)get_userdata($this->userId)->data;
+		}
 		
 		//Change ID to userid because its a confusing name
 		$this->defaultValues['user_id']	= $this->defaultValues['ID'];

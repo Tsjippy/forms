@@ -32,12 +32,16 @@ class ElementHtmlBuilder extends SimForms{
 	public $usermeta;
 
     public function __construct($parentInstance){
-		parent::__construct();
+		//parent::__construct();
 
 		$this->parentInstance		= $parentInstance;
 
 		$this->formData				= $parentInstance->formData;
 		$this->formElements			= $parentInstance->formElements;
+
+		$this->nonInputs			= $parentInstance->nonInputs;
+		$this->user					= $parentInstance->user;
+		$this->userId				= $parentInstance->userId;
         
 		$this->reset();
     }
@@ -307,7 +311,7 @@ class ElementHtmlBuilder extends SimForms{
 		if(str_contains($_SERVER['REDIRECT_URL'], 'get_input_html')){
 			$valueIndexes	= explode('[', $this->element->name);
 
-			foreach($valueIndexes as $i=>$index){
+			foreach($valueIndexes as $i => $index){
 				if($i == 0){
 					if(!isset($this->submission->formresults[$index])){
 						break;
@@ -456,7 +460,7 @@ class ElementHtmlBuilder extends SimForms{
 	 * Gets the element value
 	 */
 	protected function getValueHtml(){
-		if(in_array($this->element->type, $this->parentInstance->nonInputs)){
+		if(in_array($this->element->type, $this->nonInputs)){
 			return '';
 		}
 
