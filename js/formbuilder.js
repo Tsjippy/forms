@@ -1253,9 +1253,9 @@ window.addEventListener('change', ev=>{
 
 		if(warningsConditions != null){
 			if( target.value == 'submitted'){
-				warningsConditions.querySelector(`[name*='[conditional-value]']`).classList.add('hidden');
+				warningsConditions.querySelector(`[name*='[conditional-value]']`).style.visibility = 'hidden';
 			}else{
-				warningsConditions.querySelector(`[name*='[conditional-value]']`).classList.remove('hidden');
+				warningsConditions.querySelector(`[name*='[conditional-value]']`).style.visibility = '';
 			}
 		}
 	}else if(target.matches(`.switch [name='enable']`)){

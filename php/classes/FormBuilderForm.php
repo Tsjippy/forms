@@ -851,6 +851,27 @@ class FormBuilderForm extends SimForms{
 
 		ob_start();
 		?>
+		<datalist id="meta-key">
+			<?php
+			foreach($userMetaKeys as $key){
+				if(isset($userMetas[$key])){
+					$value	= $userMetas[$key][0];
+				}else{
+					$value	= $wpdb->get_var("SELECT `meta_value` FROM `{$wpdb->usermeta}` WHERE meta_key = '$key'");
+				}
+
+				// Check if array, store array keys
+				$value 	= maybe_unserialize($value);
+				$data	= '';
+				if(is_array($value)){
+					$keys	= implode(',', array_keys($value));
+					$data	= "data-keys=$keys";
+				}
+				echo "<option value='$key' $data>";
+			}
+
+			?>
+		</datalist>
 		<label>Do not warn if user has role</label>
 		<select name='<?php echo $name;?>[roles][]' multiple>
 			<option value=''>---</option>
@@ -883,26 +904,6 @@ class FormBuilderForm extends SimForms{
 					<input type="hidden" class="no-reset warning-condition combinator" name="<?php echo $name;?>[<?php echo $conditionIndex;?>][combinator]" value="<?php echo $condition['combinator'];?>">
 
 					<input type="text" class="warning-condition meta-key" name="<?php echo $name;?>[<?php echo $conditionIndex;?>][meta-key]" value="<?php echo $condition['meta-key'];?>" list="meta-key" style="width: fit-content;">
-					<datalist id="meta-key">
-						<?php
-						foreach($userMetaKeys as $key){
-							if(isset($userMetas[$key])){
-								$value	= $userMetas[$key][0];
-							}else{
-								$value	= $wpdb->get_var("SELECT `meta_value` FROM `{$wpdb->usermeta}` WHERE meta_key = '$key'");
-							}
-							// Check if array, store array keys
-							$value 	= maybe_unserialize($value);
-							$data	= '';
-							if(is_array($value)){
-								$keys	= implode(',', array_keys($value));
-								$data	= "data-keys=$keys";
-							}
-							echo "<option value='$key' $data>";
-						}
-
-						?>
-					</datalist>
 
 					<span class="index-wrapper <?php if(empty($condition['meta-key-index'])){echo 'hidden';}?>">
 						<span>and index</span>
@@ -938,7 +939,7 @@ class FormBuilderForm extends SimForms{
 						}
 						?>
 					</select>
-					<input  type='text'   class='warning-condition' name='<?php echo $name;?>[<?php echo $conditionIndex;?>][conditional-value]' value="<?php echo $condition['conditional-value'];?>" style="width: fit-content;">
+					<input  type='text'   class='warning-condition' name='<?php echo $name;?>[<?php echo $conditionIndex;?>][conditional-value]' value="<?php echo $condition['conditional-value'];?>" style="width: fit-content; <?php if($condition['equation'] == 'submitted'){echo 'visibility:hidden;';}?>">
 					
 					<button type='button' class='warn-cond button <?php if(!empty($condition['combinator']) && $condition['combinator'] == 'and'){echo 'active';}?>'	title='Add a new "AND" rule' value="and">AND</button>
 					<button type='button' class='warn-cond button  <?php if(!empty($condition['combinator']) && $condition['combinator'] == 'or'){echo 'active';}?>'	title='Add a new "OR"  rule' value="or">OR</button>
