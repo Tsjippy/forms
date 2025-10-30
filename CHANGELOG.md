@@ -14,6 +14,7 @@
 - creating dynamic js conditions with shortcodes
 - do not serialize empty data
 - bug when retrieving meta formdate for other user
+- bug when retrieving non indexed meta value
 
 ### Updated
 
