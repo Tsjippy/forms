@@ -7,6 +7,7 @@
 ### Changed
 - removed form reset option
 - remove db columns on update
+- use new family class
 
 ### Fixed
 - creating dynamic js conditions with shortcodes
