@@ -8,6 +8,7 @@
 - removed form reset option
 - remove db columns on update
 - use new family class
+- supply meta value to uploader
 
 ### Fixed
 - creating dynamic js conditions with shortcodes
