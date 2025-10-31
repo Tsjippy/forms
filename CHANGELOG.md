@@ -8,6 +8,7 @@
 - render loader image using js
 
 ### Fixed
+- default selected option for checkboxes and radios
 
 ### Updated
 
