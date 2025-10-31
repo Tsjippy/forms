@@ -4,12 +4,17 @@
 ### Added
 
 ### Changed
-- code cleanup
-- render loader image using js
 
 ### Fixed
 
 ### Updated
+
+## [8.8.7] - 2025-10-31
+
+
+### Changed
+- code cleanup
+- render loader image using js
 
 ## [8.8.6] - 2025-10-30
 
