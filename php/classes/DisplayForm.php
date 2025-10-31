@@ -379,7 +379,7 @@ class DisplayForm extends SubmitForm{
 
 			// First step of the form
 			if(!$this->isFormStep){
-				$html .= SIM\LOADERIMAGE;
+				$html .= '<div class="loader-image-trigger"></div>';
 			}
 			
 			$this->formStepCounter	+= 1;
