@@ -48,7 +48,10 @@ trait ElementHtml{
 	 * @return	array					The array of values
 	 */
 	function getElementValues($element){
-		$values	= [];
+		$values	= [
+			'defaults'	=> [],
+			'metavalue'	=> []
+		];
 
 		// Do not return default values when requesting the html over rest api
 		if(defined('REST_REQUEST')){
@@ -71,10 +74,10 @@ trait ElementHtml{
 			foreach($elementValues as $elementValue){
 				$elementValue	= trim($elementValue);
 
-				$exploded	= explode('|', $elementValue);
+				$exploded		= explode('|', $elementValue);
 
 				if(count($exploded) > 1){
-					$values['defaults'][$exploded[0]]	= $exploded[1];
+					$values['defaults'][$exploded[0]]				= $exploded[1];
 				}else{
 					$values['defaults'][strtolower($elementValue)]	= $elementValue;
 				}
@@ -96,7 +99,6 @@ trait ElementHtml{
 			if(count($elementNames) == 1){
 				//non array name
 				$elementName			= $elementNames[0];
-				$values['metavalue']	= [];
 				if(isset($this->usermeta[$elementName])){
 					$values['metavalue']	= (array)maybe_unserialize($this->usermeta[$elementName]);
 				}
@@ -110,8 +112,8 @@ trait ElementHtml{
 				$resultFound	= false;
 				foreach($elementNames as $v){
 					if(isset($values['metavalue'][$v])){
-						$values['metavalue'] = (array)$values['metavalue'][$v];
-						$resultFound	= true;
+						$values['metavalue'] 	= (array)$values['metavalue'][$v];
+						$resultFound			= true;
 					}
 				}
 
@@ -123,26 +125,21 @@ trait ElementHtml{
 		}
 		
 		//add default values
-		if(empty($element->multiple) || in_array($element->type, ['select','checkbox'])){
-			$key					= $element->default_value;
+		if(empty($element->multiple) || in_array($element->type, ['select', 'checkbox', 'radio'])){
+			$key							= $element->default_value;
 
 			if(!empty($key)){
 				if(isset($this->defaultValues[$key])){
-					$values['defaults']		= $this->defaultValues[$key];
-				}else{
-					$values['defaults']		= $key;
+					$values['defaults']		= array_merge($values['defaults'], (array)$this->defaultValues[$key]);
+				}elseif(!in_array($key, $values['defaults'])) {
+					$values['defaults'][]	= $key;
 				}
 			}
 		}
 		
 		if(!empty($element->default_array_value)){
-			$key					= $element->default_array_value;
+			$key						= $element->default_array_value;
 			if(!empty($this->defaultArrayValues[$key]) && is_array($this->defaultArrayValues[$key])){
-				if(!empty($values['defaults']) && !is_array($values['defaults'])){
-					$values['defaults']	= [$values['defaults']];
-				}else{
-					$values['defaults']	= [];
-				}
 				$values['defaults']		= $this->defaultArrayValues[$key] + $values['defaults'];
 			}
 		}

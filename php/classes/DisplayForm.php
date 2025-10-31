@@ -224,11 +224,11 @@ class DisplayForm extends SubmitForm{
 		// Get the values we need
 		if(empty($this->formData->save_in_meta)){
 			if(!empty($values['defaults'])){
-				$values		= array_values((array)$values['defaults']);
+				$values		= array_values($values['defaults']);
 			}
 		}else{
 			if(!empty($values['metavalue'])){
-				$values		= array_values((array)$values['metavalue']);
+				$values		= array_values($values['metavalue']);
 			}
 		}
 

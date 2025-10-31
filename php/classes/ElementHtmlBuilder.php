@@ -255,9 +255,9 @@ class ElementHtmlBuilder extends SimForms{
 			empty($this->parentInstance->formData->save_in_meta) && 
 			!empty($this->elementValues['defaults'])
 		){
-			$values		= array_values((array)$this->elementValues['defaults']);
+			$values		= array_values($this->elementValues['defaults']);
 		}elseif(!empty($this->elementValues['metavalue'])){
-			$values		= array_values((array)$this->elementValues['metavalue']);
+			$values		= array_values($this->elementValues['metavalue']);
 		}
 
 		//check how many elements we should render
@@ -494,7 +494,7 @@ class ElementHtmlBuilder extends SimForms{
 					empty($this->elementValues['metavalue'])					// or the metavalue is empty
 				)
 			){
-				$this->selectedValue		= array_values((array)$this->elementValues['defaults'])[0];
+				$this->selectedValue		= array_values($this->elementValues['defaults'])[0];
 			}elseif(!empty($this->elementValues['metavalue'])){
 				$elIndex	= 0;
 				if(str_contains($this->element->name, '[]')){
@@ -743,7 +743,7 @@ class ElementHtmlBuilder extends SimForms{
 		}
 
 		if(isset($this->elementValues['metavalue'] )){
-			foreach((array)$this->elementValues['metavalue'] as $key=>$val){
+			foreach($this->elementValues['metavalue'] as $key=>$val){
 				if(is_array($val)){
 					foreach($val as $v){
 						if(is_array($v)){
@@ -792,7 +792,7 @@ class ElementHtmlBuilder extends SimForms{
 
 		$html		= "<div class='checkbox-options-group formfield'>";
 			// build the options
-			foreach($this->elementValues['defaults'] as $key=>$option){
+			foreach($this->elementValues['defaults'] as $key => $option){
 				if($this->multiwrap){
 					$checked	= '%checked%';
 				}elseif(
