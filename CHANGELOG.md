@@ -5,6 +5,7 @@
 
 ### Changed
 - code cleanup
+- render loader image using js
 
 ### Fixed
 
