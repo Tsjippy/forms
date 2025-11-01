@@ -55,7 +55,7 @@ function restApiInit() {
 		array(
 			'methods' 				=> 'POST,GET',
 			'callback' 				=> 	function(){
-				$displayFormResults	= new DisplayFormResults();
+				$displayFormResults	= new DisplayFormResults([]);
 				return $displayFormResults->insertInDb($_REQUEST['form-id']);
 			},
 			'permission_callback' 	=> '__return_true',
@@ -174,7 +174,7 @@ function showFormResults($attributes){
 		$attributes['id']	= $attributes['tableid'];
 	}
 	 
-	$displayFormResults = new DisplayFormResults();
+	$displayFormResults = new DisplayFormResults($attributes);
     $displayFormResults->processAtts($attributes);
 	
 	$html	= $displayFormResults->showFormresultsTable();

@@ -182,7 +182,7 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\getInputHtml',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'id'		=> array(
+				'elementId'		=> array(
 					'required'	=> true,
 				),
 				'submission-id'		=> array(
@@ -379,14 +379,14 @@ function archiveSubmission(){
 }
 
 function getInputHtml(){
-	$formTable		= new DisplayFormResults();
+	$formTable		= new DisplayFormResults($_POST);
 
 	$formTable->getSubmission($_POST['submission-id']);
 
 	// Get the form id from the submission and load the form
 	$formTable->getForm($formTable->submission->form_id);
 
-	$elementId		= sanitize_text_field($_POST['id']);
+	$elementId		= sanitize_text_field($_POST['element-id']);
 
 	$elementName	= sanitize_text_field($_POST['name']);
 
@@ -395,7 +395,7 @@ function getInputHtml(){
 	$curValue		= '';
 
 	if(!$element){
-		return new \WP_Error('No element found', "No element found with id '{$_POST['elementid']}'");
+		return new \WP_Error('No element found', "No element found with id '$elementId'");
 	}
 
 	// get value
@@ -425,7 +425,7 @@ function getInputHtml(){
 }
 
 function editValue(){
-	$formTable					= new EditFormResults();
+	$formTable					= new EditFormResults($_POST);
 		
 	$formTable->submissionId	= $_POST['submission-id'];
 	

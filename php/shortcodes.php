@@ -13,7 +13,7 @@ function showFormSelector($atts=[]){
         'no_meta'   => true
     ), $atts );
 
-    $formTable	= new DisplayFormResults();
+    $formTable	= new DisplayFormResults($atts);
     $formTable->getForms();
 
     $forms          = $formTable->forms;
@@ -164,7 +164,7 @@ function missingFormFields($atts){
 add_filter( 'wp_insert_post_data', __NAMESPACE__.'\insertPostData', 10, 2 );
 function insertPostData($data , $postarr){
 	if(function_exists('wp_get_current_user')){
-		$formtable  = new DisplayFormResults();
+		$formtable  = new DisplayFormResults($_POST);
         return $formtable->checkForFormShortcode($data , $postarr);
 	}
 

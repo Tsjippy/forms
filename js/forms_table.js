@@ -215,6 +215,7 @@ async function getInputHtml(target){
 	let formData = new FormData();
     formData.append('form-id', formId);
     formData.append('submission-id', submissionId);
+    formData.append('element-id', data.elementId);
 
 	for( var d in data){
 		formData.append(d, data[d]);

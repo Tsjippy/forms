@@ -29,7 +29,7 @@ class DisplayFormResults extends DisplayForm{
 	public $sortColumnFound;
 	public $spliced;
 
-	public function __construct($atts=[]){
+	public function __construct($atts){
 		global $wpdb;
 		
 		$this->shortcodeTable			= $wpdb->prefix . 'sim_form_shortcodes';
@@ -56,7 +56,10 @@ class DisplayFormResults extends DisplayForm{
 			$this->excelContent	= [];
 		}
 
-		$this->enrichColumnSettings();
+		$result	= $this->enrichColumnSettings();
+		if(is_wp_error($result)){
+			return $result;
+		}
 
 		$this->loadTableSettings();
 	}
@@ -1061,7 +1064,7 @@ class DisplayFormResults extends DisplayForm{
 			if(!$element){
 				$cellOpeningTag	= "<td $class";
 			}else{
-				$cellOpeningTag	= "<td $class data-id='$element->id' data-oldvalue='$oldValue'";
+				$cellOpeningTag	= "<td $class data-element-id='$element->id' data-oldvalue='$oldValue'";
 			}
 
 			$cellOpeningTag	= apply_filters('sim-formresult-cell-opening-tag', $cellOpeningTag.' '. $subIdString, $this, $columnSetting, $values);
