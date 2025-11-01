@@ -508,7 +508,7 @@ class ElementHtmlBuilder extends SimForms{
 					}
 				}
 
-				$this->selectedValue		= array_values((array)$this->elementValues['metavalue'])[$elIndex];
+				$this->selectedValue		= array_values($this->elementValues['metavalue'])[$elIndex];
 			}
 		}
 
@@ -676,7 +676,7 @@ class ElementHtmlBuilder extends SimForms{
 
 		$selValues	= [];
 		if(!empty($this->elementValues['metavalue'])){
-			$selValues	= array_map('strtolower', (array)$this->elementValues['metavalue']);
+			$selValues	= array_map('strtolower', $this->elementValues['metavalue']);
 		}
 
 		if(!empty($this->requestedValue)){

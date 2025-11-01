@@ -454,7 +454,6 @@ async function processFormsTableInput(target){
 	setTimeout(function(){ running = false;}, 500);	
 
 	let table			= target.closest('table');
-	let formId			= table.dataset.formId;
 	let submissionId	= target.closest('tr').dataset.id;
 	let cell			= target.closest('td');
 	cell.classList.remove('active');
@@ -472,7 +471,6 @@ async function processFormsTableInput(target){
 		
 		// Submit new value and receive the filtered value back
 		let formData = new FormData();
-		formData.append('form-id', formId);
 		formData.append('submission-id', submissionId);
 
 		for(d in data){

@@ -157,12 +157,6 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\editValue',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'form-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($formId){
-						return is_numeric($formId);
-					}
-				),
 				'submission-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($submissionId){
@@ -389,7 +383,7 @@ function getInputHtml(){
 
 	$formTable->getSubmission($_POST['submission-id']);
 
-	// Get the form id from the submission and load tge form
+	// Get the form id from the submission and load the form
 	$formTable->getForm($formTable->submission->form_id);
 
 	$elementId		= sanitize_text_field($_POST['id']);
@@ -431,12 +425,13 @@ function getInputHtml(){
 }
 
 function editValue(){
-	$formTable	= new EditFormResults();
+	$formTable					= new EditFormResults();
 		
-	$formTable->getForm($_POST['form-id']);
 	$formTable->submissionId	= $_POST['submission-id'];
 	
 	$formTable->parseSubmissions(null, $formTable->submissionId);
+
+	$formTable->getForm($formTable->submission->form_id);
 		
 	//update an existing entry
 	$elementName 	= sanitize_text_field($_POST['name']);
@@ -518,9 +513,9 @@ function editValue(){
 	}
 	
 	//send email if needed
-	$submitForm					= new SubmitForm();
-	$submitForm->getForm($_POST['form-id']);
+	$submitForm					= new SubmitForm($formTable->formData);
 	$submitForm->submission		= $formTable->submission;
+
 	$submitForm->sendEmail('fieldchanged');
 	$submitForm->sendEmail('fieldschanged');
 	

@@ -1,4 +1,4 @@
-import { getFieldValue } from  '../../../plugins/sim-plugin/includes/js/field_value.js';
+import { getFieldValue } from  '../../../plugins/sim-plugin/includes/js/partials/field_value.js';
 
 export function removeDefaultSelect(el){
 	Array.from(el.options).forEach(function(option){

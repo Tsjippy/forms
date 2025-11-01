@@ -269,7 +269,7 @@ trait CreateJs{
                             $actionArray['querystrings'][$action] = [];
                         }
                         
-                        $name	= $element->name;
+                        $name	= trim($element->name);
 
                         //formstep do not have an input-wrapper
                         if($element->type == 'formstep'){
@@ -666,7 +666,7 @@ trait CreateJs{
 
     function getSelector($element){
         $queryById          = false;
-        $name				= $element->name;
+        $name				= trim($element->name);
 
         if(str_contains($name, '[]')){
             $queryById          = true;

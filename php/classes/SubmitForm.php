@@ -6,6 +6,14 @@ use WP_Error;
 
 class SubmitForm extends SimForms{
 	public $submission;
+
+	public function __construct($formData=''){
+		parent::__construct();
+		
+		if(!empty($formData)){
+			$this->formData	= $formData;
+		}
+	}
 	
 	/**
 	 * Returns conditional e-mails with a valid condition
