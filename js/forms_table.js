@@ -447,7 +447,12 @@ async function processFormsTableInput(target){
 		target = target.target;
 	}
 	
-	if(running == target || target.value == '' || target.matches('.nice-select-search')){
+	if(
+		running == target || 
+		target.value == '' || 
+		target.matches('.nice-select-search') ||
+		target.matches('.list-selection')
+	){
 		return;
 	}
 	running = target;
