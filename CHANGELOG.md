@@ -4,13 +4,20 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.8.8] - 2025-11-01
+
+
+### Changed
 - code cleanup
 - render loader image using js
 
 ### Fixed
 - default selected option for checkboxes and radios
-
-### Updated
 
 ## [8.8.6] - 2025-10-30
 
