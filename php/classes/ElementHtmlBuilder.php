@@ -112,24 +112,6 @@ class ElementHtmlBuilder extends SimForms{
 				//Write the corrected option as html
 				$this->optionsHtml	.= " $optionType=\"$optionValue\"";
 			}
-			
-			// we are getting the html for an input and that input depends on a datalist
-			if($optionType == 'list'){
-				$datalist	= $this->getElementByName($optionValue);
-
-				if($datalist == $this->element){
-					$datalist	= $this->getElementByName($optionValue.'-list');
-					SIM\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
-				}
-
-				// The datalist is found and we are retrieving just one element. 
-				// We should prepend the html with the datalist.
-				if($datalist && get_class($this->parentInstance) == 'SIM\FORMS\DisplayFormResults'){
-					// run this from a new instance so we do not clear existing data for the current element
-					$newInstance		= new ElementHtmlBuilder($this->parentInstance);
-					$this->prependHtml	.= $newInstance->getElementHtml($datalist);
-				}
-			}
 		}
 	}
 
