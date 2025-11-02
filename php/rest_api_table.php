@@ -423,9 +423,17 @@ function getInputHtml(){
 	// Get element html with the value allready set
 	$html = $formTable->elementHtmlBuilder->getElementHtml($element, $curValue);
 	
-	// add a datalist if the element depends on one
-	if(element->options){
-		$html .= $formTable->elementHtmlBuilder->getElementHtml($element);
+	// we are getting the html for an input and that input depends on a datalist
+	$options = explode("\n", $element-options);
+			if($options == 'list'){
+				$datalist	= $formTable->getElementByName($optionValue);
+
+				if($datalist == $element){
+					$datalist	= $formTable->getElementByName($optionValue.'-list');
+					SIM\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
+				}
+
+			$html .= $formTable->elementHtmlBuilder->getElementHtml($element);
 		}
 		
 		// prepend html with the html of previous element that wrap this elemnt
