@@ -421,7 +421,25 @@ function getInputHtml(){
 	}
 
 	// Get element html with the value allready set
-	return $formTable->elementHtmlBuilder->getElementHtml($element, $curValue);
+	$html = $formTable->elementHtmlBuilder->getElementHtml($element, $curValue);
+	
+	// add a datalist if the element depends on one
+	if(element->options){
+		$html .= $formTable->elementHtmlBuilder->getElementHtml($element);
+		}
+		
+		// prepend html with the html of previous element that wrap this elemnt
+		$prevElement = $formTable->formElements[];
+		while($prevElement->wrap){
+			$html = $formTable->elementHtmlBuilder->getElementHtml($element).$html;
+			$prevElement = $formTable->formElements[];
+			}
+			
+		// add next elements if they are wrapped in this one
+		while($element->wrap){
+			$element = $formTable->formElements[];
+			$html .= $formTable->elementHtmlBuilder->getElementHtml($element);
+			}
 }
 
 function editValue(){
