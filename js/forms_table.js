@@ -1,3 +1,6 @@
+/**
+ * We need to be carefull with this script as it has overlap with the main table.js
+ */
 
 console.log("Formstable.js loaded");
 
@@ -193,26 +196,13 @@ function changeArchiveButton(element, action){
 async function getInputHtml(target){
 	let table			= target.closest('table');
 
-	// First make sure we have processed all others
-	document.querySelectorAll('td.active').forEach(td=>{
-		if(td != target){
-			processFormsTableInput(td);
-		}
-	});
-
-	// There can only be one active cell per page
-	target.classList.add('active');
-
 	let formId			= table.dataset.formId;
     let submissionId	= target.closest('tr').dataset.id;
 	let data			= target.dataset;
-	let oldText			= target.textContent;
     
-    Main.showLoader(target.firstChild);
-	
-	target.dataset.oldtext	 	= oldText;
+    let loader			= Main.showLoader(target.querySelector('.override-wrapper'), true);
 
-	let formData = new FormData();
+	let formData 		= new FormData();
     formData.append('form-id', formId);
     formData.append('submission-id', submissionId);
     formData.append('element-id', data.elementId);
@@ -224,16 +214,14 @@ async function getInputHtml(target){
 	let response	= await FormSubmit.fetchRestApi('forms/get_input_html', formData);
 
 	if(response){
-		target.innerHTML	 		= `<div class='input-wrapper'>${response}</div>`;
-
-		addFormsTableInputEventListeners(target);
+		loader.outerHTML	= `<div class='input-wrapper'>${response}</div>`;
 
 		target.querySelectorAll('.file-upload-wrap').forEach(el=>el.addEventListener('uploadfinished', uploadFinished));
 
 		// show calendar by default
 		target.querySelectorAll('input').forEach(el=>el.showPicker());
 	}else{
-		target.innerHTML	= target.dataset.oldtext;
+		target.innerHTML	= target.dataset.oldHtml;
 		target.classList.remove('active');
 	}
 }
@@ -412,57 +400,24 @@ async function getSortedPage(target){
 	}
 }
 
-function addFormsTableInputEventListeners(cell){
-	let inputs		= cell.querySelectorAll('input,select,textarea');
-		
-	inputs.forEach((inputNode)=>{
-		if(inputNode.type == 'select-one'){
-			Main.attachNiceSelect(select);
-		}
-		
-		if((inputNode.type != 'radio' && inputNode.type != 'checkbox') || inputs.length == 1){
-
-			if(inputNode.type == 'date'){
-				inputNode.addEventListener("blur", processFormsTableInput);
-			}
-			
-			inputNode.focus();
-		}
-	});
-}
-
 function uploadFinished(event){
 	if(event.target.closest('td') != null){
 		//remove as soon as we come here
 		document.removeEventListener('uploadfinished', uploadFinished);
-		processFormsTableInput(document.querySelector('[data-oldtext]'));
+		processFormsTableInput(document.querySelector('[data-oldText]'));
 	}
 }
 
 //function to get the temp input value and save it over AJAX
-var running = false;
 async function processFormsTableInput(target){
-	// target is an event
-	if(target.target != undefined){
-		target = target.target;
-	}
-	
-	if(
-		running == target || 
-		target.value == '' || 
-		target.matches('.nice-select-search') ||
-		target.matches('.list-selection')
-	){
+	// Do not proceed if this is a schedule table
+	if( target.closest('.schedule') != null ){
 		return;
 	}
-	running = target;
-	
-	setTimeout(function(){ running = false;}, 500);	
 
 	let table			= target.closest('table');
 	let submissionId	= target.closest('tr').dataset.id;
 	let cell			= target.closest('td');
-	cell.classList.remove('active');
     let data			= cell.dataset;
 	let value			= FormFunctions.getFieldValue(target, cell, false);
 	let shortcodeId		= '';
@@ -491,6 +446,8 @@ async function processFormsTableInput(target){
 		let response	= await FormSubmit.fetchRestApi('forms/edit_value', formData);
 	
 		if(response){
+			target.classList.remove('editing');
+
 			let newValue = response['new-value'];
 			
 			if(typeof(newValue) == 'string'){
@@ -513,43 +470,13 @@ async function processFormsTableInput(target){
 			cell.dataset.oldvalue	 	= JSON.stringify(newValue);
 	
 			Main.displayMessage(response.message.replace('_', ' '));
+
+			return;
 		}
-		
-		// Something went wrong restore the old text
-		else{
-			cell.innerHTML = cell.dataset.oldtext;
-		}
-	}else{
-		cell.innerHTML = cell.dataset.oldtext;
 	}
 
-	addFormsTableInputEventListeners(target);
-
-	if(target.dataset.oldtext != undefined){
-		delete target.dataset.oldtext;
-	}
-}
-
-// Add a change button when changing form values
-function addChangeButton(target){
-	let activeCell	= target.closest('td.active');
-	
-	if(activeCell == null){
-		return;
-	}
-
-	let button = document.createElement('button');
-    button.innerHTML = 'Save changes';
-    button.classList.add('button');
-    button.classList.add('small');
-    button.classList.add('save');
-
-	button.addEventListener('click', ev=>processFormsTableInput(ev.target.closest('td').querySelector('input')));
-
-	// only add the button once
-	if(activeCell.querySelector('.save') == null){
-		activeCell.querySelector('.input-wrapper').appendChild(button)
-	}
+	// Restore the old value
+	cell.innerHTML = cell.dataset.oldHtml;
 }
 
 const copyContent = async (target) => {
@@ -568,18 +495,6 @@ const copyContent = async (target) => {
     } catch (err) {
 		Main.displayMessage('Failed to copy: '+err, 'error');
     }
-}
-
-const editCellValue	= async(event, td) => {
-	let target	= event.target;
-	if( target.matches('td.edit-forms-table')){
-		event.stopPropagation();
-		getInputHtml(target);
-	}else if(td.matches('td.edit-forms-table') && target.tagName != 'INPUT' && target.tagName != 'A' && target.tagName != 'TEXTAREA' && !target.closest('.nice-select') && !target.matches('.button.save')){
-		console.log(target)
-		event.stopPropagation();
-		getInputHtml(target.closest('td'));
-	}
 }
 
 const hideColumn	= async (target) => {
@@ -615,11 +530,12 @@ const hideColumn	= async (target) => {
 }
 
 document.addEventListener("click", event=>{
-	let target = event.target;
+	let target 		= event.target;
+	let td 			= target.closest('td');
+	let activeCell	= document.querySelector('td.active');
 
 	if(target.name == 'submit_column_setting'){
 		saveColumnSettings(target);
-		event.stopPropagation();
 	}else if(target.name == 'submit_table_setting'){
 		saveTableSettings(target);
 	}else if(target.name == 'form-settings[autoarchive]'){
@@ -632,64 +548,52 @@ document.addEventListener("click", event=>{
 		}
 	}else if(target.closest('.form-result-navigation') != null && (target.matches('.next') || target.matches('.prev') || target.matches('.page-number'))){
 		getNextPage(target);
-		event.stopPropagation();
 	}
 
-	if(target.tagName == 'TH' && target.closest(".form-results-wrapper").querySelector('.form-result-navigation') != null){
+	else if(target.tagName == 'TH' && target.closest(".form-results-wrapper").querySelector('.form-result-navigation') != null){
 		// get a sorted table over AJAX
 		getSortedPage(target);
 	}
 
 	// copy cell contents
-	if(target.matches('.copy')){
+	else if(target.matches('.copy')){
 		copyContent(target);
 	}
 
 	//Actions
-	if(target.matches('.delete.forms-table-action')){
+	else if(target.matches('.delete.forms-table-action')){
 		removeSubmission(target);
 	}
 
-	if(target.matches('.archive.forms-table-action, .unarchive.forms-table-action')){
+	else if(target.matches('.archive.forms-table-action, .unarchive.forms-table-action')){
 		archiveSubmission(target);
 	}
 
-	if(target.matches('.print.forms-table-action')){
+	else if(target.matches('.print.forms-table-action')){
 		window.location.href = window.location.href.split('?')[0]+"?print=true&table_id="+table.dataset.id+"&submission_id="+table_row.querySelector("[id='id' i]").textContent;
 	}
 	
 	//Open settings modal
-	if(target.classList.contains('edit-formshortcode-settings')){
+	else if(target.classList.contains('edit-formshortcode-settings')){
 		Main.showModal(document.querySelector('.modal.form-shortcode-settings'));
 	}
-	
-	//Edit data
-	let td = target.closest('td');
-	if(!target.matches('.copy') && td && !td.matches('.active')){
-		editCellValue(event, td);
-	}
 
-	// If we clicked somewhere and there is an active cell
-	let activeCell	= document.querySelector('td.active');
-	if(activeCell != null && td == null && activeCell.closest('.schedule') == null){
-		if((target.type != 'checkbox') || target.length == 1){
-			console.log(target);
-			processFormsTableInput(activeCell);
-		}
-	}
-
-	if(target.matches('form .table-permissions-rights-form')){
+	else if(target.matches('form .table-permissions-rights-form')){
 		target.closest('div').querySelector('.permission-wrapper').classList.toggle('hidden');
 	}
 
 	//Hide column
-	if(target.classList.contains('visibility-icon')){
+	else if(target.classList.contains('visibility-icon')){
 		hideColumn(target);
 	}
 
-	if(target.matches('.reset-col-vis')){
+	else if(target.matches('.reset-col-vis')){
 		showHiddenColumns(target);
+	}else{
+		return;
 	}
+
+	event.stopImmediatePropagation();
 });
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -723,45 +627,23 @@ document.addEventListener('change', event=>{
 
 		// position table
 		SimTableFunctions.positionTable();
+	}else{
+		return;
 	}
 
-	if(target.closest('td.active') != null){
-		if(target.type != 'file' && target.type != 'date' && target.type != 'checkbox'){
-			// Check if there are multiple inputs
-			names=[];
-			target.closest('td.active').querySelectorAll('input').forEach(el=>{
-				if(!names.includes(el.type)){
-					names.push(el.type);
-				}
-			});
+	event.stopImmediatePropagation();
+});
 
-			if(names.length == 1){
-				processFormsTableInput(target);
-			}else{
-				addChangeButton(target);
-			}
-		}else if(target.type != 'file'){
-			addChangeButton(target);
-		}
+document.addEventListener("table-content-update-inputs-loaded", async event => {
+	let target	= event.target;
+
+	if( target.matches('.forms-table:not(.active, .copy)')){
+		await getInputHtml(target);
 	}
 });
 
-//Add a keyboard listener
-document.addEventListener("keyup", function(event){
-	if (['Enter', 'NumpadEnter'].includes(event.key) && keysPressed.Shift == undefined) {
+document.addEventListener("table-content-before-update", event => {
+	let target	= event.target;
 
-		let activeCell	= document.querySelector('td.active');
-		if(activeCell != null){
-			processFormsTableInput(activeCell);
-		}
-	}
-
-	delete keysPressed[event.key];
-});
-
-
-// Keep track of which keys are pressed
-let keysPressed = {};
-document.addEventListener('keydown', (event) => {
-   keysPressed[event.key] = true;
+	processFormsTableInput(target);
 });

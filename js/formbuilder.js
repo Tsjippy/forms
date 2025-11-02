@@ -1068,22 +1068,22 @@ window.addEventListener("click", event => {
 	}
 	
 	//request form values via AJAX
-	if (target.classList.contains('edit-form-element')){
+	else if (target.classList.contains('edit-form-element')){
 		requestEditElementData(target);
 	}
 
-	if (target.classList.contains('copy-form-element')){
+	else if (target.classList.contains('copy-form-element')){
 		target.classList.add('clicked');
 
 		addFormElement(target, true);
 	}
 
-	if (target.classList.contains('remove-form-element')){
+	else if (target.classList.contains('remove-form-element')){
 		maybeRemoveElement(target);
 	}
 
 	//open the modal to add an element
-	if (target.classList.contains('add-form-element') || target.name == 'createform'){
+	else if (target.classList.contains('add-form-element') || target.name == 'createform'){
 		if( !window.location.href.includes('formbuilder=true')){
 			let combine	= '&';
 			if( !window.location.href.includes('?')){
@@ -1097,7 +1097,7 @@ window.addEventListener("click", event => {
 	}
 	
 	//actions on element type select
-	if (target.closest('.element-type') != null){
+	else if (target.closest('.element-type') != null){
 		showCondionalFields(target.dataset.value, target.closest('form'));
 		
 		//if label type is selected, wrap by default
@@ -1109,27 +1109,27 @@ window.addEventListener("click", event => {
 	
 	/* ELEMENT CONDITION ACTIONS */
 	//actions on condition equation select
-	if (target.closest('.equation') != null){
+	else if (target.closest('.equation') != null){
 		showOrHideConditionFields(target);
 	}
 	
 	//add new conditions_rule
-	if (target.classList.contains('and-rule') || target.classList.contains('or-rule')){
+	else if (target.classList.contains('and-rule') || target.classList.contains('or-rule')){
 		addConditionRule(target);
 	}
 	
 	//add new condition row
-	if (target.classList.contains('add-condition')){
+	else if (target.classList.contains('add-condition')){
 		addCondition(target);
 	}
 	
 	//remove  condition row
-	if (target.classList.contains('remove-condition')){
+	else if (target.classList.contains('remove-condition')){
 		removeConditionRule(target);
 	}
 	
 	//show copy fields
-	if (target.classList.contains('showcopyfields')){
+	else if (target.classList.contains('showcopyfields')){
 		if(target.checked){
 			target.closest('.copyfieldswrapper').querySelector('.copyfields').classList.remove('hidden');
 		}else{
@@ -1137,7 +1137,7 @@ window.addEventListener("click", event => {
 		}
 	}
 	
-	if(target.classList.contains('email-trigger')){
+	else if(target.classList.contains('email-trigger')){
 		let el = target.closest('.clone-div').querySelector('.conditional-field-wrapper');
 		if(target.value == 'fieldchanged'){
 			el.classList.remove('hidden');
@@ -1160,29 +1160,31 @@ window.addEventListener("click", event => {
 		}
 	}
 	
-	if(target.classList.contains('from-email')){
+	else if(target.classList.contains('from-email')){
 		fromEmailClicked(target);
 	}
 	
-	if(target.classList.contains('email-to')){
+	else if(target.classList.contains('email-to')){
 		toEmailClicked(target);
 	}
 	
-	if(target.classList.contains('placeholderselect') || target.classList.contains('placeholders')){
+	else if(target.classList.contains('placeholderselect') || target.classList.contains('placeholders')){
 		placeholderSelect(target);
 	}
 
 	//copy warning-conditions row
-	if(target.matches('.warn-cond')){
+	else if(target.matches('.warn-cond')){
 		copyWarningCondition(target);
 	}
 
-	if(target.matches('.remove-warn-cond')){
+	else if(target.matches('.remove-warn-cond')){
 		removeWarningCondition(target)
 	}
 
-	if(target.matches('.builder-permissions-rights-form')){
+	else if(target.matches('.builder-permissions-rights-form')){
 		target.closest('div').querySelector('.permission-wrapper').classList.toggle('hidden');
+	}else{
+		event.stopImmediatePropagation();
 	}
 });
 
@@ -1262,7 +1264,11 @@ window.addEventListener('change', ev=>{
 		target.closest(`form`).querySelector(`.recurring-submissions`).classList.toggle('hidden');
 	}else if(target.matches(`.frequency, #period, [name="window-start"], [name="window-end"], [name="reminder-startdate"], #reminder-period, [name="reminder-amount"]`)){
 		updateReminderMinMax(target);
+	}else{
+		return;
 	}
+
+	event.stopImmediatePropagation();
 });
 
 function fixWarningConditionNumbering(parent){

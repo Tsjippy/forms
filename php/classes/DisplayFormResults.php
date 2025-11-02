@@ -1034,7 +1034,7 @@ class DisplayFormResults extends DisplayForm{
 			
 			//if the user has one of the roles defined for this element
 			if($elementEditRights && $elementName != 'id'){
-				$class	.= ' edit-forms-table';
+				$class	.= ' edit forms-table';
 				$class	= trim($class);
 				$class	= " class='$class' data-name='$elementName'";
 			}elseif(!empty($class)){
@@ -2253,7 +2253,7 @@ class DisplayFormResults extends DisplayForm{
 	private function printTableFooter(){
 		?>
 		<div class='sim-table-footer'>
-			<p id="table-remark">Click on any cell with <span class="edit-forms-table">underlined text</span> to edit its contents.<br>Click on any header to sort the column.</p>
+			<p id="table-remark">Click on any cell with <span class="edit forms-table">underlined text</span> to edit its contents.<br>Click on any header to sort the column.</p>
 			
 			<?php
 			//Add excel export button if allowed
