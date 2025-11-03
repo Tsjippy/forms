@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- make sure form result display element are always added
 
 ### Updated
 
