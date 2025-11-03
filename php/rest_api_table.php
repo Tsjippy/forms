@@ -498,6 +498,7 @@ function editValue(){
 
 	$updated		= false;
 
+	// Updating a value that is already there
 	if(isset($formTable->submission->formresults[$elementName])){
 		$oldValue			= $formTable->submission->formresults[$elementName];
 
@@ -517,8 +518,11 @@ function editValue(){
 		$formTable->submission->formresults[$elementName]	= $newValue;
 
 		$updated											= true;
+	
+	}
+	
 	// If there is a sub id set and this field is not a main field
-	}elseif($subId > -1){
+	elseif($subId > -1){
 		$splitElements				= $formTable->formData->split;
 
 		foreach($splitElements as $index){
@@ -540,7 +544,15 @@ function editValue(){
 				break;
 			}
 		}
-	}else{
+	}
+	
+	// update the submitter user id
+	elseif($elementName == 'submitteruserid'){
+		$formTable->submission->userid	= $newValue;
+		$updated						= true;
+	}
+
+	else{
 		if(is_array($formTable->submission)){
 			SIM\printArray($formTable->submission);
 		}else{

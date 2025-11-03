@@ -8,7 +8,6 @@ function moduleUpdate($oldVersion){
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     
-
     SIM\printArray($oldVersion);
 
     $simForms = new SimForms();
@@ -339,6 +338,10 @@ function moduleUpdate($oldVersion){
         foreach(['form_reset', 'reminder_frequency', 'reminder_period', 'reminder_conditions', 'reminder_amount', 'reminder_startdate'] as $columnName){
             maybe_drop_column( $simForms->tableName, $columnName, "ALTER TABLE $simForms->tableName DROP COLUMN $columnName");
         }
+    }
+
+    if($oldVersion < '8.9.0'){
+        $wpdb->query("UPDATE `{$wpdb->prefix}sim_form_shortcode_column_settings` SET `name`='submitteruserid' WHERE `element_id` = -2");
     }
 }
 

@@ -281,6 +281,10 @@ class ElementHtmlBuilder extends SimForms{
 	 * Get the previous values of a element
 	 */
 	function getPrevValues($returnArray=false){
+		if(empty($this->submission)){
+			$this->submission	= $this->parentInstance->submission;
+		}
+
 		// Check if we should inlcude previous submitted values
 		$prevValues		= '';
 
@@ -299,11 +303,17 @@ class ElementHtmlBuilder extends SimForms{
 			// just one possible value found
 			if($i == 0){
 				// there is no value in the form results
-				if(!isset($this->submission->formresults[$index])){
-					break;
-				}
+				if(empty($this->submission->formresults[$index])){
 
-				$prevValues	= $this->submission->formresults[$index];
+					// check the submission meta data
+					if(empty($this->submission->$index)){
+						break;
+					}
+
+					$prevValues	= $this->submission->$index;
+				}else{
+					$prevValues	= $this->submission->formresults[$index];
+				}
 			}
 			
 			// return the sub value
@@ -597,6 +607,9 @@ class ElementHtmlBuilder extends SimForms{
 			$html	.= "<ul class='list-selection-list'>";
 				foreach($this->requestedValue as $v){
 					if(method_exists($this, 'transformInputData')){
+						if(empty($this->submission)){
+							$this->submission	= $this->parentInstance->submission;
+						}
 						$transValue		= $this->transformInputData($v, $this->element->name, $this->submission->formresults);
 					}else{
 						$transValue		= $v;

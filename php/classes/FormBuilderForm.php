@@ -48,6 +48,12 @@ class FormBuilderForm extends SimForms{
 		}
 
 		// Add booking date elements
+		/**
+		 * Filters the elements of this form,
+		 * @param	array	$elements		The elements array
+		 * @param	object	$object			The form instance
+		 * @param	bool	$force			Wheter to force a requery	
+		 */
 		$elements	= apply_filters('sim-forms-elements', $this->formElements, $this, true);
 		
 		foreach($elements as $element){

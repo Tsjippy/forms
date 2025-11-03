@@ -33,6 +33,7 @@ class EditFormResults extends DisplayFormResults{
 		$result = $wpdb->update(
 			$this->submissionTableName,
 			array(
+				'userid'			=> $this->submission->userid,
 				'timelastedited'	=> date("Y-m-d H:i:s"),
 				'formresults'		=> maybe_serialize($this->submission->formresults),
 				'archived'			=> $archive,
@@ -42,6 +43,7 @@ class EditFormResults extends DisplayFormResults{
 				'id'				=> $submissionId,
 			),
 			array(
+				'%d',
 				'%s',
 				'%s',
 				'%d',

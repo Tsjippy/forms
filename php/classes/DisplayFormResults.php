@@ -37,6 +37,9 @@ class DisplayFormResults extends DisplayForm{
 		$this->sortColumn				= false;
 		$this->sortDirection			= 'ASC';
 		$this->spliced					= false;
+
+		// add the elements filter before the parent construct, as that will apply the filter
+		add_filter('sim-forms-elements', [$this, 'addExtraElements'], 10, 3);
 		
 		// call parent constructor
 		parent::__construct($atts);
@@ -62,6 +65,62 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$this->loadTableSettings();
+	}
+
+	/**
+	 * Function to add the elements for submission meta
+	 */
+	public function addExtraElements($elements, $object, $force){
+		// Build the array of element details
+		$newElements	= [
+			-4 => [
+				'name'				=> 'edittime',
+				'nicename'			=> 'Last edit time',
+			],
+			-3 => [
+				'name'				=> 'submissiontime',
+				'nicename'			=> 'Submission date',
+			],
+			-2 => [
+				'name'				=> 'submitteruserid',
+				'nicename'			=> 'Submitted By',
+				'type'				=> 'number'
+			],
+			-1 => [
+				'name'				=> 'id',
+				'nicename'			=> 'ID',
+				'type'				=> 'number'
+			]			
+		];
+
+		if(!empty($this->formData->split)){
+			$newElements[-5] = [
+				'name'				=> 'subid',
+				'nicename'			=> 'Sub-Id',
+				'type'				=> 'number'
+			];
+		}
+
+		foreach($newElements as $id => $newElement){
+			if(isset($this->formData->elementMapping['id'][$id])){
+				continue;
+			}
+			$element 			= new \stdClass();
+
+			$element->id 		= $id;
+			if(isset($newElement['type'])){
+				$element->type = $newElement['type'];
+			}else{
+				$element->type		= 'text';
+			}
+			$element->name		= $newElement['name'];
+			$element->nicename	= $newElement['nicename'];
+
+			// Add to the front of the array
+			array_unshift($elements, $element);
+		}
+
+		return $elements;
 	}
 
 	public function getMetaKeyFormSubmissions($userId=null, $all=false){
@@ -631,118 +690,13 @@ class DisplayFormResults extends DisplayForm{
 
 		$this->columnSettings[$element->id] = [
 			'name'				=> $element->name,
-			'nice-name'			=> $element->niceName,
+			'nice_name'			=> empty($element->nicename) ? $element->name : $element->nicename,
 			'show'				=> $show,
 			'edit_right_roles'	=> $editRightRoles,
 			'view_right_roles'	=> $viewRightRoles
 		];
 
-		$this->elementMapper();
-
-		// add to the form elements
-		$this->formElements[]		= $element;
-
-		//add the mappers
-		$this->formData->elementMapping['id'][$element->id]			= count($this->formElements)-1;
-		$this->formData->elementMapping['name'][$element->name][] 	= count($this->formElements)-1;
-		$this->formData->elementMapping['type'][$element->type][] 	= count($this->formElements)-1;
-		
 		return $this->columnSettings[$element->id];
-	}
-
-	/**
-	 * Adds extra column settings and also adds the virtual elements
-	 *
-	 * @return		array	The form elements
-	 */
-	public function addColumnSettings(){
-		if(isset($this->columnSettings[-1]) && isset($this->formData->elementMapping['id'][-1])){
-			return $this->formElements;
-		}
-
-		//also add the id
-		if(!isset($this->columnSettings[-1])){
-			$this->columnSettings[-1] = [
-				'name'				=> 'id',
-				'nice-name'			=> 'ID',
-				'show'				=> 1,
-				'edit_right_roles'	=> [],
-				'view_right_roles'	=> []
-			];
-		}
-
-		if(!isset($this->columnSettings[-2])){
-			//also add the submitted by
-			$this->columnSettings[-2] = [
-				'name'				=> 'userid',
-				'nice-name'			=> 'Submitted By',
-				'show'				=> 1,
-				'edit_right_roles'	=> [],
-				'view_right_roles'	=> []
-			];
-		}
-
-		if(!isset($this->columnSettings[-3])){
-			//also add the submission date
-			$this->columnSettings[-3] = [
-				'name'				=> 'submissiontime',
-				'nice-name'			=> 'Submission date',
-				'show'				=> 1,
-				'edit_right_roles'	=> [],
-				'view_right_roles'	=> []
-			];
-		}
-
-		if(!isset($this->columnSettings[-4])){
-			//also add the last edited date
-			$this->columnSettings[-4] = [
-				'name'				=> 'edittime',
-				'nice-name'			=> 'Last edit time',
-				'show'				=> 1,
-				'edit_right_roles'	=> [],
-				'view_right_roles'	=> []
-			];
-		}
-		
-		//also add the subid
-		if(!isset($this->columnSettings[-5]) && !empty($this->formData->split)){
-			$this->columnSettings[-5] = [
-				'name'				=> 'subid',
-				'nice-name'			=> 'Sub-Id',
-				'show'				=> 1,
-				'edit_right_roles'	=> [],
-				'view_right_roles'	=> []
-			];
-		}
-
-		$this->elementMapper();
-
-		// add column settings as elements
-		foreach($this->columnSettings as $key => $setting){
-			if(!is_array($setting)){
-				continue;
-			}
-
-			if($key > -1){
-				continue;
-			}
-			$element 			= new \stdClass();
-
-			$element->id 		= $key;
-			$element->type		= 'text';
-			$element->name		= $setting['name'];
-			$element->nicename	= $setting['nice-name'];
-
-			// add to the form elements
-			$this->formElements[]		= $element;
-
-			//add the mappers
-			$this->formData->elementMapping['id'][$element->id]			= count($this->formElements)-1;
-			$this->formData->elementMapping['name'][$element->name][] 	= count($this->formElements)-1;
-			$this->formData->elementMapping['type'][$element->type][] 	= count($this->formElements)-1;
-		}
-
-		return $this->columnSettings;
 	}
 
 	/**
@@ -773,8 +727,6 @@ class DisplayFormResults extends DisplayForm{
 
 		$this->enriched	= true;
 		$elementIds		= [];
-		
-		$this->addColumnSettings();
 		
 		//loop over all elements to build a new array
 		foreach ($this->formElements as $element){
@@ -2011,8 +1963,8 @@ class DisplayFormResults extends DisplayForm{
 				foreach($submissions as $this->submission){
 					$values				= $this->submission->formresults;
 
-					$values['id']		= $this->submission->id;
-					$values['userid']	= $this->submission->userid;
+					$values['id']				= $this->submission->id;
+					$values['submitteruserid']	= $this->submission->userid;
 
 					// Skip if needed
 					if($type == 'others' && $values[$userIdKey] == $this->user->ID){

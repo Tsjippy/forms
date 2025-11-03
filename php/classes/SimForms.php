@@ -40,6 +40,7 @@ class SimForms{
 	public $shortcodeColumnSettingsTable;
 	public $emailSettings;
 	public $formReminder;
+	protected $userIdElementName;
 
 	public function __construct(){
 		global $wpdb;
@@ -500,7 +501,7 @@ class SimForms{
 
 		$this->getAllFormElements('priority', $this->formData->id, true);
 
-		foreach($this->formElements as $index=>$element){
+		foreach($this->formElements as $index => $element){
 			$this->formData->elementMapping['id'][$element->id]			= $index;
 			$this->formData->elementMapping['name'][$element->name][] 	= $index;
 			$this->formData->elementMapping['type'][$element->type][] 	= $index;
@@ -700,8 +701,11 @@ class SimForms{
 	 * @return	string|false|WP_error	the element name, a wp error object or false if no user id element is found
 	 */
 	public function findUserIdElementName(){
+		if(!empty($this->userIdElementName)){
+			return $this->userIdElementName;
+		}
 		// find the user id element
-		$userIdKey	= 'user-id';
+		$userIdKey	= 'submitteruserid'; // the name of the meta 
 
 		$result		= $this->getElementByName('user_id');
 
@@ -716,6 +720,8 @@ class SimForms{
 		}elseif($this->getElementByName('user-id')){
 			$userIdKey	= 'user-id';
 		}
+
+		$this->userIdElementName	= $userIdKey;
 
 		return $userIdKey;
 	}
@@ -818,6 +824,12 @@ class SimForms{
 			}
 		}
 
+		/**
+		 * Filters the elements of this form,
+		 * @param	array	$elements		The elements array
+		 * @param	object	$object			The form instance
+		 * @param	bool	$force			Wheter to force a requery	
+		 */
 		$this->formElements 		=  apply_filters('sim-forms-elements', $elements, $this, false);
 	}
 
