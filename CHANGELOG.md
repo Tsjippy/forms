@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- js listeneres order
 
 ### Fixed
 - some bugs
