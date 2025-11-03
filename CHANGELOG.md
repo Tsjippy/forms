@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- make sure form result display element are always added
 
 ### Updated
+
+## [8.9.0] - 2025-11-03
+
+
+### Fixed
+- make sure form result display element are always added
 
 ## [8.8.9] - 2025-11-03
 
