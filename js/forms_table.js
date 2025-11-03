@@ -59,7 +59,7 @@ async function askConfirmation(text){
 
 async function removeSubmission(target){
 	if(await askConfirmation('delete')){		
-		let submissionId	= target.closest('tr').dataset.id;
+		let submissionId	= target.closest('tr').dataset.submissionId;
 		let table			= target.closest('table');
 
 		let formData = new FormData();
@@ -72,7 +72,7 @@ async function removeSubmission(target){
 		let response	= await FormSubmit.fetchRestApi('forms/remove_submission', formData);
 
 		if(response){
-			table.querySelectorAll(`.table-row[data-id="${submissionId}"]`).forEach(
+			table.querySelectorAll(`.table-row[data-submission-id="${submissionId}"]`).forEach(
 				row=>row.remove()
 			);
 		}
@@ -82,7 +82,7 @@ async function removeSubmission(target){
 async function archiveSubmission(target){	
 	let table			= target.closest('table');
 	let tableRow		= target.closest('tr');
-	let submissionId	= tableRow.dataset.id;
+	let submissionId	= tableRow.dataset.submissionId;
 	let showSwal		= true;
 	let action			= target.value;
 	let response;
@@ -145,7 +145,7 @@ async function archiveSubmission(target){
 		
 		// Delete all
 		if(formData.get('subid') == null){
-			table.querySelectorAll(`[data-id="${submissionId}"]`).forEach(row=>{
+			table.querySelectorAll(`[data-submission-id="${submissionId}"]`).forEach(row=>{
 				row.dispatchEvent(event);
 
 				// just change the button name
@@ -163,7 +163,7 @@ async function archiveSubmission(target){
 			});
 		// Only delete subid
 		}else{
-			table.querySelectorAll(`.table-row[data-id="${submissionId}"][data-subid="${tableRow.dataset.subid}"]`).forEach(row=>{
+			table.querySelectorAll(`.table-row[data-submission-id="${submissionId}"][data-subid="${tableRow.dataset.subid}"]`).forEach(row=>{
 				row.dispatchEvent(event);
 				
 				// just change the button name
@@ -475,7 +475,7 @@ async function processFormsTableInput(target){
 	
 			//Update all occurences of this field
 			if(data['subid'] != undefined){
-				let targets	= table.querySelectorAll(`tr[data-id="${submissionId}"] td[data-id="${data['id']}"]`);
+				let targets	= table.querySelectorAll(`tr[data-submission-id="${submissionId}"] td[data-id="${data['id']}"]`);
 				targets.forEach(td=>{td.innerHTML = newValue;});
 			}else{
 				cell.innerHTML = newValue;
