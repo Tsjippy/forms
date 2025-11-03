@@ -5,6 +5,7 @@
 
 ### Changed
 - js listeneres order
+- removed redundant code
 
 ### Fixed
 - some bugs
