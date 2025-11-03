@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- data-id to data-submission-id
 
 ### Fixed
 
 ### Updated
+
+## [8.9.1] - 2025-11-03
+
+
+### Changed
+- data-id to data-submission-id
 
 ## [8.9.0] - 2025-11-03
 
