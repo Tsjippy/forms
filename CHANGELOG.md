@@ -4,13 +4,20 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.8.9] - 2025-11-03
+
+
+### Changed
 - js listeneres order
 - removed redundant code
 
 ### Fixed
 - some bugs
-
-### Updated
 
 ## [8.8.8] - 2025-11-01
 
