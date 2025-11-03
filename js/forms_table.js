@@ -193,39 +193,6 @@ function changeArchiveButton(element, action){
 	element.outerHTML = `<button class="${action} button forms-table-action" name="${action}-action" value="${action}">${text}</button>`;
 }
 
-async function getInputHtml(target){
-	let table			= target.closest('table');
-
-	let formId			= table.dataset.formId;
-    let submissionId	= target.closest('tr').dataset.id;
-	let data			= target.dataset;
-    
-    let loader			= Main.showLoader(target.querySelector('.override-wrapper'), true);
-
-	let formData 		= new FormData();
-    formData.append('form-id', formId);
-    formData.append('submission-id', submissionId);
-    formData.append('element-id', data.elementId);
-
-	for( var d in data){
-		formData.append(d, data[d]);
-	}
-
-	let response	= await FormSubmit.fetchRestApi('forms/get_input_html', formData);
-
-	if(response){
-		loader.outerHTML	= `<div class='input-wrapper'>${response}</div>`;
-
-		target.querySelectorAll('.file-upload-wrap').forEach(el=>el.addEventListener('uploadfinished', uploadFinished));
-
-		// show calendar by default
-		target.querySelectorAll('input').forEach(el=>el.showPicker());
-	}else{
-		target.innerHTML	= target.dataset.oldHtml;
-		target.classList.remove('active');
-	}
-}
-
 function updatePageNav(navWrapper, pageNr){
 
 	navWrapper.querySelector('.current').classList.remove('current');
@@ -400,6 +367,50 @@ async function getSortedPage(target){
 	}
 }
 
+function prepareInputs(target){
+	// attach upload listenerss
+	target.querySelectorAll('.file-upload-wrap').forEach(el => el.addEventListener('uploadfinished', uploadFinished));
+
+	// Attache niceselects
+	target.querySelectorAll('select').forEach(el => {
+		if(el._niceSelect == undefined){
+			Main.attachNiceSelect(el);
+		}
+	});
+
+	// focus on the first input
+	target.querySelector('input, select, textarea').focus();
+
+	// Show the save button
+	target.querySelector(`button.save`).classList.remove('hidden');
+}
+
+async function getInputHtml(target){
+	let data			= target.dataset;
+    let submissionId	= target.closest('tr').dataset.submissionId;
+	let shortcodeId		= target.closest('table').dataset.shortcodeId;
+    let loader			= Main.showLoader(target.querySelector('.override-wrapper'), true, 50, 'Loading...');
+
+	let formData 		= new FormData();
+	if(data.subid != undefined){
+    	formData.append('subid', data.subid);
+	}
+    formData.append('submission-id', submissionId);
+	formData.append('shortcode-id', shortcodeId);
+    formData.append('element-id', data.elementId);
+
+	let response	= await FormSubmit.fetchRestApi('forms/get_input_html', formData);
+
+	if(response){
+		loader.outerHTML	= `<div class='input-wrapper'>${response}</div>`;
+
+		prepareInputs(target);
+	}else{
+		target.innerHTML	= target.dataset.oldHtml;
+		target.classList.remove('editing');
+	}
+}
+
 function uploadFinished(event){
 	if(event.target.closest('td') != null){
 		//remove as soon as we come here
@@ -416,9 +427,9 @@ async function processFormsTableInput(target){
 	}
 
 	let table			= target.closest('table');
-	let submissionId	= target.closest('tr').dataset.id;
 	let cell			= target.closest('td');
     let data			= cell.dataset;
+	let submissionId	= target.closest('tr').dataset.submissionId;
 	let value			= FormFunctions.getFieldValue(target, cell, false);
 	let shortcodeId		= '';
 
@@ -427,17 +438,20 @@ async function processFormsTableInput(target){
 	}
 
 	//Only update when needed
-	if (value != JSON.parse(cell.dataset.oldvalue)){
-		Main.showLoader(cell.querySelector('.input-wrapper'));
+	if (value != data.oldText){
+		// hide the submit button
+		cell.querySelector(`button.save`).classList.add('hidden');
+
+		Main.showLoader(cell.querySelector('.input-wrapper'),true, 50, 'Saving...');
 		
 		// Submit new value and receive the filtered value back
 		let formData = new FormData();
 		formData.append('submission-id', submissionId);
-
-		for(d in data){
-			formData.append(d, data[d]);
-		}
+		formData.append('element-id', data.elementId);
 		formData.append('new-value', JSON.stringify(value));
+		if(data.subid != undefined){
+			formData.append('subid', data.subid);
+		}
 
 		if(shortcodeId != ''){
 			formData.append('shortcode-id', shortcodeId);
@@ -460,14 +474,12 @@ async function processFormsTableInput(target){
 			}
 	
 			//Update all occurences of this field
-			if(data['subid'] == undefined){
+			if(data['subid'] != undefined){
 				let targets	= table.querySelectorAll(`tr[data-id="${submissionId}"] td[data-id="${data['id']}"]`);
 				targets.forEach(td=>{td.innerHTML = newValue;});
 			}else{
 				cell.innerHTML = newValue;
 			}
-
-			cell.dataset.oldvalue	 	= JSON.stringify(newValue);
 	
 			Main.displayMessage(response.message.replace('_', ' '));
 
@@ -531,8 +543,6 @@ const hideColumn	= async (target) => {
 
 document.addEventListener("click", event=>{
 	let target 		= event.target;
-	let td 			= target.closest('td');
-	let activeCell	= document.querySelector('td.active');
 
 	if(target.name == 'submit_column_setting'){
 		saveColumnSettings(target);
@@ -637,13 +647,23 @@ document.addEventListener('change', event=>{
 document.addEventListener("table-content-update-inputs-loaded", async event => {
 	let target	= event.target;
 
-	if( target.matches('.forms-table:not(.active, .copy)')){
+	if( target.matches('.forms-table:not(.copy)')){
+		event.preventDefault();
+
 		await getInputHtml(target);
+
+		button.classList.remove('hidden');
+
+		prepareInputs(target);
 	}
 });
 
-document.addEventListener("table-content-before-update", event => {
+document.addEventListener("table-content-before-update", async event => {
 	let target	= event.target;
 
-	processFormsTableInput(target);
+	if( target.matches('.forms-table:not(.copy)')){
+		event.preventDefault();
+
+		processFormsTableInput(target);
+	}
 });

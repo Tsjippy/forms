@@ -1035,19 +1035,17 @@ class DisplayFormResults extends DisplayForm{
 			//if the user has one of the roles defined for this element
 			if($elementEditRights && $elementName != 'id'){
 				$class	.= ' edit forms-table';
+			}
+			
+			if(!empty($class)){
 				$class	= trim($class);
-				$class	= " class='$class' data-name='$elementName'";
-			}elseif(!empty($class)){
-				$class	= trim($class);
-				$class = " class='$class'";
+				$class 	= " class='$class'";
 			}
 			
 			//Convert underscores to spaces, but not in urls
 			if(!str_contains($value, 'href=')){
 				$value	= str_replace('_',' ',$value);
 			}
-
-			$oldValue		= json_encode($orgFieldValue);
 
 			// Use the indexed name to get the element, otherwise we might get the wrong
 			if(isset($values['elementindex']) && $this->getElementByName($name.'['.$values['elementindex'].']['.$elementName.']')){
@@ -1064,7 +1062,7 @@ class DisplayFormResults extends DisplayForm{
 			if(!$element){
 				$cellOpeningTag	= "<td $class";
 			}else{
-				$cellOpeningTag	= "<td $class data-element-id='$element->id' data-oldvalue='$oldValue'";
+				$cellOpeningTag	= "<td $class data-element-id='$element->id'";
 			}
 
 			$cellOpeningTag	= apply_filters('sim-formresult-cell-opening-tag', $cellOpeningTag.' '. $subIdString, $this, $columnSetting, $values);
@@ -1145,7 +1143,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		if(!empty($rowContents)){
-			echo "<tr class='table-row' data-id='{$values['id']}' $subIdString>";
+			echo "<tr class='table-row' data-submission-id='{$values['id']}' $subIdString>";
 				echo $rowContents;
 				echo $buttonCell;
 			echo '</tr>';

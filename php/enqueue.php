@@ -107,7 +107,7 @@ function registerScripts(){
 
     wp_register_script( 'sim_formbuilderjs', SIM\pathToUrl(MODULE_PATH.'js/formbuilder.min.js'), array('sim_forms_script','sortable'), MODULE_VERSION, true);
     
-    wp_register_script('sim_forms_table_script', SIM\pathToUrl(MODULE_PATH.'js/forms_table.js'), array('sim_forms_script', 'sim_table_script'), MODULE_VERSION, true);
+    wp_register_script('sim_forms_table_script', SIM\pathToUrl(MODULE_PATH.'js/forms_table.min.js'), array('sim_forms_script', 'sim_table_script'), MODULE_VERSION, true);
 
     if(is_numeric(get_the_ID())){
         $formBuilderPages   = SIM\getModuleOption(MODULE_SLUG, 'formbuilder-pages');

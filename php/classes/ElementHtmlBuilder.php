@@ -26,7 +26,6 @@ class ElementHtmlBuilder extends SimForms{
 	private $tagCloseHtml;
 	private $selectOptionsHtml;
 	public $html;
-	private $prependHtml;
 	public $formData;
 	public $formElements;
 	public $usermeta;
@@ -59,7 +58,6 @@ class ElementHtmlBuilder extends SimForms{
 		$this->tagCloseHtml			= '';
 		$this->selectOptionsHtml	= '';
 		$this->html					= '';
-		$this->prependHtml			= '';
 	}
 
     /**
@@ -90,10 +88,10 @@ class ElementHtmlBuilder extends SimForms{
 		//Loop over the options array
 		foreach($options as $option){
 			//Remove starting or ending spaces and make it lowercase
-			$option 		= trim($option);
+			$option 		= explode('=', trim($option));
 
-			$optionType		= explode('=', $option)[0];
-			$optionValue	= str_replace('\\\\', '\\', explode('=', $option)[1]);
+			$optionType		= $option[0];
+			$optionValue	= str_replace('\\\\', '\\', $option[1]);
 			
 			if($removeMin && in_array($optionType, ['min', 'max'])){
 				continue;
@@ -290,37 +288,45 @@ class ElementHtmlBuilder extends SimForms{
 			$prevValues		= [];
 		}
 		
-		if(str_contains($_SERVER['REDIRECT_URL'], 'get_input_html')){
-			$valueIndexes	= explode('[', $this->element->name);
+		// we are not doing this via an api request
+		if(!str_contains($_SERVER['REDIRECT_URL'], 'get_input_html') || !empty($this->requestedValue)){
+			return $prevValues;
+		}
 
-			foreach($valueIndexes as $i => $index){
-				if($i == 0){
-					if(!isset($this->submission->formresults[$index])){
-						break;
-					}
+		$valueIndexes	= explode('[', $this->element->name);
 
-					$prevValues	= $this->submission->formresults[$index];
-				}else{
-					if($i == 1 && is_numeric($_POST['subid'])){
-						$index	= $_POST['subid'];
-					}
-
-					$index	= trim($index, ']');
-
-					if(!isset($prevValues[$index])){
-						break;
-					}
-
-					$prevValues	= $prevValues[$index];
-				}					
-			}
-
-			if(is_string($prevValues)){
-				$result	= json_decode($prevValues);
-
-				if (json_last_error() === JSON_ERROR_NONE) {
-					$prevValues		= $result;
+		foreach($valueIndexes as $i => $index){
+			// just one possible value found
+			if($i == 0){
+				// there is no value in the form results
+				if(!isset($this->submission->formresults[$index])){
+					break;
 				}
+
+				$prevValues	= $this->submission->formresults[$index];
+			}
+			
+			// return the sub value
+			else{
+				if($i == 1 && is_numeric($_POST['subid'])){
+					$index	= $_POST['subid'];
+				}
+
+				$index	= trim($index, ']');
+
+				if(!isset($prevValues[$index])){
+					break;
+				}
+
+				$prevValues	= $prevValues[$index];
+			}					
+		}
+
+		if(is_string($prevValues)){
+			$result	= json_decode($prevValues);
+
+			if (json_last_error() === JSON_ERROR_NONE) {
+				$prevValues		= $result;
 			}
 		}
 
@@ -573,14 +579,11 @@ class ElementHtmlBuilder extends SimForms{
 	} 
 
 	protected function getMultiTextInputHtml(){
-		// add previous made inputs
-		$preValues	= $this->getPrevValues($this->element, true);
+		if(empty($this->requestedValue) && !empty($this->defaultArrayValues[$this->element->default_value])){
+			$this->requestedValue	= $this->defaultArrayValues[$this->element->default_value];
 
-		if(empty($preValues) && !empty($this->defaultArrayValues[$this->element->default_value])){
-			$preValues	= $this->defaultArrayValues[$this->element->default_value];
-
-			if(!is_array($preValues)){
-				$preValues	= [$preValues];
+			if(!is_array($this->requestedValue)){
+				$this->requestedValue	= [$this->requestedValue];
 			}
 		}
 
@@ -592,7 +595,7 @@ class ElementHtmlBuilder extends SimForms{
 		$html	= "<div class='option-wrapper'>";
 			// container for choices made
 			$html	.= "<ul class='list-selection-list'>";
-				foreach($preValues as $v){
+				foreach($this->requestedValue as $v){
 					if(method_exists($this, 'transformInputData')){
 						$transValue		= $this->transformInputData($v, $this->element->name, $this->submission->formresults);
 					}else{
@@ -611,7 +614,7 @@ class ElementHtmlBuilder extends SimForms{
 
 			// add the text input
 			$html	.= "<div class='multi-text-input-wrapper'>";
-				$html	.= "<input type='text' $this->idHtml name='{$this->element->name}[]' class='$this->classHtml datalistinput multiple' $this->optionsHtml>";
+				$html	.= "<input type='text' $this->idHtml name='$elName' class='$this->classHtml datalistinput multiple' $this->optionsHtml>";
 				$html	.= '<button type="button" class="small add-list-selection hidden">Add</button>';
 			$html	.= "</div>";
 		$html	.= "</div>";
@@ -875,8 +878,6 @@ class ElementHtmlBuilder extends SimForms{
 				$this->html	= "<$this->tagType $this->nameHtml $this->idHtml class='$this->classHtml' $this->optionsHtml $this->valueHtml>$this->tagContent$this->tagCloseHtml";
 			}
 		}
-
-		$this->html	= $this->prependHtml.$this->html;
 		
 		//remove unnessary whitespaces
 		$this->html = preg_replace('/\h+/', ' ', $this->html);

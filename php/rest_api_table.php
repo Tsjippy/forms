@@ -163,8 +163,11 @@ function restApiInitTable() {
 						return is_numeric($submissionId);
 					}
 				),
-				'name'		=> array(
+				'element-id'		=> array(
 					'required'	=> true,
+					'validate_callback' => function($submissionId){
+						return is_numeric($submissionId);
+					}
 				),
 				'new-value'		=> array(
 					'required'	=> true,
@@ -182,7 +185,7 @@ function restApiInitTable() {
 			'callback' 				=> __NAMESPACE__.'\getInputHtml',
 			'permission_callback' 	=> '__return_true',
 			'args'					=> array(
-				'elementId'		=> array(
+				'element-id'		=> array(
 					'required'	=> true,
 				),
 				'submission-id'		=> array(
@@ -378,6 +381,9 @@ function archiveSubmission(){
 	return $message;
 }
 
+/**
+ * Retrieves the element html needed to be able to update a form result entry
+ */
 function getInputHtml(){
 	$formTable		= new DisplayFormResults($_POST);
 
@@ -386,70 +392,85 @@ function getInputHtml(){
 	// Get the form id from the submission and load the form
 	$formTable->getForm($formTable->submission->form_id);
 
+	$userIdElement	= $formTable->findUserIdElementName();
+
+	$userId			= $formTable->submission->formresults[$userIdElement];
+	if(empty($userId)){
+		$userId			= $formTable->submission->userid;
+	}
+
+	$formTable->userId							= $userId;
+	$formTable->elementHtmlBuilder->userId		= $userId;
+	$formTable->elementHtmlBuilder->formData	= $formTable->formData;
+
 	$elementId		= sanitize_text_field($_POST['element-id']);
 
-	$elementName	= sanitize_text_field($_POST['name']);
-
 	$element		= $formTable->getElementById($elementId);
-
-	$curValue		= '';
 
 	if(!$element){
 		return new \WP_Error('No element found', "No element found with id '$elementId'");
 	}
 
-	// get value
-	if(isset($_POST['subid'])){
-		$subId = $_POST['subid'];
-	}
-
 	// Check if we are dealing with an split element with form name[X]name
 	preg_match('/(.*?)\[[0-9]\]\[(.*?)\]/', $element->name, $matches);
 
-	if(isset($formTable->submission->formresults[$elementName])){
-		$curValue	= $formTable->submission->formresults[$elementName];
-	}elseif(isset($formTable->submission->formresults[str_replace('[]', '', $element->name)])){
-		$curValue	= $formTable->submission->formresults[str_replace('[]', '', $element->name)];
-	}elseif(isset($formTable->submission->formresults[$matches[1]])){
-		if($subId > -1 && isset($formTable->submission->formresults[$matches[1]][$subId][$matches[2]])){
-			$curValue	= $formTable->submission->formresults[$matches[1]][$subId][$matches[2]];
-		}
-	}
-
-	if(is_array($curValue) && isset($subId) && !empty($curValue[$subId])){
-		$curValue	= $curValue[$subId];
-	}
-
-	// Get element html with the value allready set
-	$html = $formTable->elementHtmlBuilder->getElementHtml($element, $curValue);
+	// Get element html
+	$html 		= $formTable->elementHtmlBuilder->getElementHtml($element);
 	
-	// we are getting the html for an input and that input depends on a datalist
-	$options = explode("\n", $element-options);
-			if($options == 'list'){
-				$datalist	= $formTable->getElementByName($optionValue);
+	/**
+	 * Check if this element needs a datalist
+	 */
 
-				if($datalist == $element){
-					$datalist	= $formTable->getElementByName($optionValue.'-list');
-					SIM\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
-				}
-
-			$html .= $formTable->elementHtmlBuilder->getElementHtml($element);
-		}
+	// Get all options
+	$options	= explode("\n", trim($element->options));
 		
-		// prepend html with the html of previous element that wrap this elemnt
-		$prevElement = $formTable->formElements[];
-		while($prevElement->wrap){
-			$html = $formTable->elementHtmlBuilder->getElementHtml($element).$html;
-			$prevElement = $formTable->formElements[];
+	//Loop over the options array
+	foreach($options as $option){
+		//Remove starting or ending spaces and make it lowercase
+		$option 		= explode('=', trim($option));
+
+		$optionType		= $option[0];
+		$optionValue	= str_replace('\\\\', '\\', $option[1]);
+
+		// This option is a list option
+		if($optionType == 'list'){
+			$datalist	= $formTable->getElementByName($optionValue);
+
+			if($datalist == $element){
+				$datalist	= $formTable->getElementByName($optionValue.'-list');
+				SIM\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
 			}
-			
-		// add next elements if they are wrapped in this one
-		while($element->wrap){
-			$element = $formTable->formElements[];
-			$html .= $formTable->elementHtmlBuilder->getElementHtml($element);
+
+			// Get the html of the datalist element
+			if($datalist){
+				$html .= $formTable->elementHtmlBuilder->getElementHtml($datalist);
 			}
+		}
+	}
+		
+	// prepend html with the html of previous element that wrap this elemnt
+	$index			= $element->priority - 2;
+	$prevElement 	= $formTable->formElements[$index];
+	while($prevElement && $prevElement->wrap){
+		$index--;
+		$html 			= $formTable->elementHtmlBuilder->getElementHtml($prevElement).$html;
+		$prevElement 	= $formTable->formElements[$index];
+	}
+		
+	// add next elements if they are wrapped in this one
+	$index			= $element->priority;
+	while($element->wrap){
+		$element = $formTable->formElements[$index];
+		$html 	.= $formTable->elementHtmlBuilder->getElementHtml($element);
+		$index++;
+	}
+
+	return $html;
 }
 
+/**
+ * Updates a value in the submission results table with a new value
+ */
 function editValue(){
 	$formTable					= new EditFormResults($_POST);
 		
@@ -458,9 +479,13 @@ function editValue(){
 	$formTable->parseSubmissions(null, $formTable->submissionId);
 
 	$formTable->getForm($formTable->submission->form_id);
+
+	$elementId					= sanitize_text_field($_POST['element-id']);
+
+	$element					= $formTable->getElementById($elementId);
 		
 	//update an existing entry
-	$elementName 	= sanitize_text_field($_POST['name']);
+	$elementName 	= $element->name;
 	$newValue 		= json_decode(sanitize_textarea_field(stripslashes($_POST['new-value'])));
 
 	$transValue		= $formTable->transformInputData($newValue, $elementName, $formTable->submission->formresults);
