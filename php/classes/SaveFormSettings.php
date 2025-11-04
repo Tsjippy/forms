@@ -155,7 +155,8 @@ class SaveFormSettings extends SimForms{
 			'show'					=> '%d',	
 			'name'					=> '%s',	
 			'nice_name'				=> '%s',
-			'priority'				=> '%d',	
+			'priority'				=> '%d',
+			'copy'					=> '%d',	
 			'view_right_roles'		=> '%s',
 			'edit_right_roles'		=> '%s'
 		];
@@ -626,20 +627,23 @@ class SaveFormSettings extends SimForms{
 	 */
 	public function saveColumnSettings($settings=[], $shortcodeId=''){
 		$priority	= 0;
+
+
+		if( empty($shortcodeId) && isset($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])){
+			$shortcodeId	= $_POST['shortcode-id'];
+		}
+
 		foreach($settings as $elementId => $column){
 			if(!is_array($column)){
 				continue;
 			}
 
 			$priority++;
-			$column['priority']	= $priority;
+			$column['priority']		= $priority;
 
 			$column['element_id']	= $elementId;
-			if(empty($column['shortcode_id']) && is_numeric($shortcodeId)){
-				$column['shortcode_id']	= $shortcodeId;
-			}elseif(empty($column['shortcode_id']) && isset($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])){
-				$column['shortcode_id']	= $_POST['shortcode-id'];
-			}
+
+			$column['shortcode_id']	= $shortcodeId;
 			
 			//if there are edit rights defined
 			if(!empty($column['edit_right_roles'])){

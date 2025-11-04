@@ -647,7 +647,7 @@ document.addEventListener('change', event=>{
 document.addEventListener("table-content-update-inputs-loaded", async event => {
 	let target	= event.target;
 
-	if( target.matches('.forms-table:not(.copy)')){
+	if( target.matches('.forms-table')){
 		event.preventDefault();
 
 		await getInputHtml(target);
@@ -661,7 +661,7 @@ document.addEventListener("table-content-update-inputs-loaded", async event => {
 document.addEventListener("table-content-before-update", async event => {
 	let target	= event.target;
 
-	if( target.matches('.forms-table:not(.copy)')){
+	if( target.matches('.forms-table')){
 		event.preventDefault();
 
 		processFormsTableInput(target);

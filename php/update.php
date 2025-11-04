@@ -343,8 +343,8 @@ function moduleUpdate($oldVersion){
     if($oldVersion < '8.9.0'){
         $wpdb->query("UPDATE `{$wpdb->prefix}sim_form_shortcode_column_settings` SET `name`='submitteruserid' WHERE `element_id` = -2");
     }
-}
 
-add_action('init', function(){
-//    moduleUpdate('8.8.7');
-});
+    if($oldVersion < '8.9.3'){
+        maybe_add_column("{$wpdb->prefix}sim_form_shortcode_column_settings", 'copy', "ALTER TABLE {$wpdb->prefix}sim_form_shortcode_column_settings ADD COLUMN `copy` bool");
+    }
+}
