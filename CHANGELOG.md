@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- hide columns
 
 ### Updated
+
+## [8.9.4] - 2025-11-04
+
+
+### Fixed
+- hide columns
 
 ## [8.9.3] - 2025-11-04
 
