@@ -1212,7 +1212,7 @@ window.addEventListener('change', ev=>{
 			});
 		}
 	}else if(target.matches(".condition-row [name*='[property-value]']")){
-		let selectedElement	= document.querySelector(`.form-element-wrapper[data-id="${target.value}"]`);
+		let selectedElement	= document.querySelector(`.form-element-wrapper[data-element-id="${target.value}"]`);
 		if(selectedElement == null){
 			return;
 		}

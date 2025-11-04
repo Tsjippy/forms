@@ -475,7 +475,7 @@ async function processFormsTableInput(target){
 	
 			//Update all occurences of this field
 			if(data['subid'] != undefined){
-				let targets	= table.querySelectorAll(`tr[data-submission-id="${submissionId}"] td[data-id="${data['id']}"]`);
+				let targets	= table.querySelectorAll(`tr[data-submission-id="${submissionId}"] td[data-element-id="${data['id']}"]`);
 				targets.forEach(td=>{td.innerHTML = newValue;});
 			}else{
 				cell.innerHTML = newValue;

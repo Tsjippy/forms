@@ -399,9 +399,10 @@ function getInputHtml(){
 		$userId			= $formTable->submission->userid;
 	}
 
-	$formTable->userId							= $userId;
-	$formTable->elementHtmlBuilder->userId		= $userId;
-	$formTable->elementHtmlBuilder->formData	= $formTable->formData;
+	$formTable->userId								= $userId;
+	$formTable->elementHtmlBuilder->userId			= $userId;
+	$formTable->elementHtmlBuilder->formData		= $formTable->formData;
+	$formTable->elementHtmlBuilder->formElements	= $formTable->formElements;
 
 	$elementId		= sanitize_text_field($_POST['element-id']);
 

@@ -157,7 +157,7 @@ class FormBuilderForm extends SimForms{
 		}
 
 		//Add form edit controls if needed
-		$html = " <div class='form-element-wrapper $extraClass' data-id='{$element->id}' data-form-id='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
+		$html = " <div class='form-element-wrapper $extraClass' data-element-id='{$element->id}' data-form-id='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
 			$html 	.= "<span class='movecontrol formfield-button' aria-hidden=1>:::<br><span class='element-id$idHidden' style='font-size:xx-small'>$element->id</span></span>";
 			$html 	.= "<div class='resizer-wrapper'>";
 				if($element->type == 'info'){
@@ -1749,7 +1749,7 @@ class FormBuilderForm extends SimForms{
 			if(!empty($copyTo['copyto']) && in_array($elementId, $copyTo['copyto'])){
 				$counter++;
 				?>
-				<div class="form-element-wrapper" data-id="<?php echo $el->id;?>" data-form-id="<?php echo $this->formData->id;?>">
+				<div class="form-element-wrapper" data-element-id="<?php echo $el->id;?>" data-form-id="<?php echo $this->formData->id;?>">
 					<button type="button" class="edit-form-element button" title="Jump to conditions element">View conditions of '<?php echo $el->name;?>'</button>
 				</div>
 				<?php
