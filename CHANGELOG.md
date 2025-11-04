@@ -6,9 +6,17 @@
 ### Changed
 
 ### Fixed
-- get input html
 
 ### Updated
+
+## [8.9.2] - 2025-11-04
+
+
+### Changed
+- only redirect to account page when not requesting another page
+
+### Fixed
+- get input html
 
 ## [8.9.1] - 2025-11-03
 
