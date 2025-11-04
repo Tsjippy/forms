@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- only redirect to account page when not requesting another page
 
 ### Fixed
 - get input html
