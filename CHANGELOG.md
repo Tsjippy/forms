@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- copy form input
 
 ### Updated
+
+## [8.9.3] - 2025-11-04
+
+
+### Fixed
+- copy form input
 
 ## [8.9.2] - 2025-11-04
 
