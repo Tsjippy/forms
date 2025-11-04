@@ -510,16 +510,16 @@ const copyContent = async (target) => {
 }
 
 const hideColumn	= async (target) => {
-	if(target.tagName == 'SPAN'){
-		target = target.querySelector('img');
-	}
-
 	// Table itself
 	if(target.parentNode.matches('th')){
 		let cell 	= target.parentNode;
 
 		// Hide the column
 		var table		= cell.closest('table');
+		let tableRows	= table.rows;
+		for (const element of tableRows) {
+			element.cells[cell.cellIndex].classList.add('hidden')
+		}
 
 		// store as preference
 		var formData	= new FormData();
@@ -592,11 +592,6 @@ document.addEventListener("click", event=>{
 		target.closest('div').querySelector('.permission-wrapper').classList.toggle('hidden');
 	}
 
-	//Hide column
-	else if(target.classList.contains('visibility-icon')){
-		hideColumn(target);
-	}
-
 	else if(target.matches('.reset-col-vis')){
 		showHiddenColumns(target);
 	}else{
@@ -665,5 +660,15 @@ document.addEventListener("table-content-before-update", async event => {
 		event.preventDefault();
 
 		processFormsTableInput(target);
+	}
+});
+
+document.addEventListener("table-content-before-column-hide", async event => {
+	let target	= event.target;
+
+	if( target.closest('.column-setting-wrapper') != null || target.closest('.form-data-table' ) != null){
+		event.preventDefault();
+
+		hideColumn(target);
 	}
 });
