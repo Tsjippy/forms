@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- async form loading
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [8.9.5] - 2025-11-06
+
+
+### Added
+- async form loading
 
 ## [8.9.4] - 2025-11-04
 
