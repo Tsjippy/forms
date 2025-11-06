@@ -265,16 +265,19 @@ class DisplayFormResults extends DisplayForm{
 			return $this->getMetaKeyFormSubmissions($userId, $all);
 		}
 
-		$query				= "SELECT * FROM {$this->submissionTableName} WHERE ";
+		$query				= "SELECT * FROM %i WHERE ";
+		$values				= [$this->submissionTableName];
 
 		if(empty($submissionId) && !empty($_REQUEST['id'])){
 			$submissionId	= $_REQUEST['id'];
 		}
 		
 		if(is_numeric($submissionId)){
-			$query .= "id='$submissionId'";
+			$query 		.= "id=%d";
+			$values[]	= $submissionId; 
 		}elseif(isset($this->formData->id)){
-			$query	.= "form_id={$this->formData->id}";
+			$query		.= "form_id=%d";
+			$values[]	 = $this->formData->id; 
 		}else{
 			$query	.= "1=1";
 		}
@@ -313,32 +316,45 @@ class DisplayFormResults extends DisplayForm{
 			}
 
 			if($this->sortColumnFound){
-				$query	.= " ORDER BY `$this->sortColumn` $this->sortDirection";
+				$query	.= " ORDER BY %` %s";
+				$values[]	= $this->sortColumn;
+				$values[]	= $this->sortDirection;
 			}else{
 				// have to get all results to be able to sort them later
 				$all		= true;
 			}
 		}
 
-		$query					= apply_filters('sim_formdata_retrieval_query', $query, $userId, $this);
+		extract(apply_filters(
+			'sim_formdata_retrieval_query', 
+			[
+				'query'		=> $query,
+				'values'	=> $values,
+			],
+			$userId, 
+			$this
+		));
 
 		// Get the total
-		$this->total			= $wpdb->get_var(str_replace('*', 'count(*) as total', $query));
+		$countQuery		= str_replace('*', 'count(*) as total', $query);
+		$this->total	= $wpdb->get_var($wpdb->prepare($countQuery, ...$values));
 
 		// add the limit only if we are not querying everything, or for a specific user or start is larger than the total
 		if(!$all && empty($userId) && $start < $this->total){
 			$this->spliced	= true;
-			$query	.= " LIMIT $start, $this->pageSize";
+			$query	.= " LIMIT %d, %d";
+			$values[]	= $start;
+			$values[]	= $this->pageSize;
 		}
 
 		// Get results
-		$result	= $wpdb->get_results($query);
+		$result	= $wpdb->get_results(
+			$wpdb->prepare($query, ...$values)
+		);
 
 		foreach($result as &$r){
 			$r->formresults	= unserialize($r->formresults);
 		}
-
-		$result	= apply_filters('sim_retrieved_formdata', $result, $userId, $this);
 
 		if(is_numeric($userId)){
 			// find the user id element
@@ -366,6 +382,8 @@ class DisplayFormResults extends DisplayForm{
 				return $result;
 			}
 		}
+
+		$result	= apply_filters('sim_retrieved_formdata', $result, $userId, $this);
 
 		// unserialize
 		$keptCount		= 0;
