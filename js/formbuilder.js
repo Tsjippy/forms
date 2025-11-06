@@ -123,9 +123,14 @@ function fixElementNumbering(form){
 	});
 }
 
-// add new element
-async function showEmptyModal(target){
+//edit existing or add new element
+async function requestEditElementData(target, requestNew=false){
 	target.classList.add('clicked');
+
+	let elementId		= -1;
+	if(!requestNew){
+		elementId	= formElementWrapper.dataset.elementId;
+	}
 
 	let formId					= target.dataset.formId;
 	if(formId == undefined){
@@ -135,47 +140,6 @@ async function showEmptyModal(target){
 			formId = document.querySelector('input[type=hidden][name="form-id"').value;
 		}
 	}
-	
-	clearFormInputs();
-
-	// Hide all
-	modal.querySelectorAll(".shouldhide").forEach(el=>el.classList.replace('shouldhide', 'hidden'))
-	
-	if(formElementWrapper != null){
-		modal.querySelector('[name="insert-after"]').value = formElementWrapper.dataset.priority;
-	}
-	
-	modal.querySelector('[name="submit-form-element"]').textContent = modal.querySelector('[name="submit-form-element"]').textContent.replace('Change','Add');
-	
-	modal.querySelector('.element-conditions-wrapper').innerHTML = Main.showLoader(null, false, 50, '', true);
-	
-	Main.showModal(modal);
-
-	// Scroll to top of the modal
-	modal.querySelector(`[name='formfield[type]']`).scrollIntoView({block: "center"});
-
-	var formData = new FormData();
-	formData.append('elementid', '-1');
-	formData.append('form-id', formId);
-	var response = await FormSubmit.fetchRestApi('forms/request_form_conditions_html', formData);
-
-	//fill the element conditions tab
-	modal.querySelector('.element-conditions-wrapper').innerHTML = response;
-
-	// Add nice selects
-	modal.querySelectorAll('.condition-select').forEach(function(select){
-		Main.attachNiceSelect(select);
-	});
-}
-
-//edit existing element
-async function requestEditElementData(target){
-	target.classList.add('clicked');
-
-	let elementId		= formElementWrapper.dataset.id;
-	let formId			= target.closest('.form-element-wrapper').dataset.formId;
-	modal.querySelector('[name="element-id"]').value = formElementWrapper.dataset.id;
-	modal.originalhtml	= target.outerHTML;
 
 	let editButton		= target.outerHTML;
 
@@ -190,36 +154,41 @@ async function requestEditElementData(target){
 	
 	let response = await FormSubmit.fetchRestApi('forms/request_form_element', formData);
 
-	if(response){
-		//fill the form after we have clicked the edit button
-		if(modal.querySelector('[name="add-form-element-form"]') != null){
-			modal.querySelector('[name="add-form-element-form"]').innerHTML = response.elementForm;
-
-			//activate tiny mce's
-			modal.querySelectorAll('.wp-editor-area').forEach(el =>{
-				tinymce.execCommand( 'mceRemoveEditor', false, el.id );
-				tinymce.execCommand( 'mceAddEditor', false, el.id );
-			});
-		}
-
-		showCondionalFields(modal.querySelector('[name="formfield[type]"]').value, modal.querySelector('[name="add-form-element-form"]'));
-
-		//fill the element conditions tab
-		modal.querySelector('.element-conditions-wrapper').innerHTML = response.conditionsHtml;
-
-		// Add nice selects
-		modal.querySelectorAll('select').forEach(function(select){
-			Main.attachNiceSelect(select);
-		});
-		
-		Main.showModal(modal);
-
-		// Scroll to top of the modal
-		modal.querySelector(`[name='formfield[type]']`).scrollIntoView({block: "center"});
-		
-		//show edit button again
-		loader.outerHTML	= editButton;
+	if(!response){
+		return;
 	}
+
+	//fill the form after we have clicked the edit button
+	document.getElementById(`element-builder`).innerHTML = response.elementForm;
+
+	//activate tiny mce's
+	modal.querySelectorAll('.wp-editor-area').forEach(el =>{
+		tinymce.execCommand( 'mceRemoveEditor', false, el.id );
+		tinymce.execCommand( 'mceAddEditor', false, el.id );
+	});
+
+	// Add nice selects
+	modal.querySelectorAll('.condition-select').forEach(function(select){
+		Main.attachNiceSelect(select);
+	});
+
+	showCondionalFields(modal.querySelector('[name="formfield[type]"]').value, modal.querySelector('[name="add-form-element-form"]'));
+
+	//fill the element conditions tab
+	modal.querySelector('.element-conditions-wrapper').innerHTML = response.conditionsHtml;
+
+	// Add nice selects
+	modal.querySelectorAll('select').forEach(function(select){
+		Main.attachNiceSelect(select);
+	});
+	
+	Main.showModal(modal);
+
+	// Scroll to top of the modal
+	modal.querySelector(`[name='formfield[type]']`).scrollIntoView({block: "center"});
+	
+	//show edit button again
+	loader.outerHTML	= editButton;
 }
 
 // Add a new element
@@ -1093,7 +1062,7 @@ window.addEventListener("click", event => {
 			
 			return;
 		}
-		showEmptyModal(target);
+		requestEditElementData(target, true);
 	}
 	
 	//actions on element type select

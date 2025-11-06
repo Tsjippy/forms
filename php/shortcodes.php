@@ -6,6 +6,12 @@ add_shortcode('formselector', __NAMESPACE__.'\showFormSelector');
 function showFormSelector($atts=[]){
     global $wpdb;
 
+    wp_enqueue_script('sim_forms_script');
+    
+    wp_enqueue_script('sim_forms_table_script');
+
+    wp_enqueue_style('sim_forms_style');
+
     ob_start();
 
     $a = shortcode_atts( array(
@@ -81,7 +87,9 @@ function showFormSelector($atts=[]){
             $resultActive  = '';
         }
 
-        // Loop over the forms to add the to the page
+        /**
+         * Loop over the forms to add both the form and the submission data 
+         */
         foreach($forms as $form){
 		    $query			= "SELECT * FROM {$formTable->shortcodeTable} WHERE form_id= '{$form->id}'";
 		    $shortcodeData 	= $wpdb->get_results($query);
@@ -100,20 +108,20 @@ function showFormSelector($atts=[]){
                 $hidden = ' hidden';
             }
 
-            echo "<div id='{$form->name}' class='main-form-wrapper$hidden'>";
+            $id = strtolower(str_replace([' ', '_'], '-', $form->name));
+
+            echo "<div id='$id' class='main-form-wrapper$hidden'>";
                 //only show button if not queried
                 if(!isset($_REQUEST['display'])){
-                    echo "<button class='button tablink$formActive' id='show-{$form->name}_form' data-target='{$form->name}_form'>Show form</button>";
-                    echo "<button class='button formresults tablink$resultActive' id='show-{$form->name}_results' data-target='{$form->name}_results'>Show form results</button>";
+                    echo "<button class='button tablink$formActive' id='show-{$id}-form' data-target='{$id}-form'>Show form</button>";
+                    echo "<button class='button formresults tablink$resultActive' id='show-{$id}_results' data-target='{$id}-results'>Show form results</button>";
                 }
 
-                 echo "<div id='{$form->name}_form' class='form-wrapper$formVis'>";
-                    echo do_shortcode("[formbuilder formname='$form->name']");
+                echo "<div id='{$id}-form' class='form-wrapper $formVis form-load-trigger' data-form-id={$form->id}>";
                 echo "</div>";
 
                 
-                echo "<div id='{$form->name}_results' class='form-results-wrapper$resultVis'>";
-                    echo do_shortcode("[formresults id=$shortcodeId formname='$form->name']");
+                echo "<div id='{$id}-results' class='form-results-wrapper $resultVis form-load-trigger' data-shortcode-id=$shortcodeId>";
                 echo "</div>";
             echo "</div>";
         }

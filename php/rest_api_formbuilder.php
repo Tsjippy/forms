@@ -20,6 +20,44 @@ function checkPermissions(){
 
 add_action( 'rest_api_init', __NAMESPACE__.'\restApiInitForms');
 function restApiInitForms() {
+	// load form
+	register_rest_route(
+		RESTAPIPREFIX.'/forms',
+		'/load_form',
+		array(
+			'methods' 				=> 'POST',
+			'callback' 				=> 	__NAMESPACE__.'\loadForm',
+			'permission_callback' 	=> '__return_true',
+			'args'					=> array(
+				'form-id'		=> array(
+					'required'	=> true,
+					'validate_callback' => function($formId){
+						return is_numeric($formId);
+					}
+				)
+			)
+		)
+	);
+
+	// load form results table
+	register_rest_route(
+		RESTAPIPREFIX.'/forms',
+		'/load_form_results',
+		array(
+			'methods' 				=> 'POST',
+			'callback' 				=> 	__NAMESPACE__.'\loadFormResults',
+			'permission_callback' 	=> '__return_true',
+			'args'					=> array(
+				'shortcode-id'		=> array(
+					'required'	=> true,
+					'validate_callback' => function($id){
+						return is_numeric($id);
+					}
+				)
+			)
+		)
+	);
+
 	// copy element to form
 	register_rest_route(
 		RESTAPIPREFIX.'/forms',
@@ -642,4 +680,16 @@ function saveFormEmails(){
 	}
 	
 	return "Succesfully saved your form e-mail configuration";
+}
+
+function loadForm(){
+	$displayForm	= new DisplayForm(['form-id' => $_POST['form-id']]);
+
+	return $displayForm->showForm();
+}
+
+function loadFormResults(){
+	$displayFormResults = new DisplayFormResults(['shortcode-id'=> $_POST['shortcode-id']]);
+	
+	return $displayFormResults->showFormresultsTable();
 }

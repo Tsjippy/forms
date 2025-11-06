@@ -377,7 +377,6 @@ class FormBuilderForm extends SimForms{
 				<button class="button tablink formbuilder-form"			id="show-element-conditions" data-target="element-conditions">Element conditions</button>
 				
 				<div class="tabcontent" id="element-builder">
-					<?php echo $this->elementBuilderForm();?>
 				</div>
 				
 				<div class="tabcontent hidden" id="element-conditions">
@@ -1353,14 +1352,16 @@ class FormBuilderForm extends SimForms{
 	 * Form to add or edit a new form element
 	 */
 	public function elementBuilderForm($element=null){
-		ob_start();
-
 		$heading	= "Please fill in the form to add a new form element";
 
 		if(is_numeric($element)){
 			$element = $this->getElementById($element);
 
-			$heading	= "Change this element";
+			if($element ){
+				$heading	= "Change this element";
+			}else{
+				$element	= null;
+			}
 		}
 
 		$numericElements	= [];
@@ -1375,14 +1376,10 @@ class FormBuilderForm extends SimForms{
 		}
 
 		$nonInputClasses	= 'non-'.implode(' non-', $this->nonInputs);
-
+		
+		ob_start();
 		?>
-		<script>
-			const numericElements	= <?php echo json_encode($numericElements); ?>;
-			const dateElements		= <?php echo json_encode($dateElements); ?>;
-		</script>
-		<form action="" method="post" name="add-form-element-form" class="form-element-form sim-form" data-add-empty=1>
-			<div style="display: none;" class="error"></div>
+		<div class="form-wrapper">
 			<h4><?php echo $heading;?></h4><br>
 
 			<input type="hidden" class="no-reset" name="form-id" value="<?php echo $this->formData->id;?>">
@@ -1683,6 +1680,31 @@ class FormBuilderForm extends SimForms{
 			}else{
 				$text	= "Change";
 			}
+		?>
+		</div>
+		<?php
+
+		/**
+		 * Filters the form contents of adding or editing an element
+		 * 
+		 * @param	string	$html		The form html
+		 * @param	object	$object		The FormBuilderForm Instance
+		 * @param	object	$element	The current element which is edited
+		 */
+		$formContents	= apply_filters('sim-forms-element-form-content', ob_get_clean(), $this, $element);
+
+		ob_start();
+		?>
+		<script>
+			const numericElements	= <?php echo json_encode($numericElements); ?>;
+			const dateElements		= <?php echo json_encode($dateElements); ?>;
+		</script>
+		<form action="" method="post" name="add-form-element-form" class="form-element-form sim-form" data-add-empty=1>
+			<div style="display: none;" class="error"></div>
+			<?php
+
+			echo $formContents;
+
 			echo SIM\addSaveButton('submit-form-element',"$text form element"); ?>
 		</form>
 		<?php

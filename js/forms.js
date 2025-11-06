@@ -133,6 +133,32 @@ async function onlyOwnSwitch(target){
 	requestNewFormResults(target);
 }
 
+//Load after page load
+document.addEventListener("DOMContentLoaded", () => {
+	let html		= Main.showLoader('', false, 100, 'Please wait...', true);
+
+	document.querySelectorAll(`.form-load-trigger`).forEach(async el => {
+		el.innerHTML	= html;
+		let formId		= el.dataset.formId;
+		let shortcodeId	= el.dataset.shortcodeId;
+
+		let formData	= new FormData();
+		let response	= false;
+		
+		if(formId != null){
+			formData.append('form-id', formId);
+			response = await FormSubmit.fetchRestApi('forms/load_form', formData);
+		}else{
+			formData.append('shortcode-id', shortcodeId);
+			response = await FormSubmit.fetchRestApi('forms/load_form_results', formData);
+		}
+
+		if(response){
+			el.innerHTML	= response;
+		}
+	});
+});
+
 //we are online again
 window.addEventListener('online', function(){
 	document.querySelectorAll('.form-submit').forEach(btn=>{
