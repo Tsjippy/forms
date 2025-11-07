@@ -5,6 +5,7 @@
 
 ### Changed
 - use wpdb->prepare
+- bug fixes
 
 ### Fixed
 
