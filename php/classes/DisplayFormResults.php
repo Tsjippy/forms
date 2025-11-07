@@ -133,10 +133,12 @@ class DisplayFormResults extends DisplayForm{
 			$desc	= $desc->Field;
 		}
 		
-		$query				= "SELECT * FROM {$wpdb->usermeta} WHERE ";
+		$query				= "SELECT * FROM %i WHERE ";
+		$values				= [$wpdb->usermeta];
 
 		if(is_numeric($userId)){
-			$query				= "user_id = $userId ";
+			$query				= "user_id = %d ";
+			$values[]			= $userId;
 		}
 
 		$counter	= 0;
@@ -152,17 +154,20 @@ class DisplayFormResults extends DisplayForm{
 					}
 
 
-					$query			.= "meta_key = '$name' ";
+					$query			.= "meta_key = %s ";
+					$values[]		 = $name;
 
 					$counter++;
 				}
 			}
 		}
 
-		$query					= apply_filters('sim_formdata_retrieval_query', $query, $userId, $this);
+		extract(apply_filters('sim_formdata_retrieval_query', $params, $userId, $submissionId, $this));
 
 		// Get results
-		$result		= $wpdb->get_results($query);
+		$result		= $wpdb->get_results(
+			$wpdb->prepare($query, $values)
+		);
 
 		// parse results to merge based on userId
 		$results	= [];
@@ -226,8 +231,6 @@ class DisplayFormResults extends DisplayForm{
 			if($this->sortDirection != 'ASC'){
 				$this->sortDirection	= 'DESC';
 			}
-
-			
 		}	
 
 		foreach($results as &$r){
@@ -332,6 +335,7 @@ class DisplayFormResults extends DisplayForm{
 				'values'	=> $values,
 			],
 			$userId, 
+			$submissionId,
 			$this
 		));
 
@@ -348,11 +352,11 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		// Get results
-		$result	= $wpdb->get_results(
+		$results	= $wpdb->get_results(
 			$wpdb->prepare($query, ...$values)
 		);
 
-		foreach($result as &$r){
+		foreach($results as &$r){
 			$r->formresults	= unserialize($r->formresults);
 		}
 
@@ -367,27 +371,27 @@ class DisplayFormResults extends DisplayForm{
 					$query	.= " LIMIT $start, $this->pageSize";
 				}
 				
-				$result	= $wpdb->get_results($query);
+				$results	= $wpdb->get_results($query);
 				
 				if($wpdb->last_error !== ''){
 					SIM\printArray($wpdb->print_error());
 				}else{
-					foreach($result as &$r){
-						$r->formresults	= unserialize($r->formresults);
+					foreach($results as &$result){
+						$result->formresults	= unserialize($result->formresults);
 					}
 
-					$result	= apply_filters('sim_retrieved_formdata', $result, $userId, $this);
+					$results	= apply_filters('sim_retrieved_formdata', $results, $userId, $this);
 				}
 		
-				return $result;
+				return $results;
 			}
 		}
 
-		$result	= apply_filters('sim_retrieved_formdata', $result, $userId, $this);
+		$results	= apply_filters('sim_retrieved_formdata', $results, $userId, $this);
 
 		// unserialize
 		$keptCount		= 0;
-		foreach($result as $index=>&$submission){
+		foreach($results as $index => &$submission){
 			if(
 				is_numeric($userId)									&& 	// We only want results af a particular user
 				(
@@ -404,7 +408,7 @@ class DisplayFormResults extends DisplayForm{
 				// delete the result if we only want to keep results of a certain user and is not this user
 				$shouldRemove	= apply_filters('sim_remove_formdata', true, $userId, $submission);
 				if($shouldRemove){
-					unset($result[$index]);
+					unset($results[$index]);
 
 					$this->total--;
 				}else{
@@ -412,7 +416,7 @@ class DisplayFormResults extends DisplayForm{
 
 					// check if we have enough results left
 					if($keptCount == $start + $this->pageSize){
-						$result	= array_splice($result, $keptCount);
+						$results	= array_splice($results, $keptCount);
 						break;
 					}
 				}
@@ -423,7 +427,7 @@ class DisplayFormResults extends DisplayForm{
 			SIM\printArray($wpdb->print_error());
 		}
 
-		return $result;
+		return $results;
 	}
 
 	/**
@@ -506,7 +510,7 @@ class DisplayFormResults extends DisplayForm{
 		}elseif(count($this->submissions) == 1){
 			$this->submission	= array_values($this->submissions)[0];
 		}elseif(!empty($submissionId)){
-			$this->submission	= $this->submissions;
+			$this->submission	= $this->submissions[0];
 		}
 	}
 
@@ -591,8 +595,16 @@ class DisplayFormResults extends DisplayForm{
 			$splitNames[] = str_replace('[]', '', $this->getElementById($id, 'name'));
 		}
 
+		if(empty($this->submissions)){
+			$this->submissions	= [$this->submission];
+		}
+
 		//loop over all submissions
 		foreach($this->submissions as $this->submission){
+			if(empty($this->submission)){
+				continue;
+			}
+
 			// check how many entries we should make
 			$count	= 1;
 			foreach($splitNames as $splitName){
@@ -632,7 +644,7 @@ class DisplayFormResults extends DisplayForm{
 	/**
 	 * This function creates seperated entries from entries with an splitted value
 	 */
-	protected function processSplittedData(){
+	public function processSplittedData(){
 		if(empty($this->formData->split)){
 			return;
 		}

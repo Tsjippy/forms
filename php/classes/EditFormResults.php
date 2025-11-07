@@ -29,6 +29,19 @@ class EditFormResults extends DisplayFormResults{
 
 		$this->submission->formresults['edittime']	= date("Y-m-d H:i:s");
 
+		/**
+		 * Filters the form results
+		 * 
+		 * @param array		$formResults	The form results
+		 * @param object	$object			The EditFormResults Instance
+		 * @param bool		$update			Whether this is an update or an new submission
+		 */
+		$this->submission->formresults 				= apply_filters('sim_before_saving_formdata', $this->submission->formresults, $this, true);
+
+		if(is_wp_error($this->submission->formresults )){
+			return $this->submission->formresults;
+		}
+
 		//Update the database
 		$result = $wpdb->update(
 			$this->submissionTableName,

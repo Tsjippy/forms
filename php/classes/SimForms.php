@@ -376,13 +376,21 @@ class SimForms{
 				$this->insertForm();
 				$this->formData 	=  new \stdClass();
 			}else{
-				$this->formData 					=  (object)$result[0];
+				$this->formData 					= (object)$result[0];
 				$this->formData->actions			= maybe_unserialize($this->formData->actions);
 				$this->formData->split				= maybe_unserialize($this->formData->split);
 				$this->formData->full_right_roles	= maybe_unserialize($this->formData->full_right_roles);
 				$this->formData->submit_others_form	= maybe_unserialize($this->formData->submit_others_form);				
 				
 				$formId								= $this->formData->id;
+
+				/**
+				 * Filters the elements the submission data should be splitted on
+				 * 
+				 * @param	array	$splitElements	The current element id's
+				 * @param	object	$object			Form instance
+				 */
+				$this->formData->split				= apply_filters('sim-forms-split-elements', $this->formData->split, $this);
 			}
 		}
 
@@ -613,7 +621,7 @@ class SimForms{
 				// add []
 				$name	.= '[]';
 			}elseif(!empty($this->formData->split)){
-				// only the last part of a splitted name is give
+				// only the last part of a splitted name is given
 				$mainName	= explode('[', $this->getElementById($this->formData->split[0], 'name'))[0];
 
 				// we already tried adding splits, did not work
@@ -951,7 +959,7 @@ class SimForms{
 	}
 
 	/**
-	 * Get a singleform submission
+	 * Get a single form submission
 	 *
 	 * @param	int		$submissionId	The id of a submission
 	 *
@@ -960,15 +968,19 @@ class SimForms{
 	public function getSubmission($submissionId){
 		global $wpdb;
 
-		$query	= "SELECT * FROM $this->submissionTableName WHERE id = $submissionId";
+		$results	= $wpdb->get_results(
+			$wpdb->prepare("SELECT * FROM %i WHERE id = %d", $this->submissionTableName, $submissionId)
+		);
 
-		$result	= $wpdb->get_results($query);
+		foreach($results as &$result){
+			$result->formresults	= maybe_unserialize($result->formresults);
+		}
 
-		if(isset($result[0])){
+		$results	= apply_filters('sim_retrieved_formdata', $results, '', $this);
 
-			$this->submission	= $result[0];
+		if(isset($results[0])){
 
-			$this->submission->formresults	= maybe_unserialize($this->submission->formresults);
+			$this->submission	= $results[0];
 
 			return $this->submission;
 		}

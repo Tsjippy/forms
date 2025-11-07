@@ -364,7 +364,7 @@ class SubmitForm extends SimForms{
 
 		// remove empty splitted entries
 		if(isset($this->formData->split)){
-			foreach($this->formData->split as $index=>$id){
+			foreach($this->formData->split as $index => $id){
 				$name	= $this->getElementById($id, 'name');
 
 				// Check if we are dealing with an split element with form name[X]name
@@ -404,7 +404,14 @@ class SubmitForm extends SimForms{
 		// Add a security has for submissions from outside
 		$this->submission->formresults['viewhash']		= wp_hash($this->submission->id);
 		
-		$this->submission->formresults 					= apply_filters('sim_before_saving_formdata', $this->submission->formresults, $this);
+		/**
+		 * Filters the form results
+		 * 
+		 * @param array		$formResults	The form results
+		 * @param object	$object			The SubmitForm Instance
+		 * @param bool		$update			Whether this is an update or an new submission
+		 */
+		$this->submission->formresults 					= apply_filters('sim_before_saving_formdata', $this->submission->formresults, $this, false);
 
 		if(is_wp_error($this->submission->formresults)){
 			return $this->submission->formresults;
@@ -521,4 +528,27 @@ class SubmitForm extends SimForms{
 
 		return $message;
 	}
+
+	/**
+     * Updates the current submisison in the db
+     */
+    public function updateSubmissionData(){
+        global $wpdb;
+
+        $wpdb->update(
+            $this->submissionTableName,
+            [
+                'formresults'   => serialize($this->submission->formresults)
+            ],
+            array(
+                'id'		    => $this->submission->id
+            ),
+        );
+
+        if(empty($wpdb->last_error)){
+            return true;
+        }else{
+            return $wpdb->last_error;
+        }
+    }
 }

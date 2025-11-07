@@ -568,7 +568,10 @@ function editValue(){
 		return new WP_Error('submission-update', 'Could not update the value');
 	}
 
-	$formTable->updateSubmission();
+	$result		= $formTable->updateSubmission();
+	if(is_wp_error($result)){
+		return $result;
+	}
 
 	$message	= apply_filters('sim-forms-submission-updated', $message, $formTable, $elementName, $oldValue, $newValue);
 

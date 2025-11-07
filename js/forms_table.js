@@ -475,7 +475,7 @@ async function processFormsTableInput(target){
 	
 			//Update all occurences of this field
 			if(data['subid'] != undefined){
-				let targets	= table.querySelectorAll(`tr[data-submission-id="${submissionId}"] td[data-element-id="${data['id']}"]`);
+				let targets	= table.querySelectorAll(`tr[data-submission-id="${submissionId}"] td[data-element-id="${data.elementId}"]`);
 				targets.forEach(td=>{td.innerHTML = newValue;});
 			}else{
 				cell.innerHTML = newValue;
@@ -646,8 +646,6 @@ document.addEventListener("table-content-update-inputs-loaded", async event => {
 		event.preventDefault();
 
 		await getInputHtml(target);
-
-		button.classList.remove('hidden');
 
 		prepareInputs(target);
 	}

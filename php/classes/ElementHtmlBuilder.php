@@ -732,7 +732,7 @@ class ElementHtmlBuilder extends SimForms{
 	 *
 	 */
 	public function checkboxesHtml(){
-		// get all the default options and make them lowercase
+		// Get all the checked options and make them lowercase
 		$lowValues	= [];
 		
 		$defaultKey				= $this->element->default_value;
@@ -740,8 +740,8 @@ class ElementHtmlBuilder extends SimForms{
 			$lowValues[]		= strtolower($this->elementValues['defaults'][$defaultKey]);
 		}
 
-		if(isset($this->elementValues['metavalue'] )){
-			foreach($this->elementValues['metavalue'] as $key=>$val){
+		if(!empty($this->elementValues['metavalue'] )){
+			foreach($this->elementValues['metavalue'] as $key => $val){
 				if(is_array($val)){
 					foreach($val as $v){
 						if(is_array($v)){
@@ -780,17 +780,26 @@ class ElementHtmlBuilder extends SimForms{
 			}
 		}
 
+		/**
+		 * Filters the options to build to show a checkbox or radio for
+		 * 
+		 * @param 	array	$options	the options in array where the key is the value of the element and the value is the text to be displayed
+		 * @param	object	$object		this instance
+		 */
+		$options		= apply_filters('sim-forms-checkbox-options', $this->elementValues['defaults'], $this);
+
 		// check the length of each option
 		$maxLength		= 0;
 		$totalLength	= 0;
-		foreach($this->elementValues['defaults'] as $option){
+		// Check how much space wee need
+		foreach($options as $option){
 			$maxLength		 = max($maxLength, strlen($option));
 			$totalLength	+= strlen($option);
 		}
 
 		$html		= "<div class='checkbox-options-group formfield'>";
 			// build the options
-			foreach($this->elementValues['defaults'] as $key => $option){
+			foreach($options as $key => $option){
 				if($this->multiwrap){
 					$checked	= '%checked%';
 				}elseif(
