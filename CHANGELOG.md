@@ -8,6 +8,7 @@
 - bug fixes
 
 ### Fixed
+- allow multiple selections when editing sub entry
 
 ### Updated
 
