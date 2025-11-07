@@ -387,7 +387,7 @@ function archiveSubmission(){
 function getInputHtml(){
 	$formTable		= new DisplayFormResults($_POST);
 
-	$formTable->getSubmission($_POST['submission-id']);
+	$formTable->parseSubmissions('', $_POST['submission-id']);
 
 	// Get the form id from the submission and load the form
 	$formTable->getForm($formTable->submission->form_id);
@@ -421,7 +421,6 @@ function getInputHtml(){
 	/**
 	 * Check if this element needs a datalist
 	 */
-
 	// Get all options
 	$options	= explode("\n", trim($element->options));
 		

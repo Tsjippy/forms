@@ -29,6 +29,7 @@ class ElementHtmlBuilder extends SimForms{
 	public $formData;
 	public $formElements;
 	public $usermeta;
+	public $submissions;
 
     public function __construct($parentInstance){
 		//parent::__construct();
@@ -281,8 +282,8 @@ class ElementHtmlBuilder extends SimForms{
 	 * Get the previous values of a element
 	 */
 	function getPrevValues($returnArray=false){
-		if(empty($this->submission)){
-			$this->submission	= $this->parentInstance->submission;
+		if(empty($this->submissions)){
+			$this->submissions	= $this->parentInstance->submissions;
 		}
 
 		// Check if we should inlcude previous submitted values
@@ -297,22 +298,31 @@ class ElementHtmlBuilder extends SimForms{
 			return $prevValues;
 		}
 
-		$valueIndexes	= explode('[', $this->element->name);
+		$valueIndexes	= explode('[', str_replace('[]', '', $this->element->name));
 
 		foreach($valueIndexes as $i => $index){
 			// just one possible value found
 			if($i == 0){
 				// there is no value in the form results
-				if(empty($this->submission->formresults[$index])){
+				if(empty($this->submissions[0]->formresults[$index])){
 
 					// check the submission meta data
-					if(empty($this->submission->$index)){
+					if(empty($this->submissions[0]->$index)){
 						break;
 					}
 
-					$prevValues	= $this->submission->$index;
+					$prevValues	= $this->submissions[0]->$index;
+				}
+				
+				// This is a splitted value, select all values
+				elseif(count($this->submissions) > 1 && !empty($_POST['subid'])){
+					$prevValues	= [];
+
+					foreach($this->submissions as $submission){
+						$prevValues[]	= $submission->formresults[$index];
+					}
 				}else{
-					$prevValues	= $this->submission->formresults[$index];
+					$prevValues	= $this->submissions[0]->formresults[$index];
 				}
 			}
 			
@@ -607,10 +617,10 @@ class ElementHtmlBuilder extends SimForms{
 			$html	.= "<ul class='list-selection-list'>";
 				foreach($this->requestedValue as $v){
 					if(method_exists($this, 'transformInputData')){
-						if(empty($this->submission)){
-							$this->submission	= $this->parentInstance->submission;
+						if(empty($this->submissions)){
+							$this->submissions	= $this->parentInstance->submissions;
 						}
-						$transValue		= $this->transformInputData($v, $this->element->name, $this->submission->formresults);
+						$transValue		= $this->transformInputData($v, $this->element->name, $this->submissions[0]->formresults);
 					}else{
 						$transValue		= $v;
 					}
@@ -733,11 +743,11 @@ class ElementHtmlBuilder extends SimForms{
 	 */
 	public function checkboxesHtml(){
 		// Get all the checked options and make them lowercase
-		$lowValues	= [];
+		$selected	= [];
 		
 		$defaultKey				= $this->element->default_value;
 		if(!empty($defaultKey) && !empty($this->elementValues['defaults'][$defaultKey])){
-			$lowValues[]		= strtolower($this->elementValues['defaults'][$defaultKey]);
+			$selected[]		= strtolower($this->elementValues['defaults'][$defaultKey]);
 		}
 
 		if(!empty($this->elementValues['metavalue'] )){
@@ -746,14 +756,14 @@ class ElementHtmlBuilder extends SimForms{
 					foreach($val as $v){
 						if(is_array($v)){
 							foreach($v as $v2){
-								$lowValues[] = strtolower($v2);
+								$selected[] = strtolower($v2);
 							}
 						}else{
-							$lowValues[] = strtolower($v);
+							$selected[] = strtolower($v);
 						}
 					}
 				}else{
-					$lowValues[] = strtolower($val);
+					$selected[] = strtolower($val);
 				}
 			}
 		}
@@ -765,18 +775,18 @@ class ElementHtmlBuilder extends SimForms{
 						foreach($v as $av){
 							if(is_array($av)){
 								foreach($av as $aav){
-									$lowValues[] = strtolower($aav);
+									$selected[] = strtolower($aav);
 								}
 							}else{
-								$lowValues[] = strtolower($av);
+								$selected[] = strtolower($av);
 							}
 						}
 					}else{
-						$lowValues[] = strtolower($v);
+						$selected[] = strtolower($v);
 					}
 				}
 			}else{
-				$lowValues[] = strtolower($this->requestedValue);
+				$selected[] = strtolower($this->requestedValue);
 			}
 		}
 
@@ -803,8 +813,8 @@ class ElementHtmlBuilder extends SimForms{
 				if($this->multiwrap){
 					$checked	= '%checked%';
 				}elseif(
-					in_array(strtolower($option), $lowValues) || 
-					in_array(strtolower($key), $lowValues) || 
+					in_array(strtolower($option), $selected) || 
+					in_array(strtolower($key), $selected) || 
 					in_array($this->element->default_value, [$key, $option])
 				){
 					$checked	= 'checked';
