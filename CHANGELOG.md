@@ -4,13 +4,20 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [8.9.6] - 2025-11-07
+
+
+### Changed
 - use wpdb->prepare
 - bug fixes
 
 ### Fixed
 - allow multiple selections when editing sub entry
-
-### Updated
 
 ## [8.9.5] - 2025-11-06
 
