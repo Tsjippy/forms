@@ -4,7 +4,7 @@ use SIM;
 use WP_Embed;
 use WP_Error;
 
-class SubmitForm extends SimForms{
+class SubmitForm extends SaveFormSettings{
 	public $submission;
 
 	public function __construct($formData=''){
@@ -145,7 +145,7 @@ class SubmitForm extends SimForms{
 	 *
 	 * @param	string	$trigger	One of 'submitted' or 'fieldchanged'. Default submitted
 	 */
-	public function sendEmail($trigger='submitted'){
+	public function sendEmail($trigger='submitted', $replaceValues=[]){
 		$this->getEmailSettings();
 		
 		foreach($this->emailSettings as $key => $email){
@@ -164,7 +164,7 @@ class SubmitForm extends SimForms{
 					$from	= $email->else_from;
 				}
 			}elseif($email->from_email == 'fixed'){
-				$from	= $this->processPlaceholders($email->from);
+				$from	= $this->processPlaceholders($email->from, $replaceValues);
 			}
 
 			if(empty($from)){
@@ -332,12 +332,12 @@ class SubmitForm extends SimForms{
 		
 		$this->submission->userid			= $this->userId;
 
-		$this->submission->formresults 		= $_POST;
+		$formresults 		= $_POST;
 
 		// check for required empty elements
 		foreach($this->formElements as $element){
 			// element is required but has no value
-			if($element->required && $this->submission->formresults[$element->name] === '' ){
+			if($element->required && $formresults[$element->name] === '' ){
 				return new \WP_Error('Error', "$element->nicename is required!");
 			}
 		}
@@ -345,18 +345,18 @@ class SubmitForm extends SimForms{
 		$this->submission->archived 		= false;
 			
 		//remove the action and the formname
-		unset($this->submission->formresults['formname']);
-		unset($this->submission->formresults['fileupload']);
-		unset($this->submission->formresults['userid']);
-			
-		$this->submission->formresults['formurl']	= $_POST['formurl'];
+		unset($formresults['formname']);
+		unset($formresults['fileupload']);
+		unset($formresults['userid']);		
+		unset($formresults['form-id']);
+		unset($formresults['_wpnonce']);
 
 		// add the submission id to the form results
-		if(empty($this->formData->save_in_meta)){
+		/* if(empty($this->formData->save_in_meta)){
 			//Get the id from db before insert so we can use it in emails and file uploads
-			$this->submission->formresults['id']	= $wpdb->get_var( "SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE (TABLE_NAME = '{$this->submissionTableName}') AND table_schema='$wpdb->dbname'");
-			$this->submission->id					= $this->submission->formresults['id'];
-		}
+			$submissionId	= $wpdb->get_var( "SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE (TABLE_NAME = '{$this->submissionTableName}') AND table_schema='$wpdb->dbname'");
+			$this->submission->id					= $submissionId;
+		} */
 
 		// remove empty splitted entries
 		if(isset($this->formData->split)){
@@ -369,10 +369,10 @@ class SubmitForm extends SimForms{
 				if(
 					$matches && 
 					isset($matches[1]) && 
-					is_array($this->submission->formresults[$matches[1]])
+					is_array($formresults[$matches[1]])
 				){
 					// loop over all the sub entries of the split field to see if they are empty
-					foreach($this->submission->formresults[$matches[1]] as $index=>&$sub){
+					foreach($formresults[$matches[1]] as $index=>&$sub){
 						$empty	= true;
 						if(is_array($sub)){
 							foreach($sub as $s){
@@ -385,32 +385,32 @@ class SubmitForm extends SimForms{
 
 						if($empty){
 							// remove from results
-							unset($this->submission->formresults[$matches[1]][$index]);
+							unset($formresults[$matches[1]][$index]);
 						}
 
 						$sub['elementindex']	= $index; // store the elementname so we can get the original element for editing
 					}
 
 					// reindex
-					$this->submission->formresults[$matches[1]] = array_values(	$this->submission->formresults[$matches[1]]);
+					$formresults[$matches[1]] = array_values(	$formresults[$matches[1]]);
 				}
 			}
 		}
 
-		// Add a security has for submissions from outside
-		$this->submission->formresults['viewhash']		= wp_hash($this->submission->id);
+		// Add a security hash for submissions from outside
+		$formresults['viewhash']		= wp_hash($this->submission->id);
 		
 		/**
 		 * Filters the form results
 		 * 
-		 * @param array		$formResults	The form results
+		 * @param array		$formresults	The form results
 		 * @param object	$object			The SubmitForm Instance
 		 * @param bool		$update			Whether this is an update or an new submission
 		 */
-		$this->submission->formresults 					= apply_filters('sim_before_saving_formdata', $this->submission->formresults, $this, false);
+		$formresults 					= apply_filters('sim_before_saving_formdata', $formresults, $this, false);
 
-		if(is_wp_error($this->submission->formresults)){
-			return $this->submission->formresults;
+		if(is_wp_error($formresults)){
+			return $formresults;
 		}
 
 		$message = $this->formData->succes_message;
@@ -419,12 +419,9 @@ class SubmitForm extends SimForms{
 		}
 		
 		//save to submission table
-		if(empty($this->formData->save_in_meta)){
-			$this->submission->formresults['submissiontime']	= $this->submission->timecreated;
-			$this->submission->formresults['edittime']			= $this->submission->timelastedited;
-			
+		if(empty($this->formData->save_in_meta)){			
 			//sort arrays
-			foreach($this->submission->formresults as $key=>&$result){
+			foreach($formresults as $key => &$result){
 				if(is_array($result)){
 					//check if this a aray of uploaded files
 					if(!is_array(array_values($result)[0]) && str_contains(array_values($result)[0],'wp-content/uploads/')){
@@ -437,30 +434,30 @@ class SubmitForm extends SimForms{
 				}
 			}
 
-			$submission 				= (array) $this->submission;
-			$submission['formresults']	= serialize($this->submission->formresults);
+			// Insert Submission
+			$submissionId	= $this->insertOrUpdateData($this->submissionTableName, $this->submission);
 
-			$wpdb->insert(
-				$this->submissionTableName,
-				$submission
-			);
+			// Insert Submission Data
+			$this->insertOrUpdateData($this->submissionValuesTableName, $formresults);
+
+			$placeholders				= $formresults;
+
+			$placeholders['id']			= $submissionId;
+
+			$placeholders['formurl']	= $submissionId;
 			
-			$this->sendEmail();
+			$this->sendEmail('submitted', $placeholders);
 				
 			if($wpdb->last_error !== ''){
 				$message	=  new \WP_Error('error', $wpdb->last_error);
 			}elseif(empty($this->formData->include_id) || $this->formData->include_id){
-				$message	.= "\nYour id is {$this->submission->formresults['id']}";
+				$message	.= "\nYour id is {$formresults['id']}";
 			}
 		//save to user meta
-		}else{
-			unset($this->submission->formresults['formurl']);
-			unset($this->submission->formresults['form-id']);
-			unset($this->submission->formresults['_wpnonce']);
-			
+		}else{			
 			//get user data as array
 			$userData		= (array)get_userdata($this->userId)->data;
-			foreach($this->submission->formresults as $key => &$result){
+			foreach($formresults as $key => &$result){
 				$subKey	= false;
 
 				//remove empty elements from the array

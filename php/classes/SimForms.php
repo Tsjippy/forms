@@ -31,10 +31,12 @@ class SimForms{
 	public $onlyOwn;
 	public $all;
 	public $submission;
+	public $submissions;
 	public $tableName;
 	public $formReminderTable;
 	public $elTableName;
 	public $submissionTableName;
+	public $submissionValuesTableName;
 	public $formEmailTable;
 	public $shortcodeTable;
 	public $shortcodeColumnSettingsTable;
@@ -49,6 +51,7 @@ class SimForms{
 		$this->isMultiStepForm				= '';
 		$this->formStepCounter				= 0;
 		$this->submissionTableName			= $wpdb->prefix . 'sim_form_submissions';
+		$this->submissionValuesTableName	= $wpdb->prefix . 'sim_form_submission_values';
 		$this->tableName					= $wpdb->prefix . 'sim_forms';
 		$this->formReminderTable			= $wpdb->prefix . 'sim_form_reminders';
 		$this->elTableName					= $wpdb->prefix . 'sim_form_elements';
@@ -254,7 +257,7 @@ class SimForms{
 
 		maybe_create_table($this->shortcodeColumnSettingsTable, $sql );
 
-		//submission table
+		// submission table
 		$sql = "CREATE TABLE {$this->submissionTableName} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			form_id	int NOT NULL,
@@ -262,13 +265,23 @@ class SimForms{
 			timelastedited datetime DEFAULT NULL,
 			userid mediumint(9) NOT NULL,
 			submitter_id mediumint(9) NOT NULL,
-			formresults longtext NOT NULL,
 			archived BOOLEAN,
 			archivedsubs tinytext,
 			PRIMARY KEY  (id)
 		) $charsetCollate;";
 
 		maybe_create_table($this->submissionTableName, $sql );
+
+		// Submission values table
+		$sql = "CREATE TABLE {$this->submissionValuesTableName} (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			submission_id	int NOT NULL,
+			`key` text NOT NULL,
+			`value` longtext NOT NULL,
+			PRIMARY KEY  (id)
+		) $charsetCollate;";
+
+		maybe_create_table($this->submissionValuesTableName, $sql );
 	}
 
 	/**
@@ -321,36 +334,37 @@ class SimForms{
 		// insert default elements
 		$elements = [
 			array(
-				'type' => 'hidden',
-				'name'			=> 'userid',
-			 'default_value' => 'userid'
+				'type' 					=> 'hidden',
+				'name'					=> 'userid',
+			 	'default_value' 		=> 'userid'
 			),
 			array(
-				'type' => 'label',
-				'name'			=> 'name-label',
-				'text' => 'Your Name',
-				'wrap' => true
-			)
+				'type' 					=> 'label',
+				'name'					=> 'name-label',
+				'text' 					=> 'Your Name',
+				'wrap'					=> true
+			),
 			array(
-				'type' => 'text',
-				'name'			=> 'name',
-				'options' => 'list=users',
-				'default_value' => 'name'
-			)
+				'type' 					=> 'text',
+				'name'					=> 'name',
+				'options' 				=> 'list=users',
+				'default_value' 		=> 'name'
+			),
 			array(
-				'type' => 'datalist',
-				'name'			=> 'users',
-				'default_array_value' => 'users'
+				'type' 					=> 'datalist',
+				'name'					=> 'users',
+				'default_array_value' 	=> 'users'
 			)
-			];
+		];
 			
-			foreach($elements as $element){
-				$element['form_id'] = $formId;
+		foreach($elements as $element){
+			$element['form_id'] = $formId;
 				
-		$wpdb->insert(
-			$this->elementTableName,
-			$element
-		);
+			$wpdb->insert(
+				$this->elTableName,
+				$element
+			);
+		}
 	}
 	
 	/**
@@ -972,25 +986,33 @@ class SimForms{
 	public function getSubmission($submissionId){
 		global $wpdb;
 
+		// return an already loaded submission
+		if(!empty($this->submissions)){
+			foreach($this->submissions as $submission){
+				if($submission->id == $submissionId){
+					return $submission;
+				}
+			}
+		}
+
+		// Get the submission
 		$results	= $wpdb->get_results(
 			$wpdb->prepare("SELECT * FROM %i WHERE id = %d", $this->submissionTableName, $submissionId)
 		);
 
-		foreach($results as $index => &$result){
-			$result->formresults	= maybe_unserialize($result->formresults);
-
-			// something went wrong
-			if(!is_array($result->formresults)){
-				SIM\printArray("Could not unserialize results for submission $result->id");
-				unset($results[$index]);
-			}
-		}
+		// Get the submission values
+		$formresults	= $wpdb->get_results(
+			$wpdb->prepare("SELECT * FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, $submissionId),
+			ARRAY_A
+		);
 
 		$results	= apply_filters('sim_retrieved_formdata', $results, '', $this);
 
 		if(isset($results[0])){
 
 			$this->submission	= $results[0];
+
+			$this->submission->formresults	= $formresults;
 
 			return $this->submission;
 		}
@@ -1087,7 +1109,7 @@ class SimForms{
 				if($match == 'formurl'){
 					$string 		= str_replace("http://%$match%", $replaceValue, $string);
 				}
-				$string 		= str_replace("%$match%", $replaceValue, $string);
+				$string 			= str_replace("%$match%", $replaceValue, $string);
 			}
 		}
 		

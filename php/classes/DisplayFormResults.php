@@ -13,8 +13,6 @@ class DisplayFormResults extends DisplayForm{
 	public $excelContent;
 	public $currentPage;
 	public $total;
-	public $submission;
-	public $submissions;
 	public $splittedSubmissions;
 	public $pageSplittedSubmissions;
 	public $hiddenColumns;
@@ -168,8 +166,7 @@ class DisplayFormResults extends DisplayForm{
 				'query'		=> $query,
 				'values'	=> $values,
 			], 
-			$userId, 
-			$submissionId, 
+			$userId,
 			$this
 		));
 
@@ -252,25 +249,28 @@ class DisplayFormResults extends DisplayForm{
 	/**
 	 * Get formresults of the current form
 	 *
-	 * @param	int		$userId			Optional the user id to get the results of. Default null
-	 * @param	int		$submissionId	Optional a specific id. Default null
+	 * @param	int|array	$userId			Optional the user id to get the results of or an array of user ids. Default null
+	 * @param	int			$submissionId	Optional a specific id. Default null
 	 *
-	 * @return	array					array of results
+	 * @return	array						array of results
 	 */
 	public function getSubmissions($userId=null, $submissionId=null, $all=false){
 		global $wpdb;
+
+		$userId	= apply_filters('sim-forms-userids-to-retrieve', $userId, $this);
 
 		if(isset($_REQUEST['all'])){
 			$all	= true;
 		}
 
-		// return an already loaded submission
-		if(is_numeric($submissionId) && !empty($this->submissions)){
-			foreach($this->submissions as $submission){
-				if($submission->id == $submissionId){
-					return [$submission];
-				}
-			}
+		// Submission id
+		if(empty($submissionId) && !empty($_REQUEST['id'])){
+			$submissionId	= $_REQUEST['id'];
+		}
+
+		if(is_numeric($submissionId)){
+			// Return a single submission
+			return [$this->getSubmission($submissionId)];
 		}
 
 		if($this->formData->save_in_meta){
@@ -279,33 +279,46 @@ class DisplayFormResults extends DisplayForm{
 
 		$query				= "SELECT * FROM %i WHERE ";
 		$values				= [$this->submissionTableName];
-
-		// Submission id
-		if(empty($submissionId) && !empty($_REQUEST['id'])){
-			$submissionId	= $_REQUEST['id'];
-		}
+		$where				= [];
 		
-		if(is_numeric($submissionId)){
-			$query 		.= "id=%d";
-			$values[]	= $submissionId; 
-		}elseif(isset($this->formData->id)){
-			$query		.= "form_id=%d";
-			$values[]	 = $this->formData->id; 
-		}else{
-			$query	.= "1=1";
+		/**
+		 * Get the where statements
+		 */
+		// Form Id
+		if(isset($this->formData->id)){
+			$where[]	=  "form_id=%d";
+			$values[]	= $this->formData->id; 
 		}
 		
 		// Archived
 		if(!$this->showArchived && $submissionId == null){
-			$query .= " and archived=0";
+			$where[]	=  "archived=0";
 		}
 
 		// User
 		if(is_numeric($userId)){
-			$query 		.= "id=%d";
-			$values[]	= $submissionId; 
+			$where[]	= "userid=%d";
+			$values[]	= $userId; 
 		}
 
+		if(is_array($userId)){
+			$q	= [];
+			foreach($userId as $id){
+				if(is_numeric($id)){
+					$q[]		= "userid=%d";
+					$values[]	= $id;
+				}
+			}
+
+			$where[]	= '('.implode(' OR ', $q).')';
+		}
+
+		// Get the where query
+		$query	.= implode(' AND ', $where);
+
+		/**
+		 * Pagination
+		 */
 		// Limit the amount to 100
 		if(isset($_REQUEST['page-number']) && is_numeric($_REQUEST['page-number'])){
 			$this->currentPage	= $_REQUEST['page-number'];
@@ -322,7 +335,9 @@ class DisplayFormResults extends DisplayForm{
 			$this->currentPage	= 0;
 		}
 
-		// sort colomn
+		/**
+		 * sort column
+		 */ 
 		$this->sortColumnFound	= false;
 		if($this->sortColumn){
 			$colNames	= $wpdb->get_results( "DESC $this->submissionTableName" );
@@ -336,12 +351,9 @@ class DisplayFormResults extends DisplayForm{
 			}
 
 			if($this->sortColumnFound){
-				$query	.= " ORDER BY %` %s";
+				$query	.= " ORDER BY %s %s";
 				$values[]	= $this->sortColumn;
 				$values[]	= $this->sortDirection;
-			}else{
-				// have to get all results to be able to sort them later
-				$all		= true;
 			}
 		}
 
@@ -351,8 +363,7 @@ class DisplayFormResults extends DisplayForm{
 				'query'		=> $query,
 				'values'	=> $values,
 			],
-			$userId, 
-			$submissionId,
+			$userId,
 			$this
 		));
 
@@ -368,54 +379,38 @@ class DisplayFormResults extends DisplayForm{
 			$values[]	= $this->pageSize;
 		}
 
-		// Get results
+		// Get the submissions
 		$results	= $wpdb->get_results(
 			$wpdb->prepare($query, ...$values)
 		);
 
-		foreach($results as &$r){
-			$r->formresults	= unserialize($r->formresults);
-		}
-
-		$results	= apply_filters('sim_retrieved_formdata', $results, $userId, $this);
-
-		// unserialize
-		$keptCount		= 0;
-		foreach($results as $index => &$submission){
-			if(
-				is_numeric($userId)									&& 	// We only want results af a particular user
-				(
-					(
-						isset($submission->formresults[$userIdKey])		&& 	// There is an user id in the result
-						$submission->formresults[$userIdKey] != $userId		// But not the right one
-					)													||
-					(
-						!isset($submission->formresults[$userIdKey])	&& 	// There is no user id in the result
-						$submission->userid != $userId						// this user did not submit this form
-					)
-				)
-			){
-				// delete the result if we only want to keep results of a certain user and is not this user
-				$shouldRemove	= apply_filters('sim_remove_formdata', true, $userId, $submission);
-				if($shouldRemove){
-					unset($results[$index]);
-
-					$this->total--;
-				}else{
-					$keptCount++;
-
-					// check if we have enough results left
-					if($keptCount == $start + $this->pageSize){
-						$results	= array_splice($results, $keptCount);
-						break;
-					}
-				}
-			}
-		}
-
 		if($wpdb->last_error !== ''){
 			SIM\printArray($wpdb->print_error());
 		}
+
+		// Get the submission data
+		foreach($results as &$result){
+			$sort	= '';
+			$values	= [$result->id];
+
+			// Sort if not already sorted
+			if(!$this->sortColumnFound){
+				$sort 		= " ORDER BY %s %s";
+				$values[]	= $this->sortColumn;
+				$values[]	= $this->sortDirection;
+			}
+
+			$result->formresults	= $wpdb->get_results(
+				$wpdb->prepare("SELECT * FROM %i WHERE submission_id = %d $sort", $this->submissionValuesTableName, ...$values),
+				ARRAY_A
+			);
+
+			if($wpdb->last_error !== ''){
+				SIM\printArray($wpdb->print_error());
+			}
+		}
+
+		$results	= apply_filters('sim_retrieved_formdata', $results, $userId, $this);
 
 		return $results;
 	}

@@ -123,12 +123,20 @@ class SaveFormSettings extends SimForms{
 			'timecreated'			=> '%s',	
 			'timelastedited'		=> '%s',	
 			'userid'				=> '%d',
-			'formresults'			=> '%s',
 			'archived'				=> '%d',
 			'archivedsubs'			=> '%s'
 		];
 
 		$this->tableFormats[$this->submissionTableName]	= apply_filters('forms-submission-table-formats', $formats, $this);
+
+		// Form Submission Data
+		$formats	= [
+			'submission_id'			=> '%d',	
+			'key'					=> '%s',	
+			'value'					=> '%s'
+		];
+
+		$this->tableFormats[$this->submissionValuesTableName]	= apply_filters('forms-submission-values-table-formats', $formats, $this);
 
 		// Table Settings
 		$formats	= [

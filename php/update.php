@@ -353,7 +353,7 @@ function moduleUpdate($oldVersion){
 
         $results    = $wpdb->get_results("SELECT * FROM $simForms->submissionTableName");
         foreach($results as &$result){
-            $formresults    = maybe_unserialize($result->formresults);
+            $formresults    = maybe_unserialize(maybe_unserialize($result->formresults));
 
             $userId         = $result->userid;
             if(isset($formresults['userid'])){
@@ -371,23 +371,57 @@ function moduleUpdate($oldVersion){
 
             $result->userid         = $userId;
 
-            $result->formresults    = maybe_serialize($result->formresults);
-
-            //Update the database
-			$wpdb->update($simForms->submissionTableName,
+            //Update the submission
+			$wpdb->update(
+                $simForms->submissionTableName,
 				[
                     'submitter_id'  => $result->userid,
-                    'userid'        => $userId,
-                    'formresults'   => maybe_serialize($result->formresults)
+                    'userid'        => $userId
                 ],
 				array(
 					'id'		=> $result->id
 				),
+                [
+                    '%d',
+                    '%d'
+                ]
 			);
+
+            /**
+             * Insert all into the new submission values table
+             */
+            unset($formresults['submissiontime']);
+            unset($formresults['edittime']);
+            unset($formresults['formurl']);
+            unset($formresults['id']);
+            unset($formresults['_wpnonce']);
+            unset($formresults['booking-startdate']);
+            unset($formresults['booking-enddate']);
+            unset($formresults['user-id']);
+
+            foreach($formresults as $key => $value){
+                if(empty($value)){
+                    continue;
+                }
+
+                $wpdb->insert(
+                    $simForms->submissionValuesTableName,
+                    [
+                        'submission_id' => $result->id,
+                        'key'           => $key,
+                        'value'         => $value
+                    ],
+                    [
+                        '%d',
+                        '%s',
+                        '%s'
+                    ]
+                );
+            }
         }
     }
 }
 
 add_action('init', function(){
-    //moduleUpdate('8.9.6');
+    moduleUpdate('8.9.6');
 });
