@@ -316,7 +316,41 @@ class SimForms{
 			return new \WP_Error('error', $wpdb->print_error());
 		}
 
-		return $wpdb->insert_id;
+		$formId = $wpdb->insert_id;
+		
+		// insert default elements
+		$elements = [
+			array(
+				'type' => 'hidden',
+				'name'			=> 'userid',
+			 'default_value' => 'userid'
+			),
+			array(
+				'type' => 'label',
+				'name'			=> 'name-label',
+				'text' => 'Your Name',
+				'wrap' => true
+			)
+			array(
+				'type' => 'text',
+				'name'			=> 'name',
+				'options' => 'list=users',
+				'default_value' => 'name'
+			)
+			array(
+				'type' => 'datalist',
+				'name'			=> 'users',
+				'default_array_value' => 'users'
+			)
+			];
+			
+			foreach($elements as $element){
+				$element['form_id'] = $formId;
+				
+		$wpdb->insert(
+			$this->elementTableName,
+			$element
+		);
 	}
 	
 	/**
