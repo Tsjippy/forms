@@ -162,7 +162,16 @@ class DisplayFormResults extends DisplayForm{
 			}
 		}
 
-		extract(apply_filters('sim_formdata_retrieval_query', $params, $userId, $submissionId, $this));
+		extract(apply_filters(
+			'sim_formdata_retrieval_query', 
+			[
+				'query'		=> $query,
+				'values'	=> $values,
+			], 
+			$userId, 
+			$submissionId, 
+			$this
+		));
 
 		// Get results
 		$result		= $wpdb->get_results(
@@ -1092,6 +1101,9 @@ class DisplayFormResults extends DisplayForm{
 			$buttonsHtml	= [];
 			$buttons		= '';
 			foreach($this->formData->actions as $action){
+				/**
+				 * check if this submission is already archived, in that case make it an unarchive button
+				 */ 
 				if(
 					$action == 'archive' && 
 					(
@@ -1100,7 +1112,7 @@ class DisplayFormResults extends DisplayForm{
 					) && 
 					(
 						$this->submission->archived ||
-						$this->submission->formresults['archived']
+						!empty($this->submission->formresults['archived'])
 					)
 				){
 					$action = 'unarchive';
@@ -1109,12 +1121,17 @@ class DisplayFormResults extends DisplayForm{
 			}
 			$buttonsHtml = apply_filters('sim_form_actions_html', $buttonsHtml, $values, $subId, $this);
 			
+			$userIdKey	= $this->findUserIdElementName();
+
 			//we have te html now, check for which one we have permission
-			foreach($buttonsHtml as $action=>$button){
+			foreach($buttonsHtml as $action => $button){
 				if(
-					$this->tableEditPermissions || 																		//if we are allowed to do all actions
-					$values['userid'] == $this->user->ID || 															//or this is our own entry
-					(isset($this->columnSettings[$action]['edit_right_roles']) && array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles']))		//or we have permission for this specific button
+					$this->tableEditPermissions || 			// if we are allowed to do all actions
+					$values[$userIdKey] == $this->user->ID || // or this is our own entry
+					(
+						isset($this->columnSettings[$action]['edit_right_roles']) && 
+						array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])
+					)		//or we have permission for this specific button
 				){
 					$buttons .= $button;
 				}

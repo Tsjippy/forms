@@ -150,7 +150,7 @@ class SaveFormSettings extends SimForms{
 		// Column Settings
 		$formats	= [
 			'shortcode_id'			=> '%d',
-			'element_id'			=> '%d',
+			'element_id'			=> '%s',
 			'width'					=> '%d',
 			'show'					=> '%d',	
 			'name'					=> '%s',	
@@ -290,7 +290,7 @@ class SaveFormSettings extends SimForms{
 		}
 
 		// fix possible where indexes
-		foreach($where as &$val){
+		foreach($where as $index => &$val){
 			if(!is_string($val) ){
 				continue;
 			}
@@ -303,6 +303,10 @@ class SaveFormSettings extends SimForms{
 			$newVal	= str_replace('_', '-', $val);
 			if(!is_numeric($val) && !empty($data[$newVal])){
 				$val	= $data[$newVal];
+			}
+
+			if(empty($val)){
+				unset($where[$index]);
 			}
 		}
 		unset($val);
@@ -646,17 +650,17 @@ class SaveFormSettings extends SimForms{
 			$column['shortcode_id']	= $shortcodeId;
 			
 			//if there are edit rights defined
-			if(!empty($column['edit_right_roles'])){
+			if(!empty($column['edit-right-roles'])){
 				//create view array if it does not exist
-				if(!is_array($column['view_right_roles'])){
-					$column['view_right_roles'] = [];
+				if(empty($column['view-right-roles']) || !is_array($column['view-right-roles'])){
+					$column['view-right-roles'] = [];
 				}
 				
 				//merge and save
-				$column['view_right_roles'] = array_merge($column['view_right_roles'], $column['edit_right_roles']);
+				$column['view-right-roles'] = array_merge($column['view-right-roles'], $column['edit-right-roles']);
 			}
 
-			$result	= $this->insertOrUpdateData($this->shortcodeColumnSettingsTable, $column, ['id' => 'column_id']);
+			$result	= $this->insertOrUpdateData($this->shortcodeColumnSettingsTable, $column, ['column-id' => $column['column-id']]);
 
 			if(is_wp_error($result)){
 				return $result;
