@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- store-non-numeric element id
 
 ### Updated
 
