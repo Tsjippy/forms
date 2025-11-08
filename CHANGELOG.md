@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- store form submission values in seperate table
 
 ### Fixed
 - store-non-numeric element id
