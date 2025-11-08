@@ -438,7 +438,9 @@ class SubmitForm extends SaveFormSettings{
 			$submissionId	= $this->insertOrUpdateData($this->submissionTableName, $this->submission);
 
 			// Insert Submission Data
-			$this->insertOrUpdateData($this->submissionValuesTableName, $formresults);
+			foreach($formresults as $formresult){
+				$this->insertOrUpdateData($this->submissionValuesTableName, $formresult);
+			}
 
 			$placeholders				= $formresults;
 
