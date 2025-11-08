@@ -243,22 +243,10 @@ class FormReminders extends SimForms{
 
         $submissions	= $wpdb->get_results($query);
 
-        // Determine which element holds the user id
-        $userIdElementName		= $this->findUserIdElementName();
-        if(is_wp_error($userIdElementName)){
-            return $userIdElementName;
-        }
-
         // get all the users who have submitted the form after the currentIntervalStart date
         $usersWithSubmission	= [];
         foreach($submissions as $submission){
-            $results	= maybe_unserialize($submission->formresults);
-
-            if(!empty($results[$userIdElementName])){
-                $usersWithSubmission[]	= $results[$userIdElementName];
-            }else{
-                $usersWithSubmission[]	= $submission->userid;
-            }
+            $usersWithSubmission[]	= $submission->userid;
         }
 
         $usersWithoutSubmission	= array_diff($this->userIds, $usersWithSubmission);		

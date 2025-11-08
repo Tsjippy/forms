@@ -392,12 +392,7 @@ function getInputHtml(){
 	// Get the form id from the submission and load the form
 	$formTable->getForm($formTable->submission->form_id);
 
-	$userIdElement	= $formTable->findUserIdElementName();
-
-	$userId			= $formTable->submission->formresults[$userIdElement];
-	if(empty($userId)){
-		$userId			= $formTable->submission->userid;
-	}
+	$userId			= $formTable->submission->userid;
 
 	$formTable->userId								= $userId;
 	$formTable->elementHtmlBuilder->userId			= $userId;
@@ -548,8 +543,8 @@ function editValue(){
 	
 	// update the submitter user id
 	elseif($elementName == 'submitteruserid'){
-		$formTable->submission->userid	= $newValue;
-		$updated						= true;
+		$formTable->submission->submitter_id	= $newValue;
+		$updated								= true;
 	}
 
 	else{
@@ -559,6 +554,11 @@ function editValue(){
 			$formTable->submission->formresults[$elementName]	= $newValue;
 			$updated											= true;
 		}
+	}
+
+	if($elementName == 'userid'){
+		$formTable->submission->userid			= $newValue;
+		$updated								= true;
 	}
 
 	if($updated){

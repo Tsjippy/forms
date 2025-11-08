@@ -242,7 +242,7 @@ class SimForms{
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			shortcode_id int NOT NULL,
 			width int,
-			element_id int,
+			element_id tinytext,
 			`show` boolean,
 			name tinytext,
 			nice_name tinytext,
@@ -261,6 +261,7 @@ class SimForms{
 			timecreated datetime DEFAULT NULL,
 			timelastedited datetime DEFAULT NULL,
 			userid mediumint(9) NOT NULL,
+			submitter_id mediumint(9) NOT NULL,
 			formresults longtext NOT NULL,
 			archived BOOLEAN,
 			archivedsubs tinytext,
@@ -704,37 +705,6 @@ class SimForms{
 	}
 
 	/**
-	 * Finds the user id element in a form
-	 *
-	 * @return	string|false|WP_error	the element name, a wp error object or false if no user id element is found
-	 */
-	public function findUserIdElementName(){
-		if(!empty($this->userIdElementName)){
-			return $this->userIdElementName;
-		}
-		// find the user id element
-		$userIdKey	= 'submitteruserid'; // the name of the meta 
-
-		$result		= $this->getElementByName('user_id');
-
-		if(is_wp_error($result)){
-			return $result;
-		}
-
-		if($result){
-			$userIdKey	= 'user_id';
-		}elseif($this->getElementByName('userid')){
-			$userIdKey	= 'userid';
-		}elseif($this->getElementByName('user-id')){
-			$userIdKey	= 'user-id';
-		}
-
-		$this->userIdElementName	= $userIdKey;
-
-		return $userIdKey;
-	}
-
-	/**
 	 * Finds the user name element in a form
 	 *
 	 * @return	string	the element name or false if no name element is found
@@ -972,8 +942,14 @@ class SimForms{
 			$wpdb->prepare("SELECT * FROM %i WHERE id = %d", $this->submissionTableName, $submissionId)
 		);
 
-		foreach($results as &$result){
+		foreach($results as $index => &$result){
 			$result->formresults	= maybe_unserialize($result->formresults);
+
+			// something went wrong
+			if(!is_array($result->formresults)){
+				SIM\printArray("Could not unserialize results for submission $result->id");
+				unset($results[$index]);
+			}
 		}
 
 		$results	= apply_filters('sim_retrieved_formdata', $results, '', $this);

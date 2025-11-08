@@ -347,4 +347,47 @@ function moduleUpdate($oldVersion){
     if($oldVersion < '8.9.3'){
         maybe_add_column("{$wpdb->prefix}sim_form_shortcode_column_settings", 'copy', "ALTER TABLE {$wpdb->prefix}sim_form_shortcode_column_settings ADD COLUMN `copy` bool");
     }
+
+    if($oldVersion < '8.9.7'){
+        maybe_add_column($simForms->submissionTableName, 'submitter_id', "ALTER TABLE {$simForms->submissionTableName} ADD COLUMN `submitter_id` int");
+
+        $results    = $wpdb->get_results("SELECT * FROM $simForms->submissionTableName");
+        foreach($results as &$result){
+            $formresults    = maybe_unserialize($result->formresults);
+
+            $userId         = $result->userid;
+            if(isset($formresults['userid'])){
+                $userId = $formresults['userid'];
+                unset($formresults['userid']);
+            }elseif(isset($formresults['user-id'])){
+                $userId = $formresults['user-id'];
+                unset($formresults['user-id']);
+            }elseif(isset($formresults['user_id'])){
+                $userId = $formresults['user_id'];
+                unset($formresults['user_id']);
+            }
+
+            $result->submitter_id   = $result->userid;
+
+            $result->userid         = $userId;
+
+            $result->formresults    = maybe_serialize($result->formresults);
+
+            //Update the database
+			$wpdb->update($simForms->submissionTableName,
+				[
+                    'submitter_id'  => $result->userid,
+                    'userid'        => $userId,
+                    'formresults'   => maybe_serialize($result->formresults)
+                ],
+				array(
+					'id'		=> $result->id
+				),
+			);
+        }
+    }
 }
+
+add_action('init', function(){
+    //moduleUpdate('8.9.6');
+});

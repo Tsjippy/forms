@@ -280,6 +280,7 @@ class DisplayFormResults extends DisplayForm{
 		$query				= "SELECT * FROM %i WHERE ";
 		$values				= [$this->submissionTableName];
 
+		// Submission id
 		if(empty($submissionId) && !empty($_REQUEST['id'])){
 			$submissionId	= $_REQUEST['id'];
 		}
@@ -294,8 +295,15 @@ class DisplayFormResults extends DisplayForm{
 			$query	.= "1=1";
 		}
 		
+		// Archived
 		if(!$this->showArchived && $submissionId == null){
 			$query .= " and archived=0";
+		}
+
+		// User
+		if(is_numeric($userId)){
+			$query 		.= "id=%d";
+			$values[]	= $submissionId; 
 		}
 
 		// Limit the amount to 100
@@ -367,33 +375,6 @@ class DisplayFormResults extends DisplayForm{
 
 		foreach($results as &$r){
 			$r->formresults	= unserialize($r->formresults);
-		}
-
-		if(is_numeric($userId)){
-			// find the user id element
-			$userIdKey	= $this->findUserIdElementName();
-
-			// Form does not contain an user id field, run the query against the user who submitted the form
-			if(!$userIdKey){
-				$query = explode(' LIMIT', $query)[0]." and userid='$userId'";
-				if(!$all){
-					$query	.= " LIMIT $start, $this->pageSize";
-				}
-				
-				$results	= $wpdb->get_results($query);
-				
-				if($wpdb->last_error !== ''){
-					SIM\printArray($wpdb->print_error());
-				}else{
-					foreach($results as &$result){
-						$result->formresults	= unserialize($result->formresults);
-					}
-
-					$results	= apply_filters('sim_retrieved_formdata', $results, $userId, $this);
-				}
-		
-				return $results;
-			}
 		}
 
 		$results	= apply_filters('sim_retrieved_formdata', $results, $userId, $this);
@@ -840,9 +821,7 @@ class DisplayFormResults extends DisplayForm{
 		$rowContents	= '';
 		$excelRow		= [];
 
-		$userIdElName   = $this->findUserIdElementName();
-
-		if($values[$userIdElName] == $this->user->ID || $values[$userIdElName] == $this->user->partnerId){
+		if($this->submission->userid == $this->user->ID || $this->submission->userid == $this->user->partnerId){
 			$ownEntry	= true;
 		}else{
 			$ownEntry	= false;
@@ -1120,14 +1099,12 @@ class DisplayFormResults extends DisplayForm{
 				$buttonsHtml[$action]	= "<button class='$action button forms-table-action' name='{$action}-action' value='$action'/>".ucfirst($action)."</button>";
 			}
 			$buttonsHtml = apply_filters('sim_form_actions_html', $buttonsHtml, $values, $subId, $this);
-			
-			$userIdKey	= $this->findUserIdElementName();
 
 			//we have te html now, check for which one we have permission
 			foreach($buttonsHtml as $action => $button){
 				if(
 					$this->tableEditPermissions || 			// if we are allowed to do all actions
-					$values[$userIdKey] == $this->user->ID || // or this is our own entry
+					$this->submission->userid == $this->user->ID || // or this is our own entry
 					(
 						isset($this->columnSettings[$action]['edit_right_roles']) && 
 						array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])
@@ -1956,27 +1933,6 @@ class DisplayFormResults extends DisplayForm{
 	}
 
 	/**
-	 * Checks if a given submssion belongs to a given user
-	 *
-	 * @param	object		$submission			The submission to check
-	 * @param	int			$userId				The user id
-	 * @param	bool		$includingPartner	Also return true if the partner submitted
-	 *
-	 * @return	bool							True if the submission belongs to the user, false otherwise
-	 */
-	public function ownSubmission($submission, $userId, $includingPartner){
-		$submissionUserId	= $submission->userid;
-
-		$userIdElementName	= $this->findUserIdElementName();
-
-		if(isset($submission->formresults[$userIdElementName])){
-			$submissionUserId	= $submission->formresults['userid'];
-		}
-
-		return $submissionUserId == $userId;
-	}
-
-	/**
 	 * creates the main table html
 	 *
 	 * @param	string		$type			Either 'own', 'others' or 'all'
@@ -1985,8 +1941,6 @@ class DisplayFormResults extends DisplayForm{
 	 * @return	bool						If there are submissions or not
 	 */
 	public function theTable($type, $submissions){
-		$userIdKey			= $this->findUserIdElementName();
-
 		if($this->spliced){
 			// only use the submissions for this page
 			$submissions	= array_splice($submissions, ($this->currentPage*$this->pageSize), $this->pageSize);
@@ -2011,10 +1965,10 @@ class DisplayFormResults extends DisplayForm{
 					$values				= $this->submission->formresults;
 
 					$values['id']				= $this->submission->id;
-					$values['submitteruserid']	= $this->submission->userid;
+					$values['submitteruserid']	= $this->submission->submitter_id;
 
 					// Skip if needed
-					if($type == 'others' && $values[$userIdKey] == $this->user->ID){
+					if($type == 'others' && $this->submission->userid == $this->user->ID){
 						continue;
 					}
 
