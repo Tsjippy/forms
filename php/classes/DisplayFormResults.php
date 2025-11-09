@@ -844,7 +844,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 	}
 
-	protected function getRowContents($values, $subId){
+	protected function getRowContents(){
 		$rowContents	= '';
 		$excelRow		= [];
 
@@ -958,14 +958,14 @@ class DisplayFormResults extends DisplayForm{
 				$rowHasContents	= true;
 
 				//Get the field value from the array
-				if(!isset($values[$elementName])){
+				if(!isset($this->submission->{$elementName})){
 					$value	= 'X';
 				}else{
-					$value	= $values[$elementName];
+					$value	= $this->submission->{$elementName};
 				}
 					
 				// Add sub id if this is an sub value
-				if($subId > -1){
+				if($this->submission->subId > -1){
 					$element	= $this->getElementById($id);
 					preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $element->name, $matches);
 					$name	= $element->name;
@@ -975,7 +975,7 @@ class DisplayFormResults extends DisplayForm{
 					}
 					
 					if(!empty($splitNames) && in_array($name, $splitNames)){
-						$subIdString = "data-subid='$subId'";
+						$subIdString = "data-subid='{$this->submission->subId}'";
 					}
 				}
 
@@ -986,8 +986,8 @@ class DisplayFormResults extends DisplayForm{
 				//transform if needed
 				$orgFieldValue	= $value;
 
-				$value 			= apply_filters('sim-form-result-table-value', $value, $columnSetting, $values, $this);
-				$value 			= $this->transformInputData($value, $elementName, (object)$values);
+				$value 			= apply_filters('sim-form-result-table-value', $value, $columnSetting, $this->submission, $this);
+				$value 			= $this->transformInputData($value, $elementName, $this->submission);
 				
 				//show original email in excel
 				if(gettype($value) == 'string' && str_contains($value, '@')){
@@ -1045,8 +1045,8 @@ class DisplayFormResults extends DisplayForm{
 			}
 
 			// Use the indexed name to get the element, otherwise we might get the wrong
-			if(isset($values['elementindex']) && $this->getElementByName($name.'['.$values['elementindex'].']['.$elementName.']')){
-				$element		= $this->getElementByName( $name.'['.$values['elementindex'].']['.$elementName.']');
+			if(isset($this->submission->elementindex) && $this->getElementByName($name.'['.$this->submission->elementindex.']['.$elementName.']')){
+				$element		= $this->getElementByName( $name.'['.$this->submission->elementindex.']['.$elementName.']');
 			}else{			
 				$element		= $this->getElementByName($elementName);
 			}
@@ -1062,7 +1062,7 @@ class DisplayFormResults extends DisplayForm{
 				$cellOpeningTag	= "<td $class data-element-id='$element->id'";
 			}
 
-			$cellOpeningTag	= apply_filters('sim-formresult-cell-opening-tag', $cellOpeningTag.' '. $subIdString, $this, $columnSetting, $values);
+			$cellOpeningTag	= apply_filters('sim-formresult-cell-opening-tag', $cellOpeningTag.' '. $subIdString, $this, $columnSetting, $this->submission);
 
 			// Add a copy option to the value
 			$copy	= "";
@@ -1086,18 +1086,16 @@ class DisplayFormResults extends DisplayForm{
 	/**
 	 * Writes a row of the table to the screen
 	 *
-	 * @param	array	$values			Array containing all the values of a form submission
-	 * @param	int		$subId			The subid of a submission. Default -1 for none
 	 */
-	protected function writeTableRow($values, $subId){
+	protected function writeTableRow(){
 		//If this row should be written and it is the first cell then write
-		if($subId > -1){
-			$subIdString = "data-subid='$subId'";
+		if($this->submission->subId > -1){
+			$subIdString = "data-subid='{$this->submission->subId}'";
 		}else{
 			$subIdString = "";
 		}
 		
-		$rowContents	= $this->getRowContents($values, $subId);
+		$rowContents	= $this->getRowContents();
 
 		$buttonCell		= '';
 
@@ -1125,7 +1123,7 @@ class DisplayFormResults extends DisplayForm{
 				}
 				$buttonsHtml[$action]	= "<button class='$action button forms-table-action' name='{$action}-action' value='$action'/>".ucfirst($action)."</button>";
 			}
-			$buttonsHtml = apply_filters('sim_form_actions_html', $buttonsHtml, $values, $subId, $this);
+			$buttonsHtml = apply_filters('sim_form_actions_html', $buttonsHtml, $this->submission, $this->submission->subId, $this);
 
 			//we have te html now, check for which one we have permission
 			foreach($buttonsHtml as $action => $button){
@@ -1146,7 +1144,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		if(!empty($rowContents)){
-			echo "<tr class='table-row' data-submission-id='{$values['id']}' $subIdString>";
+			echo "<tr class='table-row' data-submission-id='{$this->submission->id}' $subIdString>";
 				echo $rowContents;
 				echo $buttonCell;
 			echo '</tr>';
@@ -1994,7 +1992,7 @@ class DisplayFormResults extends DisplayForm{
 						continue;
 					}
 						
-					if($this->writeTableRow($this->submission, $this->submission->subId)){
+					if($this->writeTableRow()){
 						// this row has contents
 						$allRowsEmpty	= false;
 					}

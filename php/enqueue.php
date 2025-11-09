@@ -27,8 +27,6 @@ function checkFormExistence($formName){
 
 add_action( 'wp_after_insert_post', __NAMESPACE__.'\afterInsertPost', 10, 2);
 function afterInsertPost($postId, $post){
-    global $Modules;
-
     if(has_block('sim/formbuilder', $post)){
         $hasFormbuilderShortcode    = true;
 
@@ -57,6 +55,9 @@ function afterInsertPost($postId, $post){
                 if($shortcode[2] == 'formbuilder'){
                     // Get the formbuilder name from the shortcode
                     $formName       = shortcode_parse_atts($shortcode[3])['formname'];
+                    if(empty($formName)){
+                        $formName       = shortcode_parse_atts($shortcode[3])['name'];
+                    }
 
                     $newFormName    = checkFormExistence($formName);
 

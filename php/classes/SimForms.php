@@ -331,29 +331,58 @@ class SimForms{
 
 		$formId = $wpdb->insert_id;
 		
-		// insert default elements
+		/**
+		 * insert default elements
+		 */
+
+		// First create the name element as we need its id for the user id element conditions
+		$wpdb->insert(
+			$this->elTableName,
+			array(
+				'form_id' 		=> $formId,
+				'type' 			=> 'text',
+				'name'			=> 'name',
+				'options' 		=> 'list=users',
+				'default_value' => 'display_name',
+				'priority'		=> 3
+			)
+		);
+
+		$elementId	= $wpdb->insert_id;
+
 		$elements = [
 			array(
-				'type' 					=> 'hidden',
+				'type' 					=> 'number',
 				'name'					=> 'userid',
-			 	'default_value' 		=> 'userid'
+			 	'default_value' 		=> 'user_id',
+				'hidden'				=> true,
+				'conditions'			=> serialize([
+					[
+						'rules'				=> [
+							[
+								'conditional-field'	=> $elementId,
+								'equation'			=> 'changed',
+							]
+						],
+						'action'			=> 'property',
+						'property-name'		=> 'value',
+						'property-value'	=> $elementId
+					]
+				]),
+				'priority'				=> 1
 			),
 			array(
 				'type' 					=> 'label',
 				'name'					=> 'name-label',
 				'text' 					=> 'Your Name',
-				'wrap'					=> true
-			),
-			array(
-				'type' 					=> 'text',
-				'name'					=> 'name',
-				'options' 				=> 'list=users',
-				'default_value' 		=> 'name'
+				'wrap'					=> true,
+				'priority'				=> 2
 			),
 			array(
 				'type' 					=> 'datalist',
 				'name'					=> 'users',
-				'default_array_value' 	=> 'users'
+				'default_array_value' 	=> 'all_users',
+				'priority'				=> 4
 			)
 		];
 			
@@ -868,6 +897,7 @@ class SimForms{
 				array(
 					'formname'		=> '',
 					'form-name'		=> '',
+					'name'			=> '',
 					'userid'		=> '',
 					'user-id'		=> '',
 					'search'		=> '',
@@ -885,7 +915,11 @@ class SimForms{
 			);
 
 			if(empty($atts['form-name'])){
-				$atts['form-name']	= $atts['formname'];
+				if(!empty($atts['formname'])){
+					$atts['form-name']	= $atts['formname'];
+				}else{
+					$atts['form-name']	= $atts['name'];
+				}
 			}
 
 			if(empty($atts['user-id'])){
@@ -1046,7 +1080,7 @@ class SimForms{
 
 		if(!empty($this->submission)){
 			if(empty($replaceValues)){
-				$replaceValues = $this->submission;
+				$replaceValues = (array) $this->submission;
 			}
 
 			if(empty($this->submission->submissiondate)){

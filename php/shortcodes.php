@@ -135,14 +135,25 @@ function showFormSelector($atts=[]){
 //shortcode to make forms
 add_shortcode( 'formbuilder', __NAMESPACE__.'\showForm');
 function showForm($atts){
-    $simForms = new SimForms();
-    return $simForms->determineForm($atts);
+    $simForms   = new SimForms();
+    $html       = $simForms->determineForm($atts);
+    if(is_wp_error($html)){
+        return "<div class='error'>".$html->get_error_message()."</div>";
+    }
+
+    return $html;
 }
 
 add_shortcode( 'formresults', __NAMESPACE__.'\formResults' );
 function formResults($atts){
 	$displayFormResults = new DisplayFormResults($atts);
-	return $displayFormResults->showFormresultsTable();
+	$html   = $displayFormResults->showFormresultsTable();
+
+    if(is_wp_error($html)){
+        return "<div class='error'>".$html->get_error_message()."</div>";
+    }
+
+    return $html;
 }
 
 //Shortcode for recommended fields

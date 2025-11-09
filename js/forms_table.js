@@ -578,10 +578,6 @@ document.addEventListener("click", event=>{
 	else if(target.matches('.archive.forms-table-action, .unarchive.forms-table-action')){
 		archiveSubmission(target);
 	}
-
-	else if(target.matches('.print.forms-table-action')){
-		window.location.href = window.location.href.split('?')[0]+"?print=true&table_id="+table.dataset.id+"&submission_id="+table_row.querySelector("[id='id' i]").textContent;
-	}
 	
 	//Open settings modal
 	else if(target.classList.contains('edit-formshortcode-settings')){

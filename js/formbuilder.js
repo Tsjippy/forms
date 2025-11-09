@@ -232,17 +232,17 @@ async function addFormElement(target, copying=false){
 
 	// Show loader
 	if(!editing){
-		let loader 				= Main.showLoader(wrapper, false);
-		loader.dataset.priority	= priority;
+		let loader 					= Main.showLoader(wrapper, false);
+		loader.dataset.priority		= priority;
 		loader.classList.add('form-element-wrapper');
-		loader.dataset.id		= -1;
+		loader.dataset.elementId	= -1;
 
 		// make sure all priorities are correct
 		fixElementNumbering(referenceNode.closest('form'));
 
 		var indexes	= {};
 		document.querySelectorAll(`.form-element-wrapper`).forEach(el => {
-			indexes[el.dataset.id]	= el.dataset.priority;
+			indexes[el.dataset.elementId]	= el.dataset.priority;
 		})
 		
 		indexes						= JSON.stringify(indexes);
@@ -251,7 +251,7 @@ async function addFormElement(target, copying=false){
 	let response;
 	if(copying){
 		let formData			= new FormData();
-		formData.append('element-id', wrapper.dataset.id);
+		formData.append('element-id', wrapper.dataset.elementId);
 		formData.append('form-id', wrapper.dataset.formId);
 		formData.append('order', indexes);
 		formData.append('insert-after', formElementWrapper.dataset.priority);
@@ -298,7 +298,7 @@ async function sendElementSize(el, widthPercentage){
 		//send new width over AJAX
 		let formData = new FormData();
 		formData.append('form-id', el.closest('.form-element-wrapper').dataset.formId);
-		formData.append('elementid', el.closest('.form-element-wrapper').dataset.id);
+		formData.append('elementid', el.closest('.form-element-wrapper').dataset.elementId);
 		formData.append('new-width', widthPercentage);
 		
 		let response = await FormSubmit.fetchRestApi('forms/edit_formfield_width', formData);
@@ -315,7 +315,7 @@ async function removeElement(target){
 	let parent			= target.parentNode;
 	let elementWrapper	= target.closest('.form-element-wrapper');
 	let formId			= elementWrapper.dataset.formId;
-	let elementIndex 	= elementWrapper.dataset.id;
+	let elementIndex 	= elementWrapper.dataset.elementId;
 	let form			= target.closest('form');
 
 	Main.showLoader(target);
@@ -349,11 +349,11 @@ async function reorderformelements(event){
 
 		let formData = new FormData();
 		formData.append('form-id', event.item.dataset.formId);
-		formData.append('el-id', event.item.dataset.id);
+		formData.append('el-id', event.item.dataset.elementId);
 
 		let indexes	= {};
 		document.querySelectorAll(`.form-element-wrapper`).forEach(el => {
-			indexes[el.dataset.id]	= el.dataset.priority;
+			indexes[el.dataset.elementId]	= el.dataset.priority;
 		})
 		
 		formData.append('indexes', JSON.stringify(indexes));

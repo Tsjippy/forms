@@ -615,7 +615,7 @@ class DisplayForm extends SubmitForm{
 				$html	.= "<div class='form-elements'>";
 					$html	.= "<input type='hidden' class='no-reset' name='form-id' value='{$this->formData->id}'>";
 					$html	.= "<input type='hidden' class='no-reset' name='formurl' value='".SIM\currentUrl(true)."'>";
-					$html	.= "<input type='hidden' class='no-reset' name='user-id' value='$this->userId'>";
+					$html	.= "<input type='hidden' class='no-reset' name='submitter-id' value='$this->userId'>";
 					foreach($this->formElements as $element){
 						$html	.= $this->buildHtml($element);
 					}

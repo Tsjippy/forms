@@ -26,17 +26,23 @@ trait ElementHtml{
 		$this->defaultValues['user_id']	= $this->defaultValues['ID'];
 		unset($this->defaultValues['ID']);
 		
-		$this->defaultArrayValues	= [];
-		
 		foreach(['user_pass', 'user_activation_key', 'user_status', 'user_level'] as $field){
 			unset($this->defaultValues[$field]);
 		}
 		
 		//get defaults from filters
 		$this->defaultValues		= apply_filters('sim_add_form_defaults', $this->defaultValues, $this->userId, $this->formName);
-		$this->defaultArrayValues	= apply_filters('sim_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formName);
 		
 		ksort($this->defaultValues);
+				
+		$this->defaultArrayValues	= [];
+
+		foreach(SIM\getUserAccounts(false, false, [], [], [], true) as $user){
+			$defaultArrayValues['all_users'][$user->ID] = $user->display_name;
+		}
+
+		$this->defaultArrayValues	= apply_filters('sim_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formName);
+		
 		ksort($this->defaultArrayValues);
 	}
     

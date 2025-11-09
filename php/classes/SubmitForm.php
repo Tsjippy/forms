@@ -314,7 +314,10 @@ class SubmitForm extends SaveFormSettings{
 		
 		$this->getForm($this->submission->form_id);
 
+		// The user id of the current user
 		$this->userId	= $this->user->ID;
+
+		// Check if we are submitting for another user
 		if(isset($_POST['userid']) && is_numeric($_POST['userid'])){
 			//If we are submitting for someone else and we do not have the right to save the form for someone else
 			if(
@@ -344,6 +347,8 @@ class SubmitForm extends SaveFormSettings{
 		}
 
 		$this->submission->archived 		= false;
+
+		$formUrl	= $formresults['formurl'];
 			
 		//remove the action and the formname
 		unset($formresults['formname']);
@@ -351,13 +356,8 @@ class SubmitForm extends SaveFormSettings{
 		unset($formresults['userid']);		
 		unset($formresults['form-id']);
 		unset($formresults['_wpnonce']);
-
-		// add the submission id to the form results
-		/* if(empty($this->formData->save_in_meta)){
-			//Get the id from db before insert so we can use it in emails and file uploads
-			$submissionId	= $wpdb->get_var( "SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE (TABLE_NAME = '{$this->submissionTableName}') AND table_schema='$wpdb->dbname'");
-			$this->submission->id					= $submissionId;
-		} */
+		unset($formresults['formurl']);
+		unset($formresults['form-id']);
 
 		// remove empty splitted entries
 		if(isset($this->formData->split)){
@@ -420,7 +420,10 @@ class SubmitForm extends SaveFormSettings{
 		}
 		
 		//save to submission table
-		if(empty($this->formData->save_in_meta)){			
+		if(empty($this->formData->save_in_meta)){
+			// Insert Submission
+			$this->submission->id	= $this->insertOrUpdateData($this->submissionTableName, $this->submission);
+
 			//sort arrays
 			foreach($formresults as $key => &$result){
 				if(is_array($result)){
@@ -428,35 +431,46 @@ class SubmitForm extends SaveFormSettings{
 					if(!is_array(array_values($result)[0]) && str_contains(array_values($result)[0],'wp-content/uploads/')){
 						//rename the file
 						$this->processFiles($result, $key);
+						$result	= $this->submission->{$key};
 					}else{
 						//sort the array
 						ksort($result);
 					}
+				}elseif(str_contains($result,'wp-content/uploads/')){
+					//rename the file
+					$this->processFiles([$result], $key);
+					$result	= $this->submission->{$key}[0];
 				}
 			}
 
-			// Insert Submission
-			$submissionId	= $this->insertOrUpdateData($this->submissionTableName, $this->submission);
-
 			// Insert Submission Data
 			foreach($formresults as $key => $value){
-				$this->insertOrUpdateData($this->submissionValuesTableName, $formresult);
+				$data	= [
+					'submission_id'	=> $this->submission->id,
+					'key'			=> $key,
+					'value' 		=> $value
+				];
+
+				$this->insertOrUpdateData(
+					$this->submissionValuesTableName, 
+					$data
+				);
 			}
 
-			$placeholders				= $formresults;
+			$placeholders				= (array) $formresults;
 
-			$placeholders['id']			= $submissionId;
+			$placeholders['id']			= $this->submission->id;
 
-			$placeholders['formurl']	= $submissionId;
+			$placeholders['formurl']	= $formUrl;
 
-			$placeholders['formid']		= $submissionId;
+			$placeholders['formid']		= $this->submission->form_id;
 			
 			$this->sendEmail('submitted', $placeholders);
 				
 			if($wpdb->last_error !== ''){
 				$message	=  new \WP_Error('error', $wpdb->last_error);
 			}elseif(empty($this->formData->include_id) || $this->formData->include_id){
-				$message	.= "\nYour id is {$formresults['id']}";
+				$message	.= "\nYour id is {$this->submission->id}";
 			}
 		//save to user meta
 		}else{			
