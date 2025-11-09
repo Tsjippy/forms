@@ -372,7 +372,7 @@ function archiveSubmission(){
 		$message					= "Entry with id {$formTable->submissionId} succesfully {$action}d";
 
 		if($archive){
-			$formTable->updateSubmission($archive);
+			$formTable->archiveSubmission($archive);
 		}else{
 			$formTable->unArchiveAll($formTable->submissionId);
 		}
@@ -483,7 +483,7 @@ function editValue(){
 	$elementName 	= $element->name;
 	$newValue 		= json_decode(sanitize_textarea_field(stripslashes($_POST['new-value'])));
 
-	$transValue		= $formTable->transformInputData($newValue, $elementName, $formTable->submission->formresults);
+	$transValue		= $formTable->transformInputData($newValue, $elementName, $formTable->submission);
 	
 	$subId			= $_POST['subid'];
 	// By default -> submission is the splitted submission, we want the original
@@ -494,8 +494,8 @@ function editValue(){
 	$updated		= false;
 
 	// Updating a value that is already there
-	if(isset($formTable->submission->formresults[$elementName])){
-		$oldValue			= $formTable->submission->formresults[$elementName];
+	if(isset($formTable->submission->{$elementName})){
+		$oldValue			= $formTable->submission->{$elementName};
 
 		if($oldValue == $newValue){
 			if(is_array($oldValue)){
@@ -510,9 +510,9 @@ function editValue(){
 			$temp[$subId]	= $newValue;
 			$newValue		= $temp;
 		}
-		$formTable->submission->formresults[$elementName]	= $newValue;
+		$formTable->submission->{$elementName}	= $newValue;
 
-		$updated											= true;
+		$updated								= true;
 	
 	}
 	
@@ -531,11 +531,11 @@ function editValue(){
 			}
 
 			//check if this is a main field
-			if(isset($formTable->submission->formresults[$splitElementName][$subId][$elementName])){
-				$oldValue																		= $formTable->submission->formresults[$splitElementName][$subId][$elementName];
-				$formTable->submission->formresults[$splitElementName][$subId][$elementName]	= $newValue;
+			if(isset($formTable->submission->{$splitElementName}[$subId][$elementName])){
+				$oldValue															= $formTable->submission->{$splitElementName}[$subId][$elementName];
+				$formTable->submission->{$splitElementName}[$subId][$elementName]	= $newValue;
 
-				$updated																		= true;
+				$updated															= true;
 				break;
 			}
 		}
@@ -551,8 +551,8 @@ function editValue(){
 		if(is_array($formTable->submission)){
 			SIM\printArray($formTable->submission);
 		}else{
-			$formTable->submission->formresults[$elementName]	= $newValue;
-			$updated											= true;
+			$formTable->submission->{$elementName}	= $newValue;
+			$updated								= true;
 		}
 	}
 
@@ -567,7 +567,7 @@ function editValue(){
 		return new WP_Error('submission-update', 'Could not update the value');
 	}
 
-	$result		= $formTable->updateSubmission();
+	$result		= $formTable->updateSubmission($elementName, $newValue);
 	if(is_wp_error($result)){
 		return $result;
 	}
@@ -581,9 +581,6 @@ function editValue(){
 	//send email if needed
 	$submitForm					= new SubmitForm($formTable->formData);
 	$submitForm->submission		= $formTable->submission;
-
-	$submitForm->sendEmail('fieldchanged');
-	$submitForm->sendEmail('fieldschanged');
 	
 	//send message back to js
 	return [

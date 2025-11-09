@@ -121,25 +121,31 @@ class DisplayFormResults extends DisplayForm{
 		return $elements;
 	}
 
+	/**
+	 * Retrieves all user metas and user data's and use them as submission data
+	 */
 	public function getMetaKeyFormSubmissions($userId=null, $all=false){
 		global $wpdb;
 
 		// also check the users table
 		$colNames	= $wpdb->get_results( "DESC {$wpdb->users}" );
-		$usedCols	= [];
+		$usedCols	= ['ID', 'user_registered'];
 		foreach($colNames as &$desc){
 			$desc	= $desc->Field;
 		}
 		
-		$query				= "SELECT * FROM %i WHERE ";
+		$baseQuery			= "SELECT * FROM %i WHERE ";
+		$where				= [];
 		$values				= [$wpdb->usermeta];
 
 		if(is_numeric($userId)){
-			$query				= "user_id = %d ";
+			$where[]			= "user_id = %d ";
 			$values[]			= $userId;
 		}
 
-		$counter	= 0;
+		$or	= [];
+
+		// Loop over all form elements to see which metas/userdata we need to get
 		foreach($this->formElements as $element){
 			if(!in_array($element->type, $this->nonInputs) && $element->id >= 0){
 				$name			= trim($element->name, '[]');
@@ -147,70 +153,82 @@ class DisplayFormResults extends DisplayForm{
 				if(in_array($name, $colNames)){
 					$usedCols[]	= $name;
 				}else{
-					if($counter > 0){
-						$query			.= "OR ";
-					}
-
-
-					$query			.= "meta_key = %s ";
+					$or[]			.= "meta_key = %s ";
 					$values[]		 = $name;
-
-					$counter++;
 				}
 			}
 		}
 
+		$where[]	= '('.implode(' AND ', $or).')';
+
+		$submissions = [];
+		/**
+		 * Build the base submission
+		 */
+		$values	= [implode(',', $usedCols), $wpdb->users];
+
+		$w	= '';
+		if(is_numeric($userId)){
+			$w			= "where user_id = %d ";
+			$values[]	= $userId;
+		}
+		$users		= $wpdb->get_results(
+			$wpdb->prepare("select %s from %i $w", $values)
+		);
+
+		$counter	= 0;
+		foreach($users as $user){
+			$submission 	= new \stdClass();
+
+			$submission->id					= $counter;
+			$submission->form_id			= $this->formData->id;
+
+			// Base submission data
+			$submission->timecreated		= $user->user_registered;
+			$submission->timelastedited		= $user->user_registered;
+			unset($usedCols['user_registered']);
+
+			$submission->userid				= $user->ID;
+			$submission->submitter_id		= $user->ID;
+			unset($usedCols['ID']);
+
+			// Add the remaining user data if any
+			foreach($usedCols as $col){
+				$submission->$col	= $user->$col;
+			}
+
+			$submissions[$user->ID]	= $submission;
+
+			$counter++;
+		}
+
+		/**
+		 * Add the metas to the submissions
+		 */
 		extract(apply_filters(
 			'sim_formdata_retrieval_query', 
 			[
-				'query'		=> $query,
+				'base'		=> $baseQuery,
+				'where'		=> $where,
 				'values'	=> $values,
-			], 
+			],
 			$userId,
 			$this
 		));
 
-		// Get results
-		$result		= $wpdb->get_results(
+		$query	= $base.implode(' AND ', $where);
+
+		$metas		= $wpdb->get_results(
 			$wpdb->prepare($query, $values)
 		);
 
 		// parse results to merge based on userId
-		$results	= [];
-		$counter	= 0;
-		foreach($result as $r){
-			if(!isset($results[$r->user_id])){
-				$results[$r->user_id]					= new \stdClass();
-				$results[$r->user_id]->id				= $counter;
-				$results[$r->user_id]->form_id			= $this->formData->id;
-				$results[$r->user_id]->timecreated		= get_userdata($r->user_id)->user_registered;
-				$results[$r->user_id]->timelastedited	= get_userdata($r->user_id)->user_registered;
-				$results[$r->user_id]->userid			= $r->user_id;
-				$results[$r->user_id]->formresults		= [
-					'submissiontime'	=> $results[$r->user_id]->timecreated,
-					'edittime'			=> $results[$r->user_id]->timelastedited
-				];
-
-				$counter++;
-			}
-
-			$results[$r->user_id]->formresults[$r->meta_key]	= maybe_unserialize($r->meta_value);
-		}
-
-		// now also add result from the users table
-		if(!empty($usedCols)){
-			$selectQuery	= 'ID,'.implode(',', $usedCols);
-			$result		= $wpdb->get_results("Select $selectQuery from {$wpdb->users}");
-
-			foreach($result as $r){	
-				foreach($usedCols as $col){
-					$results[$r->ID]->formresults[$col]	= maybe_unserialize($r->$col);
-				}
-			}
+		foreach($metas as $meta){
+			$submissions[$meta->user_id]->{$meta->meta_key}	= maybe_unserialize($meta->meta_value);
 		}
 
 		// Get the total
-		$this->total			= count($results);
+		$this->total			= count($submissions);
 
 		// Limit the amount to 100
 		if(!$all && isset($_REQUEST['page-number']) && is_numeric($_REQUEST['page-number']) && $this->total > $this->pageSize){
@@ -224,7 +242,7 @@ class DisplayFormResults extends DisplayForm{
 			}
 			$start			= $this->currentPage * $this->pageSize;
 
-			$results		= array_slice($results, $start, $this->pageSize);
+			$submissions		= array_slice($submissions, $start, $this->pageSize);
 
 			$this->spliced	= true;
 		}else{
@@ -237,20 +255,31 @@ class DisplayFormResults extends DisplayForm{
 			if($this->sortDirection != 'ASC'){
 				$this->sortDirection	= 'DESC';
 			}
-		}	
-
-		foreach($results as &$r){
-			$r->formresults	= maybe_unserialize($r->formresults);
 		}
 
-		return apply_filters('sim_retrieved_formdata', $results, $userId, $this);
+		return apply_filters('sim_retrieved_formdata', $submissions, $userId, $this);
+	}
+
+	/**
+	 * Get a specific submission value
+	 * @param	int			$submissionId	A submission id
+	 * @param	string		$key			The key of the value
+	 *
+	 * @return	array						array of results
+	 */
+	public function getSubmissionValue($submissionId, $key){
+		global $wpdb;
+
+		return $wpdb->get_var(
+			$wpdb->prepare("SELECT * FROM %i WHERE submission_id = %d and key=%s", $this->submissionValuesTableName, $submissionId, $key),
+		);
 	}
 
 	/**
 	 * Get formresults of the current form
 	 *
 	 * @param	int|array	$userId			Optional the user id to get the results of or an array of user ids. Default null
-	 * @param	int			$submissionId	Optional a specific id. Default null
+	 * @param	int			$submissionId	Optional a specific submission id. Default null
 	 *
 	 * @return	array						array of results
 	 */
@@ -277,7 +306,7 @@ class DisplayFormResults extends DisplayForm{
 			return $this->getMetaKeyFormSubmissions($userId, $all);
 		}
 
-		$query				= "SELECT * FROM %i WHERE ";
+		$baseQuery			= "SELECT * FROM %i WHERE ";
 		$values				= [$this->submissionTableName];
 		$where				= [];
 		
@@ -313,8 +342,22 @@ class DisplayFormResults extends DisplayForm{
 			$where[]	= '('.implode(' OR ', $q).')';
 		}
 
-		// Get the where query
-		$query	.= implode(' AND ', $where);
+		extract(apply_filters(
+			'sim_formdata_retrieval_query', 
+			[
+				'base'		=> $baseQuery,
+				'where'		=> $where,
+				'values'	=> $values,
+			],
+			$userId,
+			$this
+		));
+
+		$query	= $base.implode(' AND ', $where);
+
+		// Get the total
+		$countQuery		= str_replace('*', 'count(*) as total', $query);
+		$this->total	= $wpdb->get_var($wpdb->prepare($countQuery, ...$values));
 
 		/**
 		 * Pagination
@@ -336,7 +379,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		/**
-		 * sort column
+		 * Sort column
 		 */ 
 		$this->sortColumnFound	= false;
 		if($this->sortColumn){
@@ -357,20 +400,6 @@ class DisplayFormResults extends DisplayForm{
 			}
 		}
 
-		extract(apply_filters(
-			'sim_formdata_retrieval_query', 
-			[
-				'query'		=> $query,
-				'values'	=> $values,
-			],
-			$userId,
-			$this
-		));
-
-		// Get the total
-		$countQuery		= str_replace('*', 'count(*) as total', $query);
-		$this->total	= $wpdb->get_var($wpdb->prepare($countQuery, ...$values));
-
 		// add the limit only if we are not querying everything, or for a specific user or start is larger than the total
 		if(!$all && empty($userId) && $start < $this->total){
 			$this->spliced	= true;
@@ -390,20 +419,23 @@ class DisplayFormResults extends DisplayForm{
 
 		// Get the submission data
 		foreach($results as &$result){
+			foreach($result as &$value){
+				$value	= maybe_unserialize($value);
+			}
+			unset($value);
+
 			$sort	= '';
 			$values	= [$result->id];
 
-			// Sort if not already sorted
-			if(!$this->sortColumnFound){
-				$sort 		= " ORDER BY %s %s";
-				$values[]	= $this->sortColumn;
-				$values[]	= $this->sortDirection;
-			}
-
-			$result->formresults	= $wpdb->get_results(
-				$wpdb->prepare("SELECT * FROM %i WHERE submission_id = %d $sort", $this->submissionValuesTableName, ...$values),
-				ARRAY_A
+			$formresults	= $wpdb->get_results(
+				$wpdb->prepare("SELECT `key`, `value` FROM %i WHERE submission_id = %d $sort", $this->submissionValuesTableName, ...$values),
+				OBJECT_K
 			);
+
+			foreach($formresults as $key => $formresult){
+				// use { } to prevent key naming issues
+				$result->{$key}	= maybe_unserialize($formresult->value);
+			}
 
 			if($wpdb->last_error !== ''){
 				SIM\printArray($wpdb->print_error());
@@ -441,15 +473,15 @@ class DisplayFormResults extends DisplayForm{
 			// ascending
 			if($this->sortDirection == 'ASC'){
 				if($sortElementType == 'date'){
-					return strtotime($a->formresults[$this->sortColumn]) <=> strtotime($b->formresults[$this->sortColumn]);
+					return strtotime($a->{$this->sortColumn}) <=> strtotime($b->{$this->sortColumn});
 				}
-				return $a->formresults[$this->sortColumn] > $b->formresults[$this->sortColumn];
+				return $a->{$this->sortColumn} > $b->{$this->sortColumn};
 			// Decending
 			}else{
 				if($sortElementType == 'date'){
-					return strtotime($b->formresults[$this->sortColumn]) <=> strtotime($a->formresults[$this->sortColumn]);
+					return strtotime($b->{$this->sortColumn}) <=> strtotime($a->{$this->sortColumn});
 				}
-				return $b->formresults[$this->sortColumn] > $a->formresults[$this->sortColumn];
+				return $b->{$this->sortColumn} > $a->{$this->sortColumn};
 			}
 		});
 	}
@@ -508,14 +540,14 @@ class DisplayFormResults extends DisplayForm{
 
 		//loop over all submissions
 		foreach($this->submissions as $this->submission){
-			if(empty($this->submission->formresults[$splitElementName])){
+			if(empty($this->submission->{$splitElementName})){
 				continue;
 			}
 
 			$this->submission->archivedsubs	= maybe_unserialize($this->submission->archivedsubs);
 
 			// loop over all entries of the split key
-			foreach($this->submission->formresults[$splitElementName] as $subKey=>$subSubmission){
+			foreach($this->submission->{$splitElementName} as $subKey => $subSubmission){
 				// Should always be an array
 				if(!is_array($subSubmission)){
 					continue;
@@ -560,10 +592,10 @@ class DisplayFormResults extends DisplayForm{
 				}
 
 				// Add the array to the formresults array
-				$newSubmission->formresults = array_merge($this->submission->formresults, $subSubmission);
+				$newSubmission = (object) array_merge((array) $this->submission, (array) $subSubmission);
 
 				// remove the index value from the copy
-				unset($newSubmission->formresults[$splitElementName]);
+				unset($newSubmission->{$splitElementName});
 
 				// Add the subkey
 				$newSubmission->subId			= $subKey;
@@ -593,11 +625,11 @@ class DisplayFormResults extends DisplayForm{
 			// check how many entries we should make
 			$count	= 1;
 			foreach($splitNames as $splitName){
-				if(!is_array($this->submission->formresults[$splitName])){
-					$this->submission->formresults[$splitName]	= [$this->submission->formresults[$splitName]];
+				if(!is_array($this->submission->{$splitName})){
+					$this->submission->{$splitName}	= [$this->submission->{$splitName}];
 				}
 
-				$c	= count($this->submission->formresults[$splitName]);
+				$c	= count($this->submission->{$splitName});
 
 				if($c > $count){
 					$count	= $c;
@@ -610,10 +642,10 @@ class DisplayFormResults extends DisplayForm{
 				$newSubmission	= clone $this->submission;
 
 				foreach($splitNames as $splitName){
-					if(isset($newSubmission->formresults[$splitName][$x])){
-						$newSubmission->formresults[$splitName]	= $newSubmission->formresults[$splitName][$x];
+					if(isset($newSubmission->{$splitName}[$x])){
+						$newSubmission->{$splitName}	= $newSubmission->{$splitName}[$x];
 					}else{
-						$newSubmission->formresults[$splitName]	= '';
+						$newSubmission->{$splitName}	= '';
 					}
 				}
 
@@ -1086,7 +1118,7 @@ class DisplayFormResults extends DisplayForm{
 					) && 
 					(
 						$this->submission->archived ||
-						!empty($this->submission->formresults['archived'])
+						!empty($this->submission->archived)
 					)
 				){
 					$action = 'unarchive';
@@ -1771,8 +1803,8 @@ class DisplayFormResults extends DisplayForm{
 
 				foreach($submissions as $key=>$submission){
 					if(
-						!isset($submission->formresults[$name])	||													// The filter value is not set at all
-						!$this->compareFilterValue($submission->formresults[$name], $filter['type'], $filterValue)	// The filter value does not match the value
+						!isset($submission->{$name})	||													// The filter value is not set at all
+						!$this->compareFilterValue($submission->{$name}, $filter['type'], $filterValue)	// The filter value does not match the value
 					){
 						unset($submissions[$key]);
 						$filteredCount++;
@@ -1957,25 +1989,12 @@ class DisplayFormResults extends DisplayForm{
 				<?php
 				$allRowsEmpty	= true;
 				foreach($submissions as $this->submission){
-					$values				= $this->submission->formresults;
-
-					$values['id']				= $this->submission->id;
-					$values['submitteruserid']	= $this->submission->submitter_id;
-
 					// Skip if needed
 					if($type == 'others' && $this->submission->userid == $this->user->ID){
 						continue;
 					}
-
-					$subId	= -1;
-					if(isset($this->submission->subId)){
-						$subId				= $this->submission->subId;
-						if($subId > -1){
-							$values['subid']= $this->submission->subId;
-						}
-					}
 						
-					if($this->writeTableRow($values, $subId)){
+					if($this->writeTableRow($this->submission, $this->submission->subId)){
 						// this row has contents
 						$allRowsEmpty	= false;
 					}
@@ -2393,11 +2412,11 @@ class DisplayFormResults extends DisplayForm{
 								//we have permission on this row for this button
 								if(
 									(
-										isset($submission->formresults['userid']) &&				// formresults contains a userid
-										$submission->formresults['userid'] == $this->user->ID		// userid is the current user
+										isset($submission->userid) &&				// formresults contains a userid
+										$submission->userid == $this->user->ID		// userid is the current user
 									) ||
 									(
-										!isset($submission->formresults['userid']) &&				// formresults don't contain a userid
+										!isset($submission->userid) &&				// formresults don't contain a userid
 										$submission->userid == $this->user->ID						// current user submitted the form
 									)
 								){

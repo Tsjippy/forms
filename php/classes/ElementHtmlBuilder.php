@@ -304,7 +304,7 @@ class ElementHtmlBuilder extends SimForms{
 			// just one possible value found
 			if($i == 0){
 				// there is no value in the form results
-				if(empty($this->submissions[0]->formresults[$index])){
+				if(empty($this->submissions[0]->{$index})){
 
 					// check the submission meta data
 					if(empty($this->submissions[0]->$index)){
@@ -319,10 +319,10 @@ class ElementHtmlBuilder extends SimForms{
 					$prevValues	= [];
 
 					foreach($this->submissions as $submission){
-						$prevValues[]	= $submission->formresults[$index];
+						$prevValues[]	= $submission->{$index};
 					}
 				}else{
-					$prevValues	= $this->submissions[0]->formresults[$index];
+					$prevValues	= $this->submissions[0]->{$index};
 				}
 			}
 			
@@ -620,7 +620,7 @@ class ElementHtmlBuilder extends SimForms{
 						if(empty($this->submissions)){
 							$this->submissions	= $this->parentInstance->submissions;
 						}
-						$transValue		= $this->transformInputData($v, $this->element->name, $this->submissions[0]->formresults);
+						$transValue		= $this->transformInputData($v, $this->element->name, $this->submissions[0]);
 					}else{
 						$transValue		= $v;
 					}

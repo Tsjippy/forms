@@ -397,12 +397,41 @@ function moduleUpdate($oldVersion){
             unset($formresults['_wpnonce']);
             unset($formresults['booking-startdate']);
             unset($formresults['booking-enddate']);
+            unset($formresults['booking-room']);
             unset($formresults['user-id']);
+            unset($formresults['formid']);
 
             foreach($formresults as $key => $value){
                 if(empty($value)){
                     continue;
                 }
+
+                $oldKey    = $key;
+
+                // make sure the key is valid
+                // Make sure we only are working on the name
+                $key	= end(explode('\\', $key));
+
+                // Replace spaces with _
+                $key	= str_replace(" ", "_", $key);
+
+                // Make lowercase
+                $key	= strtolower($key);
+
+                // Keep only valid chars
+                $key = preg_replace('/[^a-zA-Z0-9_]/', '', $key);
+
+                // Remove ending _
+                $key	= trim($key, " \n\r\t\v\0_");
+
+                // Make sure the first char is a letter or _
+                $key[0] = preg_replace('/[^a-zA-Z_]/', '_', $key[0]);    
+                
+                if($oldKey !== $key){
+                    SIM\printArray("Changed key '$oldKey' to '$key' for submission id $result->id");
+                }
+
+                $value  = maybe_serialize($value);
 
                 $wpdb->insert(
                     $simForms->submissionValuesTableName,
@@ -423,5 +452,5 @@ function moduleUpdate($oldVersion){
 }
 
 add_action('init', function(){
-    moduleUpdate('8.9.6');
+    //moduleUpdate('8.9.6');
 });

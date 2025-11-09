@@ -1002,8 +1002,8 @@ class SimForms{
 
 		// Get the submission values
 		$formresults	= $wpdb->get_results(
-			$wpdb->prepare("SELECT * FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, $submissionId),
-			ARRAY_A
+			$wpdb->prepare("SELECT `key`, `value` FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, $submissionId),
+			OBJECT_K
 		);
 
 		$results	= apply_filters('sim_retrieved_formdata', $results, '', $this);
@@ -1012,7 +1012,9 @@ class SimForms{
 
 			$this->submission	= $results[0];
 
-			$this->submission->formresults	= $formresults;
+			foreach($formresults as $key => $formresult){
+				$results[0]->{$key}	= maybe_unserialize($formresult->value);
+			}
 
 			return $this->submission;
 		}
@@ -1024,7 +1026,7 @@ class SimForms{
      * Add signal data to wp_mail args
      */
     public function addFormData($args){
-        $args['formresults'] = $this->submission->formresults;
+        $args['submission'] = $this->submission;
 
         return $args;
     }
@@ -1042,18 +1044,18 @@ class SimForms{
 			return $string;
 		}
 
-		if(!empty($this->submission->formresults)){
+		if(!empty($this->submission)){
 			if(empty($replaceValues)){
-				$replaceValues = $this->submission->formresults;
+				$replaceValues = $this->submission;
 			}
 
-			if(empty($this->submission->formresults['submissiondate'])){
-				$this->submission->formresults['submissiondate']	= date('d F y', strtotime($this->submission->formresults['submissiontime']));
-				$this->submission->formresults['editdate']			= date('d F y', strtotime($this->submission->formresults['edittime']));
+			if(empty($this->submission->submissiondate)){
+				$this->submission->submissiondate	= date('d F y', strtotime($this->submission->submissiontime));
+				$this->submission->editdate			= date('d F y', strtotime($this->submission->edittime));
 			}
 			
-			if(isset($_REQUEST['subid']) && empty($this->submission->formresults['subid'])){
-				$this->submission->formresults['subid']	= $_REQUEST['subid'];
+			if(isset($_REQUEST['subid']) && empty($this->submission->subid)){
+				$this->submission->subid	= $_REQUEST['subid'];
 			}
 		}
 

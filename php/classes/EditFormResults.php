@@ -5,14 +5,15 @@ use SIM;
 class EditFormResults extends DisplayFormResults{
 	public $submissionId;
 	
-	 /**
+	/**
 	 * Update an existing form submission
 	 *
-	 * @param	bool	$archive	Whether we should archive the submission. Default false
+	 * @param	string	$key		The key to update
+	 * @param	mixed	$value		The value to set
 	 *
-	 *  @return	true|WP_Error		The result or error on failure
+	 * @return	true|WP_Error		The result or error on failure
 	 */
-	public function updateSubmission($archive=false){
+	public function updateSubmission($key, $value){
 		global $wpdb;
 
 		$submissionId	= $this->submission->id;
@@ -27,7 +28,7 @@ class EditFormResults extends DisplayFormResults{
 			}
 		}
 
-		$this->submission->formresults['edittime']	= date("Y-m-d H:i:s");
+		$this->submission->edittime	= date("Y-m-d H:i:s");
 
 		/**
 		 * Filters the form results
@@ -36,19 +37,109 @@ class EditFormResults extends DisplayFormResults{
 		 * @param object	$object			The EditFormResults Instance
 		 * @param bool		$update			Whether this is an update or an new submission
 		 */
-		$this->submission->formresults 				= apply_filters('sim_before_saving_formdata', $this->submission->formresults, $this, true);
+		$this->submission 				= apply_filters('sim_before_saving_formdata', $this->submission, $this, true);
 
-		if(is_wp_error($this->submission->formresults )){
-			return $this->submission->formresults;
+		if(is_wp_error($this->submission )){
+			return $this->submission;
 		}
+
+		//Update the submission
+		$result = $wpdb->update(
+			$this->submissionTableName,
+			array(
+				'userid'			=> $this->submission->userid,
+				'submitter_id'		=> $this->submission->submitter_id,
+				'timelastedited'	=> date("Y-m-d H:i:s")
+			),
+			array(
+				'id'				=> $submissionId,
+			),
+			array(
+				'%d',
+				'%d',
+				'%s'
+			)
+		);
+		
+		if($wpdb->last_error !== ''){
+			$message	= $wpdb->print_error();
+			if(defined('REST_REQUEST')){
+				return new \WP_Error('form error', $message);
+			}else{
+				SIM\printArray($message);
+			}
+		}elseif(!$result){
+			$message	= "No row with id $submissionId found";
+			if(defined('REST_REQUEST')){
+				return new \WP_Error('form error', $message);
+			}else{
+				SIM\printArray($message);
+				SIM\printArray($this->submission);
+			}
+		}
+
+		//Update the submission data
+		if($key != 'userid' && $key != 'submitter_id'){
+			$result = $wpdb->update(
+				$this->submissionValuesTableName,
+				array(
+					'key'		=> $key,
+					'value'		=> $value
+				),
+				array(
+					'id'				=> $submissionId,
+				),
+				array(
+					'%s',
+					'%s'
+				)
+			);
+		}
+
+		if($wpdb->last_error !== ''){
+			$message	= $wpdb->print_error();
+			if(defined('REST_REQUEST')){
+				return new \WP_Error('form error', $message);
+			}else{
+				SIM\printArray($message);
+			}
+		}
+
+		$this->sendEmail('fieldchanged');
+		$this->sendEmail('fieldschanged');
+		
+		return $result;
+	}
+
+	/**
+	 * (un)Archive an existing form submission
+	 *
+	 * @param	bool	$archive	Whether we should archive the submission. Default false
+	 *
+	 * @return	true|WP_Error		The result or error on failure
+	 */
+	public function archiveSubmission($archive){
+		global $wpdb;
+
+		$submissionId	= $this->submission->id;
+		if(!is_numeric($submissionId)){
+			if(is_numeric($this->submissionId)){
+				$submissionId	= $this->submissionId;
+			}elseif(is_numeric($_POST['submission-id'])){
+				$submissionId	= $_POST['submission-id'];
+			}else{
+				SIM\printArray('No submission id found');
+				return false;
+			}
+		}
+
+		$this->submission->edittime	= date("Y-m-d H:i:s");
 
 		//Update the database
 		$result = $wpdb->update(
 			$this->submissionTableName,
 			array(
-				'userid'			=> $this->submission->userid,
 				'timelastedited'	=> date("Y-m-d H:i:s"),
-				'formresults'		=> maybe_serialize($this->submission->formresults),
 				'archived'			=> $archive,
 				'archivedsubs'		=> maybe_serialize($this->submission->archivedsubs)
 			),
@@ -56,8 +147,6 @@ class EditFormResults extends DisplayFormResults{
 				'id'				=> $submissionId,
 			),
 			array(
-				'%d',
-				'%s',
 				'%s',
 				'%d',
 				'%s'
@@ -77,7 +166,7 @@ class EditFormResults extends DisplayFormResults{
 				return new \WP_Error('form error', $message);
 			}else{
 				SIM\printArray($message);
-				SIM\printArray($this->submission->formresults);
+				SIM\printArray($this->submission);
 			}
 		}
 
@@ -160,13 +249,13 @@ class EditFormResults extends DisplayFormResults{
 				//there is no trigger value found in the results, check multi value array
 				if(
 					!empty($splitElementName) &&								// we should split
-					empty($this->submission->formresults[$triggerName]) && 		// we don't have a triggerfield in the results
-					isset($this->submission->formresults[$splitElementName])	// but we do have the splitted field
+					empty($this->submission->{$triggerName}) && 		// we don't have a triggerfield in the results
+					isset($this->submission->{$splitElementName})	// but we do have the splitted field
 				){
 					$archivedCounter	= 0;
 
 					//loop over all multi values
-					foreach((array)$this->submission->formresults[$splitElementName] as $subId=>$sub){
+					foreach((array)$this->submission->{$splitElementName} as $subId=>$sub){
 						if(
 							!is_array($sub)		||
 							(isset($sub['archived']) && 	// Archive entry exists
@@ -186,7 +275,7 @@ class EditFormResults extends DisplayFormResults{
 								strtotime($val) < strtotime($triggerValue)	// value is smaller than the trigger value
 							)
 						){
-							$this->submission->formresults[$splitElementName][$subId]['archived'] = true;
+							$this->submission->{$splitElementName}[$subId]['archived'] = true;
 
 							// add
 							if(empty($this->submission->archivedsubs)){
@@ -201,7 +290,7 @@ class EditFormResults extends DisplayFormResults{
 						}
 					}
 
-					if(count((array)$this->submission->formresults[$splitElementName]) == $archivedCounter && !$this->submission->archived){
+					if(count((array)$this->submission->{$splitElementName}) == $archivedCounter && !$this->submission->archived){
 						// Something went wrong in the past, mark submission as archived
 						$result = $wpdb->update(
 							$this->submissionTableName,
@@ -220,8 +309,8 @@ class EditFormResults extends DisplayFormResults{
 					}
 				}else{
 					//if the form value is equal to the trigger value it needs to be to be archived
-					if(isset($this->submission->formresults[$triggerName]) && $this->submission->formresults[$triggerName] == $triggerValue){
-						$this->updateSubmission(true);
+					if(isset($this->submission->{$triggerName}) && $this->submission->{$triggerName} == $triggerValue){
+						$this->archiveSubmission(true);
 					}
 				}
 			}
@@ -257,13 +346,13 @@ class EditFormResults extends DisplayFormResults{
 				$elementName	= $matches[1];
 			}
 
-			if(isset($this->submission->formresults[$elementName]) && count($this->submission->formresults[$elementName]) > count($this->submission->archivedsubs)){
+			if(isset($this->submission->{$elementName}) && count($this->submission->{$elementName}) > count($this->submission->archivedsubs)){
 				$allArchived = false;
 			}
 		}
 		
 		//update and mark as archived if all entries are empty or archived
-		$this->updateSubmission($allArchived);
+		$this->archiveSubmission($allArchived);
 	}
 
 	/**
@@ -280,7 +369,7 @@ class EditFormResults extends DisplayFormResults{
 		$this->submission->archivedsubs	= [];
 		
 		//update and mark as archived if all entries are empty or archived
-		$this->updateSubmission(false);
+		$this->archiveSubmission(false);
 	}
 
 	/**

@@ -29,7 +29,7 @@ class SubmitForm extends SaveFormSettings{
 			$elementName	= $this->getElementById($condition['fieldid'], 'name');
 
 			//get the submitted form value
-			$formValue = $this->submission->formresults[$elementName];
+			$formValue = $this->submission->{$elementName};
 					
 			//if the value matches the conditional value
 			if(strtolower($formValue) == strtolower($condition['value'])){
@@ -84,7 +84,7 @@ class SubmitForm extends SaveFormSettings{
 			// get the element value
 			$elementName	= str_replace('[]', '', $this->getElementById($changedElementId, 'name'));
 
-			$formValue 		= $this->submission->formresults[$elementName];
+			$formValue 		= $this->submission->{$elementName};
 			if(is_array($formValue)){
 				$formValue	= $formValue[0];
 			}
@@ -109,16 +109,16 @@ class SubmitForm extends SaveFormSettings{
 
 			// get element and the form result of that element
 			$element	= $this->getElementById($email->submitted_trigger['element']);
-			if(empty($this->submission->formresults[$element->name])){
+			if(empty($this->submission->{$element->name})){
 				$elValue	= '';
 			}else{
-				$elValue	= $this->submission->formresults[$element->name];
+				$elValue	= $this->submission->{$element->name};
 			}
 			
 			// get the value to compare with
 			if(is_numeric($email->submitted_trigger['value-element'])){
 				$compareElement	= $this->getElementById($email->submitted_trigger['value-element']);
-				$compareElValue	= $this->submission->formresults[$compareElement->name];
+				$compareElValue	= $this->submission->{$compareElement->name};
 			}else{
 				$compareElValue	= $email->submitted_trigger['value'];
 			}
@@ -278,12 +278,13 @@ class SubmitForm extends SaveFormSettings{
 			
 			//also add submission id if not saving to meta
 			if(empty($this->formData->save_in_meta)){
-				$fileName	= $this->submission->formresults['id']."_$fileName";
+				$fileName	= $this->submission->id."_$fileName";
 			}
 			
 			//Create the filename
 			$i = 0;
 			$targetFile = $targetDir.$fileName;
+
 			//add a number if the file already exists
 			while (file_exists($targetFile)) {
 				$i++;
@@ -293,10 +294,10 @@ class SubmitForm extends SaveFormSettings{
 			//if rename is succesfull
 			if (rename($path, $targetFile)) {
 				//update in formdata
-				$this->submission->formresults[$inputName][$key]	= str_replace(ABSPATH, '', $targetFile);
+				$this->submission->{$inputName}[$key]	= str_replace(ABSPATH, '', $targetFile);
 			}else {
 				//update in formdata
-				$this->submission->formresults[$inputName][$key]	= str_replace(ABSPATH, '', $path);
+				$this->submission->{$inputName}[$key]	= str_replace(ABSPATH, '', $path);
 			}
 		}
 	}
@@ -407,7 +408,7 @@ class SubmitForm extends SaveFormSettings{
 		 * @param object	$object			The SubmitForm Instance
 		 * @param bool		$update			Whether this is an update or an new submission
 		 */
-		$formresults 					= apply_filters('sim_before_saving_formdata', $formresults, $this, false);
+		$formresults 					= apply_filters('sim_before_saving_formdata', (object)$formresults, $this, false);
 
 		if(is_wp_error($formresults)){
 			return $formresults;
@@ -423,7 +424,7 @@ class SubmitForm extends SaveFormSettings{
 			//sort arrays
 			foreach($formresults as $key => &$result){
 				if(is_array($result)){
-					//check if this a aray of uploaded files
+					//check if this an aray of uploaded files
 					if(!is_array(array_values($result)[0]) && str_contains(array_values($result)[0],'wp-content/uploads/')){
 						//rename the file
 						$this->processFiles($result, $key);
@@ -438,7 +439,7 @@ class SubmitForm extends SaveFormSettings{
 			$submissionId	= $this->insertOrUpdateData($this->submissionTableName, $this->submission);
 
 			// Insert Submission Data
-			foreach($formresults as $formresult){
+			foreach($formresults as $key => $value){
 				$this->insertOrUpdateData($this->submissionValuesTableName, $formresult);
 			}
 
@@ -447,6 +448,8 @@ class SubmitForm extends SaveFormSettings{
 			$placeholders['id']			= $submissionId;
 
 			$placeholders['formurl']	= $submissionId;
+
+			$placeholders['formid']		= $submissionId;
 			
 			$this->sendEmail('submitted', $placeholders);
 				
@@ -523,27 +526,4 @@ class SubmitForm extends SaveFormSettings{
 
 		return $message;
 	}
-
-	/**
-     * Updates the current submisison in the db
-     */
-    public function updateSubmissionData(){
-        global $wpdb;
-
-        $wpdb->update(
-            $this->submissionTableName,
-            [
-                'formresults'   => serialize($this->submission->formresults)
-            ],
-            array(
-                'id'		    => $this->submission->id
-            ),
-        );
-
-        if(empty($wpdb->last_error)){
-            return true;
-        }else{
-            return $wpdb->last_error;
-        }
-    }
 }

@@ -180,18 +180,26 @@ class SaveFormSettings extends SimForms{
 	public function getUniqueName($element, $update, $oldElement){
 		global $wpdb;
 
-		// Remove any ' from the name, replace white space with _ as php does this automatically in post
-		$element->name	= str_replace(["\\'", " "], ['', "_"], $element->name);
-
 		// Make sure we only are working on the name
 		$element->name	= end(explode('\\', $element->name));
+
+		// Replace spaces with _
+		$element->name	= str_replace(" ", "_", $element->name);
 
 		// Make lowercase
 		$element->name	= strtolower($element->name);
 
+		// Keep only valid chars
+		$element->name = preg_replace('/[^a-zA-Z0-9_]/', '', $element->name);
+
 		// Remove ending _
 		$element->name	= trim($element->name, " \n\r\t\v\0_");
 
+		// Make sure the first char is a letter or _
+		$element->name[0] = preg_replace('/[^a-zA-Z_]/', '_', $element->name[0]);
+
+		// Check if name is unique
+		// Get all elements with this name
 		$elements		= $this->getElementByName($element->name, '', false);
 		if(
 			str_contains($element->name, '[]') 	||  	// Doesn't need to be unique 
@@ -209,6 +217,7 @@ class SaveFormSettings extends SimForms{
 		$elementName = $element->name;
 		
 		$i = '';
+
 		// getElementByName returns false when no match found
 		while($this->getElementByName($elementName)){
 			$i++;
@@ -240,10 +249,8 @@ class SaveFormSettings extends SimForms{
 		// Update column settings
 		$displayFormResults	= new DisplayFormResults(['form-id' => $this->formData->id]);
 
-		$query						= "SELECT * FROM {$displayFormResults->shortcodeTable} WHERE form_id = '{$this->formData->id}'";
+		$query				= "SELECT * FROM {$displayFormResults->shortcodeTable} WHERE form_id = '{$this->formData->id}'";
 		foreach($wpdb->get_results($query) as $data){
-			//$displayFormResults->shortcodeId	= $data->id;
-			//$displayFormResults->loadShortcodeData();
 			$columnSettings	= $displayFormResults->addColumnSetting($element);
 			if($columnSettings === false){
 				continue;
@@ -253,27 +260,15 @@ class SaveFormSettings extends SimForms{
 		}
 
 		// Update submission data
-		$displayFormResults->showArchived	= true;
-		$displayFormResults->getForm($this->formData->id);
-		$displayFormResults->parseSubmissions(null, null, true);
-
-		$submitForm	= new SubmitForm();
-
-		foreach($displayFormResults->submissions as $submission){
-			if(isset($submission->formresults[$oldElement->name])){
-				$submission->formresults[$element->name]	= $submission->formresults[$oldElement->name];
-				unset($submission->formresults[$oldElement->name]);
-			}
-			$wpdb->update(
-				$submitForm->submissionTableName,
-				array(
-					'formresults'	=> maybe_serialize($submission->formresults),
-				),
-				array(
-					'id'			=> $submission->id
-				)
-				);
-		}
+		$wpdb->update(
+			$this->submissionValuesTableName,
+			array(
+				'key'	=> $element->name,
+			),
+			array(
+				'key'	=> $oldElement->name
+			)
+		);
 
 		return $element->name;
 	}
