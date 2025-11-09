@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- insert user id element on new forms
 
 ### Changed
 - store form submission values in seperate table
