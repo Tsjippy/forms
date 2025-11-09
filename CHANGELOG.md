@@ -5,6 +5,7 @@
 
 ### Changed
 - store form submission values in seperate table
+- formresults to submission
 
 ### Fixed
 - store-non-numeric element id
