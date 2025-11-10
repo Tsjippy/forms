@@ -85,11 +85,11 @@ class EditFormResults extends DisplayFormResults{
 			$result = $wpdb->update(
 				$this->submissionValuesTableName,
 				array(
-					'key'		=> $key,
-					'value'		=> maybe_serialize($value)
+					'key'			=> $key,
+					'value'			=> maybe_serialize($value)
 				),
 				array(
-					'id'		=> $submissionId,
+					'submission_id'	=> $submissionId,
 				),
 				array(
 					'%s',
@@ -116,42 +116,113 @@ class EditFormResults extends DisplayFormResults{
 	/**
 	 * (un)Archive an existing form submission
 	 *
-	 * @param	bool	$archive	Whether we should archive the submission. Default false
+	 * @param	bool	$archive	Whether we should archive or unarchive the submission. Default false
 	 *
 	 * @return	true|WP_Error		The result or error on failure
 	 */
-	public function archiveSubmission($archive){
-		global $wpdb;
-
-		$submissionId	= $this->submission->id;
-		if(!is_numeric($submissionId)){
-			if(is_numeric($this->submissionId)){
-				$submissionId	= $this->submissionId;
-			}elseif(is_numeric($_POST['submission-id'])){
-				$submissionId	= $_POST['submission-id'];
-			}else{
-				SIM\printArray('No submission id found');
-				return false;
-			}
+	public function archiveSubSubmission($archive, $subId, $submissionId){
+		//we are archiving a sub-entry
+		if(!is_numeric($subId)){
+			return false;
 		}
 
-		$this->submission->edittime	= date("Y-m-d H:i:s");
+		global $wpdb;
 
-		//Update the database
+		// Add the index to the archived indexes
+		if($archive){
+			$result = $wpdb->insert(
+				$this->submissionValuesTableName,
+				array(
+					'submission_id'	=> $submissionId,
+					'key'			=> 'archived_indexes',
+					'value'			=> $subId
+				),
+				array(
+					'%d',
+					'%s',
+					'%s'
+				)
+			);
+		}
+		
+		// Remove the index from the archived indexes
+		else{
+			$result = $wpdb->delete(
+				$this->submissionValuesTableName,
+				array(
+					'submission_id'	=> $submissionId,
+					'key'			=> 'archived_indexes',
+					'value'			=> $subId
+				)
+			);
+		}
+
+		if($wpdb->last_error !== ''){
+			$message	= $wpdb->print_error();
+			if(defined('REST_REQUEST')){
+				return new \WP_Error('form error', $message);
+			}else{
+				SIM\printArray($message);
+			}
+		}elseif(!$result){
+			$message	= "No row with id $submissionId found";
+			if(defined('REST_REQUEST')){
+				return new \WP_Error('form error', $message);
+			}else{
+				SIM\printArray($message);
+				SIM\printArray($this->submission);
+			}
+		}	
+		
+		// We did not archive the whole submission, so stop here
+		if(!$this->checkIfAllArchived()){
+			//not all subentries are archived, no need to archive the whole submission
+			return "Entry with id {$this->submissionId} and sub-id $subId succesfully " . ($archive ? 'archived' : 'unarchived');
+		}
+
+		return false;
+	}
+
+	/**
+	 * (un)Archive an existing form submission
+	 *
+	 * @param	bool	$archive	Whether we should archive or unarchive the submission. Default false
+	 *
+	 * @return	true|WP_Error		The result or error on failure
+	 */
+	public function archiveSubmission($archive, $subId = null){
+		global $wpdb;
+
+		if(is_numeric($this->submissionId)){
+			$submissionId	= $this->submissionId;
+		}elseif(is_numeric($_POST['submission-id'])){
+			$submissionId	= $_POST['submission-id'];
+		}elseif(!empty($this->submission->id)){
+			$submissionId	= $this->submission->id;
+		}else{
+			SIM\printArray('No submission id found');
+			return false;
+		}
+	
+		$result	= $this->archiveSubSubmission($archive, $subId, $submissionId);	
+
+		if($result){
+			return $result;
+		}
+
+		// Mark as (un)archived
 		$result = $wpdb->update(
 			$this->submissionTableName,
 			array(
 				'timelastedited'	=> date("Y-m-d H:i:s"),
-				'archived'			=> $archive,
-				'archivedsubs'		=> maybe_serialize($this->submission->archivedsubs)
+				'archived'			=> $archive
 			),
 			array(
 				'id'				=> $submissionId,
 			),
 			array(
 				'%s',
-				'%d',
-				'%s'
+				'%d'
 			)
 		);
 		
@@ -170,6 +241,8 @@ class EditFormResults extends DisplayFormResults{
 				SIM\printArray($message);
 				SIM\printArray($this->submission);
 			}
+		}else{
+			$message	= "Entry with id {$this->submissionId} succesfully " . ($archive ? 'archived' : 'unarchived');
 		}
 
 		if($archive){
@@ -178,7 +251,7 @@ class EditFormResults extends DisplayFormResults{
 			do_action('sim-forms-entry-archived', $this, $submissionId);
 		}
 		
-		return $result;
+		return $message;
 	}
 	
 	/**
@@ -250,14 +323,14 @@ class EditFormResults extends DisplayFormResults{
 
 				//there is no trigger value found in the results, check multi value array
 				if(
-					!empty($splitElementName) &&								// we should split
-					empty($this->submission->{$triggerName}) && 		// we don't have a triggerfield in the results
+					!empty($splitElementName) &&					// we should split
+					empty($this->submission->{$triggerName}) && 	// we don't have a triggerfield in the results
 					isset($this->submission->{$splitElementName})	// but we do have the splitted field
 				){
 					$archivedCounter	= 0;
 
 					//loop over all multi values
-					foreach((array)$this->submission->{$splitElementName} as $subId=>$sub){
+					foreach((array)$this->submission->{$splitElementName} as $subId => $sub){
 						if(
 							!is_array($sub)		||
 							(isset($sub['archived']) && 	// Archive entry exists
@@ -277,37 +350,8 @@ class EditFormResults extends DisplayFormResults{
 								strtotime($val) < strtotime($triggerValue)	// value is smaller than the trigger value
 							)
 						){
-							$this->submission->{$splitElementName}[$subId]['archived'] = true;
-
-							// add
-							if(empty($this->submission->archivedsubs)){
-								$this->submission->archivedsubs	= [$subId];
-							}elseif(!in_array($subId, $this->submission->archivedsubs)){
-								// only add if not yet there
-								$this->submission->archivedsubs[]	= $subId;
-							}
-							
-							//update in db
-							$this->checkIfAllArchived();
+							$this->archiveSubmission(true, $subId); 
 						}
-					}
-
-					if(count((array)$this->submission->{$splitElementName}) == $archivedCounter && !$this->submission->archived){
-						// Something went wrong in the past, mark submission as archived
-						$result = $wpdb->update(
-							$this->submissionTableName,
-							array(
-								'timelastedited'	=> date("Y-m-d H:i:s"),
-								'archived'			=> true
-							),
-							array(
-								'id'				=> $this->submission->id,
-							),
-							array(
-								'%s',
-								'%d'
-							)
-						);
 					}
 				}else{
 					//if the form value is equal to the trigger value it needs to be to be archived
@@ -323,14 +367,12 @@ class EditFormResults extends DisplayFormResults{
 	 * Checks if all sub entries are archived, if so archives the whole
 	 */
 	public function checkIfAllArchived(){
+		global $wpdb;
+
 		//check if all subfields are archived or empty
 		$allArchived = true;
 
 		$splitIds	= $this->formData->split;
-
-		if(!is_array($this->submission->archivedsubs)){
-			$this->submission->archivedsubs	= [];
-		}
 
 		foreach($splitIds as $id){
 			if(!$id){
@@ -348,30 +390,18 @@ class EditFormResults extends DisplayFormResults{
 				$elementName	= $matches[1];
 			}
 
-			if(isset($this->submission->{$elementName}) && count($this->submission->{$elementName}) > count($this->submission->archivedsubs)){
+			$archivedCount	= count($this->getSubmissionValue($this->submission->id, 'archived_indexes'));
+
+			// Check id there are still non archived entries
+			if(
+				isset($this->submission->{$elementName}) && 
+				count($this->submission->{$elementName}) > $archivedCount
+			){
 				$allArchived = false;
 			}
 		}
-		
-		//update and mark as archived if all entries are empty or archived
-		$this->archiveSubmission($allArchived);
-	}
 
-	/**
-	 * Checks if all sub entries are archived, if so archives the whole
-	 *
-	 * @param	object	$data	the data to check
-	 */
-	public function unArchiveAll($id){
-		if($this->submission->id != $id){
-			// Get the submission
-			$this->parseSubmissions(null, $id);
-		}
-
-		$this->submission->archivedsubs	= [];
-		
-		//update and mark as archived if all entries are empty or archived
-		$this->archiveSubmission(false);
+		return $allArchived;
 	}
 
 	/**

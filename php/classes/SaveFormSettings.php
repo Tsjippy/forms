@@ -124,8 +124,7 @@ class SaveFormSettings extends SimForms{
 			'timelastedited'		=> '%s',	
 			'userid'				=> '%d',	
 			'submitter_id'			=> '%d',
-			'archived'				=> '%d',
-			'archivedsubs'			=> '%s'
+			'archived'				=> '%d'
 		];
 
 		$this->tableFormats[$this->submissionTableName]	= apply_filters('forms-submission-table-formats', $formats, $this);

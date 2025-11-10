@@ -6,7 +6,7 @@ add_action('sim_forms_module_update', __NAMESPACE__.'\moduleUpdate');
 function moduleUpdate($oldVersion){
     global $wpdb;
 
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    require_once ABSPATH . 'wp-admin/install-helper.php';
     
     SIM\printArray($oldVersion);
 
@@ -351,8 +351,29 @@ function moduleUpdate($oldVersion){
     if($oldVersion < '8.9.7'){
         maybe_add_column($simForms->submissionTableName, 'submitter_id', "ALTER TABLE {$simForms->submissionTableName} ADD COLUMN `submitter_id` int");
 
-        $results    = $wpdb->get_results("SELECT * FROM $simForms->submissionTableName");
+        $results        = $wpdb->get_results("SELECT * FROM $simForms->submissionTableName");
+        $elsChangend    = [];
         foreach($results as &$result){
+            // change archivedsubs
+            $archivedsubs    = maybe_unserialize(maybe_unserialize($result->archivedsubs));
+            if(!empty($archivedsubs)){
+                foreach($archivedsubs as $i => $archivedsub){
+                    $wpdb->insert(
+                        $simForms->submissionValuesTableName,
+                        array(
+                            'submission_id'	=> $result->id,
+                            'key'			=> 'archived_indexes',
+                            'value'			=> $archivedsub
+                        ),
+                        array(
+                            '%d',
+                            '%s',
+                            '%s'
+                        )
+                    );
+                }
+            }
+
             $formresults    = maybe_unserialize(maybe_unserialize($result->formresults));
             if(empty($formresults)){
                 continue;
@@ -404,7 +425,7 @@ function moduleUpdate($oldVersion){
             unset($formresults['formid']);
 
             foreach($formresults as $key => $value){
-                if(empty($value)){
+                if(empty($value) || str_contains($key, '[') || str_contains($key, ']')){
                     continue;
                 }
 
@@ -421,7 +442,7 @@ function moduleUpdate($oldVersion){
                 $key	= strtolower($key);
 
                 // Keep only valid chars
-                $key = preg_replace('/[^a-zA-Z0-9_]/', '', $key);
+                $key = preg_replace('/[^a-zA-Z0-9_]/', '_', $key);
 
                 // Remove ending _
                 $key	= trim($key, " \n\r\t\v\0_");
@@ -429,10 +450,11 @@ function moduleUpdate($oldVersion){
                 // Make sure the first char is a letter or _
                 $key[0] = preg_replace('/[^a-zA-Z_]/', '_', $key[0]);    
                 
-                if($oldKey !== $key){
+                if($oldKey !== $key && !in_array($key, $elsChangend)){
                     // Update form element name
-                    $wpdb->query("UPDATE `wp_sim_form_elements` SET `name`='$key' WHERE `name`='$oldKey'");
-                    SIM\printArray("Changed key '$oldKey' to '$key' for submission id $result->id");
+                    $wpdb->query("UPDATE `$simForms->elTableName` SET `name`='$key' WHERE `name`='$oldKey'");
+
+                    $elsChangend[$oldKey] = $key;
                 }
 
                 $value  = maybe_serialize($value);
@@ -453,6 +475,7 @@ function moduleUpdate($oldVersion){
                 );
             }
         }
+        SIM\printArray($elsChangend);
 
         // rename user id input elements to userid
         $wpdb->query("UPDATE `$simForms->elTableName` SET `name`='userid' WHERE `name`='user-id' OR `name`='user_id'");
@@ -464,7 +487,7 @@ function moduleUpdate($oldVersion){
             from
                 $simForms->elTableName
             where
-                $simForms->elTableName.form_id = wp_sim_forms.id
+                $simForms->elTableName.form_id = $simForms->tableName.id
             )"
         );
 
@@ -507,10 +530,10 @@ function moduleUpdate($oldVersion){
 
         $path	= MODULE_PATH."/js/dynamic";
 
-        if ( $wp_filesystem->delete( $path, true ) ) {
-            echo 'Folder deleted successfully.';
-        } else {
-            echo 'Failed to delete folder.';
+        $wp_filesystem->delete( $path, true );
+
+        foreach(['archivedsubs', 'formresults'] as $columnName){
+            maybe_drop_column( $simForms->submissionTableName, $columnName, "ALTER TABLE $simForms->submissionTableName DROP COLUMN $columnName");
         }
     }
 }

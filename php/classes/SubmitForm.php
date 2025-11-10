@@ -350,7 +350,7 @@ class SubmitForm extends SaveFormSettings{
 
 		$this->submission->archived 		= false;
 
-		$formUrl	= $formresults['formurl'];
+		$formUrl							= $formresults['formurl'];
 			
 		//remove the action and the formname
 		unset($formresults['formname']);
@@ -374,28 +374,16 @@ class SubmitForm extends SaveFormSettings{
 					isset($matches[1]) && 
 					is_array($formresults[$matches[1]])
 				){
+					// remove empty entries
+					$results = SIM\cleanUpNestedArray($formresults[$matches[1]]);
+
 					// loop over all the sub entries of the split field to see if they are empty
-					foreach($formresults[$matches[1]] as $index=>&$sub){
-						$empty	= true;
-						if(is_array($sub)){
-							foreach($sub as $s){
-								if(!empty($s)){
-									$empty	= false;
-									break;
-								}
-							}
-						}
-
-						if($empty){
-							// remove from results
-							unset($formresults[$matches[1]][$index]);
-						}
-
+					foreach($results as $index => &$sub){
 						$sub['elementindex']	= $index; // store the elementname so we can get the original element for editing
 					}
 
 					// reindex
-					$formresults[$matches[1]] = array_values(	$formresults[$matches[1]]);
+					$formresults[$matches[1]] = array_values($results);
 				}
 			}
 		}
@@ -447,13 +435,10 @@ class SubmitForm extends SaveFormSettings{
 					$this->processFiles([$result], $key);
 					$result	= $this->submission->{$key}[0];
 				}
-			}
 
-			// Insert Submission Data
-			foreach($formresults as $key => $value){
-				$value	= SIM\cleanUpNestedArray($value);
+				$result	= SIM\cleanUpNestedArray($result);
 
-				if(empty($value)){
+				if(empty($result)){
 					continue;
 				}
 
@@ -461,7 +446,7 @@ class SubmitForm extends SaveFormSettings{
 				$data	= [
 					'submission_id'	=> $this->submission->id,
 					'key'			=> $key,
-					'value' 		=> $value
+					'value' 		=> $result
 				];
 
 				$this->insertOrUpdateData(
@@ -503,7 +488,7 @@ class SubmitForm extends SaveFormSettings{
 					}
 				}
 
-				//update in the _users table
+				//update in the users table
 				if(isset($userData[$key])){
 					if($subKey){
 						$userData[$key][$subKey]		= $result;

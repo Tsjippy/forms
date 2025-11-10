@@ -271,7 +271,7 @@ class DisplayFormResults extends DisplayForm{
 		global $wpdb;
 
 		return maybe_unserialize($wpdb->get_var(
-			$wpdb->prepare("SELECT * FROM %i WHERE submission_id = %d and key=%s", $this->submissionValuesTableName, $submissionId, $key),
+			$wpdb->prepare("SELECT * FROM %i WHERE submission_id = %d and `key`=%s", $this->submissionValuesTableName, $submissionId, $key),
 		));
 	}
 
@@ -315,7 +315,7 @@ class DisplayFormResults extends DisplayForm{
 		 */
 		// Form Id
 		if(isset($this->formData->id)){
-			$where[]	=  "form_id=%d";
+			$where[]	= "form_id=%d";
 			$values[]	= $this->formData->id; 
 		}
 		
@@ -532,7 +532,7 @@ class DisplayFormResults extends DisplayForm{
 	}
 
 	/**
-	 * creates seperate entries for each sub-submission
+	 * Creates seperate entries for each sub-submission
 	 *
 	 * @param	string	$splitElementName	The name of the element the results should be split on
 	 */
@@ -544,7 +544,7 @@ class DisplayFormResults extends DisplayForm{
 				continue;
 			}
 
-			$this->submission->archivedsubs	= maybe_unserialize($this->submission->archivedsubs);
+			$archivedSubs	= $this->getSubmissionValue($this->submission->id, 'archived_indexes');
 
 			// loop over all entries of the split key
 			foreach($this->submission->{$splitElementName} as $subKey => $subSubmission){
@@ -572,8 +572,9 @@ class DisplayFormResults extends DisplayForm{
 				// Check if archived
 				if(
 					(
-						is_array($this->submission->archivedsubs) && 
-						in_array($subKey, $this->submission->archivedsubs)
+						!empty($archivedSubs) &&
+						is_array($archivedSubs) &&
+						in_array($subKey, $archivedSubs)
 					)	||
 					$subSubmission['archived']
 				){

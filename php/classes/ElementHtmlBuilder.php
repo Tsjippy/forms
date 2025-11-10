@@ -286,7 +286,7 @@ class ElementHtmlBuilder extends SimForms{
 			$this->submissions	= $this->parentInstance->submissions;
 		}
 
-		// Check if we should inlcude previous submitted values
+		// Check if we should include previous submitted values
 		$prevValues		= '';
 
 		if($returnArray){

@@ -329,15 +329,12 @@ function removeSubmission(){
 	return "Entry with id {$_POST['submission-id']} succesfully removed";
 }
 
-// Archive or unarchive a (sub)submission
+/**
+ * Archive or unarchive a subsubmission
+ */
 function archiveSubmission(){
 	$formTable					= new EditFormResults($_POST);
 	$formTable->submissionId	= $_POST['submission-id'];
-
-	$formTable->parseSubmissions(null, $formTable->submissionId);
-
-	$formTable->submission->archivedsubs	= maybe_unserialize($formTable->submission->archivedsubs);
-
 	$action						= $_POST['action'];
 
 	if($action	== 'archive'){
@@ -346,37 +343,12 @@ function archiveSubmission(){
 		$archive = false;
 	}
 
+	$subId		= null;
 	if(isset($_POST['subid']) && is_numeric($_POST['subid'])){
-		// Reset the submission to the un-splitted one
-		$formTable->submission	= $formTable->submissions[0];
-
-		$subId					= $_POST['subid'];
-		$message				= "Entry with id {$formTable->submissionId} and subid $subId succesfully {$action}d";
-
-		if($archive){
-			// add
-			if(empty($formTable->submission->archivedsubs)){
-				$formTable->submission->archivedsubs	= [$subId];
-			}elseif(!in_array($subId, $formTable->submission->archivedsubs)){
-				// only add if not yet there
-				$formTable->submission->archivedsubs[]	= $subId;
-			}
-		}else{
-			// remove
-			$formTable->submission->archivedsubs	= array_diff($formTable->submission->archivedsubs, [$subId]);
-		}
-		
-		//check if all subfields are archived or empty
-		$formTable->checkIfAllArchived();
-	}else{
-		$message					= "Entry with id {$formTable->submissionId} succesfully {$action}d";
-
-		if($archive){
-			$formTable->archiveSubmission($archive);
-		}else{
-			$formTable->unArchiveAll($formTable->submissionId);
-		}
+		$subId		= $_POST['subid'];
 	}
+	
+	$message	= $formTable->archiveSubmission($archive, $subId);
 	
 	return $message;
 }

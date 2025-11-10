@@ -266,7 +266,6 @@ class SimForms{
 			userid mediumint(9) NOT NULL,
 			submitter_id mediumint(9) NOT NULL,
 			archived BOOLEAN,
-			archivedsubs tinytext,
 			PRIMARY KEY  (id)
 		) $charsetCollate;";
 
@@ -1112,6 +1111,32 @@ class SimForms{
 			$displayForm	= new DisplayForm($atts);
 			return $displayForm->showForm();
 		}
+	}
+
+	/**
+	 * Get submission value
+	 * 
+	 * @param	int		$submissionId	The id of a submission
+	 * @param	string	$key			The key of the submission value
+	 */
+	public function getSubmissionValue($submissionId, $key){
+		global $wpdb;
+
+		$results	= $wpdb->get_col(
+			$wpdb->prepare("SELECT `value` FROM %i WHERE submission_id = %d AND `key` = %s", $this->submissionValuesTableName, $submissionId, $key)
+		);
+
+		if(count($results) == 1){
+			$result	= $results[0];
+		}
+
+		if(is_array($results)){
+			$results = array_map(function($value){
+				return maybe_unserialize($value);
+			}, $results);
+		}
+
+		return maybe_unserialize($result);
 	}
 
 	/**
