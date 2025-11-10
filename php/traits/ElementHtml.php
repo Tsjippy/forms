@@ -38,14 +38,65 @@ trait ElementHtml{
 		$this->defaultArrayValues	= [];
 
 		foreach(SIM\getUserAccounts(false, false, [], [], [], true) as $user){
-			$defaultArrayValues['all_users'][$user->ID] = $user->display_name;
+			$this->defaultArrayValues['all_users'][$user->ID] = $user->display_name;
 		}
 
 		$this->defaultArrayValues	= apply_filters('sim_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formName);
 		
 		ksort($this->defaultArrayValues);
 	}
-    
+
+	/**
+	 * Gets the meta value from for an element
+	 */
+    function getMetaElementValue($elementNames){
+		if(empty($this->formData->save_in_meta)){
+			return '';
+		}
+
+		//only load usermeta once
+		if(!is_array($this->usermeta)){
+			//usermeta comes as arrays, only keep the first
+			$this->usermeta	= [];
+			foreach(get_user_meta($this->userId) as $key => $meta){
+				$this->usermeta[$key]	= $meta[0];
+			}
+			$this->usermeta	= apply_filters('sim_forms_load_userdata', $this->usermeta, $this->userId);
+		}
+
+		$metaValue	= '';
+	
+		if(count($elementNames) == 1){
+			//non array name
+			$elementName			= $elementNames[0];
+
+			if(isset($this->usermeta[$elementName])){
+				$metaValue	= (array)maybe_unserialize($this->usermeta[$elementName]);
+			}
+		}elseif(!empty($this->usermeta[$elementNames[0]])){
+			//an array of values, we only want a specific one
+			$metaValue	= (array)maybe_unserialize($this->usermeta[$elementNames[0]]);
+			
+			unset($elementNames[0]);
+
+			//loop over all the subkeys, and store the value until we have our final result
+			$resultFound	= false;
+			foreach($elementNames as $v){
+				if(isset($metaValue[$v])){
+					$metaValue 		= (array)$metaValue[$v];
+					$resultFound	= true;
+				}
+			}
+
+			// somehow it does not exist, return an empty value
+			if(!$resultFound){
+				$metaValue	= '';
+			}
+		}
+
+		return $metaValue;
+	}
+
 	/**
 	 * Gets the prefilled values of an element
 	 *
@@ -54,11 +105,6 @@ trait ElementHtml{
 	 * @return	array					The array of values
 	 */
 	function getElementValues($element){
-		$values	= [
-			'defaults'	=> [],
-			'metavalue'	=> []
-		];
-
 		// Do not return default values when requesting the html over rest api
 		if(defined('REST_REQUEST')){
 			//return $values;
@@ -67,12 +113,20 @@ trait ElementHtml{
 		if(in_array($element->type, $this->nonInputs) && $element->type != 'datalist'){
 			return [];
 		}
+		
+		$values	= [
+			'defaults'	=> [],
+			'metavalue'	=> []
+		];
 
 		$this->buildDefaultsArray();
 
 		//get the elementName, remove [] and split on remaining [
 		$elementNames		= explode('[', trim($element->name, '[]'));
 
+		/**
+		 * Gets values from the element settings
+		 */
 		if(!empty($element->valuelist)){
 			$elementValues	= explode("\n", $element->valuelist);
 
@@ -91,44 +145,7 @@ trait ElementHtml{
 		}
 		
 		//retrieve meta values if needed
-		if(!empty($this->formData->save_in_meta)){
-			//only load usermeta once
-			if(!is_array($this->usermeta)){
-				//usermeta comes as arrays, only keep the first
-				$this->usermeta	= [];
-				foreach(get_user_meta($this->userId) as $key=>$meta){
-					$this->usermeta[$key]	= $meta[0];
-				}
-				$this->usermeta	= apply_filters('sim_forms_load_userdata', $this->usermeta, $this->userId);
-			}
-		
-			if(count($elementNames) == 1){
-				//non array name
-				$elementName			= $elementNames[0];
-				if(isset($this->usermeta[$elementName])){
-					$values['metavalue']	= (array)maybe_unserialize($this->usermeta[$elementName]);
-				}
-			}elseif(!empty($this->usermeta[$elementNames[0]])){
-				//an array of values, we only want a specific one
-				$values['metavalue']	= (array)maybe_unserialize($this->usermeta[$elementNames[0]]);
-				
-
-				unset($elementNames[0]);
-				//loop over all the subkeys, and store the value until we have our final result
-				$resultFound	= false;
-				foreach($elementNames as $v){
-					if(isset($values['metavalue'][$v])){
-						$values['metavalue'] 	= (array)$values['metavalue'][$v];
-						$resultFound			= true;
-					}
-				}
-
-				// somehow it does not exist, return an empty value
-				if(!$resultFound){
-					$values['metavalue']	= '';
-				}
-			}
-		}
+		$values['metavalue']	= $this->getMetaElementValue($elementNames);
 		
 		//add default values
 		if(empty($element->multiple) || in_array($element->type, ['select', 'checkbox', 'radio'])){

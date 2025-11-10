@@ -179,7 +179,7 @@ class SubmitForm extends SaveFormSettings{
 					$to	= $email->else_to;
 				}
 			}elseif($email->email_to == 'fixed'){
-				$to		= $this->processPlaceholders($email->to);
+				$to		= $this->processPlaceholders($email->to, $replaceValues);
 
 				// if no e-mail found, find any numbers and assume they are user ids
 				// than replace the id with the e-mail of that user
@@ -212,8 +212,8 @@ class SubmitForm extends SaveFormSettings{
 				continue;
 			}
 
-			$subject	= $this->processPlaceholders($email->subject);
-			$message	= $this->processPlaceholders($email->message);
+			$subject	= $this->processPlaceholders($email->subject, $replaceValues);
+			$message	= $this->processPlaceholders($email->message, $replaceValues);
 
 			$headers	= $email->headers;
 			if(!is_array($headers)){
@@ -229,7 +229,7 @@ class SubmitForm extends SaveFormSettings{
 			}
 			
 			if(is_string($email->files)){
-				$files		= $this->processPlaceholders($email->files);
+				$files		= $this->processPlaceholders($email->files, $replaceValues);
 
 				if(is_string($files)){
 					$files		= explode(',', trim($files));
@@ -315,7 +315,7 @@ class SubmitForm extends SaveFormSettings{
 		$this->getForm($this->submission->form_id);
 
 		// The user id of the current user
-		$this->userId	= $this->user->ID;
+		$this->userId						= $this->user->ID;
 
 		// Check if we are submitting for another user
 		if(isset($_POST['userid']) && is_numeric($_POST['userid'])){
@@ -330,13 +330,15 @@ class SubmitForm extends SaveFormSettings{
 			}
 		}
 
+		$formresults 						= $_POST;
+
 		$this->submission->timecreated		= date("Y-m-d H:i:s");
 
 		$this->submission->timelastedited	= date("Y-m-d H:i:s");
 		
-		$this->submission->userid			= $this->userId;
-
-		$formresults 		= $_POST;
+		$this->submission->userid			= $formresults['userid'];
+		
+		$this->submission->submitter_id		= $this->userId;
 
 		// check for required empty elements
 		foreach($this->formElements as $element){
@@ -424,6 +426,10 @@ class SubmitForm extends SaveFormSettings{
 			// Insert Submission
 			$this->submission->id	= $this->insertOrUpdateData($this->submissionTableName, $this->submission);
 
+			if(is_wp_error($this->submission->id)){
+				return $this->submission->id;
+			}
+
 			//sort arrays
 			foreach($formresults as $key => &$result){
 				if(is_array($result)){
@@ -445,6 +451,13 @@ class SubmitForm extends SaveFormSettings{
 
 			// Insert Submission Data
 			foreach($formresults as $key => $value){
+				$value	= SIM\cleanUpNestedArray($value);
+
+				if(empty($value)){
+					continue;
+				}
+
+				//insert the data
 				$data	= [
 					'submission_id'	=> $this->submission->id,
 					'key'			=> $key,

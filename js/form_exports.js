@@ -330,7 +330,7 @@ export function updateMultiStepControls(form){
 
 	// check if this is the last visible
 	let currentFormstep		= form.querySelector('.formstep:not(.step-hidden)');
-	if(visibleFormsteps[visibleFormsteps.length-1] == currentFormstep){
+	if(visibleFormsteps[visibleFormsteps.length - 1] == currentFormstep){
 		// make the submit button visible
 		form.querySelector('.next-button').classList.add('hidden');
 		form.querySelector('.form-submit ').classList.remove('hidden');

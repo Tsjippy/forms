@@ -451,9 +451,7 @@ trait CreateJs{
         }
 
         if(!empty($tabJs)){
-            $tabJs  = "\n\n\t\tthis.forms.forEach(form => {
-                $tabJs
-            });";
+            $tabJs  = "\n\n\t\tthis.forms.forEach(form => {\n\t\t\t$tabJs\n\t\t});";
         }
 
         // Process get variables in the url

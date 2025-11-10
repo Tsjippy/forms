@@ -153,13 +153,13 @@ class DisplayFormResults extends DisplayForm{
 				if(in_array($name, $colNames)){
 					$usedCols[]	= $name;
 				}else{
-					$or[]			.= "meta_key = %s ";
+					$or[]			.= "%s";
 					$values[]		 = $name;
 				}
 			}
 		}
 
-		$where[]	= '('.implode(' AND ', $or).')';
+		$where[]	= 'meta_key IN ('.implode(',', $or).')';
 
 		$submissions = [];
 		/**
@@ -270,9 +270,9 @@ class DisplayFormResults extends DisplayForm{
 	public function getSubmissionValue($submissionId, $key){
 		global $wpdb;
 
-		return $wpdb->get_var(
+		return maybe_unserialize($wpdb->get_var(
 			$wpdb->prepare("SELECT * FROM %i WHERE submission_id = %d and key=%s", $this->submissionValuesTableName, $submissionId, $key),
-		);
+		));
 	}
 
 	/**

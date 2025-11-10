@@ -122,7 +122,8 @@ class SaveFormSettings extends SimForms{
 			'form_id'				=> '%d',	
 			'timecreated'			=> '%s',	
 			'timelastedited'		=> '%s',	
-			'userid'				=> '%d',
+			'userid'				=> '%d',	
+			'submitter_id'			=> '%d',
 			'archived'				=> '%d',
 			'archivedsubs'			=> '%s'
 		];
@@ -320,6 +321,8 @@ class SaveFormSettings extends SimForms{
 		foreach($data as $index => $value){
 			unset($data[$index]);
 
+			$value	= SIM\cleanUpNestedArray($value);
+
 			if(!empty($value)){
 				$value	= maybe_serialize($value);
 			}
@@ -499,77 +502,6 @@ class SaveFormSettings extends SimForms{
 				$element->priority	= $newIndexes[$element->id];
 
 				$this->updatePriority($element);
-			}
-		}
-	}
-
-	/**
-	 * Checks if the current form exists in the db. If not, inserts it
-	 */
-	public function maybeInsertForm($formId=''){
-		global $wpdb;
-
-		if(!isset($this->formName)){
-			return new WP_ERROR('forms', 'No formname given');
-		}
-		
-		$query	= "SELECT * FROM {$this->tableName} WHERE `name` = '{$this->formName}'";
-		if(is_numeric($formId)){
-			$query	.= " OR id=$formId";
-		}
-		//check if form row already exists
-		if(!$wpdb->get_var($query)){
-			//Create a new form row
-			$this->insertForm();
-		}
-	}
-
-	/**
-	 * Deletes a form
-	 *
-	 * @param	int		$formId	The id of the form to be deleted
-	 * @param	int		$pageId	The id of a page with a formbuilder shortcode
-	 *
-	 * @return	string			The deletion result
-	*/
-	public  function deleteForm($formId){
-		global $wpdb;
-
-		// Remove the form
-		$wpdb->delete(
-			$this->tableName,
-			['id' => $formId],
-			['%d']
-		);
-
-		// remove the form elements
-		$wpdb->delete(
-			$this->elTableName,
-			['form_id' => $formId],
-			['%d']
-		);
-
-		// remove the form submissions
-		$wpdb->delete(
-			$this->submissionTableName,
-			['form_id' => $formId],
-			['%d']
-		);
-
-		$query		= "SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[formbuilder formname={$this->formData->name}]%'";
-		$results	= $wpdb->get_results ($query);
-
-		// remove the shortcode from the page
-		foreach($results as $postId){
-			$post	= get_post($postId);
-
-			$post->post_content	= str_replace("[formbuilder formname={$this->formData->name}]", '', $post->post_content);
-
-			// delete post
-			if(empty($post->post_content)){
-				wp_delete_post($post->ID);
-			}else{
-				wp_update_post( $post );
 			}
 		}
 	}

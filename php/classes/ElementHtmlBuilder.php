@@ -530,8 +530,6 @@ class ElementHtmlBuilder extends SimForms{
 
 			$this->valueHtml	= "value='$this->selectedValue'";
 		}
-
-		return;
 	}
 
 	/**

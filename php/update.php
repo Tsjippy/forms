@@ -354,7 +354,9 @@ function moduleUpdate($oldVersion){
         $results    = $wpdb->get_results("SELECT * FROM $simForms->submissionTableName");
         foreach($results as &$result){
             $formresults    = maybe_unserialize(maybe_unserialize($result->formresults));
-
+            if(empty($formresults)){
+                continue;
+            }
             $userId         = $result->userid;
             if(isset($formresults['userid'])){
                 $userId = $formresults['userid'];
@@ -428,11 +430,14 @@ function moduleUpdate($oldVersion){
                 $key[0] = preg_replace('/[^a-zA-Z_]/', '_', $key[0]);    
                 
                 if($oldKey !== $key){
+                    // Update form element name
+                    $wpdb->query("UPDATE `wp_sim_form_elements` SET `name`='$key' WHERE `name`='$oldKey'");
                     SIM\printArray("Changed key '$oldKey' to '$key' for submission id $result->id");
                 }
 
                 $value  = maybe_serialize($value);
 
+                // insert the value
                 $wpdb->insert(
                     $simForms->submissionValuesTableName,
                     [
@@ -447,6 +452,65 @@ function moduleUpdate($oldVersion){
                     ]
                 );
             }
+        }
+
+        // rename user id input elements to userid
+        $wpdb->query("UPDATE `$simForms->elTableName` SET `name`='userid' WHERE `name`='user-id' OR `name`='user_id'");
+
+        // Remove empty forms
+        $wpdb->query("DELETE FROM `$simForms->tableName` WHERE not exists
+            (
+            select 1
+            from
+                $simForms->elTableName
+            where
+                $simForms->elTableName.form_id = wp_sim_forms.id
+            )"
+        );
+
+        // Insert userid element if needed
+        $formIds = $wpdb->get_col("select distinct id
+            from
+            $simForms->tableName as forms
+            where save_in_meta <> 1 AND not exists
+            (
+            select 1
+            from
+                $simForms->elTableName as elements
+            where
+                elements.form_id = forms.id and
+                elements.name = 'userid'
+            )"
+        );
+
+        foreach($formIds as $formId){
+
+            // Insert the userid element
+            $wpdb->insert(
+                $simForms->elTableName,
+                array(
+                    'form_id'				=> $formId,
+                    'type' 					=> 'number',
+                    'name'					=> 'userid',
+                    'default_value' 		=> 'user_id',
+                    'hidden'				=> true,
+                    'priority'				=> 1
+                )
+            );
+        }
+
+        //remove dynamic js files
+        require_once( ABSPATH . 'wp-admin/includes/file.php' );
+
+        WP_Filesystem();
+        global $wp_filesystem;
+
+        $path	= MODULE_PATH."/js/dynamic";
+
+        if ( $wp_filesystem->delete( $path, true ) ) {
+            echo 'Folder deleted successfully.';
+        } else {
+            echo 'Failed to delete folder.';
         }
     }
 }

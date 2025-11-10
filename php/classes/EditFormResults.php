@@ -16,6 +16,8 @@ class EditFormResults extends DisplayFormResults{
 	public function updateSubmission($key, $value){
 		global $wpdb;
 
+		$value	= SIM\cleanUpNestedArray($value);
+
 		$submissionId	= $this->submission->id;
 		if(!is_numeric($submissionId)){
 			if(is_numeric($this->submissionId)){
@@ -84,10 +86,10 @@ class EditFormResults extends DisplayFormResults{
 				$this->submissionValuesTableName,
 				array(
 					'key'		=> $key,
-					'value'		=> $value
+					'value'		=> maybe_serialize($value)
 				),
 				array(
-					'id'				=> $submissionId,
+					'id'		=> $submissionId,
 				),
 				array(
 					'%s',

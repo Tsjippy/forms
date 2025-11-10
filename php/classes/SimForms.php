@@ -395,6 +395,110 @@ class SimForms{
 			);
 		}
 	}
+
+	/**
+	 * Checks if the current form exists in the db. If not, inserts it
+	 */
+	public function maybeInsertForm($formId=''){
+		global $wpdb;
+
+		if(!isset($this->formName)){
+			return new WP_ERROR('forms', 'No formname given');
+		}
+		
+		$query	= "SELECT * FROM {$this->tableName} WHERE `name` = '{$this->formName}'";
+		if(is_numeric($formId)){
+			$query	.= " OR id=$formId";
+		}
+		//check if form row already exists
+		if(!$wpdb->get_var($query)){
+			//Create a new form row
+			$this->insertForm();
+		}
+	}
+
+	/**
+	 * Deletes a form
+	 *
+	 * @param	int		$formId	The id of the form to be deleted
+	 *
+	 * @return	string			The deletion result
+	*/
+	public  function deleteForm($formId){
+		global $wpdb;
+
+		// Remove the form
+		$wpdb->delete(
+			$this->tableName,
+			['id' => $formId],
+			['%d']
+		);
+
+		// remove the form elements
+		$wpdb->delete(
+			$this->elTableName,
+			['form_id' => $formId],
+			['%d']
+		);
+
+		// emails
+		$wpdb->delete(
+			$this->formEmailTable,
+			['form_id' => $formId],
+			['%d']
+		);
+
+		// reminders
+		$wpdb->delete(
+			$this->formReminderTable,
+			['form_id' => $formId],
+			['%d']
+		);
+
+		//sortcodes
+		$wpdb->delete(
+			$this->shortcodeTable,
+			['form_id' => $formId],
+			['%d']
+		);
+
+		// shortcode setttings
+		$wpdb->delete(
+			$this->shortcodeColumnSettingsTable,
+			['form_id' => $formId],
+			['%d']
+		);
+		
+		// submission values
+		$wpdb->query("DELETE sv FROM {$this->submissionValuesTableName} sv
+			JOIN {$this->submissionTableName} s ON sv.submission_id = s.id
+			WHERE s.form_id = $formId");
+
+		// remove the form submissions
+		$wpdb->delete(
+			$this->submissionTableName,
+			['form_id' => $formId],
+			['%d']
+		);
+
+		// update or delete posts with this form
+		$query		= "SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[formbuilder formname={$this->formData->name}]%'";
+		$results	= $wpdb->get_results ($query);
+
+		// remove the shortcode from the page
+		foreach($results as $postId){
+			$post	= get_post($postId);
+
+			$post->post_content	= str_replace("[formbuilder formname={$this->formData->name}]", '', $post->post_content);
+
+			// delete post
+			if(empty($post->post_content)){
+				wp_delete_post($post->ID);
+			}else{
+				wp_update_post( $post );
+			}
+		}
+	}
 	
 	/**
 	 * Gets all forms from the db
