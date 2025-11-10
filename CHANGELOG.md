@@ -10,6 +10,7 @@
 
 ### Fixed
 - store-non-numeric element id
+- nug with form submission dat which is an array
 
 ### Updated
 
