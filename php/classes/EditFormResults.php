@@ -367,8 +367,6 @@ class EditFormResults extends DisplayFormResults{
 	 * Checks if all sub entries are archived, if so archives the whole
 	 */
 	public function checkIfAllArchived(){
-		global $wpdb;
-
 		//check if all subfields are archived or empty
 		$allArchived = true;
 

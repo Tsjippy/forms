@@ -43,6 +43,7 @@ class SimForms{
 	public $emailSettings;
 	public $formReminder;
 	protected $userIdElementName;
+	protected $tableFormats;
 
 	public function __construct(){
 		global $wpdb;
@@ -97,6 +98,8 @@ class SimForms{
 		}else{
 			$this->editRights		= false;
 		}
+
+		$this->tableFormats();
 	}
 
 	/**
@@ -275,12 +278,175 @@ class SimForms{
 		$sql = "CREATE TABLE {$this->submissionValuesTableName} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			submission_id	int NOT NULL,
+			sub_id	int,
 			`key` text NOT NULL,
 			`value` longtext NOT NULL,
 			PRIMARY KEY  (id)
 		) $charsetCollate;";
 
 		maybe_create_table($this->submissionValuesTableName, $sql );
+	}
+
+		/**
+	 * Defines the formats of each column in each table for use in $wpdb->insert and $wpdb->update
+	 */
+	private function tableFormats(){
+		// Form Settings
+		$formats			= [
+			'name'					=> '%s',
+			'version'				=> '%s',
+			'button_text'			=> '%s',
+			'succes_message'		=> '%s',
+			'include_id'			=> '%d',
+			'form_name'				=> '%s',
+			'save_in_meta'			=> '%d',
+			'reminder_frequency'	=> '%s',
+			'reminder_amount'		=> '%s',
+			'reminder_period'		=> '%s',
+			'reminder_conditions'	=> '%s',
+			'reminder_startdate'	=> '%s',
+			'form_url'				=> '%s',
+			'actions'				=> '%s',
+			'autoarchive'			=> '%d',
+			'autoarchive_el'		=> '%d',
+			'autoarchive_value'		=> '%s',
+			'split'					=> '%s',
+			'full_right_roles'		=> '%s',
+			'submit_others_form'	=> '%s',
+			'upload_path'			=> '%s'
+		];
+
+		$this->tableFormats[$this->tableName]			= apply_filters('forms-form-table-formats', $formats, $this);
+
+		// From Reminder Settings
+		$formats			= [
+			'form_id'				=> '%d',
+			'frequency'				=> '%d',
+			'period'				=> '%s',
+			'reminder_startdate'	=> '%s',
+			'reminder_amount'		=> '%d',
+			'reminder_period'		=> '%s',
+			'window_start'			=> '%s',
+			'window_end'			=> '%s',
+			'conditions'			=> '%s'
+		];
+
+		$this->tableFormats[$this->formReminderTable]			= apply_filters('forms-form-reminder-formats', $formats, $this);
+
+		// Form Elements
+		$formats		= [
+			'form_id'				=> '%d',
+			'type'					=> '%s',
+			'priority'				=> '%d',
+			'width'					=> '%d',
+			'functionname'			=> '%s',
+			'foldername'			=> '%s',
+			'name'					=> '%s',
+			'nicename'				=> '%s',
+			'text'					=> '%s',
+			'html'					=> '%s',
+			'valuelist'				=> '%s',
+			'default_value'			=> '%s',
+			'default_array_value'	=> '%s',
+			'options'				=> '%s',
+			'required'				=> '%d',
+			'mandatory'				=> '%d',
+			'recommended'			=> '%d',
+			'wrap'					=> '%d',
+			'hidden'				=> '%d',
+			'multiple'				=> '%d',
+			'library'				=> '%d',
+			'editimage'				=> '%d',
+		  	'conditions'			=> '%s',
+			'remove'				=> '%s',
+			'add'					=> '%s',
+		];
+
+		$this->tableFormats[$this->elTableName]		= apply_filters('forms-element-table-formats', $formats, $this);
+
+		// Form Emails
+		$formats	= [
+			'form_id'				=> '%d',	
+			'email_trigger'			=> '%s',	
+			'submitted_trigger'		=> '%s',	
+			'conditional_field'		=> '%s',	
+			'conditional_fields'	=> '%s',
+			'conditional_value'		=> '%s',
+			'from_email'			=> '%s',
+			'from'					=> '%s',
+			'conditional_from_email'=> '%s',
+			'else_from'				=> '%s',
+			'email_to'				=> '%s',
+			'to'					=> '%s',
+			'conditional_email_to'	=> '%s',
+			'else_to'				=> '%s',
+			'subject'				=> '%s',
+			'message'				=> '%s',
+			'headers'				=> '%s',
+			'files'					=> '%s'
+		];
+
+		$this->tableFormats[$this->formEmailTable]	= apply_filters('forms-email-table-formats', $formats, $this);
+
+		// Form Submissions
+		$formats	= [
+			'form_id'				=> '%d',	
+			'timecreated'			=> '%s',	
+			'timelastedited'		=> '%s',	
+			'userid'				=> '%d',	
+			'submitter_id'			=> '%d',
+			'archived'				=> '%d'
+		];
+
+		$this->tableFormats[$this->submissionTableName]	= apply_filters('forms-submission-table-formats', $formats, $this);
+
+		// Form Submission Data
+		$formats	= [
+			'submission_id'			=> '%d',	
+			'sub_id'				=> '%d',	
+			'key'					=> '%s',	
+			'value'					=> '%s'
+		];
+
+		$this->tableFormats[$this->submissionValuesTableName]	= apply_filters('forms-submission-values-table-formats', $formats, $this);
+
+		// Table Settings
+		$formats	= [
+			'form_id'				=> '%d',
+			'title' 				=> '%s',
+			'default_sort'			=> '%s',	
+			'sort_direction'		=> '%s',
+			'filter'				=> '%s',	
+			'hide_row'				=> '%d',
+			'result_type'			=> '%s',
+			'split_table'			=> '%s',
+			'archived'				=> '%d',
+			'view_right_roles'		=> '%s',
+			'edit_right_roles'		=> '%s'
+		];
+
+		$this->tableFormats[$this->shortcodeTable]	= apply_filters('forms-shortcode-table-formats', $formats, $this);
+
+		// Column Settings
+		$formats	= [
+			'shortcode_id'			=> '%d',
+			'element_id'			=> '%s',
+			'width'					=> '%d',
+			'show'					=> '%d',	
+			'name'					=> '%s',	
+			'nice_name'				=> '%s',
+			'priority'				=> '%d',
+			'copy'					=> '%d',	
+			'view_right_roles'		=> '%s',
+			'edit_right_roles'		=> '%s'
+		];
+
+		$this->tableFormats[$this->shortcodeColumnSettingsTable]	= apply_filters('forms-shortcode-settings-table-formats', $formats, $this);
+
+		// Sort formats by key to make sure they are in the same order as the data
+		foreach($this->tableFormats as &$format){
+			ksort($format);
+		}
 	}
 
 	/**
@@ -1119,24 +1285,26 @@ class SimForms{
 	 * @param	int		$submissionId	The id of a submission
 	 * @param	string	$key			The key of the submission value
 	 */
-	public function getSubmissionValue($submissionId, $key){
+	public function getSubmissionValue($submissionId, $key, $returnArray=false){
 		global $wpdb;
 
 		$results	= $wpdb->get_col(
 			$wpdb->prepare("SELECT `value` FROM %i WHERE submission_id = %d AND `key` = %s", $this->submissionValuesTableName, $submissionId, $key)
 		);
 
-		if(count($results) == 1){
-			$result	= $results[0];
+		$results = array_map(function($value){
+			return maybe_unserialize($value);
+		}, $results);
+
+		if($returnArray){
+			return $results;
 		}
 
-		if(is_array($results)){
-			$results = array_map(function($value){
-				return maybe_unserialize($value);
-			}, $results);
-		}
+		if(empty($results)){
+			return '';
+		}	
 
-		return maybe_unserialize($result);
+		return $results[0];
 	}
 
 	/**

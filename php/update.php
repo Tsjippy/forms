@@ -351,6 +351,17 @@ function moduleUpdate($oldVersion){
     if($oldVersion < '8.9.7'){
         maybe_add_column($simForms->submissionTableName, 'submitter_id', "ALTER TABLE {$simForms->submissionTableName} ADD COLUMN `submitter_id` int");
 
+        $splitters    = [];
+        $results     = $wpdb->get_results("SELECT id, split FROM $simForms->tableName WHERE split IS NOT NULL AND split <> ''");
+        foreach($results as $result){
+            $splitters[$result->id] = [];
+
+            $elementIds    = maybe_unserialize($result->split);
+            foreach($elementIds as $elementId){
+                $splitters[$result->id][]  = explode('[', $wpdb->get_var("SELECT name FROM $simForms->elTableName WHERE id = $elementId"))[0];
+            }
+        }
+
         $results        = $wpdb->get_results("SELECT * FROM $simForms->submissionTableName");
         $elsChangend    = [];
         foreach($results as &$result){
@@ -378,6 +389,7 @@ function moduleUpdate($oldVersion){
             if(empty($formresults)){
                 continue;
             }
+
             $userId         = $result->userid;
             if(isset($formresults['userid'])){
                 $userId = $formresults['userid'];
@@ -413,6 +425,8 @@ function moduleUpdate($oldVersion){
             /**
              * Insert all into the new submission values table
              */
+
+            // unset unneeded values
             unset($formresults['submissiontime']);
             unset($formresults['edittime']);
             unset($formresults['formurl']);
@@ -426,6 +440,67 @@ function moduleUpdate($oldVersion){
 
             foreach($formresults as $key => $value){
                 if(empty($value) || str_contains($key, '[') || str_contains($key, ']')){
+                    continue;
+                }
+
+                // the current form has splitters and the current key is one of them
+                if(
+                    in_array($result->form_id, array_keys($splitters)) &&
+                    in_array($key, $splitters[$result->form_id])
+                ){
+                    // Split the data and insert each entry
+                    foreach($value as $index => $subValues){
+                        if(empty($subValues)){
+                            continue;
+                        }
+
+                        // Subvalues is an array itself
+                        if(is_array($subValues)){
+                            foreach($subValues as $subKey => $subValue){
+                                if(empty($subValue)){
+                                    continue;
+                                }
+
+                                // insert the value
+                                $wpdb->insert(
+                                    $simForms->submissionValuesTableName,
+                                    [
+                                        'submission_id' => $result->id,
+                                        'sub_id'        => $index,
+                                        'key'           => $subKey,
+                                        'value'         => maybe_serialize($subValue)
+                                    ],
+                                    [
+                                        '%d',
+                                        '%d',
+                                        '%s',
+                                        '%s'
+                                    ]
+                                );
+                            }
+                            continue;
+                        }
+
+                        // single value for the split entry
+                        // insert the value
+                        $wpdb->insert(
+                            $simForms->submissionValuesTableName,
+                            [
+                                'submission_id' => $result->id,
+                                'sub_id'        => $index,
+                                'key'           => $key,
+                                'value'         => maybe_serialize($subValues)
+                            ],
+                            [
+                                '%d',
+                                '%d',
+                                '%s',
+                                '%s'
+                            ]
+                        );
+                    }
+
+                    // skip to the next entry
                     continue;
                 }
 

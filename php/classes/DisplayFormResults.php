@@ -261,21 +261,6 @@ class DisplayFormResults extends DisplayForm{
 	}
 
 	/**
-	 * Get a specific submission value
-	 * @param	int			$submissionId	A submission id
-	 * @param	string		$key			The key of the value
-	 *
-	 * @return	array						array of results
-	 */
-	public function getSubmissionValue($submissionId, $key){
-		global $wpdb;
-
-		return maybe_unserialize($wpdb->get_var(
-			$wpdb->prepare("SELECT * FROM %i WHERE submission_id = %d and `key`=%s", $this->submissionValuesTableName, $submissionId, $key),
-		));
-	}
-
-	/**
 	 * Get formresults of the current form
 	 *
 	 * @param	int|array	$userId			Optional the user id to get the results of or an array of user ids. Default null
@@ -506,12 +491,6 @@ class DisplayFormResults extends DisplayForm{
 			$this->sortSubmissions($this->submissions);
 		}else{
 			$this->submissions		= $this->getSubmissions($userId, $submissionId, true);
-	
-			$this->processSplittedData();
-
-			if(empty($this->splittedSubmissions) && !empty($this->submissions)){
-				$this->splittedSubmissions	= $this->submissions;
-			}
 
 			$this->sortSubmissions($this->splittedSubmissions);
 
@@ -528,165 +507,6 @@ class DisplayFormResults extends DisplayForm{
 			$this->submission	= array_values($this->submissions)[0];
 		}elseif(!empty($submissionId)){
 			$this->submission	= $this->submissions[0];
-		}
-	}
-
-	/**
-	 * Creates seperate entries for each sub-submission
-	 *
-	 * @param	string	$splitElementName	The name of the element the results should be split on
-	 */
-	public function splitArrayedSubmission($splitElementName){
-
-		//loop over all submissions
-		foreach($this->submissions as $this->submission){
-			if(empty($this->submission->{$splitElementName})){
-				continue;
-			}
-
-			$archivedSubs	= $this->getSubmissionValue($this->submission->id, 'archived_indexes');
-
-			// loop over all entries of the split key
-			foreach($this->submission->{$splitElementName} as $subKey => $subSubmission){
-				// Should always be an array
-				if(!is_array($subSubmission)){
-					continue;
-				}
-
-				// Check if it has data
-				$hasData	= false;
-				foreach($subSubmission as $value){
-					if(!empty($value)){
-						$hasData = true;
-						break;
-					}
-				}
-
-				if(!$hasData){
-					continue;
-				}
-
-				// If it has data add as a seperate item to the submission data
-				$newSubmission	= clone $this->submission;
-
-				// Check if archived
-				if(
-					(
-						!empty($archivedSubs) &&
-						is_array($archivedSubs) &&
-						in_array($subKey, $archivedSubs)
-					)	||
-					$subSubmission['archived']
-				){
-					if($this->showArchived || isset($_REQUEST['id'])){
-						// mark the entry as archived
-						$newSubmission->archived	= true;
-					}else{
-						// do not add an archived sub value to the results
-						continue;
-					}
-				}
-
-				//Check if need to display
-				if(!empty($_REQUEST['subid']) && is_numeric($_REQUEST['subid']) && $_REQUEST['subid'] != $subKey){
-					continue;
-				}
-
-				// Add the array to the formresults array
-				$newSubmission = (object) array_merge((array) $this->submission, (array) $subSubmission);
-
-				// remove the index value from the copy
-				unset($newSubmission->{$splitElementName});
-
-				// Add the subkey
-				$newSubmission->subId			= $subKey;
-
-				// Copy the entry
-				$this->splittedSubmissions[]	= $newSubmission;
-			}
-		}
-	}
-
-	public function splitSubmission(){
-		$splitNames	= [];
-		foreach($this->formData->split as $id){
-			$splitNames[] = str_replace('[]', '', $this->getElementById($id, 'name'));
-		}
-
-		if(empty($this->submissions)){
-			$this->submissions	= [$this->submission];
-		}
-
-		//loop over all submissions
-		foreach($this->submissions as $this->submission){
-			if(empty($this->submission)){
-				continue;
-			}
-
-			// check how many entries we should make
-			$count	= 1;
-			foreach($splitNames as $splitName){
-				if(!is_array($this->submission->{$splitName})){
-					$this->submission->{$splitName}	= [$this->submission->{$splitName}];
-				}
-
-				$c	= count($this->submission->{$splitName});
-
-				if($c > $count){
-					$count	= $c;
-				}
-			}
-
-			// loop over
-			for($x = 0; $x < $count; $x++){
-				// create a new submission
-				$newSubmission	= clone $this->submission;
-
-				foreach($splitNames as $splitName){
-					if(isset($newSubmission->{$splitName}[$x])){
-						$newSubmission->{$splitName}	= $newSubmission->{$splitName}[$x];
-					}else{
-						$newSubmission->{$splitName}	= '';
-					}
-				}
-
-				// Add the subkey
-				$newSubmission->subId			= apply_filters('sim-formresults-split-subid', $x, $newSubmission, $this);
-
-				//add the new submission
-				$this->splittedSubmissions[]	= $newSubmission;
-			}
-		}
-	}
-
-	/**
-	 * This function creates seperated entries from entries with an splitted value
-	 */
-	public function processSplittedData(){
-		if(empty($this->formData->split)){
-			return;
-		}
-
-		// Get all the elements we should split the rows for
-		$splitElements				= $this->formData->split;
-
-		// Get the name of the first element
-		$splitElementName			= $this->getElementById($splitElements[0], 'name');
-
-		if(!$splitElementName){
-			return;
-		}
-
-		// Check if we are dealing with an split element with form name[X]name
-		preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $splitElementName, $matches);
-
-		$this->splittedSubmissions  = [];
-
-		if($matches && isset($matches[1])){
-			$splitElementName	= $matches[1];
-			$this->splitArrayedSubmission($splitElementName);
-		}else{
-			$this->splitSubmission();
 		}
 	}
 	

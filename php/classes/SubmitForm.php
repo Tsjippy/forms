@@ -303,6 +303,95 @@ class SubmitForm extends SaveFormSettings{
 	}
 
 	/**
+	 * remove empty splitted entries
+	 * 
+	 * @param	array	$formresults	The form results array
+	 */
+	public function parseSplittedData(&$formresults){
+		if(!isset($this->formData->split)){
+			return;
+		}
+
+		global $wpdb;
+		
+		// loop over all split elements
+		foreach($this->formData->split as $index => $id){
+			// get the name of the split element
+			$name	= $this->getElementById($id, 'name');
+
+			// Check if we are dealing with an split element with form name[X]name
+			preg_match('/(.*?)\[[0-9]\](\[.*?\])/', $name, $matches);
+
+			// Yes we are
+			if(
+				$matches && 
+				isset($matches[1]) && 
+				is_array($formresults[$matches[1]])
+			){
+				// remove empty entries
+				$results = SIM\cleanUpNestedArray($formresults[$matches[1]]);
+
+				// loop over all the sub entries of the split field to see if they are empty
+				foreach($results as $index => $subValues){
+					foreach($subValues as $subKey => $subValue){
+						if(empty($subValue)){
+							continue;
+						}
+
+						// insert the value
+						$wpdb->insert(
+							$this->submissionValuesTableName,
+							[
+								'submission_id' => $this->submission->id,
+								'sub_id'        => $index,
+								'key'           => $subKey,
+								'value'         => maybe_serialize($subValue)
+							],
+							[
+								'%d',
+								'%d',
+								'%s',
+								'%s'
+							]
+						);
+					}
+				}
+
+				// reindex
+				unset($formresults[$matches[1]]);
+			}
+			
+			// single value for the split entry
+			else{
+				// loop over all the sub entries of the split field to see if they are empty
+				foreach($formresults[$name] as $key => $subValue){
+					if(empty($subValue)){
+						continue;
+					}
+
+					$wpdb->insert(
+						$this->submissionValuesTableName,
+						[
+							'submission_id' => $this->submission->id,
+							'sub_id'        => $index,
+							'key'           => $key,
+							'value'         => maybe_serialize($subValue)
+						],
+						[
+							'%d',
+							'%d',
+							'%s',
+							'%s'
+						]
+					);
+				}
+
+				unset($formresults[$name]);
+			}
+		}
+	}
+
+	/**
 	 * Save a form submission to the db
 	 */
 	public function formSubmit(){
@@ -361,33 +450,6 @@ class SubmitForm extends SaveFormSettings{
 		unset($formresults['formurl']);
 		unset($formresults['form-id']);
 
-		// remove empty splitted entries
-		if(isset($this->formData->split)){
-			foreach($this->formData->split as $index => $id){
-				$name	= $this->getElementById($id, 'name');
-
-				// Check if we are dealing with an split element with form name[X]name
-				preg_match('/(.*?)\[[0-9]\](\[.*?\])/', $name, $matches);
-
-				if(
-					$matches && 
-					isset($matches[1]) && 
-					is_array($formresults[$matches[1]])
-				){
-					// remove empty entries
-					$results = SIM\cleanUpNestedArray($formresults[$matches[1]]);
-
-					// loop over all the sub entries of the split field to see if they are empty
-					foreach($results as $index => &$sub){
-						$sub['elementindex']	= $index; // store the elementname so we can get the original element for editing
-					}
-
-					// reindex
-					$formresults[$matches[1]] = array_values($results);
-				}
-			}
-		}
-
 		// Add a security hash for submissions from outside
 		$formresults['viewhash']		= wp_hash($this->submission->id);
 		
@@ -398,7 +460,7 @@ class SubmitForm extends SaveFormSettings{
 		 * @param object	$object			The SubmitForm Instance
 		 * @param bool		$update			Whether this is an update or an new submission
 		 */
-		$formresults 					= apply_filters('sim_before_saving_formdata', (object)$formresults, $this, false);
+		$formresults 					= (array) apply_filters('sim_before_saving_formdata', (object)$formresults, $this, false);
 
 		if(is_wp_error($formresults)){
 			return $formresults;
@@ -417,6 +479,11 @@ class SubmitForm extends SaveFormSettings{
 			if(is_wp_error($this->submission->id)){
 				return $this->submission->id;
 			}
+
+			/**
+			 * remove empty splitted entries
+			 */
+			$this->parseSplittedData($formresults);
 
 			//sort arrays
 			foreach($formresults as $key => &$result){
@@ -455,7 +522,7 @@ class SubmitForm extends SaveFormSettings{
 				);
 			}
 
-			$placeholders				= (array) $formresults;
+			$placeholders				= $formresults;
 
 			$placeholders['id']			= $this->submission->id;
 
