@@ -517,7 +517,7 @@ function moduleUpdate($oldVersion){
                 $key	= strtolower($key);
 
                 // Keep only valid chars
-                $key = preg_replace('/[^a-zA-Z0-9_]/', '_', $key);
+                $key = preg_replace('/[^a-zA-Z0-9_\[\]]/', '_', $key);
 
                 // Remove ending _
                 $key	= trim($key, " \n\r\t\v\0_");

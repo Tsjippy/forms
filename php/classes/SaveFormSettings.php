@@ -25,7 +25,7 @@ class SaveFormSettings extends SimForms{
 		$element->name	= strtolower($element->name);
 
 		// Keep only valid chars
-		$element->name = preg_replace('/[^a-zA-Z0-9_]/', '', $element->name);
+		$element->name = preg_replace('/[^a-zA-Z0-9_\[\]]/', '', $element->name);
 
 		// Remove ending _
 		$element->name	= trim($element->name, " \n\r\t\v\0_");
@@ -54,7 +54,20 @@ class SaveFormSettings extends SimForms{
 		$i = '';
 
 		// getElementByName returns false when no match found
-		while($this->getElementByName($elementName)){
+		while(true){
+			$existingElement	= $this->getElementByName($elementName);
+
+			if(
+				!$existingElement || 							// No existing element found
+				$existingElement->name != $element->name ||		// Different name found
+				( 
+					$update && 									// Updating existing element
+					$existingElement->id == $element->id 		// Same element
+				) 
+			){
+				break;
+			}
+
 			$i++;
 			
 			$elementName = "{$element->name}_$i";

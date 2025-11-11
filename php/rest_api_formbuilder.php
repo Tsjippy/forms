@@ -449,10 +449,12 @@ function addFormElement($copy=false){
 		$element->name	.= '_'.$element->type;
 	}
 	
-	//Give an unique name
-	$element->name		= $simForms->getUniqueName($element, $update, $oldElement, $simForms);
-	if(is_wp_error($element->name)){
-		return $element->name;
+	//Get an unique name if needed
+	if(!$update || $element->name != $oldElement->name){
+		$element->name		= $simForms->getUniqueName($element, $update, $oldElement, $simForms);
+		if(is_wp_error($element->name)){
+			return $element->name;
+		}
 	}
 
 	//Store info text in text column

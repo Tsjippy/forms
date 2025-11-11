@@ -1284,12 +1284,25 @@ class SimForms{
 	 * 
 	 * @param	int		$submissionId	The id of a submission
 	 * @param	string	$key			The key of the submission value
+	 * @param	int		$subId			The sub id in case of multiple values for the same key	
+	 * @param	bool	$returnArray	Wheter to return an array of values, default false
 	 */
-	public function getSubmissionValue($submissionId, $key, $returnArray=false){
+	public function getSubmissionValue($submissionId, $key, $subId='', $returnArray=false){
 		global $wpdb;
 
+		$query		= "SELECT `value` FROM %i WHERE submission_id = %d AND `key` = %s";
+		$values		= [
+			$submissionId, 
+			$key
+		];
+
+		if(is_numeric($subId)){
+			$query		.= " AND sub_id = %d";
+			$values[]	= $subId;
+		}
+		
 		$results	= $wpdb->get_col(
-			$wpdb->prepare("SELECT `value` FROM %i WHERE submission_id = %d AND `key` = %s", $this->submissionValuesTableName, $submissionId, $key)
+			$wpdb->prepare($query, $this->submissionValuesTableName, ...$values)
 		);
 
 		$results = array_map(function($value){
@@ -1305,61 +1318,6 @@ class SimForms{
 		}	
 
 		return $results[0];
-	}
-
-	/**
-	 * Get a single form submission
-	 *
-	 * @param	int		$submissionId	The id of a submission
-	 *
-	 * @return	object|false			The submission or false if not found
-	 */
-	public function getSubmission($submissionId){
-		global $wpdb;
-
-		// return an already loaded submission
-		if(!empty($this->submissions)){
-			foreach($this->submissions as $submission){
-				if($submission->id == $submissionId){
-					return $submission;
-				}
-			}
-		}
-
-		// Get the submission
-		$results	= $wpdb->get_results(
-			$wpdb->prepare("SELECT * FROM %i WHERE id = %d", $this->submissionTableName, $submissionId)
-		);
-
-		// Get the submission values
-		$formresults	= $wpdb->get_results(
-			$wpdb->prepare("SELECT `key`, `value`, sub_id FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, $submissionId)
-		);
-
-		$results	= apply_filters('sim_retrieved_formdata', $results, '', $this);
-
-		if(isset($results[0])){
-
-			$this->submission	= $results[0];
-
-			foreach($formresults as $formresult){
-				// support multiple values with same key
-				if(!empty($result->{$formresult->key})){
-					$results[0]->{$formresult->key}	= [
-						$results[0]->{$formresult->key},
-						maybe_unserialize($formresult->value)
-					];
-
-					continue;
-				}
-
-				$results[0]->{$formresult->key}	= maybe_unserialize($formresult->value);
-			}
-
-			return $this->submission;
-		}
-
-		return false;
 	}
 
 	/**

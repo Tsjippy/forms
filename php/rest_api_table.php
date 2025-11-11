@@ -364,16 +364,16 @@ function getInputHtml(){
 	// Get the form id from the submission and load the form
 	$formTable->getForm($formTable->submission->form_id);
 
-	$userId			= $formTable->submission->userid;
+	$userId											= $formTable->submission->userid;
 
 	$formTable->userId								= $userId;
 	$formTable->elementHtmlBuilder->userId			= $userId;
 	$formTable->elementHtmlBuilder->formData		= $formTable->formData;
 	$formTable->elementHtmlBuilder->formElements	= $formTable->formElements;
 
-	$elementId		= sanitize_text_field($_POST['element-id']);
+	$elementId										= sanitize_text_field($_POST['element-id']);
 
-	$element		= $formTable->getElementById($elementId);
+	$element										= $formTable->getElementById($elementId);
 
 	if(!$element){
 		return new \WP_Error('No element found', "No element found with id '$elementId'");
@@ -382,8 +382,16 @@ function getInputHtml(){
 	// Check if we are dealing with an split element with form name[X]name
 	preg_match('/(.*?)\[[0-9]\]\[(.*?)\]/', $element->name, $matches);
 
+	$name	= $element->name;
+
+	if(!empty($matches[2])){
+		$name	= $matches[2];
+	}
+
+	$value	= $formTable->getSubmissionValue($_POST['submission-id'], $name, $_POST['subid']);
+
 	// Get element html
-	$html 		= $formTable->elementHtmlBuilder->getElementHtml($element);
+	$html 		= $formTable->elementHtmlBuilder->getElementHtml($element, $value);
 	
 	/**
 	 * Check if this element needs a datalist
@@ -442,25 +450,59 @@ function editValue(){
 	$formTable					= new EditFormResults($_POST);
 		
 	$formTable->submissionId	= $_POST['submission-id'];
+
+	$elementId					= sanitize_text_field($_POST['element-id']);
+
+	$subId						= sanitize_text_field($_POST['subid']);
+
+	$newValue 					= json_decode(sanitize_textarea_field(stripslashes($_POST['new-value'])));
+
+	$oldValue					= $formTable->getSubmissionValue($formTable->submissionId, $elementId, $subId);
+
+	if($oldValue == $newValue){
+		if(is_array($oldValue)){
+			$oldValue	= implode(' ', $oldValue);
+		}
+		return new WP_Error('sim-forms', "Old value '$oldValue' is the same as the new value!");
+	}
+
+	// update the submissiom
+	$result		= $formTable->updateSubmission($elementId, $newValue);
+	if(is_wp_error($result)){
+		return $result;
+	}
+
 	
 	$formTable->parseSubmissions(null, $formTable->submissionId);
 
 	$formTable->getForm($formTable->submission->form_id);
 
-	$elementId					= sanitize_text_field($_POST['element-id']);
+	
 
 	$element					= $formTable->getElementById($elementId);
 		
 	//update an existing entry
 	$elementName 	= $element->name;
-	$newValue 		= json_decode(sanitize_textarea_field(stripslashes($_POST['new-value'])));
+
+	// Check if we are dealing with an split element with form name[X]name
+	preg_match('/(.*?)\[[0-9]\]\[(.*?)\]/', $element->name, $matches);
+
+	if(!empty($matches[2])){
+		$elementName	= $matches[2];
+	}
+
+	
 
 	$transValue		= $formTable->transformInputData($newValue, $elementName, $formTable->submission);
 	
-	$subId			= $_POST['subid'];
+	
 	// By default -> submission is the splitted submission, we want the original
-	if($subId > -1){
-		$formTable->submission		= $formTable->submissions[0];
+	if(is_numeric($subId) && $subId > -1){
+		foreach($formTable->submissions as $formTable->submission){
+			if($formTable->submission->subId == $subId){
+				break;
+			}
+		}
 	}
 
 	$updated		= false;
@@ -469,53 +511,10 @@ function editValue(){
 	if(isset($formTable->submission->{$elementName})){
 		$oldValue			= $formTable->submission->{$elementName};
 
-		if($oldValue == $newValue){
-			if(is_array($oldValue)){
-				$oldValue	= implode(' ', $oldValue);
-			}
-			return new WP_Error('sim-forms', "Old value '$oldValue' is the same as the new value!");
-		}
+		
 
-		// Update only one entry in the array
-		if(is_array($oldValue) && $subId > -1 && isset($oldValue[$subId])){
-			$temp			= $oldValue;
-			$temp[$subId]	= $newValue;
-			$newValue		= $temp;
-		}
 		$formTable->submission->{$elementName}	= $newValue;
 
-		$updated								= true;
-	
-	}
-	
-	// If there is a sub id set and this field is not a main field
-	elseif($subId > -1){
-		$splitElements				= $formTable->formData->split;
-
-		foreach($splitElements as $index){
-
-			$splitElementName			= $formTable->getElementById($index, 'name');
-
-			preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $splitElementName, $matches);
-
-			if(isset($matches[1])){
-				$splitElementName	= $matches[1];
-			}
-
-			//check if this is a main field
-			if(isset($formTable->submission->{$splitElementName}[$subId][$elementName])){
-				$oldValue															= $formTable->submission->{$splitElementName}[$subId][$elementName];
-				$formTable->submission->{$splitElementName}[$subId][$elementName]	= $newValue;
-
-				$updated															= true;
-				break;
-			}
-		}
-	}
-	
-	// update the submitter user id
-	elseif($elementName == 'submitteruserid'){
-		$formTable->submission->submitter_id	= $newValue;
 		$updated								= true;
 	}
 
@@ -528,10 +527,7 @@ function editValue(){
 		}
 	}
 
-	if($elementName == 'userid'){
-		$formTable->submission->userid			= $newValue;
-		$updated								= true;
-	}
+
 
 	if($updated){
 		$message = "Succesfully updated '$elementName' to $transValue";

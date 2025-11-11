@@ -280,11 +280,6 @@ class DisplayFormResults extends DisplayForm{
 			$submissionId	= $_REQUEST['id'];
 		}
 
-		if(is_numeric($submissionId)){
-			// Return a single submission
-			return [$this->getSubmission($submissionId)];
-		}
-
 		if($this->formData->save_in_meta){
 			return $this->getMetaKeyFormSubmissions($userId, $all);
 		}
@@ -305,6 +300,12 @@ class DisplayFormResults extends DisplayForm{
 		// Archived
 		if(!$this->showArchived && $submissionId == null){
 			$where[]	=  "archived=0";
+		}
+
+		// Specific Submission
+		if(is_numeric($submissionId)){
+			$where[]	= "id=%d";
+			$values[]	= $submissionId; 
 		}
 
 		// User
@@ -386,9 +387,9 @@ class DisplayFormResults extends DisplayForm{
 		// add the limit only if we are not querying everything, or for a specific user or start is larger than the total
 		if(!$all && empty($userId) && $start < $this->total){
 			$this->spliced	= true;
-			$query	.= " LIMIT %d, %d";
-			$values[]	= $start;
-			$values[]	= $this->pageSize;
+			$query		   .= " LIMIT %d, %d";
+			$values[]		= $start;
+			$values[]		= $this->pageSize;
 		}
 
 		// Get the submissions
@@ -401,37 +402,75 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		// Get the submission data
+		$newResults	= [];
 		foreach($results as &$result){
 			foreach($result as &$value){
 				$value	= maybe_unserialize($value);
 			}
 			unset($value);
-
-			$sort	= '';
+			
 			$values	= [$result->id];
 
 			$formresults	= $wpdb->get_results(
-				$wpdb->prepare("SELECT `key`, `value`, sub_id FROM %i WHERE submission_id = %d $sort", $this->submissionValuesTableName, ...$values)
+				$wpdb->prepare("SELECT `key`, `value`, sub_id FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, ...$values)
 			);
 
+			$subIdCounter	= 0;
+			$subIndexes		= [];
 			foreach($formresults as $formresult){
-				// support multiple values with same key
-				if(!empty($result->{$formresult->key})){
-					$result->{$formresult->key}	= [
-						$result->{$formresult->key},
-						maybe_unserialize($formresult->value)
-					];
+				$value	= maybe_unserialize($formresult->value);
+
+				/**
+				 * Split into multiple entries when sub_id is set
+				 */
+				if(is_numeric($formresult->sub_id)){
+					// Make the value an array if it is not already
+					if(empty($result->{$formresult->key})){
+						$result->{$formresult->key}	= [];
+					}
+
+					// add the value to the array
+					$result->{$formresult->key}[$formresult->sub_id]	= $value;
+
+					// Keep a counter to see how many sub id's there are
+					if(count($result->{$formresult->key}) > $subIdCounter){
+						$subIdCounter	= count($result->{$formresult->key});
+					}
+
+					// Store the key to split on
+					if(!in_array($formresult->key, $subIndexes)){
+						$subIndexes[]	= $formresult->key;
+					}
 
 					continue;
 				}
 
 				// use { } to prevent key naming issues
-				$result->{$formresult->key}	= maybe_unserialize($formresult->value);
+				$result->{$formresult->key}	= $value;
 			}
 
 			if($wpdb->last_error !== ''){
 				SIM\printArray($wpdb->print_error());
 			}
+
+			for ($i=0; $i < $subIdCounter; $i++){
+				$newResult	= clone $result;
+
+				foreach($subIndexes as $subIndex){
+					$subIds					= array_keys($newResult->{$subIndex});
+
+					$newResult->subId		= $subIds[$i];
+
+					$newResult->{$subIndex}	= $newResult->{$subIndex}[$subIds[$i]];
+				}
+
+				// Add row
+				$newResults[]	= $newResult;
+			}
+		}
+
+		if(!empty($newResults)){
+			$results	= $newResults;
 		}
 
 		$results	= apply_filters('sim_retrieved_formdata', $results, $userId, $this);
@@ -658,8 +697,8 @@ class DisplayFormResults extends DisplayForm{
 		}
 	}
 
-	protected function getRowContents($subId=''){
-		$rowContents	= [];
+	protected function getRowContents(){
+		$rowContents	= '';
 		$excelRow		= [];
 
 		if($this->submission->userid == $this->user->ID || $this->submission->userid == $this->user->partnerId){
@@ -670,7 +709,7 @@ class DisplayFormResults extends DisplayForm{
 
 		$rowHasContents	= false;
 		$iconUrl = SIM\pathToUrl(MODULE_PATH.'/pictures/copy.png');
-		$indexes = [];
+		
 		foreach($this->columnSettings as $id => $columnSetting){
 			if(!is_array($columnSetting)){
 				continue;
@@ -745,7 +784,7 @@ class DisplayFormResults extends DisplayForm{
 			}
 					
 			/*
-					Write the content to the cell, convert to something if needed
+				Write the content to the cell, convert to something if needed
 			*/
 			$elementName 	= str_replace('[]', '', $columnSetting['name']);
 			$class 			= $columnSetting['name'];
@@ -760,20 +799,10 @@ class DisplayFormResults extends DisplayForm{
 				}else{
 					$value	= $this->submission->{$elementName};
 				}
-				
-				// wrap in array so we can loop over subids
-				if(empty($value->sub_id)){
-					$values = [$value];
-				}else{
-					$values = $value;
-				}
-					
-				// loop over all values
-				foreach($values as $index => $value){
-					
+						
 				// Add sub id if this is an sub value
-				if(!empty($value->sub_id)){
-					$subIdString = "data-subid='{$value->sub_id}'";
+				if(!empty($this->submission->subId)){
+					$subIdString = "data-subid='{$this->submission->subId}'";
 				}
 
 				if($value === null){
@@ -846,6 +875,8 @@ class DisplayFormResults extends DisplayForm{
 				$style	= "style='max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;'";
 			}
 
+			$elementId		= $id;
+			// for action buttons there is no element id
 			if(!$elementId){
 				$cellOpeningTag	= "<td $class";
 			}else{
@@ -860,19 +891,15 @@ class DisplayFormResults extends DisplayForm{
 				$copy	= "<img class='copy' src='$iconUrl' width='20' height='20' loading='lazy' title='Click to copy cell contents'>";
 			}
 			
-			if(empty($rowContents[$index]){
-				$rowContents[$index] = [];
-			}
-			
-			$rowContents[$index][] = "$cellOpeningTag $style>$copy$value</td>";
+			$rowContents .= "$cellOpeningTag $style>$copy$value</td>";
 
 
-		$this->excelContent[] = $excelRow;
+			$this->excelContent[] = $excelRow;
 		}
 		
 		// none of the cells in this row has a value, only X
 		if(!$rowHasContents){
-			return [];
+			return '';
 		}
 		
 		// we now have a an array of rows containing arrays of cells
@@ -928,27 +955,23 @@ class DisplayFormResults extends DisplayForm{
 					$buttons .= $button;
 				}
 			}
-			if(!empty($buttons)){
-				$buttonCell	= "<td>$buttons</td>";
-			}
 		}
 
 		if(!empty($rowContents)){
-			// print all the rows, could be more than 1 if splitted
-			foreach($rowContents as $subId => $row){
-				?>
-				<tr class='table-row' data-submission-id='<?php echo esc_attr($this->submission->id);?>' <?php if(count($rowContents) > 1)?> data-subid='<?php echo esc_attr($this->submission->subId);?>'>
-					<?php
-					if(
-						
-					)
+			?>
+			<tr class='table-row' data-submission-id='<?php echo esc_attr($this->submission->id);?>' >
+				<?php
+				echo $rowContents;
+				if(!empty($buttons)){
 					?>
 					<td>
-							<?php echo $buttons;?>
+						<?php echo $buttons;?>
 					</td>
-				</tr>
-				<?php
-			}
+					<?php
+				}
+				?>
+			</tr>
+			<?php
 			
 			return true;
 		}

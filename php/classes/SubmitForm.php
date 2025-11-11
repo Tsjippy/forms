@@ -480,9 +480,7 @@ class SubmitForm extends SaveFormSettings{
 				return $this->submission->id;
 			}
 
-			/**
-			 * remove empty splitted entries
-			 */
+			//remove empty splitted entries
 			$this->parseSplittedData($formresults);
 
 			//sort arrays

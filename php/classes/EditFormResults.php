@@ -10,10 +10,11 @@ class EditFormResults extends DisplayFormResults{
 	 *
 	 * @param	string	$key		The key to update
 	 * @param	mixed	$value		The value to set
+	 * @param	int		$subId		The sub id in case of multiple values for the same key, default null
 	 *
 	 * @return	true|WP_Error		The result or error on failure
 	 */
-	public function updateSubmission($key, $value){
+	public function updateSubmission($key, $value, $subId = null){
 		global $wpdb;
 
 		$value	= SIM\cleanUpNestedArray($value);
@@ -30,37 +31,45 @@ class EditFormResults extends DisplayFormResults{
 			}
 		}
 
-		$this->submission->edittime	= date("Y-m-d H:i:s");
-
 		/**
 		 * Filters the form results
 		 * 
-		 * @param array		$formResults	The form results
-		 * @param object	$object			The EditFormResults Instance
-		 * @param bool		$update			Whether this is an update or an new submission
+		 * @param mixed			$value			The value to set
+		 * @param int|string	$key			The key to update
+		 * @param object		$object			The EditFormResults Instance
+		 * @param bool			$update			Whether this is an update or an new submission
 		 */
-		$this->submission 				= apply_filters('sim_before_saving_formdata', $this->submission, $this, true);
+		$value 				= apply_filters('sim_before_updating_formdata', $value, $key, $this, true);
 
-		if(is_wp_error($this->submission )){
-			return $this->submission;
+		if(is_wp_error($value )){
+			return $value;
+		}
+
+		// Always update the timelastedited
+		$data = [
+			'timelastedited'	=> date("Y-m-d H:i:s")
+		];
+
+		$formats = [
+			'%s'
+		];
+
+		if($key == 'userid'){
+			$data['userid']		= $value;
+			$formats[]			= '%d';
+		}elseif($key == 'submitter_id'){
+			$data['submitter_id']	= $value;
+			$formats[]				= '%d';
 		}
 
 		//Update the submission
 		$result = $wpdb->update(
 			$this->submissionTableName,
-			array(
-				'userid'			=> $this->submission->userid,
-				'submitter_id'		=> $this->submission->submitter_id,
-				'timelastedited'	=> date("Y-m-d H:i:s")
-			),
+			$data,
 			array(
 				'id'				=> $submissionId,
 			),
-			array(
-				'%d',
-				'%d',
-				'%s'
-			)
+			$formats
 		);
 		
 		if($wpdb->last_error !== ''){
@@ -80,30 +89,39 @@ class EditFormResults extends DisplayFormResults{
 			}
 		}
 
-		//Update the submission data
 		if($key != 'userid' && $key != 'submitter_id'){
+			$where	= array(
+				'submission_id'	=> $submissionId,
+				'key'			=> $key,
+			);
+
+			$formats	= array(
+				'%d',
+				'%s'
+			);
+
+			if(is_numeric($subId)){
+				$where['sub_id']	= $subId;
+				$formats[]			= '%d';
+			}
+
+			//Update the submission data
 			$result = $wpdb->update(
 				$this->submissionValuesTableName,
 				array(
-					'key'			=> $key,
 					'value'			=> maybe_serialize($value)
 				),
-				array(
-					'submission_id'	=> $submissionId,
-				),
-				array(
-					'%s',
-					'%s'
-				)
+				$where,
+				$formats
 			);
-		}
 
-		if($wpdb->last_error !== ''){
-			$message	= $wpdb->print_error();
-			if(defined('REST_REQUEST')){
-				return new \WP_Error('form error', $message);
-			}else{
-				SIM\printArray($message);
+			if($wpdb->last_error !== ''){
+				$message	= $wpdb->print_error();
+				if(defined('REST_REQUEST')){
+					return new \WP_Error('form error', $message);
+				}else{
+					SIM\printArray($message);
+				}
 			}
 		}
 
@@ -388,7 +406,7 @@ class EditFormResults extends DisplayFormResults{
 				$elementName	= $matches[1];
 			}
 
-			$archivedCount	= count($this->getSubmissionValue($this->submission->id, 'archived_indexes'));
+			$archivedCount	= count($this->getSubmissionValue($this->submission->id, 'archived_indexes', '', true));
 
 			// Check id there are still non archived entries
 			if(
