@@ -354,12 +354,12 @@ function moduleUpdate($oldVersion){
         $splitters    = [];
         $results     = $wpdb->get_results("SELECT id, split FROM $simForms->tableName WHERE split IS NOT NULL AND split <> ''");
         foreach($results as $result){
-            $splitters[$result->id] = [];
+            $splitters[$result->id] = maybe_unserialize($result->split);
 
-            $elementIds    = maybe_unserialize($result->split);
+            /* $elementIds    = maybe_unserialize($result->split);
             foreach($elementIds as $elementId){
                 $splitters[$result->id][]  = explode('[', $wpdb->get_var("SELECT name FROM $simForms->elTableName WHERE id = $elementId"))[0];
-            }
+            } */
         }
 
         $results        = $wpdb->get_results("SELECT * FROM $simForms->submissionTableName");
