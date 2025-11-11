@@ -659,7 +659,7 @@ class DisplayFormResults extends DisplayForm{
 	}
 
 	protected function getRowContents($subId=''){
-		$rowContents	= '';
+		$rowContents	= [];
 		$excelRow		= [];
 
 		if($this->submission->userid == $this->user->ID || $this->submission->userid == $this->user->partnerId){
@@ -669,7 +669,8 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$rowHasContents	= false;
-
+		$iconUrl = SIM\pathToUrl(MODULE_PATH.'/pictures/copy.png');
+		$indexes = [];
 		foreach($this->columnSettings as $id => $columnSetting){
 			if(!is_array($columnSetting)){
 				continue;
@@ -759,10 +760,20 @@ class DisplayFormResults extends DisplayForm{
 				}else{
 					$value	= $this->submission->{$elementName};
 				}
+				
+				// wrap in array so we can loop over subids
+				if(empty($value->sub_id)){
+					$values = [$value];
+				}else{
+					$values = $value;
+				}
+					
+				// loop over all values
+				foreach($values as $index => $value){
 					
 				// Add sub id if this is an sub value
-				if(!empty($value->subid)){
-					$subIdString = "data-subid='{$value->subid}'";
+				if(!empty($value->sub_id)){
+					$subIdString = "data-subid='{$value->sub_id}'";
 				}
 
 				if($value === null){
@@ -846,18 +857,21 @@ class DisplayFormResults extends DisplayForm{
 			// Add a copy option to the value
 			$copy	= "";
 			if(isset($columnSetting['copy'])){
-				$copy	= "<img class='copy' src='".SIM\pathToUrl(MODULE_PATH.'/pictures/copy.png')."' width='20' height='20' loading='lazy' title='Click to copy cell contents'>";
+				$copy	= "<img class='copy' src='$iconUrl' width='20' height='20' loading='lazy' title='Click to copy cell contents'>";
 			}
 			
-			$rowContents .= "$cellOpeningTag $style>$copy$value</td>";
+			if(empty($rowContents[$index]){
+				$rowContents[$index] = '';
+			}
+			
+			// none of the cells in this row has a value, only X
+		if($rowHasContents){
+			$rowContents[$index] .= "$cellOpeningTag $style>$copy$value</td>";
 		}
 
-		// none of the cells in this row has a value, only X
-		if(!$rowHasContents){
-			return '';
-		}
 
 		$this->excelContent[] = $excelRow;
+		}
 
 		return $rowContents;
 	}
