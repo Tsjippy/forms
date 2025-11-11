@@ -413,13 +413,12 @@ class DisplayFormResults extends DisplayForm{
 			$values	= [$result->id];
 
 			$formresults	= $wpdb->get_results(
-				$wpdb->prepare("SELECT `key`, `value` FROM %i WHERE submission_id = %d $sort", $this->submissionValuesTableName, ...$values),
-				OBJECT_K
+				$wpdb->prepare("SELECT `key`, `value`, subid FROM %i WHERE submission_id = %d $sort", $this->submissionValuesTableName, ...$values)
 			);
 
-			foreach($formresults as $key => $formresult){
+			foreach($formresults as $formresult){
 				// use { } to prevent key naming issues
-				$result->{$key}	= maybe_unserialize($formresult->value);
+				$result->{$formresult->key}	= maybe_unserialize($formresult->value);
 			}
 
 			if($wpdb->last_error !== ''){
@@ -485,21 +484,9 @@ class DisplayFormResults extends DisplayForm{
 			return;
 		}
 
-		if(empty($this->formData->split)){
-			$this->submissions		= $this->getSubmissions($userId, $submissionId, $all);
+		$this->submissions		= $this->getSubmissions($userId, $submissionId, $all);
 
-			$this->sortSubmissions($this->submissions);
-		}else{
-			$this->submissions		= $this->getSubmissions($userId, $submissionId, true);
-
-			$this->sortSubmissions($this->splittedSubmissions);
-
-			if(empty($this->splittedSubmissions)){
-				$this->total	= 0;
-			}else{
-				$this->total	= count($this->splittedSubmissions);
-			}
-		}
+		$this->sortSubmissions($this->submissions);
 
 		if(!empty($this->splittedSubmissions) && count($this->splittedSubmissions) == 1){
 			$this->submission	= array_values($this->splittedSubmissions)[0];
@@ -544,7 +531,7 @@ class DisplayFormResults extends DisplayForm{
 			return false;
 		}
 
-		$element	= $this->findSplittedElementName($element);
+		$element		= $this->findSplittedElementName($element);
 
 		$editRightRoles	= [];
 		$viewRightRoles	= [];

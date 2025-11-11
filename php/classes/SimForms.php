@@ -1333,8 +1333,7 @@ class SimForms{
 
 		// Get the submission values
 		$formresults	= $wpdb->get_results(
-			$wpdb->prepare("SELECT `key`, `value` FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, $submissionId),
-			OBJECT_K
+			$wpdb->prepare("SELECT `key`, `value` FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, $submissionId)
 		);
 
 		$results	= apply_filters('sim_retrieved_formdata', $results, '', $this);
@@ -1343,8 +1342,8 @@ class SimForms{
 
 			$this->submission	= $results[0];
 
-			foreach($formresults as $key => $formresult){
-				$results[0]->{$key}	= maybe_unserialize($formresult->value);
+			foreach($formresults as $formresult){
+				$results[0]->{$formresult->key}	= maybe_unserialize($formresult->value);
 			}
 
 			return $this->submission;
