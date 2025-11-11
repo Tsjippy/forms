@@ -861,18 +861,21 @@ class DisplayFormResults extends DisplayForm{
 			}
 			
 			if(empty($rowContents[$index]){
-				$rowContents[$index] = '';
+				$rowContents[$index] = [];
 			}
 			
-			// none of the cells in this row has a value, only X
-		if($rowHasContents){
-			$rowContents[$index] .= "$cellOpeningTag $style>$copy$value</td>";
-		}
+			$rowContents[$index][] = "$cellOpeningTag $style>$copy$value</td>";
 
 
 		$this->excelContent[] = $excelRow;
 		}
-
+		
+		// none of the cells in this row has a value, only X
+		if(!$rowHasContents){
+			return [];
+		}
+		
+		// we now have a an array of rows containing arrays of cells
 		return $rowContents;
 	}
 	
@@ -881,22 +884,16 @@ class DisplayFormResults extends DisplayForm{
 	 *
 	 */
 	protected function writeTableRow(){
-		//If this row should be written and it is the first cell then write
-		if($this->submission->subId > -1){
-			$subIdString = "data-subid='{$this->submission->subId}'";
-		}else{
-			$subIdString = "";
-		}
 		
 		$rowContents	= $this->getRowContents();
 
-		$buttonCell		= '';
+		$buttons = '';
 
 		//if there are actions
 		if(!empty($this->formData->actions)){
 			//loop over all the actions
 			$buttonsHtml	= [];
-			$buttons		= '';
+			
 			foreach($this->formData->actions as $action){
 				/**
 				 * check if this submission is already archived, in that case make it an unarchive button
@@ -937,11 +934,22 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		if(!empty($rowContents)){
-			echo "<tr class='table-row' data-submission-id='{$this->submission->id}' $subIdString>";
-				echo $rowContents;
-				echo $buttonCell;
-			echo '</tr>';
-
+			// print all the rows, could be more than 1 if splitted
+			foreach($rowContents as $subId => $row){
+				?>
+				<tr class='table-row' data-submission-id='<?php echo esc_attr($this->submission->id);?>' <?php if(count($rowContents) > 1)?> data-subid='<?php echo esc_attr($this->submission->subId);?>'>
+					<?php
+					if(
+						
+					)
+					?>
+					<td>
+							<?php echo $buttons;?>
+					</td>
+				</tr>
+				<?php
+			}
+			
 			return true;
 		}
 
