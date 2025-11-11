@@ -411,7 +411,7 @@ class DisplayFormResults extends DisplayForm{
 			$values	= [$result->id];
 
 			$formresults	= $wpdb->get_results(
-				$wpdb->prepare("SELECT `key`, `value`, subid FROM %i WHERE submission_id = %d $sort", $this->submissionValuesTableName, ...$values)
+				$wpdb->prepare("SELECT `key`, `value`, sub_id FROM %i WHERE submission_id = %d $sort", $this->submissionValuesTableName, ...$values)
 			);
 
 			foreach($formresults as $formresult){
@@ -658,7 +658,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 	}
 
-	protected function getRowContents(){
+	protected function getRowContents($subId=''){
 		$rowContents	= '';
 		$excelRow		= [];
 
@@ -706,8 +706,11 @@ class DisplayFormResults extends DisplayForm{
 				!array_intersect($this->userRoles, $columnSetting['view_right_roles'])			// and we do not have the view right role
 			){
 				//later on there will be a row with data in this column
-				if($this->ownData && in_array('own', $columnSetting['view_right_roles'])){
-					$value = 'X';
+				if(
+					$this->ownData && 															// we are only showing own data
+					in_array('own', $columnSetting['view_right_roles'])							// and this column can be viewed by owner	
+				){
+					$value = 'X'; // we cannot see this value, but we can see other values in this column
 				}else{
 					continue;
 				}
@@ -758,18 +761,8 @@ class DisplayFormResults extends DisplayForm{
 				}
 					
 				// Add sub id if this is an sub value
-				if($this->submission->subId > -1){
-					$element	= $this->getElementById($id);
-					preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $element->name, $matches);
-					$name	= $element->name;
-
-					if($matches && isset($matches[1])){
-						$name	= $matches[1];
-					}
-					
-					if(!empty($splitNames) && in_array($name, $splitNames)){
-						$subIdString = "data-subid='{$this->submission->subId}'";
-					}
+				if(!empty($value->subid)){
+					$subIdString = "data-subid='{$value->subid}'";
 				}
 
 				if($value === null){
@@ -837,22 +830,15 @@ class DisplayFormResults extends DisplayForm{
 				$value	= str_replace('_',' ',$value);
 			}
 
-			// Use the indexed name to get the element, otherwise we might get the wrong
-			if(isset($this->submission->elementindex) && $this->getElementByName($name.'['.$this->submission->elementindex.']['.$elementName.']')){
-				$element		= $this->getElementByName( $name.'['.$this->submission->elementindex.']['.$elementName.']');
-			}else{			
-				$element		= $this->getElementByName($elementName);
-			}
-
 			$style			= '';
 			if(!empty($columnSetting['width'])){
 				$style	= "style='max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;'";
 			}
 
-			if(!$element){
+			if(!$elementId){
 				$cellOpeningTag	= "<td $class";
 			}else{
-				$cellOpeningTag	= "<td $class data-element-id='$element->id'";
+				$cellOpeningTag	= "<td $class data-element-id='$elementId'";
 			}
 
 			$cellOpeningTag	= apply_filters('sim-formresult-cell-opening-tag', $cellOpeningTag.' '. $subIdString, $this, $columnSetting, $this->submission);
