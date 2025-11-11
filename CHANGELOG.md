@@ -3,6 +3,7 @@
 
 ### Added
 - insert user id element on new forms
+- support for multiple values with same key
 
 ### Changed
 - store form submission values in seperate table
