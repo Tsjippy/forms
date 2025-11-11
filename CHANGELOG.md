@@ -7,6 +7,7 @@
 ### Changed
 - store form submission values in seperate table
 - formresults to submission
+- split data on submission
 
 ### Fixed
 - store-non-numeric element id
