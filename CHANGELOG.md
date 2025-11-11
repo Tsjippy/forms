@@ -9,6 +9,7 @@
 - store form submission values in seperate table
 - formresults to submission
 - split data on submission
+- store values on element id not on name
 
 ### Fixed
 - store-non-numeric element id
