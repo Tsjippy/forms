@@ -1343,6 +1343,16 @@ class SimForms{
 			$this->submission	= $results[0];
 
 			foreach($formresults as $formresult){
+				// support multiple values with same key
+				if(!empty($result->{$formresult->key})){
+					$results[0]->{$formresult->key}	= [
+						$results[0]->{$formresult->key},
+						maybe_unserialize($formresult->value)
+					];
+
+					continue;
+				}
+
 				$results[0]->{$formresult->key}	= maybe_unserialize($formresult->value);
 			}
 

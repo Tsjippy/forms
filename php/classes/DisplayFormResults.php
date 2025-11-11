@@ -13,8 +13,6 @@ class DisplayFormResults extends DisplayForm{
 	public $excelContent;
 	public $currentPage;
 	public $total;
-	public $splittedSubmissions;
-	public $pageSplittedSubmissions;
 	public $hiddenColumns;
 	public $columnSettings;
 	public $tableSettings;
@@ -417,6 +415,16 @@ class DisplayFormResults extends DisplayForm{
 			);
 
 			foreach($formresults as $formresult){
+				// support multiple values with same key
+				if(!empty($result->{$formresult->key})){
+					$result->{$formresult->key}	= [
+						$result->{$formresult->key},
+						maybe_unserialize($formresult->value)
+					];
+
+					continue;
+				}
+
 				// use { } to prevent key naming issues
 				$result->{$formresult->key}	= maybe_unserialize($formresult->value);
 			}
@@ -488,9 +496,7 @@ class DisplayFormResults extends DisplayForm{
 
 		$this->sortSubmissions($this->submissions);
 
-		if(!empty($this->splittedSubmissions) && count($this->splittedSubmissions) == 1){
-			$this->submission	= array_values($this->splittedSubmissions)[0];
-		}elseif(count($this->submissions) == 1){
+		if(count($this->submissions) == 1){
 			$this->submission	= array_values($this->submissions)[0];
 		}elseif(!empty($submissionId)){
 			$this->submission	= $this->submissions[0];
@@ -660,27 +666,6 @@ class DisplayFormResults extends DisplayForm{
 			$ownEntry	= true;
 		}else{
 			$ownEntry	= false;
-		}
-
-		// Get the names of fields the data is splitted on
-		$splitNames	= [];
-		if(is_array($this->formData->split)){
-			foreach($this->formData->split as $id){
-				$element	= $this->getElementById($id);
-
-				if(!$element){
-					continue;
-				}
-
-				// Check if we are dealing with an split element with form name[X]name
-				preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $element->name, $matches);
-
-				if($matches && isset($matches[1])){
-					$splitNames[] = $matches[1];
-				}else{
-					$splitNames[] = $element->name;
-				}
-			}
 		}
 
 		$rowHasContents	= false;
@@ -1607,7 +1592,7 @@ class DisplayFormResults extends DisplayForm{
 			// Filter the current submission data
 			if(!empty($filterValue)){
 
-				foreach($submissions as $key=>$submission){
+				foreach($submissions as $key => $submission){
 					if(
 						!isset($submission->{$name})	||													// The filter value is not set at all
 						!$this->compareFilterValue($submission->{$name}, $filter['type'], $filterValue)	// The filter value does not match the value
@@ -1623,11 +1608,7 @@ class DisplayFormResults extends DisplayForm{
 		$this->total	= $this->total - $filteredCount;
 
 		// Get the submissions we need
-		if(isset($this->splittedSubmissions)){
-			$this->splittedSubmissions	= array_chunk($submissions, $this->pageSize)[$this->currentPage];
-		}else{
-			$this->submissions			= array_chunk($submissions, $this->pageSize)[$this->currentPage];
-		}
+		$this->submissions			= array_chunk($submissions, $this->pageSize)[$this->currentPage];
 
 		$this->spliced	= true;
 
@@ -1776,7 +1757,7 @@ class DisplayFormResults extends DisplayForm{
 	public function theTable($type, $submissions){
 		if($this->spliced){
 			// only use the submissions for this page
-			$submissions	= array_splice($submissions, ($this->currentPage*$this->pageSize), $this->pageSize);
+			$submissions	= array_splice($submissions, ($this->currentPage * $this->pageSize), $this->pageSize);
 		}
 
 		?>
@@ -1896,12 +1877,7 @@ class DisplayFormResults extends DisplayForm{
 
 		$this->parseSubmissions($userId, null, $all, $force);
 
-		$submissions		= $this->submissions;
-		if(isset($this->splittedSubmissions)){
-			$submissions	= $this->splittedSubmissions;
-		}
-
-		$submissions	= $this->filterSubmissions($submissions);
+		$submissions	= $this->filterSubmissions($this->submissions);
 
 		// do not write anything if empty 
 		if($type != 'all' && empty($submissions)){
