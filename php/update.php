@@ -443,6 +443,11 @@ function moduleUpdate($oldVersion){
                     continue;
                 }
 
+                $elementId  = $wpdb->get_var("SELECT id FROM $simForms->elTableName WHERE `name` = '$key' AND form_id = {$result->form_id}");
+                if(empty($elementId)){
+                    continue;
+                }
+
                 // the current form has splitters and the current key is one of them
                 if(
                     in_array($result->form_id, array_keys($splitters)) &&
@@ -504,34 +509,6 @@ function moduleUpdate($oldVersion){
                     continue;
                 }
 
-                $oldKey    = $key;
-
-                // make sure the key is valid
-                // Make sure we only are working on the name
-                $key	= end(explode('\\', $key));
-
-                // Replace spaces with _
-                $key	= str_replace(" ", "_", $key);
-
-                // Make lowercase
-                $key	= strtolower($key);
-
-                // Keep only valid chars
-                $key = preg_replace('/[^a-zA-Z0-9_\[\]]/', '_', $key);
-
-                // Remove ending _
-                $key	= trim($key, " \n\r\t\v\0_");
-
-                // Make sure the first char is a letter or _
-                $key[0] = preg_replace('/[^a-zA-Z_]/', '_', $key[0]);    
-                
-                if($oldKey !== $key && !in_array($key, $elsChangend)){
-                    // Update form element name
-                    $wpdb->query("UPDATE `$simForms->elTableName` SET `name`='$key' WHERE `name`='$oldKey'");
-
-                    $elsChangend[$oldKey] = $key;
-                }
-
                 $value  = maybe_serialize($value);
 
                 // insert the value
@@ -539,7 +516,7 @@ function moduleUpdate($oldVersion){
                     $simForms->submissionValuesTableName,
                     [
                         'submission_id' => $result->id,
-                        'key'           => $key,
+                        'key'           => $elementId,
                         'value'         => $value
                     ],
                     [
