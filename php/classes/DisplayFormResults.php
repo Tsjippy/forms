@@ -3,6 +3,7 @@ namespace SIM\FORMS;
 
 use ParagonIE\Sodium\Core\Curve25519\Ge\P2;
 use SIM;
+use stdClass;
 use WP_Error;
 
 class DisplayFormResults extends DisplayForm{
@@ -70,6 +71,8 @@ class DisplayFormResults extends DisplayForm{
 	public function addExtraElements($elements, $object, $force){
 		// Build the array of element details
 		$newElements	= [
+			// -6 = archived indexes
+			// -7 = hash
 			-4 => [
 				'name'				=> 'edittime',
 				'nicename'			=> 'Last edit time',
@@ -338,7 +341,7 @@ class DisplayFormResults extends DisplayForm{
 			$this
 		));
 
-		$query	= $base.implode(' AND ', $where);
+		$query			= $base.implode(' AND ', $where);
 
 		// Get the total
 		$countQuery		= str_replace('*', 'count(*) as total', $query);
@@ -403,21 +406,38 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		// Get the submission data
-		$newResults	= [];
-		foreach($results as &$result){
-			foreach($result as &$value){
-				$value	= maybe_unserialize($value);
+		$submissions	= [];
+		foreach($results as $index => $result){
+			$submission	= new stdClass();
+			foreach($result as $key => $value){
+				$submission->$key	= maybe_unserialize($value);
 			}
-			unset($value);
-			
-			$values	= [$result->id];
 
-			$formresults	= $wpdb->get_results(
-				$wpdb->prepare("SELECT `element_id`, `value`, sub_id FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, ...$values)
+			$subIds			= $wpdb->get_col(
+				$wpdb->prepare("SELECT distinct `sub_id` FROM %i WHERE `submission_id` =%d and `sub_id` IS NOT NULL", $this->submissionValuesTableName, $result->id)
 			);
 
-			$subIdCounter	= 0;
-			$subIndexes		= [];
+			$splitSubmissions	= [];
+			foreach($subIds as $subId){
+				$splitSubmissions[$subId]	= [];
+			}
+
+			$formresults	= $wpdb->get_results(
+				$wpdb->prepare("SELECT `element_id`, `value`, sub_id FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, $result->id)
+			);
+
+			if($wpdb->last_error !== ''){
+				SIM\printArray($wpdb->print_error());
+
+				continue;
+			}
+
+			// no form data
+			if(empty($formresults)){
+				continue;
+			}
+
+			// Loop over all data, store non-indexed values on the submission, and indexed ones in a seperate array
 			foreach($formresults as $formresult){
 				$value	= maybe_unserialize($formresult->value);
 
@@ -425,58 +445,38 @@ class DisplayFormResults extends DisplayForm{
 				 * Split into multiple entries when sub_id is set
 				 */
 				if(is_numeric($formresult->sub_id)){
-					// Make the value an array if it is not already
-					if(empty($result->{$formresult->element_id})){
-						$result->{$formresult->element_id}	= [];
-					}
-
 					// add the value to the array
-					$result->{$formresult->element_id}[$formresult->sub_id]	= $value;
-
-					// Keep a counter to see how many sub id's there are
-					if(count($result->{$formresult->element_id}) > $subIdCounter){
-						$subIdCounter	= count($result->{$formresult->element_id});
-					}
-
-					// Store the key to split on
-					if(!in_array($formresult->element_id, $subIndexes)){
-						$subIndexes[]	= $formresult->element_id;
-					}
-
-					continue;
+					$splitSubmissions[$formresult->sub_id][$formresult->element_id]= $value;
+				}else{
+					// use { } to prevent key naming issues
+					$submission->{$formresult->element_id}	= $value;
 				}
-
-				// use { } to prevent key naming issues
-				$result->{$formresult->element_id}	= $value;
 			}
 
-			if($wpdb->last_error !== ''){
-				SIM\printArray($wpdb->print_error());
-			}
+			// Now add the subvalues in seperate submissions
+			foreach($subIds as $subId){
+				$clone	= clone $submission;
 
-			for ($i=0; $i < $subIdCounter; $i++){
-				$newResult	= clone $result;
+				$clone->subId	= $subId;
 
-				foreach($subIndexes as $subIndex){
-					$subIds					= array_keys($newResult->{$subIndex});
-
-					$newResult->subId		= $subIds[$i];
-
-					$newResult->{$subIndex}	= $newResult->{$subIndex}[$subIds[$i]];
+				// add the values for this index to the clone
+				foreach($splitSubmissions[$subId] as $elementId => $value){
+					$clone->{$elementId}	= $value;
 				}
 
-				// Add row
-				$newResults[]	= $newResult;
+				// Add the clone to the submissions
+				$submissions[]	= $clone;
+			}
+
+			// add the subission to the submissions if no subids
+			if(empty($subIds)){
+				$submissions[]	= $submission;
 			}
 		}
 
-		if(!empty($newResults)){
-			$results	= $newResults;
-		}
+		$submissions	= apply_filters('sim_retrieved_formdata', $submissions, $userId, $this);
 
-		$results	= apply_filters('sim_retrieved_formdata', $results, $userId, $this);
-
-		return $results;
+		return $submissions;
 	}
 
 	/**
@@ -542,27 +542,6 @@ class DisplayFormResults extends DisplayForm{
 			$this->submission	= $this->submissions[0];
 		}
 	}
-	
-	protected function findSplittedElementName($element){
-		// Do not continue if no split is defined
-		if(empty($this->formData->split)){
-			return $element;
-		}
-
-		//find the keyword followed by one or more numbers between [] followed by a  keyword between []
-		$pattern	= "/.*?\[[0-9]+\]\[([^\]]+)\]/i";
-
-		// The element does not match the pattern
-		if( !preg_match($pattern, $element->name, $matches)){
-			return $element;
-		}
-		
-		//replace the name
-		$element->name			= $matches[1];
-		$element->nice_Name		= ucfirst($element->name);
-		
-		return $element;
-	}
 
 	/**
 	 * Adds a new column setting for a new element
@@ -571,40 +550,20 @@ class DisplayFormResults extends DisplayForm{
 	 * 
 	 * @return false|array			false if no column setting was added, array of column settings if added
 	 */
-	public function addColumnSetting($element){
+	public function addColumnSetting($element, $elementIds){
 		//do not show non-input elements
 		if(in_array($element->type, $this->nonInputs)){
 			return false;
 		}
-		
-		// Split the element and update the element name
-		$element		= $this->findSplittedElementName($element);
-
-		$editRightRoles	= [];
-		$viewRightRoles	= [];
-		$show			= 1;
-		$elementIds 	= [$element->id];
-
-		// we are adding an element 
-		if(isset($this->columnSettings[$element->id])){
-			$show			= $this->columnSettings[$element->id]['show'];
-			$editRightRoles	= $this->columnSettings[$element->id]['edit_right_roles'];
-			$viewRightRoles = $this->columnSettings[$element->id]['view_right_roles'];
-			if(!empty($this->columnSettings[$element->id]['elementIds'])){
-				$elementIds[] = $element->id;
-			}
-		}
 
 		$this->columnSettings[$element->id] = [
-			'ids'     			=> $elementIds,
+			'elementIds'		=> $elementIds,
 			'name'				=> $element->name,
 			'nice_name'			=> empty($element->nicename) ? $element->name : $element->nicename,
-			'show'				=> $show,
-			'edit_right_roles'	=> $editRightRoles,
-			'view_right_roles'	=> $viewRightRoles
+			'show'				=> 1,
+			'edit_right_roles'	=> [],
+			'view_right_roles'	=> []
 		];
-
-		return $this->columnSettings[$element->id];
 	}
 
 	/**
@@ -634,40 +593,77 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$this->enriched	= true;
-		$elementIds		= [];
-		
-		//loop over all elements to build a new array
-		foreach ($this->formElements as $element){
-			$elementIds[]	= $element->id;
 
-			//check if the element is in the array, if not add it
-			if(!isset($this->columnSettings[$element->id])){
-				$this->addColumnSetting($element);
-				
-				continue;
-			}
-			
-			// element ids array
-			if(!isset($this->columnSettings[$element->id]['elementIds'])){
-				$this->columnSettings[$element->id]['elementIds']	= [$element-id];
-			}
-			
-			// edit permissions
-			if(!isset($this->columnSettings[$element->id]['edit_right_roles'])){
-				$this->columnSettings[$element->id]['edit_right_roles']	= [];
-			}
-			
-			// View permissions
-			if(!isset($this->columnSettings[$element->id]['view_right_roles'])){
-				$this->columnSettings[$element->id]['view_right_roles']	= [];
+		/**
+		 * Find the split base names if any
+		 */
+		$baseNames	= [];
+		// Check if this is an splitted element
+		if(!empty($this->formData->split)){
+
+			// loop over all element ids tha data should be splitted on
+			foreach($this->formData->split as $splitElementId){
+
+				// Get the element name
+				$name	= $this->getElementById($splitElementId, 'name');
+
+				// Find the base name keyword followed by one or more numbers between [] followed by a keyword between []
+				$pattern	= "/(.*?)\[[0-9]+\]\[([^\]]+)\]/i";
+
+				// This is name matches the pattern
+				if( preg_match($pattern, $name, $matches)){
+					$baseNames[]	= $matches[1];
+				}
 			}
 		}
 		
-		//check for removed elements
-		foreach(array_diff(array_keys((array)$this->columnSettings), $elementIds) as $condition){
-			//only unset elements
-			if(is_numeric($condition) && $condition > -1){
-				unset($this->columnSettings[$condition]);
+		//loop over all elements to build a new array
+		foreach ($this->formElements as $element){
+			if(!empty(isset($this->columnSettings[$element->id]))){
+				// edit permissions
+				if(!isset($this->columnSettings[$element->id]['edit_right_roles'])){
+					$this->columnSettings[$element->id]['edit_right_roles']	= [];
+				}
+				
+				// View permissions
+				if(!isset($this->columnSettings[$element->id]['view_right_roles'])){
+					$this->columnSettings[$element->id]['view_right_roles']	= [];
+				}
+			}
+
+			$elementIds	= [];
+
+			// Check if this is an splitted element
+			if(!empty($baseNames) && str_contains($element->name, '[')){
+				// loop over all base names that data should be splitted on
+				foreach($baseNames as $baseName){
+					// Check if this name belongs to this splitted element
+					$pattern	= "/$baseName\[[0-9]+\]\[([^\]]+)\]/i";
+					if( preg_match($pattern, $element->name, $matches)){
+						$name			= $matches[1];
+						
+						// check if the name is already in the settings
+						foreach($this->columnSettings as &$setting){
+
+							// its already in settings, just add the extra element id
+							if($setting['name'] == $name){
+								$setting['elementIds'][]	= $element->id;
+
+								// go to the next element
+								continue 3;
+							}
+						}
+
+						// We only come here if there is no column at all yet, add the current element id
+						$elementIds	= [$element->id];
+						break;
+					}
+				}
+			}
+
+			//check if the element is in the array, if not add it
+			if(!isset($this->columnSettings[$element->id])){
+				$this->addColumnSetting($element, $elementIds);
 			}
 		}
 
@@ -726,7 +722,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$rowHasContents	= false;
-		$iconUrl = SIM\pathToUrl(MODULE_PATH.'/pictures/copy.png');
+		$iconUrl 		= SIM\pathToUrl(MODULE_PATH.'/pictures/copy.png');
 		
 		foreach($this->columnSettings as $id => $columnSetting){
 			if(!is_array($columnSetting)){
@@ -812,20 +808,27 @@ class DisplayFormResults extends DisplayForm{
 			if($value != 'X'){
 				$rowHasContents	= true;
 
-				//Get the field value from the array
-				// Add sub id if this is an sub value
+				//Get the element value from the array
 				if(
-					!empty($this->submission->subId) && 					// sub id set
-					!empty($columnSetting['elementIds'][$elementId])			// there are split element ids defined for this name
+					!empty($this->submission->subId) && 				// sub id set
+					!empty($columnSetting['elementIds']) &&				// this has an element ids array		
+					in_array($id, $columnSetting['elementIds'])			// there are split element ids defined for this name
 				){
 					$subIdString = "data-subid='{$this->submission->subId}'";
 					
-					$elementId = $this->subElements[$this->submission->subId][$columnSetting['name']];
-					$value	= $this->submission->{$elementId};
-				} if(!isset($this->submission->{$id})){
-					$value	= 'X';
-				}else{
+					// Find the splitted value
+					foreach($columnSetting['elementIds'] as $elementId){
+						if(!empty($this->submission->{$elementId})){
+							$value	= $this->submission->{$elementId};
+							break;
+						}
+					}
+				}elseif(isset($this->submission->{$id})){
 					$value	= $this->submission->{$id};
+				}elseif(isset($this->submission->{$elementName})){
+					$value	= $this->submission->{$elementName};
+				}else{
+					$value	= 'X';
 				}
 
 				if($value === null){
@@ -2302,9 +2305,7 @@ class DisplayFormResults extends DisplayForm{
 	 *
 	 * @return	array			The filtered post data
 	 */
-	public function checkForFormShortcode($data) {
-		global $wpdb;
-		
+	public function checkForFormShortcode($data) {		
 		//find any formresults shortcode
 		$pattern = "/\[formresults([^\]]*formname=(.*)[^\]]*)\]/s";
 		

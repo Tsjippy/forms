@@ -320,11 +320,8 @@ class SubmitForm extends SaveFormSettings{
 			$name	= $this->getElementById($id, 'name');
 
 			// Check if we are dealing with an split element with form name[X]name
-			preg_match('/(.*?)\[[0-9]\](\[.*?\])/', $name, $matches);
-
-			// Yes we are
 			if(
-				$matches && 
+				preg_match('/(.*?)\[[0-9]\](\[.*?\])/', $name, $matches) && 
 				isset($matches[1]) && 
 				is_array($formresults[$matches[1]])
 			){
@@ -338,13 +335,16 @@ class SubmitForm extends SaveFormSettings{
 							continue;
 						}
 
+						// Find the element id
+						$elementId	= $this->getElementByName($matches[1]."[$index][$subKey]", 'id');
+
 						// insert the value
 						$wpdb->insert(
 							$this->submissionValuesTableName,
 							[
 								'submission_id' => $this->submission->id,
 								'sub_id'        => $index,
-								'element_id'    => $subKey,
+								'element_id'    => $elementId,
 								'value'         => maybe_serialize($subValue)
 							],
 							[
@@ -509,7 +509,14 @@ class SubmitForm extends SaveFormSettings{
 					continue;
 				}
 
-				$elementId	= $this->getElementByName($key, 'id');
+				if($key == 'viewhash'){
+					$elementId = -7;
+				}else{
+					$elementId	= $this->getElementByName($key, 'id');
+					if(!$elementId){
+						continue;
+					}
+				}
 
 				//insert the data
 				$data	= [

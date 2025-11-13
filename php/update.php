@@ -349,6 +349,14 @@ function moduleUpdate($oldVersion){
     }
 
     if($oldVersion < '8.9.7'){
+        // delete broken coulmn settings
+        $wpdb->delete(
+            $simForms->shortcodeColumnSettingsTable,
+            [
+                'form_id'    => 0
+            ]
+        );
+
         maybe_add_column($simForms->submissionTableName, 'submitter_id', "ALTER TABLE {$simForms->submissionTableName} ADD COLUMN `submitter_id` int");
 
         $splitters    = [];
