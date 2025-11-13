@@ -24,7 +24,7 @@ class DisplayFormResults extends DisplayForm{
 	public $sortDirection;
 	public $sortColumnFound;
 	public $spliced;
-	public $splitElementIds;
+	public $subElements;
 
 	public function __construct($atts){
 		global $wpdb;
@@ -576,20 +576,27 @@ class DisplayFormResults extends DisplayForm{
 		if(in_array($element->type, $this->nonInputs)){
 			return false;
 		}
-
+		
+		// Split the element and update the element name
 		$element		= $this->findSplittedElementName($element);
 
 		$editRightRoles	= [];
 		$viewRightRoles	= [];
 		$show			= 1;
+		$elementIds 	= [$element->id];
 
+		// we are adding an element 
 		if(isset($this->columnSettings[$element->id])){
 			$show			= $this->columnSettings[$element->id]['show'];
 			$editRightRoles	= $this->columnSettings[$element->id]['edit_right_roles'];
 			$viewRightRoles = $this->columnSettings[$element->id]['view_right_roles'];
+			if(!empty($this->columnSettings[$element->id]['elementIds'])){
+				$elementIds[] = $element->id;
+			}
 		}
 
 		$this->columnSettings[$element->id] = [
+			'ids'     			=> $elementIds,
 			'name'				=> $element->name,
 			'nice_name'			=> empty($element->nicename) ? $element->name : $element->nicename,
 			'show'				=> $show,
@@ -636,13 +643,23 @@ class DisplayFormResults extends DisplayForm{
 			//check if the element is in the array, if not add it
 			if(!isset($this->columnSettings[$element->id])){
 				$this->addColumnSetting($element);
-			}else{
-				if(!isset($this->columnSettings[$element->id]['edit_right_roles'])){
-					$this->columnSettings[$element->id]['edit_right_roles']	= [];
-				}
-				if(!isset($this->columnSettings[$element->id]['view_right_roles'])){
-					$this->columnSettings[$element->id]['view_right_roles']	= [];
-				}
+				
+				continue;
+			}
+			
+			// element ids array
+			if(!isset($this->columnSettings[$element->id]['elementIds'])){
+				$this->columnSettings[$element->id]['elementIds']	= [$element-id];
+			}
+			
+			// edit permissions
+			if(!isset($this->columnSettings[$element->id]['edit_right_roles'])){
+				$this->columnSettings[$element->id]['edit_right_roles']	= [];
+			}
+			
+			// View permissions
+			if(!isset($this->columnSettings[$element->id]['view_right_roles'])){
+				$this->columnSettings[$element->id]['view_right_roles']	= [];
 			}
 		}
 		
@@ -787,38 +804,28 @@ class DisplayFormResults extends DisplayForm{
 			/*
 				Write the content to the cell, convert to something if needed
 			*/
-			$elementName 	= str_replace('[]', '', $columnSetting['name']);
 			$class 			= $columnSetting['name'];
+
+			$elementName	= $columnSetting['name'];
 
 			//add field value if we are allowed to see it
 			if($value != 'X'){
 				$rowHasContents	= true;
 
 				//Get the field value from the array
-				if(!empty($this->submission->{$id})){
-					$value	= $this->submission->{$id};
-				}elseif(!empty($this->submission->{$elementName})){
-					$value	= $this->submission->{$elementName};
-				}
-				
 				// Add sub id if this is an sub value
-				elseif(
+				if(
 					!empty($this->submission->subId) && 					// sub id set
-					!empty($this->splitElementIds[$elementName]) &&			// there are split element ids defined for this name
-					is_array($this->splitElementIds[$elementName]) &&		// it is an array
-					in_array($id, $this->splitElementIds[$elementName])		// and the current id is in that array
+					!empty($columnSetting['elementIds'][$elementId])			// there are split element ids defined for this name
 				){
 					$subIdString = "data-subid='{$this->submission->subId}'";
-
-					foreach($this->splitElementIds[$elementName] as $splitElementId){
-						if(!empty($this->submission->{$splitElementId})){
-							$value	= $this->submission->{$splitElementId};
-							break;
-						}
-					}
-					$value	= $this->submission->{$elementName};
-				}else{
+					
+					$elementId = $this->subElements[$this->submission->subId][$columnSetting['name']];
+					$value	= $this->submission->{$elementId};
+				} if(!isset($this->submission->{$id})){
 					$value	= 'X';
+				}else{
+					$value	= $this->submission->{$id};
 				}
 
 				if($value === null){
@@ -1803,53 +1810,12 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	public function theTable($type, $submissions){
 		global $wpdb;
-
+		
 		if($this->spliced){
 			// only use the submissions for this page
 			$submissions	= array_splice($submissions, ($this->currentPage * $this->pageSize), $this->pageSize);
 		}
-
-		$this->splitElementIds	= [];
-		foreach($this->formData->split as $splitElementId){
-			$splitElement		= $this->getElementById($splitElementId);
-
-			if($splitElement){
-				$this->splitElementIds[]	= $splitElement->id;
-
-				$pattern	= "/(.*?)\[[0-9]+\]\[([^\]]+)\]/i";
-
-				// The element does not match the pattern
-				if( !preg_match($pattern, $splitElement->name, $matches)){
-					continue;
-				}
-
-				$baseKey	= $matches[1];
-
-				// Get all elements with this basekey
-				$results		= $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT id, name FROM %i WHERE form_id = %d AND name LIKE %s", 
-						$this->elTableName, 
-						$this->formData->id,
-						$baseKey.'[%'
-					)
-				);
-
-				// Loop over the found elements
-				foreach($results as $result){
-					$element	= $this->findSplittedElementName($result);
-
-					// Store the element id in the split element ids
-					if(empty($this->splitElementIds[$element->name])){
-						$this->splitElementIds[$element->name]	= [];
-					}
-
-					$this->splitElementIds[$element->name][]	= $result->id;
-				}
-			}
-		}
-
-
+		
 		?>
 		<style>
 			.name{
