@@ -24,6 +24,7 @@ class DisplayFormResults extends DisplayForm{
 	public $sortDirection;
 	public $sortColumnFound;
 	public $spliced;
+	public $subElements;
 
 	public function __construct($atts){
 		global $wpdb;
@@ -575,20 +576,27 @@ class DisplayFormResults extends DisplayForm{
 		if(in_array($element->type, $this->nonInputs)){
 			return false;
 		}
-
+		
+		// Split the element and update the element name
 		$element		= $this->findSplittedElementName($element);
 
 		$editRightRoles	= [];
 		$viewRightRoles	= [];
 		$show			= 1;
+		$elementIds = [$element->id];
 
+		// we are adding an element 
 		if(isset($this->columnSettings[$element->id])){
 			$show			= $this->columnSettings[$element->id]['show'];
 			$editRightRoles	= $this->columnSettings[$element->id]['edit_right_roles'];
 			$viewRightRoles = $this->columnSettings[$element->id]['view_right_roles'];
+			if(!empty($this->columnSettings[$element->id]['elementIds'])){
+				$elementIds[] = $element->id;
+			}
 		}
 
 		$this->columnSettings[$element->id] = [
+			'ids'     => $elementIds,
 			'name'				=> $element->name,
 			'nice_name'			=> empty($element->nicename) ? $element->name : $element->nicename,
 			'show'				=> $show,
@@ -635,13 +643,23 @@ class DisplayFormResults extends DisplayForm{
 			//check if the element is in the array, if not add it
 			if(!isset($this->columnSettings[$element->id])){
 				$this->addColumnSetting($element);
-			}else{
-				if(!isset($this->columnSettings[$element->id]['edit_right_roles'])){
-					$this->columnSettings[$element->id]['edit_right_roles']	= [];
-				}
-				if(!isset($this->columnSettings[$element->id]['view_right_roles'])){
-					$this->columnSettings[$element->id]['view_right_roles']	= [];
-				}
+				
+				continue;
+			}
+			
+			// element ids array
+			if(!isset($this->columnSettings[$element->id]['elementIds'])){
+				$this->columnSettings[$element->id]['elementIds']	= [$element-id];
+			}
+			
+			// edit permissions
+			if(!isset($this->columnSettings[$element->id]['edit_right_roles'])){
+				$this->columnSettings[$element->id]['edit_right_roles']	= [];
+			}
+			
+			// View permissions
+			if(!isset($this->columnSettings[$element->id]['view_right_roles'])){
+				$this->columnSettings[$element->id]['view_right_roles']	= [];
 			}
 		}
 		
@@ -786,7 +804,6 @@ class DisplayFormResults extends DisplayForm{
 			/*
 				Write the content to the cell, convert to something if needed
 			*/
-			$elementName 	= str_replace('[]', '', $columnSetting['name']);
 			$class 			= $columnSetting['name'];
 
 			//add field value if we are allowed to see it
@@ -794,15 +811,16 @@ class DisplayFormResults extends DisplayForm{
 				$rowHasContents	= true;
 
 				//Get the field value from the array
-				if(!isset($this->submission->{$elementName})){
-					$value	= 'X';
-				}else{
-					$value	= $this->submission->{$elementName};
-				}
-						
 				// Add sub id if this is an sub value
 				if(!empty($this->submission->subId)){
 					$subIdString = "data-subid='{$this->submission->subId}'";
+					
+					$elementId = $this->subElements[$this->submission->subId][$columnSetting['name']];
+					$value	= $this->submission->{$elementId};
+				} if(!isset($this->submission->{$id})){
+					$value	= 'X';
+				}else{
+					$value	= $this->submission->{$id};
 				}
 
 				if($value === null){
@@ -1786,11 +1804,34 @@ class DisplayFormResults extends DisplayForm{
 	 * @return	bool						If there are submissions or not
 	 */
 	public function theTable($type, $submissions){
+		global $wpdb;
+		
 		if($this->spliced){
 			// only use the submissions for this page
 			$submissions	= array_splice($submissions, ($this->currentPage * $this->pageSize), $this->pageSize);
 		}
 
+  $results = $wpdb->get_results(
+		 $wpdb-prepare(
+				"SELECT element_id, sub_id FROM %i WHERE sub_id NOT NULL AND form_id = %d",
+				[
+					$this->submissionDataTable,
+					$this->formData->form_id
+				]
+			)
+		);
+		
+		$this->subElements = [];
+		
+		//index by subid
+		foreach($results as $result){
+			if(empty($subElements[$result->sub_id]){
+				$this->subElements[$result->sub_id] = [];
+			}
+			
+			$this->subElements[$result->sub_id][] = $result->element_id;
+		}
+		
 		?>
 		<style>
 			.name{
