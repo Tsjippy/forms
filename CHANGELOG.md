@@ -10,6 +10,7 @@
 - formresults to submission
 - split data on submission
 - store values on element id not on name
+- store form results by element id not name
 
 ### Fixed
 - store-non-numeric element id
