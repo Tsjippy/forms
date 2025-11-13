@@ -246,13 +246,13 @@ class SimForms{
 		// shortcode Column Settings table
 		$sql = "CREATE TABLE {$this->shortcodeColumnSettingsTable} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			shortcode_id int NOT NULL,
-			width int,
+			shortcode_id mediumint(9) NOT NULL,
+			width mediumint(9),
 			element_id tinytext,
 			`show` boolean,
 			name tinytext,
 			nice_name tinytext,
-			`priority` int,
+			`priority` mediumint(9),
 			view_right_roles longtext,
 			edit_right_roles longtext,
 			PRIMARY KEY  (id)
@@ -277,9 +277,9 @@ class SimForms{
 		// Submission values table
 		$sql = "CREATE TABLE {$this->submissionValuesTableName} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			submission_id	int NOT NULL,
-			sub_id	int,
-			`key` text NOT NULL,
+			submission_id	mediumint(9) NOT NULL,
+			sub_id	mediumint(9),
+			element_id mediumint(9) NOT NULL,
 			`value` longtext NOT NULL,
 			PRIMARY KEY  (id)
 		) $charsetCollate;";
@@ -404,7 +404,7 @@ class SimForms{
 		$formats	= [
 			'submission_id'			=> '%d',	
 			'sub_id'				=> '%d',	
-			'key'					=> '%s',	
+			'element_id'			=> '%d',	
 			'value'					=> '%s'
 		];
 
@@ -1283,17 +1283,17 @@ class SimForms{
 	 * Get submission value
 	 * 
 	 * @param	int		$submissionId	The id of a submission
-	 * @param	string	$key			The key of the submission value
+	 * @param	string	$elementId		The element_id of the submission value
 	 * @param	int		$subId			The sub id in case of multiple values for the same key	
 	 * @param	bool	$returnArray	Wheter to return an array of values, default false
 	 */
-	public function getSubmissionValue($submissionId, $key, $subId='', $returnArray=false){
+	public function getSubmissionValue($submissionId, $elementId, $subId='', $returnArray=false){
 		global $wpdb;
 
 		$query		= "SELECT `value` FROM %i WHERE submission_id = %d AND `key` = %s";
 		$values		= [
 			$submissionId, 
-			$key
+			$elementId
 		];
 
 		if(is_numeric($subId)){

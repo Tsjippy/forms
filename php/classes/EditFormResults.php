@@ -92,7 +92,7 @@ class EditFormResults extends DisplayFormResults{
 		if($key != 'userid' && $key != 'submitter_id'){
 			$where	= array(
 				'submission_id'	=> $submissionId,
-				'key'			=> $key,
+				'element_id'	=> $key,
 			);
 
 			$formats	= array(
@@ -152,7 +152,7 @@ class EditFormResults extends DisplayFormResults{
 				$this->submissionValuesTableName,
 				array(
 					'submission_id'	=> $submissionId,
-					'key'			=> 'archived_indexes',
+					'element_id'	=> -6,
 					'value'			=> $subId
 				),
 				array(
@@ -169,7 +169,7 @@ class EditFormResults extends DisplayFormResults{
 				$this->submissionValuesTableName,
 				array(
 					'submission_id'	=> $submissionId,
-					'key'			=> 'archived_indexes',
+					'element_id'	=> -6,
 					'value'			=> $subId
 				)
 			);
@@ -406,7 +406,7 @@ class EditFormResults extends DisplayFormResults{
 				$elementName	= $matches[1];
 			}
 
-			$archivedCount	= count($this->getSubmissionValue($this->submission->id, 'archived_indexes', '', true));
+			$archivedCount	= count($this->getSubmissionValue($this->submission->id, -6, '', true));
 
 			// Check id there are still non archived entries
 			if(

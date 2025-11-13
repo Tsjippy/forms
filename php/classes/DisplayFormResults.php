@@ -24,6 +24,7 @@ class DisplayFormResults extends DisplayForm{
 	public $sortDirection;
 	public $sortColumnFound;
 	public $spliced;
+	public $splitElementIds;
 
 	public function __construct($atts){
 		global $wpdb;
@@ -101,16 +102,16 @@ class DisplayFormResults extends DisplayForm{
 			if(isset($this->formData->elementMapping['id'][$id])){
 				continue;
 			}
-			$element 			= new \stdClass();
+			$element 				= new \stdClass();
 
-			$element->id 		= $id;
+			$element->id 			= $id;
 			if(isset($newElement['type'])){
 				$element->type = $newElement['type'];
 			}else{
 				$element->type		= 'text';
 			}
-			$element->name		= $newElement['name'];
-			$element->nicename	= $newElement['nicename'];
+			$element->name			= $newElement['name'];
+			$element->nicename		= $newElement['nicename'];
 
 			// Add to the front of the array
 			array_unshift($elements, $element);
@@ -412,7 +413,7 @@ class DisplayFormResults extends DisplayForm{
 			$values	= [$result->id];
 
 			$formresults	= $wpdb->get_results(
-				$wpdb->prepare("SELECT `key`, `value`, sub_id FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, ...$values)
+				$wpdb->prepare("SELECT `element_id`, `value`, sub_id FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, ...$values)
 			);
 
 			$subIdCounter	= 0;
@@ -425,28 +426,28 @@ class DisplayFormResults extends DisplayForm{
 				 */
 				if(is_numeric($formresult->sub_id)){
 					// Make the value an array if it is not already
-					if(empty($result->{$formresult->key})){
-						$result->{$formresult->key}	= [];
+					if(empty($result->{$formresult->element_id})){
+						$result->{$formresult->element_id}	= [];
 					}
 
 					// add the value to the array
-					$result->{$formresult->key}[$formresult->sub_id]	= $value;
+					$result->{$formresult->element_id}[$formresult->sub_id]	= $value;
 
 					// Keep a counter to see how many sub id's there are
-					if(count($result->{$formresult->key}) > $subIdCounter){
-						$subIdCounter	= count($result->{$formresult->key});
+					if(count($result->{$formresult->element_id}) > $subIdCounter){
+						$subIdCounter	= count($result->{$formresult->element_id});
 					}
 
 					// Store the key to split on
-					if(!in_array($formresult->key, $subIndexes)){
-						$subIndexes[]	= $formresult->key;
+					if(!in_array($formresult->element_id, $subIndexes)){
+						$subIndexes[]	= $formresult->element_id;
 					}
 
 					continue;
 				}
 
 				// use { } to prevent key naming issues
-				$result->{$formresult->key}	= $value;
+				$result->{$formresult->element_id}	= $value;
 			}
 
 			if($wpdb->last_error !== ''){
@@ -794,15 +795,30 @@ class DisplayFormResults extends DisplayForm{
 				$rowHasContents	= true;
 
 				//Get the field value from the array
-				if(!isset($this->submission->{$elementName})){
-					$value	= 'X';
-				}else{
+				if(!empty($this->submission->{$id})){
+					$value	= $this->submission->{$id};
+				}elseif(!empty($this->submission->{$elementName})){
 					$value	= $this->submission->{$elementName};
 				}
-						
+				
 				// Add sub id if this is an sub value
-				if(!empty($this->submission->subId)){
+				elseif(
+					!empty($this->submission->subId) && 					// sub id set
+					!empty($this->splitElementIds[$elementName]) &&			// there are split element ids defined for this name
+					is_array($this->splitElementIds[$elementName]) &&		// it is an array
+					in_array($id, $this->splitElementIds[$elementName])		// and the current id is in that array
+				){
 					$subIdString = "data-subid='{$this->submission->subId}'";
+
+					foreach($this->splitElementIds[$elementName] as $splitElementId){
+						if(!empty($this->submission->{$splitElementId})){
+							$value	= $this->submission->{$splitElementId};
+							break;
+						}
+					}
+					$value	= $this->submission->{$elementName};
+				}else{
+					$value	= 'X';
 				}
 
 				if($value === null){
@@ -1026,7 +1042,7 @@ class DisplayFormResults extends DisplayForm{
 
 	protected function columnSettingsForm($class, $viewRoles, $editRoles){
 		?>
-		<div class="tabcontent <?php echo $class;?>" id="column-settings-<?php echo $this->shortcodeId;?>">
+		<div class="tabcontent" id="column-settings-<?php echo $this->shortcodeId;?>">
 			<form class="sortable-column-settings-rows">
 				<input type='hidden' class='no-reset' class='shortcode-settings' name='shortcode-id'	value='<?php echo $this->shortcodeId;?>'>
 				
@@ -1388,7 +1404,7 @@ class DisplayFormResults extends DisplayForm{
 						<?php
 							// Splitted fields
 							$foundElements = [];
-							foreach($this->formElements as $key=>$element){
+							foreach($this->formElements as $key => $element){
 								$pattern = "/([^\[]+)\[[0-9]*\]/i";
 								
 								if(
@@ -1405,7 +1421,7 @@ class DisplayFormResults extends DisplayForm{
 									<h4>Select fields where you want to create seperate rows for</h4>
 									<?php
 
-									foreach($foundElements as $id=>$element){
+									foreach($foundElements as $id => $element){
 										$name	= ucfirst(strtolower(str_replace('_', ' ', $element)));
 										
 										//Check which option is the selected one
@@ -1786,10 +1802,53 @@ class DisplayFormResults extends DisplayForm{
 	 * @return	bool						If there are submissions or not
 	 */
 	public function theTable($type, $submissions){
+		global $wpdb;
+
 		if($this->spliced){
 			// only use the submissions for this page
 			$submissions	= array_splice($submissions, ($this->currentPage * $this->pageSize), $this->pageSize);
 		}
+
+		$this->splitElementIds	= [];
+		foreach($this->formData->split as $splitElementId){
+			$splitElement		= $this->getElementById($splitElementId);
+
+			if($splitElement){
+				$this->splitElementIds[]	= $splitElement->id;
+
+				$pattern	= "/(.*?)\[[0-9]+\]\[([^\]]+)\]/i";
+
+				// The element does not match the pattern
+				if( !preg_match($pattern, $splitElement->name, $matches)){
+					continue;
+				}
+
+				$baseKey	= $matches[1];
+
+				// Get all elements with this basekey
+				$results		= $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT id, name FROM %i WHERE form_id = %d AND name LIKE %s", 
+						$this->elTableName, 
+						$this->formData->id,
+						$baseKey.'[%'
+					)
+				);
+
+				// Loop over the found elements
+				foreach($results as $result){
+					$element	= $this->findSplittedElementName($result);
+
+					// Store the element id in the split element ids
+					if(empty($this->splitElementIds[$element->name])){
+						$this->splitElementIds[$element->name]	= [];
+					}
+
+					$this->splitElementIds[$element->name][]	= $result->id;
+				}
+			}
+		}
+
 
 		?>
 		<style>

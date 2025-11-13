@@ -344,13 +344,13 @@ class SubmitForm extends SaveFormSettings{
 							[
 								'submission_id' => $this->submission->id,
 								'sub_id'        => $index,
-								'key'           => $subKey,
+								'element_id'    => $subKey,
 								'value'         => maybe_serialize($subValue)
 							],
 							[
 								'%d',
 								'%d',
-								'%s',
+								'%d',
 								'%s'
 							]
 						);
@@ -369,12 +369,14 @@ class SubmitForm extends SaveFormSettings{
 						continue;
 					}
 
+					$elementId = $this->getElementByName($name.'['.$key.']', 'id');
+
 					$wpdb->insert(
 						$this->submissionValuesTableName,
 						[
 							'submission_id' => $this->submission->id,
 							'sub_id'        => $index,
-							'key'           => $key,
+							'element_id'    => $elementId,
 							'value'         => maybe_serialize($subValue)
 						],
 						[
@@ -507,10 +509,12 @@ class SubmitForm extends SaveFormSettings{
 					continue;
 				}
 
+				$elementId	= $this->getElementByName($key, 'id');
+
 				//insert the data
 				$data	= [
 					'submission_id'	=> $this->submission->id,
-					'key'			=> $key,
+					'element_id'	=> $elementId,
 					'value' 		=> $result
 				];
 

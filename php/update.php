@@ -354,16 +354,24 @@ function moduleUpdate($oldVersion){
         $splitters    = [];
         $results     = $wpdb->get_results("SELECT id, split FROM $simForms->tableName WHERE split IS NOT NULL AND split <> ''");
         foreach($results as $result){
-            $splitters[$result->id] = maybe_unserialize($result->split);
+            if(empty($splitters[$result->id])){
+                $splitters[$result->id] = [];
+            }
+            foreach(maybe_unserialize($result->split) as $elementId){
+                $splitters[$result->id][$elementId] = count(explode('[', $wpdb->get_var("SELECT name FROM $simForms->elTableName WHERE id = $elementId"))) > 1;
+            }
+        }
 
-            /* $elementIds    = maybe_unserialize($result->split);
-            foreach($elementIds as $elementId){
-                $splitters[$result->id][]  = explode('[', $wpdb->get_var("SELECT name FROM $simForms->elTableName WHERE id = $elementId"))[0];
-            } */
+        $elementIds    = [];
+        foreach($wpdb->get_results("SELECT id, form_id, `name` FROM $simForms->elTableName") as $result){
+            if(empty($elementIds[$result->form_id])){
+                $elementIds[$result->form_id] = [];
+            }
+
+            $elementIds[$result->form_id][$result->name] = $result->id;
         }
 
         $results        = $wpdb->get_results("SELECT * FROM $simForms->submissionTableName");
-        $elsChangend    = [];
         foreach($results as &$result){
             // change archivedsubs
             $archivedsubs    = maybe_unserialize(maybe_unserialize($result->archivedsubs));
@@ -373,12 +381,12 @@ function moduleUpdate($oldVersion){
                         $simForms->submissionValuesTableName,
                         array(
                             'submission_id'	=> $result->id,
-                            'key'			=> 'archived_indexes',
+                            'element_id'    => -6,
                             'value'			=> $archivedsub
                         ),
                         array(
                             '%d',
-                            '%s',
+                            '%d',
                             '%s'
                         )
                     );
@@ -443,26 +451,16 @@ function moduleUpdate($oldVersion){
                     continue;
                 }
 
-                $elementId  = $wpdb->get_var("SELECT id FROM $simForms->elTableName WHERE `name` = '$key' AND form_id = {$result->form_id}");
+                $elementId  = $elementIds[$result->form_id][$key] ?? null;
                 if(empty($elementId)){
-                    continue;
-                }
+                    if(is_array($value) && !empty($value[0]) && is_array($value[0]) && !is_numeric(array_keys($value[0])[0])){
+                        // Possibly a splitter, check all element ids
+                        foreach($value as $index => $subValues){
+                            $index++;
 
-                // the current form has splitters and the current key is one of them
-                if(
-                    in_array($result->form_id, array_keys($splitters)) &&
-                    in_array($key, $splitters[$result->form_id])
-                ){
-                    // Split the data and insert each entry
-                    foreach($value as $index => $subValues){
-                        if(empty($subValues)){
-                            continue;
-                        }
-
-                        // Subvalues is an array itself
-                        if(is_array($subValues)){
                             foreach($subValues as $subKey => $subValue){
-                                if(empty($subValue)){
+                                $elementId  = $elementIds[$result->form_id][$key."[$index][$subKey]"] ?? null;
+                                if(empty($elementId)){
                                     continue;
                                 }
 
@@ -472,34 +470,46 @@ function moduleUpdate($oldVersion){
                                     [
                                         'submission_id' => $result->id,
                                         'sub_id'        => $index,
-                                        'key'           => $subKey,
+                                        'element_id'    => $elementId,
                                         'value'         => maybe_serialize($subValue)
                                     ],
                                     [
                                         '%d',
                                         '%d',
-                                        '%s',
+                                        '%d',
                                         '%s'
                                     ]
                                 );
                             }
+                        }
+                    }
+                    continue;
+                }
+
+                // the current form has splitters and the current key is one of them
+                if(
+                    in_array($result->form_id, array_keys($splitters)) &&
+                    isset($splitters[$result->form_id][$elementId])
+                ){
+                    // Split the data and insert each entry
+                    foreach($value as $index => $subValue){
+                        if(empty($subValue)){
                             continue;
                         }
 
                         // single value for the split entry
-                        // insert the value
                         $wpdb->insert(
                             $simForms->submissionValuesTableName,
                             [
                                 'submission_id' => $result->id,
                                 'sub_id'        => $index,
-                                'key'           => $key,
-                                'value'         => maybe_serialize($subValues)
+                                'element_id'    => $elementId,
+                                'value'         => maybe_serialize($subValue)
                             ],
                             [
                                 '%d',
                                 '%d',
-                                '%s',
+                                '%d',
                                 '%s'
                             ]
                         );
@@ -516,18 +526,17 @@ function moduleUpdate($oldVersion){
                     $simForms->submissionValuesTableName,
                     [
                         'submission_id' => $result->id,
-                        'key'           => $elementId,
+                        'element_id'    => $elementId,
                         'value'         => $value
                     ],
                     [
                         '%d',
-                        '%s',
+                        '%d',
                         '%s'
                     ]
                 );
             }
         }
-        SIM\printArray($elsChangend);
 
         // rename user id input elements to userid
         $wpdb->query("UPDATE `$simForms->elTableName` SET `name`='userid' WHERE `name`='user-id' OR `name`='user_id'");
@@ -585,7 +594,7 @@ function moduleUpdate($oldVersion){
         $wp_filesystem->delete( $path, true );
 
         foreach(['archivedsubs', 'formresults'] as $columnName){
-            maybe_drop_column( $simForms->submissionTableName, $columnName, "ALTER TABLE $simForms->submissionTableName DROP COLUMN $columnName");
+            //maybe_drop_column( $simForms->submissionTableName, $columnName, "ALTER TABLE $simForms->submissionTableName DROP COLUMN $columnName");
         }
     }
 }

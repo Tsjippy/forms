@@ -94,30 +94,6 @@ class SaveFormSettings extends SimForms{
 		// update js
 		$this->createJs();
 
-		// Update column settings
-		$displayFormResults	= new DisplayFormResults(['form-id' => $this->formData->id]);
-
-		$query				= "SELECT * FROM {$displayFormResults->shortcodeTable} WHERE form_id = '{$this->formData->id}'";
-		foreach($wpdb->get_results($query) as $data){
-			$columnSettings	= $displayFormResults->addColumnSetting($element);
-			if($columnSettings === false){
-				continue;
-			}
-
-			saveColumnSettings($columnSettings, $displayFormResults->shortcodeId);
-		}
-
-		// Update submission data
-		$wpdb->update(
-			$this->submissionValuesTableName,
-			array(
-				'key'	=> $element->name,
-			),
-			array(
-				'key'	=> $oldElement->name
-			)
-		);
-
 		return $element->name;
 	}
 
