@@ -553,7 +553,7 @@ class DisplayForm extends SubmitForm{
 		return $html;
 	}
 	
-	public function addElement($type, $textContent, $properties, $parent){
+	public function addElement($type, $parent, $textContent='', $attributes=[]){
 		$element = $this->dom->createElement($type, $textContent );
 		foreach($attributes as $attribute => $value){
 					$element->setAttribute($attribute, $value);
@@ -616,12 +616,14 @@ class DisplayForm extends SubmitForm{
 			 
 			// Formbuilder button
 			if($this->editRights){
-				$button = $this->dom->createElement('button', 'Switch to formbuilder' );
-				$button->setAttribute('type', 'button');
-				$button->setAttribute('class', 'button small formbuilder-switch');
+				$attributes = [
+					'type' => 'button',
+					'class' => 'button small formbuilder-switch'
+				];
+				$this->addElement('button', $this->formWrapper, 'Switch to formbuilder', $attributes);
 			}
 		
-			$html	.= "<h3>$formName</h3>";
+			$this->addElement("<h3>", $this->formWrapper, formName);
 
 			if(array_intersect($this->userRoles, $this->submitRoles) && !empty($this->formData->save_in_meta)){
 				$html	.= SIM\userSelect("Select an user to show the data of:");
