@@ -74,15 +74,15 @@ class DisplayFormResults extends DisplayForm{
 			// -6 = archived indexes
 			// -7 = hash
 			-4 => [
-				'name'				=> 'edittime',
+				'name'				=> 'timelastedited',
 				'nicename'			=> 'Last edit time',
 			],
 			-3 => [
-				'name'				=> 'submissiontime',
+				'name'				=> 'timecreated',
 				'nicename'			=> 'Submission date',
 			],
 			-2 => [
-				'name'				=> 'submitteruserid',
+				'name'				=> 'submitter_id',
 				'nicename'			=> 'Submitted By',
 				'type'				=> 'number'
 			],
@@ -95,7 +95,7 @@ class DisplayFormResults extends DisplayForm{
 
 		if(!empty($this->formData->split)){
 			$newElements[-5] = [
-				'name'				=> 'subid',
+				'name'				=> 'subId',
 				'nicename'			=> 'Sub-Id',
 				'type'				=> 'number'
 			];
@@ -662,7 +662,7 @@ class DisplayFormResults extends DisplayForm{
 			}
 
 			//check if the element is in the array, if not add it
-			if(!isset($this->columnSettings[$element->id])){
+ 			if(!isset($this->columnSettings[$element->id])){
 				$this->addColumnSetting($element, $elementIds);
 			}
 		}
@@ -724,7 +724,7 @@ class DisplayFormResults extends DisplayForm{
 		$rowHasContents	= false;
 		$iconUrl 		= SIM\pathToUrl(MODULE_PATH.'/pictures/copy.png');
 		
-		foreach($this->columnSettings as $id => $columnSetting){
+		foreach($this->columnSettings as $elementId => $columnSetting){
 			if(!is_array($columnSetting)){
 				continue;
 			}
@@ -734,7 +734,7 @@ class DisplayFormResults extends DisplayForm{
 			$orgFieldValue	= $value;
 
 			//If the column is hidden, do not show this cell
-			if(!$columnSetting['show'] || !is_numeric($id)){
+			if(!$columnSetting['show'] || !is_numeric($elementId)){
 				continue;
 			}
 
@@ -810,9 +810,9 @@ class DisplayFormResults extends DisplayForm{
 
 				//Get the element value from the array
 				if(
-					!empty($this->submission->subId) && 				// sub id set
+					isset($this->submission->subId) && 					// sub id set
 					!empty($columnSetting['elementIds']) &&				// this has an element ids array		
-					in_array($id, $columnSetting['elementIds'])			// there are split element ids defined for this name
+					in_array($elementId, $columnSetting['elementIds'])	// there are split element ids defined for this name
 				){
 					$subIdString = "data-subid='{$this->submission->subId}'";
 					
@@ -823,8 +823,8 @@ class DisplayFormResults extends DisplayForm{
 							break;
 						}
 					}
-				}elseif(isset($this->submission->{$id})){
-					$value	= $this->submission->{$id};
+				}elseif(isset($this->submission->{$elementId})){
+					$value	= $this->submission->{$elementId};
 				}elseif(isset($this->submission->{$elementName})){
 					$value	= $this->submission->{$elementName};
 				}else{
@@ -901,7 +901,6 @@ class DisplayFormResults extends DisplayForm{
 				$style	= "style='max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;'";
 			}
 
-			$elementId		= $id;
 			// for action buttons there is no element id
 			if(!$elementId){
 				$cellOpeningTag	= "<td $class";

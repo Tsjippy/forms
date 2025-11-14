@@ -1290,7 +1290,7 @@ class SimForms{
 	public function getSubmissionValue($submissionId, $elementId, $subId='', $returnArray=false){
 		global $wpdb;
 
-		$query		= "SELECT `value` FROM %i WHERE submission_id = %d AND `key` = %s";
+		$query		= "SELECT `value` FROM %i WHERE submission_id = %d AND `element_id` = %s";
 		$values		= [
 			$submissionId, 
 			$elementId

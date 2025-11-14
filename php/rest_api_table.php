@@ -379,16 +379,7 @@ function getInputHtml(){
 		return new \WP_Error('No element found', "No element found with id '$elementId'");
 	}
 
-	// Check if we are dealing with an split element with form name[X]name
-	preg_match('/(.*?)\[[0-9]\]\[(.*?)\]/', $element->name, $matches);
-
-	$name	= $element->name;
-
-	if(!empty($matches[2])){
-		$name	= $matches[2];
-	}
-
-	$value	= $formTable->getSubmissionValue($_POST['submission-id'], $name, $_POST['subid']);
+	$value	= $formTable->getSubmissionValue($_POST['submission-id'], $elementId, $_POST['subid']);
 
 	// Get element html
 	$html 		= $formTable->elementHtmlBuilder->getElementHtml($element, $value);
@@ -476,13 +467,13 @@ function editValue(){
 	}
 
 	//get transformed value
-	$elementName	= $formTable->getElementById($elementId)->name;
-	$submission		= $formTable->getSubmissions('', $formTable->submissionId);
-	$transValue		= $formTable->transformInputData($newValue, $elementName, $submission);
+	$elementName	= $formTable->getElementById($elementId, ' name' );
+	$submissions	= $formTable->getSubmissions('', $formTable->submissionId);
+	$transValue		= $formTable->transformInputData($newValue, $elementName, $submissions[0]);
 
 	//send message back to js
 	return [
-		'message'			=> "Succesfully updated the value to $newValue",
+		'message'			=> "Succesfully updated the value to $transValue",
 		'new-value'			=> $transValue,
 	];
 }

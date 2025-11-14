@@ -8,38 +8,38 @@ class EditFormResults extends DisplayFormResults{
 	/**
 	 * Update an existing form submission
 	 *
-	 * @param	string	$key		The key to update
+	 * @param	int		$elementId	The element id of the value
 	 * @param	mixed	$value		The value to set
 	 * @param	int		$subId		The sub id in case of multiple values for the same key, default null
 	 *
 	 * @return	true|WP_Error		The result or error on failure
 	 */
-	public function updateSubmission($key, $value, $subId = null){
+	public function updateSubmission($elementId, $value, $subId = null){
 		global $wpdb;
 
 		$value	= SIM\cleanUpNestedArray($value);
 
-		$submissionId	= $this->submission->id;
-		if(!is_numeric($submissionId)){
-			if(is_numeric($this->submissionId)){
-				$submissionId	= $this->submissionId;
-			}elseif(is_numeric($_POST['submission-id'])){
-				$submissionId	= $_POST['submission-id'];
-			}else{
-				SIM\printArray('No submission id found');
-				return false;
-			}
+		if(!empty($this->submission->id) && is_numeric($this->submission->id)){
+			$submissionId	= $this->submission->id;
+		}elseif(is_numeric($this->submissionId)){
+			$submissionId	= $this->submissionId;
+		}elseif(is_numeric($_POST['submission-id'])){
+			$submissionId	= $_POST['submission-id'];
+		}else{
+			SIM\printArray('No submission id found');
+			return false;
 		}
 
 		/**
 		 * Filters the form results
 		 * 
 		 * @param mixed			$value			The value to set
-		 * @param int|string	$key			The key to update
+		 * @param int			$elementId		The element id of the value
+		 * @param int			$subId			The sub id of the value
 		 * @param object		$object			The EditFormResults Instance
 		 * @param bool			$update			Whether this is an update or an new submission
 		 */
-		$value 				= apply_filters('sim_before_updating_formdata', $value, $key, $this, true);
+		$value 				= apply_filters('sim_before_updating_formdata', $value, $elementId, $subId, $this, true);
 
 		if(is_wp_error($value )){
 			return $value;
@@ -54,10 +54,10 @@ class EditFormResults extends DisplayFormResults{
 			'%s'
 		];
 
-		if($key == 'userid'){
+		if($elementId == 'userid'){
 			$data['userid']		= $value;
 			$formats[]			= '%d';
-		}elseif($key == 'submitter_id'){
+		}elseif($elementId == 'submitter_id'){
 			$data['submitter_id']	= $value;
 			$formats[]				= '%d';
 		}
@@ -89,10 +89,10 @@ class EditFormResults extends DisplayFormResults{
 			}
 		}
 
-		if($key != 'userid' && $key != 'submitter_id'){
+		if($elementId != 'userid' && $elementId != 'submitter_id'){
 			$where	= array(
 				'submission_id'	=> $submissionId,
-				'element_id'	=> $key,
+				'element_id'	=> $elementId,
 			);
 
 			$formats	= array(
@@ -112,6 +112,9 @@ class EditFormResults extends DisplayFormResults{
 					'value'			=> maybe_serialize($value)
 				),
 				$where,
+				[
+					'%s'
+				],
 				$formats
 			);
 
