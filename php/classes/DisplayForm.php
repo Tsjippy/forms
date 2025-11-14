@@ -561,7 +561,12 @@ class DisplayForm extends SubmitForm{
 				
 				$parent->appendChild($element);
 			}
-				
+	
+	public function addRawHtml($html, $parent){
+		$fragment = $dom->createDocumentFragment();
+		$fragment->appendXML($html);
+		$parent->appendChild($fragment);
+	}
 				
 	/**
 	 * Show the form
@@ -601,16 +606,6 @@ class DisplayForm extends SubmitForm{
 			$buttonText	= $this->formData->button_text;
 		}
 
-		$dataset	= "data-form-id='{$this->formData->id}'";
-
-		// Reset a form when not saving to meta
-		if(empty($this->formData->save_in_meta)){
-			$dataset .= " data-reset=1";
-		}else{
-			// make sure empty checkboxes show up in form results
-			$dataset .= " data-add-empty=1";
-		}
-
 		$this->formWrapper = $this->dom->createElement('div');
 		$this->formWrapper->setAttribute('class', 'sim-form-wrapper');
 			 
@@ -623,16 +618,30 @@ class DisplayForm extends SubmitForm{
 				$this->addElement('button', $this->formWrapper, 'Switch to formbuilder', $attributes);
 			}
 		
-			$this->addElement("<h3>", $this->formWrapper, formName);
+			$this->addElement("h3", $this->formWrapper, formName);
 
 			if(array_intersect($this->userRoles, $this->submitRoles) && !empty($this->formData->save_in_meta)){
-				$html	.= SIM\userSelect("Select an user to show the data of:");
+				$this->addRawHtml(SIM\userSelect("Select an user to show the data of:"));
 			}
-			$html	.=  apply_filters('sim_before_form', '', $this->formName);
+			$this->addRawHtml(apply_filters('sim_before_form', '', $this->formName));
 
-			$html	.= "<form action='' method='post' class='sim-form-wrapper' $dataset>";
-				$html	.= "<div class='form-elements'>";
-					$html	.= "<input type='hidden' class='no-reset' name='form-id' value='{$this->formData->id}'>";
+			$attributes = [
+				'method'=>'post',
+				'class'=>'sim-form-wrapper',
+				 'data-form-id' => $this->formData->id
+				];
+
+		// Reset a form when not saving to meta
+		if(empty($this->formData->save_in_meta)){
+			$attributes["data-reset"]=1;
+		}else{
+			// make sure empty checkboxes show up in form results
+			$attributes["data-add-empty"]=1;
+		}
+		
+			$form = $this->addElement("form", $this->formWrapper, '', $attributes);
+			$this->addElement('div', $form,'',['class'=>'form-elements']);
+					$this->addElement('input type='hidden' class='no-reset' name='form-id' value='{$this->formData->id}'>";
 					$html	.= "<input type='hidden' class='no-reset' name='formurl' value='".SIM\currentUrl(true)."'>";
 					foreach($this->formElements as $element){
 						$html	.= $this->buildHtml($element);
