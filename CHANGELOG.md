@@ -17,6 +17,7 @@
 - nug with form submission dat which is an array
 - update bug
 - column settings for defaults
+- bug with windows paths
 
 ### Updated
 
