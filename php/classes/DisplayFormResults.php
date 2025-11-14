@@ -633,7 +633,7 @@ class DisplayFormResults extends DisplayForm{
 
 			$elementIds	= [];
 
-			// Check if this is an splitted element
+			// Check if this is an indexed splitted element basename[index][keyname]
 			if(!empty($baseNames) && str_contains($element->name, '[')){
 				// loop over all base names that data should be splitted on
 				foreach($baseNames as $baseName){
@@ -659,6 +659,15 @@ class DisplayFormResults extends DisplayForm{
 						break;
 					}
 				}
+			}
+
+			// Splitted element with just normal multiple values name[index]
+			elseif(
+				!empty($this->formData->split) && 
+				is_array($this->formData->split) &&
+				in_array($element->id, $this->formData->split)
+			){
+				$elementIds[]	= $element->id;
 			}
 
 			//check if the element is in the array, if not add it
@@ -812,7 +821,7 @@ class DisplayFormResults extends DisplayForm{
 				if(
 					isset($this->submission->subId) && 					// sub id set
 					!empty($columnSetting['elementIds']) &&				// this has an element ids array		
-					in_array($elementId, $columnSetting['elementIds'])	// there are split element ids defined for this name
+					in_array($elementId, $columnSetting['elementIds'])	// this element belongs to this setting
 				){
 					$subIdString = "data-subid='{$this->submission->subId}'";
 					
@@ -858,7 +867,7 @@ class DisplayFormResults extends DisplayForm{
 				}
 
 				//Display an X if there is nothing to show
-				if (empty($value) && $value !== 0){
+				if ($value == ''){
 					$value = "X";
 				}
 				
@@ -917,10 +926,9 @@ class DisplayFormResults extends DisplayForm{
 			}
 			
 			$rowContents .= "$cellOpeningTag $style>$copy$value</td>";
-
-
-			$this->excelContent[] = $excelRow;
 		}
+
+		$this->excelContent[] = $excelRow;
 		
 		// none of the cells in this row has a value, only X
 		if(!$rowHasContents){
