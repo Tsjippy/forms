@@ -16,6 +16,7 @@
 - store-non-numeric element id
 - nug with form submission dat which is an array
 - update bug
+- column settings for defaults
 
 ### Updated
 
