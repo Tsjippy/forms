@@ -17,6 +17,7 @@ class DisplayForm extends SubmitForm{
 	private $tabId;
 	public $elementHtmlBuilder;
 	public $nonWrappable;
+	public $dom;
 
 	public function __construct($atts=[]){
 		parent::__construct();
@@ -39,6 +40,8 @@ class DisplayForm extends SubmitForm{
 
 			$this->getUserId($atts);
 		}
+		
+		$this->dom = new DOMDocument();
 
 		$this->elementHtmlBuilder		= new ElementHtmlBuilder($this);
 	}
@@ -550,6 +553,7 @@ class DisplayForm extends SubmitForm{
 		return $html;
 	}
 	
+	public function addElement($type, 
 	/**
 	 * Show the form
 	 */
@@ -579,7 +583,7 @@ class DisplayForm extends SubmitForm{
 			wp_enqueue_script( "dynamic_{$this->formName}forms", SIM\pathToUrl($jsPath), array('sim_forms_script'), $this->formData->version, true);
 		}
 
-		$html		= apply_filters('sim-forms-before-showing-form', '', $this);
+		$this->dom->loadHTML( apply_filters('sim-forms-before-showing-form', '', $this));
 
 		$formName	= $this->formData->form_name;
 
@@ -598,10 +602,14 @@ class DisplayForm extends SubmitForm{
 			$dataset .= " data-add-empty=1";
 		}
 
-		$html	.= '<div class="sim-form-wrapper">';
+		$this->formWrapper = $this->dom->createElement('div');
+		$this->formWrapper->setAttribute('class', 'sim-form-wrapper');
+			 
 			// Formbuilder button
 			if($this->editRights){
-				$html	.= "<button type='button' class='button small formbuilder-switch'>Switch to formbuilder</button>";
+				$button = $this->dom->createElement('button', 'Switch to formbuilder' );
+				$button->setAttribute('type', 'button');
+				$button->setAttribute('class', 'button small formbuilder-switch');
 			}
 		
 			$html	.= "<h3>$formName</h3>";
