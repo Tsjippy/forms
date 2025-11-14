@@ -553,7 +553,16 @@ class DisplayForm extends SubmitForm{
 		return $html;
 	}
 	
-	public function addElement($type, 
+	public function addElement($type, $textContent, $properties, $parent){
+		$element = $this->dom->createElement($type, $textContent );
+		foreach($attributes as $attribute => $value){
+					$element->setAttribute($attribute, $value);
+				}
+				
+				$parent->appendChild($element);
+			}
+				
+				
 	/**
 	 * Show the form
 	 */
