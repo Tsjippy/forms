@@ -449,7 +449,7 @@ class ElementHtmlBuilder extends DisplayForm{
 	/**
 	 * Get the tag content of an element, i.e. the conten between the openening and closing tag
 	 */
-	protected function getTagContent(){
+	protected function getTagContent(&$node){
 		if($this->element->type == 'textarea'){
 			$value	= $this->requestedValue;
 			if(empty($value)){
@@ -461,38 +461,38 @@ class ElementHtmlBuilder extends DisplayForm{
 					$value	= array_values($value)[0];
 				}
 
-				$this->tagContent = $value;
+				$node->nodeValue = $value;
 			}
 		}elseif(!empty($this->element->text)){
 			switch($this->element->type){
 				case 'formstep':
-					$this->tagContent = "<h3>{$this->element->text}</h3>";
+					$this->addElement("h3", $node, [], $this->element->text);
 					break;
 				case 'label':
-					$this->tagContent = "<h4 class='label-text'>{$this->element->text}</h4>";
+					$this->addElement("h4", $node, ['class' => 'label-text'], $this->element->text);
 					break;
 				case 'button':
-					$this->tagContent = $this->element->text;
+					$node->nodeValue = $this->element->text;
 					break;
 				default:
-					$this->tagContent = "<label class='label-text'>{$this->element->text}</label>";
+					$this->addElement( "label", $node, ['class' => 'label-text'], $this->element->text);
 			}
-		}
-		
-		switch($this->element->type){
-			case 'select':
-				$this->tagContent .= $this->selectOptionsHtml();
-				break;
-			case 'datalist':
-				$this->tagContent .= $this->datalistOptionsHtml();
-				break;
-			case 'radio':
-			case 'checkbox':
-				$this->html .= $this->checkboxesHtml();
-				break;
-			default:
-				$this->tagContent .= "";
-		}
+		}else{
+    		switch($this->element->type){
+    			case 'select':
+    				$this->selectOptionsHtml($node);
+    				break;
+    			case 'datalist':
+    				$this->datalistOptionsHtml($node);
+    				break;
+    			case 'radio':
+    			case 'checkbox':
+                    $this->checkboxesHtml($node);
+    				break;
+    			default:
+    				$test = "";
+    		}
+        }
 	}
 
 	protected function getMultiTextInputHtml(){
@@ -867,11 +867,11 @@ class ElementHtmlBuilder extends DisplayForm{
 			$this->getMultiElementHtml($parent);
 
 			if(empty($this->html)){
-				$this->html	= "<$this->tagType $this->nameHtml $this->idHtml class='$this->classHtml' $this->optionsHtml $this->valueHtml>$this->tagContent$this->tagCloseHtml";
-			}
+                $node = $this->addElement($this->tagType, $parent, $this->attributes);
+        	}
 
 			// do this after the creation of the element
-			$this->getTagContent();	
+			$this->getTagContent($node);	
 		}
 		
 		//remove unnessary whitespaces
