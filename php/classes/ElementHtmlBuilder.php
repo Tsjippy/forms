@@ -23,7 +23,6 @@ class ElementHtmlBuilder extends DisplayForm{
 	private $selectedValue;
 	private $tagContent;
 	private $tagCloseHtml;
-	private $selectOptionsHtml;
 	public $html;
 	public $formData;
 	public $formElements;
@@ -51,10 +50,6 @@ class ElementHtmlBuilder extends DisplayForm{
 		$this->optionsHtml			= '';
 		$this->tagType				= '';
 		$this->selectedValue		= '';
-		$this->tagContent			= '';
-		$this->tagCloseHtml			= '';
-		$this->selectOptionsHtml	= '';
-		$this->html					= '';
 		$this->attributes			= ['class' => ''];
 	}
 
@@ -644,7 +639,7 @@ class ElementHtmlBuilder extends DisplayForm{
 	 * 
 	 * @return	string			The html
 	 */
-	public function selectOptionsHtml(){
+	public function selectOptionsHtml(&$node){
 		$elContent	= "<option value=''>---</option>";
 
 		$selValues	= [];
@@ -663,27 +658,26 @@ class ElementHtmlBuilder extends DisplayForm{
 		}
 
 		foreach($this->elementValues['defaults'] as $key => $option){
-			if(
+			$attributes = [
+                'value' => $key
+            ];
+            
+            if(
 				in_array(strtolower($option), $selValues) || 
 				in_array(strtolower($key), $selValues) || 
 				in_array($this->element->default_value, [$key, $option])
 			){
-				$selected	= 'selected="selected"';
-			}else{
-				$selected	= '';
+				$attributes['selected'] ="selected";
 			}
-			$elContent .= "<option value='$key' $selected>$option</option>";
+			$this->addElement( "option", $node, $attributes, $option);
 		}
-
-		return $elContent;
 	}
 
 	/**
 	 * Options html for a datalist element
 	 * Returns all the options of a datalist
 	 */
-	public function datalistOptionsHtml(){
-		$elContent	= '';
+	public function datalistOptionsHtml($node){
 
 		foreach($this->elementValues['defaults'] as $key => $option){
 			if(is_array($option)){
@@ -691,22 +685,29 @@ class ElementHtmlBuilder extends DisplayForm{
 			}else{
 				$value	= $option;
 			}
-
-			$elContent .= "<option data-value='$key' value='$value'>";
-
-			if(is_array($option)){
-				$elContent .= $option['display']."</option>";
+            
+            $elContent = '';
+            if(is_array($option)){
+				$elContent = $option['display'];
 			}
-		}
 
-		return $elContent;
+			$this->addElement(
+                "option",
+                $node, 
+                [
+                    'data-value' => $key,
+                    'value' => $value
+                ],
+                $elContent
+            );
+		}
 	}
 
 	/**
 	 * Returns all the element of a radio or checkbox element
 	 *
 	 */
-	public function checkboxesHtml(){
+	public function checkboxesHtml(&$parent){
 		// Get all the checked options and make them lowercase
 		$selected	= [];
 		
@@ -772,39 +773,45 @@ class ElementHtmlBuilder extends DisplayForm{
 			$totalLength	+= strlen($option);
 		}
 
-		$html		= "<div class='checkbox-options-group formfield'>";
-			// build the options
-			foreach($options as $key => $option){
+		$checkboxWrapper = $this->addElement('div', $parent, ['class' => 'checkbox-options-group formfield');
+		
+        // build the options
+		foreach($options as $key => $option){
+            $attributes = $this->attributes;
 				if(
 					in_array(strtolower($option), $selected) || 
 					in_array(strtolower($key), $selected) || 
 					in_array($this->element->default_value, [$key, $option])
 				){
-					$checked	= 'checked';
-				}else{
-					$checked	= '';
+					$attributes['checked']	= 'checked';
 				}
 
-				$id	= '';
-				if(!empty($this->idHtml)){
-					$id	= trim($this->idHtml, "'");
-					$id	= "$id-$key'";
+				if(!empty->attributes['id'])){
+					$attributes['id']	.= "-$key";
 				}
-				
-				$html .= "<label class='checkbox-label'>";
-					$html .= "<input type='{$this->element->type}' name='{$this->element->name}' $id class='$this->classHtml' $this->optionsHtml value='$key' $checked>";
-					$html .= "<span class='optionlabel'>$option</span>";
-				$html .= "</label>";
-
+                
+                $attributes['type'] = $this->element->type;
+                $attributes['name'] = $this->element->name;
+				$attributes['value'] = $key;
+                
+                $label = $this->addElement('label', $checkboxWrapper, ['class' => 'checkbox-label']);']);
+				$this->addElement(
+                    "input",
+                    $label,
+                    $attributes
+                );
+                
+                $this->addElement(
+                    "span",
+                    $label,
+                    ['class' => 'optionlabel'],
+                    $option
+                );
 
 				if($maxLength > 8 || $totalLength > 30){
-					$html .= "<br>";
+                    $this->addElement("br", $checkboxWrapper);
 				}
 			}
-
-		$html .= "</div>";
-
-		return $html;
 	}
 
 	/**
@@ -873,9 +880,6 @@ class ElementHtmlBuilder extends DisplayForm{
 			// do this after the creation of the element
 			$this->getTagContent($node);	
 		}
-		
-		//remove unnessary whitespaces
-		$this->html = preg_replace('/\h+/', ' ', $this->html);
 		
 		//check if we need to transform a keyword to date
 		preg_match_all('/%([^%;]*)%/i', $this->html, $matches);
