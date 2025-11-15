@@ -187,19 +187,19 @@ class ElementHtmlBuilder extends DisplayForm{
 					$node->attributes['checked']	= 'checked';
 				}
 			}
-		}elseif(is_array($value)){
-			$elementHtml	= str_replace('%value%', $value[$index], $elementHtml);
 		}else{
-			$elementHtml	= str_replace('%value%', $value, $elementHtml);
-		}
+            if(is_array($value)){
+    			$value	= $value[$index];
+    		}
+            
+            $node->attributes['value'] = $value;
+        }
 
 		// Add the index to the label if we are not displaying it on seperate tabs
 		if($this->element->type == 'label' && $this->parentInstance->multiWrapElementCount < $this->parentInstance->minElForTabs){
 			$nr				= $index + 1;
-			$elementHtml	= str_replace('</h4>'," $nr</h4>", $elementHtml);
+			$node->textContent .= " $nr</h4>";
 		}
-
-		return $elementHtml;
 	}
 
 	/**
