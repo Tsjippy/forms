@@ -610,6 +610,8 @@ class ElementHtmlBuilder extends DisplayForm{
     			$node	= $this->addElement($this->tagType, $buttonWrapper, $this->attributes, $this->tagContent);
     		}
             
+            $this->multiElementHtml($index, $value, $node);
+            
             // add the buttons
             $this->addElement(
                 'button', 
