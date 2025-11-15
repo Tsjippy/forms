@@ -400,25 +400,13 @@ class DisplayForm extends SubmitForm{
 				}
 				$i++;
 			}
-
-			return $html;
-		}
-		
-		if($this->multiwrap && $element->type != 'multi-start' && $element->type != 'multi-end'){
-			$this->processMultiFields($element, $parent, $width);
-
-			return $html;
-		}
-
-		if($element->type == 'multi-end'){
-			$this->multiwrap	= false;
-
+			
 			//write down all the multi html
 			$name	= str_replace('_multi-end', '_multi-start', $element->name);
 
-			$elementHtml	= "<div class='clone-divs-wrapper' name='$name'>";
+			$this->multiWrapper = $this->addElement("div", $parent, ['class' => 'clone-divs-wrapper', 'name' => $name]) CV;
 			if(!$this->clonableFormStep){
-				$elementHtml .= $this->renderButtons();
+				$this->rawHtml( $this->renderButtons(), $this->multiWrapper);
 
 				// Tablink buttons
 				if($this->multiWrapElementCount >= $this->minElForTabs ){
@@ -429,25 +417,35 @@ class DisplayForm extends SubmitForm{
 							$active = 'active';
 						}
 
-						$elementHtml	.= "<button class='button tablink $active' type='button' id='show-{$element->name}-$index' data-target='{$this->tabId}-$index' style='margin-right:4px;'>
-							{$element->nicename} $index
-						</button>";
+						$this->addElement(
+							'button',
+							$this->multiWrapper,
+							[
+								 'class' => "button tablink $active",
+									'type' => 'button',
+									'id' => "show-{$element->name}-$index",
+									'data-target' => "$this->tabId}-$index",
+									'style' => 'margin-right:4px;'
+								],
+								"{$element->nicename} $index"
+							);
 					}
 				}
 			}
 
-			foreach($this->multiInputsHtml as $multiHtml){
-				$elementHtml .= $multiHtml;
-			}
+			return;
+		}
+		
+		if($this->multiwrap && $element->type != 'multi-start' && $element->type != 'multi-end'){
+			$this->processMultiFields($element, $parent, $width);
+
+			return $html;
+		}
+
+		if($element->type == 'multi-end'){
+			$this->multiwrap	= false;
 			
-			if($this->wrap){
-				if($this->wrap	== 'label'){
-					$elementHtml .= '</label>';
-				}
 				$this->wrap	= false;
-			}
-			
-			$elementHtml	.= '</div>';
 		}
 		
 		// wrap an element and a folowing field in the same wrapper
