@@ -321,13 +321,15 @@ class ElementHtmlBuilder extends DisplayForm{
 	 * Determines the tag type of an element
 	 */
 	protected function getTagType(){
-		$this->tagType		= "input type='{$this->element->type}'";
-
 		if(in_array($this->element->type, ['formstep', 'info', 'div-start'])){
 			$this->tagType	= "div";
 		}elseif(in_array($this->element->type, array_merge($this->parentInstance->nonInputs, ['select', 'textarea']))){
 			$this->tagType	= $this->element->type;
-		}
+		}else{
+            $this->attributes['type'] = $this->element->type;
+            
+            $this->tagType		= "input";
+        }
 	}
 
 	/**
