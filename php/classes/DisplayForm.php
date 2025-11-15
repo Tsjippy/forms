@@ -116,8 +116,6 @@ class DisplayForm extends SubmitForm{
 			$class	= "tabcontent $hidden' id='$this->tabId-$id";
 		}
 
-		
-
 		$style	= '';
 		if($this->multiWrapElementCount < $this->minElForTabs){
 			$style	= 'style="display:flex;"';
@@ -138,23 +136,9 @@ class DisplayForm extends SubmitForm{
 	 * All html for closing a multi wrap
 	 */
 	protected function multiWrapEnd($index, $element){
-		//close any label first before adding the buttons
-		if($this->wrap == 'label'){
-			$this->multiInputsHtml[$index] .= "</label>";
-		}
-		
-		//close select
-		if($element->type == 'select'){
-			$this->multiInputsHtml[$index] .= "</select>";
-		}
-
-		$this->multiInputsHtml[$index] .= "</div>"; //close multi-input-wrapper div
-
 		if($this->multiWrapElementCount < $this->minElForTabs){
 			$this->multiInputsHtml[$index] .= $this->renderButtons();
 		}
-		
-		$this->multiInputsHtml[$index] .= "</div>"; //close clone-div
 	}
 	
 	/**
@@ -211,11 +195,6 @@ class DisplayForm extends SubmitForm{
 			!in_array($this->nextElement->type, ['select','php','formstep'])	// and the next element type is not a select or php element
 		){
 			$this->wrap = $element->type;
-		}
-
-		// Close the input wrapper div if we are not wrapping
-		if(!$this->wrap){
-			$elementHtml .= "</div>";
 		}
 
 		if(in_array($element->type, $this->nonInputs)){
@@ -387,7 +366,6 @@ class DisplayForm extends SubmitForm{
 			$i								= $elementIndex + 1;
 			$this->multiWrapValueCount		= 1;
 			$this->multiWrapElementCount	= 0;
-			$this->multiInputsHtml 			= [];
 
 			//loop over all consequent wrapped elements
 			while(true){
