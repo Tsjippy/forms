@@ -207,7 +207,6 @@ class ElementHtmlBuilder extends DisplayForm{
      * 
 	 */
 	function multiInput($parent){
-		$this->multiInputsHtml	= [];
 		
 		//add label to each entry if prev element is a label and wrapped with this one
 		if(
@@ -613,8 +612,14 @@ class ElementHtmlBuilder extends DisplayForm{
 		if(empty($this->element->multiple)){
 			return false;
 		}
-
-		if($this->element->type == 'select'){
+        
+        if($this->element->type == 'text'){
+			$this->getMultiTextInputHtml($parent);
+			return;
+		}
+        
+        // get base element
+        if($this->element->type == 'select'){
 			$attributes	= $this->attributes;
 			$attributes['name']	= $this->element->name;
 			$node = $this->addElement(
@@ -622,25 +627,67 @@ class ElementHtmlBuilder extends DisplayForm{
 				$parent,
 				$attributes
 			);
-		}elseif($this->element->type == 'text'){
-			$this->getMultiTextInputHtml();
-			return;
 		}else{
-			$atttributes	= $this->attributes;
-			$attributes['value']	= '%value%';
-
-			$node	= $this->addElement($this->tagType, $parent, $attributes, $this->tagContent);
+			$node	= $this->addElement($this->tagType, $parent, $this->attributes, $this->tagContent);
 		}
+
+        $multiWrapper = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper');
 		
-		$this->multiInput($node);
+        //add label to each entry if prev element is a label and wrapped with this one
+		if(
+			!empty($this->prevElement)	&&
+			$this->prevElement->type	== 'label' && 
+			!empty($this->prevElement->wrap) && 
+			$this->prevElement != $this->element
+		){
+			$this->prevElement->text = $this->prevElement->text.' %key%';
+			$prevLabel = $this->getElementHtml($this->prevElement, $parent).'</label>';
+		}else{
+			$prevLabel	= '';
+		}
 
-		$html	= "<div class='clone-divs-wrapper'>";
-			foreach($this->multiInputsHtml as $h){
-				$html	.= $h;
+		if(
+			empty($this->parentInstance->formData->save_in_meta) && 
+			!empty($this->elementValues['defaults'])
+		){
+			$values		= array_values($this->elementValues['defaults']);
+		}elseif(!empty($this->elementValues['metavalue'])){
+			$values		= array_values($this->elementValues['metavalue']);
+		}
+
+		//check how many elements we should render
+		$this->multiWrapValueCount	= max(1, count((array)$values));
+
+		//create as many inputs as the maximum value found
+		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
+			$val	= '';
+			if(!empty($values[$index])){
+				$val	= $values[$index];
 			}
-		$html	.= '</div>';
 
-		$this->html	= $html; 
+			$elementItemHtml	= $this->prepareElementHtml($index, $val, $parent);
+			
+			//open the clone div
+			$html	= "<div class='clone-div' data-div-id='$index'>";
+				//add flex to single multi items, re-add the label for each value
+				$html .= str_replace('%key%', $index + 1, $prevLabel);
+				
+				//wrap input AND buttons in a flex div
+				$html .= "<div class='button-wrapper' style='width:100%; display: flex;'>";
+			
+					//write the element
+					$html .= $elementItemHtml;
+			
+					//close any label first before adding the buttons
+					if($this->wrap == 'label'){
+						$html .= "</label>";
+					}
+			
+					$html .= "<button type='button' class='add button' style='flex: 1;'>+</button>";
+					$html .= "<button type='button' class='remove button' style='flex: 1;'>-</button>";
+				$html .= "</div>";
+			$html .= "</div>";//close clone-div
+ 
 	}
 
 	/**
