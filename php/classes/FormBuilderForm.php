@@ -3,7 +3,7 @@ namespace SIM\FORMS;
 use SIM;
 use stdClass;
 
-class FormBuilderForm extends SimForms{
+class FormBuilderForm extends DisplayForm{
 	use ElementHtml;
 
 	public $isInDiv;
@@ -95,7 +95,7 @@ class FormBuilderForm extends SimForms{
 	 *
 	 * @return	string					The html
 	 */
-	public function buildHtml($element, $key=0){
+	public function buildHtml($element, $parent, $key=0){
 		if(isset($this->formElements[$key+1])){
 			$this->nextElement		= $this->formElements[$key+1];
 		}else{
@@ -119,7 +119,7 @@ class FormBuilderForm extends SimForms{
 		}
 
 		//Load default values for this element
-		$elementHtml = $this->elementHtmlBuilder->getElementHtml($element);
+		$elementHtml = $this->elementHtmlBuilder->getElementHtml($element, $parent);
 		
 		//Check if element needs to be hidden
 		if(!empty($element->hidden) && $element->hidden == true){

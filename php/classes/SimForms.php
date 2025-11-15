@@ -47,8 +47,7 @@ class SimForms{
 
 	public function __construct(){
 		global $wpdb;
-
-		$this->isFormStep					= false;
+		
 		$this->isMultiStepForm				= '';
 		$this->formStepCounter				= 0;
 		$this->submissionTableName			= $wpdb->prefix . 'sim_form_submissions';

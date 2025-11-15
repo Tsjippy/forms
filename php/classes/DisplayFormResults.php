@@ -1684,7 +1684,7 @@ class DisplayFormResults extends DisplayForm{
 	 *
 	 * @return string	The html
 	 */
-	protected function renderFilterForm(){
+	protected function renderFilterForm($parent=''){
 		$html	= '';
 
 		if(!empty($this->tableSettings->filter)){
@@ -1702,7 +1702,7 @@ class DisplayFormResults extends DisplayForm{
 					$filterValue	= $_POST[$filterKey];
 				}
 	
-				$elementHtml	= $this->elementHtmlBuilder->getElementHtml($filterElement, $filterValue);
+				$elementHtml	= $this->elementHtmlBuilder->getElementHtml($filterElement, $parent, $filterValue);
 				
 				// make sure the name is not the element name but the filtername
 				$elementHtml	= str_replace("name='{$filterElement->name}'", "name='$filterKey'", $elementHtml);

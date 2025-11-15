@@ -3,7 +3,7 @@ namespace SIM\FORMS;
 use SIM;
 use WP_Error;
 
-class ElementHtmlBuilder extends SimForms{
+class ElementHtmlBuilder extends DisplayForm{
     use ElementHtml;
 
     public $defaultArrayValues;
@@ -18,7 +18,6 @@ class ElementHtmlBuilder extends SimForms{
     private $optionsHtml;
     private $classHtml;
 	private $tagType;
-	private $nameHtml;
 	private $idHtml;
 	private $valueHtml;
 	private $selectedValue;
@@ -30,6 +29,7 @@ class ElementHtmlBuilder extends SimForms{
 	public $formElements;
 	public $usermeta;
 	public $submissions;
+	public $attributes;
 
     public function __construct($parentInstance){
 		//parent::__construct();
@@ -50,15 +50,12 @@ class ElementHtmlBuilder extends SimForms{
 		$this->elementValues		= [];
 		$this->optionsHtml			= '';
 		$this->tagType				= '';
-		$this->nameHtml				= '';
-		$this->idHtml				= '';
-		$this->classHtml			= '';
-		$this->valueHtml			= '';
 		$this->selectedValue		= '';
 		$this->tagContent			= '';
 		$this->tagCloseHtml			= '';
 		$this->selectOptionsHtml	= '';
 		$this->html					= '';
+		$this->attributes			= ['class' => ''];
 	}
 
     /**
@@ -69,7 +66,7 @@ class ElementHtmlBuilder extends SimForms{
 			BUTTON TYPE
 		*/
 		if($this->element->type == 'button'){
-			$this->optionsHtml	.= " type='button'";
+			$this->attributes["type"]	='button';
 		}
 
 		if(empty($this->element->options)){
@@ -99,7 +96,7 @@ class ElementHtmlBuilder extends SimForms{
 			}
 
 			if($optionType == 'class'){
-				$this->classHtml .= " $optionValue";
+				$this->attributes['class']	.= $optionValue;
 			}else{
 				//remove any leading "
 				$optionValue	= trim($optionValue, '\'"');
@@ -109,7 +106,7 @@ class ElementHtmlBuilder extends SimForms{
 				}
 
 				//Write the corrected option as html
-				$this->optionsHtml	.= " $optionType=\"$optionValue\"";
+				$this->attributes[$optionType] = "$optionValue";
 			}
 		}
 	}
@@ -120,49 +117,49 @@ class ElementHtmlBuilder extends SimForms{
 	 * 
 	 * @param	int				$index			The current iteration index of the element
 	 * @param	string|array	$value			The value to add
+	 * @param	object			$node			The node to edit
 	 * 
 	 * @return	string							The updated HTML
 	 */
-	function prepareElementHtml($index, $value, $baseHtml=''){
+	function prepareElementHtml($index, $value, $node){
 		if($value === null){
 			$value = '';
 		}
 
-		if(empty($baseHtml)){
-			$baseHtml	= $this->html;
-		}
-
 		// make sure we add the [] after the index
-		$elementHtml		= str_replace('[]', '', $baseHtml, $replaceCount);
-		$indexString 		= "[$index]";
+		$attribute 					= $node->attributes['name'];
+		$node->attributes['name']	= str_replace('[]', '', $node->attributes['name'], $replaceCount);
+		$indexString 				= "[$index]";
 		if($replaceCount){
-			$indexString	.= "[]";
+			$indexString			.= "[]";
 		}
 
-		//Add the key to the fields name
-		$elementHtml	= preg_replace("/(name='.*?)'/i", "\${1}$indexString'", $elementHtml);
+		// Add the index to the name
+		$node->attributes['name']	= $node->attributes['name'].$indexString;
 
-		// Add the key to the id
-		$elementHtml	= preg_replace("/(id='.*?)'/i", "\${1}[$index]'", $elementHtml);
+		// Add the index to the id
+		$node->attributes['id']		= $node->attributes['id']."[$index]";
 					
 		//we are dealing with a select, add options
 		if($this->element->type == 'select'){
-			$elementHtml .= "<option value=''>---</option>";
+			// default empty first option
+			$this->addElement("option", $node, ["value" => ''], "---");
 
 			// Loop over the select options to see which option should be selected
 			foreach($this->elementValues['defaults'] as $optionKey => $option){
-				if(strtolower($value) == strtolower($optionKey) || strtolower($value) == strtolower($option)){
-					$selected	= 'selected="selected"';
-				}else{
-					$selected	= '';
-				}
-				$elementHtml .= "<option value='$optionKey' $selected>$option</option>";
-			}
+				$attributes	= [
+					"value" => $optionKey
+				];
 
-			$elementHtml  .= "</select>";
+				if(strtolower($value) == strtolower($optionKey) || strtolower($value) == strtolower($option)){
+					$attributes['selected']	= 'selected';
+				}
+
+				$this->addElement("option", $node, $attributes, $option);
+			}
 		}
 		
-		// Add the options for checkboxes and radios
+		// Make add the selected value if any
 		elseif(in_array($this->element->type, ['radio', 'checkbox'])){
 			$options	= explode("\n", trim($this->element->options));
 
@@ -187,14 +184,7 @@ class ElementHtmlBuilder extends SimForms{
 				
 				// This is the selected radio or checkbox value
 				if($found){
-					//remove the % to leave the selected
-					$elementHtml	= str_replace('%', '', $elementHtml);
-				}
-				
-				// This option is not selected
-				else{
-					//remove the %checked% keyword
-					$elementHtml	= str_replace('%checked%', '', $elementHtml);
+					$node->attributes['checked']	= 'checked';
 				}
 			}
 		}elseif(is_array($value)){
@@ -216,7 +206,7 @@ class ElementHtmlBuilder extends SimForms{
 	 * Renders the html for element who can have multiple inputs
      * 
 	 */
-	function multiInput($initialHtml){
+	function multiInput($parent){
 		$this->multiInputsHtml	= [];
 		
 		//add label to each entry if prev element is a label and wrapped with this one
@@ -227,7 +217,7 @@ class ElementHtmlBuilder extends SimForms{
 			$this->prevElement != $this->element
 		){
 			$this->prevElement->text = $this->prevElement->text.' %key%';
-			$prevLabel = $this->getElementHtml($this->prevElement).'</label>';
+			$prevLabel = $this->getElementHtml($this->prevElement, $parent).'</label>';
 		}else{
 			$prevLabel	= '';
 		}
@@ -251,7 +241,7 @@ class ElementHtmlBuilder extends SimForms{
 				$val	= $values[$index];
 			}
 
-			$elementItemHtml	= $this->prepareElementHtml($index, $val, $initialHtml);
+			$elementItemHtml	= $this->prepareElementHtml($index, $val, $parent);
 			
 			//open the clone div
 			$html	= "<div class='clone-div' data-div-id='$index'>";
@@ -390,7 +380,7 @@ class ElementHtmlBuilder extends SimForms{
 		//Load js
 		$uploader 		= new SIM\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey]);
 		
-		$this->html		= $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $this->optionsHtml, $this->element->editimage);
+		return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $this->optionsHtml, $this->element->editimage);
 	}
 
 	/**
@@ -409,7 +399,7 @@ class ElementHtmlBuilder extends SimForms{
 	/**
 	 * Determines the element name
 	 */
-	protected function getNameHtml(){
+	protected function getNameAttribute(){
 		$this->element->name	= trim($this->element->name, " \n\r\t\v\0_");
 
 		// [] not yet added to name
@@ -417,57 +407,48 @@ class ElementHtmlBuilder extends SimForms{
 			$this->element->name .= '[]';
 		}
 
-		$this->nameHtml		= "name='{$this->element->name}'" ;
-
-		$nameNeeded			= false;
-
-		// No need for a name if not an input, only needed for js code
-		/* if(in_array($this->element->type, $this->parentInstance->nonInputs)){
-			$this->nameHtml	= '';
-		} */
+		$this->attributes["name"] = $this->element->name;
 	}
 
 	/**
 	 * Get element Id
 	 */
 	protected function getElementId(){
-		$this->idHtml	= "";
-
 		//datalist needs an id to work as well as mandatory elements for use in anchor links
 		if($this->element->type == 'datalist' || $this->element->mandatory || $this->element->recommended){
-			$this->idHtml	= "id='{$this->element->name}'";
+			$this->attributes["id"] = $this->element->name;
 		}
 
 		if(str_contains($this->element->name, '[]')){
-			$this->idHtml	= "id='E{$this->element->id}'";
+			$this->attributes["id"] = "E{$this->element->id}";
 		}
 	}
 
 	/**
 	 * Gets the class string for an element
 	 */
-	protected function getClassHtml(){
-		$this->classHtml = " formfield";
+	protected function getClasses(){
+		$this->attributes['class']	.= "formfield";
 
 		switch($this->element->type){
 			case 'label':
-				$this->classHtml .= " form-label";
+				$this->attributes['class']	.= "form-label";
 				break;
 			case 'button':
-				$this->classHtml .= " button";
+				$this->attributes['class']	.= "button";
 				break;
 			case 'formstep':
-				$this->classHtml .= " formstep step-hidden";
+				$this->attributes['class']	.= "formstep step-hidden";
 				break;
 			default:
-				$this->classHtml .= " formfield-input";
+				$this->attributes['class']	.= "formfield-input";
 		}
 	}
 
 	/**
 	 * Gets the element value
 	 */
-	protected function getValueHtml(){
+	protected function getValue(){
 		if(in_array($this->element->type, $this->nonInputs)){
 			return '';
 		}
@@ -478,16 +459,13 @@ class ElementHtmlBuilder extends SimForms{
 		}
 
 		// Write a placeholder value for multi elements
-		if($this->parentInstance->multiwrap || !empty($this->element->multiple)){
-			if(str_contains($this->tagType, 'input')){
-				$this->valueHtml	= "value='%value%'";
-			}
-
-			return;
-		}
-		
-
-		if(empty($this->elementValues) && empty($this->requestedValue)){
+		if(
+			$this->parentInstance->multiwrap || 
+			!empty($this->element->multiple) ||
+			(
+				empty($this->elementValues) && empty($this->requestedValue)
+			)
+		){
 			return;
 		}
 
@@ -528,7 +506,7 @@ class ElementHtmlBuilder extends SimForms{
 				$this->selectedValue	= array_values($this->selectedValue)[0];
 			}
 
-			$this->valueHtml	= "value='$this->selectedValue'";
+			$this->attributes["value"] = $this->selectedValue;
 		}
 	}
 
@@ -581,21 +559,6 @@ class ElementHtmlBuilder extends SimForms{
 		}
 	}
 
-	/**
-	 * Determines if we should have a tag closure
-	 */
-	protected function getTagClose(){
-		//close the html
-		if(in_array($this->element->type, ['select', 'textarea', 'button', 'datalist'])){
-			$this->tagCloseHtml	= "</{$this->element->type}>";
-		}
-		
-		//only close a label field if it is not wrapped
-		elseif($this->element->type == 'label' && empty($this->element->wrap)){
-			$this->tagCloseHtml	= "</label>";
-		}
-	} 
-
 	protected function getMultiTextInputHtml(){
 		if(empty($this->requestedValue) && !empty($this->defaultArrayValues[$this->element->default_value])){
 			$this->requestedValue	= $this->defaultArrayValues[$this->element->default_value];
@@ -646,21 +609,30 @@ class ElementHtmlBuilder extends SimForms{
 	/**
 	 * Gets the html for elements with multiple instances
 	 */
-	protected function getMultiElementHtml(){
+	protected function getMultiElementHtml($parent){
 		if(empty($this->element->multiple)){
-			return;
+			return false;
 		}
 
 		if($this->element->type == 'select'){
-			$html	= "<select name='{$this->element->name}' $this->idHtml class='$this->classHtml' $this->optionsHtml>";
+			$attributes	= $this->attributes;
+			$attributes['name']	= $this->element->name;
+			$node = $this->addElement(
+				'select',
+				$parent,
+				$attributes
+			);
 		}elseif($this->element->type == 'text'){
 			$this->getMultiTextInputHtml();
 			return;
 		}else{
-			$html	= "<$this->tagType $this->nameHtml $this->idHtml class='$this->classHtml' $this->optionsHtml value='%value%'>$this->tagContent$this->tagCloseHtml";
+			$atttributes	= $this->attributes;
+			$attributes['value']	= '%value%';
+
+			$node	= $this->addElement($this->tagType, $parent, $attributes, $this->tagContent);
 		}
 		
-		$this->multiInput($html);
+		$this->multiInput($node);
 
 		$html	= "<div class='clone-divs-wrapper'>";
 			foreach($this->multiInputsHtml as $h){
@@ -808,9 +780,7 @@ class ElementHtmlBuilder extends SimForms{
 		$html		= "<div class='checkbox-options-group formfield'>";
 			// build the options
 			foreach($options as $key => $option){
-				if($this->multiwrap){
-					$checked	= '%checked%';
-				}elseif(
+				if(
 					in_array(strtolower($option), $selected) || 
 					in_array(strtolower($key), $selected) || 
 					in_array($this->element->default_value, [$key, $option])
@@ -849,7 +819,7 @@ class ElementHtmlBuilder extends SimForms{
 	 *
 	 * @return	string| WP error		The html
 	 */
-	public function getElementHtml($element, $requestedValue =''){
+	public function getElementHtml($element, $parent, $requestedValue =''){
 		$this->reset();
 		$this->element				= $element;
 		$this->requestedValue		= $requestedValue;
@@ -862,51 +832,51 @@ class ElementHtmlBuilder extends SimForms{
 			$content 	= wp_kses_post($this->element->text);
 			$content	= SIM\deslash($content);
 
-			$this->html = "<div name='{$this->element->name}'>$content</div>";
+			$this->addElement('div', $parent, ['name'=>$this->element->name], $content);
 		}elseif($this->element->type == 'php'){
 			//we store the functionname in the html variable replace any double \ with a single \
 			$functionName 	= str_replace('\\\\', '\\', $this->element->functionname);
 
 			//only continue if the function exists
 			if (function_exists( $functionName ) ){
-				$this->html		= $functionName($this->userId);
+				$this->addRawHtml($functionName($this->userId), $parent);
 			}else{
-				$this->html		= "php function '$functionName' not found";
+				$this->addElement('text', $parent, [], "php function '$functionName' not found");
 			}
 		}elseif($this->element->type == 'div-start'){
-			$class		= '';
+			$attributes	= ['name'=> $this->element->name];
 			if($this->element->hidden){
-				$class	= "class='hidden'";
+				$attributes["class"] = 'hidden';
 			}
-			$this->html 		= "<div name='{$this->element->name}' $class>";
+			$this->addElement('div', $parent, $attributes);
 		}elseif($this->element->type == 'div-end'){
+			// not sure what to do here
 			$this->html 		= "</div>";
 		}elseif(in_array($this->element->type, ['multi-start', 'multi-end'])){
 			$this->html 		= "";
 		}elseif(in_array($this->element->type, ['info'])){
-			$this->html	.= $this->infoBoxHtml($this->element->text);
+			$this->addRawHtml($this->infoBoxHtml($this->element->text), $parent);
 		}elseif(in_array($this->element->type, ['file', 'image'])){
-			$this->uploaderHtml();
+			$this->addRawHtml($this->uploaderHtml(), $parent);
 		}else{
 			$this->getTagType();
 
-			$this->getNameHtml();			
+			$this->getNameAttribute();			
 
 			$this->getElementId();
 			
-			$this->getClassHtml();
+			$this->getClasses();
 
-			$this->getValueHtml();			
+			$this->getValue();
 			
-			$this->getTagContent();			
-			
-			$this->getTagClose();	
-			
-			$this->getMultiElementHtml();
+			$this->getMultiElementHtml($parent);
 
 			if(empty($this->html)){
 				$this->html	= "<$this->tagType $this->nameHtml $this->idHtml class='$this->classHtml' $this->optionsHtml $this->valueHtml>$this->tagContent$this->tagCloseHtml";
 			}
+
+			// do this after the creation of the element
+			$this->getTagContent();	
 		}
 		
 		//remove unnessary whitespaces
