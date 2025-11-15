@@ -121,7 +121,7 @@ class ElementHtmlBuilder extends DisplayForm{
 	 * 
 	 * @return	string							The updated HTML
 	 */
-	function prepareElementHtml($index, $value, $node){
+	function multiElementHtml($index, $value, $node){
 		if($value === null){
 			$value = '';
 		}
@@ -200,71 +200,6 @@ class ElementHtmlBuilder extends DisplayForm{
 		}
 
 		return $elementHtml;
-	}
-
-	/**
-	 * Renders the html for element who can have multiple inputs
-     * 
-	 */
-	function multiInput($parent){
-		
-		//add label to each entry if prev element is a label and wrapped with this one
-		if(
-			!empty($this->prevElement)	&&
-			$this->prevElement->type	== 'label' && 
-			!empty($this->prevElement->wrap) && 
-			$this->prevElement != $this->element
-		){
-			$this->prevElement->text = $this->prevElement->text.' %key%';
-			$prevLabel = $this->getElementHtml($this->prevElement, $parent).'</label>';
-		}else{
-			$prevLabel	= '';
-		}
-
-		if(
-			empty($this->parentInstance->formData->save_in_meta) && 
-			!empty($this->elementValues['defaults'])
-		){
-			$values		= array_values($this->elementValues['defaults']);
-		}elseif(!empty($this->elementValues['metavalue'])){
-			$values		= array_values($this->elementValues['metavalue']);
-		}
-
-		//check how many elements we should render
-		$this->multiWrapValueCount	= max(1, count((array)$values));
-
-		//create as many inputs as the maximum value found
-		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
-			$val	= '';
-			if(!empty($values[$index])){
-				$val	= $values[$index];
-			}
-
-			$elementItemHtml	= $this->prepareElementHtml($index, $val, $parent);
-			
-			//open the clone div
-			$html	= "<div class='clone-div' data-div-id='$index'>";
-				//add flex to single multi items, re-add the label for each value
-				$html .= str_replace('%key%', $index + 1, $prevLabel);
-				
-				//wrap input AND buttons in a flex div
-				$html .= "<div class='button-wrapper' style='width:100%; display: flex;'>";
-			
-					//write the element
-					$html .= $elementItemHtml;
-			
-					//close any label first before adding the buttons
-					if($this->wrap == 'label'){
-						$html .= "</label>";
-					}
-			
-					$html .= "<button type='button' class='add button' style='flex: 1;'>+</button>";
-					$html .= "<button type='button' class='remove button' style='flex: 1;'>-</button>";
-				$html .= "</div>";
-			$html .= "</div>";//close clone-div
-
-			$this->multiInputsHtml[$index]	= $html;
-		}
 	}
 
 	/**
@@ -618,35 +553,7 @@ class ElementHtmlBuilder extends DisplayForm{
 			return;
 		}
         
-        // get base element
-        if($this->element->type == 'select'){
-			$attributes	= $this->attributes;
-			$attributes['name']	= $this->element->name;
-			$node = $this->addElement(
-				'select',
-				$parent,
-				$attributes
-			);
-		}else{
-			$node	= $this->addElement($this->tagType, $parent, $this->attributes, $this->tagContent);
-		}
-
-        $multiWrapper = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper');
-		
-        //add label to each entry if prev element is a label and wrapped with this one
-		if(
-			!empty($this->prevElement)	&&
-			$this->prevElement->type	== 'label' && 
-			!empty($this->prevElement->wrap) && 
-			$this->prevElement != $this->element
-		){
-			$this->prevElement->text = $this->prevElement->text.' %key%';
-			$prevLabel = $this->getElementHtml($this->prevElement, $parent).'</label>';
-		}else{
-			$prevLabel	= '';
-		}
-
-		if(
+        if(
 			empty($this->parentInstance->formData->save_in_meta) && 
 			!empty($this->elementValues['defaults'])
 		){
@@ -658,37 +565,74 @@ class ElementHtmlBuilder extends DisplayForm{
 		//check how many elements we should render
 		$this->multiWrapValueCount	= max(1, count((array)$values));
 
+        $multiWrapper = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper');
+		
 		//create as many inputs as the maximum value found
 		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
 			$val	= '';
 			if(!empty($values[$index])){
 				$val	= $values[$index];
 			}
-
-			$elementItemHtml	= $this->prepareElementHtml($index, $val, $parent);
 			
 			//open the clone div
-			$html	= "<div class='clone-div' data-div-id='$index'>";
-				//add flex to single multi items, re-add the label for each value
-				$html .= str_replace('%key%', $index + 1, $prevLabel);
-				
-				//wrap input AND buttons in a flex div
-				$html .= "<div class='button-wrapper' style='width:100%; display: flex;'>";
+			$cloneDiv = $this->addElement(	"div", $multiWrapper, ["class" => 'clone-div', "data-div-id" => '$index']);
+            
+            //add label to each entry if prev element is a label and wrapped with this one
+            $parentNode = cloneDiv;
+    		if(
+    			!empty($this->prevElement)	&&
+    			!empty($this->prevElement->wrap) && 
+    			$this->prevElement != $this->element
+    		){
+    			$parentNode = $this->getElementHtml($this->prevElement, $cloneDiv);
+    		}
+            
+            //wrap input AND buttons in a flex div
+            $buttonWrapper = $this->addElement(
+                "div", 
+                $parentNode,
+                [
+                    'class' => 'button-wrapper',
+                    'style' => 'width:100%; display: flex;'
+                ]
+            );
 			
-					//write the element
-					$html .= $elementItemHtml;
-			
-					//close any label first before adding the buttons
-					if($this->wrap == 'label'){
-						$html .= "</label>";
-					}
-			
-					$html .= "<button type='button' class='add button' style='flex: 1;'>+</button>";
-					$html .= "<button type='button' class='remove button' style='flex: 1;'>-</button>";
-				$html .= "</div>";
-			$html .= "</div>";//close clone-div
- 
-	}
+            // get base element
+            if($this->element->type == 'select'){
+    			$attributes	= $this->attributes;
+    			$attributes['name']	= $this->element->name;
+    			$node = $this->addElement(
+    				'select',
+    				$buttonWrapper,
+    				$attributes
+    			);
+    		}else{
+    			$node	= $this->addElement($this->tagType, $buttonWrapper, $this->attributes, $this->tagContent);
+    		}
+            
+            // add the buttons
+            $this->addElement(
+                'button', 
+                $buttonWrapper,
+                [
+                    'type' => 'button',
+                    'class' => 'add button',
+                    'style' => 'flex: 1'
+                ],
+                '+'
+            );
+            
+            $this->addElement(
+                'button', 
+                $buttonWrapper,
+                [
+                    'type' => 'button',
+                    'class' => 'remove button',
+                    'style' => 'flex: 1'
+                ],
+                '-'
+            );
+        }
 
 	/**
 	 * Options html for a select element
