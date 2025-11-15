@@ -118,10 +118,8 @@ class ElementHtmlBuilder extends DisplayForm{
 	 * @param	int				$index			The current iteration index of the element
 	 * @param	string|array	$value			The value to add
 	 * @param	object			$node			The node to edit
-	 * 
-	 * @return	string							The updated HTML
 	 */
-	function prepareElementHtml($index, $value, $node){
+	function prepareElementHtml($index, $value, &$node){
 		if($value === null){
 			$value = '';
 		}
@@ -187,19 +185,23 @@ class ElementHtmlBuilder extends DisplayForm{
 					$node->attributes['checked']	= 'checked';
 				}
 			}
-		}elseif(is_array($value)){
-			$elementHtml	= str_replace('%value%', $value[$index], $elementHtml);
+		}
+
+		// add value
+		elseif(is_array($value)){
+			$node->attributes['value'] =  $value[$index];
 		}else{
-			$elementHtml	= str_replace('%value%', $value, $elementHtml);
+			$node->attributes['value'] = $value;
 		}
 
 		// Add the index to the label if we are not displaying it on seperate tabs
-		if($this->element->type == 'label' && $this->parentInstance->multiWrapElementCount < $this->parentInstance->minElForTabs){
+		if(
+			$this->element->type == 'label' && 
+			$this->parentInstance->multiWrapElementCount < $this->parentInstance->minElForTabs
+		){
 			$nr				= $index + 1;
-			$elementHtml	= str_replace('</h4>'," $nr</h4>", $elementHtml);
+			//$elementHtml	= str_replace('</h4>'," $nr</h4>", $elementHtml);
 		}
-
-		return $elementHtml;
 	}
 
 	/**
@@ -458,7 +460,7 @@ class ElementHtmlBuilder extends DisplayForm{
 			$this->requestedValue	= $this->getPrevValues();
 		}
 
-		// Write a placeholder value for multi elements
+		// Do not continue
 		if(
 			$this->parentInstance->multiwrap || 
 			!empty($this->element->multiple) ||
@@ -626,10 +628,7 @@ class ElementHtmlBuilder extends DisplayForm{
 			$this->getMultiTextInputHtml();
 			return;
 		}else{
-			$atttributes	= $this->attributes;
-			$attributes['value']	= '%value%';
-
-			$node	= $this->addElement($this->tagType, $parent, $attributes, $this->tagContent);
+			$node	= $this->addElement($this->tagType, $parent, $this->attributes, $this->tagContent);
 		}
 		
 		$this->multiInput($node);
