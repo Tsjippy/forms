@@ -670,8 +670,19 @@ class DisplayForm extends SubmitForm{
 		];
 		$this->addElement('input', $form, $attributes);
 
+		$parent = $form;
+		$formstep = '';
 		foreach($this->formElements as $element){
-			$html	.= $this->buildHtml($element, $form);
+			$node = $this->buildHtml($element, $parent);
+			
+			// we should wrap the next element in thus one
+			if($element->wrap){
+				$parent = $node;
+			}elseif(!empty($formstep){
+				$parent = $formstep
+			}else{
+				$parent = $form;
+			}
 		}
 		
 		$buttonText	= 'Submit the form';
@@ -679,32 +690,44 @@ class DisplayForm extends SubmitForm{
 			$buttonText	= $this->formData->button_text;
 		}
 
-		//close the last formstep if needed
+		// Add formstep buttons
 		if($this->isFormStep){
-			$html	.= "</div>";
-			$html	.= "<div class='multi-step-controls hidden'>";
-				$html	.= "<div class='multi-step-controls-wrapper'>";
-					$html	.= "<div style='flex:1;'>";
-						$html	.= "<button type='button' class='button' name='previous-button'>Previous</button>";
-					$html	.= "</div>";
+			$formstepButtonWrapper = $this->addElement(	"div", $form, ['class' => 'multi-step-controls hidden');
+				$wrapper = $this->addElement( "div", $formstepButtonWrapper, ['class' => 'multi-step-controls-wrapper');
+					$prevWrapper = $this->addElement('div', $wrapper,	['style' => 'flex:1;']);
+						$this->addElement(	
+							"button", 
+							$prevWrapper, 
+							[
+								'type' => 'button', 
+								'class' =>'button',
+								'name' => 'previous-button'
+							],
+							'Previous'
+						);
 					
 					//Circles which indicates the steps of the form:
-					$html	.= "<div class='step-wrapper' style='flex:1;text-align:center;margin:auto;'>";
+					$indicatorWrapper = $this->addElement('div', $wrapper,	['class' => 'step-wrapper', 'style' => 'flex:1;text-align:center;margin:auto;']);
 						for ($x = 1; $x <= $this->formStepCounter; $x++) {
-							$html	.= "<span class='step'></span>";
+							$this->addElement('span', $indicatorWrapper, [ 'class' => 'step']);
 						}
-					$html	.= "</div>";
 				
-					$html	.= "<div style='flex:1;'>";
-						$html	.= "<button type='button' class='button next-button' name='next-button'>Next</button>";
-						$html	.= SIM\addSaveButton('submit-form', $buttonText, 'hidden');
-					$html	.= "</div>";
-				$html	.= "</div>";
-			$html	.= "</div>";
+					$nextWrapper = $this->addElement("div", $wrapper, ['style' => 'flex:1;']);
+						$this->addElement(
+							'button', 
+							$nextWrapper,
+							[
+								'type' => 'button', 
+								'class' => 'button next-button', 
+								'name='next-button'
+							],
+							'Next'
+						);
+						$this->addRawHtml(SIM\addSaveButton('submit-form', $buttonText, 'hidden'), $nextWrapper);
 		}
 
 		if(!$this->isFormStep && !empty($this->formElements)){
-			$html	.= SIM\addSaveButton('submit-form', $buttonText);
+			$this->addRawHtml(SIM\addSaveButton('submit-form', $buttonText), $form);
 		}
 
 		$html =  $this->dom->saveHTML();
