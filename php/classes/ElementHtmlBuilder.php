@@ -479,6 +479,24 @@ class ElementHtmlBuilder extends DisplayForm{
 	protected function getClasses(){
 		$this->attributes['class']	.= "formfield";
 
+		//Check if element needs to be hidden
+		if(!empty($element->hidden)){
+			$this->attributes['class'] .= ' hidden';
+		}
+		
+		//if the current element is required or this is a label and the next element is required
+		if(
+			!empty($element->required)		||
+			!empty($element->mandatory)		||
+			$element->wrap		&&
+			(
+				$this->nextElement->required	||
+				$this->nextElement->mandatory
+			)
+		){
+			$this->attributes['class'] .= ' required';
+		}
+
 		switch($this->element->type){
 			case 'label':
 				$this->attributes['class']	.= "form-label";
