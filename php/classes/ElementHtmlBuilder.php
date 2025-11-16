@@ -981,10 +981,19 @@ class ElementHtmlBuilder extends DisplayForm{
 	 *
 	 * @return	string| WP error		The html
 	 */
-	public function getElementHtml($element, $parent, $requestedValue =''){
+	public function getElementHtml($element, $parent='', $requestedValue =''){
 		$this->reset();
 		$this->element				= $element;
 		$this->requestedValue		= $requestedValue;
+		$returnHtml = false;
+		if(empty($parent)){
+			// Create a new DOMDocument object
+			$dom = new DOMDocument();
+			
+			$parent = $dom;
+			
+   $returnHtml = true;
+		}
 
 		$this->elementValues		= $this->getElementValues($element);
 
@@ -1090,6 +1099,11 @@ class ElementHtmlBuilder extends DisplayForm{
 			}
 		}
 
-		return apply_filters('sim-form-element-html', $node, $this);
+		$node = apply_filters('sim-form-element-html', $node, $this);
+		
+		if($returnHtml){
+			return $dom->saveHtml();
 	}
+	
+	return $node;
 }
