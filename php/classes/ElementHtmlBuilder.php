@@ -183,53 +183,32 @@ class ElementHtmlBuilder extends DisplayForm{
 		 * Add Select options
 		 */
 		if($this->element->type == 'select'){
-			// default empty first option
-			$this->addElement("option", $node, ["value" => ''], "---");
-
-			// Loop over the select options to see which option should be selected
-			foreach($this->elementValues['defaults'] as $optionKey => $option){
-				$attributes	= [
-					"value" => $optionKey
-				];
-
-				if(strtolower($value) == strtolower($optionKey) || strtolower($value) == strtolower($option)){
-					$attributes['selected']	= 'selected';
+			$options = $node->getElementsByTagName('option');
+			
+			foreach($nodes as $node){
+				if($node->attributes['value'] == $value){
+					$node->attributes['selected'] = 'selected';
+				}else
+					$node->removeAttribute('selected');
 				}
-
-				$this->addElement("option", $node, $attributes, $option);
-			}
 		}
 		
 		/**
 		 * checkbox checked value
 		 */
 		elseif(in_array($this->element->type, ['radio', 'checkbox'])){
-			$options	= explode("\n", trim($this->element->options));
-
-			//make key and value lowercase
-			array_walk_recursive($options, function(&$item, &$key){
-				$item 	= strtolower($item);
-				$key 	= strtolower($key);
-			});
-
-			foreach($options as $optionKey => $option){
-				$found = false;
-
-				if(is_array($value)){
-					foreach($value as $v){
-						if(strtolower($v) == $optionKey || strtolower($v) == $option){
-							$found 	= true;
-						}
-					}
-				}elseif(strtolower($value) == $optionKey || strtolower($value) == $option){
-					$found 	= true;
+			$options = $node->getElementsByTagName('this->element->type');
+			
+			foreach($nodes as $node){
+				if($node->attributes['value'] == $value){
+					$node->attributes['checked'] = 'checked';
+				}else
+					$node->removeAttribute('checked');
 				}
-				
-				// This is the selected radio or checkbox value
-				if($found){
-					$node->attributes['checked']	= 'checked';
-				}
-			}
+		}
+		
+		elseif($this->element->type == 'textarea'){
+			$node->nodeValue = $value;
 		}
 
 		/**
@@ -248,70 +227,6 @@ class ElementHtmlBuilder extends DisplayForm{
 		){
 			$nr					 = $index + 1;
 			$node->nodeValue	.= " $nr";
-		}
-	}
-
-	/**
-	 * Renders the html for element who can have multiple inputs
-	 */
-	function multiInput($parent){		
-		if(
-			empty($this->parentInstance->formData->save_in_meta) && 
-			!empty($this->elementValues['defaults'])
-		){
-			$values		= array_values($this->elementValues['defaults']);
-		}elseif(!empty($this->elementValues['metavalue'])){
-			$values		= array_values($this->elementValues['metavalue']);
-		}
-
-		//check how many elements we should render
-		$this->multiWrapValueCount	= max(1, count((array)$values));
-
-		//create as many inputs as the maximum value found
-		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
-			$val	= '';
-			if(!empty($values[$index])){
-				$val	= $values[$index];
-			}
-			
-			// Open the clone div
-			$wrapper	= $this->addElement(
-				'div', 
-				$parent, 
-				[
-					'class'			=> 'clone-div',
-					'data-div-id'	=> $index
-				]
-			);
-
-			$parentNode		= $wrapper;
-			//add wrapping element to each entry if prev element is wrapped with this one
-			if(
-				!empty($this->prevElement)	&&
-				!empty($this->prevElement->wrap) && 
-				$this->prevElement != $this->element
-			){
-				$wrappingNode = $this->getElementHtml($this->prevElement, $wrapper);
-				$wrappingNode->attributes->nodeValue	.= $index + 1;
-
-				$parentNode		= $wrappingNode;
-			}
-
-			//wrap input AND buttons in a flex div
-			$flexWrapper	= $this->addElement(
-				'div',
-				$parentNode,
-				[
-					'class'	=> 'button-wrapper',
-					'style' => 'width:100%; display: flex;' 
-				]
-			);
-				
-			// Add the element itself
-			$node	= $this->addElement($this->tagType, $flexWrapper, $this->attributes, $this->tagContent);
-			$this->changeNodeAttributes($index, $val, $node);				
-
-			$this->renderButtons($flexWrapper);
 		}
 	}
 
@@ -695,7 +610,7 @@ class ElementHtmlBuilder extends DisplayForm{
 	/**
 	 * Gets the html for elements with multiple instances
 	 */
-	protected function getMultiElementHtml($parent){
+	protected function getMultiElementHtml($node){
 		if(empty($this->element->multiple)){
 			return false;
 		}
@@ -705,6 +620,8 @@ class ElementHtmlBuilder extends DisplayForm{
 			return;
 		}
         
+		$parent = $node->parentNode;
+		
         if(
 			empty($this->parentInstance->formData->save_in_meta) && 
 			!empty($this->elementValues['defaults'])
@@ -736,6 +653,7 @@ class ElementHtmlBuilder extends DisplayForm{
     			!empty($this->prevElement->wrap) && 
     			$this->prevElement != $this->element
     		){
+							
     			$parentNode = $this->getElementHtml($this->prevElement, $cloneDiv);
     		}
             
@@ -749,20 +667,8 @@ class ElementHtmlBuilder extends DisplayForm{
                 ]
             );
 			
-            // get base element
-            if($this->element->type == 'select'){
-    			$attributes	= $this->attributes;
-    			$attributes['name']	= $this->element->name;
-    			$node = $this->addElement(
-    				'select',
-    				$buttonWrapper,
-    				$attributes
-    			);
-    		}else{
-    			$node	= $this->addElement($this->tagType, $buttonWrapper, $this->attributes, $this->tagContent);
-    		}
-            
-            $this->changeNodeAttributes($index, $val, $node);
+            $copy = $node->cloneNode(true)
+            $this->changeNodeAttributes($index, $val, $copy);
             
             // add the buttons
             $this->addElement(
@@ -787,6 +693,9 @@ class ElementHtmlBuilder extends DisplayForm{
                 '-'
             );
         }
+								
+								// Delete the original node
+								$parent->removeChild($node);
 	}
 
 	/**
@@ -1145,14 +1054,14 @@ class ElementHtmlBuilder extends DisplayForm{
 
 				$this->getValue();
 				
-				$this->getMultiElementHtml($parent);
-
 				$node = $this->addElement($this->tagType, $parent, $this->attributes);
 
 				// do this after the creation of the element
 				$this->getTagContent($node);	
 			}
 		
+			$this->getMultiElementHtml($node);
+
 		// We should add the same node multiple times
 		if($this->multiWrapElementCount > 0){
 			$clones = $this->multiWrapper->children;
