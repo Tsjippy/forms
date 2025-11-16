@@ -356,7 +356,7 @@ function archiveSubmission(){
 /**
  * Retrieves the element html needed to be able to update a form result entry
  */
-function getInputHtml($parent){
+function getInputHtml(){
 	$formTable		= new DisplayFormResults($_POST);
 
 	$formTable->parseSubmissions('', $_POST['submission-id']);
@@ -382,6 +382,7 @@ function getInputHtml($parent){
 	$value	= $formTable->getSubmissionValue($_POST['submission-id'], $elementId, $_POST['subid']);
 
 	// Get element html
+	
 	$html 		= $formTable->elementHtmlBuilder->getElementHtml($element, $parent, $value);
 	
 	/**
