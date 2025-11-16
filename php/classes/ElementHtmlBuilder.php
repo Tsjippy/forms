@@ -1155,15 +1155,16 @@ class ElementHtmlBuilder extends DisplayForm{
 		
 		// We should add the same node multiple times
 		if($this->multiWrapElementCount > 0){
-			$copy = $node->cloneNode(true);
+			$clones = $this->multiWrapper->children;
 			
-			// Modify an attribute of the cloned node to distinguish it
-		$copy->setAttribute('id', 'cloned');
+			for ($index = 0; $index < $this->multiWrapValueCount; $index++)
+				$copy = $node->cloneNode(true);
+				$value = $values[$index];
+				$this->changeNodeAttributes($index, $value, $copy);
 
-		// Append the cloned node to the multiWrapper clone div
-		$clones = $this->multiWrapper->children;
-		
-		$this->multiWrapper->appendChild($clonedNode);
+				// Append the cloned node to the multiWrapper clone div
+				$clones[$index]->appendChild($copy);
+			}
 		}
 		
 		//check if we need to transform a keyword to date
