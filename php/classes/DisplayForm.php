@@ -392,16 +392,29 @@ class DisplayForm extends SubmitForm{
 
 		$parent = $form;
 		$formstep = '';
-		foreach($this->formElements as $element){
-			$node = $this->buildHtml($element, $parent);
+		$parents = [$form];
+		foreach($this->formElements as $index => $element){
+			$node = $this->buildHtml($element, end($parents));
 			
 			// we should wrap the next element in this one
-			if($element->wrap){
-				$parent = $node;
-			}elseif(empty($formstep)){
-				$parent = $form;
-			}else{
-				$parent = $formstep;
+			if(
+				(
+					$element->wrap &&
+					!$this->formElements[$index - 1]->wrap
+				)|| 
+				in_array($element->type, ['formstep', 'div-start', 'multi-start'])
+			){
+				$parents[$element] = $node;
+			}
+			// we finished wrapping remove last parent
+			elseif(
+				(
+					!$element->wrap && 
+					end($parents)->wrap
+				) ||
+				in_array($element->type, ['div-end', 'multi-end'])
+			){
+				array_pop($parents);
 			}
 		}
 
