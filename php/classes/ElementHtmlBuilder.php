@@ -1088,8 +1088,12 @@ class ElementHtmlBuilder extends DisplayForm{
 				$this->multiwrapStart();
 				break;
 			case 'div-end':
+				break;
 			case 'multi-end':
 				// nothing to do
+				if($this->multiWrapElementCount < $this->minElForTabs){
+					$this->renderButtons();
+				}
 				break;
 			case 'info':
 				$node		= $this->addRawHtml($this->infoBoxHtml($this->element->text), $parent);
