@@ -395,13 +395,13 @@ class DisplayForm extends SubmitForm{
 		foreach($this->formElements as $element){
 			$node = $this->buildHtml($element, $parent);
 			
-			// we should wrap the next element in thus one
+			// we should wrap the next element in this one
 			if($element->wrap){
 				$parent = $node;
-			}elseif(!empty($formstep)){
-				$parent = $formstep;
-			}else{
+			}elseif(empty($formstep)){
 				$parent = $form;
+			}else{
+				$parent = $formstep;
 			}
 		}
 
