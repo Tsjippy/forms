@@ -383,7 +383,7 @@ function getInputHtml(){
 
 	// Get element html
 	
-	$html 		= $formTable->elementHtmlBuilder->getElementHtml($element, $parent, $value);
+	$html 		= $formTable->elementHtmlBuilder->getElementHtml($element, '', $value);
 	
 	/**
 	 * Check if this element needs a datalist
@@ -410,7 +410,7 @@ function getInputHtml(){
 
 			// Get the html of the datalist element
 			if($datalist){
-				$html .= $formTable->elementHtmlBuilder->getElementHtml($datalist, $parent);
+				$html .= $formTable->elementHtmlBuilder->getElementHtml($datalist, '');
 			}
 		}
 	}
@@ -420,7 +420,7 @@ function getInputHtml(){
 	$prevElement 	= $formTable->formElements[$index];
 	while($prevElement && $prevElement->wrap){
 		$index--;
-		$html 			= $formTable->elementHtmlBuilder->getElementHtml($prevElement, $parent).$html;
+		$html 			= $formTable->elementHtmlBuilder->getElementHtml($prevElement, '').$html;
 		$prevElement 	= $formTable->formElements[$index];
 	}
 		
