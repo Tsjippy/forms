@@ -115,8 +115,6 @@ class DisplayForm extends SubmitForm{
 			}
 		}
 
-		$this->elementHtmlBuilder->html	= $elementHtml;
-
 		// Create as many clones as the maximum value of one of the elements 
 		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
 			$val	= '';
