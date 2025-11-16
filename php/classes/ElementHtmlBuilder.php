@@ -15,11 +15,7 @@ class ElementHtmlBuilder extends DisplayForm{
 	private $parentInstance;
 	private $requestedValue;
 	private $elementValues;
-    private $optionsHtml;
-    private $classHtml;
 	private $tagType;
-	private $idHtml;
-	private $valueHtml;
 	private $selectedValue;
 	private $tagContent;
 	private $tagCloseHtml;
@@ -47,16 +43,15 @@ class ElementHtmlBuilder extends DisplayForm{
 
 	public function reset(){
 		$this->elementValues		= [];
-		$this->optionsHtml			= '';
 		$this->tagType				= '';
 		$this->selectedValue		= '';
 		$this->attributes			= ['class' => ''];
 	}
 
     /**
-	 * Gets the options html string
+	 * Gets the elment attributes
 	 */
-	protected function getOptionHtml(){
+	protected function getAttributes(){
 		/*
 			BUTTON TYPE
 		*/
@@ -96,31 +91,82 @@ class ElementHtmlBuilder extends DisplayForm{
 				//remove any leading "
 				$optionValue	= trim($optionValue, '\'"');
 
-				if($this->element->type == 'date' && in_array($optionType, ['min', 'max', 'value']) && strtotime($optionValue)){
+				// Parse a date value
+				if(
+					$this->element->type == 'date' && 
+					in_array($optionType, ['min', 'max', 'value']) && 
+					strtotime($optionValue)
+				){
 					$optionValue	= Date('Y-m-d', strtotime($optionValue));
 				}
 
-				//Write the corrected option as html
+				// Store in the attributes array
 				$this->attributes[$optionType] = "$optionValue";
 			}
 		}
 	}
 
 	/**
-	 * Changes the element html to accomodate multiple values
+	 * Renders the add and remove buttons for a multi-answer group
+	 */
+	protected function renderButtons($parent){
+		ob_start();
+
+		$addText	= '+';
+		if(!empty($this->prevElement) && !empty($this->prevElement->add)){
+			$addText	= $this->prevElement->add;
+		}
+
+		$removeText	= '-';
+		if(!empty($this->prevElement) && !empty($this->prevElement->remove)){
+			$removeText	= $this->prevElement->remove;
+		}
+		
+		$wrapper	= $this->addElement(
+			'div',
+			$parent,
+			[
+				'class'	=> 'button-wrapper',
+				'style'	=> 'margin: auto;'
+			]
+		);
+
+		$this->addElement(
+			'div',
+			$wrapper,
+			[
+				'type'	=> 'button',
+				'class'	=> 'add button',
+				'style'	=> 'flex: 1;max-width: max-content;'
+			],
+			$addText
+		);
+
+		$this->addElement(
+			'div',
+			$wrapper,
+			[
+				'type'	=> 'button',
+				'class'	=> 'remove button',
+				'style'	=> 'flex: 1;max-width: max-content;'
+			],
+			$removeText
+		);
+	}
+
+	/**
 	 * Adds an index to the name and id and adds the value of the current index
 	 * 
 	 * @param	int				$index			The current iteration index of the element
 	 * @param	string|array	$value			The value to add
 	 * @param	object			$node			The node to edit
 	 */
-	function prepareElementHtml($index, $value, &$node){
+	function changeNodeAttributes($index, $value, &$node){
 		if($value === null){
 			$value = '';
 		}
 
-		// make sure we add the [] after the index
-		$attribute 					= $node->attributes['name'];
+		// make sure we add the [] after the index if there was [] originally
 		$node->attributes['name']	= str_replace('[]', '', $node->attributes['name'], $replaceCount);
 		$indexString 				= "[$index]";
 		if($replaceCount){
@@ -133,7 +179,9 @@ class ElementHtmlBuilder extends DisplayForm{
 		// Add the index to the id
 		$node->attributes['id']		= $node->attributes['id']."[$index]";
 					
-		//we are dealing with a select, add options
+		/**
+		 * Add Select options
+		 */
 		if($this->element->type == 'select'){
 			// default empty first option
 			$this->addElement("option", $node, ["value" => ''], "---");
@@ -152,7 +200,9 @@ class ElementHtmlBuilder extends DisplayForm{
 			}
 		}
 		
-		// Make add the selected value if any
+		/**
+		 * checkbox checked value
+		 */
 		elseif(in_array($this->element->type, ['radio', 'checkbox'])){
 			$options	= explode("\n", trim($this->element->options));
 
@@ -182,9 +232,11 @@ class ElementHtmlBuilder extends DisplayForm{
 			}
 		}
 
-		// add value
+		/**
+		 *  Element value
+		 */ 
 		elseif(is_array($value)){
-			$node->attributes['value'] =  $value[$index];
+			$node->attributes['value'] = $value[$index];
 		}else{
 			$node->attributes['value'] = $value;
 		}
@@ -194,31 +246,15 @@ class ElementHtmlBuilder extends DisplayForm{
 			$this->element->type == 'label' && 
 			$this->parentInstance->multiWrapElementCount < $this->parentInstance->minElForTabs
 		){
-			$nr				= $index + 1;
-			//$elementHtml	= str_replace('</h4>'," $nr</h4>", $elementHtml);
+			$nr					 = $index + 1;
+			$node->nodeValue	.= " $nr";
 		}
 	}
 
 	/**
 	 * Renders the html for element who can have multiple inputs
-     * 
 	 */
-	function multiInput($parent){
-		$this->multiInputsHtml	= [];
-		
-		//add label to each entry if prev element is a label and wrapped with this one
-		if(
-			!empty($this->prevElement)	&&
-			$this->prevElement->type	== 'label' && 
-			!empty($this->prevElement->wrap) && 
-			$this->prevElement != $this->element
-		){
-			$this->prevElement->text = $this->prevElement->text.' %key%';
-			$prevLabel = $this->getElementHtml($this->prevElement, $parent).'</label>';
-		}else{
-			$prevLabel	= '';
-		}
-
+	function multiInput($parent){		
 		if(
 			empty($this->parentInstance->formData->save_in_meta) && 
 			!empty($this->elementValues['defaults'])
@@ -237,31 +273,45 @@ class ElementHtmlBuilder extends DisplayForm{
 			if(!empty($values[$index])){
 				$val	= $values[$index];
 			}
-
-			$elementItemHtml	= $this->prepareElementHtml($index, $val, $parent);
 			
-			//open the clone div
-			$html	= "<div class='clone-div' data-div-id='$index'>";
-				//add flex to single multi items, re-add the label for each value
-				$html .= str_replace('%key%', $index + 1, $prevLabel);
+			// Open the clone div
+			$wrapper	= $this->addElement(
+				'div', 
+				$parent, 
+				[
+					'class'			=> 'clone-div',
+					'data-div-id'	=> $index
+				]
+			);
+
+			$parentNode		= $wrapper;
+			//add wrapping element to each entry if prev element is wrapped with this one
+			if(
+				!empty($this->prevElement)	&&
+				!empty($this->prevElement->wrap) && 
+				$this->prevElement != $this->element
+			){
+				$wrappingNode = $this->getElementHtml($this->prevElement, $wrapper);
+				$wrappingNode->attributes->nodeValue	.= $index + 1;
+
+				$parentNode		= $wrappingNode;
+			}
+
+			//wrap input AND buttons in a flex div
+			$flexWrapper	= $this->addElement(
+				'div',
+				$parentNode,
+				[
+					'class'	=> 'button-wrapper',
+					'style' => 'width:100%; display: flex;' 
+				]
+			);
 				
-				//wrap input AND buttons in a flex div
-				$html .= "<div class='button-wrapper' style='width:100%; display: flex;'>";
-			
-					//write the element
-					$html .= $elementItemHtml;
-			
-					//close any label first before adding the buttons
-					if($this->wrap == 'label'){
-						$html .= "</label>";
-					}
-			
-					$html .= "<button type='button' class='add button' style='flex: 1;'>+</button>";
-					$html .= "<button type='button' class='remove button' style='flex: 1;'>-</button>";
-				$html .= "</div>";
-			$html .= "</div>";//close clone-div
+			// Add the element itself
+			$node	= $this->addElement($this->tagType, $flexWrapper, $this->attributes, $this->tagContent);
+			$this->changeNodeAttributes($index, $val, $node);				
 
-			$this->multiInputsHtml[$index]	= $html;
+			$this->renderButtons($flexWrapper);
 		}
 	}
 
@@ -377,7 +427,7 @@ class ElementHtmlBuilder extends DisplayForm{
 		//Load js
 		$uploader 		= new SIM\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey]);
 		
-		return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $this->optionsHtml, $this->element->editimage);
+		return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $this->attributes, $this->element->editimage);
 	}
 
 	/**
@@ -512,53 +562,43 @@ class ElementHtmlBuilder extends DisplayForm{
 	/**
 	 * Get the tag content of an element, i.e. the conten between the openening and closing tag
 	 */
-	protected function getTagContent(&$node){
-		if($this->element->type == 'textarea'){
-			$value	= $this->requestedValue;
-			if(empty($value)){
-				$value	= $this->selectedValue;
-			}
-
-			if(!empty($value)){
-				if(is_array($value)){
-					$value	= array_values($value)[0];
+	protected function getTagContent($node){
+		switch($this->element->type){
+			case 'textarea':
+				$value	= $this->requestedValue;
+				if(empty($value)){
+					$value	= $this->selectedValue;
 				}
 
-				$node->nodeValue = $value;
-			}
-		}elseif(!empty($this->element->text)){
-			switch($this->element->type){
-				case 'formstep':
-					$this->addElement("h3", $node, [], $this->element->text);
-					break;
-				case 'label':
-					$this->addElement("h4", $node, ['class' => 'label-text'], $this->element->text);
-					break;
-				case 'button':
-					$node->nodeValue = $this->element->text;
-					break;
-				default:
-					$this->addElement( "label", $node, ['class' => 'label-text'], $this->element->text);
-			}
-		}else{
-    		switch($this->element->type){
-    			case 'select':
-    				$this->selectOptionsHtml($node);
-    				break;
-    			case 'datalist':
-    				$this->datalistOptionsHtml($node);
-    				break;
-    			case 'radio':
-    			case 'checkbox':
-                    $this->checkboxesHtml($node);
-    				break;
-    			default:
-    				$test = "";
-    		}
+				if(!empty($value)){
+					if(is_array($value)){
+						$value	= array_values($value)[0];
+					}
+
+					$node->nodeValue = $value;
+				}
+				break;
+			case 'formstep':
+				$this->addElement("h3", $node, [], $this->element->text);
+				break;
+			case 'label':
+				$this->addElement("h4", $node, ['class' => 'label-text'], $this->element->text);
+				break;
+			case 'button':
+				$node->nodeValue = $this->element->text;
+				break;
+			case 'select':
+				$this->addSelectOptions($node);
+				break;
+			case 'datalist':
+				$this->addDatalistOptions($node);
+				break;
+			default:
+				$this->addElement( "label", $node, ['class' => 'label-text'], $this->element->text);
         }
 	}
 
-	protected function getMultiTextInputHtml(){
+	protected function getMultiTextInputHtml($parent){
 		if(empty($this->requestedValue) && !empty($this->defaultArrayValues[$this->element->default_value])){
 			$this->requestedValue	= $this->defaultArrayValues[$this->element->default_value];
 
@@ -572,37 +612,66 @@ class ElementHtmlBuilder extends DisplayForm{
 			$elName	.= '[]';
 		}
 
-		$html	= "<div class='option-wrapper'>";
-			// container for choices made
-			$html	.= "<ul class='list-selection-list'>";
-				foreach($this->requestedValue as $v){
-					if(method_exists($this, 'transformInputData')){
-						if(empty($this->submissions)){
-							$this->submissions	= $this->parentInstance->submissions;
-						}
-						$transValue		= $this->transformInputData($v, $this->element->name, $this->submissions[0]);
-					}else{
-						$transValue		= $v;
-					}
+		$wrapper = $this->addElement("div", $parent, ['class' => 'option-wrapper']);
+			
+		/**
+		 * The list of prefileld values
+		 */
 
-					$html	.= "<li class='list-selection'>";
-						$html	.= "<button type='button' class='small remove-list-selection'>";
-							$html	.= "<span class='remove-list-selection'>×</span>";
-						$html	.= "</button>";
-						$html	.= "<input type='hidden' class='no-reset' name='$elName' value='$v'>";
-						$html	.= "<span class='selected-name'>$transValue</span>";
-					$html	.= "</li>";
+		// The unoredered list for choices made
+		$selectionList	= $this->addElement("ul", $wrapper, ['class' => 'list-selection-list']);
+
+		// Add all the list items
+		foreach($this->requestedValue as $v){
+			if(method_exists($this, 'transformInputData')){
+				if(empty($this->submissions)){
+					$this->submissions	= $this->parentInstance->submissions;
 				}
-			$html	.= "</ul>";
+				$transValue		= $this->transformInputData($v, $this->element->name, $this->submissions[0]);
+			}else{
+				$transValue		= $v;
+			}
 
-			// add the text input
-			$html	.= "<div class='multi-text-input-wrapper'>";
-				$html	.= "<input type='text' $this->idHtml name='$elName' class='$this->classHtml datalistinput multiple' $this->optionsHtml>";
-				$html	.= '<button type="button" class="small add-list-selection hidden">Add</button>';
-			$html	.= "</div>";
-		$html	.= "</div>";
+			$listItem	= $this->addElement('li', $selectionList, ['class' => 'list-selection']);
 
-		$this->html	= $html;
+			$button		= $this->addElement(
+				'button', 
+				$listItem, 
+				[
+					'type'	=> 'button',
+					'class'	=> 'small remove-list-selection'
+				]
+			);
+
+			$this->addElement('span', $button, ['class' => 'remove-list-selection'], '×');
+
+			$this->addElement(
+				'input',
+				$listItem,
+				[
+					'type'	=> 'hidden',
+					'class'	=> 'no-reset',
+					'name'	=> $elName,
+					'value'	=> $v
+				]
+			);
+
+			$this->addElement('span', $listItem, ['class' => 'selected-name'], $transValue);
+		}
+
+		/**
+		 * Add the actual text input
+		 */
+		$inputWrapper			= $this->addElement('div', $wrapper, ['class' => 'multi-text-input-wrapper']);
+
+		$attributes				= $this->attributes;
+		$attributes['type']		= 'text';
+		$attributes['name']		= $elName;
+		$attributes['class']	.= "datalistinput multiple";
+		
+		$this->addElement('input', $inputWrapper, $attributes);
+
+		$this->addElement('button', $inputWrapper, ['type' => "button", 'class' => "small add-list-selection hidden"], 'add');
 	}
 
 	/**
@@ -630,7 +699,7 @@ class ElementHtmlBuilder extends DisplayForm{
 		//check how many elements we should render
 		$this->multiWrapValueCount	= max(1, count((array)$values));
 
-        $multiWrapper = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper');
+        $multiWrapper = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
 		
 		//create as many inputs as the maximum value found
 		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
@@ -643,7 +712,7 @@ class ElementHtmlBuilder extends DisplayForm{
 			$cloneDiv = $this->addElement(	"div", $multiWrapper, ["class" => 'clone-div', "data-div-id" => '$index']);
             
             //add label to each entry if prev element is a label and wrapped with this one
-            $parentNode = cloneDiv;
+            $parentNode = $cloneDiv;
     		if(
     			!empty($this->prevElement)	&&
     			!empty($this->prevElement->wrap) && 
@@ -675,14 +744,14 @@ class ElementHtmlBuilder extends DisplayForm{
     			$node	= $this->addElement($this->tagType, $buttonWrapper, $this->attributes, $this->tagContent);
     		}
             
-            $this->multiElementHtml($index, $value, $node);
+            $this->changeNodeAttributes($index, $val, $node);
             
             // add the buttons
             $this->addElement(
                 'button', 
                 $buttonWrapper,
                 [
-                    'type' => 'button',
+                    'type'	=> 'button',
                     'class' => 'add button',
                     'style' => 'flex: 1'
                 ],
@@ -693,22 +762,22 @@ class ElementHtmlBuilder extends DisplayForm{
                 'button', 
                 $buttonWrapper,
                 [
-                    'type' => 'button',
+                    'type' 	=> 'button',
                     'class' => 'remove button',
                     'style' => 'flex: 1'
                 ],
                 '-'
             );
         }
+	}
 
 	/**
-	 * Options html for a select element
-	 * Gets all the options of a select element
-	 * 
-	 * @return	string			The html
+	 * Options for a select element
+	 * Adds all the options of a select element
 	 */
-	public function selectOptionsHtml(&$node){
-		$elContent	= "<option value=''>---</option>";
+	public function addSelectOptions($node){
+		// Empty option on the top
+		$this->addElement( "option", $node, ['value' => ''], '---');
 
 		$selValues	= [];
 		if(!empty($this->elementValues['metavalue'])){
@@ -742,11 +811,9 @@ class ElementHtmlBuilder extends DisplayForm{
 	}
 
 	/**
-	 * Options html for a datalist element
-	 * Returns all the options of a datalist
+	 * Adds the options to a datalist element
 	 */
-	public function datalistOptionsHtml($node){
-
+	public function addDatalistOptions($node){
 		foreach($this->elementValues['defaults'] as $key => $option){
 			if(is_array($option)){
 				$value	= $option['value'];
@@ -772,11 +839,13 @@ class ElementHtmlBuilder extends DisplayForm{
 	}
 
 	/**
-	 * Returns all the element of a radio or checkbox element
+	 * Adds all the checkboaxes or radios
 	 *
 	 */
-	public function checkboxesHtml(&$parent){
-		// Get all the checked options and make them lowercase
+	public function addCheckboxes($parent){
+		/**
+		 * Get all the checked options and make them lowercase
+		 */
 		$selected	= [];
 		
 		$defaultKey				= $this->element->default_value;
@@ -835,49 +904,133 @@ class ElementHtmlBuilder extends DisplayForm{
 		// check the length of each option
 		$maxLength		= 0;
 		$totalLength	= 0;
-		// Check how much space wee need
+
+		// Check how much space we need
 		foreach($options as $option){
 			$maxLength		 = max($maxLength, strlen($option));
 			$totalLength	+= strlen($option);
 		}
 
-		$checkboxWrapper = $this->addElement('div', $parent, ['class' => 'checkbox-options-group formfield');
+		$checkboxWrapper = $this->addElement('div', $parent, ['class' => 'checkbox-options-group formfield']);
 		
         // build the options
 		foreach($options as $key => $option){
+			// Add a wrapping label
+			$label = $this->addElement('label', $checkboxWrapper, ['class' => 'checkbox-label']);
+
+			// Default attributes
             $attributes = $this->attributes;
-				if(
-					in_array(strtolower($option), $selected) || 
-					in_array(strtolower($key), $selected) || 
-					in_array($this->element->default_value, [$key, $option])
-				){
-					$attributes['checked']	= 'checked';
+
+			// Checked attribute
+			if(
+				in_array(strtolower($option), $selected) || 
+				in_array(strtolower($key), $selected) || 
+				in_array($this->element->default_value, [$key, $option])
+			){
+				$attributes['checked']	= 'checked';
+			}
+
+			// Element id
+			if(!empty($attributes['id'])){
+				$attributes['id']	.= "-$key";
+			}
+			
+			// Other attributes
+			$attributes['type'] = $this->element->type;
+			$attributes['name'] = $this->element->name;
+			$attributes['value'] = $key;
+
+			// Add the input
+			$this->addElement(
+				"input",
+				$label,
+				$attributes
+			);
+			
+			// Text for the checkbox or radio
+			$this->addElement(
+				"span",
+				$label,
+				['class' => 'optionlabel'],
+				$option
+			);
+
+			// one of the options is longer than 8 or the total is more than 30, add each checkbox on a seperate line
+			if($maxLength > 8 || $totalLength > 30){
+				$this->addElement("br", $checkboxWrapper);
+			}
+		}
+	}
+
+	public function multiwrapStart(){
+		// We are wrapping so we need to find the max amount of filled in fields
+			$i								= $elementIndex + 1;
+			$this->multiWrapValueCount		= 1;
+			$this->multiWrapElementCount	= 0;
+
+			//loop over all consequent wrapped elements
+			while(true){
+				$type	= $this->formElements[$i]->type;
+
+				// Loop till we reach a multi-end element or the end of the form
+				if($type == 'multi-end' || empty($this->formElements[$i])){
+					break;
 				}
 
-				if(!empty->attributes['id'])){
-					$attributes['id']	.= "-$key";
-				}
-                
-                $attributes['type'] = $this->element->type;
-                $attributes['name'] = $this->element->name;
-				$attributes['value'] = $key;
-                
-                $label = $this->addElement('label', $checkboxWrapper, ['class' => 'checkbox-label']);']);
-				$this->addElement(
-                    "input",
-                    $label,
-                    $attributes
-                );
-                
-                $this->addElement(
-                    "span",
-                    $label,
-                    ['class' => 'optionlabel'],
-                    $option
-                );
+				$this->multiWrapElementCount++;
 
-				if($maxLength > 8 || $totalLength > 30){
-                    $this->addElement("br", $checkboxWrapper);
+				if(!in_array($type, $this->nonInputs)){
+					//Get the field values and count
+					$values			= $this->getElementValues($this->formElements[$i]);
+
+					if(empty($values) || !is_array(array_values($values)[0])){
+						$valueCount	= 0;
+					}else{
+						$valueCount		= count(array_values($values)[0]);
+
+						// Do not count the valuelist values
+						if(!empty($this->formElements[$i]->valuelist)){
+							$elementValues	= explode("\n", $this->formElements[$i]->valuelist);
+							$valueCount	= $valueCount - count($elementValues);
+						}
+					}
+					
+					if($valueCount > $this->multiWrapValueCount){
+						$this->multiWrapValueCount = $valueCount;
+					}
+				}
+				$i++;
+			}
+			
+			//write down all the multi html
+			$name	= str_replace('_multi-end', '_multi-start', $element->name);
+
+			$this->multiWrapper = $this->addElement("div", $parent, ['class' => 'clone-divs-wrapper', 'name' => $name]);
+			if(!$this->clonableFormStep){
+				$this->addRawHtml( $this->renderButtons(), $this->multiWrapper);
+
+				// Tablink buttons
+				if($this->multiWrapElementCount >= $this->minElForTabs ){
+					for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
+						$active = '';
+
+						if($index === 1){
+							$active = 'active';
+						}
+
+						$this->addElement(
+							'button',
+							$this->multiWrapper,
+							[
+								 'class' => "button tablink $active",
+									'type' => 'button',
+									'id' => "show-{$element->name}-$index",
+									'data-target' => "$this->tabId}-$index",
+									'style' => 'margin-right:4px;'
+								],
+								"{$element->nicename} $index"
+							);
+					}
 				}
 			}
 	}
@@ -896,58 +1049,72 @@ class ElementHtmlBuilder extends DisplayForm{
 
 		$this->elementValues		= $this->getElementValues($element);
 
-		$this->getOptionHtml();
+		$this->getAttributes();
+
+		$this->getNameAttribute();			
+
+		$this->getElementId();
 		
-		if($this->element->type == 'p'){
-			$content 	= wp_kses_post($this->element->text);
-			$content	= SIM\deslash($content);
+		$this->getClasses();
+		
+		switch($this->element->type){
+			case 'p':
+				$content 	= wp_kses_post($this->element->text);
+				$content	= SIM\deslash($content);
 
-			$this->addElement('div', $parent, ['name'=>$this->element->name], $content);
-		}elseif($this->element->type == 'php'){
-			//we store the functionname in the html variable replace any double \ with a single \
-			$functionName 	= str_replace('\\\\', '\\', $this->element->functionname);
+				$node		= $this->addElement('div', $parent, ['name'=>$this->element->name], $content);
+				break;
+			case 'php':
+				//we store the functionname in the html variable replace any double \ with a single \
+				$functionName 	= str_replace('\\\\', '\\', $this->element->functionname);
 
-			//only continue if the function exists
-			if (function_exists( $functionName ) ){
-				$this->addRawHtml($functionName($this->userId), $parent);
-			}else{
-				$this->addElement('text', $parent, [], "php function '$functionName' not found");
+				//only continue if the function exists
+				if (function_exists( $functionName ) ){
+					$node		= $this->addRawHtml($functionName($this->userId), $parent);
+				}else{
+					$node		= $this->addElement('text', $parent, [], "php function '$functionName' not found");
+				}
+
+				break;
+			case 'div-start':
+				$attributes	= ['name'=> $this->element->name];
+				if($this->element->hidden){
+					$attributes["class"] = 'hidden';
+				}
+
+				$node		= $this->addElement('div', $parent, $attributes);
+				break;
+			case 'multi-start':
+				$this->multiwrapStart();
+				break;
+			case 'div-end':
+			case 'multi-end':
+				// nothing to do
+				break;
+			case 'info':
+				$node		= $this->addRawHtml($this->infoBoxHtml($this->element->text), $parent);
+
+				break;
+			case 'file':
+			case 'image':
+				$node		= $this->addRawHtml($this->uploaderHtml(), $parent);
+				break;
+			case 'radio':
+			case 'checkbox':
+				$node		= $this->addCheckboxes($parent);
+				break;
+			default:
+				$this->getTagType();
+
+				$this->getValue();
+				
+				$this->getMultiElementHtml($parent);
+
+				$node = $this->addElement($this->tagType, $parent, $this->attributes);
+
+				// do this after the creation of the element
+				$this->getTagContent($node);	
 			}
-		}elseif($this->element->type == 'div-start'){
-			$attributes	= ['name'=> $this->element->name];
-			if($this->element->hidden){
-				$attributes["class"] = 'hidden';
-			}
-			$this->addElement('div', $parent, $attributes);
-		}elseif($this->element->type == 'div-end'){
-			// not sure what to do here
-			$this->html 		= "</div>";
-		}elseif(in_array($this->element->type, ['multi-start', 'multi-end'])){
-			$this->html 		= "";
-		}elseif(in_array($this->element->type, ['info'])){
-			$this->addRawHtml($this->infoBoxHtml($this->element->text), $parent);
-		}elseif(in_array($this->element->type, ['file', 'image'])){
-			$this->addRawHtml($this->uploaderHtml(), $parent);
-		}else{
-			$this->getTagType();
-
-			$this->getNameAttribute();			
-
-			$this->getElementId();
-			
-			$this->getClasses();
-
-			$this->getValue();
-			
-			$this->getMultiElementHtml($parent);
-
-			if(empty($this->html)){
-                $node = $this->addElement($this->tagType, $parent, $this->attributes);
-        	}
-
-			// do this after the creation of the element
-			$this->getTagContent($node);	
-		}
 		
 		//check if we need to transform a keyword to date
 		preg_match_all('/%([^%;]*)%/i', $this->html, $matches);
@@ -964,6 +1131,6 @@ class ElementHtmlBuilder extends DisplayForm{
 			}
 		}
 
-		return apply_filters('sim-form-element-html', $this->html, $this);
+		return apply_filters('sim-form-element-html', $node, $this);
 	}
 }
