@@ -115,6 +115,7 @@ class DisplayForm extends SubmitForm{
 			}
 		}
 
+
 		// Create as many clones as the maximum value of one of the elements 
 		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
 			$val	= '';
@@ -384,6 +385,53 @@ class DisplayForm extends SubmitForm{
 			return $fragment;
 		}
 	}
+	
+	public function formStepControls(){
+		// l formstep buttons
+		if($this->isFormStep){
+			$formstepButtonWrapper 	= $this->addElement("div", $form, ['class' => 'multi-step-controls hidden']);
+			$wrapper 				= $this->addElement("div", $formstepButtonWrapper, ['class' => 'multi-step-controls-wrapper']);
+			$prevWrapper 			= $this->addElement('div', $wrapper,	['style' => 'flex:1;']);
+			
+			/**
+			 * Previous button
+			 */
+			$this->addElement(	
+				"button", 
+				$prevWrapper, 
+				[
+					'type' => 'button', 
+					'class' =>'button',
+					'name' => 'previous-button'
+				],
+				'Previous'
+			);
+			
+			//Circles which indicates the steps of the form:
+			$indicatorWrapper = $this->addElement('div', $wrapper,	['class' => 'step-wrapper', 'style' => 'flex:1;text-align:center;margin:auto;']);
+			for ($x = 1; $x <= $this->formStepCounter; $x++) {
+				$this->addElement('span', $indicatorWrapper, [ 'class' => 'step']);
+			}
+		
+			/**
+			 * Next button
+			 */
+			$nextWrapper = $this->addElement("div", $wrapper, ['style' => 'flex:1;']);
+			$this->addElement(
+				'button', 
+				$nextWrapper,
+				[
+					'type'	=> 'button', 
+					'class' => 'button next-button', 
+					'name'	=> 'next-button'
+				],
+				'Next'
+			);
+
+			// Submit button
+			$this->addRawHtml(SIM\addSaveButton('submit-form', $buttonText, 'hidden'), $nextWrapper);
+		}
+}
 				
 	/**
 	 * Show the form
@@ -491,51 +539,6 @@ class DisplayForm extends SubmitForm{
 		$buttonText	= 'Submit the form';
 		if(!empty($this->formData->button_text)){
 			$buttonText	= $this->formData->button_text;
-		}
-
-		// Add formstep buttons
-		if($this->isFormStep){
-			$formstepButtonWrapper 	= $this->addElement("div", $form, ['class' => 'multi-step-controls hidden']);
-			$wrapper 				= $this->addElement("div", $formstepButtonWrapper, ['class' => 'multi-step-controls-wrapper']);
-			$prevWrapper 			= $this->addElement('div', $wrapper,	['style' => 'flex:1;']);
-			
-			/**
-			 * Previous button
-			 */
-			$this->addElement(	
-				"button", 
-				$prevWrapper, 
-				[
-					'type' => 'button', 
-					'class' =>'button',
-					'name' => 'previous-button'
-				],
-				'Previous'
-			);
-			
-			//Circles which indicates the steps of the form:
-			$indicatorWrapper = $this->addElement('div', $wrapper,	['class' => 'step-wrapper', 'style' => 'flex:1;text-align:center;margin:auto;']);
-			for ($x = 1; $x <= $this->formStepCounter; $x++) {
-				$this->addElement('span', $indicatorWrapper, [ 'class' => 'step']);
-			}
-		
-			/**
-			 * Next button
-			 */
-			$nextWrapper = $this->addElement("div", $wrapper, ['style' => 'flex:1;']);
-			$this->addElement(
-				'button', 
-				$nextWrapper,
-				[
-					'type'	=> 'button', 
-					'class' => 'button next-button', 
-					'name'	=> 'next-button'
-				],
-				'Next'
-			);
-
-			// Submit button
-			$this->addRawHtml(SIM\addSaveButton('submit-form', $buttonText, 'hidden'), $nextWrapper);
 		}
 
 		if(!$this->isFormStep && !empty($this->formElements)){
