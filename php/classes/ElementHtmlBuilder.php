@@ -180,7 +180,7 @@ class ElementHtmlBuilder extends DisplayForm{
 		$node->attributes['id']		= $node->attributes['id']."[$index]";
 					
 		/**
-		 * Add Select options
+		 * Change selected option
 		 */
 		if($this->element->type == 'select'){
 			$options = $node->getElementsByTagName('option');
@@ -194,7 +194,7 @@ class ElementHtmlBuilder extends DisplayForm{
 		}
 		
 		/**
-		 * checkbox checked value
+		 * Change selected checkbox
 		 */
 		elseif(in_array($this->element->type, ['radio', 'checkbox'])){
 			$options = $node->getElementsByTagName('this->element->type');
@@ -206,14 +206,13 @@ class ElementHtmlBuilder extends DisplayForm{
 					$node->removeAttribute('checked');
 				}
 		}
-		
-		elseif($this->element->type == 'textarea'){
-			$node->nodeValue = $value;
-		}
 
 		/**
 		 *  Element value
 		 */ 
+		elseif($this->element->type == 'textarea'){
+			$node->nodeValue = $value;
+		}
 		elseif(is_array($value)){
 			$node->attributes['value'] = $value[$index];
 		}else{
