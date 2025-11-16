@@ -244,7 +244,7 @@ class ElementHtmlBuilder extends DisplayForm{
 		// Add the index to the label if we are not displaying it on seperate tabs
 		if(
 			$this->element->type == 'label' && 
-			$this->parentInstance->multiWrapElementCount < $this->parentInstance->minElForTabs
+			$this->multiWrapElementCount < $this->minElForTabs
 		){
 			$nr					 = $index + 1;
 			$node->nodeValue	.= " $nr";
@@ -717,7 +717,7 @@ class ElementHtmlBuilder extends DisplayForm{
 		//check how many elements we should render
 		$this->multiWrapValueCount	= max(1, count((array)$values));
 
-        $multiWrapper = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
+  $multiWrapper = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
 		
 		//create as many inputs as the maximum value found
 		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
@@ -981,74 +981,87 @@ class ElementHtmlBuilder extends DisplayForm{
 	}
 
 	public function multiwrapStart(){
-		// We are wrapping so we need to find the max amount of filled in fields
+			// We are wrapping so we need to find the max amount of filled in fields
 			$i								= $elementIndex + 1;
 			$this->multiWrapValueCount		= 1;
 			$this->multiWrapElementCount	= 0;
 
 			//loop over all consequent wrapped elements
-			while(true){
+			// Loop till we reach a multi-end element or the end of the form
+			while(!empty($this->formElements[$i]) && $this->formElements[$i]->type != 'multi-end'){
 				$type	= $this->formElements[$i]->type;
-
-				// Loop till we reach a multi-end element or the end of the form
-				if($type == 'multi-end' || empty($this->formElements[$i])){
-					break;
-				}
 
 				$this->multiWrapElementCount++;
 
-				if(!in_array($type, $this->nonInputs)){
-					//Get the field values and count
-					$values			= $this->getElementValues($this->formElements[$i]);
+				if(in_array($type, $this->nonInputs)){
+					continue;
+				}
+				
+				//Get the field values and count
+				$values			= $this->getElementValues($this->formElements[$i]);
 
-					if(empty($values) || !is_array(array_values($values)[0])){
-						$valueCount	= 0;
-					}else{
-						$valueCount		= count(array_values($values)[0]);
+				if(empty($values) || !is_array(array_values($values)[0])){
+					$valueCount	= 0;
+				}else{
+					$valueCount		= count(array_values($values)[0]);
 
-						// Do not count the valuelist values
-						if(!empty($this->formElements[$i]->valuelist)){
-							$elementValues	= explode("\n", $this->formElements[$i]->valuelist);
-							$valueCount	= $valueCount - count($elementValues);
-						}
-					}
-					
-					if($valueCount > $this->multiWrapValueCount){
-						$this->multiWrapValueCount = $valueCount;
+					// Do not count the valuelist values
+					if(!empty($this->formElements[$i]->valuelist)){
+						$elementValues	= explode("\n", $this->formElements[$i]->valuelist);
+						$valueCount	= $valueCount - count($elementValues);
 					}
 				}
+				
+				if($valueCount > $this->multiWrapValueCount){
+					$this->multiWrapValueCount = $valueCount;
+				}
+				
 				$i++;
 			}
 			
-			//write down all the multi html
-			$name	= str_replace('_multi-end', '_multi-start', $element->name);
+			// Get the name
+			$name	= $element->name;
 
 			$this->multiWrapper = $this->addElement("div", $parent, ['class' => 'clone-divs-wrapper', 'name' => $name]);
-			if(!$this->clonableFormStep){
-				$this->addRawHtml( $this->renderButtons(), $this->multiWrapper);
+			if($this->clonableFormStep){
+				return;
+			}
+			
+			// Add the clone divs
+			for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
+				$this->addElement(
+					'div', 
+					$this->multiWrapper, 
+					[
+						'class'			=> 'clone-div',
+						'data-div-id'	=> $index
+					]
+				);
+			}
+			
+			$this->renderButtons($this->multiWrapper);
 
-				// Tablink buttons
-				if($this->multiWrapElementCount >= $this->minElForTabs ){
-					for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
-						$active = '';
+			// Tablink buttons
+			if($this->multiWrapElementCount >= $this->minElForTabs ){
+				for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
+					$active = '';
 
-						if($index === 1){
-							$active = 'active';
-						}
-
-						$this->addElement(
-							'button',
-							$this->multiWrapper,
-							[
-								 'class' => "button tablink $active",
-									'type' => 'button',
-									'id' => "show-{$element->name}-$index",
-									'data-target' => "$this->tabId}-$index",
-									'style' => 'margin-right:4px;'
-								],
-								"{$element->nicename} $index"
-							);
+					if($index === 1){
+						$active = 'active';
 					}
+
+					$this->addElement(
+						'button',
+						$this->multiWrapper,
+						[
+							 'class' => "button tablink $active",
+								'type' => 'button',
+								'id' => "show-{$element->name}-$index",
+								'data-target' => "$this->tabId}-$index",
+								'style' => 'margin-right:4px;'
+							],
+							"{$element->nicename} $index"
+						);
 				}
 			}
 	}
@@ -1112,6 +1125,8 @@ class ElementHtmlBuilder extends DisplayForm{
 				if($this->multiWrapElementCount < $this->minElForTabs){
 					$this->renderButtons();
 				}
+				
+				$this->multiWrapElementCount = -1;
 				break;
 			case 'info':
 				$node		= $this->addRawHtml($this->infoBoxHtml($this->element->text), $parent);
@@ -1137,6 +1152,17 @@ class ElementHtmlBuilder extends DisplayForm{
 				// do this after the creation of the element
 				$this->getTagContent($node);	
 			}
+		
+		// We should add the same node multiple times
+		if($this->multiWrapElementCount > 0){
+			$copy = $node->cloneNode(true);
+			
+			// Modify an attribute of the cloned node to distinguish it
+		$copy->setAttribute('id', 'cloned');
+
+		// Append the cloned node to the root element
+		$this->multiWrapper->appendChild($clonedNode);
+		}
 		
 		//check if we need to transform a keyword to date
 		preg_match_all('/%([^%;]*)%/i', $this->html, $matches);
