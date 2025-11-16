@@ -1116,7 +1116,7 @@ class ElementHtmlBuilder extends DisplayForm{
 				$node		= $this->addElement('div', $parent, $attributes);
 				break;
 			case 'multi-start':
-				$this->multiwrapStart();
+				$node = $this->multiwrapStart();
 				break;
 			case 'div-end':
 				break;
@@ -1160,7 +1160,9 @@ class ElementHtmlBuilder extends DisplayForm{
 			// Modify an attribute of the cloned node to distinguish it
 		$copy->setAttribute('id', 'cloned');
 
-		// Append the cloned node to the root element
+		// Append the cloned node to the multiWrapper clone div
+		$clones = $this->multiWrapper->children;
+		
 		$this->multiWrapper->appendChild($clonedNode);
 		}
 		
