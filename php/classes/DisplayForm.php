@@ -61,15 +61,6 @@ class DisplayForm extends SubmitForm{
 			$this->userId	= $_GET['user-id'];
 		}
 	}
-
-	/**
-	 * All html for closing a multi wrap
-	 */
-	protected function multiWrapEnd($index, $element){
-		if($this->multiWrapElementCount < $this->minElForTabs){
-			$this->multiInputsHtml[$index] .= $this->renderButtons();
-		}
-	}
 	
 	/**
 	 * Renders the html for element who can have multiple inputs
@@ -78,31 +69,10 @@ class DisplayForm extends SubmitForm{
 	 * @param	int		$width			The width of the elements
 	 */
 	protected function processMultiFields($element, $parent, $width){
-		$class	= '';
-
-		//Check if element needs to be hidden
-		if(!empty($element->hidden)){
-			$class .= ' hidden';
-		}
-		
-		//if the current element is required or this is a label and the next element is required
-		if(
-			!empty($element->required)		||
-			!empty($element->mandatory)		||
-			$element->type == 'label'		&&
-			(
-				$this->nextElement->required	||
-				$this->nextElement->mandatory
-			)
-		){
-			$class .= ' required';
-		}
-
-		$elementHtml = $this->elementHtmlBuilder->getElementHtml($element, $parent);
+		$node = $this->elementHtmlBuilder->getElementHtml($element, $parent);
 		
 		// close the wrapping element after the last wrapped element
 		if($this->wrap && !$element->wrap){
-			$elementHtml .= "</$this->wrap>";
 			$this->wrap = false;
 		}elseif(!$this->wrap){
 			if($element->type == 'info'){
