@@ -95,7 +95,7 @@ class FormBuilderForm extends DisplayForm{
 	 *
 	 * @return	string					The html
 	 */
-	public function buildHtml($element, $parent, $key=0){
+	public function buildHtml($element, $key=0){
 		if(isset($this->formElements[$key+1])){
 			$this->nextElement		= $this->formElements[$key+1];
 		}else{
@@ -119,7 +119,7 @@ class FormBuilderForm extends DisplayForm{
 		}
 
 		//Load default values for this element
-		$elementHtml = $this->elementHtmlBuilder->getElementHtml($element, $parent);
+		$elementHtml = $this->elementHtmlBuilder->getElementHtml($element);
 		
 		//Check if element needs to be hidden
 		if(!empty($element->hidden) && $element->hidden == true){
