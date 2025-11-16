@@ -116,8 +116,6 @@ class DisplayForm extends SubmitForm{
 			$class	= "tabcontent $hidden' id='$this->tabId-$id";
 		}
 
-		
-
 		$style	= '';
 		if($this->multiWrapElementCount < $this->minElForTabs){
 			$style	= 'style="display:flex;"';
@@ -138,23 +136,9 @@ class DisplayForm extends SubmitForm{
 	 * All html for closing a multi wrap
 	 */
 	protected function multiWrapEnd($index, $element){
-		//close any label first before adding the buttons
-		if($this->wrap == 'label'){
-			$this->multiInputsHtml[$index] .= "</label>";
-		}
-		
-		//close select
-		if($element->type == 'select'){
-			$this->multiInputsHtml[$index] .= "</select>";
-		}
-
-		$this->multiInputsHtml[$index] .= "</div>"; //close multi-input-wrapper div
-
 		if($this->multiWrapElementCount < $this->minElForTabs){
 			$this->multiInputsHtml[$index] .= $this->renderButtons();
 		}
-		
-		$this->multiInputsHtml[$index] .= "</div>"; //close clone-div
 	}
 	
 	/**
@@ -211,11 +195,6 @@ class DisplayForm extends SubmitForm{
 			!in_array($this->nextElement->type, ['select','php','formstep'])	// and the next element type is not a select or php element
 		){
 			$this->wrap = $element->type;
-		}
-
-		// Close the input wrapper div if we are not wrapping
-		if(!$this->wrap){
-			$elementHtml .= "</div>";
 		}
 
 		if(in_array($element->type, $this->nonInputs)){
@@ -387,7 +366,6 @@ class DisplayForm extends SubmitForm{
 			$i								= $elementIndex + 1;
 			$this->multiWrapValueCount		= 1;
 			$this->multiWrapElementCount	= 0;
-			$this->multiInputsHtml 			= [];
 
 			//loop over all consequent wrapped elements
 			while(true){
@@ -422,25 +400,13 @@ class DisplayForm extends SubmitForm{
 				}
 				$i++;
 			}
-
-			return $html;
-		}
-		
-		if($this->multiwrap && $element->type != 'multi-start' && $element->type != 'multi-end'){
-			$this->processMultiFields($element, $parent, $width);
-
-			return $html;
-		}
-
-		if($element->type == 'multi-end'){
-			$this->multiwrap	= false;
-
+			
 			//write down all the multi html
 			$name	= str_replace('_multi-end', '_multi-start', $element->name);
 
-			$elementHtml	= "<div class='clone-divs-wrapper' name='$name'>";
+			$this->multiWrapper = $this->addElement("div", $parent, ['class' => 'clone-divs-wrapper', 'name' => $name]) CV;
 			if(!$this->clonableFormStep){
-				$elementHtml .= $this->renderButtons();
+				$this->rawHtml( $this->renderButtons(), $this->multiWrapper);
 
 				// Tablink buttons
 				if($this->multiWrapElementCount >= $this->minElForTabs ){
@@ -451,25 +417,35 @@ class DisplayForm extends SubmitForm{
 							$active = 'active';
 						}
 
-						$elementHtml	.= "<button class='button tablink $active' type='button' id='show-{$element->name}-$index' data-target='{$this->tabId}-$index' style='margin-right:4px;'>
-							{$element->nicename} $index
-						</button>";
+						$this->addElement(
+							'button',
+							$this->multiWrapper,
+							[
+								 'class' => "button tablink $active",
+									'type' => 'button',
+									'id' => "show-{$element->name}-$index",
+									'data-target' => "$this->tabId}-$index",
+									'style' => 'margin-right:4px;'
+								],
+								"{$element->nicename} $index"
+							);
 					}
 				}
 			}
 
-			foreach($this->multiInputsHtml as $multiHtml){
-				$elementHtml .= $multiHtml;
-			}
+			return;
+		}
+		
+		if($this->multiwrap && $element->type != 'multi-start' && $element->type != 'multi-end'){
+			$this->processMultiFields($element, $parent, $width);
+
+			return $html;
+		}
+
+		if($element->type == 'multi-end'){
+			$this->multiwrap	= false;
 			
-			if($this->wrap){
-				if($this->wrap	== 'label'){
-					$elementHtml .= '</label>';
-				}
 				$this->wrap	= false;
-			}
-			
-			$elementHtml	.= '</div>';
 		}
 		
 		// wrap an element and a folowing field in the same wrapper
@@ -670,8 +646,19 @@ class DisplayForm extends SubmitForm{
 		];
 		$this->addElement('input', $form, $attributes);
 
+		$parent = $form;
+		$formstep = '';
 		foreach($this->formElements as $element){
-			$html	.= $this->buildHtml($element, $form);
+			$node = $this->buildHtml($element, $parent);
+			
+			// we should wrap the next element in thus one
+			if($element->wrap){
+				$parent = $node;
+			}elseif(!empty($formstep){
+				$parent = $formstep
+			}else{
+				$parent = $form;
+			}
 		}
 		
 		$buttonText	= 'Submit the form';
@@ -679,32 +666,44 @@ class DisplayForm extends SubmitForm{
 			$buttonText	= $this->formData->button_text;
 		}
 
-		//close the last formstep if needed
+		// Add formstep buttons
 		if($this->isFormStep){
-			$html	.= "</div>";
-			$html	.= "<div class='multi-step-controls hidden'>";
-				$html	.= "<div class='multi-step-controls-wrapper'>";
-					$html	.= "<div style='flex:1;'>";
-						$html	.= "<button type='button' class='button' name='previous-button'>Previous</button>";
-					$html	.= "</div>";
+			$formstepButtonWrapper = $this->addElement(	"div", $form, ['class' => 'multi-step-controls hidden');
+				$wrapper = $this->addElement( "div", $formstepButtonWrapper, ['class' => 'multi-step-controls-wrapper');
+					$prevWrapper = $this->addElement('div', $wrapper,	['style' => 'flex:1;']);
+						$this->addElement(	
+							"button", 
+							$prevWrapper, 
+							[
+								'type' => 'button', 
+								'class' =>'button',
+								'name' => 'previous-button'
+							],
+							'Previous'
+						);
 					
 					//Circles which indicates the steps of the form:
-					$html	.= "<div class='step-wrapper' style='flex:1;text-align:center;margin:auto;'>";
+					$indicatorWrapper = $this->addElement('div', $wrapper,	['class' => 'step-wrapper', 'style' => 'flex:1;text-align:center;margin:auto;']);
 						for ($x = 1; $x <= $this->formStepCounter; $x++) {
-							$html	.= "<span class='step'></span>";
+							$this->addElement('span', $indicatorWrapper, [ 'class' => 'step']);
 						}
-					$html	.= "</div>";
 				
-					$html	.= "<div style='flex:1;'>";
-						$html	.= "<button type='button' class='button next-button' name='next-button'>Next</button>";
-						$html	.= SIM\addSaveButton('submit-form', $buttonText, 'hidden');
-					$html	.= "</div>";
-				$html	.= "</div>";
-			$html	.= "</div>";
+					$nextWrapper = $this->addElement("div", $wrapper, ['style' => 'flex:1;']);
+						$this->addElement(
+							'button', 
+							$nextWrapper,
+							[
+								'type' => 'button', 
+								'class' => 'button next-button', 
+								'name='next-button'
+							],
+							'Next'
+						);
+						$this->addRawHtml(SIM\addSaveButton('submit-form', $buttonText, 'hidden'), $nextWrapper);
 		}
 
 		if(!$this->isFormStep && !empty($this->formElements)){
-			$html	.= SIM\addSaveButton('submit-form', $buttonText);
+			$this->addRawHtml(SIM\addSaveButton('submit-form', $buttonText), $form);
 		}
 
 		$html =  $this->dom->saveHTML();

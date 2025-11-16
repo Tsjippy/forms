@@ -23,7 +23,6 @@ class ElementHtmlBuilder extends DisplayForm{
 	private $selectedValue;
 	private $tagContent;
 	private $tagCloseHtml;
-	private $selectOptionsHtml;
 	public $html;
 	public $formData;
 	public $formElements;
@@ -51,10 +50,6 @@ class ElementHtmlBuilder extends DisplayForm{
 		$this->optionsHtml			= '';
 		$this->tagType				= '';
 		$this->selectedValue		= '';
-		$this->tagContent			= '';
-		$this->tagCloseHtml			= '';
-		$this->selectOptionsHtml	= '';
-		$this->html					= '';
 		$this->attributes			= ['class' => ''];
 	}
 
@@ -389,13 +384,15 @@ class ElementHtmlBuilder extends DisplayForm{
 	 * Determines the tag type of an element
 	 */
 	protected function getTagType(){
-		$this->tagType		= "input type='{$this->element->type}'";
-
 		if(in_array($this->element->type, ['formstep', 'info', 'div-start'])){
 			$this->tagType	= "div";
 		}elseif(in_array($this->element->type, array_merge($this->parentInstance->nonInputs, ['select', 'textarea']))){
 			$this->tagType	= $this->element->type;
-		}
+		}else{
+            $this->attributes['type'] = $this->element->type;
+            
+            $this->tagType		= "input";
+        }
 	}
 
 	/**
@@ -515,7 +512,7 @@ class ElementHtmlBuilder extends DisplayForm{
 	/**
 	 * Get the tag content of an element, i.e. the conten between the openening and closing tag
 	 */
-	protected function getTagContent(){
+	protected function getTagContent(&$node){
 		if($this->element->type == 'textarea'){
 			$value	= $this->requestedValue;
 			if(empty($value)){
@@ -527,38 +524,38 @@ class ElementHtmlBuilder extends DisplayForm{
 					$value	= array_values($value)[0];
 				}
 
-				$this->tagContent = $value;
+				$node->nodeValue = $value;
 			}
 		}elseif(!empty($this->element->text)){
 			switch($this->element->type){
 				case 'formstep':
-					$this->tagContent = "<h3>{$this->element->text}</h3>";
+					$this->addElement("h3", $node, [], $this->element->text);
 					break;
 				case 'label':
-					$this->tagContent = "<h4 class='label-text'>{$this->element->text}</h4>";
+					$this->addElement("h4", $node, ['class' => 'label-text'], $this->element->text);
 					break;
 				case 'button':
-					$this->tagContent = $this->element->text;
+					$node->nodeValue = $this->element->text;
 					break;
 				default:
-					$this->tagContent = "<label class='label-text'>{$this->element->text}</label>";
+					$this->addElement( "label", $node, ['class' => 'label-text'], $this->element->text);
 			}
-		}
-		
-		switch($this->element->type){
-			case 'select':
-				$this->tagContent .= $this->selectOptionsHtml();
-				break;
-			case 'datalist':
-				$this->tagContent .= $this->datalistOptionsHtml();
-				break;
-			case 'radio':
-			case 'checkbox':
-				$this->html .= $this->checkboxesHtml();
-				break;
-			default:
-				$this->tagContent .= "";
-		}
+		}else{
+    		switch($this->element->type){
+    			case 'select':
+    				$this->selectOptionsHtml($node);
+    				break;
+    			case 'datalist':
+    				$this->datalistOptionsHtml($node);
+    				break;
+    			case 'radio':
+    			case 'checkbox':
+                    $this->checkboxesHtml($node);
+    				break;
+    			default:
+    				$test = "";
+    		}
+        }
 	}
 
 	protected function getMultiTextInputHtml(){
@@ -615,32 +612,94 @@ class ElementHtmlBuilder extends DisplayForm{
 		if(empty($this->element->multiple)){
 			return false;
 		}
-
-		if($this->element->type == 'select'){
-			$attributes	= $this->attributes;
-			$attributes['name']	= $this->element->name;
-			$node = $this->addElement(
-				'select',
-				$parent,
-				$attributes
-			);
-		}elseif($this->element->type == 'text'){
-			$this->getMultiTextInputHtml();
+        
+        if($this->element->type == 'text'){
+			$this->getMultiTextInputHtml($parent);
 			return;
-		}else{
-			$node	= $this->addElement($this->tagType, $parent, $this->attributes, $this->tagContent);
 		}
+        
+        if(
+			empty($this->parentInstance->formData->save_in_meta) && 
+			!empty($this->elementValues['defaults'])
+		){
+			$values		= array_values($this->elementValues['defaults']);
+		}elseif(!empty($this->elementValues['metavalue'])){
+			$values		= array_values($this->elementValues['metavalue']);
+		}
+
+		//check how many elements we should render
+		$this->multiWrapValueCount	= max(1, count((array)$values));
+
+        $multiWrapper = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper');
 		
-		$this->multiInput($node);
-
-		$html	= "<div class='clone-divs-wrapper'>";
-			foreach($this->multiInputsHtml as $h){
-				$html	.= $h;
+		//create as many inputs as the maximum value found
+		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
+			$val	= '';
+			if(!empty($values[$index])){
+				$val	= $values[$index];
 			}
-		$html	.= '</div>';
-
-		$this->html	= $html; 
-	}
+			
+			//open the clone div
+			$cloneDiv = $this->addElement(	"div", $multiWrapper, ["class" => 'clone-div', "data-div-id" => '$index']);
+            
+            //add label to each entry if prev element is a label and wrapped with this one
+            $parentNode = cloneDiv;
+    		if(
+    			!empty($this->prevElement)	&&
+    			!empty($this->prevElement->wrap) && 
+    			$this->prevElement != $this->element
+    		){
+    			$parentNode = $this->getElementHtml($this->prevElement, $cloneDiv);
+    		}
+            
+            //wrap input AND buttons in a flex div
+            $buttonWrapper = $this->addElement(
+                "div", 
+                $parentNode,
+                [
+                    'class' => 'button-wrapper',
+                    'style' => 'width:100%; display: flex;'
+                ]
+            );
+			
+            // get base element
+            if($this->element->type == 'select'){
+    			$attributes	= $this->attributes;
+    			$attributes['name']	= $this->element->name;
+    			$node = $this->addElement(
+    				'select',
+    				$buttonWrapper,
+    				$attributes
+    			);
+    		}else{
+    			$node	= $this->addElement($this->tagType, $buttonWrapper, $this->attributes, $this->tagContent);
+    		}
+            
+            $this->multiElementHtml($index, $value, $node);
+            
+            // add the buttons
+            $this->addElement(
+                'button', 
+                $buttonWrapper,
+                [
+                    'type' => 'button',
+                    'class' => 'add button',
+                    'style' => 'flex: 1'
+                ],
+                '+'
+            );
+            
+            $this->addElement(
+                'button', 
+                $buttonWrapper,
+                [
+                    'type' => 'button',
+                    'class' => 'remove button',
+                    'style' => 'flex: 1'
+                ],
+                '-'
+            );
+        }
 
 	/**
 	 * Options html for a select element
@@ -648,7 +707,7 @@ class ElementHtmlBuilder extends DisplayForm{
 	 * 
 	 * @return	string			The html
 	 */
-	public function selectOptionsHtml(){
+	public function selectOptionsHtml(&$node){
 		$elContent	= "<option value=''>---</option>";
 
 		$selValues	= [];
@@ -667,27 +726,26 @@ class ElementHtmlBuilder extends DisplayForm{
 		}
 
 		foreach($this->elementValues['defaults'] as $key => $option){
-			if(
+			$attributes = [
+                'value' => $key
+            ];
+            
+            if(
 				in_array(strtolower($option), $selValues) || 
 				in_array(strtolower($key), $selValues) || 
 				in_array($this->element->default_value, [$key, $option])
 			){
-				$selected	= 'selected="selected"';
-			}else{
-				$selected	= '';
+				$attributes['selected'] ="selected";
 			}
-			$elContent .= "<option value='$key' $selected>$option</option>";
+			$this->addElement( "option", $node, $attributes, $option);
 		}
-
-		return $elContent;
 	}
 
 	/**
 	 * Options html for a datalist element
 	 * Returns all the options of a datalist
 	 */
-	public function datalistOptionsHtml(){
-		$elContent	= '';
+	public function datalistOptionsHtml($node){
 
 		foreach($this->elementValues['defaults'] as $key => $option){
 			if(is_array($option)){
@@ -695,22 +753,29 @@ class ElementHtmlBuilder extends DisplayForm{
 			}else{
 				$value	= $option;
 			}
-
-			$elContent .= "<option data-value='$key' value='$value'>";
-
-			if(is_array($option)){
-				$elContent .= $option['display']."</option>";
+            
+            $elContent = '';
+            if(is_array($option)){
+				$elContent = $option['display'];
 			}
-		}
 
-		return $elContent;
+			$this->addElement(
+                "option",
+                $node, 
+                [
+                    'data-value' => $key,
+                    'value' => $value
+                ],
+                $elContent
+            );
+		}
 	}
 
 	/**
 	 * Returns all the element of a radio or checkbox element
 	 *
 	 */
-	public function checkboxesHtml(){
+	public function checkboxesHtml(&$parent){
 		// Get all the checked options and make them lowercase
 		$selected	= [];
 		
@@ -776,39 +841,45 @@ class ElementHtmlBuilder extends DisplayForm{
 			$totalLength	+= strlen($option);
 		}
 
-		$html		= "<div class='checkbox-options-group formfield'>";
-			// build the options
-			foreach($options as $key => $option){
+		$checkboxWrapper = $this->addElement('div', $parent, ['class' => 'checkbox-options-group formfield');
+		
+        // build the options
+		foreach($options as $key => $option){
+            $attributes = $this->attributes;
 				if(
 					in_array(strtolower($option), $selected) || 
 					in_array(strtolower($key), $selected) || 
 					in_array($this->element->default_value, [$key, $option])
 				){
-					$checked	= 'checked';
-				}else{
-					$checked	= '';
+					$attributes['checked']	= 'checked';
 				}
 
-				$id	= '';
-				if(!empty($this->idHtml)){
-					$id	= trim($this->idHtml, "'");
-					$id	= "$id-$key'";
+				if(!empty->attributes['id'])){
+					$attributes['id']	.= "-$key";
 				}
-				
-				$html .= "<label class='checkbox-label'>";
-					$html .= "<input type='{$this->element->type}' name='{$this->element->name}' $id class='$this->classHtml' $this->optionsHtml value='$key' $checked>";
-					$html .= "<span class='optionlabel'>$option</span>";
-				$html .= "</label>";
-
+                
+                $attributes['type'] = $this->element->type;
+                $attributes['name'] = $this->element->name;
+				$attributes['value'] = $key;
+                
+                $label = $this->addElement('label', $checkboxWrapper, ['class' => 'checkbox-label']);']);
+				$this->addElement(
+                    "input",
+                    $label,
+                    $attributes
+                );
+                
+                $this->addElement(
+                    "span",
+                    $label,
+                    ['class' => 'optionlabel'],
+                    $option
+                );
 
 				if($maxLength > 8 || $totalLength > 30){
-					$html .= "<br>";
+                    $this->addElement("br", $checkboxWrapper);
 				}
 			}
-
-		$html .= "</div>";
-
-		return $html;
 	}
 
 	/**
@@ -871,15 +942,12 @@ class ElementHtmlBuilder extends DisplayForm{
 			$this->getMultiElementHtml($parent);
 
 			if(empty($this->html)){
-				$this->html	= "<$this->tagType $this->nameHtml $this->idHtml class='$this->classHtml' $this->optionsHtml $this->valueHtml>$this->tagContent$this->tagCloseHtml";
-			}
+                $node = $this->addElement($this->tagType, $parent, $this->attributes);
+        	}
 
 			// do this after the creation of the element
-			$this->getTagContent();	
+			$this->getTagContent($node);	
 		}
-		
-		//remove unnessary whitespaces
-		$this->html = preg_replace('/\h+/', ' ', $this->html);
 		
 		//check if we need to transform a keyword to date
 		preg_match_all('/%([^%;]*)%/i', $this->html, $matches);
