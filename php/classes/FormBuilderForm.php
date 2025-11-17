@@ -4,8 +4,6 @@ use SIM;
 use stdClass;
 
 class FormBuilderForm extends DisplayForm{
-	use ElementHtml;
-
 	public $isInDiv;
 	public $defaultArrayValues;
 	public $defaultValues;
@@ -19,8 +17,6 @@ class FormBuilderForm extends DisplayForm{
 
 	public function __construct($atts=[]){
 		parent::__construct();
-
-		$this->elementHtmlBuilder	= new ElementHtmlBuilder($this);
 
 		if(!empty($atts)){
 			$this->processAtts($atts);
@@ -95,19 +91,9 @@ class FormBuilderForm extends DisplayForm{
 	 *
 	 * @return	string					The html
 	 */
-	public function buildHtml($element, $key=0){
-		if(isset($this->formElements[$key+1])){
-			$this->nextElement		= $this->formElements[$key+1];
-		}else{
-			$this->nextElement		= '';
-		}
-
-		//store the prev rendered element before updating the current element
-		$prevRenderedElement	= $this->currentElement;
-		$this->currentElement	= $element;
-				
+	public function buildHtml($element, $key=0){				
 		//Set the element width to 85 percent so that the info icon floats next to it
-		if($key != 0 && $prevRenderedElement->type == 'info'){
+		if($key != 0 && $this->prevElement->type == 'info'){
 			$width = 85;
 		//We are dealing with a label which is wrapped around the next element
 		}elseif($element->type == 'label'	&& !isset($element->wrap) && is_numeric($this->nextElement->width)){
@@ -119,7 +105,7 @@ class FormBuilderForm extends DisplayForm{
 		}
 
 		//Load default values for this element
-		$elementHtml = $this->elementHtmlBuilder->getElementHtml($element);
+		$elementHtml = $this->getElementHtml($element);
 		
 		//Check if element needs to be hidden
 		if(!empty($element->hidden) && $element->hidden == true){
@@ -167,7 +153,7 @@ class FormBuilderForm extends DisplayForm{
 				}
 				
 				if($element->type == 'formstep'){
-					$html .= ' ***Formstep element***</div>';
+					$html .= ' ***Formstep element***';
 				}elseif($element->type == 'datalist'){
 					$html .= " ***Datalist element $element->name***";
 				}elseif($element->type == 'multi-start'){
@@ -332,8 +318,19 @@ class FormBuilderForm extends DisplayForm{
 						<input type='hidden' class='no-reset' name='form-id'		value='<?php echo $this->formData->id;?>'>
 
 						<?php
-						foreach($this->formElements as $key=>$element){
+						$this->nextElement		= '';
+						foreach($this->formElements as $key => $element){
+							if(isset($this->formElements[$key + 1])){
+								$this->nextElement		= $this->formElements[$key + 1];
+							}else{
+								$this->nextElement		= '';
+							}
+
+							$this->currentElement	= $element;
+
 							echo $this->buildHtml($element, $key);
+
+							$this->prevElement	= $element;
 						}
 						?>
 					</div>

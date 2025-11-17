@@ -355,7 +355,7 @@ export function showFormStep(n, form) {
 			}
 
 			//show form controls
-			form.querySelector('.multi-step-controls.hidden').classList.remove('hidden');
+			form.querySelectorAll('.multi-step-controls.hidden').forEach(el => el.classList.remove('hidden'));
 		}
 		
 		//hide all formsteps

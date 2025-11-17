@@ -2,23 +2,8 @@
 namespace SIM\FORMS;
 use SIM;
 
-class DisplayForm extends SubmitForm{
-	use ElementHtml;
+class DisplayForm extends ElementHtmlBuilder{
 	use CreateJs;
-
-	public $wrap;
-	public $multiWrapValueCount;
-	public $multiWrapElementCount;
-	public $minElForTabs;
-	public $nextElement;
-	public $prevElement;
-	public $currentElement;
-	public $usermeta;
-	private $tabId;
-	public $elementHtmlBuilder;
-	public $nonWrappable;
-	public $dom;
-	public $formWrapper;
 
 	public function __construct($atts=[]){
 		parent::__construct();
@@ -43,8 +28,6 @@ class DisplayForm extends SubmitForm{
 		}
 		
 		$this->dom 						= new \DOMDocument();
-
-		$this->elementHtmlBuilder		= new ElementHtmlBuilder($this);
 	}
 
 	/**
@@ -60,37 +43,6 @@ class DisplayForm extends SubmitForm{
 		){
 			$this->userId	= $_GET['user-id'];
 		}
-	}
-	
-	/**
-	 * Checks if this is a clonable formstep, meaning a multi_start - multi-end group wrapped inside a formstep
-	 */
-	protected function isClonableFormStep(){
-		$this->clonableFormStep	= false;
-
-		if(
-			$this->nextElement->type == 'multi-start' && 
-			$this->currentElement->type == 'formstep'
-		){
-			// loop until we find the multi-end
-			$x	= $this->currentElement->priority; // this is the index of the next element, which is the multi-start
-			while(true){
-				$x++;
-				// This is the multi end
-				if($this->formElements[$x]->type == 'multi-end'){
-					// only if the next element is a formstep we have a clonable formstep
-					if(
-						empty($this->formElements[$x + 1]) ||				// this is the last element of the form
-						$this->formElements[$x + 1]->type == 'formstep'		// the next element is a formstep
-					){
-						$this->clonableFormStep	= true;
-					}
-					break;
-				}
-			}
-		}
-		
-		return $this->clonableFormStep;
 	}
 
 	/**
@@ -117,40 +69,31 @@ class DisplayForm extends SubmitForm{
 					'class'	=> $class
 				]
 			);
-		}elseif($element->type == 'div-end'){
+		}elseif(in_array($element->type, ['div-end'])){
 			return;
 		}
-
-		if(isset($this->formElements[$elementIndex -1])){
-			$this->prevElement		= $this->formElements[$elementIndex - 1];
-		}else{
-			$this->prevElement		= '';
-		}
-
-		if(isset($this->formElements[$elementIndex + 1])){
-			$this->nextElement		= $this->formElements[$elementIndex + 1];
-		}else{
-			$this->nextElement		= '';
-		}
-
-		//store the prev rendered element before updating the current element
-		$prevRenderedElement	= $this->currentElement;
-		$this->currentElement	= $element;
-				
-		//Set the element width to 85 percent so that the info icon floats next to it
-		if($elementIndex != 0 && $prevRenderedElement->type == 'info'){
-			$width = 85;
-		//We are dealing with a label which is wrapped around the next element
-		}elseif($element->type == 'label' && !isset($element->wrap) && is_numeric($this->nextElement->width)){
-			$width = $this->nextElement->width;
-		}elseif(is_numeric($element->width)){
-			$width = $element->width;
-		}else{
-			$width = 100;
-		}
 		
-		// element wrapper
-		if(!$this->wrap){
+		/**
+		 * Wrap elements that are not wrapped in anoter element
+		 * in a div container, except for formsteps
+		 */
+		if(
+			!$this->isClonableFormStep() && 	// this is a clonable formstep and a multi-start element
+			!$this->wrap &&						// this element is not wrapped in a previous element
+			$element->type != 'formstep'		// this is not a formstep
+		){
+			//Set the element width to 85 percent so that the info icon floats next to it
+			if($elementIndex != 0 && $this->prevElement->type == 'info'){
+				$width = 85;
+			//We are dealing with a label which is wrapped around the next element
+			}elseif($element->type == 'label' && !isset($element->wrap) && is_numeric($this->nextElement->width)){
+				$width = $this->nextElement->width;
+			}elseif(is_numeric($element->width)){
+				$width = $element->width;
+			}else{
+				$width = 100;
+			}
+
 			$class	= 'input-wrapper';
 
 			//Check if element needs to be hidden
@@ -178,18 +121,20 @@ class DisplayForm extends SubmitForm{
 				if(!empty($element->wrap)){
 					$class	.= ' flex';
 				}
-				$style = "width:$width";
+				$style = "width:$width%";
 			}
 			
-			$parent = $this->addElement('div', $parent, ['class', $class, 'style' => $style]);
+			$parent = $this->addElement('div', $parent, ['class' => $class, 'style' => $style]);
 		}
-		
-		// do not write any html if this is a clonable formstep
+
+		// Only add element if this is not a clonable formstep
 		$node = '';
-		if(!$this->isClonableFormStep()){
-			//Load default values for this element
-			$node 	= $this->elementHtmlBuilder->getElementHtml($element, $parent);
-	
+		if(
+			!$this->clonableFormStep ||			// this is not a clonable formstep
+			$element->type == 'multi-start'		// or it is but this is the multi-start element
+		){
+			$node 	= $this->getElementHtml($element, $parent);
+
 			if(is_wp_error($node)){
 				return $node;
 			}
@@ -207,53 +152,7 @@ class DisplayForm extends SubmitForm{
 			$this->formStepCounter	+= 1;
 		}
 
-		if($element->type == 'multi-start'){
-			$this->multiwrap				= true;
-		}
-
-		if($element->type == 'multi-end'){
-			$this->multiwrap	= false;
-		}
-	}
-	
-	/**
-	 * Adds an element and its attributes to a parent element
-	 * 
-	 * @param	string	$type			The element tagname
-	 * @param	object	$parent			The parent node
-	 * @param	array	$attributes		An array of attribute names and values
-	 * @param	string	$textContent	The text content of the element
-	 * 
-	 * @return	object					The created node
-	 */
-	public function addElement($type, $parent, $attributes=[], $textContent=''){
-		$element = $this->dom->createElement($type, $textContent );
-
-		foreach($attributes as $attribute => $value){
-			$element->setAttribute($attribute, $value);
-		}
-		
-		$parent->appendChild($element);
-
-		return $element;
-	}
-	
-	/**
-	 * Creates nodes from raw html and adds it to the parent
-	 * 
-	 * @param	string	$html		The html
-	 * @param	object	$parent		The parent Node
-	 * 
-	 * @return	object				The created node
-	 */
-	public function addRawHtml($html, &$parent){
-		if(!empty($html)){
-			$fragment = $this->dom->createDocumentFragment();
-			$fragment->appendXML($html);
-			$parent->appendChild($fragment);
-
-			return $fragment;
-		}
+		return $node;
 	}
 	
 	public function formStepControls($parent){
@@ -357,6 +256,9 @@ class DisplayForm extends SubmitForm{
 		}
 		$this->addRawHtml(apply_filters('sim_before_form', '', $this->formName), $this->formWrapper);
 
+		/**
+		 * Form container
+		 */
 		$attributes = [
 			'method'		=> 'post',
 			'class'			=> 'sim-form-wrapper',
@@ -374,6 +276,9 @@ class DisplayForm extends SubmitForm{
 		
 		$this->addElement('div', $form, ['class'=>'form-elements']);
 
+		/**
+		 * Hidden input for form id
+		 */
 		$attributes = [
 			'type'		=> 'hidden',
 			'class'		=> 'no-reset',
@@ -382,6 +287,9 @@ class DisplayForm extends SubmitForm{
 		];
 		$this->addElement('input', $form, $attributes);
 
+		/**
+		 * Hidden input for form url
+		 */
 		$attributes = [
 			'type'		=> 'hidden',
 			'class'		=> 'no-reset',
@@ -390,34 +298,72 @@ class DisplayForm extends SubmitForm{
 		];
 		$this->addElement('input', $form, $attributes);
 
-		$parent = $form;
-		$formstep = '';
-		$parents = [$form];
+		/**
+		 * Loop over all form elements and add the nodes
+		 */
+		$parents 			= ['root' => $form];
+		$this->prevElement	= '';
 		foreach($this->formElements as $index => $element){
+			/**
+			 * Store the current and the next elements
+			 */
+			if(isset($this->formElements[$index + 1])){
+				$this->nextElement		= $this->formElements[$index + 1];
+			}else{
+				$this->nextElement		= '';
+			}
+
+			$this->currentElement	= $element;
+
+			// Reset the parents if this is a formstep
+			if ($element->type == 'formstep'){
+				$parents = ['root' => $form];
+			}
+
+			// Insert the main node
 			$node = $this->buildHtml($element, end($parents));
 			
-			// we should wrap the next element in this one
+			/**
+			 * Check if we should change the parent node
+			 */
 			if(
+				!empty($node) &&															// the node is set
 				(
-					$element->wrap &&
-					!$this->formElements[$index - 1]->wrap
-				)|| 
-				in_array($element->type, ['formstep', 'div-start', 'multi-start'])
+					(
+						$element->wrap &&													// this is the first wraping element
+						!$this->formElements[$index - 1]->wrap
+					) || 
+					in_array($element->type, ['formstep', 'div-start', 'multi-start']) ||	// this is a wrapping element type
+					$this->clonableFormStep													// this is a clonable forstep multi-start
+				)
 			){
-				$parents[$element] = $node;
+				// Make the first child-div the parent of the concuring elements
+				if($element->type == 'multi-start'){
+					$parents[$element->type] = $this->multiwrapperFirstClone;
+				}else{
+					$parents[$element->type] = $node;
+				}
 			}
 			// we finished wrapping remove last parent
 			elseif(
 				(
 					!$element->wrap && 
-					end($parents)->wrap
+					$this->formElements[$index - 1]->wrap
 				) ||
 				in_array($element->type, ['div-end', 'multi-end'])
 			){
 				array_pop($parents);
 			}
+
+			/**
+			 * Store the current element as the previous element before next iteration
+			 */
+			$this->prevElement		= $element;
 		}
 
+		/**
+		 * Form end
+		 */
 		if(!empty($this->formElements)){
 			$hidden = '';
 			$parent = $form;

@@ -3,49 +3,458 @@ namespace SIM\FORMS;
 use SIM;
 use WP_Error;
 
-class ElementHtmlBuilder extends DisplayForm{
-    use ElementHtml;
-
+class ElementHtmlBuilder extends SubmitForm{
     public $defaultArrayValues;
     public $prevElement;
+	public $nextElement;
+	public $currentElement;
     public $multiWrapValueCount;
     public $wrap;
     public $defaultValues;
     public $element;
-	private $parentInstance;
 	private $requestedValue;
 	private $elementValues;
 	private $tagType;
 	private $selectedValue;
-	private $tagContent;
-	private $tagCloseHtml;
 	public $html;
 	public $formData;
 	public $formElements;
 	public $usermeta;
 	public $submissions;
 	public $attributes;
+	public $multiwrapperFirstClone;
+	public $multiWrapElementCount;
+	public $minElForTabs;
+	public $elementHtmlBuilder;
+	public $nonWrappable;
+	public $dom;
+	public $formWrapper;
 
-    public function __construct($parentInstance){
-		//parent::__construct();
-
-		$this->parentInstance		= $parentInstance;
-
-		$this->formData				= $parentInstance->formData;
-		$this->formElements			= $parentInstance->formElements;
-
-		$this->nonInputs			= $parentInstance->nonInputs;
-		$this->user					= $parentInstance->user;
-		$this->userId				= $parentInstance->userId;
+    public function __construct(){
+		parent::__construct();
         
 		$this->reset();
     }
 
 	public function reset(){
-		$this->elementValues		= [];
-		$this->tagType				= '';
-		$this->selectedValue		= '';
-		$this->attributes			= ['class' => ''];
+		$this->elementValues			= [];
+		$this->tagType					= '';
+		$this->selectedValue			= '';
+		$this->attributes				= ['class' => ''];
+	}
+
+	/**
+	 * Checks if this is a clonable formstep, meaning a multi_start - multi-end group wrapped inside a formstep
+	 */
+	protected function isClonableFormStep(){
+		$this->clonableFormStep	= false;
+
+		if(
+			(
+				$this->nextElement->type == 'multi-start' && 
+				$this->currentElement->type == 'formstep'
+			) ||
+			(
+				$this->currentElement->type == 'multi-start' && 
+				$this->prevElement->type == 'formstep'
+			)
+		){
+			// loop until we find the multi-end
+			$x	= $this->currentElement->priority; // this is the index of the next element, which is the multi-start
+			while(true){
+				$x++;
+				// This is the multi end
+				if($this->formElements[$x]->type == 'multi-end'){
+					// only if the next element is a formstep we have a clonable formstep
+					if(
+						empty($this->formElements[$x + 1]) ||				// this is the last element of the form
+						$this->formElements[$x + 1]->type == 'formstep'		// the next element is a formstep
+					){
+						$this->clonableFormStep	= true;
+					}
+					break;
+				}
+			}
+		}
+		
+		return $this->clonableFormStep;
+	}
+
+	/**
+	 * Builds the array with default values for the current user
+	 */
+	function buildDefaultsArray(){
+		//Only create one time
+		if(!empty($this->defaultValues)){
+			return;
+		}
+
+		if(empty($this->formName)){
+			$this->formName			= $this->formData->name;
+		}
+
+		$this->defaultValues		= (array)$this->user->data;
+		if($this->userId != $this->user->ID){
+			$this->defaultValues		= (array)get_userdata($this->userId)->data;
+		}
+		
+		//Change ID to userid because its a confusing name
+		$this->defaultValues['user_id']	= $this->defaultValues['ID'];
+		unset($this->defaultValues['ID']);
+		
+		foreach(['user_pass', 'user_activation_key', 'user_status', 'user_level'] as $field){
+			unset($this->defaultValues[$field]);
+		}
+		
+		//get defaults from filters
+		$this->defaultValues		= apply_filters('sim_add_form_defaults', $this->defaultValues, $this->userId, $this->formName);
+		
+		ksort($this->defaultValues);
+				
+		$this->defaultArrayValues	= [];
+
+		foreach(SIM\getUserAccounts(false, false, [], [], [], true) as $user){
+			$this->defaultArrayValues['all_users'][$user->ID] = $user->display_name;
+		}
+
+		$this->defaultArrayValues	= apply_filters('sim_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formName);
+		
+		ksort($this->defaultArrayValues);
+	}
+
+	/**
+	 * Gets the meta value from for an element
+	 */
+    function getMetaElementValue($elementNames){
+		if(empty($this->formData->save_in_meta)){
+			return '';
+		}
+
+		//only load usermeta once
+		if(!is_array($this->usermeta)){
+			//usermeta comes as arrays, only keep the first
+			$this->usermeta	= [];
+			foreach(get_user_meta($this->userId) as $key => $meta){
+				$this->usermeta[$key]	= $meta[0];
+			}
+			$this->usermeta	= apply_filters('sim_forms_load_userdata', $this->usermeta, $this->userId);
+		}
+
+		$metaValue	= '';
+	
+		if(count($elementNames) == 1){
+			//non array name
+			$elementName			= $elementNames[0];
+
+			if(isset($this->usermeta[$elementName])){
+				$metaValue	= (array)maybe_unserialize($this->usermeta[$elementName]);
+			}
+		}elseif(!empty($this->usermeta[$elementNames[0]])){
+			//an array of values, we only want a specific one
+			$metaValue	= (array)maybe_unserialize($this->usermeta[$elementNames[0]]);
+			
+			unset($elementNames[0]);
+
+			//loop over all the subkeys, and store the value until we have our final result
+			$resultFound	= false;
+			foreach($elementNames as $v){
+				if(isset($metaValue[$v])){
+					$metaValue 		= (array)$metaValue[$v];
+					$resultFound	= true;
+				}
+			}
+
+			// somehow it does not exist, return an empty value
+			if(!$resultFound){
+				$metaValue	= '';
+			}
+		}
+
+		return $metaValue;
+	}
+
+	/**
+	 * Gets the prefilled values of an element
+	 *
+	 * @param	object	$element		The element
+	 *
+	 * @return	array					The array of values
+	 */
+	function getElementValues($element){
+		// Do not return default values when requesting the html over rest api
+		if(defined('REST_REQUEST')){
+			//return $values;
+		}
+		
+		if(in_array($element->type, $this->nonInputs) && $element->type != 'datalist'){
+			return [];
+		}
+		
+		$values	= [
+			'defaults'	=> [],
+			'metavalue'	=> []
+		];
+
+		$this->buildDefaultsArray();
+
+		//get the elementName, remove [] and split on remaining [
+		$elementNames		= explode('[', trim($element->name, '[]'));
+
+		/**
+		 * Gets values from the element settings
+		 */
+		if(!empty($element->valuelist)){
+			$elementValues	= explode("\n", $element->valuelist);
+
+			// split in value text pairs if needed
+			foreach($elementValues as $elementValue){
+				$elementValue	= trim($elementValue);
+
+				$exploded		= explode('|', $elementValue);
+
+				if(count($exploded) > 1){
+					$values['defaults'][$exploded[0]]				= $exploded[1];
+				}else{
+					$values['defaults'][strtolower($elementValue)]	= $elementValue;
+				}
+			}
+		}
+		
+		//retrieve meta values if needed
+		$values['metavalue']	= $this->getMetaElementValue($elementNames);
+		
+		//add default values
+		if(empty($element->multiple) || in_array($element->type, ['select', 'checkbox', 'radio'])){
+			$key							= $element->default_value;
+
+			if(!empty($key)){
+				if(isset($this->defaultValues[$key])){
+					$values['defaults']		= array_merge($values['defaults'], (array)$this->defaultValues[$key]);
+				}elseif(!in_array($key, $values['defaults'])) {
+					$values['defaults'][]	= $key;
+				}
+			}
+		}
+		
+		if(!empty($element->default_array_value)){
+			$key						= $element->default_array_value;
+			if(!empty($this->defaultArrayValues[$key]) && is_array($this->defaultArrayValues[$key])){
+				$values['defaults']		= $this->defaultArrayValues[$key] + $values['defaults'];
+			}
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Returns the html for an info element
+	 */
+	public function infoBoxHtml($text, $dom=''){
+		$returnHtml	 = false;
+
+		if(empty($dom)){
+			$returnHtml	 = true;
+			$dom 	= new \DOMDocument();
+		}
+
+		//remove any paragraphs
+		$content 	= str_replace(['<p>', '</p>'], '', $text);
+		$content 	= SIM\deslash($content);
+		
+		$node		= $this->addElement('div', $dom, ['class' => 'info-box']);
+		$wrapper	= $this->addElement('div', $node, ['style' => "float:right"]);
+		$paragraph	= $this->addElement('p', $wrapper, ['class' => "info-icon"]);
+		$this->addElement(
+			'img', 
+			$paragraph, 
+			[
+				'draggable' => "false",
+				'role'		=> "img",
+				'class'		=> "emoji",
+				'alt'		=> "ℹ",
+				'src'		=> SIM\PICTURESURL.'/info.png',
+				'loading'	=> "lazy"
+			]
+		);
+
+		$this->addElement('span', $node, ['class' => "info-text"], $content);
+
+		if($returnHtml){
+			return $dom->saveHtml();
+		}
+
+		return $node;
+	}
+
+	/**
+	 * Transforms a given string to hyperlinks or other formats
+	 *
+	 * @param 	string	$string			the string to convert
+	 * @param	string	$elementName	The name of the element the string value belongs to
+	 * @param	object	$submission		The submission this string belongs to
+	 *
+	 * @return	string					The transformed string
+	 */
+	public function transformInputData($string, $elementName, $submission){
+		if(empty($string)){
+			return $string;
+		}
+		
+		//convert arrays to strings
+		if(is_array($string)){
+			$output = '';
+
+			foreach($string as $sub){
+				if(!empty($output)){
+					$output .= "<br>";
+				}
+				$output .= $this->transformInputData($sub, $elementName, $submission);
+			}
+			return $output;
+		}
+		
+		$output		= $string;
+		//open mail programm on click on email
+		if (str_contains($string, '@')) {
+			$name		= '';
+			if(isset($submission->name)){
+				$name	= "Hi $submission->name,";
+			}elseif(isset($submission->your_name)){
+				$name	= "Hi $submission->your_name,";
+			}elseif(isset($submission->first_name)){
+				$name	= "Hi $submission->first_name,";
+			}
+			$output 	= "<a href='mailto:$string?subject=Regarding your {$this->formData->name} with id $submission->id&body={$name}'>$string</a>";
+		//Convert link to clickable link if not already
+		}elseif(
+			(
+				str_contains($string, 'https://')	||
+				str_contains($string, 'http://')	||
+				str_contains($string, '/form_uploads/')
+			) &&
+			!str_contains($string, 'href') &&
+			!str_contains($string, '<img')
+		) {
+			$url	= str_replace(['https://', 'http://'], '', SITEURL);
+			$string	= str_replace(str_replace('\\', '/', ABSPATH), '', $string);
+
+			if(!str_contains($string, $url)){
+				$string		= SITEURL."/$string";
+			}
+
+			$text	= "Link";
+
+			if(getimagesize(SIM\urlToPath($string)) !== false) {
+				$text	= "<img src='$string' alt='form_upload' style='width:150px;' loading='lazy'>";
+			}
+			$output		= "<a href='$string'>$text</a>";
+		// Convert phonenumber to signal link
+		}elseif(gettype($string) == 'string' && $string[0] == '+'){
+			$numbers		= explode(" ", $string);
+			$output			= '';
+			$signalNumber	= '';
+
+			$userIdKey	= false;
+			if(isset($submission->user_id)){
+				$userIdKey	= 'user_id';
+			}elseif(isset($submission->userid)){
+				$userIdKey	= 'userid';
+			}
+
+			if($userIdKey){
+				$signalNumber	= get_user_meta($submission->$userIdKey, 'signal_number', true);
+			}
+
+			foreach($numbers as $number){
+				if($userIdKey && $number == $signalNumber){
+					$output	.= "<a href='https://signal.me/#p/$number'>$number</a><br>";
+				}else{
+					$output	.= "<a href='https://api.whatsapp.com/send?phone=$number&text=Regarding%20your%20submission%20of%20{$this->formData->form_name}%20with%20id%20$submission->id'>$number</a><br>";
+				}
+			}
+		//display dates in a nice way
+		}elseif(strtotime($string) && Date('Y', strtotime($string)) < 2200 && Date('Y', strtotime($string)) > 1900){
+			$date		= date_parse($string);
+
+			//Only transform if everything is there
+			if($date['year'] && $date['month'] && $date['day']){
+				$format		= get_option('date_format');
+
+				//include time if needed
+				if($date['hour'] && $date['minute']){
+					$format	.= ' '.get_option('time_format');
+				}
+
+				$output		= date($format, strtotime($string));
+			}
+		}
+	
+		$output = apply_filters('sim_transform_formtable_data', $output, $elementName);
+		return $output;
+	}
+
+	/**
+	 * Adds an element and its attributes to a parent element
+	 * 
+	 * @param	string	$type			The element tagname
+	 * @param	object	$parent			The parent node
+	 * @param	array	$attributes		An array of attribute names and values
+	 * @param	string	$textContent	The text content of the element
+	 * 
+	 * @return	object					The created node
+	 */
+	public function addElement($type, $parent, $attributes=[], $textContent=''){
+		try {
+			$node = $this->dom->createElement($type, $textContent );
+		} catch (\DOMException $e) {
+			// Catch the specific DOMException
+			SIM\printArray("Caught DOMException: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+		} catch (\Exception $e) {
+			// Catch any other general exceptions if needed
+			SIM\printArray( "Caught general Exception: " . $e->getMessage());
+		}
+
+		foreach($attributes as $attribute => $value){
+			try{
+				$node->setAttribute($attribute, $value);
+			} catch (\DOMException $e) {
+				// Catch the specific DOMException
+				SIM\printArray("Caught DOMException for attribute '$attribute' " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+			} catch (\Exception $e) {
+				// Catch any other general exceptions if needed
+				SIM\printArray( "Caught general Exception: " . $e->getMessage());
+			}
+		}
+		
+		try{
+			$parent->appendChild($node);
+		} catch (\DOMException $e) {
+			// Catch the specific DOMException
+			SIM\printArray("Caught DOMException: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+		} catch (\Exception $e) {
+			// Catch any other general exceptions if needed
+			SIM\printArray( "Caught general Exception: " . $e->getMessage());
+		}
+
+		return $node;
+	}
+	
+	/**
+	 * Creates nodes from raw html and adds it to the parent
+	 * 
+	 * @param	string	$html		The html
+	 * @param	object	$parent		The parent Node
+	 * 
+	 * @return	object				The created node
+	 */
+	public function addRawHtml($html, $parent){
+		if(!empty($html)){
+			$fragment = $this->dom->createDocumentFragment();
+			$fragment->appendXML($html);
+			$parent->appendChild($fragment);
+
+			return $fragment;
+		}
 	}
 
     /**
@@ -66,7 +475,7 @@ class ElementHtmlBuilder extends DisplayForm{
 		$removeMin	= false;
 
 		// do not have min values in a form table to allow to edit values for the past
-		if(get_class($this->parentInstance) == 'SIM\FORMS\DisplayFormResults'){
+		if(get_class($this) == 'SIM\FORMS\DisplayFormResults'){
 			$removeMin	= true;
 		}
 
@@ -152,6 +561,8 @@ class ElementHtmlBuilder extends DisplayForm{
 			],
 			$removeText
 		);
+
+		return $wrapper;
 	}
 
 	/**
@@ -161,71 +572,92 @@ class ElementHtmlBuilder extends DisplayForm{
 	 * @param	string|array	$value			The value to add
 	 * @param	object			$node			The node to edit
 	 */
-	function changeNodeAttributes($index, $value, &$node){
-		if($value === null){
-			$value = '';
-		}
-
-		// make sure we add the [] after the index if there was [] originally
-		$node->attributes['name']	= str_replace('[]', '', $node->attributes['name'], $replaceCount);
-		$indexString 				= "[$index]";
-		if($replaceCount){
-			$indexString			.= "[]";
-		}
-
-		// Add the index to the name
-		$node->attributes['name']	= $node->attributes['name'].$indexString;
-
-		// Add the index to the id
-		$node->attributes['id']		= $node->attributes['id']."[$index]";
-					
-		/**
-		 * Change selected option
-		 */
-		if($this->element->type == 'select'){
-			$options = $node->getElementsByTagName('option');
-			
-			foreach($nodes as $node){
-				if($node->attributes['value'] == $value){
-					$node->attributes['selected'] = 'selected';
-				}else
-					$node->removeAttribute('selected');
-				}
-		}
-		
-		/**
-		 * Change selected checkbox
-		 */
-		elseif(in_array($this->element->type, ['radio', 'checkbox'])){
-			$options = $node->getElementsByTagName('this->element->type');
-			
-			foreach($nodes as $node){
-				if($node->attributes['value'] == $value){
-					$node->attributes['checked'] = 'checked';
-				}else
-					$node->removeAttribute('checked');
-				}
-		}
-
-		/**
-		 *  Element value
-		 */ 
-		elseif($this->element->type == 'textarea'){
-			$node->nodeValue = $value;
-		}
-		elseif(is_array($value)){
-			$node->attributes['value'] = $value[$index];
+	function changeNodeAttributes($index, $value, $node){
+		// the node is already an input
+		if(in_array($node->tagName, ['input', 'textarea', 'select'])){
+			$nodes	= [$node];
 		}else{
-			$node->attributes['value'] = $value;
+			$nodes	= $node->getElementsByTagName('*');
 		}
 
-		// Add the index to the label if we are not displaying it on seperate tabs
-		if(
-			$this->element->type == 'label' && 
-			$this->multiWrapElementCount < $this->minElForTabs
-		){
-			$nr					 = $index + 1;
-			$node->nodeValue	.= " $nr";
+		foreach($nodes as $node){
+			if(!in_array($node->tagName, ['input', 'textarea', 'select'])){
+				continue;
+			}
+
+			if($value === null ){
+				$value = '';
+			}
+			
+			/**
+			 * Change the name
+			 */
+			// make sure we add the [] after the index if there was [] originally
+			$name				= str_replace('[]', '', $this->element->name, $replaceCount);
+			$indexString 		= "[$index]";
+			if($replaceCount){
+				$indexString	.= "[]";
+			}
+
+			// Add the index to the name
+			$node->setAttribute('name', $name.$indexString);
+
+			/**
+			 * Change the id
+			 */
+			if(!empty($node->attributes['id']->value)){
+				// Add the index to the id
+				$node->setAttribute('id', $name."[$index]");
+			}
+						
+			/**
+			 * Change selected option
+			 */
+			if($this->element->type == 'select'){
+				$options = $node->getElementsByTagName('option');
+				
+				foreach($options as $option){
+					if($option->attributes['value'] == $value){
+						$option->setAttribute('selected', 'selected');
+					}else
+						$option->removeAttribute('selected');
+					}
+			}
+			
+			/**
+			 * Change selected checkbox
+			 */
+			elseif(in_array($this->element->type, ['radio', 'checkbox'])){
+				$nodes = $node->getElementsByTagName($this->element->type);
+				
+				foreach($nodes as $node){
+					if($node->attributes['value'] == $value){
+						$node->setAttribute('checked', 'checked');
+					}else
+						$node->removeAttribute('checked');
+					}
+			}
+
+			/**
+			 *  Element value
+			 */ 
+			elseif($this->element->type == 'textarea'){
+				$node->nodeValue = $value;
+			}
+			elseif(is_array($value)){
+				$node->setAttribute('value', $value[$index]);
+			}elseif(!empty($value)){
+				$node->setAttribute('value', $value);
+			}
+
+			// Add the index to the label if we are not displaying it on seperate tabs
+			if(
+				$this->element->type == 'label' && 
+				$this->multiWrapElementCount < $this->minElForTabs
+			){
+				$nr					 = $index + 1;
+				$node->nodeValue	.= " $nr";
+			}
 		}
 	}
 
@@ -234,7 +666,7 @@ class ElementHtmlBuilder extends DisplayForm{
 	 */
 	function getPrevValues($returnArray=false){
 		if(empty($this->submissions)){
-			$this->submissions	= $this->parentInstance->submissions;
+			return;
 		}
 
 		// Check if we should include previous submitted values
@@ -321,15 +753,15 @@ class ElementHtmlBuilder extends DisplayForm{
 
 		// Form setting
 		if(empty($targetDir)){
-			$targetDir = $this->parentInstance->formData->upload_path;
+			$targetDir = $this->formData->upload_path;
 		}
 
 		// Default setting
 		if(empty($targetDir)){
-			$targetDir = 'form_uploads/'.$this->parentInstance->formData->form_name;
+			$targetDir = 'form_uploads/'.$this->formData->form_name;
 		}
 
-		if(empty($this->parentInstance->formData->save_in_meta)){
+		if(empty($this->formData->save_in_meta)){
 			$library	= false;
 			$metakey	= '';
 			$userId		= '';
@@ -349,9 +781,9 @@ class ElementHtmlBuilder extends DisplayForm{
 	 */
 	protected function getTagType(){
 		if(in_array($this->element->type, ['formstep', 'info', 'div-start'])){
-			$this->tagType	= "div";
-		}elseif(in_array($this->element->type, array_merge($this->parentInstance->nonInputs, ['select', 'textarea']))){
-			$this->tagType	= $this->element->type;
+			$this->tagType		= "div";
+		}elseif(in_array($this->element->type, array_merge($this->nonInputs, ['select', 'textarea']))){
+			$this->tagType		= $this->element->type;
 		}else{
             $this->attributes['type'] = $this->element->type;
             
@@ -394,15 +826,15 @@ class ElementHtmlBuilder extends DisplayForm{
 		$this->attributes['class']	.= "formfield";
 
 		//Check if element needs to be hidden
-		if(!empty($element->hidden)){
+		if(!empty($this->element->hidden)){
 			$this->attributes['class'] .= ' hidden';
 		}
 		
 		//if the current element is required or this is a label and the next element is required
 		if(
-			!empty($element->required)		||
-			!empty($element->mandatory)		||
-			$element->wrap		&&
+			!empty($this->element->required)		||
+			!empty($this->element->mandatory)		||
+			$this->element->wrap		&&
 			(
 				$this->nextElement->required	||
 				$this->nextElement->mandatory
@@ -413,16 +845,16 @@ class ElementHtmlBuilder extends DisplayForm{
 
 		switch($this->element->type){
 			case 'label':
-				$this->attributes['class']	.= "form-label";
+				$this->attributes['class']	.= " form-label";
 				break;
 			case 'button':
-				$this->attributes['class']	.= "button";
+				$this->attributes['class']	.= " button";
 				break;
 			case 'formstep':
-				$this->attributes['class']	.= "formstep step-hidden";
+				$this->attributes['class']	.= " formstep step-hidden";
 				break;
 			default:
-				$this->attributes['class']	.= "formfield-input";
+				$this->attributes['class']	.= " formfield-input";
 		}
 	}
 
@@ -441,7 +873,7 @@ class ElementHtmlBuilder extends DisplayForm{
 
 		// Do not continue
 		if(
-			$this->parentInstance->multiwrap || 
+			$this->multiwrap || 
 			!empty($this->element->multiple) ||
 			(
 				empty($this->elementValues) && empty($this->requestedValue)
@@ -455,10 +887,10 @@ class ElementHtmlBuilder extends DisplayForm{
 		if(empty($this->requestedValue)){
 			//this is an input and there is a value for it
 			if(
-				!empty($this->elementValues['defaults']) && 					// there is a default value
+				!empty($this->elementValues['defaults']) && 	// there is a default value
 				(
-					empty($this->parentInstance->formData->save_in_meta) || 	// we are not saving to the user meta table
-					empty($this->elementValues['metavalue'])					// or the metavalue is empty
+					empty($this->formData->save_in_meta) || 	// we are not saving to the user meta table
+					empty($this->elementValues['metavalue'])	// or the metavalue is empty
 				)
 			){
 				$this->selectedValue		= array_values($this->elementValues['defaults'])[0];
@@ -530,6 +962,9 @@ class ElementHtmlBuilder extends DisplayForm{
         }
 	}
 
+	/**
+	 * Add the nodes needed for a multi text
+	 */
 	protected function getMultiTextInputHtml($parent){
 		if(empty($this->requestedValue) && !empty($this->defaultArrayValues[$this->element->default_value])){
 			$this->requestedValue	= $this->defaultArrayValues[$this->element->default_value];
@@ -557,7 +992,7 @@ class ElementHtmlBuilder extends DisplayForm{
 		foreach($this->requestedValue as $v){
 			if(method_exists($this, 'transformInputData')){
 				if(empty($this->submissions)){
-					$this->submissions	= $this->parentInstance->submissions;
+					$this->submissions	= $this->submissions;
 				}
 				$transValue		= $this->transformInputData($v, $this->element->name, $this->submissions[0]);
 			}else{
@@ -597,13 +1032,14 @@ class ElementHtmlBuilder extends DisplayForm{
 		$inputWrapper			= $this->addElement('div', $wrapper, ['class' => 'multi-text-input-wrapper']);
 
 		$attributes				= $this->attributes;
-		$attributes['type']		= 'text';
 		$attributes['name']		= $elName;
 		$attributes['class']	.= "datalistinput multiple";
 		
 		$this->addElement('input', $inputWrapper, $attributes);
 
 		$this->addElement('button', $inputWrapper, ['type' => "button", 'class' => "small add-list-selection hidden"], 'add');
+
+		return $wrapper;
 	}
 
 	/**
@@ -614,15 +1050,10 @@ class ElementHtmlBuilder extends DisplayForm{
 			return false;
 		}
         
-        if($this->element->type == 'text'){
-			$this->getMultiTextInputHtml($parent);
-			return;
-		}
-        
 		$parent = $node->parentNode;
 		
         if(
-			empty($this->parentInstance->formData->save_in_meta) && 
+			empty($this->formData->save_in_meta) && 
 			!empty($this->elementValues['defaults'])
 		){
 			$values		= array_values($this->elementValues['defaults']);
@@ -633,7 +1064,7 @@ class ElementHtmlBuilder extends DisplayForm{
 		//check how many elements we should render
 		$this->multiWrapValueCount	= max(1, count((array)$values));
 
-  $multiWrapper = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
+  		$multiWrapper 				= $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
 		
 		//create as many inputs as the maximum value found
 		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
@@ -642,59 +1073,34 @@ class ElementHtmlBuilder extends DisplayForm{
 				$val	= $values[$index];
 			}
 			
-			//open the clone div
-			$cloneDiv = $this->addElement(	"div", $multiWrapper, ["class" => 'clone-div', "data-div-id" => '$index']);
+			// Add the clone div
+			$cloneDiv	= $this->addElement("div", $multiWrapper, ["class" => 'clone-div', "data-div-id" => $index]);
             
-            //add label to each entry if prev element is a label and wrapped with this one
+            // Add label to each entry if prev element is a label and wrapped with this one
             $parentNode = $cloneDiv;
     		if(
     			!empty($this->prevElement)	&&
     			!empty($this->prevElement->wrap) && 
     			$this->prevElement != $this->element
-    		){
-							
+    		){		
     			$parentNode = $this->getElementHtml($this->prevElement, $cloneDiv);
     		}
-            
-            //wrap input AND buttons in a flex div
-            $buttonWrapper = $this->addElement(
-                "div", 
-                $parentNode,
-                [
-                    'class' => 'button-wrapper',
-                    'style' => 'width:100%; display: flex;'
-                ]
-            );
+
+			// Create the add and remove buttons
+			$buttonWrapper	= $this->renderButtons($parentNode);
 			
-            $copy = $node->cloneNode(true)
+			// Clone the original input
+            $copy			= $node->cloneNode(true);
+
+			// Update node values
             $this->changeNodeAttributes($index, $val, $copy);
-            
-            // add the buttons
-            $this->addElement(
-                'button', 
-                $buttonWrapper,
-                [
-                    'type'	=> 'button',
-                    'class' => 'add button',
-                    'style' => 'flex: 1'
-                ],
-                '+'
-            );
-            
-            $this->addElement(
-                'button', 
-                $buttonWrapper,
-                [
-                    'type' 	=> 'button',
-                    'class' => 'remove button',
-                    'style' => 'flex: 1'
-                ],
-                '-'
-            );
+
+			// Add the copy to the button wrapper before the buttons
+			$buttonWrapper->prepend($copy);
         }
 								
-								// Delete the original node
-								$parent->removeChild($node);
+		// Delete the original node
+		$parent->removeChild($node);
 	}
 
 	/**
@@ -756,8 +1162,8 @@ class ElementHtmlBuilder extends DisplayForm{
                 "option",
                 $node, 
                 [
-                    'data-value' => $key,
-                    'value' => $value
+                    'data-value' 	=> $key,
+                    'value' 		=> $value
                 ],
                 $elContent
             );
@@ -862,9 +1268,9 @@ class ElementHtmlBuilder extends DisplayForm{
 			}
 			
 			// Other attributes
-			$attributes['type'] = $this->element->type;
-			$attributes['name'] = $this->element->name;
-			$attributes['value'] = $key;
+			$attributes['type'] 	= $this->element->type;
+			$attributes['name'] 	= $this->element->name;
+			$attributes['value']	= $key;
 
 			// Add the input
 			$this->addElement(
@@ -886,92 +1292,129 @@ class ElementHtmlBuilder extends DisplayForm{
 				$this->addElement("br", $checkboxWrapper);
 			}
 		}
+
+		return $checkboxWrapper;
 	}
 
-	public function multiwrapStart(){
-			// We are wrapping so we need to find the max amount of filled in fields
-			$i								= $elementIndex + 1;
-			$this->multiWrapValueCount		= 1;
-			$this->multiWrapElementCount	= 0;
+	/**
+	 * Calculates the amount of clones needed
+	 * and creates the wrapper for each clone
+	 */
+	public function multiwrapStart($parent){
+		/**
+		 * find the max number of values
+		 */
+		$i								= $this->element->priority;
+		$this->multiWrapValueCount		= 1;
+		$this->multiWrapElementCount	= 0;
 
-			//loop over all consequent wrapped elements
-			// Loop till we reach a multi-end element or the end of the form
-			while(!empty($this->formElements[$i]) && $this->formElements[$i]->type != 'multi-end'){
-				$type	= $this->formElements[$i]->type;
+		// Loop till we reach a multi-end element or the end of the form and count the values of each input
+		while(!empty($this->formElements[$i]) && $this->formElements[$i]->type != 'multi-end'){
+			$i++;
 
-				$this->multiWrapElementCount++;
+			$type	= $this->formElements[$i]->type;
 
-				if(in_array($type, $this->nonInputs)){
-					continue;
-				}
-				
-				//Get the field values and count
-				$values			= $this->getElementValues($this->formElements[$i]);
+			$this->multiWrapElementCount++;
 
-				if(empty($values) || !is_array(array_values($values)[0])){
-					$valueCount	= 0;
-				}else{
-					$valueCount		= count(array_values($values)[0]);
-
-					// Do not count the valuelist values
-					if(!empty($this->formElements[$i]->valuelist)){
-						$elementValues	= explode("\n", $this->formElements[$i]->valuelist);
-						$valueCount	= $valueCount - count($elementValues);
-					}
-				}
-				
-				if($valueCount > $this->multiWrapValueCount){
-					$this->multiWrapValueCount = $valueCount;
-				}
-				
-				$i++;
+			if(in_array($type, $this->nonInputs)){
+				continue;
 			}
 			
-			// Get the name
-			$name	= $element->name;
+			//Get the field values and count
+			$values			= $this->getElementValues($this->formElements[$i]);
 
-			$this->multiWrapper = $this->addElement("div", $parent, ['class' => 'clone-divs-wrapper', 'name' => $name]);
-			if($this->clonableFormStep){
-				return;
+			if(empty($values) || !is_array(array_values($values)[0])){
+				$valueCount	= 0;
+			}else{
+				$valueCount	= count(array_values($values)[0]);
+
+				// Do not count the valuelist values
+				if(!empty($this->formElements[$i]->valuelist)){
+					$elementValues	= explode("\n", $this->formElements[$i]->valuelist);
+					$valueCount		= $valueCount - count($elementValues);
+				}
 			}
 			
-			// Add the clone divs
-			for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
+			if($valueCount > $this->multiWrapValueCount){
+				$this->multiWrapValueCount = $valueCount;
+			}
+		}
+		
+		// Get the name
+		$name		= $this->element->name;
+
+		$attributes	=  [
+			'class' => 'clone-divs-wrapper', 
+			'name' => $name
+		];
+
+		$multiWrapper = $this->addElement("div", $parent, $attributes);
+		
+		// We do not need to continue if this is a formstep
+		if($this->clonableFormStep && $this->element->type == 'formstep'){
+			return;
+		}
+
+		// Add the clone divs
+		for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
+
+			$attributes	= [
+				'class'			=> "clone-div",
+			];
+
+			if($this->isClonableFormStep()){
+				$attributes['class']	.= ' formstep step-hidden';
+			}
+
+			 /**
+			 * Instead of showing the whole in a single view,
+			 * we show each group of inputs in a seperate tab
+			 * if the number of inputs in each group is bigger than
+			 * the minimum
+			 */
+			elseif($this->multiWrapElementCount >= $this->minElForTabs ){
+				$active = '';
+
+				// First button is the active button
+				if($index === 1){
+					$active = 'active';
+				}
+
+				// Add the button to switch to a certain tab
 				$this->addElement(
-					'div', 
-					$this->multiWrapper, 
+					'button',
+					$multiWrapper,
 					[
-						'class'			=> 'clone-div',
-						'data-div-id'	=> $index
-					]
+						'class' 		=> "button tablink $active",
+						'type'			=> 'button',
+						'id' 			=> "show-{$name}-$index",
+						'data-target'	=> "$name-$index",
+						'style' 		=> 'margin-right:4px;'
+					],
+					"{$this->element->nicename} $index"
 				);
+
+				// Extra class for each clone-div 
+				$attributes['class']	.= ' tabcontent';
+				$attributes['id']		 = "$name-$index";
 			}
-			
-			$this->renderButtons($this->multiWrapper);
 
-			// Tablink buttons
-			if($this->multiWrapElementCount >= $this->minElForTabs ){
-				for ($index = 1; $index <= $this->multiWrapValueCount; $index++) {
-					$active = '';
+			// Add the clone-div
+			$cloneDiv	= $this->addElement(
+				'div', 
+				$multiWrapper, 
+				$attributes
+			);
 
-					if($index === 1){
-						$active = 'active';
-					}
-
-					$this->addElement(
-						'button',
-						$this->multiWrapper,
-						[
-							 'class' => "button tablink $active",
-								'type' => 'button',
-								'id' => "show-{$element->name}-$index",
-								'data-target' => "$this->tabId}-$index",
-								'style' => 'margin-right:4px;'
-							],
-							"{$element->nicename} $index"
-						);
-				}
+			if(empty($this->multiwrapperFirstClone)){
+				$this->multiwrapperFirstClone	= $cloneDiv;
 			}
+
+			// add the add and remove buttons
+			$this->renderButtons($cloneDiv);
+		}
+
+		return $multiWrapper;
 	}
 
 	/**
@@ -983,16 +1426,18 @@ class ElementHtmlBuilder extends DisplayForm{
 	 */
 	public function getElementHtml($element, $parent='', $requestedValue =''){
 		$this->reset();
+
 		$this->element				= $element;
 		$this->requestedValue		= $requestedValue;
-		$returnHtml = false;
+		$returnHtml 				= false;
+
 		if(empty($parent)){
 			// Create a new DOMDocument object
-			$dom = new DOMDocument();
+			$this->dom 	= new \DOMDocument();
 			
-			$parent = $dom;
+			$parent 	= $this->dom;
 			
-   $returnHtml = true;
+   			$returnHtml = true;
 		}
 
 		$this->elementValues		= $this->getElementValues($element);
@@ -1004,13 +1449,17 @@ class ElementHtmlBuilder extends DisplayForm{
 		$this->getElementId();
 		
 		$this->getClasses();
+
+		$this->getValue();
 		
 		switch($this->element->type){
 			case 'p':
 				$content 	= wp_kses_post($this->element->text);
 				$content	= SIM\deslash($content);
 
-				$node		= $this->addElement('div', $parent, ['name'=>$this->element->name], $content);
+				$node		= $this->addElement('div', $parent, ['name'=>$this->element->name]);
+
+				$this->addRawHtml($content, $node);
 				break;
 			case 'php':
 				//we store the functionname in the html variable replace any double \ with a single \
@@ -1033,20 +1482,22 @@ class ElementHtmlBuilder extends DisplayForm{
 				$node		= $this->addElement('div', $parent, $attributes);
 				break;
 			case 'multi-start':
-				$node = $this->multiwrapStart();
+				$node = $this->multiwrapStart($parent);
 				break;
 			case 'div-end':
 				break;
 			case 'multi-end':
+				$this->multiwrapperFirstClone = '';
+
 				// nothing to do
 				if($this->multiWrapElementCount < $this->minElForTabs){
-					$this->renderButtons();
+					$this->renderButtons($parent);
 				}
 				
 				$this->multiWrapElementCount = -1;
 				break;
 			case 'info':
-				$node		= $this->addRawHtml($this->infoBoxHtml($this->element->text), $parent);
+				$node		= $this->infoBoxHtml($this->element->text, $parent);
 
 				break;
 			case 'file':
@@ -1058,29 +1509,75 @@ class ElementHtmlBuilder extends DisplayForm{
 				$node		= $this->addCheckboxes($parent);
 				break;
 			default:
-				$this->getTagType();
+				if($this->element->type == 'text' && $this->element->multiple){
+					$node	= $this->getMultiTextInputHtml($parent);
 
-				$this->getValue();
-				
-				$node = $this->addElement($this->tagType, $parent, $this->attributes);
+					// Set to false otherwise we have trouble in getMultiElementHtml
+					$this->element->multiple	= false;
+				}else{
 
-				// do this after the creation of the element
-				$this->getTagContent($node);	
-			}
+					$this->getTagType();
+					
+					$node 	= $this->addElement($this->tagType, $parent, $this->attributes);
+
+					// do this after the creation of the element
+					$this->getTagContent($node);
+				}	
+		}
 		
-			$this->getMultiElementHtml($node);
+		// Duplicate inputs with multiple values
+		$this->getMultiElementHtml($node);
 
-		// We should add the same node multiple times
-		if($this->multiWrapElementCount > 0){
-			$clones = $this->multiWrapper->children;
-			
-			for ($index = 0; $index < $this->multiWrapValueCount; $index++)
-				$copy = $node->cloneNode(true);
-				$value = $values[$index];
-				$this->changeNodeAttributes($index, $value, $copy);
+		/**
+		 *  Process elements in a multi-wrap
+		 */ 
+		if(	
+			$this->multiwrapperFirstClone != '' && 					// We have something to clone
+			get_class($this) != "SIM\FORMS\FormBuilderForm" && 		// Do not clone on formbuilder pages
+			$element->type != 'multi-start' &&						// skip this one
+			!$element->wrap											// only clone when the wrapping is finished
+		){
+			$cloneDivs	= $this->multiwrapperFirstClone->parentNode->childNodes;
 
-				// Append the cloned node to the multiWrapper clone div
-				$clones[$index]->appendChild($copy);
+			// loop over all clone-divs
+			$index	= -1;
+			foreach ($cloneDivs as $cloneDiv) {
+				$index++;
+
+				$value	= '';
+				if(!empty($this->elementValues)){
+					if(!empty($this->elementValues['defaults']) && !empty(array_values($this->elementValues['defaults'])[$index])){
+						$value	= array_values($this->elementValues['defaults'])[$index];
+					}
+
+					if(!empty($this->elementValues['metavalue']) && !empty(array_values($this->elementValues['metavalue'])[$index])){
+						$value	= array_values($this->elementValues['metavalue'])[$index];
+					}
+				}
+
+				// We do not have to proceed with the first clone-div, it already has all the elements, but we need to update its name, id and value
+				if($cloneDiv->isSameNode($this->multiwrapperFirstClone)){
+					// Update all attributes of the original
+					$this->changeNodeAttributes($index, $value, $node);
+
+					continue;
+				}
+
+				// If this is a clone-div
+				if (str_contains($cloneDiv->attributes['class']->value, 'clone-div')){
+					// Check which node to clone should be a direct child of the clone-div
+					$base	= $node;
+					while(!str_contains($base->parentNode->attributes['class']->value, 'clone-div')){
+						$base	= $base->parentNode;
+					}
+					// Clone the just created node
+					$copy	= $base->cloneNode(true);
+
+					// Update all attributes
+					$this->changeNodeAttributes($index, $value, $copy);
+
+					$cloneDiv->appendChild($copy);
+				}
 			}
 		}
 		
@@ -1102,8 +1599,9 @@ class ElementHtmlBuilder extends DisplayForm{
 		$node = apply_filters('sim-form-element-html', $node, $this);
 		
 		if($returnHtml){
-			return $dom->saveHtml();
-	}
+			return $this->dom->saveHtml();
+		}
 	
-	return $node;
+		return $node;
+	}
 }

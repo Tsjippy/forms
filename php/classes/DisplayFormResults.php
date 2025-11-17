@@ -42,8 +42,6 @@ class DisplayFormResults extends DisplayForm{
 		// call parent constructor
 		parent::__construct($atts);
 
-		$this->elementHtmlBuilder		= new ElementHtmlBuilder($this);
-
 		wp_enqueue_style('sim_formtable_style');
 
 		$family							= new SIM\FAMILY\Family();
@@ -1702,7 +1700,7 @@ class DisplayFormResults extends DisplayForm{
 					$filterValue	= $_POST[$filterKey];
 				}
 	
-				$elementHtml	= $this->elementHtmlBuilder->getElementHtml($filterElement, $parent, $filterValue);
+				$elementHtml	= $this->getElementHtml($filterElement, $parent, $filterValue);
 				
 				// make sure the name is not the element name but the filtername
 				$elementHtml	= str_replace("name='{$filterElement->name}'", "name='$filterKey'", $elementHtml);
