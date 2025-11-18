@@ -9,7 +9,6 @@ class DisplayForm extends ElementHtmlBuilder{
 		parent::__construct();
 
 		$this->isFormStep				= false;
-		$this->wrap						= false;
 		$this->nonWrappable				= [
 			'select',
 			'file',
@@ -79,7 +78,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		 */
 		if(
 			!$this->isClonableFormStep() && 	// this is a clonable formstep and a multi-start element
-			!$this->wrap &&						// this element is not wrapped in a previous element
+			!$this->prevElement->wrap &&		// this element is not wrapped in a previous element
 			$element->type != 'formstep'		// this is not a formstep
 		){
 			//Set the element width to 85 percent so that the info icon floats next to it
@@ -121,7 +120,7 @@ class DisplayForm extends ElementHtmlBuilder{
 				if(!empty($element->wrap)){
 					$class	.= ' flex';
 				}
-				$style = "width:$width%";
+				$style = "width:$width%;";
 			}
 			
 			$parent = $this->addElement('div', $parent, ['class' => $class, 'style' => $style]);

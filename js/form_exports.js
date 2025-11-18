@@ -348,11 +348,8 @@ export function updateMultiStepControls(form){
 export function showFormStep(n, form) {
 	if(typeof(form) != 'undefined'){
 		if(n == 0){
-			let loader = form.querySelector('.loader-wrapper:not(.hidden)' );
-			//hide loader
-			if(loader != null){
-				loader.classList.add('hidden');
-			}
+			// Hide any loaders
+			form.querySelectorAll('.loader-wrapper:not(.hidden), .loader-image-trigger' ).forEach( loader => loader.remove());
 
 			//show form controls
 			form.querySelectorAll('.multi-step-controls.hidden').forEach(el => el.classList.remove('hidden'));
@@ -387,7 +384,6 @@ export function showFormStep(n, form) {
 			console.log(n);
 		  	console.error(err.message);
 		}
-		
 
 		// ... and fix the Previous/Next buttons:
 		if (n == 0) {
@@ -406,7 +402,6 @@ export function showFormStep(n, form) {
 	}else{
 		console.log('no form defined');
 	}
-		
 }
 
 //next form step clicked

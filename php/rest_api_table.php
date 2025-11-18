@@ -229,7 +229,18 @@ function getPage(){
 
 	$displayFormResults->loadShortcodeData();
 
-	return $displayFormResults->renderTable($_POST['type'], true);
+	$tables	= [];
+
+	$types	= ['all'];
+	if($displayFormResults->tableSettings->split_table){
+		$types	= ['own', 'others'];
+	}
+
+	foreach($types as $type){
+		$tables[$type]				= $displayFormResults->renderTable($type);
+	}
+
+	return $tables;
 }
 
 function saveTablePrefs( \WP_REST_Request $request ) {
@@ -428,7 +439,7 @@ function getInputHtml(){
 	$index			= $element->priority;
 	while($element->wrap){
 		$element = $formTable->formElements[$index];
-		$html 	.= $formTable->elementHtmlBuilder->getElementHtml($element, $parent);
+		$html 	.= $formTable->elementHtmlBuilder->getElementHtml($element, '');
 		$index++;
 	}
 

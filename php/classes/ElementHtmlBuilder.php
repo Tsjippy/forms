@@ -105,6 +105,13 @@ class ElementHtmlBuilder extends SubmitForm{
 		foreach(['user_pass', 'user_activation_key', 'user_status', 'user_level'] as $field){
 			unset($this->defaultValues[$field]);
 		}
+
+		// Add family meta
+		$family		= new SIM\FAMILY\Family();
+		$this->defaultValues['family_name']		= $family->getFamilyName($this->user->ID);
+		$this->defaultValues['family_picture']	= $family->getFamilyMeta($this->user, 'family_picture');
+		$this->defaultValues['family_partner']	= $family->getPartner($this->user);
+		$this->defaultValues['weddingdate']		= $family->getWeddingDate($this->user);
 		
 		//get defaults from filters
 		$this->defaultValues		= apply_filters('sim_add_form_defaults', $this->defaultValues, $this->userId, $this->formName);
@@ -116,6 +123,59 @@ class ElementHtmlBuilder extends SubmitForm{
 		foreach(SIM\getUserAccounts(false, false, [], [], [], true) as $user){
 			$this->defaultArrayValues['all_users'][$user->ID] = $user->display_name;
 		}
+
+		/**
+		 *  Add family member names
+		 */ 
+		// Our own details
+		$familyNames				= [
+			$this->user->ID => get_userdata($this->user->ID)->display_name
+		];
+
+		// Partner
+		$partner	= $family->getPartner($this->user->ID, true);
+		if($partner){
+			$familyNames[$partner->ID]	= $partner->display_name;
+		}
+
+		// Siblings
+		$siblings	= $family->getSiblings($this->user->ID);
+		foreach($siblings as $sibling){
+			$familyNames[$sibling]				= get_userdata($sibling)->display_name;
+		}
+
+		$familyNamesWithChildAge				= $familyNames;
+
+		// Children
+		$children		= $family->getChildren($this->user->ID);
+		$childrenNames	= [];
+		$childrenAges	= [];
+		foreach($children as $child){
+			$name								= get_userdata($child)->display_name;
+			$birthDateString					= get_user_meta($child, 'birthday', true);
+
+			$birthDate 							= new \DateTime($birthDateString);
+			$currentDate 						= new \DateTime('today');
+
+			// Calculate the difference between the two dates
+			$interval 							= $currentDate->diff($birthDate);
+
+			// Extract the number of years from the interval
+			$age 								= $interval->y;
+
+			$childrenNames[$child]				= $name;
+			$childrenAges[$child]				= $age;
+			$familyNamesWithChildAge[$child]	= "$name ($age)";
+		}
+
+		$familyNames												= $familyNames + $childrenNames;
+
+		// Add everything to the defaults array
+		$this->defaultArrayValues['children_names']					= $childrenNames;
+		$this->defaultArrayValues['children_ages']					= $childrenAges;
+
+		$this->defaultArrayValues['family_member_names']			= $familyNames;
+		$this->defaultArrayValues['family_member_names_and_age']	= $familyNamesWithChildAge;
 
 		$this->defaultArrayValues	= apply_filters('sim_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formName);
 		
@@ -522,13 +582,13 @@ class ElementHtmlBuilder extends SubmitForm{
 		ob_start();
 
 		$addText	= '+';
-		if(!empty($this->prevElement) && !empty($this->prevElement->add)){
-			$addText	= $this->prevElement->add;
+		if(!empty($this->element->add)){
+			$addText	= $this->element->add;
 		}
 
 		$removeText	= '-';
-		if(!empty($this->prevElement) && !empty($this->prevElement->remove)){
-			$removeText	= $this->prevElement->remove;
+		if(!empty($this->element->remove)){
+			$removeText	= $this->element->remove;
 		}
 		
 		$wrapper	= $this->addElement(
@@ -541,7 +601,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		);
 
 		$this->addElement(
-			'div',
+			'button',
 			$wrapper,
 			[
 				'type'	=> 'button',
@@ -552,7 +612,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		);
 
 		$this->addElement(
-			'div',
+			'button',
 			$wrapper,
 			[
 				'type'	=> 'button',
@@ -825,24 +885,6 @@ class ElementHtmlBuilder extends SubmitForm{
 	protected function getClasses(){
 		$this->attributes['class']	.= "formfield";
 
-		//Check if element needs to be hidden
-		if(!empty($this->element->hidden)){
-			$this->attributes['class'] .= ' hidden';
-		}
-		
-		//if the current element is required or this is a label and the next element is required
-		if(
-			!empty($this->element->required)		||
-			!empty($this->element->mandatory)		||
-			$this->element->wrap		&&
-			(
-				$this->nextElement->required	||
-				$this->nextElement->mandatory
-			)
-		){
-			$this->attributes['class'] .= ' required';
-		}
-
 		switch($this->element->type){
 			case 'label':
 				$this->attributes['class']	.= " form-label";
@@ -893,7 +935,7 @@ class ElementHtmlBuilder extends SubmitForm{
 					empty($this->elementValues['metavalue'])	// or the metavalue is empty
 				)
 			){
-				$this->selectedValue		= array_values($this->elementValues['defaults'])[0];
+				$this->selectedValue		= $this->elementValues['defaults'];
 			}elseif(!empty($this->elementValues['metavalue'])){
 				$elIndex	= 0;
 				if(str_contains($this->element->name, '[]')){
@@ -917,6 +959,20 @@ class ElementHtmlBuilder extends SubmitForm{
 		){
 			if(is_array($this->selectedValue)){
 				$this->selectedValue	= array_values($this->selectedValue)[0];
+			}
+
+			// if there is a datalist attached to this element we should use the corresponding name
+			if(in_array('list', array_keys($this->attributes))){
+				$listElement	= $this->getElementByName($this->attributes['list']);
+
+				if($listElement && !empty($this->defaultArrayValues[$listElement->default_array_value])){
+					// Get the list values
+					$values	= $this->defaultArrayValues[$listElement->default_array_value];
+
+					if(!empty($values[$this->selectedValue])){
+						$this->selectedValue	= $values[$this->selectedValue];
+					}
+				}
 			}
 
 			$this->attributes["value"] = $this->selectedValue;
@@ -984,7 +1040,6 @@ class ElementHtmlBuilder extends SubmitForm{
 		/**
 		 * The list of prefileld values
 		 */
-
 		// The unoredered list for choices made
 		$selectionList	= $this->addElement("ul", $wrapper, ['class' => 'list-selection-list']);
 
@@ -1029,11 +1084,18 @@ class ElementHtmlBuilder extends SubmitForm{
 		/**
 		 * Add the actual text input
 		 */
-		$inputWrapper			= $this->addElement('div', $wrapper, ['class' => 'multi-text-input-wrapper']);
+		$inputWrapper			= $this->addElement(
+			'div', 
+			$wrapper, 
+			[
+				'class' => 'multi-text-input-wrapper'
+			]
+		);
 
 		$attributes				= $this->attributes;
+		$attributes['type']		= 'text';
 		$attributes['name']		= $elName;
-		$attributes['class']	.= "datalistinput multiple";
+		$attributes['class']	.= " datalistinput multiple";
 		
 		$this->addElement('input', $inputWrapper, $attributes);
 

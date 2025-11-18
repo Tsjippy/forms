@@ -282,6 +282,14 @@ class DisplayFormResults extends DisplayForm{
 			$submissionId	= $_REQUEST['id'];
 		}
 
+		if(!empty($this->submissions) && is_numeric($submissionId)){
+			foreach($this->submissions as $submission){
+				if($submission->id == $submissionId){
+					return [$submission];
+				}
+			}
+		}
+
 		if($this->formData->save_in_meta){
 			return $this->getMetaKeyFormSubmissions($userId, $all);
 		}
@@ -415,13 +423,49 @@ class DisplayFormResults extends DisplayForm{
 				$wpdb->prepare("SELECT distinct `sub_id` FROM %i WHERE `submission_id` =%d and `sub_id` IS NOT NULL", $this->submissionValuesTableName, $result->id)
 			);
 
-			$splitSubmissions	= [];
-			foreach($subIds as $subId){
-				$splitSubmissions[$subId]	= [];
+			$query	= "SELECT `element_id`, `value`, sub_id FROM %i WHERE submission_id = %d";
+			$values	= [
+				$this->submissionValuesTableName, 
+				$result->id
+			];
+
+			/**
+			 * Apply filters
+			 */
+			foreach($this->tableSettings->filter as $filter){
+				
+				$filterKey		= strtolower($filter['name']);
+
+				// nothing to filter, continue
+				if(empty($_POST[$filterKey])){
+					continue;
+				}
+
+				// Get the data for the current filter
+				$filterValue	= sanitize_text_field($_POST[$filterKey]);
+
+				$filterElement	= $this->getElementById($filter['element']);
+
+				$exploded		= explode('[', $filterElement->name);
+
+				$name			= str_replace(']', '', end($exploded));
+
+				// Add the filter query
+				if($filter['type'] == '=='){
+					$filter['type']	= '=';
+				}
+
+				if($filter['type'] == 'like'){
+					$filterValue	= "%$filterValue%";
+				}
+
+				$query		.= " AND value %s %s";
+				$values[]	= $filter['type'];
+				$values[]	= $filterValue;
 			}
 
 			$formresults	= $wpdb->get_results(
-				$wpdb->prepare("SELECT `element_id`, `value`, sub_id FROM %i WHERE submission_id = %d", $this->submissionValuesTableName, $result->id)
+				$wpdb->prepare($query, $values)
 			);
 
 			if($wpdb->last_error !== ''){
@@ -435,7 +479,14 @@ class DisplayFormResults extends DisplayForm{
 				continue;
 			}
 
-			// Loop over all data, store non-indexed values on the submission, and indexed ones in a seperate array
+			/**
+			 *  Loop over all data, store non-indexed values on the submission, and indexed ones in a seperate array
+			 */ 
+			$splitSubmissions	= [];
+			foreach($subIds as $subId){
+				$splitSubmissions[$subId]	= [];
+			}
+
 			foreach($formresults as $formresult){
 				$value	= maybe_unserialize($formresult->value);
 
@@ -1404,7 +1455,7 @@ class DisplayFormResults extends DisplayForm{
 						<input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo $this->formData->autoarchive_value;?>" style='max-width:200px;'>
 						
 						<?php
-						echo $this->infoBoxHtml('info', "You can use placeholders like '%today%+3days' for a value");
+						echo $this->infoBoxHtml("You can use placeholders like '%today%+3days' for a value");
 						?>
 					</div>
 				</div>
@@ -1631,53 +1682,6 @@ class DisplayFormResults extends DisplayForm{
 	}
 
 	/**
-	 * Filters the given submissions according to the filter values in POST
-	 *
-	 * @param	array		$submissions	The submissions to be filtered
-	 *
-	 * @return	array						The filtered submissions
-	 */
-	function filterSubmissions($submissions){
-		$filteredCount	= 0;
-		foreach($this->tableSettings->filter as $filter){
-			$filterElement	= $this->getElementById($filter['element']);
-			$filterValue	= '';
-			$filterKey		= strtolower($filter['name']);
-			if(!empty($_POST[$filterKey])){
-				$filterValue	= $_POST[$filterKey];
-			}
-
-			$exploded		= explode('[', $filterElement->name);
-
-			$name			= str_replace(']', '', end($exploded));
-
-			// Filter the current submission data
-			if(!empty($filterValue)){
-
-				foreach($submissions as $key => $submission){
-					if(
-						!isset($submission->{$name})	||													// The filter value is not set at all
-						!$this->compareFilterValue($submission->{$name}, $filter['type'], $filterValue)	// The filter value does not match the value
-					){
-						unset($submissions[$key]);
-						$filteredCount++;
-					}
-				}
-			}
-		}
-
-		// total minus the filtered out submissions
-		$this->total	= $this->total - $filteredCount;
-
-		// Get the submissions we need
-		$this->submissions			= array_chunk($submissions, $this->pageSize)[$this->currentPage];
-
-		$this->spliced	= true;
-
-		return $submissions;
-	}
-
-	/**
 	 * Renders the table filter html
 	 *
 	 * @return string	The html
@@ -1685,40 +1689,43 @@ class DisplayFormResults extends DisplayForm{
 	protected function renderFilterForm($parent=''){
 		$html	= '';
 
-		if(!empty($this->tableSettings->filter)){
-			$filterOption	= '';
-			foreach($this->tableSettings->filter as $filter){
-				$filterElement	= $this->getElementById($filter['element']);
-				$filterValue	= '';
-				$filterKey		= strtolower($filter['name']);
+		// Filtering not enabled
+		if(empty($this->tableSettings->filter)){
+			return $html;
+		}
 
-				if(!$filterElement || empty($filterKey)){
-					continue;
-				}
+		$filterOption	= '';
+		foreach($this->tableSettings->filter as $filter){
+			$filterElement	= $this->getElementById($filter['element']);
+			$filterValue	= '';
+			$filterKey		= strtolower($filter['name']);
 
-				if(!empty($_POST[$filterKey])){
-					$filterValue	= $_POST[$filterKey];
-				}
-	
-				$elementHtml	= $this->getElementHtml($filterElement, $parent, $filterValue);
-				
-				// make sure the name is not the element name but the filtername
-				$elementHtml	= str_replace("name='{$filterElement->name}'", "name='$filterKey'", $elementHtml);
-	
-				$filterOption	.= "<span class='filter-option'>";
-					$filterOption	.= "<label>".ucfirst($filterKey).": </label>";
-					$filterOption	.= $elementHtml;
-				$filterOption	.= "</span>";
+			if(!$filterElement || empty($filterKey)){
+				continue;
 			}
 
-			if(!empty($filterOption)){
-				$html	= "<form method='post' class='filter-options'>";
-					$html	.= "<div class='filter-wrapper'>";
-						$html	.= $filterOption;
-						$html	.= "<button class='button' style='height: fit-content;'>Filter</button>";
-					$html	.= "</div>";
-				$html	.= "</form>";
+			if(!empty($_POST[$filterKey])){
+				$filterValue	= $_POST[$filterKey];
 			}
+
+			$elementHtml	= $this->getElementHtml($filterElement, $parent, $filterValue);
+			
+			// make sure the name is not the element name but the filtername
+			$elementHtml	= str_replace("name=\"{$filterElement->name}\"", "name='$filterKey'", $elementHtml);
+
+			$filterOption	.= "<span class='filter-option'>";
+				$filterOption	.= "<label>".ucfirst($filterKey).": </label>";
+				$filterOption	.= $elementHtml;
+			$filterOption	.= "</span>";
+		}
+
+		if(!empty($filterOption)){
+			$html	= "<form method='post' class='filter-options'>";
+				$html	.= "<div class='filter-wrapper'>";
+					$html	.= $filterOption;
+					$html	.= "<button class='button filter-results' type='button' style='height: fit-content;'>Filter</button>";
+				$html	.= "</div>";
+			$html	.= "</form>";
 		}
 
 		return $html;
@@ -1777,35 +1784,18 @@ class DisplayFormResults extends DisplayForm{
 	}
 
 	/**
-	 * Compares 2 values according to a given comparison string
+	 * Gets an empty table
 	 */
-	protected function compareFilterValue ($var1, $op, $var2) {
-		if(empty($var1) && empty($var2)){
-			return true;
-		}
+	public function emptyTable(){
+		ob_start();
 
-		if(empty($var1) || empty($var2)){
-			return false;
-		}
+		?>
+		<table class='sim-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>'>
+			<td>No records found</td>
+		</table>
 
-		if(is_array($var1) && $op == 'like'){
-			if(is_array($var2)){
-				return array_intersect($var1, $var2);
-			}
-
-			return in_array($var2, $var1);
-		}
-
-		switch ($op) {
-			case "=":  		return $var1 == $var2;
-			case "!=": 		return $var1 != $var2;
-			case ">=": 		return $var1 >= $var2;
-			case "<=": 		return $var1 <= $var2;
-			case ">":  		return $var1 >  $var2;
-			case "<":  		return $var1 <  $var2;
-			case "like":	return str_contains(strtolower($var2), strtolower($var1));
-			default:       return true;
-		}
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
@@ -1817,8 +1807,6 @@ class DisplayFormResults extends DisplayForm{
 	 * @return	bool						If there are submissions or not
 	 */
 	public function theTable($type, $submissions){
-		global $wpdb;
-		
 		if($this->spliced){
 			// only use the submissions for this page
 			$submissions	= array_splice($submissions, ($this->currentPage * $this->pageSize), $this->pageSize);
@@ -1852,16 +1840,85 @@ class DisplayFormResults extends DisplayForm{
 				}
 
 				if($allRowsEmpty){
-					?>
-					<td>No records found</td>
-					<?php
+					echo $this->emptyTable();
 				}
 				?>
 			</tbody>
 		</table>
 		<?php
+	}
 
-		return $allRowsEmpty;
+	/**
+	 * Render the navigation menu in case of multiple pages of results
+	 */
+	public function navigationMenu(){
+		if($this->total <= $this->pageSize){
+			return;
+		}
+
+		$pageCount	=  ceil($this->total / $this->pageSize);
+
+		if(isset($_GET['page-number'])){
+			unset($_GET['page-number']);
+		}
+
+		$html	= "<div class='form-result-navigation'>";
+			// include a back button if we are not on the first page
+			$class = 'hidden';
+			if($this->currentPage > 0){
+				$class = '';
+			}
+			$html	.= "<button class='button small prev $class' name='prev' value='prev'>← Previous</button>";
+			//show page numbers
+			$html	.= "<span class='page-number-wrapper'>";
+				for ($x = 0; $x < $pageCount; $x++) {
+					$pageNr	= $x+1;
+
+					$class	= '';
+					if($this->currentPage == $x){
+						$class	= "current";
+					}
+					$html	.= "<span class='page-number $class' data-nr='$x'>$pageNr</span> ";
+				}
+			$html	.= "</span>";
+
+			// Include a next button if we are not on the last page
+			$class = 'hidden';
+			if($this->total > $this->pageSize && $this->currentPage != $pageCount-1){
+				$class = '';
+			}
+			$html	.= "<button class='button small next $class' name='next' value='next'>Next →</button>";
+
+			// Adjust page size
+			$get	= $_REQUEST;
+			unset($get['_wpnonce']);
+			unset($get['form-id']);
+			unset($get['shortcode-id']);
+
+			$get['pagesize']	= '';
+			$get				= '?'.http_build_query($get);
+
+			$html	.= "<select onchange=location.href='{$get}'+this.value>";
+				foreach([1000, 500, 200, 100, 50, 40, 20, 10] as $size){
+					$selected	= '';
+					if(
+						(
+							isset($_GET['pagesize']) && 
+							$_GET['pagesize'] == $size
+						) ||
+						(
+							empty($_GET['pagesize']) && 
+							$size == 100
+						)
+					){
+						$selected	= 'selected';
+					}
+					$html	.= "<option $selected>$size</option>";
+				}
+			$html	.= "</select>";
+		$html	.= "</div>";
+
+		echo $html;
 	}
 
 	/**
@@ -1872,9 +1929,9 @@ class DisplayFormResults extends DisplayForm{
 	 * @param	bool		$force		Whether to retrieve submissions even if already done
 	 * @param	bool		$all		Retrieve all bookings or paged, default false for paged
 	 *
-	 * @return	bool					True on no records found, false on data found
+	 * @return	string|false			False on no records found, else the html
 	 */
-	public function renderTable($type, $justTable=false, $force=false, $all	= false){
+	public function renderTable($type, $force=false, $all	= false){
 		$userId	= null;
 
 		// Check permissions
@@ -1885,7 +1942,7 @@ class DisplayFormResults extends DisplayForm{
 		){
 			// we do not have permission to view someone elses submissions
 			if($type == 'others'){
-				return true;
+				return 'You do not have permissions to see this.';
 			}
 			$type		= 'own';
 		}
@@ -1905,7 +1962,7 @@ class DisplayFormResults extends DisplayForm{
 				if(!empty($_REQUEST['hash']) && $_REQUEST['hash'] == wp_hash($_REQUEST['id'])){
 					$userId		= $_REQUEST['hash'];
 				}else{
-					return true;
+					return $this->emptyTable();
 				}
 			}
 		}
@@ -1935,18 +1992,11 @@ class DisplayFormResults extends DisplayForm{
 			$this->sortDirection	= strtoupper($this->tableSettings->sort_direction);
 		}
 
-		if(isset($_REQUEST['export_pfd']) || isset($_REQUEST['export-xls'])){
+		if(isset($_REQUEST['export_pdf']) || isset($_REQUEST['export-xls'])){
 			$all	= true;
 		}
 
 		$this->parseSubmissions($userId, null, $all, $force);
-
-		$submissions	= $this->filterSubmissions($this->submissions);
-
-		// do not write anything if empty 
-		if($type != 'all' && empty($submissions)){
-			return true;
-		}
 
 		/*
 			Write the header row of the table
@@ -1955,7 +2005,7 @@ class DisplayFormResults extends DisplayForm{
 		$this->ownData	= false;
 
 		if($type != 'others'){
-			foreach($submissions as $submission){				
+			foreach($this->submissions as $submission){				
 				//Our own entry or one of our partner
 				if(
 					!empty($submission->userid) &&
@@ -1972,12 +2022,6 @@ class DisplayFormResults extends DisplayForm{
 		
 		ob_start();
 
-		if($justTable){
-			$this->theTable($type, $submissions);
-
-			return ob_get_clean();
-		}
-
 		echo "<div class='form-results-wrapper'>";
 			if($type == 'own'){
 				echo "<h4>Your own submissions</h4>";
@@ -1986,79 +2030,14 @@ class DisplayFormResults extends DisplayForm{
 				echo "<h4>Submissions of others</h4>";
 			}
 
-			if($this->total > $this->pageSize){
-				$pageCount	=  ceil($this->total / $this->pageSize);
+			echo $this->navigationMenu();
 
-				if(isset($_GET['page-number'])){
-					unset($_GET['page-number']);
-				}
-				$html	= "<div class='form-result-navigation'>";
-					// include a back button if we are not on the first page
-					$class = 'hidden';
-					if($this->currentPage > 0){
-						$class = '';
-					}
-					$html	.= "<button class='button small prev $class' name='prev' value='prev'>← Previous</button>";
-					//show page numbers
-					$html	.= "<span class='page-number-wrapper'>";
-						for ($x = 0; $x < $pageCount; $x++) {
-							$pageNr	= $x+1;
-
-							$class	= '';
-							if($this->currentPage == $x){
-								$class	= "current";
-							}
-							$html	.= "<span class='page-number $class' data-nr='$x'>$pageNr</span> ";
-						}
-					$html	.= "</span>";
-
-					// Include a next button if we are not on the last page
-					$class = 'hidden';
-					if($this->total > $this->pageSize && $this->currentPage != $pageCount-1){
-						$class = '';
-					}
-					$html	.= "<button class='button small next $class' name='next' value='next'>Next →</button>";
-
-					// Adjust page size
-					$get	= $_REQUEST;
-					unset($get['_wpnonce']);
-					unset($get['form-id']);
-					unset($get['shortcode-id']);
-
-					$get['pagesize']	= '';
-					$get	= '?'.http_build_query($get);
-
-					$html	.= "<select onchange=location.href='{$get}'+this.value>";
-						foreach([1000, 500, 200, 100, 50, 40, 20, 10] as $size){
-							$selected	= '';
-							if(
-								(
-									isset($_GET['pagesize']) && 
-									$_GET['pagesize'] == $size
-								) ||
-								(
-									empty($_GET['pagesize']) && 
-									$size == 100
-								)
-							){
-								$selected	= 'selected';
-							}
-							$html	.= "<option $selected>$size</option>";
-						}
-					$html	.= "</select>";
-				$html	.= "</div>";
-
-				echo $html;
-			}
-
-			$allRowsEmpty	= $this->theTable($type, $submissions);
+			$this->theTable($type, $this->submissions);
 		echo "</div>";
 			
 		$this->printTableFooter();
 		
-		echo ob_get_clean();
-
-		return $allRowsEmpty;
+		return ob_get_clean();
 	}
 
 	private function printTableFooter(){
@@ -2101,8 +2080,7 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	public function showFormresultsTable($split = null, $all = false){
 		// first render the table so we now how many results we have
-		ob_start();
-		$allRowsEmpty	= true;
+		$tableHtml	= '';
 		if(
 			(
 				$split === null	&&									// we should use the table settings
@@ -2111,16 +2089,14 @@ class DisplayFormResults extends DisplayForm{
 			$split == true											// we should always split
 		){
 			$buttons		= $this->renderTableButtons();
-			$result1		= $this->renderTable('own', false, true, $all);
+			$tableHtml	   .= $this->renderTable('own', true, $all);
 
 			$buttons		= $this->renderTableButtons();
-			$result2		= $this->renderTable('others', false, true, $all);
-			$allRowsEmpty	= $result1 && $result2;
+			$tableHtml	   .= $this->renderTable('others', true, $all);
 		}else{
 			$buttons		= $this->renderTableButtons();
-			$allRowsEmpty	= $this->renderTable('all', false, false, $all);
+			$tableHtml		= $this->renderTable('all', false, $all);
 		}
-		$tableHtml			= ob_get_clean();
 
 		ob_start();
 		//process any $_GET acions
@@ -2139,18 +2115,7 @@ class DisplayFormResults extends DisplayForm{
 				?>
 			</div>
 			<?php
-			
-			if($allRowsEmpty){
-				?>
-				<table class='sim-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>'>
-					<td>No records found</td>
-				</table>
-				<?php
-
-				return ob_get_clean().'</div>';
-			}else{
-				echo $tableHtml;
-			}
+			echo $tableHtml;
 			?>
 		</div>
 		<?php

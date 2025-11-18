@@ -214,52 +214,70 @@ function updatePageNav(navWrapper, pageNr){
 	}
 }
 
-async function getNextPage(target){
+async function getPage(target, page=0){
+	// we only have one wrapper
 	let wrapper			= target.closest('.form.table-wrapper');
+
+	// Only get the navwrapper, table wrapper and table closest to the target
 	let navWrapper		= target.closest('.form-result-navigation');
 	let tableWrapper	= target.closest('.form-results-wrapper');
+
+	// we are filtering, just take the first table wrapper
+	if(tableWrapper == null){
+		tableWrapper	= wrapper.querySelector('.form-results-wrapper');
+	}
 	let table			= tableWrapper.querySelector('.form-data-table:not(.hidden)');
 
-	table.classList.add('hidden');
-
-	// get the requested page number
-	let	curPage			= parseInt(navWrapper.querySelector(".page-number-wrapper .current").dataset.nr);
-	let page;
-	if(target.matches('.next')){
-		page	= curPage + 1;
-	}else if(target.matches('.prev')){
-		page	= curPage - 1;
-	}else{
-		page	= target.dataset.nr;
-	}
-	
-	updatePageNav(navWrapper, page);
-
-	// check if the requested page is already loaded
-	let loadedPage	= tableWrapper.querySelector(`[data-page="${page}"]`);
-	
-	if(loadedPage != null){
-		console.log(loadedPage);
-		loadedPage.classList.remove('hidden');
-
-		return;
-	}
+	let replace	= true;
 
 	// request page over ajax
 	let formId			= table.dataset.formId;
 
-	let loader			= Main.showLoader(table, false);
+	let shortcodeId		= table.dataset.shortcodeId;
+
+	let type			= table.dataset.type;
+
+	/**
+	 * We reqested another page
+	 */
+	if(navWrapper != null){
+		updatePageNav(navWrapper, page);
+
+		let loadedPage	= tableWrapper.querySelector(`[data-page="${page}"]`);
+		
+		// check if the requested page is already loaded and show it
+		if(loadedPage != null){
+			loadedPage.classList.remove('hidden');
+
+			return;
+		}
+		table.classList.add('hidden');
+
+		Main.showLoader(table, false, 100, 'Loading data');
+	}
+
+	// If we sort or filter we want to do so on all tables
+	else{
+		type	= 'all';
+
+		wrapper.querySelectorAll('.form-results-wrapper').forEach( el => {
+			el.classList.add(el.querySelector('table').dataset.type);
+
+			el.innerHTML	= Main.showLoader(el, true, 100, 'Loading data', true);
+		});
+	}
+
 	let formData;
 	if(wrapper.querySelector(".filter-options") == null){
 		formData		= new FormData();
 	}else{
-		formData		= new FormData(wrapper.querySelector(".filter-options"));
+		formData		= new FormData(wrapper.querySelector("form.filter-options"));
 	}
 
     formData.append('form-id', formId);
     formData.append('page-number', page);
-	formData.append('shortcode-id', table.dataset.shortcodeId);
-    formData.append('type', table.dataset.type);
+	formData.append('shortcode-id', shortcodeId);
+    formData.append('type', type);
 
 	let params = new Proxy(new URLSearchParams(window.location.search), {
 		get: (searchParams, prop) => searchParams.get(prop),
@@ -267,16 +285,16 @@ async function getNextPage(target){
 
 	let archived;
 	if(params['archived'] == null){
-		archived	= false;
+		archived	= 0;
 	}else{
-		archived	= true;
+		archived	= 1;
 	}
 
 	let onlyOwn;
 	if(params['onlyOwn'] == null){
-		onlyOwn	= false;
+		onlyOwn	= 0;
 	}else{
-		onlyOwn	= true;
+		onlyOwn	= 1;
 	}
 	formData.append('archived', archived);
 	formData.append('only-own', onlyOwn);
@@ -292,78 +310,12 @@ async function getNextPage(target){
 	let response	= await FormSubmit.fetchRestApi('forms/get_page', formData);
 
 	if(response){
-		loader.outerHTML	= response;
+		for (const [tableType, tableHtml] of Object.entries(response)) {
+			wrapper.querySelector(`.form-results-wrapper.${tableType}`).outerHTML	= tableHtml;
+		}
 	}else{
 		// restore prev data
-		table.classList.remove('hidden');
-
-		loader.remove();
-
-		updatePageNav(navWrapper, curPage);
-	}
-}
-
-async function getSortedPage(target){
-	
-	let wrapper			= target.closest('.form.table-wrapper');
-	let tableWrapper	= target.closest('.form-results-wrapper');
-
-	// always start at page 1 again after sorting
-	let navWrapper		= tableWrapper.querySelector('.form-result-navigation');
-	updatePageNav(navWrapper, 0);
-
-	let table			= tableWrapper.querySelector('.form-data-table:not(.hidden)');
-	let formId			= table.dataset.formId;
-	let sortCol			= target.id;
-	let sortDir			= target.classList.contains('desc') ? 'DESC' : 'ASC';
-
-	tableWrapper.dataset.sortcol	= sortCol;
-	tableWrapper.dataset.sortdir	= sortDir;
-
-	let loader			= Main.showLoader(table, true, 50, 'Loading sorted data');
-	let formData;
-	if(wrapper.querySelector(".filter-options") == null){
-		formData		= new FormData();
-	}else{
-		formData		= new FormData(wrapper.querySelector(".filter-options"));
-	}
-
-    formData.append('form-id', formId);
-    formData.append('page-number', 0);
-	formData.append('shortcode-id', table.dataset.shortcodeId);
-    formData.append('type', table.dataset.type);
-
-	let params = new Proxy(new URLSearchParams(window.location.search), {
-		get: (searchParams, prop) => searchParams.get(prop),
-	});
-
-	let archived;
-	if(params['archived'] == null){
-		archived	= false;
-	}else{
-		archived	= true;
-	}
-
-	let onlyOwn;
-	if(params['onlyOwn'] == null){
-		onlyOwn	= false;
-	}else{
-		onlyOwn	= true;
-	}
-	formData.append('archived', archived);
-	formData.append('only-own', onlyOwn);
-	formData.append('sortcol', sortCol);
-	formData.append('sortdir', sortDir);
-
-	let response	= await FormSubmit.fetchRestApi('forms/get_page', formData);
-
-	if(response){
-		loader.outerHTML	= response;
-	}else{
-		// restore prev data
-		table.classList.remove('hidden');
-
-		loader.remove();
+		location.href		= location.href;
 	}
 }
 
@@ -556,13 +508,46 @@ document.addEventListener("click", event=>{
 		}else{
 			el.classList.add('hidden');
 		}
-	}else if(target.closest('.form-result-navigation') != null && (target.matches('.next') || target.matches('.prev') || target.matches('.page-number'))){
-		getNextPage(target);
+	}else if(
+		target.closest('.form-result-navigation') != null && 
+		(
+			target.matches('.next') || 
+			target.matches('.prev') || 
+			target.matches('.page-number') 
+		)
+	){
+		// get the requested page number
+		let	curPage			= parseInt(navWrapper.querySelector(".page-number-wrapper .current").dataset.nr);
+		let page;
+
+		if(target.matches('.next')){
+			page	= curPage + 1;
+		}else if(target.matches('.prev')){
+			page	= curPage - 1;
+		}else{
+			page	= target.dataset.nr;
+		}
+
+		getPage(target, page);
 	}
 
-	else if(target.tagName == 'TH' && target.closest(".form-results-wrapper").querySelector('.form-result-navigation') != null){
+	else if(
+		target.tagName == 'TH' && 
+		target.closest(".form-results-wrapper").querySelector('.form-result-navigation') != null
+	){
 		// get a sorted table over AJAX
-		getSortedPage(target);
+		let sortCol			= target.id;
+		let sortDir			= target.classList.contains('desc') ? 'DESC' : 'ASC';
+
+		tableWrapper.dataset.sortcol	= sortCol;
+		tableWrapper.dataset.sortdir	= sortDir;
+
+		getPage(target);
+	}
+
+	// Filter data
+	else if(target.matches(`.button.filter-results`)){
+		getPage(target);
 	}
 
 	// copy cell contents
