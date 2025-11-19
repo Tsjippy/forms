@@ -12,6 +12,7 @@
 - store values on element id not on name
 - store form results by element id not name
 - more efficient data filtering
+- change table size over AJAX
 
 ### Fixed
 - store-non-numeric element id
