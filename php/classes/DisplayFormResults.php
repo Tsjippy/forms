@@ -459,7 +459,8 @@ class DisplayFormResults extends DisplayForm{
 					$filterValue	= "%$filterValue%";
 				}
 
-				$query		.= " AND value %s %s";
+				$query		.= " AND (element_id <> %d or value %s %s)";
+				$values[]	= $filter['element'];
 				$values[]	= $filter['type'];
 				$values[]	= $filterValue;
 			}
@@ -1290,13 +1291,13 @@ class DisplayFormResults extends DisplayForm{
 							echo "<tr class='clone-div' data-div-id='$index' style='border: none;'>";
 								echo "<td style='border: none;'>";
 									echo "<select name='table-settings[filter][$index][element]' class='inline'>";
-										foreach($this->columnSettings as $key=>$columnSetting){
+										foreach($this->columnSettings as $key => $columnSetting){
 
 											if(!is_array($columnSetting)){
 												continue;
 											}
 
-											$name = $columnSetting['nice-name'];
+											$name = $columnSetting['nice_name'];
 											
 											//Check which option is the selected one
 											if($this->tableSettings->filter[$index]['element'] == $key){
@@ -1375,7 +1376,7 @@ class DisplayFormResults extends DisplayForm{
 					</select>
 					<br>
 					<label>
-						<input type='checkbox' name='table-settings[split-table]' value='yes' <?php if(isset($this->tableSettings->split_table) && $this->tableSettings->split_table){echo 'checked';}?>>
+						<input type='checkbox' name='table-settings[split-table]' value='1' <?php if(isset($this->tableSettings->split_table) && $this->tableSettings->split_table){echo 'checked';}?>>
 						Split the results in own entries and others entries
 					</label>
 
@@ -1697,7 +1698,7 @@ class DisplayFormResults extends DisplayForm{
 		$filterOption	= '';
 		foreach($this->tableSettings->filter as $filter){
 			$filterElement	= $this->getElementById($filter['element']);
-			$filterValue	= '';
+			$filterValue	= false;
 			$filterKey		= strtolower($filter['name']);
 
 			if(!$filterElement || empty($filterKey)){
@@ -1852,15 +1853,26 @@ class DisplayFormResults extends DisplayForm{
 	 * Render the navigation menu in case of multiple pages of results
 	 */
 	public function navigationMenu(){
+		$pageSize			= $_GET['pagesize'];
+		if(!is_numeric($pageSize)){
+			$pageSize	= 50;
+		}
+
+		$pageSizeSelector	=  "<select class='page-size'";
+			foreach([1000, 500, 200, 100, 50, 40, 20, 10] as $size){
+				$selected	= '';
+				if( $pageSize == $size ){
+					$selected	= 'selected';
+				}
+				$pageSizeSelector	.= "<option $selected>$size</option>";
+			}
+		$pageSizeSelector	.= "</select>";
+
 		if($this->total <= $this->pageSize){
-			return;
+			return $pageSizeSelector;
 		}
 
 		$pageCount	=  ceil($this->total / $this->pageSize);
-
-		if(isset($_GET['page-number'])){
-			unset($_GET['page-number']);
-		}
 
 		$html	= "<div class='form-result-navigation'>";
 			// include a back button if we are not on the first page
@@ -1889,33 +1901,7 @@ class DisplayFormResults extends DisplayForm{
 			}
 			$html	.= "<button class='button small next $class' name='next' value='next'>Next →</button>";
 
-			// Adjust page size
-			$get	= $_REQUEST;
-			unset($get['_wpnonce']);
-			unset($get['form-id']);
-			unset($get['shortcode-id']);
-
-			$get['pagesize']	= '';
-			$get				= '?'.http_build_query($get);
-
-			$html	.= "<select onchange=location.href='{$get}'+this.value>";
-				foreach([1000, 500, 200, 100, 50, 40, 20, 10] as $size){
-					$selected	= '';
-					if(
-						(
-							isset($_GET['pagesize']) && 
-							$_GET['pagesize'] == $size
-						) ||
-						(
-							empty($_GET['pagesize']) && 
-							$size == 100
-						)
-					){
-						$selected	= 'selected';
-					}
-					$html	.= "<option $selected>$size</option>";
-				}
-			$html	.= "</select>";
+			$html	.= $pageSizeSelector;
 		$html	.= "</div>";
 
 		echo $html;
@@ -1931,7 +1917,7 @@ class DisplayFormResults extends DisplayForm{
 	 *
 	 * @return	string|false			False on no records found, else the html
 	 */
-	public function renderTable($type, $force=false, $all	= false){
+	public function renderTable($type, $force = false, $all = false){
 		$userId	= null;
 
 		// Check permissions

@@ -68,7 +68,7 @@ class SimForms{
 		}elseif(isset($_REQUEST['pagesize']) && is_numeric($_REQUEST['pagesize'])){
 			$this->pageSize					= $_REQUEST['pagesize'];
 		}else{
-			$this->pageSize					= 100;
+			$this->pageSize					= 50;
 		}
 
 		$this->multiwrap					= false;

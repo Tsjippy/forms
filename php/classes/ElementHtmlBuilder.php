@@ -904,7 +904,7 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * Gets the element value
 	 */
 	protected function getValue(){
-		if(in_array($this->element->type, $this->nonInputs)){
+		if(in_array($this->element->type, $this->nonInputs) || $this->requestedValue === false){
 			return '';
 		}
 
@@ -1482,7 +1482,9 @@ class ElementHtmlBuilder extends SubmitForm{
 	/**
 	 * Gets the html of form element
 	 *
-	 * @param	mixed	$this->requestedValue		The value the element should have
+	 * @param	object			$element		The element data
+	 * @param	object			$parent			The parent node to appeend to
+	 * @param	string|false	$requestedValue	The value the element should have, false for no value, default empty
 	 *
 	 * @return	string| WP error		The html
 	 */

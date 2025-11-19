@@ -214,33 +214,57 @@ function updatePageNav(navWrapper, pageNr){
 	}
 }
 
-async function getPage(target, page=0){
+/**
+ * 
+ * @param {node} target  	The clicked node
+ * @param {string} action	One of page, sort or filter 
+ * @param {in} page			The page number to fetch 
+ * @returns 
+ */
+async function getPage(target, action){
 	// we only have one wrapper
 	let wrapper			= target.closest('.form.table-wrapper');
 
-	// Only get the navwrapper, table wrapper and table closest to the target
-	let navWrapper		= target.closest('.form-result-navigation');
-	let tableWrapper	= target.closest('.form-results-wrapper');
+	let orgContent		= wrapper.innerHTML;
+
+	let tableWrapper;
 
 	// we are filtering, just take the first table wrapper
-	if(tableWrapper == null){
+	if(action == 'filter'){
 		tableWrapper	= wrapper.querySelector('.form-results-wrapper');
+	}else{
+		// Only get the table wrapper to the target
+		tableWrapper	= target.closest('.form-results-wrapper');
 	}
 	let table			= tableWrapper.querySelector('.form-data-table:not(.hidden)');
 
-	let replace	= true;
-
-	// request page over ajax
+	// Get the details
 	let formId			= table.dataset.formId;
 
 	let shortcodeId		= table.dataset.shortcodeId;
 
 	let type			= table.dataset.type;
 
+	let pageSize		= tableWrapper.querySelector(`select.page-size`);
+
 	/**
 	 * We reqested another page
 	 */
-	if(navWrapper != null){
+	if(action == 'page'){
+		let navWrapper	= target.closest('.form-result-navigation');
+
+		// get the requested page number
+		let	curPage			= parseInt(navWrapper.querySelector(".page-number-wrapper .current").dataset.nr);
+		let page;
+
+		if(target.matches('.next')){
+			page	= curPage + 1;
+		}else if(target.matches('.prev')){
+			page	= curPage - 1;
+		}else{
+			page	= target.dataset.nr;
+		}
+
 		updatePageNav(navWrapper, page);
 
 		let loadedPage	= tableWrapper.querySelector(`[data-page="${page}"]`);
@@ -254,6 +278,14 @@ async function getPage(target, page=0){
 		table.classList.add('hidden');
 
 		Main.showLoader(table, false, 100, 'Loading data');
+	}
+
+	/**
+	 * Sorting
+	 */
+	else if(action == 'sort' || action == 'size'){
+		tableWrapper.classList.add(table.dataset.type);
+		tableWrapper.innerHTML	= Main.showLoader('', true, 100, 'Loading data', true);
 	}
 
 	// If we sort or filter we want to do so on all tables
@@ -270,7 +302,10 @@ async function getPage(target, page=0){
 	let formData;
 	if(wrapper.querySelector(".filter-options") == null){
 		formData		= new FormData();
-	}else{
+	}
+	
+	// Include the filter options if there is a filter
+	else{
 		formData		= new FormData(wrapper.querySelector("form.filter-options"));
 	}
 
@@ -278,6 +313,7 @@ async function getPage(target, page=0){
     formData.append('page-number', page);
 	formData.append('shortcode-id', shortcodeId);
     formData.append('type', type);
+	formData.append('size', pageSize);
 
 	let params = new Proxy(new URLSearchParams(window.location.search), {
 		get: (searchParams, prop) => searchParams.get(prop),
@@ -310,12 +346,25 @@ async function getPage(target, page=0){
 	let response	= await FormSubmit.fetchRestApi('forms/get_page', formData);
 
 	if(response){
-		for (const [tableType, tableHtml] of Object.entries(response)) {
-			wrapper.querySelector(`.form-results-wrapper.${tableType}`).outerHTML	= tableHtml;
+		for (let [tableType, tableHtml] of Object.entries(response)) {
+			if(action == 'page'){
+				const parser 	= new DOMParser();
+				const doc 		= parser.parseFromString(tableHtml, "text/html");
+
+				// append the new page to the existing pages
+				tableHtml		= doc.querySelector("table.form-data-table").innerHTML; 
+
+				tableWrapper.insertAdjacentHTML('beforeend', tableHtml);
+			}
+			
+			// Overwrite the table and navigation
+			else{
+				wrapper.querySelector(`.form-results-wrapper.${tableType}`).outerHTML	= tableHtml;
+			}
 		}
 	}else{
 		// restore prev data
-		location.href		= location.href;
+		wrapper.innerHTML	= orgContent;
 	}
 }
 
@@ -461,7 +510,7 @@ const copyContent = async (target) => {
     }
 }
 
-const hideColumn	= async (target) => {
+const hideColumn = async (target) => {
 	// Table itself
 	if(target.parentNode.matches('th')){
 		let cell 	= target.parentNode;
@@ -516,38 +565,12 @@ document.addEventListener("click", event=>{
 			target.matches('.page-number') 
 		)
 	){
-		// get the requested page number
-		let	curPage			= parseInt(navWrapper.querySelector(".page-number-wrapper .current").dataset.nr);
-		let page;
-
-		if(target.matches('.next')){
-			page	= curPage + 1;
-		}else if(target.matches('.prev')){
-			page	= curPage - 1;
-		}else{
-			page	= target.dataset.nr;
-		}
-
-		getPage(target, page);
-	}
-
-	else if(
-		target.tagName == 'TH' && 
-		target.closest(".form-results-wrapper").querySelector('.form-result-navigation') != null
-	){
-		// get a sorted table over AJAX
-		let sortCol			= target.id;
-		let sortDir			= target.classList.contains('desc') ? 'DESC' : 'ASC';
-
-		tableWrapper.dataset.sortcol	= sortCol;
-		tableWrapper.dataset.sortdir	= sortDir;
-
-		getPage(target);
+		getPage(target, 'page');
 	}
 
 	// Filter data
 	else if(target.matches(`.button.filter-results`)){
-		getPage(target);
+		getPage(target, 'filter');
 	}
 
 	// copy cell contents
@@ -613,6 +636,8 @@ document.addEventListener('change', event=>{
 
 		// position table
 		SimTableFunctions.positionTable();
+	}else if(target.matches(`.page-size`)){
+		getPage(target, 'size');
 	}else{
 		return;
 	}
@@ -649,5 +674,23 @@ document.addEventListener("table-content-before-column-hide", async event => {
 		event.preventDefault();
 
 		hideColumn(target);
+	}
+});
+
+// Listen to the sort table event from table.js
+document.addEventListener("table-sorted", async event => {
+	let target	= event.target;
+
+	// We only need to request a sorted table page if there are multiple pages, else the sorting is done by js
+	if(target.closest(".form-results-wrapper").querySelector('.form-result-navigation') != null){
+		// get a sorted table over AJAX
+		let sortCol			= target.id;
+		let sortDir			= target.classList.contains('desc') ? 'DESC' : 'ASC';
+
+		let tableWrapper	= target.closest('.form-results-wrapper');
+		tableWrapper.dataset.sortcol	= sortCol;
+		tableWrapper.dataset.sortdir	= sortDir;
+
+		getPage(target, 'sort');
 	}
 });

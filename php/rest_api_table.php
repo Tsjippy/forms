@@ -231,8 +231,8 @@ function getPage(){
 
 	$tables	= [];
 
-	$types	= ['all'];
-	if($displayFormResults->tableSettings->split_table){
+	$types	= [$_POST['type']];
+	if($_POST['type'] == 'all' && $displayFormResults->tableSettings->split_table){
 		$types	= ['own', 'others'];
 	}
 
