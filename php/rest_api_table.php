@@ -212,12 +212,6 @@ function restApiInitTable() {
 					'validate_callback' => function($formId){
 						return is_numeric($formId);
 					}
-				),
-				'page-number'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($submissionId){
-						return is_numeric($submissionId);
-					}
 				)
 			)
 		)

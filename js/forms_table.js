@@ -245,7 +245,7 @@ async function getPage(target, action){
 
 	let type			= table.dataset.type;
 
-	let pageSize		= tableWrapper.querySelector(`select.page-size`);
+	let pageSize		= tableWrapper.querySelector(`select.page-size`).value;
 
 	/**
 	 * We reqested another page
@@ -255,7 +255,7 @@ async function getPage(target, action){
 
 		// get the requested page number
 		let	curPage			= parseInt(navWrapper.querySelector(".page-number-wrapper .current").dataset.nr);
-		let page;
+		var page;
 
 		if(target.matches('.next')){
 			page	= curPage + 1;
@@ -313,7 +313,7 @@ async function getPage(target, action){
     formData.append('page-number', page);
 	formData.append('shortcode-id', shortcodeId);
     formData.append('type', type);
-	formData.append('size', pageSize);
+	formData.append('pagesize', pageSize);
 
 	let params = new Proxy(new URLSearchParams(window.location.search), {
 		get: (searchParams, prop) => searchParams.get(prop),
@@ -352,9 +352,9 @@ async function getPage(target, action){
 				const doc 		= parser.parseFromString(tableHtml, "text/html");
 
 				// append the new page to the existing pages
-				tableHtml		= doc.querySelector("table.form-data-table").innerHTML; 
+				tableHtml		= doc.querySelector("table.form-data-table").outerHTML; 
 
-				tableWrapper.insertAdjacentHTML('beforeend', tableHtml);
+				tableWrapper.querySelector(`.loader-wrapper`).outerHTML = tableHtml;
 			}
 			
 			// Overwrite the table and navigation
@@ -362,6 +362,8 @@ async function getPage(target, action){
 				wrapper.querySelector(`.form-results-wrapper.${tableType}`).outerHTML	= tableHtml;
 			}
 		}
+
+		document.querySelectorAll('select:not(.nonice,.swal2-select)').forEach(select => Main.attachNiceSelect(select));
 	}else{
 		// restore prev data
 		wrapper.innerHTML	= orgContent;

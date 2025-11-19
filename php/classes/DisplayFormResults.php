@@ -21,7 +21,7 @@ class DisplayFormResults extends DisplayForm{
 	public $formEditPermissions;
 	public $tableViewPermissions;
 	public $tableEditPermissions;
-	public $sortColumn;
+	public $sortElementIds;
 	public $sortDirection;
 	public $sortColumnFound;
 	public $spliced;
@@ -32,7 +32,7 @@ class DisplayFormResults extends DisplayForm{
 		
 		$this->shortcodeTable			= $wpdb->prefix . 'sim_form_shortcodes';
 		$this->enriched					= false;
-		$this->sortColumn				= false;
+		$this->sortElementIds			= [];
 		$this->sortDirection			= 'ASC';
 		$this->spliced					= false;
 
@@ -251,7 +251,7 @@ class DisplayFormResults extends DisplayForm{
 
 		// sort colomn
 		$this->sortColumnFound	= false;
-		if($this->sortColumn){
+		if(!empty($this->sortElementIds)){
 			if($this->sortDirection != 'ASC'){
 				$this->sortDirection	= 'DESC';
 			}
@@ -376,11 +376,12 @@ class DisplayFormResults extends DisplayForm{
 		 * Sort column
 		 */ 
 		$this->sortColumnFound	= false;
-		if($this->sortColumn){
+		if(!empty($this->sortElementIds)){
+			// check if the sort colom is a submission table column
 			$colNames	= $wpdb->get_results( "DESC $this->submissionTableName" );
 			foreach ( $colNames as $name ) {
-				if ( $name->Field === $this->sortColumn ) {
-					$this->sortColumnFound	= true;
+				if ( in_array($name->Field, $this->sortElementIds) ) {
+					$this->sortColumnFound	= $name->Field;
 				}
 			}
 			if($this->sortDirection != 'ASC'){
@@ -389,7 +390,7 @@ class DisplayFormResults extends DisplayForm{
 
 			if($this->sortColumnFound){
 				$query	.= " ORDER BY %s %s";
-				$values[]	= $this->sortColumn;
+				$values[]	= $this->sortColumnFound;
 				$values[]	= $this->sortDirection;
 			}
 		}
@@ -413,16 +414,22 @@ class DisplayFormResults extends DisplayForm{
 
 		// Get the submission data
 		$submissions	= [];
-		foreach($results as $index => $result){
+		foreach($results as $result){
 			$submission	= new stdClass();
 			foreach($result as $key => $value){
 				$submission->$key	= maybe_unserialize($value);
 			}
 
+			/**
+			 * Get the sub ids
+			 */
 			$subIds			= $wpdb->get_col(
 				$wpdb->prepare("SELECT distinct `sub_id` FROM %i WHERE `submission_id` =%d and `sub_id` IS NOT NULL", $this->submissionValuesTableName, $result->id)
 			);
 
+			/**
+			 * Get the submission data
+			 */
 			$query	= "SELECT `element_id`, `value`, sub_id FROM %i WHERE submission_id = %d";
 			$values	= [
 				$this->submissionValuesTableName, 
@@ -446,9 +453,23 @@ class DisplayFormResults extends DisplayForm{
 
 				$filterElement	= $this->getElementById($filter['element']);
 
-				$exploded		= explode('[', $filterElement->name);
+				// Invalid filter element id
+				if(!$filterElement){
+					continue;
+				}
 
-				$name			= str_replace(']', '', end($exploded));
+				$exploded			= explode('[', $filterElement->name);
+
+				// Check if we are filtering on a indexed element
+				if(count($exploded) > 1){
+					$filterIndex		= str_replace(']', '', end($exploded));
+
+					$filterElementIds	= $wpdb->get_col(
+						$wpdb->prepare("SELECT id FROM %i WHERE `name` LIKE %s", $this->elTableName, "{$exploded[0]}[%][$filterIndex]")
+					);
+				}else{
+					$filterElementIds	= [$filter['element']];
+				}
 
 				// Add the filter query
 				if($filter['type'] == '=='){
@@ -459,12 +480,14 @@ class DisplayFormResults extends DisplayForm{
 					$filterValue	= "%$filterValue%";
 				}
 
-				$query		.= " AND (element_id <> %d or value %s %s)";
-				$values[]	= $filter['element'];
-				$values[]	= $filter['type'];
-				$values[]	= $filterValue;
+				$query		.= " AND (element_id NOT IN (%s) or LOWER(value) {$filter['type']} %s)";
+				$values[]	= implode(', ', $filterElementIds);
+				$values[]	= strtolower($filterValue);
 			}
 
+			/**
+			 * DB query
+			 */
 			$formresults	= $wpdb->get_results(
 				$wpdb->prepare($query, $values)
 			);
@@ -536,35 +559,44 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	public function sortSubmissions(&$submissions){
 		// sort if needed
-		if(!$this->sortColumn || $this->sortColumnFound  || empty($submissions)){
+		if(empty($this->sortElementIds) || $this->sortColumnFound  || empty($submissions)){
 			// sorting not needed
 			return;
 		}
 
-		$sortElement	= $this->getElementByName($this->sortColumn);
-
-		if(empty($sortElement)){
-			$defaultSortElement	= $this->tableSettings->default_sort;
-			$sortElement		= $this->getElementById($defaultSortElement);
-		}
-
-		$sortElementType	= $sortElement->type;
-
 		//Sort the array
-		usort($submissions, function($a, $b) use ($sortElementType){
+		usort($submissions, function($a, $b){
 			// ascending
 			if($this->sortDirection == 'ASC'){
-				if($sortElementType == 'date'){
-					return strtotime($a->{$this->sortColumn}) <=> strtotime($b->{$this->sortColumn});
-				}
-				return $a->{$this->sortColumn} > $b->{$this->sortColumn};
+				$first	= $a;
+				$second	= $b;
 			// Decending
 			}else{
-				if($sortElementType == 'date'){
-					return strtotime($b->{$this->sortColumn}) <=> strtotime($a->{$this->sortColumn});
-				}
-				return $b->{$this->sortColumn} > $a->{$this->sortColumn};
+				$first	= $b;
+				$second	= $a;
 			}
+
+			// Find the element this submission should be sorted at
+			foreach($this->sortElementIds as $elementId){
+				if(isset($first->{$elementId})){
+					$sortElementType	= $this->getElementById($elementId, 'type');
+					$value1				= $first->{$elementId};
+				}
+
+				if(isset($second->{$elementId})){
+					$value2				= $second->{$elementId};
+				}
+
+				if(isset($value1) && isset($value2)){
+					break;
+				}
+			}
+			
+			if($sortElementType == 'date'){
+				return strtotime($value1) <=> strtotime($value2);
+			}
+
+			return $value1 > $value2;
 		});
 	}
 
@@ -737,7 +769,7 @@ class DisplayFormResults extends DisplayForm{
 			if(!isset($this->columnSettings[$action]) || !is_array($this->columnSettings[$action])){
 				$this->columnSettings[$action] = [
 					'name'				=> $action,
-					'nice-name'			=> $action,
+					'nice_name'			=> $action,
 					'show'				=> 1,
 					'edit_right_roles'	=> [],
 					'view_right_roles'	=> []
@@ -1252,7 +1284,7 @@ class DisplayFormResults extends DisplayForm{
 								continue;
 							}
 
-							$name = $columnSetting['nice-name'];
+							$name = $columnSetting['nice_name'];
 							
 							//Check which option is the selected one
 							if($this->tableSettings->default_sort != '' && $this->tableSettings->default_sort == $key){
@@ -1354,7 +1386,7 @@ class DisplayFormResults extends DisplayForm{
 							continue;
 						}
 
-						$name = $columnSetting['nice-name'];
+						$name = $columnSetting['nice_name'];
 						
 						//Check which option is the selected one
 						if($this->tableSettings->hide_row == $columnSetting['name']){
@@ -1440,7 +1472,7 @@ class DisplayFormResults extends DisplayForm{
 									continue;
 								}
 
-								$name = $columnSetting['nice-name'];
+								$name = $columnSetting['nice_name'];
 								
 								//Check which option is the selected one
 								if($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key){
@@ -1853,15 +1885,10 @@ class DisplayFormResults extends DisplayForm{
 	 * Render the navigation menu in case of multiple pages of results
 	 */
 	public function navigationMenu(){
-		$pageSize			= $_GET['pagesize'];
-		if(!is_numeric($pageSize)){
-			$pageSize	= 50;
-		}
-
 		$pageSizeSelector	=  "<select class='page-size'";
 			foreach([1000, 500, 200, 100, 50, 40, 20, 10] as $size){
 				$selected	= '';
-				if( $pageSize == $size ){
+				if( $this->pageSize == $size ){
 					$selected	= 'selected';
 				}
 				$pageSizeSelector	.= "<option $selected>$size</option>";
@@ -1918,6 +1945,8 @@ class DisplayFormResults extends DisplayForm{
 	 * @return	string|false			False on no records found, else the html
 	 */
 	public function renderTable($type, $force = false, $all = false){
+		global $wpdb;
+
 		$userId	= null;
 
 		// Check permissions
@@ -1955,17 +1984,29 @@ class DisplayFormResults extends DisplayForm{
 
 		// Check if we should sort the data
 		if($this->tableSettings->default_sort || isset($_REQUEST['sortcol'])){
+			// Get the sort column from $_POST
 			if(isset($_REQUEST['sortcol'])){
-				$this->sortColumn	= $_REQUEST['sortcol'];
-			}else{
-				$defaultSortElement	= $this->tableSettings->default_sort;
-				$sortElement		= $this->getElementById($defaultSortElement);
+				$this->sortElementIds	= [$_REQUEST['sortcol']];
+			}
+			
+			// Default sort elements
+			else{
+				$defaultSortElement		= $this->tableSettings->default_sort;
+				$sortElement			= $this->getElementById($defaultSortElement);
 
+				// check if this is an sub id, use all elements in that case
 				if($sortElement){
 					$exploded			= explode('[', $sortElement->name);
-					$sort				= str_replace(']', '', end($exploded));
 
-					$this->sortColumn	= $sort;
+					if(count($exploded) > 1){
+						$sort				= str_replace(']', '', end($exploded));
+
+						$this->sortElementIds	= $wpdb->get_col(
+							$wpdb->prepare("SELECT id FROM %i WHERE `name` LIKE %s", $this->elTableName, "{$exploded[0]}[%][$sort]")
+						);
+					}else{
+						$this->sortElementIds	= [$defaultSortElement];
+					}
 				}
 			}
 		}
@@ -2164,7 +2205,7 @@ class DisplayFormResults extends DisplayForm{
 						$class	= "";
 					}
 
-					if($this->sortColumn == $columnSetting['name']){
+					if(in_array($columnSetting['element_id'], $this->sortElementIds)){
 						$class	= strtolower($this->sortDirection). ' defaultsort';
 					}
 
