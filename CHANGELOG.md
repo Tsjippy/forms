@@ -11,6 +11,7 @@
 - split data on submission
 - store values on element id not on name
 - store form results by element id not name
+- more efficient data filtering
 
 ### Fixed
 - store-non-numeric element id
