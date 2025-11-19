@@ -508,13 +508,23 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * @return	object				The created node
 	 */
 	public function addRawHtml($html, $parent){
-		if(!empty($html)){
-			$fragment = $this->dom->createDocumentFragment();
-			$fragment->appendXML($html);
-			$parent->appendChild($fragment);
-
-			return $fragment;
+		if(empty($html)){
+			return false;
 		}
+		
+		$html		= force_balance_tags($html);
+
+		$html	= str_replace('& ', '&amp; ', $html);
+
+		$fragment 	= $this->dom->createDocumentFragment();
+		$result		= $fragment->appendXML($html);
+		if(empty($result)){
+			SIM\printArray($html);
+			return new WP_Error('sim-forms', 'Invalid HTML');
+		}
+		$node		= $parent->appendChild($fragment);
+
+		return $node;
 	}
 
     /**
@@ -596,7 +606,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			$parent,
 			[
 				'class'	=> 'button-wrapper',
-				'style'	=> 'margin: auto;'
+				'style'	=> 'margin: auto; display:flex;'
 			]
 		);
 
@@ -801,6 +811,15 @@ class ElementHtmlBuilder extends SubmitForm{
 	 */
 	protected function uploaderHtml(){
 		$name		= $this->element->name;
+		
+		$options	= $this->attributes;
+		unset($options['name']);
+		unset($options['class']);
+
+		$optionHtml	= '';
+		foreach($options as $attribute => $value){
+			$optionHtml .= " $attribute=$value";
+		}
 			
 		// Element setting
 		if(!empty($this->element->foldername)){
@@ -833,7 +852,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		//Load js
 		$uploader 		= new SIM\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey]);
 		
-		return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $this->attributes, $this->element->editimage);
+		return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $optionHtml, $this->element->editimage);
 	}
 
 	/**
@@ -1108,7 +1127,10 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * Gets the html for elements with multiple instances
 	 */
 	protected function getMultiElementHtml($node){
-		if(empty($this->element->multiple)){
+		if(
+			empty($this->element->multiple) ||
+			in_array($this->element->type, ['file', 'image', 'text'])
+		){
 			return false;
 		}
         
@@ -1123,10 +1145,23 @@ class ElementHtmlBuilder extends SubmitForm{
 			$values		= array_values($this->elementValues['metavalue']);
 		}
 
-		//check how many elements we should render
+		// check how many elements we should render
 		$this->multiWrapValueCount	= max(1, count((array)$values));
 
-  		$multiWrapper 				= $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
+		// Check if the previous node is wrapping this one
+		if(
+			!empty($this->prevElement)	&&
+			!empty($this->prevElement->wrap) && 
+			$this->prevElement != $this->element
+		){	
+			// we should clone the wrapping node
+			$node 		= $node->parentNode;
+
+			// The parent should also be updated
+			$parent		= $node->parentNode;
+		}
+
+  		$multiWrapper 	= $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
 		
 		//create as many inputs as the maximum value found
 		for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
@@ -1140,19 +1175,16 @@ class ElementHtmlBuilder extends SubmitForm{
             
             // Add label to each entry if prev element is a label and wrapped with this one
             $parentNode = $cloneDiv;
-    		if(
-    			!empty($this->prevElement)	&&
-    			!empty($this->prevElement->wrap) && 
-    			$this->prevElement != $this->element
-    		){		
-    			$parentNode = $this->getElementHtml($this->prevElement, $cloneDiv);
-    		}
 
 			// Create the add and remove buttons
 			$buttonWrapper	= $this->renderButtons($parentNode);
 			
-			// Clone the original input
-            $copy			= $node->cloneNode(true);
+			// Clone the original input but not for index 0, then we use the original
+			if($index === 0){
+				$copy 	= $node;
+			}else{
+            	$copy	= $node->cloneNode(true);
+			}
 
 			// Update node values
             $this->changeNodeAttributes($index, $val, $copy);
@@ -1160,9 +1192,6 @@ class ElementHtmlBuilder extends SubmitForm{
 			// Add the copy to the button wrapper before the buttons
 			$buttonWrapper->prepend($copy);
         }
-								
-		// Delete the original node
-		$parent->removeChild($node);
 	}
 
 	/**
@@ -1504,6 +1533,18 @@ class ElementHtmlBuilder extends SubmitForm{
    			$returnHtml = true;
 		}
 
+		/**
+		 * Override filter, return a node to bypass this function
+		 */
+		$node 					= apply_filters('sim-form-element-html-short-circuit', null, $this);
+		if(!empty($node)){
+			if($returnHtml){
+				return $this->dom->saveHtml();
+			}
+		
+			return $node;
+		}
+
 		$this->elementValues		= $this->getElementValues($element);
 
 		$this->getAttributes();
@@ -1575,9 +1616,6 @@ class ElementHtmlBuilder extends SubmitForm{
 			default:
 				if($this->element->type == 'text' && $this->element->multiple){
 					$node	= $this->getMultiTextInputHtml($parent);
-
-					// Set to false otherwise we have trouble in getMultiElementHtml
-					$this->element->multiple	= false;
 				}else{
 
 					$this->getTagType();
