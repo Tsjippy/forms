@@ -89,7 +89,11 @@ class EditFormResults extends DisplayFormResults{
 			}
 		}
 
-		if($elementId != 'userid' && $elementId != 'submitter_id'){
+		/**
+		 * Filters if we should do the update, return false for no update
+		 */
+		$continue	= apply_filters('sim-forms-should-update-form-data', true, $elementId, $submissionId, $subId, $value, $this);
+		if($elementId != 'userid' && $elementId != 'submitter_id' && $continue){			
 			$where	= array(
 				'submission_id'	=> $submissionId,
 				'element_id'	=> $elementId,

@@ -1289,19 +1289,41 @@ class SimForms{
 	public function getSubmissionValue($submissionId, $elementId, $subId='', $returnArray=false){
 		global $wpdb;
 
-		$query		= "SELECT `value` FROM %i WHERE submission_id = %d AND `element_id` = %s";
+ 		$baseQuery	= "SELECT `value` FROM %i WHERE ";
+		$where		= [
+			'submission_id = %d',
+			'`element_id` = %s' 
+		];
+
 		$values		= [
+			$this->submissionValuesTableName,
 			$submissionId, 
 			$elementId
 		];
 
 		if(is_numeric($subId)){
-			$query		.= " AND sub_id = %d";
+			$where[]	= "sub_id = %d";
 			$values[]	= $subId;
 		}
+
+		/**
+		 * Add the metas to the submissions
+		 */
+		extract(apply_filters(
+			'sim_formdata_retrieval_query', 
+			[
+				'base'		=> $baseQuery,
+				'where'		=> $where,
+				'values'	=> $values,
+			],
+			$this->userId,
+			$this
+		));
+
+		$query	= $base.implode(' AND ', $where);
 		
 		$results	= $wpdb->get_col(
-			$wpdb->prepare($query, $this->submissionValuesTableName, ...$values)
+			$wpdb->prepare($query, ...$values)
 		);
 
 		$results = array_map(function($value){

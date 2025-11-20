@@ -372,9 +372,6 @@ function getInputHtml(){
 	$userId											= $formTable->submission->userid;
 
 	$formTable->userId								= $userId;
-	$formTable->elementHtmlBuilder->userId			= $userId;
-	$formTable->elementHtmlBuilder->formData		= $formTable->formData;
-	$formTable->elementHtmlBuilder->formElements	= $formTable->formElements;
 
 	$elementId										= sanitize_text_field($_POST['element-id']);
 
@@ -388,7 +385,7 @@ function getInputHtml(){
 
 	// Get element html
 	
-	$html 		= $formTable->elementHtmlBuilder->getElementHtml($element, '', $value);
+	$html 		= $formTable->getElementHtml($element, '', $value);
 	
 	/**
 	 * Check if this element needs a datalist
@@ -415,7 +412,7 @@ function getInputHtml(){
 
 			// Get the html of the datalist element
 			if($datalist){
-				$html .= $formTable->elementHtmlBuilder->getElementHtml($datalist, '');
+				$html .= $formTable->getElementHtml($datalist, '');
 			}
 		}
 	}
@@ -425,7 +422,7 @@ function getInputHtml(){
 	$prevElement 	= $formTable->formElements[$index];
 	while($prevElement && $prevElement->wrap){
 		$index--;
-		$html 			= $formTable->elementHtmlBuilder->getElementHtml($prevElement, '').$html;
+		$html 			= $formTable->getElementHtml($prevElement, '').$html;
 		$prevElement 	= $formTable->formElements[$index];
 	}
 		
@@ -433,7 +430,7 @@ function getInputHtml(){
 	$index			= $element->priority;
 	while($element->wrap){
 		$element = $formTable->formElements[$index];
-		$html 	.= $formTable->elementHtmlBuilder->getElementHtml($element, '');
+		$html 	.= $formTable->getElementHtml($element, '');
 		$index++;
 	}
 
