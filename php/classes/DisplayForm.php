@@ -205,7 +205,7 @@ class DisplayForm extends ElementHtmlBuilder{
 	 */
 	public function showForm(){
 		//Load conditional js if available and needed
-		if($_SERVER['HTTP_HOST'] == 'localhost'){
+		if($_SERVER['HTTP_HOST'] == 'localhost' || str_contains($_SERVER['HTTP_HOST'], '.local')){
 			$jsPath		= $this->jsFileName.'.js';
 		}else{
 			$jsPath		= $this->jsFileName.'.min.js';

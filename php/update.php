@@ -449,7 +449,7 @@ function moduleUpdate($oldVersion){
             unset($formresults['id']);
             unset($formresults['_wpnonce']);
             unset($formresults['booking-startdate']);
-            unset($formresults['booking-enddate']);
+            unset($formresults['booking_enddate']);
             unset($formresults['booking-room']);
             unset($formresults['user-id']);
             unset($formresults['formid']);

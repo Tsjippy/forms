@@ -1965,8 +1965,7 @@ class DisplayFormResults extends DisplayForm{
 		$shouldShow	= apply_filters('sim-formstable-should-show', true, $this, $type);
 
 		if($shouldShow !== true){
-			echo 	$shouldShow;
-			return  false;
+			return 	$shouldShow;
 		}
 		
 		// get submissions for the current user only

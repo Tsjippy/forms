@@ -394,11 +394,156 @@ class SubmitForm extends SaveFormSettings{
 	}
 
 	/**
+	 * Save a form submission to the submission table
+	 */
+	public function saveToSubmissionTable($formresults, $formUrl, &$message){
+		global $wpdb;
+
+		if(!empty($this->formData->save_in_meta)){
+			return;
+		}
+
+		// Insert Submission
+		$this->submission->id	= $this->insertOrUpdateData($this->submissionTableName, $this->submission);
+
+		if(is_wp_error($this->submission->id)){
+			return $this->submission->id;
+		}
+
+		//remove empty splitted entries
+		$this->parseSplittedData($formresults);
+
+		//sort arrays
+		foreach($formresults as $key => &$result){
+			if(is_array($result)){
+				//check if this an aray of uploaded files
+				if(!is_array(array_values($result)[0]) && str_contains(array_values($result)[0],'wp-content/uploads/')){
+					//rename the file
+					$this->processFiles($result, $key);
+					$result	= $this->submission->{$key};
+				}else{
+					//sort the array
+					ksort($result);
+				}
+			}elseif(str_contains($result,'wp-content/uploads/')){
+				//rename the file
+				$this->processFiles([$result], $key);
+				$result	= $this->submission->{$key}[0];
+			}
+
+			$result	= SIM\cleanUpNestedArray($result);
+
+			if(empty($result)){
+				continue;
+			}
+
+			if($key == 'viewhash'){
+				$elementId = -7;
+			}else{
+				$elementId	= $this->getElementByName($key, 'id');
+				if(!$elementId){
+					continue;
+				}
+			}
+
+			//insert the data
+			$data	= [
+				'submission_id'	=> $this->submission->id,
+				'element_id'	=> $elementId,
+				'value' 		=> $result
+			];
+
+			$this->insertOrUpdateData(
+				$this->submissionValuesTableName, 
+				$data
+			);
+		}
+
+		$placeholders				= $formresults;
+
+		$placeholders['id']			= $this->submission->id;
+
+		$placeholders['formurl']	= $formUrl;
+
+		$placeholders['formid']		= $this->submission->form_id;
+		
+		$this->sendEmail('submitted', $placeholders);
+			
+		if($wpdb->last_error !== ''){
+			$message	=  new \WP_Error('error', $wpdb->last_error);
+		}elseif(empty($this->formData->include_id) || $this->formData->include_id){
+			$message	.= "\nYour id is {$this->submission->id}";
+		}
+	}
+
+	/**
+	 * Saves a submission to the user meta table
+	 */
+	public function saveToUserMetaTable($formresults){
+		//get user data as array
+		$userData		= (array)get_userdata($this->userId)->data;
+		foreach($formresults as $key => &$result){
+			$subKey	= false;
+
+			//remove empty elements from the array
+			if(is_array($result)){
+				$result	= SIM\cleanUpNestedArray($result);
+
+				//check if we should only update one entry of the array
+				$el	= $this->getElementByName($key.'['.array_keys($result)[0].']');
+				if(count(array_keys($result)) == 1 && $el){
+					$subKey	= array_keys($result)[0];
+				}
+			}
+
+			//update in the users table
+			if(isset($userData[$key])){
+				if($subKey){
+					$userData[$key][$subKey]		= $result;
+					$updateuserData					= true;
+				}elseif($userData[$key]	!= $result){
+					$userData[$key]		= $result;
+					$updateuserData		= true;
+				}
+			//update user meta
+			}else{
+				// update an indexed value
+				if($subKey){
+					$curValue	= get_user_meta($this->userId, $key, true);
+					if(empty($result)){
+						// remove subkey
+						if(isset($curValue[$subKey])){
+							unset($curValue[$subKey]);
+						}
+					}else{
+						if(!is_array($curValue)){
+							$curValue	= [];
+						}
+
+						//update subkey
+						$curValue[$subKey]	= $result[$subKey];
+					}
+
+					update_user_meta($this->userId, $key, $result);
+				}else{
+					if(empty($result)){
+						delete_user_meta($this->userId, $key);
+					}else{
+						update_user_meta($this->userId, $key, $result);
+					}
+				}
+			}
+		}
+
+		if($updateuserData){
+			wp_update_user($userData);
+		}
+	}
+
+	/**
 	 * Save a form submission to the db
 	 */
 	public function formSubmit(){
-		global $wpdb;
-
 		$this->submission					= new \stdClass();
 
 		$this->submission->form_id			= $_POST['form-id'];
@@ -462,11 +607,13 @@ class SubmitForm extends SaveFormSettings{
 		 * @param object	$object			The SubmitForm Instance
 		 * @param bool		$update			Whether this is an update or an new submission
 		 */
-		$formresults 					= (array) apply_filters('sim_before_saving_formdata', (object)$formresults, $this, false);
+		$formresults 					= apply_filters('sim_before_saving_formdata', (object)$formresults, $this, false);
 
 		if(is_wp_error($formresults)){
 			return $formresults;
 		}
+
+		$formresults	= (array) $formresults;
 
 		$message = $this->formData->succes_message;
 		if(empty($message)){
@@ -475,140 +622,14 @@ class SubmitForm extends SaveFormSettings{
 		
 		//save to submission table
 		if(empty($this->formData->save_in_meta)){
-			// Insert Submission
-			$this->submission->id	= $this->insertOrUpdateData($this->submissionTableName, $this->submission);
+			$this->saveToSubmissionTable($formresults, $formUrl, $message);
 
-			if(is_wp_error($this->submission->id)){
-				return $this->submission->id;
-			}
-
-			//remove empty splitted entries
-			$this->parseSplittedData($formresults);
-
-			//sort arrays
-			foreach($formresults as $key => &$result){
-				if(is_array($result)){
-					//check if this an aray of uploaded files
-					if(!is_array(array_values($result)[0]) && str_contains(array_values($result)[0],'wp-content/uploads/')){
-						//rename the file
-						$this->processFiles($result, $key);
-						$result	= $this->submission->{$key};
-					}else{
-						//sort the array
-						ksort($result);
-					}
-				}elseif(str_contains($result,'wp-content/uploads/')){
-					//rename the file
-					$this->processFiles([$result], $key);
-					$result	= $this->submission->{$key}[0];
-				}
-
-				$result	= SIM\cleanUpNestedArray($result);
-
-				if(empty($result)){
-					continue;
-				}
-
-				if($key == 'viewhash'){
-					$elementId = -7;
-				}else{
-					$elementId	= $this->getElementByName($key, 'id');
-					if(!$elementId){
-						continue;
-					}
-				}
-
-				//insert the data
-				$data	= [
-					'submission_id'	=> $this->submission->id,
-					'element_id'	=> $elementId,
-					'value' 		=> $result
-				];
-
-				$this->insertOrUpdateData(
-					$this->submissionValuesTableName, 
-					$data
-				);
-			}
-
-			$placeholders				= $formresults;
-
-			$placeholders['id']			= $this->submission->id;
-
-			$placeholders['formurl']	= $formUrl;
-
-			$placeholders['formid']		= $this->submission->form_id;
-			
-			$this->sendEmail('submitted', $placeholders);
-				
-			if($wpdb->last_error !== ''){
-				$message	=  new \WP_Error('error', $wpdb->last_error);
-			}elseif(empty($this->formData->include_id) || $this->formData->include_id){
-				$message	.= "\nYour id is {$this->submission->id}";
-			}
 		//save to user meta
 		}else{			
-			//get user data as array
-			$userData		= (array)get_userdata($this->userId)->data;
-			foreach($formresults as $key => &$result){
-				$subKey	= false;
-
-				//remove empty elements from the array
-				if(is_array($result)){
-					$result	= SIM\cleanUpNestedArray($result);
-
-					//check if we should only update one entry of the array
-					$el	= $this->getElementByName($key.'['.array_keys($result)[0].']');
-					if(count(array_keys($result)) == 1 && $el){
-						$subKey	= array_keys($result)[0];
-					}
-				}
-
-				//update in the users table
-				if(isset($userData[$key])){
-					if($subKey){
-						$userData[$key][$subKey]		= $result;
-						$updateuserData					= true;
-					}elseif($userData[$key]	!= $result){
-						$userData[$key]		= $result;
-						$updateuserData		= true;
-					}
-				//update user meta
-				}else{
-					// update an indexed value
-					if($subKey){
-						$curValue	= get_user_meta($this->userId, $key, true);
-						if(empty($result)){
-							// remove subkey
-							if(isset($curValue[$subKey])){
-								unset($curValue[$subKey]);
-							}
-						}else{
-							if(!is_array($curValue)){
-								$curValue	= [];
-							}
-
-							//update subkey
-							$curValue[$subKey]	= $result[$subKey];
-						}
-
-						update_user_meta($this->userId, $key, $result);
-					}else{
-						if(empty($result)){
-							delete_user_meta($this->userId, $key);
-						}else{
-							update_user_meta($this->userId, $key, $result);
-						}
-					}
-				}
-			}
-
-			if($updateuserData){
-				wp_update_user($userData);
-			}
+			$this->saveToUserMetaTable($formresults);
 		}
 
-		$message	= apply_filters('sim_after_saving_formdata', $message, $this);
+		$message	= apply_filters('sim_after_form_submission', $message, $_POST, $this);
 
 		do_action('sim-after-form-submit', $this);
 

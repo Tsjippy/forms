@@ -309,21 +309,24 @@ class ElementHtmlBuilder extends SubmitForm{
 	/**
 	 * Returns the html for an info element
 	 */
-	public function infoBoxHtml($text, $dom=''){
-		$returnHtml	 = false;
+	public function infoBoxHtml($text, $parent=''){
+		$returnHtml	 	= false;
+		$dom			= '';
 
-		if(empty($dom)){
-			$returnHtml	 = true;
+		if(empty($parent)){
+			$returnHtml	= true;
 			$dom 	= new \DOMDocument();
+			$parent	= $dom;
 		}
 
 		//remove any paragraphs
 		$content 	= str_replace(['<p>', '</p>'], '', $text);
 		$content 	= SIM\deslash($content);
 		
-		$node		= $this->addElement('div', $dom, ['class' => 'info-box']);
-		$wrapper	= $this->addElement('div', $node, ['style' => "float:right"]);
-		$paragraph	= $this->addElement('p', $wrapper, ['class' => "info-icon"]);
+		$node		= $this->addElement('div', $parent, ['class' => 'info-box'], '', $dom);
+		$wrapper	= $this->addElement('div', $node, ['style' => "float:right"], '', $dom);
+		$paragraph	= $this->addElement('p', $wrapper, ['class' => "info-icon"], '', $dom);
+
 		$this->addElement(
 			'img', 
 			$paragraph, 
@@ -334,13 +337,15 @@ class ElementHtmlBuilder extends SubmitForm{
 				'alt'		=> "ℹ",
 				'src'		=> SIM\PICTURESURL.'/info.png',
 				'loading'	=> "lazy"
-			]
+			], 
+			'', 
+			$dom
 		);
 
-		$this->addElement('span', $node, ['class' => "info-text"], $content);
+		$this->addElement('span', $node, ['class' => "info-text"], $content, $dom);
 
 		if($returnHtml){
-			return $dom->saveHtml();
+			return $dom->saveHtml($parent);
 		}
 
 		return $node;
@@ -460,12 +465,17 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * @param	object	$parent			The parent node
 	 * @param	array	$attributes		An array of attribute names and values
 	 * @param	string	$textContent	The text content of the element
+	 * @param	object	$dom			Domdocument to use, default empty for this->dom
 	 * 
 	 * @return	object					The created node
 	 */
-	public function addElement($type, $parent, $attributes=[], $textContent=''){
+	public function addElement($type, $parent, $attributes=[], $textContent='', $dom=''){
+		if(empty($dom)){
+			$dom	= $this->dom;
+		}
+
 		try {
-			$node = $this->dom->createElement($type, $textContent );
+			$node = $dom->createElement($type, $textContent );
 		} catch (\DOMException $e) {
 			// Catch the specific DOMException
 			SIM\printArray("Caught DOMException: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
@@ -514,15 +524,12 @@ class ElementHtmlBuilder extends SubmitForm{
 		
 		$html		= force_balance_tags($html);
 
-		$html	= str_replace('& ', '&amp; ', $html);
+		$dom 		= new \DOMDocument();
+		$dom->loadHTML($html);
 
-		$fragment 	= $this->dom->createDocumentFragment();
-		$result		= $fragment->appendXML($html);
-		if(empty($result)){
-			SIM\printArray($html);
-			return new WP_Error('sim-forms', 'Invalid HTML');
-		}
-		$node		= $parent->appendChild($fragment);
+		// Import the node
+		$node 		= $this->dom->importNode($dom->getElementsByTagName('body')->item(0)->childNodes->item(0), true);
+		$node		= $parent->appendChild($node);
 
 		return $node;
 	}
@@ -1536,7 +1543,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		/**
 		 * Override filter, return a node to bypass this function
 		 */
-		$node 					= apply_filters('sim-form-element-html-short-circuit', null, $this);
+		$node 					= apply_filters('sim-form-element-html-short-circuit', null, $parent, $this);
 		if(!empty($node)){
 			if($returnHtml){
 				return $this->dom->saveHtml();
