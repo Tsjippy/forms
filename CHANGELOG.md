@@ -21,6 +21,7 @@
 - column settings for defaults
 - bug with windows paths
 - problemen when .local addresses
+- bugs
 
 ### Updated
 
