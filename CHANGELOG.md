@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [9.0.0] - 2025-11-21
+
+
+### Added
 - insert user id element on new forms
 - support for multiple values with same key
 
@@ -22,8 +33,7 @@
 - bug with windows paths
 - problemen when .local addresses
 - bugs
-
-### Updated
+- issuew ith formbuilder
 
 ## [8.9.6] - 2025-11-07
 
