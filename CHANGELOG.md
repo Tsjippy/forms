@@ -5,6 +5,7 @@
 
 ### Changed
 - composer updated
+- .gitignore settings
 
 ### Fixed
 
