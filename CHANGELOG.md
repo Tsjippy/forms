@@ -22,6 +22,7 @@
 - bug with windows paths
 - problemen when .local addresses
 - bugs
+- issuew ith formbuilder
 
 ### Updated
 
