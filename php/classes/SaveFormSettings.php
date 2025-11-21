@@ -358,7 +358,7 @@ class SaveFormSettings extends SimForms{
 	/**
 	 * Stores the form reminder settings in the db
 	 */
-	public function updateFormReminder($formId='', $settings){
+	public function updateFormReminder($formId, $settings){
 		if(empty($formId)){
 			if(!empty($this->formData->id)){
 				$formId	= $this->formData->id;
