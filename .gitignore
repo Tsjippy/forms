@@ -21,31 +21,6 @@ rad.json
 #Test results file
 TestResults.xml
 
-
 node_modules/
 **/package-lock.json
-*/dynamic/
-js/dynamic/child_genericforms.js
-js/dynamic/child_genericforms.min.js
-js/dynamic/prayersforms.js
-js/dynamic/prayersforms.min.js
-js/dynamic/profile_pictureforms.js
-js/dynamic/profile_pictureforms.min.js
-js/dynamic/security_questionsforms.js
-js/dynamic/security_questionsforms.min.js
-js/dynamic/understudy_1forms.js
-js/dynamic/understudy_1forms.min.js
-js/dynamic/understudy_2forms.js
-js/dynamic/understudy_2forms.min.js
-js/dynamic/user_familyforms.js
-js/dynamic/user_familyforms.min.js
-js/dynamic/user_genericsforms.js
-js/dynamic/user_genericsforms.min.js
-js/dynamic/user_locationforms.js
-js/dynamic/user_locationforms.min.js
-js/dynamic/user_medicalforms.js
-js/dynamic/user_medicalforms.min.js
-js/dynamic/user_visaforms.js
-js/dynamic/user_visaforms.min.js
-js/dynamic/user_visaforms.min.js
-js/dynamic/user_visaforms.js
+*js/dynamic/*
