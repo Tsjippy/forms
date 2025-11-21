@@ -4,12 +4,17 @@
 ### Added
 
 ### Changed
-- composer updated
-- .gitignore settings
 
 ### Fixed
 
 ### Updated
+
+## [9.0.1] - 2025-11-21
+
+
+### Changed
+- composer updated
+- .gitignore settings
 
 ## [9.0.0] - 2025-11-21
 
