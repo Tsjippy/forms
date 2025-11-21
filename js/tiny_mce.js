@@ -66,7 +66,7 @@ tinymce.create(
                 {
                     tooltip: 'Create a new form',
                     title:'Insert a new form',
-                    cmd:'mceInsert_form-shortcode',
+                    cmd:'mceInsert_form_shortcode',
                     image:url+'/../pictures/form-insert.png'
                 }
             );
@@ -80,7 +80,7 @@ tinymce.create(
 );
 //Register the plugin
 tinymce.PluginManager.add(
-    'insert_form-shortcode',
+    'insert_form_shortcode',
     tinymce.plugins.insert_form_shortcode
 )
 

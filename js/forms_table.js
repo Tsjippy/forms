@@ -443,7 +443,7 @@ async function processFormsTableInput(target){
 	//Only update when needed
 	if (value != data.oldText){
 		// hide the submit button
-		cell.querySelector(`button.save`).classList.add('hidden');
+		cell.querySelectorAll(`button.save`).forEach(el => el.classList.add('hidden'));
 
 		Main.showLoader(cell.querySelector('.input-wrapper'),true, 50, 'Saving...');
 		

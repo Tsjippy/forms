@@ -30,6 +30,10 @@ class EditFormResults extends DisplayFormResults{
 			return false;
 		}
 
+		if(empty($this->submission)){
+			$this->parseSubmissions(null, $submissionId);
+		}
+
 		/**
 		 * Filters the form results
 		 * 

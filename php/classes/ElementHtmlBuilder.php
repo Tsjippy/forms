@@ -1142,6 +1142,11 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
         
 		$parent = $node->parentNode;
+
+		// Parent should also be a DOMElement
+		if(get_class($parent) == "DOMDocument"){
+			return;
+		}
 		
         if(
 			empty($this->formData->save_in_meta) && 

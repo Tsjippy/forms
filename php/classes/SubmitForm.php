@@ -71,7 +71,7 @@ class SubmitForm extends SaveFormSettings{
 			return false;
 		}
 
-		$changedElementId	= $_POST['id'];
+		$changedElementId	= $_POST['element-id'];
 		
 		// check if a certain element is changed to a certain value
 		if( $trigger == 'fieldchanged' ){
@@ -623,7 +623,6 @@ class SubmitForm extends SaveFormSettings{
 		//save to submission table
 		if(empty($this->formData->save_in_meta)){
 			$this->saveToSubmissionTable($formresults, $formUrl, $message);
-
 		//save to user meta
 		}else{			
 			$this->saveToUserMetaTable($formresults);
