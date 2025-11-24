@@ -209,7 +209,7 @@ class EditFormResults extends DisplayFormResults{
 			return "Entry with id {$this->submissionId} and sub-id $subId succesfully " . ($archive ? 'archived' : 'unarchived');
 		}
 
-		return false;
+		return true;
 	}
 
 	/**
@@ -294,48 +294,36 @@ class EditFormResults extends DisplayFormResults{
 		
 		//loop over all the forms
 		foreach($this->forms as $form){
+			//check if auto archive is turned on for this form
+			if(!isset($form->autoarchive) || !$form->autoarchive || empty($form->autoarchive_el)){
+				continue;
+			}
+
 			$this->formData	= $form;
 			$this->formId	= $form->id;
 			$this->formName	= $form->name;
 			$this->getForm($form->id);
 			
-			//check if auto archive is turned on for this form
-			if(!isset($form->autoarchive) || !$form->autoarchive){
-				continue;
-			}
-
-			$splitElementName	= '';
-			if(isset($form->split)){
-				$form->split				= maybe_unserialize($form->split);
-				$splitElementName			= $this->getElementById($form->split[0], 'name');
-				$result						= preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $splitElementName, $matches);
-				if($result){
-					$splitElementName		= $matches[1];
-				}
-			}
-
-			//Get all submissions of this form
-			$this->parseSubmissions(null, null, true, true);
-			
-			$triggerName	= $this->getElementById($form->autoarchive_el, 'name');
+			$triggerId		= $form->autoarchive_el;
 			$triggerValue	= $form->autoarchive_value;
 
-			if(!$triggerName || empty($triggerValue)){
+			if(empty($triggerId) || empty($triggerValue)){
 				continue;
 			}
 
-			$pattern		= "/.*?\[[0-9]+\]\[([^\]]+)\]/i";
-			if(preg_match($pattern, $triggerName, $matches)){
-				$triggerName	= $matches[1];
-			}
-			
-			//check if we need to transform a keyword to a date
+			/**
+			 * Process placeholder in the triggervalue
+			 */
+
+			// Regex pattern to search for %words%
 			$pattern = '/%([^%;]*)%/i';
-			//Execute the regex
+
+			// Get all the replace patterns
 			preg_match_all($pattern, $triggerValue, $matches);
 			if(!is_array($matches[1])){
 				SIM\printArray($matches[1]);
 			}else{
+				// Loop over all the replacements
 				foreach((array)$matches[1] as $keyword){
 					//If the keyword is a valid date keyword
 					if(strtotime($keyword)){
@@ -344,50 +332,78 @@ class EditFormResults extends DisplayFormResults{
 					}
 				}
 			}
-			
-			//loop over all submissions to see if we need to archive them
-			foreach($this->submissions as &$this->submission){
-				
-				$this->submissionId		= $this->submission->id;
+
+			$compare	= '=';
+			if(preg_match('/\d{4}-\d{2}-\d{2}/', $triggerValue)){
+				$compare	= '<';
+			}
+
+			// Get potential split
+			$splittedElements	= $this->findSplitElementIds();
+
+			if(empty($splittedElements)){
+				// just compare the value
+				$results	= $wpdb->get_results(
+					$wpdb->prepare(
+						"Select * from %i WHERE element_id = %d AND value $compare '$triggerValue'",
+						$this->submissionValuesTableName,
+						$triggerId,
+					)
+				);
+			}else{
+				// Find all possible element ids
+				$allIds				= [];
 
 				//there is no trigger value found in the results, check multi value array
-				if(
-					!empty($splitElementName) &&					// we should split
-					empty($this->submission->{$triggerName}) && 	// we don't have a triggerfield in the results
-					isset($this->submission->{$splitElementName})	// but we do have the splitted field
-				){
-					$archivedCounter	= 0;
+				if(	!empty($splittedElements)){
+					foreach($splittedElements as $baseName => $names){
+						foreach($names as $name => $elementIds){
+							// do not add subids we do not need
+							if(!in_array($triggerId, $elementIds)){
+								continue;
+							}
 
-					//loop over all multi values
-					foreach((array)$this->submission->{$splitElementName} as $subId => $sub){
-						if(
-							!is_array($sub)		||
-							(isset($sub['archived']) && 	// Archive entry exists
-							$sub['archived'])				// sub is already archived
-						){
-							$archivedCounter++;
-							continue;
+							foreach($elementIds as $elementId){
+								// This is the one we were looking for
+								$allIds[]	= $elementId;
+							}
 						}
-
-						//we found a match for a sub entry, archive it
-						$val	= $sub[$triggerName];
-						if(
-							$val == $triggerValue || 						//value is the same as the trigger value or
-							(
-								strtotime($triggerValue) 	&& 				// trigger value is a date
-								strtotime($val) 			&&				// this value is a date
-								strtotime($val) < strtotime($triggerValue)	// value is smaller than the trigger value
-							)
-						){
-							$this->archiveSubmission(true, $subId); 
-						}
-					}
-				}else{
-					//if the form value is equal to the trigger value it needs to be to be archived
-					if(isset($this->submission->{$triggerName}) && $this->submission->{$triggerName} == $triggerValue){
-						$this->archiveSubmission(true);
 					}
 				}
+
+				$allIds	= implode(',', $allIds);
+
+				$results	= $wpdb->get_results(
+					$wpdb->prepare(
+						"
+						SELECT *
+						FROM %i AS T1
+						INNER JOIN %i ON %i.id = T1.submission_id
+						WHERE 
+						%i.archived=0 AND 
+						T1.sub_id IS NOT NULL AND 
+						T1.element_id IN ($allIds) AND
+						T1.sub_id not IN (
+						SELECT value
+						FROM %i
+						WHERE element_id=-6 and submission_id=%i.id
+						) AND
+						T1.value $compare $triggerValue
+						",
+						$this->submissionValuesTableName,
+						$this->submissionTableName,
+						$this->submissionTableName,
+						$this->submissionTableName,
+						$this->submissionValuesTableName,
+						$this->submissionTableName,
+					)
+				);
+			}
+
+			foreach($results as $result){
+				$this->submissionId	= $result->submission_id;
+
+				$this->archiveSubmission(true, $result->sub_id);
 			}
 		}
 	}

@@ -602,11 +602,13 @@ function moduleUpdate($oldVersion){
         $wp_filesystem->delete( $path, true );
 
         foreach(['archivedsubs', 'formresults'] as $columnName){
-            //maybe_drop_column( $simForms->submissionTableName, $columnName, "ALTER TABLE $simForms->submissionTableName DROP COLUMN $columnName");
+            maybe_drop_column( $simForms->submissionTableName, $columnName, "ALTER TABLE $simForms->submissionTableName DROP COLUMN $columnName");
+        }
+    }
+
+    if($oldVersion < '9.0.2'){
+        foreach(['archivedsubs', 'formresults'] as $columnName){
+            maybe_drop_column( $simForms->submissionTableName, $columnName, "ALTER TABLE $simForms->submissionTableName DROP COLUMN $columnName");
         }
     }
 }
-
-add_action('init', function(){
-    //moduleUpdate('8.9.6');
-});

@@ -396,6 +396,13 @@ class FormBuilderForm extends DisplayForm{
 		
 		//Sort the roles
 		asort($userRoles);
+
+		$splittedElements	= $this->findSplitElementIds();
+
+		$keyWords			= [];
+		foreach($splittedElements as $baseName => $names){
+			$keyWords		= array_merge($keyWords, array_keys($names));
+		}
 		
 		?>
 		<div class="element-settings-wrapper">
@@ -527,7 +534,7 @@ class FormBuilderForm extends DisplayForm{
 								}
 								
 								$processed = [];
-								foreach($this->formElements as $key=>$element){
+								foreach($this->formElements as $key => $element){
 									if(in_array($element->type, $this->nonInputs)){
 										continue;
 									}
@@ -537,7 +544,7 @@ class FormBuilderForm extends DisplayForm{
 									$name = $element->name;
 									if(preg_match($pattern, $element->name,$matches)){
 										//We found a keyword, check if we already got the same one
-										if(!in_array($matches[1],$processed)){
+										if(!in_array($matches[1], $processed)){
 											//Add to the processed array
 											$processed[]	= $matches[1];
 											

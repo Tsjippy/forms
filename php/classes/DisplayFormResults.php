@@ -679,26 +679,24 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * Find the split base names if any
 		 */
-		$baseNames	= [];
-		// Check if this is an splitted element
-		if(!empty($this->formData->split)){
+		$elementIds	= $this->findSplitElementIds();
+		if(!empty($elementIds)){
+			// loop over all base names that data should be splitted on
+			foreach($elementIds as $baseName => $names){
+				// loop over all sub names
+				foreach($names as $name => $elementIds){
 
-			// loop over all element ids tha data should be splitted on
-			foreach($this->formData->split as $splitElementId){
-
-				// Get the element name
-				$name	= $this->getElementById($splitElementId, 'name');
-
-				// Find the base name keyword followed by one or more numbers between [] followed by a keyword between []
-				$pattern	= "/(.*?)\[[0-9]+\]\[([^\]]+)\]/i";
-
-				// This is name matches the pattern
-				if( preg_match($pattern, $name, $matches)){
-					$baseNames[]	= $matches[1];
+					// Loop over the column settings to add the element ids
+					foreach($this->columnSettings as &$setting){
+						// its already in settings, just add the extra element id
+						if($setting['name'] == $name){
+							$setting['elementIds']	= $elementIds;
+						}
+					}
 				}
 			}
 		}
-		
+	
 		//loop over all elements to build a new array
 		foreach ($this->formElements as $element){
 			if(!empty(isset($this->columnSettings[$element->id]))){
@@ -713,38 +711,8 @@ class DisplayFormResults extends DisplayForm{
 				}
 			}
 
-			$elementIds	= [];
-
-			// Check if this is an indexed splitted element basename[index][keyname]
-			if(!empty($baseNames) && str_contains($element->name, '[')){
-				// loop over all base names that data should be splitted on
-				foreach($baseNames as $baseName){
-					// Check if this name belongs to this splitted element
-					$pattern	= "/$baseName\[[0-9]+\]\[([^\]]+)\]/i";
-					if( preg_match($pattern, $element->name, $matches)){
-						$name			= $matches[1];
-						
-						// check if the name is already in the settings
-						foreach($this->columnSettings as &$setting){
-
-							// its already in settings, just add the extra element id
-							if($setting['name'] == $name){
-								$setting['elementIds'][]	= $element->id;
-
-								// go to the next element
-								continue 3;
-							}
-						}
-
-						// We only come here if there is no column at all yet, add the current element id
-						$elementIds	= [$element->id];
-						break;
-					}
-				}
-			}
-
 			// Splitted element with just normal multiple values name[index]
-			elseif(
+			if(
 				!empty($this->formData->split) && 
 				is_array($this->formData->split) &&
 				in_array($element->id, $this->formData->split)

@@ -384,4 +384,68 @@ class DisplayForm extends ElementHtmlBuilder{
 
 		return $html;
 	}
+
+	/**
+	 * Finds all elements that should be splitted in case of a BASENAME[index]SUBNAME name
+	 */
+	public function findSplitElementIds(){
+		$baseNames	= [];
+		// Check if this is an splitted element
+		if(empty($this->formData->split)){
+			return [];
+		}
+
+		$this->formData->split	= maybe_unserialize($this->formData->split);
+		
+		// loop over all element ids that data should be splitted on
+		foreach($this->formData->split as $splitElementId){
+
+			// Get the element name
+			$name	= $this->getElementById($splitElementId, 'name');
+
+			// Find the base name keyword followed by one or more numbers between [] followed by a keyword between []
+			$pattern	= "/(.*?)\[[0-9]+\]\[([^\]]+)\]/i";
+
+			// This is name matches the pattern
+			if( preg_match($pattern, $name, $matches)){
+				$baseNames[]	= $matches[1];
+			}
+		}
+
+		if(empty($baseNames)){
+			return [];
+		}
+
+		$elementIds	= [];
+		//loop over all elements to find splitted ones
+		foreach ($this->formElements as $element){
+			// Check if this is an indexed splitted element basename[index][keyname]
+			if(str_contains($element->name, '[')){
+				// loop over all base names that data should be splitted on
+				foreach($baseNames as $baseName){
+					// Check if this name belongs to this splitted element
+					$pattern		= "/$baseName\[[0-9]+\]\[([^\]]+)\]/i";
+
+					if( preg_match($pattern, $element->name, $matches)){
+						$name			= $matches[1];
+						
+						// store found element ids by basename
+						if(empty($elementIds[$baseName])){
+							$elementIds[$baseName]	= [];
+						}
+
+						if(empty($elementIds[$baseName][$name])){
+							$elementIds[$baseName][$name]	= [];
+						}
+
+						// Add the current element id
+						$elementIds[$baseName][$name][$element->name]	= $element->id;
+						break;
+					}
+				}
+			}
+		}
+
+		return $elementIds;
+	}
 }
