@@ -218,6 +218,11 @@ class DisplayFormResults extends DisplayForm{
 
 		$query	= $base.implode(' AND ', $where);
 
+		if(count($values) != substr_count($query, '%')){
+			SIM\printArray($query);
+			SIM\printArray($values);
+		}
+
 		$metas		= $wpdb->get_results(
 			$wpdb->prepare($query, $values)
 		);
