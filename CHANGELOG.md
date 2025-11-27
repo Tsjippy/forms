@@ -2,14 +2,21 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- logging
 
 ### Changed
 
 ### Fixed
-- user id wahala
 
 ### Updated
+
+## [9.0.2] - 2025-11-27
+
+
+### Added
+- logging
+
+### Fixed
+- user id wahala
 
 ## [9.0.1] - 2025-11-21
 
