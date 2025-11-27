@@ -553,16 +553,18 @@ class SubmitForm extends SaveFormSettings{
 		// The user id of the current user
 		$this->userId						= $this->user->ID;
 
+		$userId								= $_POST['userid'] ? $_POST['userid'] : $_POST['user-id'];
+
 		// Check if we are submitting for another user
-		if(isset($_POST['userid']) && is_numeric($_POST['userid'])){
+		if(is_numeric($userId)){
 			//If we are submitting for someone else and we do not have the right to save the form for someone else
 			if(
 				array_intersect($this->userRoles, $this->submitRoles) === false &&
-				$this->user->ID != $_POST['userid']
+				$this->user->ID != $userId
 			){
-				return new \WP_Error('Error', 'You do not have permission to save data for user with id '.$_POST['userid']);
+				return new \WP_Error('Error', "You do not have permission to save data for user with id $userId");
 			}else{
-				$this->userId = $_POST['userid'];
+				$this->userId = $userId;
 			}
 		}
 
@@ -572,7 +574,7 @@ class SubmitForm extends SaveFormSettings{
 
 		$this->submission->timelastedited	= date("Y-m-d H:i:s");
 		
-		$this->submission->userid			= $formresults['userid'];
+		$this->submission->userid			= $userId;
 		
 		$this->submission->submitter_id		= $this->userId;
 
