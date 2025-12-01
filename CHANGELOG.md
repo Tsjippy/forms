@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- multiple nodes from raw htlm
 
 ### Updated
 
