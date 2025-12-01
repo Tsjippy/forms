@@ -522,14 +522,16 @@ class ElementHtmlBuilder extends SubmitForm{
 			return false;
 		}
 		
-		$html		= force_balance_tags($html);
+		$html		= trim(force_balance_tags($html));
 
 		$dom 		= new \DOMDocument();
 		$dom->loadHTML($html);
 
 		// Import the node
-		$node 		= $this->dom->importNode($dom->getElementsByTagName('body')->item(0)->childNodes->item(0), true);
-		$node		= $parent->appendChild($node);
+		foreach ($dom->getElementsByTagName('body')->item(0)->childNodes as $node) {
+			$node 		= $this->dom->importNode($node, true);
+			$node		= $parent->appendChild($node);
+		}
 
 		return $node;
 	}
