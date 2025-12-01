@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- multiple nodes from raw htlm
 
 ### Updated
+
+## [9.0.3] - 2025-12-01
+
+
+### Fixed
+- multiple nodes from raw htlm
 
 ## [9.0.2] - 2025-11-27
 
