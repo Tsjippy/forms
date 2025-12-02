@@ -1066,7 +1066,8 @@ class FormBuilderForm extends DisplayForm{
 												Element 
 												<select class='' name='emails[<?php echo $key;?>][submitted-trigger][element]'>
 													<?php
-													echo $this->inputDropdown($email->submitted_trigger['element'], "emails[$key][submitted-trigger']['element']");
+													$elId	= isset($email->submitted_trigger['element']) ? $email->submitted_trigger['element'] : '';
+													echo $this->inputDropdown($elId, "emails[$key][submitted-trigger']['element']");
 													?>
 												</select>
 
