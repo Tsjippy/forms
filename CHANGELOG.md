@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- bug in e-mail settings
 
 ### Updated
+
+## [9.0.4] - 2025-12-02
+
+
+### Fixed
+- bug in e-mail settings
 
 ## [9.0.3] - 2025-12-01
 
