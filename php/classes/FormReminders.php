@@ -57,13 +57,18 @@ class FormReminders extends SimForms{
         
         $this->getMandatoryElements();
 
+        // Loop over the days
         foreach($this->metaForms as $day => $metaForm){
             if(empty($metaForm)){
                 continue;
             }
 
+            // Loop over the mandatory forms for this day
             foreach($metaForm as $formDetails){
+                // Save the current formdata before loading the form to save a db query
                 $this->formData = $formDetails['form'];
+
+                $this->getForm($formDetails['form']->id);
 
                 $this->checkElementNeedsInput();
             }
@@ -560,6 +565,9 @@ class FormReminders extends SimForms{
      */
     protected function getElementReminderHtml($elementId, $type='all', $childName=''){
         $element    = $this->getElementById($elementId);
+        if(!$element){
+            return '';
+        }
 
         if($type != 'all' && !$element->$type){
             return '';

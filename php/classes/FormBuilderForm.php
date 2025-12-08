@@ -1033,7 +1033,13 @@ class FormBuilderForm extends DisplayForm{
 							$hidden	= 'hidden';
 							if($key === 0){
 								$hidden = '';
-							}					
+							}
+							
+							$triggerElementId		= isset($email->submitted_trigger['element']) ? $email->submitted_trigger['element'] : '';
+							$triggerEquation		= isset($email->submitted_trigger['equation']) ? $email->submitted_trigger['equation'] : '';
+							$triggerValue			= isset($email->submitted_trigger['value']) ? $email->submitted_trigger['value'] : '';
+							$triggerValueElementId	= isset($email->submitted_trigger['value-element']) ? $email->submitted_trigger['value-element'] : '';
+
 							?>
 							<div class='clone-div tabcontent <?php echo $hidden;?>' id="email-<?php echo $key;?>" data-div-id='<?php echo $key;?>'>
 								<h4 class="formfield" style="margin-top:50px; display:inline-block;">E-mail <?php echo $key+1;?></h4>
@@ -1066,8 +1072,7 @@ class FormBuilderForm extends DisplayForm{
 												Element 
 												<select class='' name='emails[<?php echo $key;?>][submitted-trigger][element]'>
 													<?php
-													$elId	= isset($email->submitted_trigger['element']) ? $email->submitted_trigger['element'] : '';
-													echo $this->inputDropdown($elId, "emails[$key][submitted-trigger']['element']");
+													echo $this->inputDropdown($triggerElementId, "emails[$key][submitted-trigger']['element']");
 													?>
 												</select>
 
@@ -1088,7 +1093,7 @@ class FormBuilderForm extends DisplayForm{
 														];
 
 														foreach($optionArray as $option => $optionLabel){
-															if($email->submitted_trigger['equation'] == $option){
+															if($triggerEquation == $option){
 																$selected	= 'selected="selected"';
 															}else{
 																$selected	= '';
@@ -1098,13 +1103,13 @@ class FormBuilderForm extends DisplayForm{
 													?>
 												</select>
 
-												<label class='staticvalue <?php if(empty($email->submitted_trigger['equation']) || !in_array($email->submitted_trigger['equation'], ['==', '!=', '>', '<'])){echo 'hidden';}?>'>
-													<input type='text' name='emails[<?php echo $key;?>][submitted-trigger][value]' value="<?php echo $email->submitted_trigger['value'];?>" style='width: auto;'>
+												<label class='staticvalue <?php if(empty($triggerEquation) || !in_array($triggerEquation, ['==', '!=', '>', '<'])){echo 'hidden';}?>'>
+													<input type='text' name='emails[<?php echo $key;?>][submitted-trigger][value]' value="<?php echo $triggerValue;?>" style='width: auto;'>
 												</label>
 
-												<select class='dynamicvalue <?php if(empty($email->submitted_trigger['equation']) || in_array($email->submitted_trigger['equation'], ['==', '!=', '>', '<', 'checked', '!checked'])){echo 'hidden';}?>' name='emails[<?php echo $key;?>][submitted-trigger][value-element]'>
+												<select class='dynamicvalue <?php if(empty($triggerEquation) || in_array($triggerEquation, ['==', '!=', '>', '<', 'checked', '!checked'])){echo 'hidden';}?>' name='emails[<?php echo $key;?>][submitted-trigger][value-element]'>
 													<?php
-														echo $this->inputDropdown($email->submitted_trigger['value-element'], "emails[$key][submitted-trigger][value-element]");
+														echo $this->inputDropdown($triggerValueElementId, "emails[$key][submitted-trigger][value-element]");
 													?>
 												</select>
 											</div>
