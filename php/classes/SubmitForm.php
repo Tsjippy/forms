@@ -156,6 +156,7 @@ class SubmitForm extends SaveFormSettings{
 			}
 			
 			$from	= '';
+
 			//Send e-mail from conditional e-mail adress
 			if($email->from_email == 'conditional'){
 				$from 	= $this->findConditionalEmail($email->conditional_from_email);
@@ -417,7 +418,7 @@ class SubmitForm extends SaveFormSettings{
 		foreach($formresults as $key => &$result){
 			if(is_array($result)){
 				//check if this an aray of uploaded files
-				if(!is_array(array_values($result)[0]) && str_contains(array_values($result)[0],'wp-content/uploads/')){
+				if(!is_array(array_values($result)[0]) && str_contains(array_values($result)[0], 'wp-content/uploads/')){
 					//rename the file
 					$this->processFiles($result, $key);
 					$result	= $this->submission->{$key};

@@ -68,7 +68,7 @@ class FormReminders extends SimForms{
                 // Save the current formdata before loading the form to save a db query
                 $this->formData = $formDetails['form'];
 
-                $this->getForm($formDetails['form']->id);
+                $this->getForm();
 
                 $this->checkElementNeedsInput();
             }

@@ -740,7 +740,7 @@ class SimForms{
 			}
 		}
 
-		$this->elementMapper($formId);
+		$this->elementMapper(true);
 
 		if(!$this->editRights){
 			$editRoles	= ['administrator', 'editor'];
@@ -1363,9 +1363,20 @@ class SimForms{
 			return $string;
 		}
 
+		if(empty($replaceValues) && empty($this->submission)){
+			return false;
+		}
+
 		if(!empty($this->submission)){
 			if(empty($replaceValues)){
 				$replaceValues = (array) $this->submission;
+
+				// Replace ids with names
+				foreach($replaceValues as $index => $value){
+					if(is_numeric($index)){
+						$replaceValues[$this->getElementById($index, 'name')]	= $value;
+					}
+				}
 			}
 
 			if(empty($this->submission->submissiondate)){
@@ -1388,7 +1399,7 @@ class SimForms{
 
 			// Empty
 			if(empty($replaceValue)){
-				$replaceValue	= apply_filters('sim-forms-transform-empty', $replaceValue, $this, $match);
+				$replaceValue	= apply_filters('sim-forms-transform-empty', $replaceValue, $match, $replaceValues, $this);
 				if(empty($replaceValue)){
 					//remove the placeholder, there is no value
 					$string = str_replace("%$match%", '', $string);
