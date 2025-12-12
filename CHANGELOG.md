@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- clean up db
 
 ### Fixed
 
 ### Updated
+
+## [9.0.7] - 2025-12-12
+
+
+### Changed
+- clean up db
 
 ## [9.0.6] - 2025-12-11
 
