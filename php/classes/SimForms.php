@@ -1359,13 +1359,6 @@ class SimForms{
 		if(!empty($this->submission)){
 			if(empty($replaceValues)){
 				$replaceValues = (array) $this->submission;
-
-				// Replace ids with names
-				foreach($replaceValues as $index => $value){
-					if(is_numeric($index)){
-						$replaceValues[$this->getElementById($index, 'name')]	= $value;
-					}
-				}
 			}
 
 			if(empty($this->submission->submissiondate)){
@@ -1375,6 +1368,13 @@ class SimForms{
 			
 			if(isset($_REQUEST['subid']) && empty($this->submission->subid)){
 				$this->submission->subid	= $_REQUEST['subid'];
+			}
+		}
+
+		// Replace ids with names
+		foreach($replaceValues as $index => $value){
+			if(is_numeric($index)){
+				$replaceValues[$this->getElementById($index, 'name')]	= $value;
 			}
 		}
 
