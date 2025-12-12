@@ -664,8 +664,8 @@ function moduleUpdate($oldVersion){
             );
         }
     }
-}
 
-add_action('init', function(){
-    //moduleUpdate('9.0.6');
-});
+    if($oldVersion < '9.0.8'){
+        $wpdb->query("UPDATE `$simForms->shortcodeColumnSettingsTable` set name= 'booking-rooms' where name = 'booking-room'"); 
+    }
+}

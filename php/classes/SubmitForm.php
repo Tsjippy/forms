@@ -608,9 +608,8 @@ class SubmitForm extends SaveFormSettings{
 		 * 
 		 * @param array		$formresults	The form results
 		 * @param object	$object			The SubmitForm Instance
-		 * @param bool		$update			Whether this is an update or an new submission
 		 */
-		$formresults 					= apply_filters('sim_before_saving_formdata', (object)$formresults, $this, false);
+		$formresults 					= apply_filters('sim_before_inserting_formdata', (object)$formresults, $this);
 
 		if(is_wp_error($formresults)){
 			return $formresults;

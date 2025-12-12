@@ -184,22 +184,22 @@ class SaveFormSettings extends SimForms{
 			);
 
 			$result	= $wpdb->rows_affected;
-		}
 
-		// Nothing got updated, maybe we should create instead of update
-		if($wpdb->rows_affected == false){
-			// check if this already exists
-			$wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE ".implode('=%s AND ', array_keys($where))."=%s", array_values($where)));
-			
-			if($wpdb->num_rows === 0){
-				// Insert instead
-				$wpdb->insert(
-					$table,
-					$data,
-					$formats
-				);
+			// Nothing got updated, maybe we should create instead of update
+			if($result == false){
+				// check if this already exists
+				$wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE ".implode('=%s AND ', array_keys($where))."=%s", array_values($where)));
+				
+				if($wpdb->num_rows === 0){
+					// Insert instead
+					$wpdb->insert(
+						$table,
+						$data,
+						$formats
+					);
 
-				$result	= $wpdb->insert_id;
+					$result	= $wpdb->insert_id;
+				}
 			}
 		}
 

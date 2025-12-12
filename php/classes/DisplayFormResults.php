@@ -891,6 +891,8 @@ class DisplayFormResults extends DisplayForm{
 					$value	= $this->submission->{$elementId};
 				}elseif(isset($this->submission->{$elementName})){
 					$value	= $this->submission->{$elementName};
+				}elseif(isset($this->submission->{str_replace('-', '_', $elementName)})){
+					$value	= $this->submission->{str_replace('-', '_', $elementName)};
 				}else{
 					$value	= 'X';
 				}

@@ -97,7 +97,8 @@ class EditFormResults extends DisplayFormResults{
 		 * Filters if we should do the update, return false for no update
 		 */
 		$continue	= apply_filters('sim-forms-should-update-form-data', true, $elementId, $submissionId, $subId, $value, $this);
-		if($elementId != 'userid' && $elementId != 'submitter_id' && $continue){			
+		if($elementId != 'userid' && $elementId != 'submitter_id' && $continue){
+			//Update the submission data	
 			$where	= array(
 				'submission_id'	=> $submissionId,
 				'element_id'	=> $elementId,
@@ -113,26 +114,23 @@ class EditFormResults extends DisplayFormResults{
 				$formats[]			= '%d';
 			}
 
+			$data	= [
+				'submission_id'	=> $submissionId,	// include in case we need to create instead of update
+				'sub_id'		=> $subId,			// include in case we need to create instead of update
+				'element_id'	=> $elementId,		// include in case we need to create instead of update
+				'value' 		=> $value
+			];
+
 			//Update the submission data
-			$result = $wpdb->update(
+			$result	= $this->insertOrUpdateData(
 				$this->submissionValuesTableName,
-				array(
-					'value'			=> maybe_serialize($value)
-				),
+				$data,
 				$where,
-				[
-					'%s'
-				],
 				$formats
 			);
 
-			if($wpdb->last_error !== ''){
-				$message	= $wpdb->print_error();
-				if(defined('REST_REQUEST')){
-					return new \WP_Error('form error', $message);
-				}else{
-					SIM\printArray($message);
-				}
+			if(is_wp_error($result)){
+				return $result;
 			}
 		}
 
