@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- replace element ids with element names
 
 ### Updated
+
+## [9.0.9] - 2025-12-12
+
+
+### Fixed
+- replace element ids with element names
 
 ## [9.0.8] - 2025-12-12
 
