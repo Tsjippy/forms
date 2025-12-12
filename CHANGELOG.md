@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- clean up db
 
 ### Fixed
 
