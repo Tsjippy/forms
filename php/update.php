@@ -611,4 +611,61 @@ function moduleUpdate($oldVersion){
             maybe_drop_column( $simForms->submissionTableName, $columnName, "ALTER TABLE $simForms->submissionTableName DROP COLUMN $columnName");
         }
     }
+
+    if($oldVersion < '9.0.7'){
+        foreach(['form_id'] as $columnName){
+            maybe_drop_column( $simForms->shortcodeColumnSettingsTable, $columnName, "ALTER TABLE $simForms->shortcodeColumnSettingsTable DROP COLUMN $columnName");
+        }
+
+        foreach(['emails','reminder_frequency', 'reminder_amount', 'reminder_period', 'reminder_conditions', 'reminder_startdate'] as $columnName){
+            maybe_drop_column( $simForms->tableName, $columnName, "ALTER TABLE $simForms->tableName DROP COLUMN $columnName");
+        }
+
+        foreach(['table_settings','column_settings'] as $columnName){
+            maybe_drop_column( $simForms->shortcodeTable, $columnName, "ALTER TABLE $simForms->shortcodeTable DROP COLUMN $columnName");
+        }
+
+        $wpdb->query("UPDATE `$simForms->shortcodeColumnSettingsTable` set width= 200 where width IS NULL"); 
+
+        $settings   = $wpdb->get_results("SELECT * FROM `$simForms->shortcodeColumnSettingsTable` ORDER BY shortcode_id, element_id");
+
+        $prevElementId      = -1;
+        $prevShortcodeId    = -1;
+        $specials           = [];
+        foreach($settings as $index => $setting){
+            if(in_array($setting->name, ['delete', 'print', 'archive'])){
+                if(!isset($specials[$setting->shortcode_id])){
+                    $specials[$setting->shortcode_id]   = [$setting->name];
+                    continue;
+                }
+
+                if(!in_array($setting->name, $specials[$setting->shortcode_id])){
+                    $specials[$setting->shortcode_id][]   = $setting->name;
+                    continue;
+                }
+            }
+
+            elseif($setting->shortcode_id != $prevShortcodeId || $setting->element_id != $prevElementId){
+                $prevShortcodeId    = $setting->shortcode_id;
+                $prevElementId      = $setting->element_id;
+
+                continue;
+            }
+
+            // delete the duplicate row
+            $wpdb->delete(
+                $simForms->shortcodeColumnSettingsTable,
+                [
+                    'id' => $setting->id
+                ],
+                [
+                    '%d'
+                ],
+            );
+        }
+    }
 }
+
+add_action('init', function(){
+    //moduleUpdate('9.0.6');
+});

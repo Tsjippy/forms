@@ -390,7 +390,6 @@ class SaveFormSettings extends SimForms{
 	public function saveColumnSettings($settings=[], $shortcodeId=''){
 		$priority	= 0;
 
-
 		if( empty($shortcodeId) && isset($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])){
 			$shortcodeId	= $_POST['shortcode-id'];
 		}
@@ -418,7 +417,15 @@ class SaveFormSettings extends SimForms{
 				$column['view-right-roles'] = array_merge($column['view-right-roles'], $column['edit-right-roles']);
 			}
 
-			$result	= $this->insertOrUpdateData($this->shortcodeColumnSettingsTable, $column, ['column-id' => $column['column-id']]);
+			$where	= [];
+
+			if(!empty($column['column-id'])){
+				$where	= [
+					'id'	=> $column['column-id']
+				];
+			}
+
+			$result	= $this->insertOrUpdateData($this->shortcodeColumnSettingsTable, $column, $where);
 
 			if(is_wp_error($result)){
 				return $result;

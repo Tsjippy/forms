@@ -1116,7 +1116,8 @@ class DisplayFormResults extends DisplayForm{
 		?>
 		<div class="tabcontent" id="column-settings-<?php echo $this->shortcodeId;?>">
 			<form class="sortable-column-settings-rows">
-				<input type='hidden' class='no-reset' class='shortcode-settings' name='shortcode-id'	value='<?php echo $this->shortcodeId;?>'>
+				<input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo $this->shortcodeId;?>'>
+				<input type='hidden' class='no-reset' name='form-id' value='<?php echo $this->formData->id;?>'>
 				
 				<table class='sim-table' style='display:table'>
 					<thead class="column-setting-wrapper">
