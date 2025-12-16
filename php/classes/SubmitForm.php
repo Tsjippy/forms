@@ -405,7 +405,8 @@ class SubmitForm extends SaveFormSettings{
 		}
 
 		// Insert Submission
-		$this->submission->id	= $this->insertOrUpdateData($this->submissionTableName, $this->submission);
+		$submission 	= $this->submission;
+		$this->submission->id	= $this->insertOrUpdateData($this->submissionTableName, $submission);
 
 		if(is_wp_error($this->submission->id)){
 			return $this->submission->id;
@@ -615,7 +616,9 @@ class SubmitForm extends SaveFormSettings{
 			return $formresults;
 		}
 
-		$formresults	= (array) $formresults;
+		$this->submission 	= (object)array_merge((array)$this->submission, (array)$formresults);
+
+		$formresults		= (array) $formresults;
 
 		$message = $this->formData->succes_message;
 		if(empty($message)){

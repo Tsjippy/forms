@@ -108,6 +108,10 @@ class SaveFormSettings extends SimForms{
 	 * @return	array						The data ready for db injection
 	 */
 	public function insertOrUpdateData($table, &$data, $where=[], $whereFormat=['%d']){
+		if(empty($table) || empty($data)){
+			return new WP_Error('forms', 'Please supply a table and data to insert/update');
+		}
+		
 		global $wpdb;
 
 		$shouldObject	= false;
