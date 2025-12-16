@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- conditional e-mail adresses
 
 ### Updated
 
