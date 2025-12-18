@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- conditional e-mail adresses
-- form builder form
 
 ### Updated
+
+## [9.1.0] - 2025-12-18
+
+
+### Fixed
+- conditional e-mail adresses
+- form builder form
 
 ## [9.0.9] - 2025-12-12
 
