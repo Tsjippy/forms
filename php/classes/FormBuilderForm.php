@@ -83,35 +83,165 @@ class FormBuilderForm extends DisplayForm{
 		return $html;
 	}
 
+	protected function addMetaSymbols($parent, $element){
+		//Add a symbol if this field has conditions or is required
+		if(empty($element->conditions) && !$element->required && !$element->mandatory){
+			return;
+		}
+
+		$icons		= [];
+		if(!empty($element->conditions)){
+			$icons[]		= [
+				'content' 	=> '*',
+				'explainer'	=> 'This element has conditions',
+				'class'		=> '',
+				'right'		=> 20
+			];
+		}
+
+		if(!empty($element->required)){
+			$right			= 20;
+			if(count($icons) > 0){
+				$right	= 50;
+			}
+			$icons[]		= [
+				'content' 	=> '!',
+				'explainer'	=> 'This element is required',
+				'class'		=> '',
+				'right'		=> $right
+			];
+		}
+
+		if($element->mandatory){
+			$right			= 20;
+			if(count($icons) == 1){
+				$right	= 50;
+			}elseif(count($icons) == 2){
+				$right	= 80;
+			}
+
+			$icons[]		= [
+				'content' 	=> '!',
+				'explainer'	=> 'This element is conditionally required',
+				'class'		=> 'conditional',
+				'right'		=> $right
+			];
+		}
+
+		$right	= $icons[array_key_last($icons)]['right'] + 30;
+		
+		foreach($icons as $icon){
+			$div	= $this->addElement(
+				'div',
+				$parent,
+				[
+					'class'	=> 'info-box',
+					'style'	=> 'position: absolute;top: 0;width: 100%;'
+				]
+				);
+
+			$this->addElement(
+				'span',
+				$div,
+				[
+					'class' => "conditions-info formfield-button {$icon['class']}",
+					'style' => "right:{$icon['right']}px"
+				],
+				$icon['content']
+			);
+
+			$this->addElement(
+				'span',
+				$div,
+				[
+					'class' => 'info-text conditions', 
+					'style' => "position: absolute;margin: 0;right: {$right}px;top: 5px;height: 30px;"
+				],
+				$icon['explainer']
+			);
+
+		}
+	}
+
 	/**
 	 * Build all html for a particular element including edit controls.
 	 *
 	 * @param	object	$element		The element
+	 * @param	object	$parent			The parent node
 	 * @param	int		$key			The key in case of a multi element. Default 0
 	 *
 	 * @return	string					The html
 	 */
-	public function buildHtml($element, $key=0){				
-		//Set the element width to 85 percent so that the info icon floats next to it
-		if($key != 0 && $this->prevElement->type == 'info'){
-			$width = 85;
-		//We are dealing with a label which is wrapped around the next element
-		}elseif($element->type == 'label'	&& !isset($element->wrap) && is_numeric($this->nextElement->width)){
-			$width = $this->nextElement->width;
-		}elseif(is_numeric($element->width)){
-			$width = $element->width;
-		}else{
-			$width = 100;
+	public function buildHtml($element, $parent='', $key=0){
+		$returnHtml = false;
+
+		if(empty($parent)){
+			// Create a new DOMDocument object
+			$dom 		= new \DOMDocument();
+			
+			$parent 	= $dom;
+			
+   			$returnHtml = true;
+		}				
+
+		$class		= 'form-element-wrapper';
+		if($this->inMultiAnswer){
+			$class	.= 'multi-answer-element';
 		}
 
-		//Load default values for this element
-		$elementHtml = $this->getElementHtml($element);
-		
+		$style	= 'display: flex;';
+
+		// Visualy show that an element is wrapped in a div container
+		if($this->isInDiv && $element->type != 'div-end'){
+			$style	.= 'margin-left: 30px;';
+		}
+
+		//Add form edit controls if needed
+		$controlsWrapper	= $this->addElement(
+			'div',
+			$parent,
+			[
+				'class' 			=> $class,
+				'data-element-id' 	=> $element->id,
+				'data-form-id' 		=> $this->formData->id,
+				'data-priority' 	=> $element->priority,
+				'data-type' 		=> $element->type,
+				'style' 			=> $style
+			]
+		);
+
+		$span	= $this->addElement(
+			'span',
+			$controlsWrapper,
+			[
+				'class' 		=> 'movecontrol formfield-button',
+				'aria-hidden' 	=> 1
+			],
+			':::'
+		);
+
+		$this->addElement('br', $span);
+
+		$class	= 'element-id';
+		if(!isset($_REQUEST['show-id'])){
+			$class	.= ' hidden';
+		}
+		$this->addElement(
+			'span',
+			$span,
+			[
+				'class' => $class,
+				'style' => 'font-size:xx-small'
+			],
+			$element->id
+		);
+
+		$resizerWrapper	= $this->addElement('div', $controlsWrapper, ['class'=> 'resizer-wrapper']);
+
 		//Check if element needs to be hidden
+		$hidden = '';
 		if(!empty($element->hidden) && $element->hidden == true){
 			$hidden = ' hidden';
-		}else{
-			$hidden = '';
 		}
 		
 		//if the current element is required or this is a label and the next element is required
@@ -127,129 +257,133 @@ class FormBuilderForm extends DisplayForm{
 			$hidden .= ' required';
 		}
 		
-		$idHidden	= ' hidden';
-		if(isset($_REQUEST['show-id'])){
-			$idHidden	= '';
+		if($element->type == 'info'){
+			$attributes	= ["class"=> "show input-wrapper$hidden"];
+		}else{
+			//Set the element width to 85 percent so that the info icon floats next to it
+			if($key != 0 && $this->prevElement->type == 'info'){
+				$width = 85;
+			//We are dealing with a label which is wrapped around the next element
+			}elseif($element->type == 'label'	&& !isset($element->wrap) && is_numeric($this->nextElement->width)){
+				$width = $this->nextElement->width;
+			}elseif(is_numeric($element->width)){
+				$width = $element->width;
+			}else{
+				$width = 100;
+			}
+
+			$attributes	= [
+				"class" 				=> "resizer show input-wrapper$hidden",
+				"data-width-percentage" => "$width",
+				"style" 				=> "width:$width%;"
+			];
 		}
 
-		$marginLeft	= '';
-		if($this->isInDiv && $element->type != 'div-end'){
-			$marginLeft	= 'margin-left: 30px;';
+		$text	= '';
+		$name	= ucfirst(str_replace('_', ' ', $element->name));
+		if($element->type == 'formstep'){
+			$text = ' ***Formstep element***';
+		}elseif($element->type == 'datalist'){
+			$text = " ***Datalist element $element->name***";
+		}elseif($element->type == 'multi-start'){
+			$text = ' ***Multi answer start***';
+			$this->inMultiAnswer	= true;
+		}elseif($element->type == 'multi-end'){
+			$text = ' ***Multi answer end***';
+			$this->inMultiAnswer	= false;
+		}elseif($element->type == 'div-start'){
+			$text 			= " ***$name div container start***";
+			$this->isInDiv	= true;
+		}elseif($element->type == 'div-end'){
+			$name			= ucfirst(str_replace('_', ' ', $element->name));
+			$text 			= " ***$name div container end***";
+			$this->isInDiv	= false;
 		}
 
-		$extraClass		= '';
-		if($this->inMultiAnswer){
-			$extraClass	= 'multi-answer-element';
+		$resizer	= $this->addElement('div', $resizerWrapper, $attributes, $text);				
+
+		if(!in_array($element->type, ['multi-start', 'multi-end', 'div-start', 'div-end'])){
+			//Load default values for this element
+			$this->getElementHtml($element, $resizer);
 		}
 
-		//Add form edit controls if needed
-		$html = " <div class='form-element-wrapper $extraClass' data-element-id='{$element->id}' data-form-id='{$this->formData->id}' data-priority='{$element->priority}' data-type='$element->type' style='display: flex; $marginLeft'>";
-			$html 	.= "<span class='movecontrol formfield-button' aria-hidden=1>:::<br><span class='element-id$idHidden' style='font-size:xx-small'>$element->id</span></span>";
-			$html 	.= "<div class='resizer-wrapper'>";
-				if($element->type == 'info'){
-					$html .= "<div class='show input-wrapper$hidden'>";
-				}else{
-					$html .= "<div class='resizer show input-wrapper$hidden' data-width-percentage='$width' style='width:$width%;'>";
-				}
-				
-				if($element->type == 'formstep'){
-					$html .= ' ***Formstep element***';
-				}elseif($element->type == 'datalist'){
-					$html .= " ***Datalist element $element->name***";
-				}elseif($element->type == 'multi-start'){
-					$html .= ' ***Multi answer start***';
-					$elementHtml	= '';
-					$this->inMultiAnswer	= true;
-				}elseif($element->type == 'multi-end'){
-					$html .= ' ***Multi answer end***';
-					$elementHtml	= '';
-					$this->inMultiAnswer	= false;
-				}elseif($element->type == 'div-start'){
-					$name			= ucfirst(str_replace('_', ' ', $element->name));
-					$html 			.= " ***$name div container start***";
-					$elementHtml	= '';
-					$this->isInDiv	= true;
-				}elseif($element->type == 'div-end'){
-					$name			= ucfirst(str_replace('_', ' ', $element->name));
-					$html 			.= " ***$name div container end***";
-					$elementHtml	= '';
-					$this->isInDiv	= false;
-				}
-				
-				$hidden	= ' hidden';
-				if(isset($_REQUEST['show-name'])){
-					$hidden	= '';
-				}
+		$hidden	= ' hidden';
+		if(isset($_REQUEST['show-name'])){
+			$hidden	= '';
+		}
 
-				$html .= $elementHtml;
-					$html	.= "<span class='element-name $hidden' style='font-size:xx-small;'>$element->name</span>";
+		$this->addElement(
+			'span',
+			$resizer,
+			[
+				'class' => "element-name $hidden",
+				'style' => 'font-size:xx-small;'
+			],
+			$element->name
+		);
 					
-					//Add a symbol if this field has conditions or is required
-					if(!empty($element->conditions) || $element->required == true || $element->mandatory == true){
-							$icons		= [];
-							if(!empty($element->conditions)){
-								$icons[]		= [
-									'content' 	=> '*',
-									'explainer'	=> 'This element has conditions',
-									'class'		=> '',
-									'right'		=> 20
-								];
-							}
+		$this->addMetaSymbols($resizer, $element);
 
-							if(!empty($element->required)){
-								$right			= 20;
-								if(count($icons) > 0){
-									$right	= 50;
-								}
-								$icons[]		= [
-									'content' 	=> '!',
-									'explainer'	=> 'This element is required',
-									'class'		=> '',
-									'right'		=> $right
-								];
-							}
+		$this->addElement('span', $resizer, ['class' => 'width-percentage formfield-button']);
 
-							if($element->mandatory == true){
-								$right			= 20;
-								if(count($icons) == 1){
-									$right	= 50;
-								}elseif(count($icons) == 2){
-									$right	= 80;
-								}
+		$this->addElement(
+			'button',
+			$controlsWrapper,
+			[
+				'type'	=> 'button',
+				'class'	=> 'add-form-element button formfield-button',
+				'title'	=> 'Add an element after this one'
+			],
+			'+'
+		);
 
-								$icons[]		= [
-									'content' 	=> '!',
-									'explainer'	=> 'This element is conditionally required',
-									'class'		=> 'conditional',
-									'right'		=> $right
-								];
-							}
+		$this->addElement(
+			'button',
+			$controlsWrapper,
+			[
+				'type'	=> 'button',
+				'class'	=> 'remove-form-element button formfield-button',
+				'title'	=> 'Remove this element'
+			],
+			'-'
+		);
 
-							if(!empty($icons)){
-								$right	= $icons[array_key_last($icons)]['right'] + 30;
-								
-								foreach($icons as $icon){
-									$style	= "position: absolute;margin: 0;right: {$right}px;top: 5px;height: 30px;";
-									$html .= "<div class='info-box' style='position: absolute;top: 0;width: 100%;'>";
-										$html .= "<span class='conditions-info formfield-button {$icon['class']}' style='right:{$icon['right']}px'>{$icon['content']}</span>";
-										$html .= "<span class='info-text conditions' style='$style'>{$icon['explainer']}</span>";
-									$html .= "</div>";
-								}
-							}
-						
-					}
+		$this->addElement(
+			'button',
+			$controlsWrapper,
+			[
+				'type'	=> 'button',
+				'class'	=> 'edit-form-element button formfield-button',
+				'title'	=> 'Change this element'
+			],
+			'Edit'
+		);
 
-					$html .= "<span class='width-percentage formfield-button'></span>";
-				$html .= "</div>";
-			$html .= "</div>";
-			$html .= "<button type='button' class='add-form-element button formfield-button' 	title='Add an element after this one'>+</button>";
-			$html .= "<button type='button' class='remove-form-element button formfield-button'	title='Remove this element'>-</button>";
-			$html .= "<button type='button' class='edit-form-element button formfield-button'	title='Change this element'>Edit</button>";
-			$copy  = "<img class='copy copy-form-element' src='".SIM\pathToUrl(MODULE_PATH.'pictures/copy_white.png')."' loading='lazy'>";
-			$html .= "<button type='button' class='copy-form-element button formfield-button'	title='Duplicate this element'>$copy</button>";
-		$html .= "</div>";
+		$copyButton	= $this->addElement(
+			'button',
+			$controlsWrapper,
+			[
+				'type'	=> 'button',
+				'class'	=> 'copy-form-element button formfield-button',
+				'title'	=> 'Duplicate this element'
+			]
+		);
+		
+		$this->addElement(
+			'img',
+			$copyButton,
+			[
+				'class' 	=> 'copy copy-form-element',
+				'src'   	=> SIM\pathToUrl(MODULE_PATH.'pictures/copy_white.png'),
+				'loading'	=> 'lazy'
+			]
+		);
 
-		return $html;
+		if($returnHtml){
+			return $dom->saveHtml();
+		}
+
+		return $controlsWrapper;
 	}
 
 	/**
@@ -294,47 +428,7 @@ class FormBuilderForm extends DisplayForm{
 			<button class="button tablink formbuilder-form"															id="show-form-emails" data-target="form-emails">Form emails</button>
 			
 			<div class="tabcontent<?php if(empty($this->formElements)){echo ' hidden';}?>" id="element-form">
-				<?php
-				if(empty($this->formElements)){
-					?>
-					<div name="formbuildbutton">
-						<p>No formfield defined yet.</p>
-						<button name='createform' class='button' data-formname='<?php echo $this->formName;?>'>Add fields to this form</button>
-					</div>
-					<?php
-				}else{
-					?>
-					<div class="form-edit-buttons-wrapper">
-						<button name='show-id' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element id's</button>
-						<button name='show-name' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element name's</button>
-						<button class='button formbuilder-switch-back small'>Show enduser form</button>
-					</div>
-					<?php
-				}
-			
-				?>
-				<form action='' method='post' class='sim-form builder'>
-					<div class='form-elements'>
-						<input type='hidden' class='no-reset' name='form-id'		value='<?php echo $this->formData->id;?>'>
-
-						<?php
-						$this->nextElement		= '';
-						foreach($this->formElements as $key => $element){
-							if(isset($this->formElements[$key + 1])){
-								$this->nextElement		= $this->formElements[$key + 1];
-							}else{
-								$this->nextElement		= '';
-							}
-
-							$this->currentElement	= $element;
-
-							echo $this->buildHtml($element, $key);
-
-							$this->prevElement	= $element;
-						}
-						?>
-					</div>
-				</form>
+				<?php $this->formElementsForm();?>
 			</div>
 				
 			<div class="tabcontent<?php if(!empty($this->formElements)){echo ' hidden';}?>" id="form-settings">
@@ -358,6 +452,71 @@ class FormBuilderForm extends DisplayForm{
 
 		//close any open html tags
 		return force_balance_tags($html);
+	}
+
+	/**
+	 * Outputs the form builder
+	 */
+	public function formElementsForm(){
+		if(empty($this->formElements)){
+			?>
+			<div name="formbuildbutton">
+				<p>No formfield defined yet.</p>
+				<button name='createform' class='button' data-formname='<?php echo $this->formName;?>'>Add fields to this form</button>
+			</div>
+			<?php
+		}else{
+			?>
+			<div class="form-edit-buttons-wrapper">
+				<button name='show-id' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element id's</button>
+				<button name='show-name' class='button' data-action='show' style='padding-top:0px;padding-bottom:0px;'>Show element name's</button>
+				<button class='button formbuilder-switch-back small'>Show enduser form</button>
+			</div>
+			<?php
+		}
+
+		$this->dom	= new \DOMDocument();
+
+		$form		= $this->addElement(
+			'form', 
+			$this->dom, 
+			[
+				'action'	=> '',
+				'method'	=>'post',
+				'class'	 	=> 'sim-form builder'
+			]
+		);
+
+		$wrapper	= $this->addElement('div', $form, ['class'	=> 'form-elements']);
+
+		$this->addElement(
+			'input', 
+			$wrapper, 
+			[
+				'type'	=> 'hidden',
+				'class'	=> 'no-reset',
+				'name'	=> 'form-id',
+				'value'	=> $this->formData->id
+			]
+		);
+	
+		$this->nextElement		= '';
+		foreach($this->formElements as $key => $element){
+			if(isset($this->formElements[$key + 1])){
+				$this->nextElement		= $this->formElements[$key + 1];
+			}else{
+				$this->nextElement		= '';
+			}
+
+			$this->currentElement	= $element;
+
+			$this->buildHtml($element, $wrapper, $key);
+
+			$this->prevElement	= $element;
+		}
+
+		// Print the html
+		echo $this->dom->saveHtml();
 	}
 	
 	/**

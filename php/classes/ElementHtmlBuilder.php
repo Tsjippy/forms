@@ -470,6 +470,10 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * @return	object					The created node
 	 */
 	public function addElement($type, $parent, $attributes=[], $textContent='', $dom=''){
+		if(empty($parent)){
+			return;
+		}
+
 		if(empty($dom)){
 			$dom	= $this->dom;
 		}
@@ -1526,10 +1530,10 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * Gets the html of form element
 	 *
 	 * @param	object			$element		The element data
-	 * @param	object			$parent			The parent node to appeend to
+	 * @param	object			$parent			The parent node to append to, default empty to return html string
 	 * @param	string|false	$requestedValue	The value the element should have, false for no value, default empty
 	 *
-	 * @return	string| WP error		The html
+	 * @return	object|string| WP error			A DomDocumentNode or the raw html
 	 */
 	public function getElementHtml($element, $parent='', $requestedValue =''){
 		$this->reset();

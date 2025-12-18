@@ -493,7 +493,7 @@ function addFormElement($copy=false){
 	$formBuilderForm	= new FormBuilderForm();
 	$formBuilderForm->getForm($_POST['form-id']);
 
-	$html = $formBuilderForm->buildHtml($element, $index);
+	$html 				= $formBuilderForm->buildHtml($element, '', $index);
 	
 	return [
 		'message'		=> $message,
