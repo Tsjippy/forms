@@ -7,6 +7,7 @@
 
 ### Fixed
 - conditional e-mail adresses
+- form builder form
 
 ### Updated
 
