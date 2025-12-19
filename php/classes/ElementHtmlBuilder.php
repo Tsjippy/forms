@@ -488,6 +488,11 @@ class ElementHtmlBuilder extends SubmitForm{
 			SIM\printArray( "Caught general Exception: " . $e->getMessage());
 		}
 
+		// Type should come first
+		if(!empty($attributes['type'])){
+			$attributes = ['type' => $attributes['type']] + $attributes;
+		}
+
 		foreach($attributes as $attribute => $value){
 			try{
 				$node->setAttribute($attribute, $value);
@@ -1012,7 +1017,7 @@ class ElementHtmlBuilder extends SubmitForm{
 	}
 
 	/**
-	 * Get the tag content of an element, i.e. the conten between the openening and closing tag
+	 * Get the tag content of an element, i.e. the content between the openening and closing tag
 	 */
 	protected function getTagContent($node){
 		switch($this->element->type){
@@ -1046,7 +1051,7 @@ class ElementHtmlBuilder extends SubmitForm{
 				$this->addDatalistOptions($node);
 				break;
 			default:
-				$this->addElement( "label", $node, ['class' => 'label-text'], $this->element->text);
+				break;
         }
 	}
 
@@ -1142,7 +1147,8 @@ class ElementHtmlBuilder extends SubmitForm{
 	protected function getMultiElementHtml($node){
 		if(
 			empty($this->element->multiple) ||
-			in_array($this->element->type, ['file', 'image', 'text'])
+			in_array($this->element->type, ['file', 'image', 'text']) || 
+			get_class($this) === "SIM\FORMS\FormBuilderForm" 
 		){
 			return false;
 		}
