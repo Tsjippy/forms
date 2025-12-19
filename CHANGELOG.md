@@ -7,6 +7,7 @@
 
 ### Fixed
 - form export and imports
+- bug in formbuilder when multi html enabled
 
 ### Updated
 
