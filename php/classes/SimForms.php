@@ -797,9 +797,9 @@ class SimForms{
 			return new WP_Error('forms', "no form is loaded");
 		}
 		
-		$query = "select * from $this->formEmailTable where form_id={$this->formData->id}";
-		
-		$this->emailSettings				= $wpdb->get_results($query);
+		$this->emailSettings				= $wpdb->get_results(
+			$wpdb->prepare("select * from %i where form_id=%d", $this->formEmailTable, $this->formData->id)
+		);
 
 		foreach($this->emailSettings as &$emailSetting){
 			foreach($emailSetting as &$setting){

@@ -103,8 +103,6 @@ class FormReminders extends SimForms{
      */
     public function updateFormCache($formId, $userId=''){
         $this->getForm($formId);
-
-
     }
 
     public function getUserFormReminders($userId){

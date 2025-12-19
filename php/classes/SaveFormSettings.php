@@ -100,6 +100,7 @@ class SaveFormSettings extends SimForms{
 	/**
 	 * Prepares an data for storages in db
 	 * 
+	 * @param	string			$table		The table to insert/update the data into	
 	 * @param 	object|array	$data		The data to be stored
 	 * @param	array			$formats	The format the data should follow
 	 * @param	array			$where		The where clause for updates
