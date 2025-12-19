@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- form export and imports
-- bug in formbuilder when multi html enabled
 
 ### Updated
+
+## [9.1.1] - 2025-12-19
+
+
+### Fixed
+- form export and imports
+- bug in formbuilder when multi html enabled
 
 ## [9.1.0] - 2025-12-18
 
