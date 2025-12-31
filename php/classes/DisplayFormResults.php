@@ -1938,9 +1938,14 @@ class DisplayFormResults extends DisplayForm{
 			$type		= 'own';
 		}
 
+		// Ob_start here in case the filter is echoing something
+		ob_start();
+
 		$shouldShow	= apply_filters('sim-formstable-should-show', true, $this, $type);
 
 		if($shouldShow !== true){
+			ob_end_clean();
+
 			return 	$shouldShow;
 		}
 		
@@ -1952,6 +1957,8 @@ class DisplayFormResults extends DisplayForm{
 				if(!empty($_REQUEST['hash']) && $_REQUEST['hash'] == wp_hash($_REQUEST['id'])){
 					$userId		= $_REQUEST['hash'];
 				}else{
+					ob_end_clean();
+
 					return $this->emptyTable();
 				}
 			}
@@ -2021,8 +2028,6 @@ class DisplayFormResults extends DisplayForm{
 				}
 			}
 		}
-		
-		ob_start();
 
 		echo "<div class='form-results-wrapper'>";
 			if($type == 'own'){
