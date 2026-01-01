@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- allow sim-formstable-should-show filter to echo to screen
 
 ### Fixed
 
