@@ -4,16 +4,11 @@
 ### Added
 
 ### Changed
+- allow sim-formstable-should-show filter to echo to screen
 
 ### Fixed
 
 ### Updated
-
-## [9.1.2] - 2026-01-01
-
-
-### Changed
-- allow sim-formstable-should-show filter to echo to screen
 
 ## [9.1.1] - 2025-12-19
 
