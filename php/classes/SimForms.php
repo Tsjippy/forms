@@ -280,10 +280,10 @@ class SimForms{
 		maybe_create_table($this->submissionValuesTableName, $sql );
 	}
 
-		/**
+	/**
 	 * Defines the formats of each column in each table for use in $wpdb->insert and $wpdb->update
 	 */
-	private function tableFormats(){
+		private function tableFormats(){
 		// Form Settings
 		$formats			= [
 			'name'					=> '%s',
