@@ -23,7 +23,7 @@ class DisplayFormResults extends DisplayForm{
 	public $tableEditPermissions;
 	public $sortElementIds;
 	public $sortDirection;
-	public $sortColumnFound;
+	public $sortColumn;
 	public $spliced;
 	public $subElements;
 
@@ -255,7 +255,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		// sort colomn
-		$this->sortColumnFound	= false;
+		$this->sortColumn	= false;
 		if(!empty($this->sortElementIds)){
 			if($this->sortDirection != 'ASC'){
 				$this->sortDirection	= 'DESC';
@@ -382,14 +382,14 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * Sort column
 		 */ 
-		$this->sortColumnFound	= false;
+		$this->sortColumn	= false;
 		if(!empty($this->sortElementIds)){
 			// check if the sort colom is a submission table column
 			$colNames	= $wpdb->get_results( "DESC $this->submissionTableName" );
 
 			foreach ( $colNames as $name ) {
 				if ( in_array($name->Field, $this->sortElementIds) ) {
-					$this->sortColumnFound	= $name->Field;
+					$this->sortColumn	= $name->Field;
 				}
 			}
 
@@ -397,10 +397,8 @@ class DisplayFormResults extends DisplayForm{
 				$this->sortDirection	= 'DESC';
 			}
 
-			if($this->sortColumnFound){
-				$query	.= " ORDER BY %s %s";
-				$values[]	= $this->sortColumnFound;
-				$values[]	= $this->sortDirection;
+			if($this->sortColumn){
+				$query	.= " ORDER BY $this->sortColumn $this->sortDirection";
 			}
 		}
 
@@ -568,7 +566,7 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	public function sortSubmissions(&$submissions){
 		// sort if needed
-		if(empty($this->sortElementIds) || $this->sortColumnFound  || empty($submissions)){
+		if(empty($this->sortElementIds) || $this->sortColumn  || empty($submissions)){
 			// sorting not needed
 			return;
 		}
@@ -1819,12 +1817,7 @@ class DisplayFormResults extends DisplayForm{
 	 *
 	 * @return	bool						If there are submissions or not
 	 */
-	public function theTable($type, $submissions){
-		/* if($this->spliced){
-			// only use the submissions for this page
-			$submissions	= array_splice($submissions, ($this->currentPage * $this->pageSize), $this->pageSize);
-		} */
-		
+	public function theTable($type, $submissions){		
 		?>
 		<style>
 			.name{
@@ -1997,12 +1990,12 @@ class DisplayFormResults extends DisplayForm{
 			}
 		}
 
-		if(isset($_REQUEST['sortdir'])){
-			$this->sortDirection	= $_REQUEST['sortdir'];
-		}
-
 		if(isset($this->tableSettings->sort_direction)){
 			$this->sortDirection	= strtoupper($this->tableSettings->sort_direction);
+		}
+
+		if(isset($_REQUEST['sortdir'])){
+			$this->sortDirection	= $_REQUEST['sortdir'];
 		}
 
 		if(isset($_REQUEST['export_pdf']) || isset($_REQUEST['export-xls'])){
@@ -2182,8 +2175,12 @@ class DisplayFormResults extends DisplayForm{
 					}
 					
 					$niceName			= $columnSetting['nice_name'];
-					
-					if($this->tableSettings->default_sort	== $elementId){
+
+					if( $this->sortColumn && $columnSetting['name'] == $this->sortColumn ){
+						$class	= strtolower($this->sortDirection). ' defaultsort';
+					}
+
+					elseif($this->tableSettings->default_sort == $elementId){
 						$class	= "defaultsort";
 					}else{
 						$class	= "";
