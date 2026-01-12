@@ -368,9 +368,11 @@ class DisplayFormResults extends DisplayForm{
 			if(isset($_POST['prev'])){
 				$this->currentPage--;
 			}
+
 			if(isset($_POST['next'])){
 				$this->currentPage++;
 			}
+
 			$start	= $this->currentPage * $this->pageSize;
 		}else{
 			$start				= 0;
@@ -384,11 +386,13 @@ class DisplayFormResults extends DisplayForm{
 		if(!empty($this->sortElementIds)){
 			// check if the sort colom is a submission table column
 			$colNames	= $wpdb->get_results( "DESC $this->submissionTableName" );
+
 			foreach ( $colNames as $name ) {
 				if ( in_array($name->Field, $this->sortElementIds) ) {
 					$this->sortColumnFound	= $name->Field;
 				}
 			}
+
 			if($this->sortDirection != 'ASC'){
 				$this->sortDirection	= 'DESC';
 			}
@@ -400,8 +404,8 @@ class DisplayFormResults extends DisplayForm{
 			}
 		}
 
-		// add the limit only if we are not querying everything, or for a specific user or start is larger than the total
-		if(!$all && empty($userId) && $start < $this->total){
+		// add the limit only if we are not querying everything or start is larger than the total
+		if(!$all && $start < $this->total){
 			$this->spliced	= true;
 			$query		   .= " LIMIT %d, %d";
 			$values[]		= $start;
@@ -1816,10 +1820,10 @@ class DisplayFormResults extends DisplayForm{
 	 * @return	bool						If there are submissions or not
 	 */
 	public function theTable($type, $submissions){
-		if($this->spliced){
+		/* if($this->spliced){
 			// only use the submissions for this page
 			$submissions	= array_splice($submissions, ($this->currentPage * $this->pageSize), $this->pageSize);
-		}
+		} */
 		
 		?>
 		<style>
