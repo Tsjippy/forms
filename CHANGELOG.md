@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- form results page retrieval
-- table result sorting
 
 ### Updated
+
+## [9.1.4] - 2026-01-12
+
+
+### Fixed
+- form results page retrieval
+- table result sorting
 
 ## [9.1.3] - 2026-01-09
 
