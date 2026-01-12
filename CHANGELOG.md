@@ -7,6 +7,7 @@
 
 ### Fixed
 - form results page retrieval
+- table result sorting
 
 ### Updated
 
