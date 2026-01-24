@@ -334,12 +334,14 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * Build the Common Table Expressions (CTE) needed to make the pivot query
 		 */
-		$splitElements		= $this->formData->split;
+		$splitElements		= $this->formData->split ?? [];
 		$existingColumns	= ['id', 'form_id', 'timecreated', 'timelastedited', 'userid', 'archived', 'submitter_id'];
 
 		$columns			= $existingColumns;
 
 		$columnsString		= implode(', S.', $columns);
+
+		$innerJoinString	= '';
 
 		// ECT for all the values
 		$ect 				= "WITH Raw AS (\n\t"
@@ -355,9 +357,12 @@ class DisplayFormResults extends DisplayForm{
 		 * Transpose all splitted value rows to columns
 		 */
 		if(!empty($splitElements)){
+			$innerJoinString	= "\nINNER JOIN SubIdValues as V ON E.id = V.Sid";
+
 			$ect .= ",\nSubIdValues AS (\n\tSELECT \n\t\tid AS Sid, \n\t\tsub_id,\n\t\t";
 
 			$splitColumns	= [];
+
 			/**
 			 * Process split elements with the form base[index][key]
 			 */
@@ -370,7 +375,7 @@ class DisplayFormResults extends DisplayForm{
 					$splitElements	= array_merge($splitElements, array_values($ids));
 
 					// Add the column to the query
-					$splitColumns[] 		= "MAX(CASE WHEN element_id IN ($implodedIds) THEN value END) AS '$columnName'";
+					$splitColumns[] = "MAX(CASE WHEN element_id IN ($implodedIds) THEN value END) AS '$columnName'";
 				}
 			}
 
@@ -395,9 +400,9 @@ class DisplayFormResults extends DisplayForm{
 		 * Transpose rows to columns for values with an empty sub_id (non splitted) 
 		 */
 		$columnsString		= implode(", \n\t\t", $columns);
-		$ect				.= ", \nEmptySubIdValues AS (\n\tSELECT \n\t\t$columnsString,\n\t\t";
-
+		$ect			   .= ", \nEmptySubIdValues AS (\n\tSELECT \n\t\t$columnsString,\n\t\t";
 		$toColumn			= [];
+		
 		foreach($this->formElements as $element){
 			// Negative element ids are from the submission table
 			if($element->id < 0 || in_array($element->id, $splitElements) || in_array($element->type, $this->nonInputs)){
@@ -413,7 +418,7 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * The main query that joins the ect with the non-spitted values with the ect with the splitted values
 		 */
-		$baseQuery			.= "SELECT * \nFROM EmptySubIdValues E\nINNER JOIN SubIdValues as V ON E.id = V.Sid ";
+		$baseQuery			.= "SELECT * \nFROM EmptySubIdValues E $innerJoinString";
 
 		return $ect;
 	}
