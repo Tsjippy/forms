@@ -1155,8 +1155,8 @@ class FormBuilderForm extends DisplayForm{
 					<span class='placeholders' title="Click to copy">%formurl%</span>
 					<span class='placeholders' title="Click to copy">%submissiondate%</span>
 					<span class='placeholders' title="Click to copy">%editdate%</span>
-					<span class='placeholders' title="Click to copy">%submissiontime%</span>
-					<span class='placeholders' title="Click to copy">%edittime%</span>
+					<span class='placeholders' title="Click to copy">%timecreated%</span>
+					<span class='placeholders' title="Click to copy">%timelastedited%</span>
 					<span class='placeholders' title="Click to copy">%viewhash%</span>(include this in any url send to non-logged in users)
 					<br>
 					All your fieldvalues are available as well:

@@ -126,12 +126,12 @@ function moduleUpdated($options, $oldOptions){
 add_action('sim_module_actions',__NAMESPACE__.'\moduleActions' );
 function moduleActions(){
 	if(isset($_POST['import-form'])){
-		$formBuilder	= new FormBuilderForm();
+		$formBuilder	= new FormExport();
 		$formBuilder->importForm($_FILES['formfile']['tmp_name']);
 	}
 
 	if(isset($_POST['export']) && is_numeric($_POST['export'])){
-		$simForms	= new FormBuilderForm();
+		$simForms	= new FormExport();
 		$simForms->exportForm($_POST['export']);
 	}
 

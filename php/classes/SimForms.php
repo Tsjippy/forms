@@ -1301,7 +1301,7 @@ class SimForms{
 		extract(apply_filters(
 			'sim_formdata_retrieval_query', 
 			[
-				'base'		=> $baseQuery,
+				'baseQuery'	=> $baseQuery,
 				'where'		=> $where,
 				'values'	=> $values,
 			],
@@ -1309,7 +1309,7 @@ class SimForms{
 			$this
 		));
 
-		$query	= $base.implode(' AND ', $where);
+		$query	= $baseQuery.implode(' AND ', $where);
 		
 		$results	= $wpdb->get_col(
 			$wpdb->prepare($query, ...$values)
@@ -1362,8 +1362,8 @@ class SimForms{
 			}
 
 			if(empty($this->submission->submissiondate)){
-				$this->submission->submissiondate	= date('d F y', strtotime($this->submission->submissiontime));
-				$this->submission->editdate			= date('d F y', strtotime($this->submission->edittime));
+				$this->submission->submissiondate	= date('d F y', strtotime($this->submission->timecreated));
+				$this->submission->editdate			= date('d F y', strtotime($this->submission->timelastedited));
 			}
 			
 			if(isset($_REQUEST['subid']) && empty($this->submission->subid)){

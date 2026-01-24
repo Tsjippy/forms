@@ -26,6 +26,7 @@ class DisplayFormResults extends DisplayForm{
 	public $sortColumn;
 	public $spliced;
 	public $subElements;
+	public $extraElements;
 
 	public function __construct($atts){
 		global $wpdb;
@@ -68,16 +69,18 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	public function addExtraElements($elements, $object, $force){
 		// Build the array of element details
-		$newElements	= [
+		$this->extraElements	= [
 			// -6 = archived indexes
 			// -7 = hash
 			-4 => [
 				'name'				=> 'timelastedited',
 				'nicename'			=> 'Last edit time',
+				'type'				=> 'date'
 			],
 			-3 => [
 				'name'				=> 'timecreated',
 				'nicename'			=> 'Submission date',
+				'type'				=> 'date'
 			],
 			-2 => [
 				'name'				=> 'submitter_id',
@@ -92,14 +95,14 @@ class DisplayFormResults extends DisplayForm{
 		];
 
 		if(!empty($this->formData->split)){
-			$newElements[-5] = [
-				'name'				=> 'subId',
+			$this->extraElements[-5] = [
+				'name'				=> 'sub_id',
 				'nicename'			=> 'Sub-Id',
 				'type'				=> 'number'
 			];
 		}
 
-		foreach($newElements as $id => $newElement){
+		foreach($this->extraElements as $id => $newElement){
 			if(isset($this->formData->elementMapping['id'][$id])){
 				continue;
 			}
@@ -208,7 +211,7 @@ class DisplayFormResults extends DisplayForm{
 		extract(apply_filters(
 			'sim_formdata_retrieval_query', 
 			[
-				'base'		=> $baseQuery,
+				'baseQuery'	=> $baseQuery,
 				'where'		=> $where,
 				'values'	=> $values,
 			],
@@ -216,7 +219,7 @@ class DisplayFormResults extends DisplayForm{
 			$this
 		));
 
-		$query	= $base.implode(' AND ', $where);
+		$query	= $baseQuery.implode(' AND ', $where);
 
 		if(count($values) != substr_count($query, '%')){
 			SIM\printArray($query);
@@ -255,7 +258,6 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		// sort colomn
-		$this->sortColumn	= false;
 		if(!empty($this->sortElementIds)){
 			if($this->sortDirection != 'ASC'){
 				$this->sortDirection	= 'DESC';
@@ -263,6 +265,157 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		return apply_filters('sim_retrieved_formdata', $submissions, $userId, $this);
+	}
+
+	/**
+	 * Add filter querys 
+	 */
+	protected function addFilterQueries(&$where, &$values){
+		global $wpdb;
+
+		foreach($this->tableSettings->filter as $filter){
+			
+			$filterKey		= strtolower($filter['name']);
+
+			// nothing to filter, continue
+			if(empty($_POST[$filterKey])){
+				continue;
+			}
+
+			// Get the data for the current filter
+			$filterValue	= sanitize_text_field($_POST[$filterKey]);
+
+			$filterElement	= $this->getElementById($filter['element']);
+
+			// Invalid filter element id
+			if(!$filterElement){
+				continue;
+			}
+
+			/**
+			 * Check if we are filtering on a indexed element
+			 */
+			$exploded			= explode('[', $filterElement->name);
+			if(count($exploded) > 1){
+				$filterIndex		= str_replace(']', '', end($exploded));
+
+				$filterElementIds	= $wpdb->get_col(
+					$wpdb->prepare("SELECT id FROM %i WHERE `name` LIKE %s", $this->elTableName, "{$exploded[0]}[%][$filterIndex]")
+				);
+			}else{
+				$filterElementIds	= [$filter['element']];
+			}
+
+			// Add the filter query
+			if($filter['type'] == '=='){
+				$filter['type']	= '=';
+			}
+
+			if($filter['type'] == 'like'){
+				$filterValue	= "%$filterValue%";
+			}
+
+			$where[]	= "(V.element_id NOT IN (%s) or LOWER(V.value) {$filter['type']} %s)";
+			$values[]	= implode(', ', $filterElementIds);
+			$values[]	= strtolower($filterValue);
+		}
+	}
+
+	/**
+	 * Builds the columns list for the SQL query
+	 * 
+	 * @param 	array	$where			The where conditions for the query
+	 * @param 	string	$baseQuery		The base query to append the select statement to
+	 * @param 	array	$values			The values for the where conditions
+	 * 
+	 * @return string					The built ect
+	 */
+	private function columnsQuery($where, &$baseQuery, &$values){
+		/**
+		 * Build the Common Table Expressions (CTE) needed to make the pivot query
+		 */
+		$splitElements		= $this->formData->split;
+		$existingColumns	= ['id', 'form_id', 'timecreated', 'timelastedited', 'userid', 'archived', 'submitter_id'];
+
+		$columns			= $existingColumns;
+
+		$columnsString		= implode(', S.', $columns);
+
+		// ECT for all the values
+		$ect 				= "WITH Raw AS (\n\t"
+			. "SELECT S.$columnsString, V.sub_id, V.element_id, V.value\n\tFROM %i as S\n\t"
+			. "INNER JOIN %i as V ON S.id = V.submission_id \n\t"
+			. "WHERE $where\n"
+		. ")";
+
+		// add the table names to the values table
+		array_unshift($values, $this->submissionTableName, $this->submissionValuesTableName);
+
+		/**
+		 * Transpose all splitted value rows to columns
+		 */
+		if(!empty($splitElements)){
+			$ect .= ",\nSubIdValues AS (\n\tSELECT \n\t\tid AS Sid, \n\t\tsub_id,\n\t\t";
+
+			$splitColumns	= [];
+			/**
+			 * Process split elements with the form base[index][key]
+			 */
+			foreach($this->findSplitElementIds() as $base){
+				foreach($base as $columnName => $ids){
+					// Make the array of elements that share the same name a comma separated string for the query
+					$implodedIds	= implode(", ", array_values($ids));
+
+					// Store the other ids as well
+					$splitElements	= array_merge($splitElements, array_values($ids));
+
+					// Add the column to the query
+					$splitColumns[] 		= "MAX(CASE WHEN element_id IN ($implodedIds) THEN value END) AS '$columnName'";
+				}
+			}
+
+			/**
+			 * Process simple base[index] splits
+			 */
+			if(empty($splitColumns)){
+				foreach($splitElements as $splitElement){
+					// Add the column to the query
+					$splitColumns[] 		= "MAX(CASE WHEN element_id = $splitElement THEN value END) AS '$splitElement'";
+				}
+			}
+
+			$ect .= implode(",\n\t\t", $splitColumns);
+			$ect .= "\n\tFROM Raw"; 
+			$ect .= "\n\tWHERE sub_id IS NOT NULL";
+			$ect .= "\n\tGROUP BY id, sub_id";
+			$ect .= "\n)";
+		}
+
+		/**
+		 * Transpose rows to columns for values with an empty sub_id (non splitted) 
+		 */
+		$columnsString		= implode(", \n\t\t", $columns);
+		$ect				.= ", \nEmptySubIdValues AS (\n\tSELECT \n\t\t$columnsString,\n\t\t";
+
+		$toColumn			= [];
+		foreach($this->formElements as $element){
+			// Negative element ids are from the submission table
+			if($element->id < 0 || in_array($element->id, $splitElements) || in_array($element->type, $this->nonInputs)){
+				continue;
+			}
+
+			$toColumn[]		 = "MAX(CASE WHEN element_id = '$element->id' THEN value END) AS '$element->id'";
+		}
+
+		$ect				.= implode(",\n\t\t", $toColumn);
+		$ect				.= "\n\tFROM Raw \n\tWHERE sub_id IS NULL \n\tGROUP BY id\n)";
+
+		/**
+		 * The main query that joins the ect with the non-spitted values with the ect with the splitted values
+		 */
+		$baseQuery			.= "SELECT * \nFROM EmptySubIdValues E\nINNER JOIN SubIdValues as V ON E.id = V.Sid ";
+
+		return $ect;
 	}
 
 	/**
@@ -299,33 +452,37 @@ class DisplayFormResults extends DisplayForm{
 			return $this->getMetaKeyFormSubmissions($userId, $all);
 		}
 
-		$baseQuery			= "SELECT * FROM %i WHERE ";
-		$values				= [$this->submissionTableName];
-		$where				= [];
+		/**
+		 * Build the Where conditions
+		 */
+		$where			= [];
+		$values			= [];
 		
 		/**
 		 * Get the where statements
 		 */
 		// Form Id
 		if(isset($this->formData->id)){
-			$where[]	= "form_id=%d";
+			$where[]	= "S.form_id=%d";
 			$values[]	= $this->formData->id; 
 		}
 		
 		// Archived
 		if(!$this->showArchived && $submissionId == null){
-			$where[]	=  "archived=0";
+			$where[]	=  "S.archived=0";
 		}
 
 		// Specific Submission
 		if(is_numeric($submissionId)){
-			$where[]	= "id=%d";
+			$where[]	= "S.id=%d";
 			$values[]	= $submissionId; 
 		}
 
-		// User
+		/**
+		 * Specific Users
+		 */
 		if(is_numeric($userId)){
-			$where[]	= "userid=%d";
+			$where[]	= "S.userid=%d";
 			$values[]	= $userId; 
 		}
 
@@ -333,7 +490,7 @@ class DisplayFormResults extends DisplayForm{
 			$q	= [];
 			foreach($userId as $id){
 				if(is_numeric($id)){
-					$q[]		= "userid=%d";
+					$q[]		= "S.userid=%d";
 					$values[]	= $id;
 				}
 			}
@@ -341,10 +498,21 @@ class DisplayFormResults extends DisplayForm{
 			$where[]	= '('.implode(' OR ', $q).')';
 		}
 
+		/**
+		 * Filters from frontend
+		 */
+		$this->addFilterQueries($where, $values);
+
+		/**
+		 * Apply filter to modify the query
+		 * @var string	$base		The base query
+		 * @var array	$where		Array of where statements
+		 * @var array	$values		Array of values for the where statements
+		 */
 		extract(apply_filters(
 			'sim_formdata_retrieval_query', 
 			[
-				'base'		=> $baseQuery,
+				'query'		=> '',
 				'where'		=> $where,
 				'values'	=> $values,
 			],
@@ -352,11 +520,18 @@ class DisplayFormResults extends DisplayForm{
 			$this
 		));
 
-		$query			= $base.implode(' AND ', $where);
+		/**
+		 * Build the main query
+		 */
+		$ecd	= $this->columnsQuery(implode(' AND ', $where), $query, $values);
 
 		// Get the total
-		$countQuery		= str_replace('*', 'count(*) as total', $query);
+		$countQuery		= "$ecd\n\nSELECT COUNT(*) AS total FROM (\n\t$query\n) AS AllData;";
 		$this->total	= $wpdb->get_var($wpdb->prepare($countQuery, ...$values));
+
+		if(empty($this->total)){
+			return apply_filters('sim_retrieved_formdata', [], $userId, $this);
+		}
 
 		/**
 		 * Pagination
@@ -382,24 +557,22 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * Sort column
 		 */ 
-		$this->sortColumn	= false;
 		if(!empty($this->sortElementIds)){
-			// check if the sort colom is a submission table column
-			$colNames	= $wpdb->get_results( "DESC $this->submissionTableName" );
-
-			foreach ( $colNames as $name ) {
-				if ( in_array($name->Field, $this->sortElementIds) ) {
-					$this->sortColumn	= $name->Field;
-				}
-			}
-
 			if($this->sortDirection != 'ASC'){
 				$this->sortDirection	= 'DESC';
 			}
 
-			if($this->sortColumn){
-				$query	.= " ORDER BY $this->sortColumn $this->sortDirection";
+			$query		.= " \nORDER BY ";
+			$sortables	= [];
+			foreach($this->sortElementIds as $elementId){
+				if($elementId < 0){
+					$elementId = $this->extraElements[$elementId]['name'];
+				}
+
+				$sortables[] = "'$elementId' $this->sortDirection";
 			}
+
+			$query	.= implode(', ', $sortables);
 		}
 
 		// add the limit only if we are not querying everything or start is larger than the total
@@ -411,200 +584,30 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		// Get the submissions
-		$results	= $wpdb->get_results(
-			$wpdb->prepare($query, ...$values)
+		$submissions	= $wpdb->get_results(
+			$wpdb->prepare("$ecd\n\n$query", ...$values)
 		);
 
 		if($wpdb->last_error !== ''){
 			SIM\printArray($wpdb->print_error());
 		}
 
-		// Get the submission data
-		$submissions	= [];
-		foreach($results as $result){
-			$submission	= new stdClass();
-			foreach($result as $key => $value){
-				$submission->$key	= maybe_unserialize($value);
-			}
-
-			/**
-			 * Get the sub ids
-			 */
-			$subIds			= $wpdb->get_col(
-				$wpdb->prepare("SELECT distinct `sub_id` FROM %i WHERE `submission_id` =%d and `sub_id` IS NOT NULL", $this->submissionValuesTableName, $result->id)
-			);
-
-			/**
-			 * Get the submission data
-			 */
-			$query	= "SELECT `element_id`, `value`, sub_id FROM %i WHERE submission_id = %d";
-			$values	= [
-				$this->submissionValuesTableName, 
-				$result->id
-			];
-
-			/**
-			 * Apply filters
-			 */
-			foreach($this->tableSettings->filter as $filter){
-				
-				$filterKey		= strtolower($filter['name']);
-
-				// nothing to filter, continue
-				if(empty($_POST[$filterKey])){
-					continue;
-				}
-
-				// Get the data for the current filter
-				$filterValue	= sanitize_text_field($_POST[$filterKey]);
-
-				$filterElement	= $this->getElementById($filter['element']);
-
-				// Invalid filter element id
-				if(!$filterElement){
-					continue;
-				}
-
-				$exploded			= explode('[', $filterElement->name);
-
-				// Check if we are filtering on a indexed element
-				if(count($exploded) > 1){
-					$filterIndex		= str_replace(']', '', end($exploded));
-
-					$filterElementIds	= $wpdb->get_col(
-						$wpdb->prepare("SELECT id FROM %i WHERE `name` LIKE %s", $this->elTableName, "{$exploded[0]}[%][$filterIndex]")
-					);
+		/**
+		 * Unserialize values
+		 */
+		foreach($submissions as &$submission){
+			foreach($submission as $elementId => &$value){
+				if(!empty($nonSplittedValues[$submission->id]) && is_numeric($elementId)){
+					$value	= $nonSplittedValues[$submission->id][$elementId];
 				}else{
-					$filterElementIds	= [$filter['element']];
+					$value	= maybe_unserialize($value);
 				}
-
-				// Add the filter query
-				if($filter['type'] == '=='){
-					$filter['type']	= '=';
-				}
-
-				if($filter['type'] == 'like'){
-					$filterValue	= "%$filterValue%";
-				}
-
-				$query		.= " AND (element_id NOT IN (%s) or LOWER(value) {$filter['type']} %s)";
-				$values[]	= implode(', ', $filterElementIds);
-				$values[]	= strtolower($filterValue);
-			}
-
-			/**
-			 * DB query
-			 */
-			$formresults	= $wpdb->get_results(
-				$wpdb->prepare($query, $values)
-			);
-
-			if($wpdb->last_error !== ''){
-				SIM\printArray($wpdb->print_error());
-
-				continue;
-			}
-
-			// no form data
-			if(empty($formresults)){
-				continue;
-			}
-
-			/**
-			 *  Loop over all data, store non-indexed values on the submission, and indexed ones in a seperate array
-			 */ 
-			$splitSubmissions	= [];
-			foreach($subIds as $subId){
-				$splitSubmissions[$subId]	= [];
-			}
-
-			foreach($formresults as $formresult){
-				$value	= maybe_unserialize($formresult->value);
-
-				/**
-				 * Split into multiple entries when sub_id is set
-				 */
-				if(is_numeric($formresult->sub_id)){
-					// add the value to the array
-					$splitSubmissions[$formresult->sub_id][$formresult->element_id]= $value;
-				}else{
-					// use { } to prevent key naming issues
-					$submission->{$formresult->element_id}	= $value;
-				}
-			}
-
-			// Now add the subvalues in seperate submissions
-			foreach($subIds as $subId){
-				$clone	= clone $submission;
-
-				$clone->subId	= $subId;
-
-				// add the values for this index to the clone
-				foreach($splitSubmissions[$subId] as $elementId => $value){
-					$clone->{$elementId}	= $value;
-				}
-
-				// Add the clone to the submissions
-				$submissions[]	= $clone;
-			}
-
-			// add the subission to the submissions if no subids
-			if(empty($subIds)){
-				$submissions[]	= $submission;
 			}
 		}
 
 		$submissions	= apply_filters('sim_retrieved_formdata', $submissions, $userId, $this);
 
 		return $submissions;
-	}
-
-	/**
-	 * Sorts an array of subissions on the sortvalue
-	 *
-	 * @param	array	$submissions	Array of submissions past by reference
-	 */
-	public function sortSubmissions(&$submissions){
-		// sort if needed
-		if(empty($this->sortElementIds) || $this->sortColumn  || empty($submissions)){
-			// sorting not needed
-			return;
-		}
-
-		//Sort the array
-		usort($submissions, function($a, $b){
-			// ascending
-			if($this->sortDirection == 'ASC'){
-				$first	= $a;
-				$second	= $b;
-			// Decending
-			}else{
-				$first	= $b;
-				$second	= $a;
-			}
-
-			// Find the element this submission should be sorted at
-			foreach($this->sortElementIds as $elementId){
-				if(isset($first->{$elementId})){
-					$sortElementType	= $this->getElementById($elementId, 'type');
-					$value1				= $first->{$elementId};
-				}
-
-				if(isset($second->{$elementId})){
-					$value2				= $second->{$elementId};
-				}
-
-				if(isset($value1) && isset($value2)){
-					break;
-				}
-			}
-			
-			if($sortElementType == 'date'){
-				return strtotime($value1) <=> strtotime($value2);
-			}
-
-			return $value1 > $value2;
-		});
 	}
 
 	/**
@@ -623,8 +626,6 @@ class DisplayFormResults extends DisplayForm{
 
 		$this->submissions		= $this->getSubmissions($userId, $submissionId, $all);
 
-		$this->sortSubmissions($this->submissions);
-
 		if(count($this->submissions) == 1){
 			$this->submission	= array_values($this->submissions)[0];
 		}elseif(!empty($submissionId)){
@@ -636,23 +637,28 @@ class DisplayFormResults extends DisplayForm{
 	 * Adds a new column setting for a new element
 	 *
 	 * @param object	$element	the element to check if column settings exists for
+	 * @param array		$elementIds	optional array of element ids that belong to this column
 	 * 
 	 * @return false|array			false if no column setting was added, array of column settings if added
 	 */
-	public function addColumnSetting($element, $elementIds){
+	public function addColumnSetting($element, $elementIds=[]){
 		//do not show non-input elements
 		if(in_array($element->type, $this->nonInputs)){
 			return false;
 		}
 
 		$this->columnSettings[$element->id] = [
-			'elementIds'		=> $elementIds,
 			'name'				=> $element->name,
 			'nice_name'			=> empty($element->nicename) ? $element->name : $element->nicename,
 			'show'				=> 1,
 			'edit_right_roles'	=> [],
 			'view_right_roles'	=> []
 		];
+
+		// Only add element ids if available
+		if(!empty($elementIds)){
+			$this->columnSettings[$element->id]['elementIds']	= $elementIds;
+		}
 	}
 
 	/**
@@ -684,20 +690,25 @@ class DisplayFormResults extends DisplayForm{
 		$this->enriched	= true;
 
 		/**
-		 * Find the split base names if any
+		 * Get all splitted elements that share the same name and add the ids to the column settings
 		 */
 		$elementIds	= $this->findSplitElementIds();
+		$relatedIds	= [];
 		if(!empty($elementIds)){
 			// loop over all base names that data should be splitted on
 			foreach($elementIds as $baseName => $names){
 				// loop over all sub names
-				foreach($names as $name => $elementIds){
+				foreach($names as $name => $elIds){
+					// create an array to lookup by elid
+					foreach($elIds as $elId){
+						$relatedIds[$elId]	= $elIds;
+					}
 
 					// Loop over the column settings to add the element ids
 					foreach($this->columnSettings as &$setting){
 						// its already in settings, just add the extra element id
 						if($setting['name'] == $name){
-							$setting['elementIds']	= $elementIds;
+							$setting['elementIds']	= $elIds;
 						}
 					}
 				}
@@ -720,16 +731,26 @@ class DisplayFormResults extends DisplayForm{
 
 			// Splitted element with just normal multiple values name[index]
 			if(
-				!empty($this->formData->split) && 
-				is_array($this->formData->split) &&
-				in_array($element->id, $this->formData->split)
+				!empty($this->formData->split) && 					// there is a split element defined
+				is_array($this->formData->split) &&					// it is an array
+				in_array($element->id, $this->formData->split) && 	// the current element is in the split array
+				(
+					empty(array_keys($elementIds)[0]) ||			// there is no element on index 0
+					is_numeric(array_keys($elementIds)[0])			// or the first index is numeric, so we are dealing with indexes
+				)
 			){
 				$elementIds[]	= $element->id;
 			}
 
+			$id = $element->id;
+			//only the first element id is used for the column setting
+			if(!empty($relatedIds[$element->id])){
+				$id = array_values($relatedIds[$element->id])[0];
+			}
+
 			//check if the element is in the array, if not add it
- 			if(!isset($this->columnSettings[$element->id])){
-				$this->addColumnSetting($element, $elementIds);
+ 			if(!isset($this->columnSettings[$id])){
+				$this->addColumnSetting($element, $relatedIds[$element->id] ?? []);
 			}
 		}
 
@@ -2176,7 +2197,14 @@ class DisplayFormResults extends DisplayForm{
 					
 					$niceName			= $columnSetting['nice_name'];
 
-					if( $this->sortColumn && $columnSetting['name'] == $this->sortColumn ){
+					//Determine class for sorting
+					if( 
+						in_array($columnSetting['name'], $this->sortElementIds) ||
+						(
+							!empty($columnSetting['elementIds']) &&
+							array_intersect($columnSetting['elementIds'], $this->sortElementIds)
+						)
+					){
 						$class	= strtolower($this->sortDirection). ' defaultsort';
 					}
 

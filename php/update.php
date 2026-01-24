@@ -668,4 +668,52 @@ function moduleUpdate($oldVersion){
     if($oldVersion < '9.0.8'){
         $wpdb->query("UPDATE `$simForms->shortcodeColumnSettingsTable` set name= 'booking-rooms' where name = 'booking-room'"); 
     }
+
+    if($oldVersion <= '9.1.4'){
+        maybe_drop_column( $simForms->shortcodeTable, $columnName, "ALTER TABLE $simForms->shortcodeTable DROP COLUMN 'column_settings'");
+
+        maybe_drop_column( $simForms->shortcodeTable, $columnName, "ALTER TABLE $simForms->shortcodeTable DROP COLUMN 'table_settings'");
+
+        $wpdb->update(
+            $simForms->shortcodeColumnSettingsTable,
+            [
+                'name'   => 'timecreated'
+            ],
+            array(
+                'name'		=> 'submissiontime'
+            ),
+        );
+
+        $wpdb->update(
+            $simForms->shortcodeColumnSettingsTable,
+            [
+                'name'   => 'timelastedited'
+            ],
+            array(
+                'name'		=> 'edittime'
+            ),
+        );
+
+        $wpdb->update(
+            $simForms->shortcodeColumnSettingsTable,
+            [
+                'name'   => 'submitter_id'
+            ],
+            array(
+                'name'		=> 'submitteruserid'
+            ),
+        );
+
+        $wpdb->update(
+            $simForms->shortcodeColumnSettingsTable,
+            [
+                'name'   => 'userid'
+            ],
+            array(
+                'name'		=> 'user_id'
+            ),
+        );
+    }
 }
+
+//add_action('init', function(){moduleUpdate('9..4');} ); // For testing purposes only
