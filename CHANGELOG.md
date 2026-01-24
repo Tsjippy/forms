@@ -8,6 +8,7 @@
 
 ### Fixed
 - sorting
+- order on splitted columns
 
 ### Updated
 
