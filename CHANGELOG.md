@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- all form data from one query
 
 ### Fixed
 
