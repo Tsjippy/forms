@@ -4,13 +4,20 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [10.0.0] - 2026-01-24
+
+
+### Changed
 - all form data from one query
 
 ### Fixed
 - sorting
 - order on splitted columns
-
-### Updated
 
 ## [9.1.4] - 2026-01-12
 
