@@ -376,7 +376,17 @@ class DisplayFormResults extends DisplayForm{
 
 					// Add the column to the query
 					$splitColumns[] = "MAX(CASE WHEN element_id IN ($implodedIds) THEN value END) AS '$columnName'";
+
+					// Make sure we sort on the $columnName if needed
+					foreach ($this->sortElementIds as &$elementId) {
+						if(in_array($elementId, $ids)){
+							$elementId = $columnName;
+						}
+					}
+					unset($elementId); 
 				}
+
+				$this->sortElementIds	= array_unique($this->sortElementIds);
 			}
 
 			/**
