@@ -7,6 +7,7 @@
 - all form data from one query
 
 ### Fixed
+- sorting
 
 ### Updated
 
