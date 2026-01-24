@@ -357,7 +357,7 @@ class DisplayFormResults extends DisplayForm{
 		 * Transpose all splitted value rows to columns
 		 */
 		if(!empty($splitElements)){
-			$innerJoinString	= "\nINNER JOIN SubIdValues as V ON E.id = V.Sid";
+			$innerJoinString	= "\n\tINNER JOIN SubIdValues as V ON E.id = V.Sid";
 
 			$ect .= ",\nSubIdValues AS (\n\tSELECT \n\t\tid AS Sid, \n\t\tsub_id,\n\t\t";
 
@@ -416,9 +416,10 @@ class DisplayFormResults extends DisplayForm{
 		$ect				.= "\n\tFROM Raw \n\tWHERE sub_id IS NULL \n\tGROUP BY id\n)";
 
 		/**
-		 * The main query that joins the ect with the non-spitted values with the ect with the splitted values
+		 * The main ECT that joins the ect with the non-spitted values with the ect with the splitted values
 		 */
-		$baseQuery			.= "SELECT * \nFROM EmptySubIdValues E $innerJoinString";
+		$ect				.= ", \nSubmissions AS (\n\tSELECT * \n\tFROM EmptySubIdValues E $innerJoinString\n)\n\t\t";
+		$baseQuery			.= "SELECT * FROM Submissions";
 
 		return $ect;
 	}
@@ -571,10 +572,10 @@ class DisplayFormResults extends DisplayForm{
 			$sortables	= [];
 			foreach($this->sortElementIds as $elementId){
 				if($elementId < 0){
-					$elementId = $this->extraElements[$elementId]['name'];
+					$elementId 	= $this->extraElements[$elementId]['name'];
 				}
 
-				$sortables[] = "'$elementId' $this->sortDirection";
+				$sortables[] = "`$elementId` $this->sortDirection";
 			}
 
 			$query	.= implode(', ', $sortables);
