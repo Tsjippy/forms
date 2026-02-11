@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- allow submissions by non-logged in users
 
 ### Updated
 
