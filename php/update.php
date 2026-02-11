@@ -714,6 +714,10 @@ function moduleUpdate($oldVersion){
             ),
         );
     }
+
+    if($oldVersion <= '10.0.0'){
+        $wpdb->query("ALTER TABLE `$simForms->submissionTableName` CHANGE `userid` `userid` mediumint NULL");
+    }
 }
 
 //add_action('init', function(){moduleUpdate('9..4');} ); // For testing purposes only

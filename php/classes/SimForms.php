@@ -259,8 +259,8 @@ class SimForms{
 			form_id	int NOT NULL,
 			timecreated datetime DEFAULT NULL,
 			timelastedited datetime DEFAULT NULL,
-			userid mediumint(9) NOT NULL,
-			submitter_id mediumint(9) NOT NULL,
+			userid mediumint(9),
+			submitter_id mediumint(9),
 			archived BOOLEAN,
 			PRIMARY KEY  (id)
 		) $charsetCollate;";

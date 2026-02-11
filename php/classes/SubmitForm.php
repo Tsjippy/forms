@@ -627,10 +627,14 @@ class SubmitForm extends SaveFormSettings{
 		
 		//save to submission table
 		if(empty($this->formData->save_in_meta)){
-			$this->saveToSubmissionTable($formresults, $formUrl, $message);
+			$result	= $this->saveToSubmissionTable($formresults, $formUrl, $message);
 		//save to user meta
 		}else{			
-			$this->saveToUserMetaTable($formresults);
+			$result	= $this->saveToUserMetaTable($formresults);
+		}
+
+		if(is_wp_error($result)){
+			return $result;
 		}
 
 		$message	= apply_filters('sim_after_form_submission', $message, $_POST, $this);
