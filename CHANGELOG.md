@@ -7,6 +7,7 @@
 
 ### Fixed
 - allow submissions by non-logged in users
+- form auto archiving
 
 ### Updated
 
