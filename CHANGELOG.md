@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- allow submissions by non-logged in users
-- form auto archiving
 
 ### Updated
+
+## [10.0.1] - 2026-02-11
+
+
+### Fixed
+- allow submissions by non-logged in users
+- form auto archiving
 
 ## [10.0.0] - 2026-01-24
 
