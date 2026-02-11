@@ -352,7 +352,7 @@ class EditFormResults extends DisplayFormResults{
 				// Find all possible element ids
 				$allIds				= [];
 
-				//there is no trigger value found in the results, check multi value array
+				// There is no trigger value found in the results, check multi value array
 				if(	!empty($splittedElements)){
 					foreach($splittedElements as $baseName => $names){
 						foreach($names as $name => $elementIds){
@@ -371,29 +371,30 @@ class EditFormResults extends DisplayFormResults{
 
 				$allIds	= implode(',', $allIds);
 
+				/**
+				 * Get the results of all submissions that are not yet archived
+				 * -6 is the element id we use to mark sub entries as archived, so we need to exclude those from the results
+				 */
 				$results	= $wpdb->get_results(
 					$wpdb->prepare(
 						"
 						SELECT *
 						FROM %i AS T1
-						INNER JOIN %i ON %i.id = T1.submission_id
+						INNER JOIN %i AS T2 ON T1.id = T2.submission_id
 						WHERE 
-						%i.archived=0 AND 
-						T1.sub_id IS NOT NULL AND 
-						T1.element_id IN ($allIds) AND
-						T1.sub_id not IN (
-						SELECT value
-						FROM %i
-						WHERE element_id=-6 and submission_id=%i.id
-						) AND
-						T1.value $compare $triggerValue
+						T1.archived=0 AND 
+						T2.sub_id IS NOT NULL AND 
+						T2.element_id IN ($allIds) AND
+						T2.value $compare \"$triggerValue\" AND
+						T2.sub_id not IN (
+							SELECT value
+							FROM %i
+							WHERE element_id=-6 and submission_id=T2.submission_id
+						)
 						",
-						$this->submissionValuesTableName,
-						$this->submissionTableName,
-						$this->submissionTableName,
 						$this->submissionTableName,
 						$this->submissionValuesTableName,
-						$this->submissionTableName,
+						$this->submissionValuesTableName
 					)
 				);
 			}
