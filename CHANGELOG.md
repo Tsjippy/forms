@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- error in retrieving submission when no toColumn
 
 ### Updated
 
