@@ -5,6 +5,7 @@
 - get form by submission id
 
 ### Changed
+- more efficient code
 
 ### Fixed
 - error in retrieving submission when no toColumn
