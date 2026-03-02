@@ -410,7 +410,7 @@ class DisplayFormResults extends DisplayForm{
 		 * Transpose rows to columns for values with an empty sub_id (non splitted) 
 		 */
 		$columnsString		= implode(", \n\t\t", $columns);
-		$ect			   .= ", \nEmptySubIdValues AS (\n\tSELECT \n\t\t$columnsString,\n\t\t";
+		$ect			   .= ", \nEmptySubIdValues AS (\n\tSELECT \n\t\t$columnsString";
 		$toColumn			= [];
 		
 		foreach($this->formElements as $element){
@@ -422,7 +422,9 @@ class DisplayFormResults extends DisplayForm{
 			$toColumn[]		 = "MAX(CASE WHEN element_id = '$element->id' THEN value END) AS '$element->id'";
 		}
 
-		$ect				.= implode(",\n\t\t", $toColumn);
+		if(!empty($toColumn)){
+			$ect			.= ",\n\t\t".implode(",\n\t\t", $toColumn);
+		}
 		$ect				.= "\n\tFROM Raw \n\tWHERE sub_id IS NULL \n\tGROUP BY id\n)";
 
 		/**
