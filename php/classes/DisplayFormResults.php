@@ -344,7 +344,8 @@ class DisplayFormResults extends DisplayForm{
 		$innerJoinString	= '';
 
 		// ECT for all the values
-		$ect 				= "WITH Raw AS (\n\t"
+		$ect 				= "-- Table with raw data on several rows, where only the element_id and value are unique\n"
+			. "WITH Raw AS (\n\t"
 			. "SELECT S.$columnsString, V.sub_id, V.element_id, V.value\n\tFROM %i as S\n\t"
 			. "INNER JOIN %i as V ON S.id = V.submission_id \n\t"
 			. "WHERE $where\n"
@@ -410,7 +411,7 @@ class DisplayFormResults extends DisplayForm{
 		 * Transpose rows to columns for values with an empty sub_id (non splitted) 
 		 */
 		$columnsString		= implode(", \n\t\t", $columns);
-		$ect			   .= ", \nEmptySubIdValues AS (\n\tSELECT \n\t\t$columnsString";
+		$ect			   .= ", \n-- Table where the rows are transposed to columns\nEmptySubIdValues AS (\n\tSELECT \n\t\t$columnsString";
 		$toColumn			= [];
 		
 		foreach($this->formElements as $element){
@@ -430,7 +431,7 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * The main ECT that joins the ect with the non-spitted values with the ect with the splitted values
 		 */
-		$ect				.= ", \nSubmissions AS (\n\tSELECT * \n\tFROM EmptySubIdValues E $innerJoinString\n)\n\t\t";
+		$ect				.= ",\n -- the final submission table including sub-values \nSubmissions AS (\n\tSELECT * \n\tFROM EmptySubIdValues E $innerJoinString\n)\n\t\t";
 		$baseQuery			.= "SELECT * FROM Submissions";
 
 		return $ect;
@@ -464,6 +465,12 @@ class DisplayFormResults extends DisplayForm{
 					return [$submission];
 				}
 			}
+		}
+
+		// Check if a form is loaded
+		if(empty($this->formData) && !empty($submissionId)){
+			// Load the form before loading the submission, because we need the form elements to load the submission data
+			$this->getFormBySubmissionId($submissionId);
 		}
 
 		if($this->formData->save_in_meta){

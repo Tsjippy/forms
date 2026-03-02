@@ -664,6 +664,25 @@ class SimForms{
 		$this->forms					= $wpdb->get_results($query);
 	}
 
+	// Get a form by name
+	public function getFormBySubmissionId($submisisonId){
+		global $wpdb;
+		
+		$formId		= $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT form_id FROM %i WHERE id = %d",
+				$this->submissionTableName,
+				$submisisonId
+			)
+		);
+
+		if(empty($formId)){
+			return new WP_Error('forms', "No form found for submission id $submisisonId");
+		}
+
+		return $this->getForm($formId);
+	}
+
 	/**
 	 * Load a specific form or creates it if it does not exist
 	 *
