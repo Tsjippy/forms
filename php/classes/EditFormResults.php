@@ -41,9 +41,8 @@ class EditFormResults extends DisplayFormResults{
 		 * @param int			$elementId		The element id of the value
 		 * @param int			$subId			The sub id of the value
 		 * @param object		$object			The EditFormResults Instance
-		 * @param bool			$update			Whether this is an update or an new submission
 		 */
-		$value 				= apply_filters('sim_before_updating_formdata', $value, $elementId, $subId, $this, true);
+		$value 				= apply_filters('sim_before_updating_formdata', $value, $elementId, $subId, $this);
 
 		if(is_wp_error($value )){
 			return $value;
@@ -133,6 +132,8 @@ class EditFormResults extends DisplayFormResults{
 				return $result;
 			}
 		}
+
+		do_action('sim_after_updating_formdata', $value, $elementId, $subId, $this);
 
 		$this->sendEmail('fieldchanged');
 		$this->sendEmail('fieldschanged');

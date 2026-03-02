@@ -57,22 +57,7 @@ class FormReminders extends SimForms{
         
         $this->getMandatoryElements();
 
-        // Loop over the days
-        foreach($this->metaForms as $day => $metaForm){
-            if(empty($metaForm)){
-                continue;
-            }
-
-            // Loop over the mandatory forms for this day
-            foreach($metaForm as $formDetails){
-                // Save the current formdata before loading the form to save a db query
-                $this->formData = $formDetails['form'];
-
-                $this->getForm();
-
-                $this->checkElementNeedsInput();
-            }
-        }
+        $this->checkElementNeedsInput();
 
         foreach($this->defaultForms as $day => $submissionForm){
             if(empty($submissionForm)){
@@ -402,24 +387,33 @@ class FormReminders extends SimForms{
      * @return	string				The html
      */
     public function checkElementNeedsInput(){
-        //Loop over the users
-        foreach($this->userIds as $userId){
+        // Sort on form
+        usort($this->mandatoryElements, function($a, $b) {
+            return $a->form_id <=> $b->form_id; // The spaceship operator (<=>) simplifies comparisons in PHP 7+
+        });
 
-            // Loop over all mandatory and required elements
-            foreach($this->mandatoryElements as $element){
+        // Loop over all mandatory and required elements
+        foreach($this->mandatoryElements as $element){
+            // Load the form data for this element to save db queries in the getElementById function
+            $this->getForm($element->form_id);
+
+            // Unserialize the warning conditions
+            $warningCondition	= maybe_unserialize($element->warning_conditions);
+
+            $metakey 	= explode('[', $element->name)[0];
+
+            // Loop over the users
+            foreach($this->userIds as $userId){
                 //check if this element applies to this user
-                $warningCondition	= maybe_unserialize($element->warning_conditions);
-
                 if($this->checkIfConditionsAppliesToUser($warningCondition, $userId)){
                     continue;
                 }
 
-                $metakey 	= explode('[', $element->name)[0];
-                $value		= get_user_meta($userId, $metakey, true);
-
                 $name		= $element->name;
                 if (str_contains($name, '[')){
-                    $value = SIM\getMetaArrayValue($userId, $name, $value);
+                    $value  = SIM\getMetaArrayValue($userId, $name, $value);
+                }else{
+                    $value  = get_user_meta($userId, $metakey, true);
                 }
 
                 // Element has a value
@@ -546,7 +540,9 @@ class FormReminders extends SimForms{
                         $this->userReminders[$userId]['metaforms'][$formId]   = [];
                     }
 
-                    $this->userReminders[$userId]['metaforms'][$formId][]    = $elementId; 
+                    if(!in_array($elementId, $this->userReminders[$userId]['metaforms'][$formId])){
+                        $this->userReminders[$userId]['metaforms'][$formId][]    = $elementId; 
+                    }
                 }
             }
         }
