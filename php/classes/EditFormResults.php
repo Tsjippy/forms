@@ -30,7 +30,7 @@ class EditFormResults extends DisplayFormResults{
 			return false;
 		}
 
-		if(empty($this->submission)){
+		if(empty($this->submission) || $this->submission->id != $submissionId){
 			$this->parseSubmissions(null, $submissionId);
 		}
 
@@ -44,7 +44,7 @@ class EditFormResults extends DisplayFormResults{
 		 */
 		$value 				= apply_filters('sim_before_updating_formdata', $value, $elementId, $subId, $this);
 
-		if(is_wp_error($value )){
+		if($value === null || is_wp_error($value)){
 			return $value;
 		}
 
@@ -58,8 +58,8 @@ class EditFormResults extends DisplayFormResults{
 		];
 
 		if($elementId == 'userid'){
-			$data['userid']		= $value;
-			$formats[]			= '%d';
+			$data['userid']			= $value;
+			$formats[]				= '%d';
 		}elseif($elementId == 'submitter_id'){
 			$data['submitter_id']	= $value;
 			$formats[]				= '%d';

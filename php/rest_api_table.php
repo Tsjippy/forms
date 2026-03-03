@@ -384,7 +384,6 @@ function getInputHtml(){
 	$value	= $formTable->getSubmissionValue($_POST['submission-id'], $elementId, $_POST['subid']);
 
 	// Get element html
-	
 	$html 		= $formTable->getElementHtml($element, '', $value);
 	
 	/**

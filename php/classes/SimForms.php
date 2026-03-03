@@ -1300,7 +1300,7 @@ class SimForms{
  		$baseQuery	= "SELECT `value` FROM %i WHERE ";
 		$where		= [
 			'submission_id = %d',
-			'`element_id` = %s' 
+			'element_id = %s' 
 		];
 
 		$values		= [
@@ -1346,7 +1346,10 @@ class SimForms{
 			return '';
 		}	
 
-		return $results[0];
+		if($subId === '' || empty( $results[$subId])){
+			return $results[0];
+		}
+		return $results[$subId];
 	}
 
 	/**

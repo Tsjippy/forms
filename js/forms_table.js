@@ -461,10 +461,10 @@ async function processFormsTableInput(target){
 		}
 		
 		let response	= await FormSubmit.fetchRestApi('forms/edit_value', formData);
+
+		target.classList.remove('editing');
 	
 		if(response){
-			target.classList.remove('editing');
-
 			let newValue = response['new-value'];
 			
 			if(typeof(newValue) == 'string'){
