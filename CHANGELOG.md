@@ -9,6 +9,7 @@
 
 ### Fixed
 - error in retrieving submission when no toColumn
+- repeated submisison when failure
 
 ### Updated
 
