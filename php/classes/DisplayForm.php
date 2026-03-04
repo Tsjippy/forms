@@ -386,20 +386,22 @@ class DisplayForm extends ElementHtmlBuilder{
 	}
 
 	/**
-	 * Finds all elements that should be splitted in case of a BASENAME[index]SUBNAME name
+	 * Finds all elements that should be splitted 
+	 * Two options:
+	 *    1 - case of a BASENAME[index]SUBNAME name
+	 *    2 - case of a BASENAME[index] name
 	 */
 	public function findSplitElementIds(){
-		$baseNames	= [];
+		$baseNames	= $elementIds = [];
 		// Check if this is an splitted element
 		if(empty($this->formData->split)){
-			return [];
+			return apply_filters('sim-forms-split-element-ids', $elementIds, $this);
 		}
 
 		$this->formData->split	= maybe_unserialize($this->formData->split);
 		
 		// loop over all element ids that data should be splitted on
 		foreach($this->formData->split as $splitElementId){
-
 			// Get the element name
 			$name	= $this->getElementById($splitElementId, 'name');
 
@@ -409,15 +411,17 @@ class DisplayForm extends ElementHtmlBuilder{
 			// This is name matches the pattern
 			if( preg_match($pattern, $name, $matches)){
 				$baseNames[]	= $matches[1];
+			}else{
+				// Splitted element with just normal multiple values name[index]
+				$elementIds[]	= $splitElementId;
 			}
 		}
 
 		if(empty($baseNames)){
-			return [];
+			return apply_filters('sim-forms-split-element-ids', $elementIds, $this);
 		}
 
-		$elementIds	= [];
-		//loop over all elements to find splitted ones
+		// Loop over all elements to find splitted ones
 		foreach ($this->formElements as $element){
 			// Check if this is an indexed splitted element basename[index][keyname]
 			if(str_contains($element->name, '[')){
@@ -446,6 +450,6 @@ class DisplayForm extends ElementHtmlBuilder{
 			}
 		}
 
-		return $elementIds;
+		return apply_filters('sim-forms-split-element-ids', $elementIds, $this);
 	}
 }

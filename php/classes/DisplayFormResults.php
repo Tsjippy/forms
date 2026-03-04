@@ -722,6 +722,13 @@ class DisplayFormResults extends DisplayForm{
 		if(!empty($elementIds)){
 			// loop over all base names that data should be splitted on
 			foreach($elementIds as $baseName => $names){
+				if(is_numeric($baseName)){
+					if(isset($this->columnSettings[$names])){
+						$this->columnSettings[$names]['elementIds']	= [$names];
+					}
+					continue;
+				}
+
 				// loop over all sub names
 				foreach($names as $name => $elIds){
 					// create an array to lookup by elid
@@ -752,19 +759,6 @@ class DisplayFormResults extends DisplayForm{
 				if(!isset($this->columnSettings[$element->id]['view_right_roles'])){
 					$this->columnSettings[$element->id]['view_right_roles']	= [];
 				}
-			}
-
-			// Splitted element with just normal multiple values name[index]
-			if(
-				!empty($this->formData->split) && 					// there is a split element defined
-				is_array($this->formData->split) &&					// it is an array
-				in_array($element->id, $this->formData->split) && 	// the current element is in the split array
-				(
-					empty(array_keys($elementIds)[0]) ||			// there is no element on index 0
-					is_numeric(array_keys($elementIds)[0])			// or the first index is numeric, so we are dealing with indexes
-				)
-			){
-				$elementIds[]	= $element->id;
 			}
 
 			$id = $element->id;
@@ -935,7 +929,9 @@ class DisplayFormResults extends DisplayForm{
 							break;
 						}
 					}
-				}elseif(isset($this->submission->{$elementId})){
+				}
+				
+				if(isset($this->submission->{$elementId})){
 					$value	= $this->submission->{$elementId};
 				}elseif(isset($this->submission->{$elementName})){
 					$value	= $this->submission->{$elementName};
