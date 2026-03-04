@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [10.0.2] - 2026-03-04
+
+
+### Added
 - get form by submission id
 
 ### Changed
@@ -10,8 +21,6 @@
 ### Fixed
 - error in retrieving submission when no toColumn
 - repeated submisison when failure
-
-### Updated
 
 ## [10.0.1] - 2026-02-11
 
