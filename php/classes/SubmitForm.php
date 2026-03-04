@@ -405,7 +405,7 @@ class SubmitForm extends SaveFormSettings{
 		}
 
 		// Insert Submission
-		$submission 	= $this->submission;
+		$submission 			= $this->submission;
 		$this->submission->id	= $this->insertOrUpdateData($this->submissionTableName, $submission);
 
 		if(is_wp_error($this->submission->id)){
