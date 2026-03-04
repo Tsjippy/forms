@@ -48,6 +48,11 @@ class EditFormResults extends DisplayFormResults{
 			return $value;
 		}
 
+		/**
+		 * Update the main submission data if we are updating the userid or submitter_id, or if we are updating a field that is used in the auto archive settings
+		 * We also always update the timelastedited field to be able to track when the submission was last edited, and to trigger the auto archive if needed
+		 */
+
 		// Always update the timelastedited
 		$data = [
 			'timelastedited'	=> date("Y-m-d H:i:s")
@@ -65,7 +70,7 @@ class EditFormResults extends DisplayFormResults{
 			$formats[]				= '%d';
 		}
 
-		//Update the submission
+		// Update the main submission data
 		$result = $wpdb->update(
 			$this->submissionTableName,
 			$data,
@@ -93,8 +98,9 @@ class EditFormResults extends DisplayFormResults{
 		}
 
 		/**
-		 * Filters if we should do the update, return false for no update
+		 * Update submission values
 		 */
+		// Filters if we should do the update, return false for no update
 		$continue	= apply_filters('sim-forms-should-update-form-data', true, $elementId, $submissionId, $subId, $value, $this);
 		if($elementId != 'userid' && $elementId != 'submitter_id' && $continue){
 			//Update the submission data	
