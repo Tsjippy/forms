@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- edit form results of splitted values
 
 ### Updated
+
+## [10.0.3] - 2026-03-04
+
+
+### Fixed
+- edit form results of splitted values
 
 ## [10.0.2] - 2026-03-04
 
