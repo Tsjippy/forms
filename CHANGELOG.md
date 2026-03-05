@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- only update edittime if needed
 
 ### Updated
 
