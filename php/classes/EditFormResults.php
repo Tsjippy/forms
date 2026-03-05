@@ -19,10 +19,10 @@ class EditFormResults extends DisplayFormResults{
 
 		$value	= SIM\cleanUpNestedArray($value);
 
-		if(!empty($this->submission->id) && is_numeric($this->submission->id)){
-			$submissionId	= $this->submission->id;
-		}elseif(is_numeric($this->submissionId)){
+		if(is_numeric($this->submissionId)){
 			$submissionId	= $this->submissionId;
+		}elseif(!empty($this->submission->id) && is_numeric($this->submission->id)){
+			$submissionId	= $this->submission->id;
 		}elseif(is_numeric($_POST['submission-id'])){
 			$submissionId	= $_POST['submission-id'];
 		}else{
@@ -88,10 +88,18 @@ class EditFormResults extends DisplayFormResults{
 				SIM\printArray($message);
 			}
 		}elseif(!$result){
-			$message	= "No row with id $submissionId found";
-			if(defined('REST_REQUEST')){
-				return new \WP_Error('form error', $message);
-			}else{
+			$column		= array_keys($data)[0];
+
+			$curValue	= $wpdb->get_var(
+				$wpdb->prepare(
+					"select $column from %i where id = %d",
+					$this->submissionTableName,
+					$submissionId
+				)
+			);
+
+			if($curValue != $data[$column]){
+				$message	= "No row with id $submissionId found\nQuery used is '$wpdb->last_query'";
 				SIM\printArray($message);
 				SIM\printArray($this->submission);
 			}
