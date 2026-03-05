@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- only update edittime if needed
 
 ### Updated
+
+## [10.0.4] - 2026-03-05
+
+
+### Fixed
+- only update edittime if needed
 
 ## [10.0.3] - 2026-03-04
 
