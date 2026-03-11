@@ -1151,7 +1151,9 @@ class SimForms{
 		$elements	= $wpdb->get_results($query);
 		foreach($elements as &$element){
 			if(!empty($element->conditions)){
-				$element->conditions	= maybe_unserialize($element->conditions);
+				while(is_serialized( $element->conditions )){
+					$element->conditions	= maybe_unserialize($element->conditions);
+				}
 			}
 		}
 

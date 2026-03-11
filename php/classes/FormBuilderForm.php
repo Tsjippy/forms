@@ -1992,7 +1992,7 @@ class FormBuilderForm extends DisplayForm{
 					foreach($condition['rules'] as $ruleIndex=>$rule){
 						?>
 						<div class='rule-row' data-rule-index='<?php echo $ruleIndex;?>'>
-							<input type='hidden' class='no-reset' class='element-condition combinator' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][combinator]' value='<?php echo $rule['combinator']; ?>'>
+							<input type='hidden' class='no-reset element-condition combinator' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][combinator]' value='<?php echo $rule['combinator']; ?>'>
 						
 							<select class='element-condition condition-select conditional-field' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional-field]' required>
 								<?php
