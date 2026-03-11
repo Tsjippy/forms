@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- unserialization error
 
 ### Updated
+
+## [10.0.5] - 2026-03-11
+
+
+### Fixed
+- unserialization error
 
 ## [10.0.4] - 2026-03-05
 
