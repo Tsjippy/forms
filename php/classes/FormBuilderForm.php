@@ -177,9 +177,9 @@ class FormBuilderForm extends DisplayForm{
 
 		if(empty($parent)){
 			// Create a new DOMDocument object
-			$dom 		= new \DOMDocument();
+			$this->dom 		= new \DOMDocument();
 			
-			$parent 	= $dom;
+			$parent 	= $this->dom;
 			
    			$returnHtml = true;
 		}				
@@ -380,7 +380,7 @@ class FormBuilderForm extends DisplayForm{
 		);
 
 		if($returnHtml){
-			return $dom->saveHtml();
+			return $this->dom->saveHtml();
 		}
 
 		return $controlsWrapper;
@@ -557,13 +557,6 @@ class FormBuilderForm extends DisplayForm{
 		
 		//Sort the roles
 		asort($userRoles);
-
-		$splittedElements	= $this->findSplitElementIds();
-
-		$keyWords			= [];
-		foreach($splittedElements as $baseName => $names){
-			$keyWords		= array_merge($keyWords, array_keys($names));
-		}
 		
 		?>
 		<div class="element-settings-wrapper">

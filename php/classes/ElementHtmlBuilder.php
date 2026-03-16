@@ -479,6 +479,9 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
 
 		try {
+			// Text content should not contain <br> tags, replace them with new line characters
+			$textContent = str_replace('<br>', "\n", $textContent);
+
 			$node = $dom->createElement($type, $textContent );
 		} catch (\DOMException $e) {
 			// Catch the specific DOMException
