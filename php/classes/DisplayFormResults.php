@@ -401,6 +401,7 @@ class DisplayFormResults extends DisplayForm{
 			}
 
 			$ect .= implode(",\n\t\t", $splitColumns);
+			$ect .= ",\n\t\tMAX(CASE WHEN element_id = '-6' THEN sub_id END) AS 'sub_archived'";
 			$ect .= "\n\tFROM Raw"; 
 			$ect .= "\n\tWHERE sub_id IS NOT NULL";
 			$ect .= "\n\tGROUP BY id, sub_id";
@@ -432,7 +433,7 @@ class DisplayFormResults extends DisplayForm{
 		 * The main ECT that joins the ect with the non-spitted values with the ect with the splitted values
 		 */
 		$ect				.= ",\n -- the final submission table including sub-values \nSubmissions AS (\n\tSELECT * \n\tFROM EmptySubIdValues E $innerJoinString\n)\n\t\t";
-		$baseQuery			.= "SELECT * FROM Submissions";
+		$baseQuery			.= "SELECT * FROM Submissions WHERE sub_id <> sub_archived or sub_archived is null";
 
 		return $ect;
 	}
@@ -494,7 +495,7 @@ class DisplayFormResults extends DisplayForm{
 		
 		// Archived
 		if(!$this->showArchived && $submissionId == null){
-			$where[]	=  "S.archived=0";
+			$where[]		=  "S.archived=0";
 		}
 
 		// Specific Submission

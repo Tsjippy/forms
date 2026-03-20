@@ -14,13 +14,13 @@ function moduleUpdate($oldVersion){
 
     $simForms->createDbTables();
 
-    if($oldVersion < '8.2.1'){
+    if(version_compare($oldVersion, '8.2.1') < 0){
         maybe_add_column($simForms->tableName, 'reminder_amount', "ALTER TABLE $simForms->tableName ADD COLUMN `reminder_amount` LONGTEXT");
 
         SIM\printArray("Added column");
     }
 
-    if($oldVersion < '8.5.9'){
+    if(version_compare($oldVersion, '8.5.9') < 0){
         $simForms->getForms();
         foreach($simForms->forms as $formData){
             $fullRightRoles = maybe_unserialize($formData->full_right_roles);
@@ -45,12 +45,12 @@ function moduleUpdate($oldVersion){
         }
     }
 
-    if($oldVersion < '8.6.9'){
+    if(version_compare($oldVersion, '8.6.9') < 0){
         maybe_add_column($simForms->elTableName, 'add', "ALTER TABLE $simForms->elTableName ADD COLUMN `add` LONGTEXT");
         maybe_add_column($simForms->elTableName, 'remove', "ALTER TABLE $simForms->elTableName ADD COLUMN `remove` LONGTEXT");
     }
 
-    if($oldVersion < '8.7.0'){
+    if(version_compare($oldVersion, '8.7.0') < 0){
         // Shortcode data
         $shortcodes   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_form_shortcodes");
         maybe_add_column("{$wpdb->prefix}sim_form_shortcodes", 'title', "ALTER TABLE {$wpdb->prefix}sim_form_shortcodes ADD COLUMN `title` tinytext");
@@ -270,7 +270,7 @@ function moduleUpdate($oldVersion){
         }
     }
 
-    if($oldVersion < '8.7.4'){
+    if(version_compare($oldVersion, '8.7.4') < 0){
         $query						= "SELECT * FROM {$simForms->shortcodeTable}";
 		$shortcodes 		        = $wpdb->get_results($query);
 
@@ -305,11 +305,11 @@ function moduleUpdate($oldVersion){
         }
     }
 
-    if($oldVersion < '8.7.8'){
+    if(version_compare($oldVersion, '8.7.8') < 0){
         maybe_add_column("{$wpdb->prefix}sim_form_shortcode_column_settings", 'priority', "ALTER TABLE {$wpdb->prefix}sim_form_shortcode_column_settings ADD COLUMN `priority` int");
     }
 
-    if($oldVersion < '8.8.1'){
+    if(version_compare($oldVersion, '8.8.1') < 0){
         $simForms->getForms();
         foreach($simForms->forms as $formData){
 
@@ -334,21 +334,21 @@ function moduleUpdate($oldVersion){
         }
     }
 
-    if($oldVersion < '8.8.6'){
+    if(version_compare($oldVersion, '8.8.6') < 0){
         foreach(['form_reset', 'reminder_frequency', 'reminder_period', 'reminder_conditions', 'reminder_amount', 'reminder_startdate'] as $columnName){
             maybe_drop_column( $simForms->tableName, $columnName, "ALTER TABLE $simForms->tableName DROP COLUMN $columnName");
         }
     }
 
-    if($oldVersion < '8.9.0'){
+    if(version_compare($oldVersion, '8.9.0') < 0){
         $wpdb->query("UPDATE `{$wpdb->prefix}sim_form_shortcode_column_settings` SET `name`='submitteruserid' WHERE `element_id` = -2");
     }
 
-    if($oldVersion < '8.9.3'){
+    if(version_compare($oldVersion, '8.9.3') < 0){
         maybe_add_column("{$wpdb->prefix}sim_form_shortcode_column_settings", 'copy', "ALTER TABLE {$wpdb->prefix}sim_form_shortcode_column_settings ADD COLUMN `copy` bool");
     }
 
-    if($oldVersion < '8.9.7'){
+    if(version_compare($oldVersion, '8.9.7') < 0){
         // delete broken coulmn settings
         $wpdb->delete(
             $simForms->shortcodeColumnSettingsTable,
@@ -606,13 +606,13 @@ function moduleUpdate($oldVersion){
         }
     }
 
-    if($oldVersion < '9.0.2'){
+    if(version_compare($oldVersion, '9.0.2') < 0){
         foreach(['archivedsubs', 'formresults'] as $columnName){
             maybe_drop_column( $simForms->submissionTableName, $columnName, "ALTER TABLE $simForms->submissionTableName DROP COLUMN $columnName");
         }
     }
 
-    if($oldVersion < '9.0.7'){
+    if(version_compare($oldVersion, '9.0.7') < 0){
         foreach(['form_id'] as $columnName){
             maybe_drop_column( $simForms->shortcodeColumnSettingsTable, $columnName, "ALTER TABLE $simForms->shortcodeColumnSettingsTable DROP COLUMN $columnName");
         }
@@ -665,11 +665,11 @@ function moduleUpdate($oldVersion){
         }
     }
 
-    if($oldVersion < '9.0.8'){
+    if(version_compare($oldVersion, '9.0.8') < 0){
         $wpdb->query("UPDATE `$simForms->shortcodeColumnSettingsTable` set name= 'booking-rooms' where name = 'booking-room'"); 
     }
 
-    if($oldVersion <= '9.1.4'){
+    if(version_compare($oldVersion, '9.1.4') < 0){
         maybe_drop_column( $simForms->shortcodeTable, $columnName, "ALTER TABLE $simForms->shortcodeTable DROP COLUMN 'column_settings'");
 
         maybe_drop_column( $simForms->shortcodeTable, $columnName, "ALTER TABLE $simForms->shortcodeTable DROP COLUMN 'table_settings'");
@@ -715,9 +715,22 @@ function moduleUpdate($oldVersion){
         );
     }
 
-    if($oldVersion <= '10.0.0'){
+    if(version_compare($oldVersion, '10.0.0') < 0){
         $wpdb->query("ALTER TABLE `$simForms->submissionTableName` CHANGE `userid` `userid` mediumint NULL");
+    }
+
+    if(version_compare($oldVersion, '10.0.5', '>=')){
+        $wpdb->update(
+            $simForms->submissionValuesTableName,
+            [
+                'sub_id'   => 'value',
+                'value'    => '1'
+            ],
+            array(
+                'element_id'		=> -6
+            ),
+        );
     }
 }
 
-//add_action('init', function(){moduleUpdate('9..4');} ); // For testing purposes only
+//add_action('init', function(){moduleUpdate('10.0.5');} ); // For testing purposes only

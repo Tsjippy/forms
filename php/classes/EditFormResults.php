@@ -176,8 +176,9 @@ class EditFormResults extends DisplayFormResults{
 				$this->submissionValuesTableName,
 				array(
 					'submission_id'	=> $submissionId,
+					'sub_id'		=> $subId,
 					'element_id'	=> -6,
-					'value'			=> $subId
+					'value'			=> 1
 				),
 				array(
 					'%d',
@@ -194,7 +195,7 @@ class EditFormResults extends DisplayFormResults{
 				array(
 					'submission_id'	=> $submissionId,
 					'element_id'	=> -6,
-					'value'			=> $subId
+					'sub_id'		=> $subId
 				)
 			);
 		}
@@ -402,7 +403,7 @@ class EditFormResults extends DisplayFormResults{
 						T2.element_id IN ($allIds) AND
 						T2.value $compare \"$triggerValue\" AND
 						T2.sub_id not IN (
-							SELECT value
+							SELECT sub_id
 							FROM %i
 							WHERE element_id=-6 and submission_id=T2.submission_id
 						)
