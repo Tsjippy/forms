@@ -7,6 +7,7 @@
 
 ### Fixed
 - formbuilder bugs
+- archive sub-submissions
 
 ### Updated
 
