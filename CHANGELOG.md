@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- refactor sql queries
 
 ### Fixed
 - formbuilder bugs
