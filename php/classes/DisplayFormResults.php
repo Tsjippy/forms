@@ -343,12 +343,41 @@ class DisplayFormResults extends DisplayForm{
 
 		$innerJoinString	= '';
 
+		// Check which where statements shoul apply to the splitted values and add those to the inner join string
+		$rawWhere			= [];
+		$rawValues			= [];
+		$finalWhere			= [];
+		$valueIndex			= 0;
+		foreach($where as $index => $whereStatement){
+			if(str_contains($whereStatement, 'S.')){
+				$rawWhere[]		= $whereStatement;
+
+				if(str_contains($whereStatement, '%')){
+					$rawValues[]	= $values[$valueIndex];
+
+					unset($values[$valueIndex]);
+				}
+			}else{
+				$finalWhere[]	= $whereStatement;
+			}
+
+			// Keep track of the value index for the where statements
+			if(str_contains($whereStatement, '%')){
+				$valueIndex++;
+			}
+		}
+
+		// merge the value arrays back in the right order
+		$values			= array_merge($rawValues, $values);
+		
+		$rawWhere	= implode(' AND ', $rawWhere);
+
 		// ECT for all the values
 		$ect 				= "-- Table with raw data on several rows, where only the element_id and value are unique\n"
 			. "WITH Raw AS (\n\t"
 			. "SELECT S.$columnsString, V.sub_id, V.element_id, V.value\n\tFROM %i as S\n\t"
 			. "INNER JOIN %i as V ON S.id = V.submission_id \n\t"
-			. "WHERE $where\n"
+			. "WHERE $rawWhere\n"
 		. ")";
 
 		// add the table names to the values table
@@ -434,6 +463,9 @@ class DisplayFormResults extends DisplayForm{
 		 */
 		$ect				.= ",\n -- the final submission table including sub-values \nSubmissions AS (\n\tSELECT * \n\tFROM EmptySubIdValues E $innerJoinString\n)\n\t\t";
 		$baseQuery			.= "SELECT * FROM Submissions WHERE sub_id <> sub_archived or sub_archived is null";
+		if(!empty($finalWhere)){
+			$baseQuery .= " AND ".implode(' AND ', $finalWhere);
+		}
 
 		return $ect;
 	}
@@ -443,10 +475,13 @@ class DisplayFormResults extends DisplayForm{
 	 *
 	 * @param	int|array	$userId			Optional the user id to get the results of or an array of user ids. Default null
 	 * @param	int			$submissionId	Optional a specific submission id. Default null
+	 * @param	bool		$all			Whether to retrieve all submissions or paged. Default false
+	 * @param	array		$where			Optional array of where conditions. Default empty array
+	 * @param	array		$values			Optional array of values for the where conditions. Default empty array
 	 *
 	 * @return	array						array of results
 	 */
-	public function getSubmissions($userId=null, $submissionId=null, $all=false){
+	public function getSubmissions($userId=null, $submissionId=null, $all=false, $where	= [], $values = []){
 		global $wpdb;
 
 		$userId	= apply_filters('sim-forms-userids-to-retrieve', $userId, $this);
@@ -477,12 +512,6 @@ class DisplayFormResults extends DisplayForm{
 		if($this->formData->save_in_meta){
 			return $this->getMetaKeyFormSubmissions($userId, $all);
 		}
-
-		/**
-		 * Build the Where conditions
-		 */
-		$where			= [];
-		$values			= [];
 		
 		/**
 		 * Get the where statements
@@ -495,7 +524,7 @@ class DisplayFormResults extends DisplayForm{
 		
 		// Archived
 		if(!$this->showArchived && $submissionId == null){
-			$where[]		=  "S.archived=0";
+			$where[]	=  "S.archived=0";
 		}
 
 		// Specific Submission
@@ -549,7 +578,7 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * Build the main query
 		 */
-		$ecd	= $this->columnsQuery(implode(' AND ', $where), $query, $values);
+		$ecd			= $this->columnsQuery($where, $query, $values);
 
 		// Get the total
 		$countQuery		= "$ecd\n\nSELECT COUNT(*) AS total FROM (\n\t$query\n) AS AllData;";

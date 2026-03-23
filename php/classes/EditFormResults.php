@@ -182,8 +182,9 @@ class EditFormResults extends DisplayFormResults{
 				),
 				array(
 					'%d',
-					'%s',
-					'%s'
+					'%d',
+					'%d',
+					'%d'
 				)
 			);
 		}
@@ -247,6 +248,7 @@ class EditFormResults extends DisplayFormResults{
 			return false;
 		}
 	
+		// If we are archiving a sub entry, we need to check if all other sub entries are also archived, if so we archive the whole submission
 		$result	= $this->archiveSubSubmission($archive, $subId, $submissionId);	
 
 		if($result){
@@ -301,8 +303,6 @@ class EditFormResults extends DisplayFormResults{
 	 * Auto archive form submission based on the form settings
 	 */
 	public function autoArchive(){
-		global $wpdb;
-
 		//get all the forms
 		$this->getForms();
 		
@@ -348,6 +348,8 @@ class EditFormResults extends DisplayFormResults{
 			}
 
 			$compare	= '=';
+
+			// If this looks like a date, we want to compare if the date is in the past, so we change the compare operator to <
 			if(preg_match('/\d{4}-\d{2}-\d{2}/', $triggerValue)){
 				$compare	= '<';
 			}
@@ -355,70 +357,33 @@ class EditFormResults extends DisplayFormResults{
 			// Get potential split
 			$splittedElements	= $this->findSplitElementIds();
 
-			if(empty($splittedElements)){
-				// just compare the value
-				$results	= $wpdb->get_results(
-					$wpdb->prepare(
-						"Select * from %i WHERE element_id = %d AND value $compare '$triggerValue'",
-						$this->submissionValuesTableName,
-						$triggerId,
-					)
-				);
-			}else{
-				// Find all possible element ids
-				$allIds				= [];
+			// Find the name of the trigger element
+			foreach($splittedElements as $baseName){
+				foreach($baseName as $name => $splitElementIds){
+					if(in_array($triggerId, $splitElementIds)){
+						$triggerId	= $name;
 
-				// There is no trigger value found in the results, check multi value array
-				if(	!empty($splittedElements)){
-					foreach($splittedElements as $baseName => $names){
-						foreach($names as $name => $elementIds){
-							// do not add subids we do not need
-							if(!in_array($triggerId, $elementIds)){
-								continue;
-							}
-
-							foreach($elementIds as $elementId){
-								// This is the one we were looking for
-								$allIds[]	= $elementId;
-							}
-						}
+						break 2;
 					}
 				}
-
-				$allIds	= implode(',', $allIds);
-
-				/**
-				 * Get the results of all submissions that are not yet archived
-				 * -6 is the element id we use to mark sub entries as archived, so we need to exclude those from the results
-				 */
-				$results	= $wpdb->get_results(
-					$wpdb->prepare(
-						"
-						SELECT *
-						FROM %i AS T1
-						INNER JOIN %i AS T2 ON T1.id = T2.submission_id
-						WHERE 
-						T1.archived=0 AND 
-						T2.sub_id IS NOT NULL AND 
-						T2.element_id IN ($allIds) AND
-						T2.value $compare \"$triggerValue\" AND
-						T2.sub_id not IN (
-							SELECT sub_id
-							FROM %i
-							WHERE element_id=-6 and submission_id=T2.submission_id
-						)
-						",
-						$this->submissionTableName,
-						$this->submissionValuesTableName,
-						$this->submissionValuesTableName
-					)
-				);
 			}
 
-			foreach($results as $result){
-				$this->submissionId	= $result->submission_id;
+			$submissions		= $this->getSubmissions(
+				null, 
+				null, 
+				true,
+				[
+					"$triggerId $compare %s"
+				],
+				[
+					$triggerValue
+				]
+			);
 
-				$this->archiveSubmission(true, $result->sub_id);
+			foreach($submissions as $submission){
+				$this->submissionId	= $submission->id;
+
+				$this->archiveSubmission(true, $submission->sub_id);
 			}
 		}
 	}

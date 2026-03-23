@@ -393,6 +393,7 @@ class DisplayForm extends ElementHtmlBuilder{
 	 */
 	public function findSplitElementIds(){
 		$baseNames	= $elementIds = [];
+		
 		// Check if this is an splitted element
 		if(empty($this->formData->split)){
 			return apply_filters('sim-forms-split-element-ids', $elementIds, $this);
