@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- bug in sql query when no splitted elements
 
 ### Updated
+
+## [10.0.7] - 2026-03-24
+
+
+### Fixed
+- bug in sql query when no splitted elements
 
 ## [10.0.6] - 2026-03-23
 
