@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- bug in sql query when no splitted elements
 
 ### Updated
 
