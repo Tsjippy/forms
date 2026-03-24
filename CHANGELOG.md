@@ -6,10 +6,18 @@
 ### Changed
 
 ### Fixed
-- formbuilder bugs
-- archive sub-submissions
 
 ### Updated
+
+## [10.0.6] - 2026-03-23
+
+
+### Changed
+- refactor sql queries
+
+### Fixed
+- formbuilder bugs
+- archive sub-submissions
 
 ## [10.0.5] - 2026-03-11
 
