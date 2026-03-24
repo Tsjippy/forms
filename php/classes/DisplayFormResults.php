@@ -322,6 +322,73 @@ class DisplayFormResults extends DisplayForm{
 	}
 
 	/**
+	 * Queries for splitted form results
+	 * Transpose all splitted value rows to columns
+	 * 
+	 * @param array $finalWhere			The array of where statements to add the sub_id where statement to
+	 * 
+	 * @return string						The updated Common Table Expressions string with the splitted values queries added
+	 */
+	private function splittedValuesQueries(&$finalWhere, &$innerJoinString){
+		if(empty($splitElements)){
+			return;
+		}
+
+		$innerJoinString	= "\n\tINNER JOIN SubIdValues as V ON E.id = V.Sid";
+
+		$ect 			   	= ",\nSubIdValues AS (\n\tSELECT \n\t\tid AS Sid, \n\t\tsub_id,\n\t\t";
+
+		$splitColumns		= [];
+
+		/**
+		 * Process split elements with the form base[index][key]
+		 */
+		foreach($this->findSplitElementIds() as $base){
+			foreach($base as $columnName => $ids){
+				// Make the array of elements that share the same name a comma separated string for the query
+				$implodedIds	= implode(", ", array_values($ids));
+
+				// Store the other ids as well
+				$splitElements	= array_merge($splitElements, array_values($ids));
+
+				// Add the column to the query
+				$splitColumns[] = "MAX(CASE WHEN element_id IN ($implodedIds) THEN value END) AS '$columnName'";
+
+				// Make sure we sort on the $columnName if needed
+				foreach ($this->sortElementIds as &$elementId) {
+					if(in_array($elementId, $ids)){
+						$elementId = $columnName;
+					}
+				}
+				unset($elementId); 
+			}
+
+			$this->sortElementIds	= array_unique($this->sortElementIds);
+		}
+
+		/**
+		 * Process simple base[index] splits
+		 */
+		if(empty($splitColumns)){
+			foreach($splitElements as $splitElement){
+				// Add the column to the query
+				$splitColumns[] 		= "MAX(CASE WHEN element_id = $splitElement THEN value END) AS '$splitElement'";
+			}
+		}
+
+		$ect .= implode(",\n\t\t", $splitColumns);
+		$ect .= ",\n\t\tMAX(CASE WHEN element_id = '-6' THEN sub_id END) AS 'sub_archived'";
+		$ect .= "\n\tFROM Raw"; 
+		$ect .= "\n\tWHERE sub_id IS NOT NULL";
+		$ect .= "\n\tGROUP BY id, sub_id";
+		$ect .= "\n)";
+
+		$finalWhere[]			= "(sub_id <> sub_archived or sub_archived is null)";
+
+		return $ect;
+	}
+
+	/**
 	 * Builds the columns list for the SQL query
 	 * 
 	 * @param 	array	$where			The where conditions for the query
@@ -383,61 +450,7 @@ class DisplayFormResults extends DisplayForm{
 		// add the table names to the values table
 		array_unshift($values, $this->submissionTableName, $this->submissionValuesTableName);
 
-		/**
-		 * Transpose all splitted value rows to columns
-		 */
-		if(!empty($splitElements)){
-			$innerJoinString	= "\n\tINNER JOIN SubIdValues as V ON E.id = V.Sid";
-
-			$ect .= ",\nSubIdValues AS (\n\tSELECT \n\t\tid AS Sid, \n\t\tsub_id,\n\t\t";
-
-			$splitColumns	= [];
-
-			/**
-			 * Process split elements with the form base[index][key]
-			 */
-			foreach($this->findSplitElementIds() as $base){
-				foreach($base as $columnName => $ids){
-					// Make the array of elements that share the same name a comma separated string for the query
-					$implodedIds	= implode(", ", array_values($ids));
-
-					// Store the other ids as well
-					$splitElements	= array_merge($splitElements, array_values($ids));
-
-					// Add the column to the query
-					$splitColumns[] = "MAX(CASE WHEN element_id IN ($implodedIds) THEN value END) AS '$columnName'";
-
-					// Make sure we sort on the $columnName if needed
-					foreach ($this->sortElementIds as &$elementId) {
-						if(in_array($elementId, $ids)){
-							$elementId = $columnName;
-						}
-					}
-					unset($elementId); 
-				}
-
-				$this->sortElementIds	= array_unique($this->sortElementIds);
-			}
-
-			/**
-			 * Process simple base[index] splits
-			 */
-			if(empty($splitColumns)){
-				foreach($splitElements as $splitElement){
-					// Add the column to the query
-					$splitColumns[] 		= "MAX(CASE WHEN element_id = $splitElement THEN value END) AS '$splitElement'";
-				}
-			}
-
-			$ect .= implode(",\n\t\t", $splitColumns);
-			$ect .= ",\n\t\tMAX(CASE WHEN element_id = '-6' THEN sub_id END) AS 'sub_archived'";
-			$ect .= "\n\tFROM Raw"; 
-			$ect .= "\n\tWHERE sub_id IS NOT NULL";
-			$ect .= "\n\tGROUP BY id, sub_id";
-			$ect .= "\n)";
-
-			$finalWhere[]			= "(sub_id <> sub_archived or sub_archived is null)";
-		}
+		$ect .= $this->splittedValuesQueries($finalWhere, $innerJoinString);
 
 		/**
 		 * Transpose rows to columns for values with an empty sub_id (non splitted) 
