@@ -462,7 +462,11 @@ class DisplayFormResults extends DisplayForm{
 		 * The main ECT that joins the ect with the non-spitted values with the ect with the splitted values
 		 */
 		$ect				.= ",\n -- the final submission table including sub-values \nSubmissions AS (\n\tSELECT * \n\tFROM EmptySubIdValues E $innerJoinString\n)\n\t\t";
-		$baseQuery			.= "SELECT * FROM Submissions WHERE sub_id <> sub_archived or sub_archived is null";
+		$baseQuery			.= "SELECT * FROM Submissions WHERE 1=1";
+		if(!empty($splitElements)){
+			$baseQuery .= " AND (sub_id <> sub_archived or sub_archived is null)";
+		}
+
 		if(!empty($finalWhere)){
 			$baseQuery .= " AND ".implode(' AND ', $finalWhere);
 		}
