@@ -435,6 +435,8 @@ class DisplayFormResults extends DisplayForm{
 			$ect .= "\n\tWHERE sub_id IS NOT NULL";
 			$ect .= "\n\tGROUP BY id, sub_id";
 			$ect .= "\n)";
+
+			$finalWhere[]			= "(sub_id <> sub_archived or sub_archived is null)";
 		}
 
 		/**
@@ -463,9 +465,6 @@ class DisplayFormResults extends DisplayForm{
 		 */
 		$ect				.= ",\n -- the final submission table including sub-values \nSubmissions AS (\n\tSELECT * \n\tFROM EmptySubIdValues E $innerJoinString\n)\n\t\t";
 		$baseQuery			.= "SELECT * FROM Submissions WHERE 1=1";
-		if(!empty($splitElements)){
-			$baseQuery .= " AND (sub_id <> sub_archived or sub_archived is null)";
-		}
 
 		if(!empty($finalWhere)){
 			$baseQuery .= " AND ".implode(' AND ', $finalWhere);
