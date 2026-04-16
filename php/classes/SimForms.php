@@ -1401,8 +1401,8 @@ class SimForms{
 				$this->submission->editdate			= date('d F y', strtotime($this->submission->timelastedited));
 			}
 			
-			if(isset($_REQUEST['subid']) && empty($this->submission->subid)){
-				$this->submission->subid	= $_REQUEST['subid'];
+			if(isset($_REQUEST['subid']) && empty($this->submission->sub_id)){
+				$this->submission->sub_id	= $_REQUEST['subid'];
 			}
 		}
 

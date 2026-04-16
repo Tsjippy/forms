@@ -327,9 +327,10 @@ class DisplayFormResults extends DisplayForm{
 	 * 
 	 * @param array $finalWhere			The array of where statements to add the sub_id where statement to
 	 * 
-	 * @return string						The updated Common Table Expressions string with the splitted values queries added
+	 * @return string					The updated Common Table Expressions string with the splitted values queries added
 	 */
 	private function splittedValuesQueries(&$finalWhere, &$innerJoinString){
+		$splitElements		= $this->formData->split ?? [];
 		if(empty($splitElements)){
 			return;
 		}
@@ -474,7 +475,7 @@ class DisplayFormResults extends DisplayForm{
 		$ect				.= "\n\tFROM Raw \n\tWHERE sub_id IS NULL \n\tGROUP BY id\n)";
 
 		/**
-		 * The main ECT that joins the ect with the non-spitted values with the ect with the splitted values
+		 * The main ECT that joins the ect with the non-splitted values with the ect with the splitted values
 		 */
 		$ect				.= ",\n -- the final submission table including sub-values \nSubmissions AS (\n\tSELECT * \n\tFROM EmptySubIdValues E $innerJoinString\n)\n\t\t";
 		$baseQuery			.= "SELECT * FROM Submissions WHERE 1=1";
@@ -962,11 +963,11 @@ class DisplayFormResults extends DisplayForm{
 
 				//Get the element value from the array
 				if(
-					isset($this->submission->subId) && 					// sub id set
+					isset($this->submission->sub_id) && 					// sub id set
 					!empty($columnSetting['elementIds']) &&				// this has an element ids array		
 					in_array($elementId, $columnSetting['elementIds'])	// this element belongs to this setting
 				){
-					$subIdString = "data-subid='{$this->submission->subId}'";
+					$subIdString = "data-subid='{$this->submission->sub_id}'";
 					
 					// Find the splitted value
 					foreach($columnSetting['elementIds'] as $elementId){
@@ -1120,7 +1121,7 @@ class DisplayFormResults extends DisplayForm{
 				}
 				$buttonsHtml[$action]	= "<button class='$action button forms-table-action' name='{$action}-action' value='$action'/>".ucfirst($action)."</button>";
 			}
-			$buttonsHtml = apply_filters('sim_form_actions_html', $buttonsHtml, $this->submission, $this->submission->subId, $this);
+			$buttonsHtml = apply_filters('sim_form_actions_html', $buttonsHtml, $this->submission, $this->submission->sub_id, $this);
 
 			//we have te html now, check for which one we have permission
 			foreach($buttonsHtml as $action => $button){
