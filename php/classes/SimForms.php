@@ -1299,6 +1299,17 @@ class SimForms{
 	public function getSubmissionValue($submissionId, $elementId, $subId='', $returnArray=false){
 		global $wpdb;
 
+		/**
+		 * Check if the requested submission is already in the submissions property, if so return the value from there instead of querying the database
+		 */
+		if(!empty($this->submissions)){
+			foreach($this->submissions as $submission){
+				if( $submission->id == $submissionId && isset($submission->{$elementId}) ){
+					return $submission->{$elementId};
+				}
+			}
+		}
+
  		$baseQuery	= "SELECT `value` FROM %i WHERE ";
 		$where		= [
 			'submission_id = %d',

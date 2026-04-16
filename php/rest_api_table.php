@@ -381,7 +381,7 @@ function getInputHtml(){
 		return new \WP_Error('No element found', "No element found with id '$elementId'");
 	}
 
-	$value	= $formTable->getSubmissionValue($_POST['submission-id'], $elementId, $_POST['subid']);
+	$value		= $formTable->getSubmissionValue($_POST['submission-id'], $elementId, isset($_POST['subid']) ? $_POST['subid'] : null);
 
 	// Get element html
 	$html 		= $formTable->getElementHtml($element, '', $value);

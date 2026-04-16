@@ -410,7 +410,7 @@ class DisplayFormResults extends DisplayForm{
 
 		$innerJoinString	= '';
 
-		// Check which where statements shoul apply to the splitted values and add those to the inner join string
+		// Check which where statements should apply to the splitted values and add those to the inner join string
 		$rawWhere			= [];
 		$rawValues			= [];
 		$finalWhere			= [];
@@ -435,7 +435,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		// merge the value arrays back in the right order
-		$values			= array_merge($rawValues, $values);
+		$values		= array_merge($rawValues, $values);
 		
 		$rawWhere	= implode(' AND ', $rawWhere);
 
