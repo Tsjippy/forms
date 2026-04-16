@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- faster value retrieval
 
 ### Fixed
 
