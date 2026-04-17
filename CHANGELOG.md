@@ -9,6 +9,12 @@
 
 ### Updated
 
+## [10.0.8] - 2026-04-16
+
+
+### Changed
+- faster value retrieval
+
 ## [10.0.7] - 2026-03-24
 
 
