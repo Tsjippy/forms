@@ -384,7 +384,9 @@ class DisplayFormResults extends DisplayForm{
 		$ect .= "\n\tGROUP BY id, sub_id";
 		$ect .= "\n)";
 
-		$finalWhere[]			= "(sub_id <> sub_archived or sub_archived is null)";
+		if(!$this->showArchived){
+			$finalWhere[]			= "(sub_id <> sub_archived or sub_archived is null)";
+		}
 
 		return $ect;
 	}
@@ -519,6 +521,9 @@ class DisplayFormResults extends DisplayForm{
 				}
 			}
 		}
+
+		// We want to see archived entries if a specific submission id is queried
+		$this->showArchived = $this->showArchived || is_numeric($submissionId);
 
 		// Check if a form is loaded
 		if(empty($this->formData) && !empty($submissionId)){
@@ -1108,10 +1113,7 @@ class DisplayFormResults extends DisplayForm{
 				 */ 
 				if(
 					$action == 'archive' && 
-					(
-						$this->showArchived ||
-						isset($_REQUEST['id'])					// if we are requesting a specific id, we are showing archived ones even if not set
-					) && 
+					$this->showArchived && 
 					(
 						$this->submission->archived ||
 						!empty($this->submission->archived)
