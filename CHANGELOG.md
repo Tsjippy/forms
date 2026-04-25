@@ -5,6 +5,7 @@
 
 ### Changed
 - main plugin name from sim-base to tsjippy-shared-functionality
+- sim prefix to tsjippy prefix
 
 ### Fixed
 - show archived submissions
