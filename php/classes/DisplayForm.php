@@ -214,7 +214,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		if(!file_exists($jsPath)){
 			//SIM\printArray("$jsPath does not exist!\nBuilding it now");
 			
-			$path	= MODULE_PATH."/js/dynamic";
+			$path	= PLUGINPATH."js/dynamic";
 			if (!is_dir($path)) {
 				wp_mkdir_p($path);
 			}

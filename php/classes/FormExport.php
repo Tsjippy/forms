@@ -333,6 +333,6 @@ class FormExport extends FormBuilderForm{
 			);
 		}
 
-		echo "<div class='success'>Import of the form '$formName' finished successfully.<br>Visit the created form <a href='$url' target='_blank'>here</a></div>";
+		return "<div class='success'>Import of the form '$formName' finished successfully.<br>Visit the created form <a href='$url' target='_blank'>here</a></div>";
 	}
 }

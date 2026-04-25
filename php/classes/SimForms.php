@@ -81,7 +81,10 @@ class SimForms{
 		if(!empty($object->post_author)){
 			$postAuthor	= $object->post_author;
 		}elseif(!empty($_REQUEST['post'])){
-			$postAuthor	= get_post($_REQUEST['post'])->post_author;
+			$post		= get_post($_REQUEST['post']);
+			if(!empty($post)){
+				$postAuthor	= $post->post_author;
+			}
 		}elseif(!empty($_POST['form-url'])){
 			$postId		= url_to_postid($_POST['form-url']);
 			
@@ -183,9 +186,9 @@ class SimForms{
 			library boolean default False,
 			editimage boolean default False,
 		  	conditions longtext,
-			warning-conditions longtext,
-			add longtext,
-			remove longtext,
+			warning_conditions longtext,
+			`add` longtext,
+			`remove` longtext,
 			PRIMARY KEY  (id)
 		  ) $charsetCollate;";
   
@@ -651,6 +654,8 @@ class SimForms{
 				wp_update_post( $post );
 			}
 		}
+
+		return "<div class='success'>Deletion of the form with id '$formId' finished successfully.</div>"; 
 	}
 	
 	/**

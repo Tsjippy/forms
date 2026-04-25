@@ -81,19 +81,25 @@ function afterInsertPost($postId, $post){
     }
 
     if($hasFormbuilderShortcode || has_shortcode($post->post_content, 'formselector') || has_block('sim/formbuilder', $post)){       
-        $pages  = SIM\getModuleOption(MODULE_SLUG, 'formbuilder-pages', false);
+        $pages  = SETTINGS['formbuilder-pages'] ?? [];
 
         $pages[]  = $postId;
 
-        SIM\updateModuleOptions(MODULE_SLUG, $pages, 'formbuilder-pages');
+        $settings   = SETTINGS;
+        $settings['formbuilder-pages'] = $pages;
+
+        update_option('sim_forms_settings', $settings);
     }
 
     if(has_shortcode($post->post_content, 'formresults') || has_shortcode($post->post_content, 'formselector')){
-        $pages  = SIM\getModuleOption(MODULE_SLUG, 'formtable-pages', false);
+        $pages  = SETTINGS['formtable-pages'] ?? [];
 
         $pages[]  = $postId;
 
-        SIM\updateModuleOptions(MODULE_SLUG, $pages, 'formtable-pages');
+        $settings   = SETTINGS;
+        $settings['formtable-pages'] = $pages;
+
+        update_option('sim_forms_settings', $settings);
     }
 }
 
@@ -101,24 +107,19 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__.'\registerScripts');
 add_action( 'admin_enqueue_scripts', __NAMESPACE__.'\registerScripts');
 
 function registerScripts(){
-    wp_register_style( 'sim_forms_style', SIM\pathToUrl(MODULE_PATH.'css/forms.min.css'), array(), MODULE_VERSION);
-    wp_register_style( 'sim_formtable_style', SIM\pathToUrl(MODULE_PATH.'css/formtable.min.css'), array(), MODULE_VERSION);
+    wp_register_style( 'sim_forms_style', SIM\pathToUrl(PLUGINPATH.'css/forms.min.css'), array(), PLUGINVERSION);
+    wp_register_style( 'sim_formtable_style', SIM\pathToUrl(PLUGINPATH.'css/formtable.min.css'), array(), PLUGINVERSION);
 
-    wp_register_script('sim_forms_script', SIM\pathToUrl(MODULE_PATH.'js/forms.min.js'), array('sweetalert', 'sim_formsubmit_script', 'sim_fileupload_script'), MODULE_VERSION, true);
+    wp_register_script('sim_forms_script', SIM\pathToUrl(PLUGINPATH.'js/forms.min.js'), array('sweetalert', 'sim_formsubmit_script', 'sim_fileupload_script'), PLUGINVERSION, true);
 
-    wp_register_script( 'sim_formbuilderjs', SIM\pathToUrl(MODULE_PATH.'js/formbuilder.min.js'), array('sim_forms_script','sortable'), MODULE_VERSION, true);
+    wp_register_script( 'sim_formbuilderjs', SIM\pathToUrl(PLUGINPATH.'js/formbuilder.min.js'), array('sim_forms_script','sortable'), PLUGINVERSION, true);
     
-    wp_register_script('sim_forms_table_script', SIM\pathToUrl(MODULE_PATH.'js/forms_table.min.js'), array('sim_forms_script', 'sim_table_script'), MODULE_VERSION, true);
+    wp_register_script('sim_forms_table_script', SIM\pathToUrl(PLUGINPATH.'js/forms_table.min.js'), array('sim_forms_script', 'sim_table_script'), PLUGINVERSION, true);
 
     if(is_numeric(get_the_ID())){
-        $formBuilderPages   = SIM\getModuleOption(MODULE_SLUG, 'formbuilder-pages');
-        if(is_array($formBuilderPages) && in_array(get_the_ID(), $formBuilderPages)){
+        $pages  = SETTINGS['formbuilder-pages'] ?? [];
+        if(in_array(get_the_ID(), $pages)){
             wp_enqueue_style('sim_forms_style');
         }
-
-        /*         $formtablePages   = SIM\getModuleOption(MODULE_SLUG, 'formtable_pages');
-        if(is_array($formtablePages) && in_array(get_the_ID(), $formtablePages)){
-            wp_enqueue_style('sim_formtable_style');
-        } */
     }
 }

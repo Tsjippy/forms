@@ -75,7 +75,7 @@ function showFormSelector($atts=[]){
             <?php
         }
 
-        if($_REQUEST['display'] == 'results'){
+        if($_REQUEST['display'] ?? '' == 'results'){
             $formVis       = ' hidden';
             $resultVis     = '';
             $formActive    = ' active';

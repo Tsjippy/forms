@@ -10,12 +10,6 @@ function initTasks(){
 	add_action( 'form_reminder_action', __NAMESPACE__.'\formReminder' );
 }
 
-function scheduleTasks(){
-    SIM\scheduleTask('auto_archive_action', 'daily');
-    
-    SIM\scheduleTask('form_reminder_action', 'daily');
-}
-
 function autoArchiveFormEntries(){
 	$editFormResults = new EditFormResults([]);
 	$editFormResults->autoArchive();

@@ -374,7 +374,7 @@ class FormBuilderForm extends DisplayForm{
 			$copyButton,
 			[
 				'class' 	=> 'copy copy-form-element',
-				'src'   	=> SIM\pathToUrl(MODULE_PATH.'pictures/copy_white.png'),
+				'src'   	=> SIM\pathToUrl(PLUGINPATH.'pictures/copy_white.png'),
 				'loading'	=> 'lazy'
 			]
 		);

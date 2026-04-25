@@ -597,7 +597,7 @@ function moduleUpdate($oldVersion){
         WP_Filesystem();
         global $wp_filesystem;
 
-        $path	= MODULE_PATH."/js/dynamic";
+        $path	= PLUGINPATH."js/dynamic";
 
         $wp_filesystem->delete( $path, true );
 

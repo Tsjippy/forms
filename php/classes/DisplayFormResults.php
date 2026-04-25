@@ -49,7 +49,11 @@ class DisplayFormResults extends DisplayForm{
 		$this->user->partnerId			= $family->getPartner($this->user->ID);
 
 		//Get personal visibility
-		$this->hiddenColumns			= get_user_meta($this->user->ID, 'hidden_columns_'.$this->formData->id, true);
+		if(empty($this->formData)){
+			$this->hiddenColumns		= [];
+		}else{
+			$this->hiddenColumns		= get_user_meta($this->user->ID, 'hidden_columns_'.$this->formData->id, true);
+		}
 		
 		if(function_exists('is_user_logged_in') && is_user_logged_in()){
 			$this->userRoles[]	= 'everyone';//used to indicate view rights on permissions
@@ -880,7 +884,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$rowHasContents	= false;
-		$iconUrl 		= SIM\pathToUrl(MODULE_PATH.'/pictures/copy.png');
+		$iconUrl 		= SIM\pathToUrl(PLUGINPATH.'pictures/copy.png');
 		
 		foreach($this->columnSettings as $elementId => $columnSetting){
 			if(!is_array($columnSetting)){
@@ -2149,7 +2153,7 @@ class DisplayFormResults extends DisplayForm{
 						<button class="button button-primary" type="submit" name="export-xls">Export data to excel</button>
 					</form>
 					<?php
-					if(SIM\getModuleOption('pdf', 'enable')){
+					if(SETTINGS['pdf'] ?? '' ==  'enable'){
 						?>
 						<form method="post" class="export-form" id="export-pdf">
 							<button class="button button-primary" type="submit" name="export-pdf">Export data to pdf</button>

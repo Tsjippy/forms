@@ -33,7 +33,7 @@ function mcePlugins($plugins){
 		[$simForms->formSelect()]
 	);
 
-	$plugins['insert_form_shortcode']		= SIM\pathToUrl(MODULE_PATH."js/tiny_mce.js?ver=".MODULE_VERSION);
+	$plugins['insert_form_shortcode']		= SIM\pathToUrl(PLUGINPATH."js/tiny_mce.js?ver=".PLUGINVERSION);
 
 	return $plugins;
 }
