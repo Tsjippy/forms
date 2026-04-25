@@ -66,8 +66,8 @@ function loadAssets(){
 
 		registerScripts();
 		
-		wp_enqueue_script( 'sim_formbuilderjs');
+		wp_enqueue_script( 'tsjippy_formbuilderjs');
 
-		wp_enqueue_script('sim_forms_table_script');
+		wp_enqueue_script('tsjippy_forms_table_script');
 	}
 }

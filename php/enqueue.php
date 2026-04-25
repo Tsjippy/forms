@@ -88,7 +88,7 @@ function afterInsertPost($postId, $post){
         $settings   = SETTINGS;
         $settings['formbuilder-pages'] = $pages;
 
-        update_option('sim_forms_settings', $settings);
+        update_option('tsjippy_forms_settings', $settings);
     }
 
     if(has_shortcode($post->post_content, 'formresults') || has_shortcode($post->post_content, 'formselector')){
@@ -99,7 +99,7 @@ function afterInsertPost($postId, $post){
         $settings   = SETTINGS;
         $settings['formtable-pages'] = $pages;
 
-        update_option('sim_forms_settings', $settings);
+        update_option('tsjippy_forms_settings', $settings);
     }
 }
 
@@ -107,19 +107,19 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__.'\registerScripts');
 add_action( 'admin_enqueue_scripts', __NAMESPACE__.'\registerScripts');
 
 function registerScripts(){
-    wp_register_style( 'sim_forms_style', SIM\pathToUrl(PLUGINPATH.'css/forms.min.css'), array(), PLUGINVERSION);
-    wp_register_style( 'sim_formtable_style', SIM\pathToUrl(PLUGINPATH.'css/formtable.min.css'), array(), PLUGINVERSION);
+    wp_register_style( 'tsjippy_forms_style', SIM\pathToUrl(PLUGINPATH.'css/forms.min.css'), array(), PLUGINVERSION);
+    wp_register_style( 'tsjippy_formtable_style', SIM\pathToUrl(PLUGINPATH.'css/formtable.min.css'), array(), PLUGINVERSION);
 
-    wp_register_script('sim_forms_script', SIM\pathToUrl(PLUGINPATH.'js/forms.min.js'), array('sweetalert', 'sim_formsubmit_script', 'sim_fileupload_script'), PLUGINVERSION, true);
+    wp_register_script('tsjippy_forms_script', SIM\pathToUrl(PLUGINPATH.'js/forms.min.js'), array('sweetalert', 'tsjippy_formsubmit_script', 'tsjippy_fileupload_script'), PLUGINVERSION, true);
 
-    wp_register_script( 'sim_formbuilderjs', SIM\pathToUrl(PLUGINPATH.'js/formbuilder.min.js'), array('sim_forms_script','sortable'), PLUGINVERSION, true);
+    wp_register_script( 'tsjippy_formbuilderjs', SIM\pathToUrl(PLUGINPATH.'js/formbuilder.min.js'), array('tsjippy_forms_script','sortable'), PLUGINVERSION, true);
     
-    wp_register_script('sim_forms_table_script', SIM\pathToUrl(PLUGINPATH.'js/forms_table.min.js'), array('sim_forms_script', 'sim_table_script'), PLUGINVERSION, true);
+    wp_register_script('tsjippy_forms_table_script', SIM\pathToUrl(PLUGINPATH.'js/forms_table.min.js'), array('tsjippy_forms_script', 'tsjippy_table_script'), PLUGINVERSION, true);
 
     if(is_numeric(get_the_ID())){
         $pages  = SETTINGS['formbuilder-pages'] ?? [];
         if(in_array(get_the_ID(), $pages)){
-            wp_enqueue_style('sim_forms_style');
+            wp_enqueue_style('tsjippy_forms_style');
         }
     }
 }

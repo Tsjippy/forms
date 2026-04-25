@@ -566,7 +566,7 @@ trait CreateJs{
         /*
         ** EXTERNAL JS
         */
-        $extraJs   = apply_filters('sim_form_extra_js', '', $this, false);
+        $extraJs   = apply_filters('tsjippy_form_extra_js', '', $this, false);
         if(!empty($extraJs)){
             if(empty($checks)){
                 $js = $extraJs;
@@ -608,7 +608,7 @@ trait CreateJs{
             $minifiedJs
         );
 
-        $extraJs   = apply_filters('sim_form_extra_js', '', $this, true);
+        $extraJs   = apply_filters('tsjippy_form_extra_js', '', $this, true);
         if(!empty($extraJs)){
             $minifiedJs .= "\n\n";
             $minifiedJs .= $extraJs;

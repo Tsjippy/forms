@@ -120,7 +120,7 @@ class AdminMenu extends ADMIN\SubAdminMenu{
 
             global $wpdb;
 
-            $emptyForms	= $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sim_forms WHERE `version` = 1 and `button_text` IS NULL");
+            $emptyForms	= $wpdb->get_results("SELECT * FROM {$wpdb->prefix}tsjippy_forms WHERE `version` = 1 and `button_text` IS NULL");
 
             foreach($emptyForms as $form){
                 $simForms->deleteForm($form->id);
@@ -135,7 +135,7 @@ class AdminMenu extends ADMIN\SubAdminMenu{
     }
 
     /**
-     * Schedules the tasks for this module
+     * Schedules the tasks for this plugin
      *
     */
     public function postSettingsSave(){

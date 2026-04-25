@@ -6,11 +6,11 @@ add_shortcode('formselector', __NAMESPACE__.'\showFormSelector');
 function showFormSelector($atts=[]){
     global $wpdb;
 
-    wp_enqueue_script('sim_forms_script');
+    wp_enqueue_script('tsjippy_forms_script');
     
-    wp_enqueue_script('sim_forms_table_script');
+    wp_enqueue_script('tsjippy_forms_table_script');
 
-    wp_enqueue_style('sim_forms_style');
+    wp_enqueue_style('tsjippy_forms_style');
 
     ob_start();
 
@@ -58,7 +58,7 @@ function showFormSelector($atts=[]){
             <div id="form-selector-wrapper">
                 <label>Select the form you want to submit or view the results of</label>
                 <br>
-                <select id="sim-forms-selector">
+                <select id="tsjippy-forms-selector">
                     <?php
                         foreach($forms as $form){
                             $name   = ucfirst(str_replace('_', ' ', $form->name));

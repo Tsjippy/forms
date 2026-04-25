@@ -257,7 +257,7 @@ class FormReminders extends SimForms{
         $query				        = "SELECT * FROM {$this->elTableName}";
 
         $this->mandatoryElements	= $wpdb->get_results($query." WHERE mandatory=1 OR recommended=1");
-        $this->mandatoryElements	= apply_filters("sim_elements_filter", $this->mandatoryElements	, $this);
+        $this->mandatoryElements	= apply_filters("tsjippy_elements_filter", $this->mandatoryElements	, $this);
     }
 
     /**
@@ -670,7 +670,7 @@ class FormReminders extends SimForms{
             $html	= "<ul>$html</ul>";
         }
 
-        $html	= apply_filters("sim_manadatory_html_filter", $html, $userId, $this);
+        $html	= apply_filters("tsjippy_manadatory_html_filter", $html, $userId, $this);
 
         return $html;
     }

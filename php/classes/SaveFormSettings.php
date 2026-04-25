@@ -266,7 +266,7 @@ class SaveFormSettings extends SimForms{
 			return new WP_Error('forms', $wpdb->last_error);
 		}
 
-		do_action('sim-after-formelement-updated', $element, $this, $oldElement);
+		do_action('tsjippy-after-formelement-updated', $element, $this, $oldElement);
 
 		return $result;
 	}
@@ -350,7 +350,7 @@ class SaveFormSettings extends SimForms{
 			return new \WP_Error('Error', 'Please supply the form settings');
 		}
 
-		$settings	= apply_filters('sim-forms-before-saving-settings', $settings, $this, $formId);
+		$settings	= apply_filters('tsjippy-forms-before-saving-settings', $settings, $this, $formId);
 
 		$result	= $this->insertOrUpdateData($this->tableName, $settings, ['id' => $formId]);
 		if(is_wp_error($result)){
@@ -381,7 +381,7 @@ class SaveFormSettings extends SimForms{
 			return $result;
 		}
 
-		do_action('sim-after-form-reminder-save', $settings, $this);
+		do_action('tsjippy-after-form-reminder-save', $settings, $this);
 
 		return true;
 	}

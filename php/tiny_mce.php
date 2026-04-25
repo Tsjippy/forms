@@ -14,7 +14,7 @@ function tinyMceInit(){
 function mcePlugins($plugins){
 	global $wp_scripts;
 
-	if(!isset($wp_scripts->registered['sim_script'])){
+	if(!isset($wp_scripts->registered['tsjippy_script'])){
 		return $plugins;
 	}
 
@@ -22,13 +22,13 @@ function mcePlugins($plugins){
 
 	//Add extra variables to the main.js script
 	wp_localize_script(
-		'sim_forms_script',
+		'tsjippy_forms_script',
 		'formSelect',
 		[$simForms->formSelect()]
 	);
 
 	wp_localize_script(
-		'sim_admin_js',
+		'tsjippy_admin_js',
 		'formSelect',
 		[$simForms->formSelect()]
 	);

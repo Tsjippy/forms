@@ -114,7 +114,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		$this->defaultValues['weddingdate']		= $family->getWeddingDate($this->user);
 		
 		//get defaults from filters
-		$this->defaultValues		= apply_filters('sim_add_form_defaults', $this->defaultValues, $this->userId, $this->formName);
+		$this->defaultValues		= apply_filters('tsjippy_add_form_defaults', $this->defaultValues, $this->userId, $this->formName);
 		
 		ksort($this->defaultValues);
 				
@@ -177,7 +177,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		$this->defaultArrayValues['family_member_names']			= $familyNames;
 		$this->defaultArrayValues['family_member_names_and_age']	= $familyNamesWithChildAge;
 
-		$this->defaultArrayValues	= apply_filters('sim_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formName);
+		$this->defaultArrayValues	= apply_filters('tsjippy_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formName);
 		
 		ksort($this->defaultArrayValues);
 	}
@@ -197,7 +197,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			foreach(get_user_meta($this->userId) as $key => $meta){
 				$this->usermeta[$key]	= $meta[0];
 			}
-			$this->usermeta	= apply_filters('sim_forms_load_userdata', $this->usermeta, $this->userId);
+			$this->usermeta	= apply_filters('tsjippy_forms_load_userdata', $this->usermeta, $this->userId);
 		}
 
 		$metaValue	= '';
@@ -454,7 +454,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			}
 		}
 	
-		$output = apply_filters('sim_transform_formtable_data', $output, $elementName);
+		$output = apply_filters('tsjippy_transform_formtable_data', $output, $elementName);
 		return $output;
 	}
 
@@ -1349,7 +1349,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		 * @param 	array	$options	the options in array where the key is the value of the element and the value is the text to be displayed
 		 * @param	object	$object		this instance
 		 */
-		$options		= apply_filters('sim-forms-checkbox-options', $this->elementValues['defaults'], $this);
+		$options		= apply_filters('tsjippy-forms-checkbox-options', $this->elementValues['defaults'], $this);
 
 		// check the length of each option
 		$maxLength		= 0;
@@ -1563,7 +1563,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		/**
 		 * Override filter, return a node to bypass this function
 		 */
-		$node 					= apply_filters('sim-form-element-html-short-circuit', null, $parent, $this);
+		$node 					= apply_filters('tsjippy-form-element-html-short-circuit', null, $parent, $this);
 		if(!empty($node)){
 			if($returnHtml){
 				return $this->dom->saveHtml();
@@ -1725,7 +1725,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			}
 		}
 
-		$node = apply_filters('sim-form-element-html', $node, $this);
+		$node = apply_filters('tsjippy-form-element-html', $node, $this);
 		
 		if($returnHtml){
 			return $this->dom->saveHtml();

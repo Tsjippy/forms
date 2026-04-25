@@ -31,19 +31,19 @@ class DisplayFormResults extends DisplayForm{
 	public function __construct($atts){
 		global $wpdb;
 		
-		$this->shortcodeTable			= $wpdb->prefix . 'sim_form_shortcodes';
+		$this->shortcodeTable			= $wpdb->prefix . 'tsjippy_form_shortcodes';
 		$this->enriched					= false;
 		$this->sortElementIds			= [];
 		$this->sortDirection			= 'ASC';
 		$this->spliced					= false;
 
 		// add the elements filter before the parent construct, as that will apply the filter
-		add_filter('sim-forms-elements', [$this, 'addExtraElements'], 10, 3);
+		add_filter('tsjippy-forms-elements', [$this, 'addExtraElements'], 10, 3);
 		
 		// call parent constructor
 		parent::__construct($atts);
 
-		wp_enqueue_style('sim_formtable_style');
+		wp_enqueue_style('tsjippy_formtable_style');
 
 		$family							= new SIM\FAMILY\Family();
 		$this->user->partnerId			= $family->getPartner($this->user->ID);
@@ -213,7 +213,7 @@ class DisplayFormResults extends DisplayForm{
 		 * Add the metas to the submissions
 		 */
 		extract(apply_filters(
-			'sim_formdata_retrieval_query', 
+			'tsjippy_formdata_retrieval_query', 
 			[
 				'baseQuery'	=> $baseQuery,
 				'where'		=> $where,
@@ -268,7 +268,7 @@ class DisplayFormResults extends DisplayForm{
 			}
 		}
 
-		return apply_filters('sim_retrieved_formdata', $submissions, $userId, $this);
+		return apply_filters('tsjippy_retrieved_formdata', $submissions, $userId, $this);
 	}
 
 	/**
@@ -507,7 +507,7 @@ class DisplayFormResults extends DisplayForm{
 	public function getSubmissions($userId=null, $submissionId=null, $all=false, $where	= [], $values = []){
 		global $wpdb;
 
-		$userId	= apply_filters('sim-forms-userids-to-retrieve', $userId, $this);
+		$userId	= apply_filters('tsjippy-forms-userids-to-retrieve', $userId, $this);
 
 		if(isset($_REQUEST['all'])){
 			$all	= true;
@@ -591,7 +591,7 @@ class DisplayFormResults extends DisplayForm{
 		 * @var array	$values		Array of values for the where statements
 		 */
 		extract(apply_filters(
-			'sim_formdata_retrieval_query', 
+			'tsjippy_formdata_retrieval_query', 
 			[
 				'query'		=> '',
 				'where'		=> $where,
@@ -611,7 +611,7 @@ class DisplayFormResults extends DisplayForm{
 		$this->total	= $wpdb->get_var($wpdb->prepare($countQuery, ...$values));
 
 		if(empty($this->total)){
-			return apply_filters('sim_retrieved_formdata', [], $userId, $this);
+			return apply_filters('tsjippy_retrieved_formdata', [], $userId, $this);
 		}
 
 		/**
@@ -686,7 +686,7 @@ class DisplayFormResults extends DisplayForm{
 			}
 		}
 
-		$submissions	= apply_filters('sim_retrieved_formdata', $submissions, $userId, $this);
+		$submissions	= apply_filters('tsjippy_retrieved_formdata', $submissions, $userId, $this);
 
 		return $submissions;
 	}
@@ -835,7 +835,7 @@ class DisplayFormResults extends DisplayForm{
 			$actions[]	= $action;
 		}
 
-		$actions = apply_filters('sim_form_actions', $actions);
+		$actions = apply_filters('tsjippy_form_actions', $actions);
 		foreach($actions as $action){
 			if(!isset($this->columnSettings[$action]) || !is_array($this->columnSettings[$action])){
 				$this->columnSettings[$action] = [
@@ -1004,7 +1004,7 @@ class DisplayFormResults extends DisplayForm{
 				//transform if needed
 				$orgFieldValue	= $value;
 
-				$value 			= apply_filters('sim-form-result-table-value', $value, $columnSetting, $this->submission, $this);
+				$value 			= apply_filters('tsjippy-form-result-table-value', $value, $columnSetting, $this->submission, $this);
 				$value 			= $this->transformInputData($value, $elementName, $this->submission);
 				
 				//show original email in excel
@@ -1074,7 +1074,7 @@ class DisplayFormResults extends DisplayForm{
 				$cellOpeningTag	= "<td $class data-element-id='$elementId'";
 			}
 
-			$cellOpeningTag	= apply_filters('sim-formresult-cell-opening-tag', $cellOpeningTag.' '. $subIdString, $this, $columnSetting, $this->submission);
+			$cellOpeningTag	= apply_filters('tsjippy-formresult-cell-opening-tag', $cellOpeningTag.' '. $subIdString, $this, $columnSetting, $this->submission);
 
 			// Add a copy option to the value
 			$copy	= "";
@@ -1127,7 +1127,7 @@ class DisplayFormResults extends DisplayForm{
 				}
 				$buttonsHtml[$action]	= "<button class='$action button forms-table-action' name='{$action}-action' value='$action'/>".ucfirst($action)."</button>";
 			}
-			$buttonsHtml = apply_filters('sim_form_actions_html', $buttonsHtml, $this->submission, $this->submission->sub_id, $this);
+			$buttonsHtml = apply_filters('tsjippy_form_actions_html', $buttonsHtml, $this->submission, $this->submission->sub_id, $this);
 
 			//we have te html now, check for which one we have permission
 			foreach($buttonsHtml as $action => $button){
@@ -1218,7 +1218,7 @@ class DisplayFormResults extends DisplayForm{
 				<input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo $this->shortcodeId;?>'>
 				<input type='hidden' class='no-reset' name='form-id' value='<?php echo $this->formData->id;?>'>
 				
-				<table class='sim-table' style='display:table'>
+				<table class='tsjippy-table' style='display:table'>
 					<thead class="column-setting-wrapper">
 						<tr>
 							<th class="columnheading formfield-button">Sort</th>
@@ -1567,7 +1567,7 @@ class DisplayFormResults extends DisplayForm{
 				</div>
 
 				<?php
-				do_action('sim-formstable-after-table-settings', $this);
+				do_action('tsjippy-formstable-after-table-settings', $this);
 				?>
 				
 				<div style='margin-top:10px;'>
@@ -1766,7 +1766,7 @@ class DisplayFormResults extends DisplayForm{
 				$this->tableEditPermissions = false;
 			}
 
-			$this->tableEditPermissions	= apply_filters('sim-table-edit-permissions', $this->tableEditPermissions, $this);
+			$this->tableEditPermissions	= apply_filters('tsjippy-table-edit-permissions', $this->tableEditPermissions, $this);
 		}
 		
 		$this->tableViewPermissions	= true;
@@ -1784,7 +1784,7 @@ class DisplayFormResults extends DisplayForm{
 			$this->tableViewPermissions 	= false;
 		}
 
-		$this->tableViewPermissions	= apply_filters('sim-table-view-permissions', $this->tableViewPermissions, $this);
+		$this->tableViewPermissions	= apply_filters('tsjippy-table-view-permissions', $this->tableViewPermissions, $this);
 	}
 
 	/**
@@ -1896,7 +1896,7 @@ class DisplayFormResults extends DisplayForm{
 		ob_start();
 
 		?>
-		<table class='sim-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>'>
+		<table class='tsjippy-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>'>
 			<td>No records found</td>
 		</table>
 
@@ -1920,7 +1920,7 @@ class DisplayFormResults extends DisplayForm{
     			white-space: normal;
 			}
 		</style>
-		<table class='sim-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>' data-type='<?php echo $type;?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
+		<table class='tsjippy-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>' data-type='<?php echo $type;?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
 			<?php
 			$this->resultTableHead($type);
 			?>
@@ -2033,7 +2033,7 @@ class DisplayFormResults extends DisplayForm{
 		// Ob_start here in case the filter is echoing something
 		ob_start();
 
-		$shouldShow	= apply_filters('sim-formstable-should-show', true, $this, $type);
+		$shouldShow	= apply_filters('tsjippy-formstable-should-show', true, $this, $type);
 
 		if($shouldShow !== true){
 			ob_end_clean();
@@ -2141,7 +2141,7 @@ class DisplayFormResults extends DisplayForm{
 
 	private function printTableFooter(){
 		?>
-		<div class='sim-table-footer'>
+		<div class='tsjippy-table-footer'>
 			<p id="table-remark">Click on any cell with <span class="edit forms-table">underlined text</span> to edit its contents.<br>Click on any header to sort the column.</p>
 			
 			<?php
@@ -2199,11 +2199,11 @@ class DisplayFormResults extends DisplayForm{
 
 		ob_start();
 		//process any $_GET acions
-		do_action('sim_formtable_GET_actions');
-		do_action('sim_formtable_POST_actions');
+		do_action('tsjippy_formtable_GET_actions');
+		do_action('tsjippy_formtable_POST_actions');
 		
 		//Load js
-		wp_enqueue_script('sim_forms_table_script');
+		wp_enqueue_script('tsjippy_forms_table_script');
 
 		?>
 		<div class='form table-wrapper'>
@@ -2231,7 +2231,7 @@ class DisplayFormResults extends DisplayForm{
 		
 		$html	= ob_get_clean();
 		
-		return apply_filters('sim-forms-form-results-html', $html, $this);
+		return apply_filters('tsjippy-forms-form-results-html', $html, $this);
 	}
 
 	/**
@@ -2316,7 +2316,7 @@ class DisplayFormResults extends DisplayForm{
 				foreach($this->formData->actions as $action){
 					$actions[]	= $action;
 				}
-				$actions = apply_filters('sim_form_actions', $actions);
+				$actions = apply_filters('tsjippy_form_actions', $actions);
 
 				//we have full permissions on this table
 				$addHeading	= false;

@@ -238,7 +238,7 @@ class SubmitForm extends SaveFormSettings{
 			}
 
 			// add the form specific footer filter
-			add_filter('sim_email_footer_url', [$this, 'emailFooter']);
+			add_filter('tsjippy_email_footer_url', [$this, 'emailFooter']);
 
 			add_filter('wp_mail', [$this, 'addFormData'], 1);
 
@@ -259,7 +259,7 @@ class SubmitForm extends SaveFormSettings{
 			}
 
 			// remove the form specific footer filter
-			remove_filter('sim_email_footer_url', [$this, 'emailFooter']);
+			remove_filter('tsjippy_email_footer_url', [$this, 'emailFooter']);
 		}
 	}
 
@@ -610,7 +610,7 @@ class SubmitForm extends SaveFormSettings{
 		 * @param array		$formresults	The form results
 		 * @param object	$object			The SubmitForm Instance
 		 */
-		$formresults 					= apply_filters('sim_before_inserting_formdata', (object)$formresults, $this);
+		$formresults 					= apply_filters('tsjippy_before_inserting_formdata', (object)$formresults, $this);
 
 		if(is_wp_error($formresults)){
 			return $formresults;
@@ -637,9 +637,9 @@ class SubmitForm extends SaveFormSettings{
 			return $result;
 		}
 
-		$message	= apply_filters('sim_after_form_submission', $message, $_POST, $this);
+		$message	= apply_filters('tsjippy_after_form_submission', $message, $_POST, $this);
 
-		do_action('sim-after-form-submit', $this);
+		do_action('tsjippy-after-form-submit', $this);
 
 		return $message;
 	}

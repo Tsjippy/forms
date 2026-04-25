@@ -5,7 +5,7 @@ use stdClass;
 use WP_Error;
 
 // Allow rest api urls for non-logged in users
-add_filter('sim_allowed_rest_api_urls', __NAMESPACE__.'\addFormResultUrls');
+add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__.'\addFormResultUrls');
 function addFormResultUrls($urls){
     $urls[] = RESTAPIPREFIX.'/forms/edit_value';
 	$urls[] = RESTAPIPREFIX.'/forms/get_input_html';
@@ -329,7 +329,7 @@ function removeSubmission(){
 		return $result;
 	}
 
-	do_action('sim-forms-entry-removed', $formTable, $_POST['submission-id']);
+	do_action('tsjippy-forms-entry-removed', $formTable, $_POST['submission-id']);
 
 	return "Entry with id {$_POST['submission-id']} succesfully removed";
 }
@@ -459,7 +459,7 @@ function editValue(){
 		if(is_array($oldValue)){
 			$oldValue	= implode(' ', $oldValue);
 		}
-		return new WP_Error('sim-forms', "Old value '$oldValue' is the same as the new value!");
+		return new WP_Error('tsjippy-forms', "Old value '$oldValue' is the same as the new value!");
 	}
 
 	// update the submissiom

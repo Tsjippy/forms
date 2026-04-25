@@ -223,18 +223,18 @@ class DisplayForm extends ElementHtmlBuilder{
 			$this->createJs();
 		}
 
-		wp_enqueue_script('sim_forms_script');
+		wp_enqueue_script('tsjippy_forms_script');
 		//Only enqueue if there is content in the file
 		if(file_exists($jsPath) && filesize($jsPath) > 0){
-			wp_enqueue_script( "dynamic_{$this->formName}forms", SIM\pathToUrl($jsPath), array('sim_forms_script'), $this->formData->version, true);
+			wp_enqueue_script( "dynamic_{$this->formName}forms", SIM\pathToUrl($jsPath), array('tsjippy_forms_script'), $this->formData->version, true);
 		}
 
-		$initialHtml	= apply_filters('sim-forms-before-showing-form', '', $this);
+		$initialHtml	= apply_filters('tsjippy-forms-before-showing-form', '', $this);
 		if(!empty($initialHtml)){
 			$this->dom->loadHTML( $initialHtml);
 		}
 
-		$this->formWrapper = $this->addElement('div', $this->dom, ['class' => 'sim-form-wrapper']);
+		$this->formWrapper = $this->addElement('div', $this->dom, ['class' => 'tsjippy-form-wrapper']);
 			 
 		// Formbuilder button
 		if($this->editRights){
@@ -253,14 +253,14 @@ class DisplayForm extends ElementHtmlBuilder{
 		if(array_intersect($this->userRoles, $this->submitRoles) && !empty($this->formData->save_in_meta)){
 			$this->addRawHtml(SIM\userSelect("Select an user to show the data of:"), $this->formWrapper);
 		}
-		$this->addRawHtml(apply_filters('sim_before_form', '', $this->formName), $this->formWrapper);
+		$this->addRawHtml(apply_filters('tsjippy_before_form', '', $this->formName), $this->formWrapper);
 
 		/**
 		 * Form container
 		 */
 		$attributes = [
 			'method'		=> 'post',
-			'class'			=> 'sim-form-wrapper',
+			'class'			=> 'tsjippy-form-wrapper',
 			'data-form-id'	=> $this->formData->id
 		];
 
@@ -396,7 +396,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		
 		// Check if this is an splitted element
 		if(empty($this->formData->split)){
-			return apply_filters('sim-forms-split-element-ids', $elementIds, $this);
+			return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
 		}
 
 		$this->formData->split	= maybe_unserialize($this->formData->split);
@@ -419,7 +419,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		}
 
 		if(empty($baseNames)){
-			return apply_filters('sim-forms-split-element-ids', $elementIds, $this);
+			return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
 		}
 
 		// Loop over all elements to find splitted ones
@@ -451,6 +451,6 @@ class DisplayForm extends ElementHtmlBuilder{
 			}
 		}
 
-		return apply_filters('sim-forms-split-element-ids', $elementIds, $this);
+		return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
 	}
 }

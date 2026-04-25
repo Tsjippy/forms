@@ -50,14 +50,14 @@ class SimForms{
 		
 		$this->isMultiStepForm				= '';
 		$this->formStepCounter				= 0;
-		$this->submissionTableName			= $wpdb->prefix . 'sim_form_submissions';
-		$this->submissionValuesTableName	= $wpdb->prefix . 'sim_form_submission_values';
-		$this->tableName					= $wpdb->prefix . 'sim_forms';
-		$this->formReminderTable			= $wpdb->prefix . 'sim_form_reminders';
-		$this->elTableName					= $wpdb->prefix . 'sim_form_elements';
-		$this->formEmailTable				= $wpdb->prefix . 'sim_form_emails';
-		$this->shortcodeColumnSettingsTable	= $wpdb->prefix . 'sim_form_shortcode_column_settings';
-		$this->shortcodeTable				= $wpdb->prefix . 'sim_form_shortcodes';
+		$this->submissionTableName			= $wpdb->prefix . 'tsjippy_form_submissions';
+		$this->submissionValuesTableName	= $wpdb->prefix . 'tsjippy_form_submission_values';
+		$this->tableName					= $wpdb->prefix . 'tsjippy_forms';
+		$this->formReminderTable			= $wpdb->prefix . 'tsjippy_form_reminders';
+		$this->elTableName					= $wpdb->prefix . 'tsjippy_form_elements';
+		$this->formEmailTable				= $wpdb->prefix . 'tsjippy_form_emails';
+		$this->shortcodeColumnSettingsTable	= $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
+		$this->shortcodeTable				= $wpdb->prefix . 'tsjippy_form_shortcodes';
 		$this->nonInputs					= ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi-start', 'multi-end', 'div-start', 'div-end'];
 		$this->multiInputsHtml				= [];
 		$this->user 						= wp_get_current_user();
@@ -105,7 +105,7 @@ class SimForms{
 	}
 
 	/**
-	 * Creates the tables for this module
+	 * Creates the tables for this plugin
 	 */
 	public function createDbTables(){
 		if ( !function_exists( 'maybe_create_table' ) ) {
@@ -749,7 +749,7 @@ class SimForms{
 				 * @param	array	$splitElements	The current element id's
 				 * @param	object	$object			Form instance
 				 */
-				$this->formData->split				= apply_filters('sim-forms-split-elements', $this->formData->split, $this);
+				$this->formData->split				= apply_filters('tsjippy-forms-split-elements', $this->formData->split, $this);
 			}
 		}
 
@@ -1168,7 +1168,7 @@ class SimForms{
 		 * @param	object	$object			The form instance
 		 * @param	bool	$force			Wheter to force a requery	
 		 */
-		$this->formElements 		=  apply_filters('sim-forms-elements', $elements, $this, false);
+		$this->formElements 		=  apply_filters('tsjippy-forms-elements', $elements, $this, false);
 	}
 
 	/**
@@ -1260,7 +1260,7 @@ class SimForms{
 
 		$this->processAtts($atts);
 
-		wp_enqueue_style('sim_forms_style');
+		wp_enqueue_style('tsjippy_forms_style');
 
 		$query				= "SELECT * FROM {$this->elTableName} WHERE `form_id`=";
 
@@ -1336,7 +1336,7 @@ class SimForms{
 		 * Add the metas to the submissions
 		 */
 		extract(apply_filters(
-			'sim_formdata_retrieval_query', 
+			'tsjippy_formdata_retrieval_query', 
 			[
 				'baseQuery'	=> $baseQuery,
 				'where'		=> $where,
@@ -1428,7 +1428,7 @@ class SimForms{
 
 			// Empty
 			if(empty($replaceValue)){
-				$replaceValue	= apply_filters('sim-forms-transform-empty', $replaceValue, $match, $replaceValues, $this);
+				$replaceValue	= apply_filters('tsjippy-forms-transform-empty', $replaceValue, $match, $replaceValues, $this);
 				if(empty($replaceValue)){
 					//remove the placeholder, there is no value
 					$string = str_replace("%$match%", '', $string);
@@ -1456,7 +1456,7 @@ class SimForms{
 				}
 
 				if(is_array($replaceValue)){
-					$replaceValue	= apply_filters('sim-forms-transform-array', implode(',', $replaceValue), $replaceValue, $this, $match);
+					$replaceValue	= apply_filters('tsjippy-forms-transform-array', implode(',', $replaceValue), $replaceValue, $this, $match);
 				}elseif(preg_match('/^(\d{4}-\d{2}-\d{2})$/', $replaceValue, $matches)){
 					$replaceValue	= date(get_option('date_format'), strtotime((string)$matches[1]));
 				}

@@ -2,7 +2,7 @@
 namespace SIM\FORMS;
 use SIM;
 
-add_filter('sim_mandatory_html_filter', __NAMESPACE__.'\addChildFields', 10, 3);
+add_filter('tsjippy_mandatory_html_filter', __NAMESPACE__.'\addChildFields', 10, 3);
 function addChildFields($html, $userId, $object){
 	// Add warnings for child fields
 	$family = new SIM\FAMILY\Family();
@@ -20,7 +20,7 @@ function addChildFields($html, $userId, $object){
 	return $html;
 }
 
-add_action('sim_dashboard_warnings', __NAMESPACE__.'\dashboardWarnings');
+add_action('tsjippy_dashboard_warnings', __NAMESPACE__.'\dashboardWarnings');
 function dashboardWarnings($userId){
 	$forms	= new FormReminders();
 

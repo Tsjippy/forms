@@ -50,7 +50,7 @@ class FormBuilderForm extends DisplayForm{
 		 * @param	object	$object			The form instance
 		 * @param	bool	$force			Wheter to force a requery	
 		 */
-		$elements	= apply_filters('sim-forms-elements', $this->formElements, $this, true);
+		$elements	= apply_filters('tsjippy-forms-elements', $this->formElements, $this, true);
 		
 		foreach($elements as $element){
 			//do not include the element itself do not include non-input types
@@ -397,7 +397,7 @@ class FormBuilderForm extends DisplayForm{
 		}
 		
 		// Load js
-		wp_enqueue_script('sim_forms_script');
+		wp_enqueue_script('tsjippy_forms_script');
 
 		if(isset($_POST['export-form']) && is_numeric($_POST['export-form'])){
 			$formExport	= new FormExport();
@@ -412,13 +412,13 @@ class FormBuilderForm extends DisplayForm{
 		}
 
 		//Formbuilder js
-		wp_enqueue_script( 'sim_formbuilderjs');
+		wp_enqueue_script( 'tsjippy_formbuilderjs');
 
 		// make sure we use unique priorities
 		ob_start();
 		
 		?>
-		<div class="sim-form-wrapper">
+		<div class="tsjippy-form-wrapper">
 			<?php
 			$this->addElementModal();
 
@@ -486,7 +486,7 @@ class FormBuilderForm extends DisplayForm{
 			[
 				'action'	=> '',
 				'method'	=>'post',
-				'class'	 	=> 'sim-form builder'
+				'class'	 	=> 'tsjippy-form builder'
 			]
 		);
 
@@ -560,7 +560,7 @@ class FormBuilderForm extends DisplayForm{
 		
 		?>
 		<div class="element-settings-wrapper">
-			<form action='' method='post' class='sim-form builder'>
+			<form action='' method='post' class='tsjippy-form builder'>
 				<div class='form-elements'>
 					<input type='hidden' class='no-reset' class='formbuilder' name='form-id'	value='<?php echo $this->formData->id;?>'>
 					
@@ -730,7 +730,7 @@ class FormBuilderForm extends DisplayForm{
 						</div>
 					</div>
 
-					<?php do_action('sim-forms-extra-form-settings', $this); ?>
+					<?php do_action('tsjippy-forms-extra-form-settings', $this); ?>
 
 					<div style='margin-top:10px;'>
 						<button class='button builder-permissions-rights-form' type='button'>Advanced</button>
@@ -874,7 +874,7 @@ class FormBuilderForm extends DisplayForm{
 		}
 
 		?>
-		<form action='' method='post' class='sim-form builder' style='margin-top:10px;'>
+		<form action='' method='post' class='tsjippy-form builder' style='margin-top:10px;'>
 			<input type='hidden' name='form-id' value='<?php echo $this->formData->id;?>'>
 
 			<?php
@@ -1000,7 +1000,7 @@ class FormBuilderForm extends DisplayForm{
 		}
 		
 		// get all possible user meta keys, not just the one the current user has
-		$userMetaKeys	= apply_filters('sim-forms-user-meta-keys', $wpdb->get_col("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}` ORDER BY `meta_key` ASC"));
+		$userMetaKeys	= apply_filters('tsjippy-forms-user-meta-keys', $wpdb->get_col("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}` ORDER BY `meta_key` ASC"));
 		
 		sort($userMetaKeys, SORT_STRING | SORT_FLAG_CASE);
 
@@ -1128,7 +1128,7 @@ class FormBuilderForm extends DisplayForm{
 
 		?>
 		<div class="emails-wrapper">
-			<form action='' method='post' class='sim-form builder'>
+			<form action='' method='post' class='tsjippy-form builder'>
 				<div class='form-elements'>
 					<input type='hidden' class='no-reset' class='formbuilder' name='form-id'	value='<?php echo $this->formData->id;?>'>
 					
@@ -1161,7 +1161,7 @@ class FormBuilderForm extends DisplayForm{
 								echo "<option>%{$element->name}%</option>";
 							}
 						}
-						do_action('sim-add-email-placeholder-option', $this);
+						do_action('tsjippy-add-email-placeholder-option', $this);
 						?>
 					</select>
 					
@@ -1307,7 +1307,7 @@ class FormBuilderForm extends DisplayForm{
 											The submission is archived or deleted
 										</label>
 										<br>
-										<?php do_action('sim-forms-after-email-triggers', $key, $email);?>
+										<?php do_action('tsjippy-forms-after-email-triggers', $key, $email);?>
 										<label>
 											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='disabled' <?php if($email->email_trigger == 'disabled'){echo 'checked';}?>>
 											Do not send this e-mail
@@ -1611,7 +1611,7 @@ class FormBuilderForm extends DisplayForm{
 						"php"			=> "Custom code"
 					];
 
-					$options	= apply_filters('sim-special-form-elements', $options);
+					$options	= apply_filters('tsjippy-special-form-elements', $options);
 
 					foreach($options as $key=>$option){
 						if($element != null && $element->type == $key){
@@ -1776,7 +1776,7 @@ class FormBuilderForm extends DisplayForm{
 			</div>
 
 			<?php
-			do_action('sim-after-formbuilder-element-options', $element);
+			do_action('tsjippy-after-formbuilder-element-options', $element);
 			?>
 			<br>
 			<div name='element-options' class='element-option reverse not-php <?php echo $nonInputClasses;?> shouldhide'>
@@ -1855,7 +1855,7 @@ class FormBuilderForm extends DisplayForm{
 		 * @param	object	$object		The FormBuilderForm Instance
 		 * @param	object	$element	The current element which is edited
 		 */
-		$formContents	= apply_filters('sim-forms-element-form-content', ob_get_clean(), $this, $element);
+		$formContents	= apply_filters('tsjippy-forms-element-form-content', ob_get_clean(), $this, $element);
 
 		ob_start();
 		?>
@@ -1863,7 +1863,7 @@ class FormBuilderForm extends DisplayForm{
 			const numericElements	= <?php echo json_encode($numericElements); ?>;
 			const dateElements		= <?php echo json_encode($dateElements); ?>;
 		</script>
-		<form action="" method="post" name="add-form-element-form" class="form-element-form sim-form" data-add-empty=1>
+		<form action="" method="post" name="add-form-element-form" class="form-element-form tsjippy-form" data-add-empty=1>
 			<div style="display: none;" class="error"></div>
 			<?php
 

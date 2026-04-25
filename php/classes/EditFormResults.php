@@ -42,7 +42,7 @@ class EditFormResults extends DisplayFormResults{
 		 * @param int			$subId			The sub id of the value
 		 * @param object		$object			The EditFormResults Instance
 		 */
-		$value 				= apply_filters('sim_before_updating_formdata', $value, $elementId, $subId, $this);
+		$value 				= apply_filters('tsjippy_before_updating_formdata', $value, $elementId, $subId, $this);
 
 		if($value === null || is_wp_error($value)){
 			return $value;
@@ -109,7 +109,7 @@ class EditFormResults extends DisplayFormResults{
 		 * Update submission values
 		 */
 		// Filters if we should do the update, return false for no update
-		$continue	= apply_filters('sim-forms-should-update-form-data', true, $elementId, $submissionId, $subId, $value, $this);
+		$continue	= apply_filters('tsjippy-forms-should-update-form-data', true, $elementId, $submissionId, $subId, $value, $this);
 		if($elementId != 'userid' && $elementId != 'submitter_id' && $continue){
 			//Update the submission data	
 			$where	= array(
@@ -147,7 +147,7 @@ class EditFormResults extends DisplayFormResults{
 			}
 		}
 
-		do_action('sim_after_updating_formdata', $value, $elementId, $subId, $this);
+		do_action('tsjippy_after_updating_formdata', $value, $elementId, $subId, $this);
 
 		$this->sendEmail('fieldchanged');
 		$this->sendEmail('fieldschanged');
@@ -293,7 +293,7 @@ class EditFormResults extends DisplayFormResults{
 		if($archive){
 			$this->sendEmail('removed');
 
-			do_action('sim-forms-entry-archived', $this, $submissionId);
+			do_action('tsjippy-forms-entry-archived', $this, $submissionId);
 		}
 		
 		return $message;

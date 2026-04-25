@@ -113,9 +113,9 @@ function showFormBuilder($attributes){
 
 	do_action('wp_enqueue_scripts');
 
-	wp_enqueue_style('sim_forms_style');
-	wp_enqueue_style( 'sim_formtable_style');
-	wp_enqueue_script( 'sim_formbuilderjs');
+	wp_enqueue_style('tsjippy_forms_style');
+	wp_enqueue_style( 'tsjippy_formtable_style');
+	wp_enqueue_script( 'tsjippy_formbuilderjs');
 
 	wp_enqueue_editor();
 
@@ -123,7 +123,7 @@ function showFormBuilder($attributes){
 	wp_enqueue_editor();
 	ob_start();
 	\_WP_Editors::editor_js();
-	wp_print_scripts(["sim_formbuilderjs"]);
+	wp_print_scripts(["tsjippy_formbuilderjs"]);
 	print_footer_scripts();
 	$js	= ob_get_clean();
 
