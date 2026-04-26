@@ -7,6 +7,7 @@
 - main plugin name from sim-base to tsjippy-shared-functionality
 - sim prefix to tsjippy prefix
 - base namespace to TSJIPPY
+- filternames to include tsjippy
 
 ### Fixed
 - show archived submissions
