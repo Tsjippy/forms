@@ -1,12 +1,12 @@
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
-  "apiVersion": 2,
-  "name": "sim/formselector",
+  "apiVersion": 3,
+  "name": "tsjippy/formselector",
   "version": "0.1.0",
   "title": "Select which form to display",
   "category": "widgets",
   "description": "Select a form to display the form or the results thereof",
-  "textdomain": "sim",
+  "textdomain": "tsjippy",
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css"
