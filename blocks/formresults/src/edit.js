@@ -12,13 +12,13 @@ const Edit = ({attributes, setAttributes}) => {
 	useEffect( 
 		() => {
 			async function getForms(){
-				const fetchedForms = await apiFetch({path: sim.restApiPrefix+'/forms/get_forms'});
+				const fetchedForms = await apiFetch({path: tsjippy.restApiPrefix+'/forms/get_forms'});
 
 				let options	= fetchedForms.map( c => (
 					{ label: c.name, value: c.id }
 				));
 
-				options.unshift({ label: __('Please select a form', 'sim'), value: '' });
+				options.unshift({ label: __('Please select a form', 'tsjippy'), value: '' });
 
 				setForms( options );
 			}
@@ -37,11 +37,11 @@ const Edit = ({attributes, setAttributes}) => {
 
 					// add shortcode id if not given
 					if(tableid == undefined){
-						tableid = await apiFetch({path: `${sim.restApiPrefix}/forms/add_form_table?formid=${formid}`});
+						tableid = await apiFetch({path: `${tsjippy.restApiPrefix}/forms/add_form_table?formid=${formid}`});
 						setAttributes({tableid: tableid});
 					}
 
-					let response = await apiFetch({path: `${sim.restApiPrefix}/forms/show_form_results?formid=${formid}&tableid=${String(tableid)}`});
+					let response = await apiFetch({path: `${tsjippy.restApiPrefix}/forms/show_form_results?formid=${formid}&tableid=${String(tableid)}`});
 					setHtml( response );
 				}
 			}
@@ -52,9 +52,9 @@ const Edit = ({attributes, setAttributes}) => {
 
 	function dropDown(){
 		return <>
-			{__('Select the form you want to show the results of', 'sim')}
+			{__('Select the form you want to show the results of', 'tsjippy')}
 			<SelectControl
-				label	= {__('Form to show', 'sim')}
+				label	= {__('Form to show', 'tsjippy')}
 				value={ formid }
 				options={ forms }
 				onChange={ (value) => {setAttributes({formid: value})} }
@@ -78,12 +78,12 @@ const Edit = ({attributes, setAttributes}) => {
 					<PanelBody>
 						{dropDown()}
 						<ToggleControl
-                            label={__('Show only personal entries', 'sim')}
+                            label={__('Show only personal entries', 'tsjippy')}
                             checked={!!attributes.onlyOwn}
                             onChange={() => setAttributes({ onlyOwn: !attributes.onlyOwn })}
                         />
 						<ToggleControl
-                            label={__('Show archived entries', 'sim')}
+                            label={__('Show archived entries', 'tsjippy')}
                             checked={!!attributes.archived}
                             onChange={() => setAttributes({ archived: !attributes.archived })}
                         />

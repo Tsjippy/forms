@@ -13,7 +13,7 @@ const Edit = ({attributes, setAttributes}) => {
 		() => {
 			async function getHTML(){
 				setHtml( < Spinner />);
-				const response = await apiFetch({path: `${sim.restApiPrefix}/forms/missing_form_fields?type=${type}`});
+				const response = await apiFetch({path: `${tsjippy.restApiPrefix}/forms/missing_form_fields?type=${type}`});
 				setHtml( response );
 			}
 		} ,

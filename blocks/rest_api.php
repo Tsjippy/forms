@@ -98,9 +98,9 @@ function showFormBuilder($attributes){
 		return false;
 	}
 	
-	$simForms = new SimForms();
+	$forms = new Forms();
 
-	$html	= $simForms->determineForm($attributes);
+	$html	= $forms->determineForm($attributes);
 	if(is_wp_error($html)){
 		$html = $html->get_error_message();
 	}
@@ -187,8 +187,8 @@ function showFormResults($attributes){
 }
 
 function getAllForms(){
-	$simForms	= new SimForms();
-	$simForms->getForms();
+	$forms	= new Forms();
+	$forms->getForms();
 
-	return $simForms->forms;
+	return $forms->forms;
 }

@@ -998,7 +998,7 @@ function removeWarningCondition(target){
 window.addEventListener("click", event => {
 	let target = event.target;
 	
-	formWrapper				= target.closest('.sim-form-wrapper');
+	formWrapper				= target.closest('.tsjippy-form-wrapper');
 	formElementWrapper		= target.closest('.form-element-wrapper');
 	
 	if(formWrapper != null){
@@ -1031,7 +1031,7 @@ window.addEventListener("click", event => {
 			el.classList.add('hidden');
 		}
 	}else if(target.name == 'save-in-meta'){
-		target.closest('.sim-form.builder').querySelector('.recurring-submissions').classList.toggle('hidden');
+		target.closest('.tsjippy-form.builder').querySelector('.recurring-submissions').classList.toggle('hidden');
 	}else if(target.name == 'formfield[mandatory]' && target.checked){
 		target.closest('div').querySelector('[name="formfield[recommended]"]').checked=true;
 	}

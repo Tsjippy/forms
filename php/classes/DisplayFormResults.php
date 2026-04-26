@@ -1856,9 +1856,9 @@ class DisplayFormResults extends DisplayForm{
 
 			// Archived button
 			if($this->showArchived){
-				$html	.= "<button class='button sim small archive-switch-hide'>Hide archived entries</button>";
+				$html	.= "<button class='button tsjippy small archive-switch-hide'>Hide archived entries</button>";
 			}else{
-				$html	.= "<button class='button sim small archive-switch-show'>Show archived entries</button>";
+				$html	.= "<button class='button tsjippy small archive-switch-show'>Show archived entries</button>";
 			}
 
 			// Only own button
@@ -1867,7 +1867,7 @@ class DisplayFormResults extends DisplayForm{
 				$this->onlyOwn || 
 				( $this->tableSettings->result_type == 'personal' && !$this->all)
 			){
-				$html	.= "<button class='button sim small only-own-switch-all'>Show all entries</button>";
+				$html	.= "<button class='button tsjippy small only-own-switch-all'>Show all entries</button>";
 			}elseif(
 				$this->tableViewPermissions &&
 				(
@@ -1876,7 +1876,7 @@ class DisplayFormResults extends DisplayForm{
 					$this->tableSettings->result_type != 'personal'
 				)
 			){
-				$html	.= "<button class='button sim small only-own-switch-on'>Show only my own entries</button>";
+				$html	.= "<button class='button tsjippy small only-own-switch-on'>Show only my own entries</button>";
 			}
 
 			$html	.= "<button type='button' class='button small show fullscreenbutton'>Show full screen</button>";

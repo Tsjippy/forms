@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class SimForms{
+class Forms{
 	
 	public $isFormStep;
 	public $isMultiStepForm;
@@ -1286,7 +1286,7 @@ class SimForms{
 			$html	= "<div class='warning'>This form has no elements yet.<br>";
 				if($this->editRights){
 					$url	 = add_query_arg('formbuilder', 1, TSJIPPY\getCurrentUrl());
-					$html	.= "<br><a href='$url' class='button small sim'>Start Building the form</a>";
+					$html	.= "<br><a href='$url' class='button small tsjippy'>Start Building the form</a>";
 				}else{
 					$html	.= "Ask an user with the editor role to start working on it";
 				}

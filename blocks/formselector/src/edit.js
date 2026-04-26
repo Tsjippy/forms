@@ -12,7 +12,7 @@ const Edit = () => {
 		() => {
 			async function getHTML(){
 				setHtml(< Spinner />);
-				const response = await apiFetch({path: sim.restApiPrefix+'/forms/form_selector'});
+				const response = await apiFetch({path: tsjippy.restApiPrefix+'/forms/form_selector'});
 				setHtml( response );
 			}
 			getHTML();

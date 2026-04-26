@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class SaveFormSettings extends SimForms{
+class SaveFormSettings extends Forms{
 	use CreateJs;
 
 	public function __construct(){

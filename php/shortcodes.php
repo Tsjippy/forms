@@ -139,8 +139,8 @@ function showFormSelector($atts=[]){
 //shortcode to make forms
 add_shortcode( 'formbuilder', __NAMESPACE__.'\showForm');
 function showForm($atts){
-    $simForms   = new SimForms();
-    $html       = $simForms->determineForm($atts);
+    $forms   = new Forms();
+    $html       = $forms->determineForm($atts);
     if(is_wp_error($html)){
         return "<div class='error'>".$html->get_error_message()."</div>";
     }

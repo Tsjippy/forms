@@ -22,19 +22,19 @@ function mcePlugins($plugins){
 		return $plugins;
 	}
 
-	$simForms	= new SimForms();
+	$forms	= new Forms();
 
 	//Add extra variables to the main.js script
 	wp_localize_script(
 		'tsjippy_forms_script',
 		'formSelect',
-		[$simForms->formSelect()]
+		[$forms->formSelect()]
 	);
 
 	wp_localize_script(
 		'tsjippy_admin_js',
 		'formSelect',
-		[$simForms->formSelect()]
+		[$forms->formSelect()]
 	);
 
 	$plugins['insert_form_shortcode']		= TSJIPPY\pathToUrl(PLUGINPATH."js/tiny_mce.js?ver=".PLUGINVERSION);

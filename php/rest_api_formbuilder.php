@@ -17,7 +17,7 @@ function addRestUrls($urls){
 }
 
 function checkPermissions(){
-	$forms	= new SimForms();
+	$forms	= new Forms();
 
 	return $forms->editRights;
 }
@@ -374,15 +374,15 @@ function copyFormElement(){
 function addFormElement($copy=false){
 	global $wpdb;
 
-	$simForms	= new SaveFormSettings();
-	$simForms->getForm($_POST['form-id']);
+	$forms	= new SaveFormSettings();
+	$forms->getForm($_POST['form-id']);
 
 	$index		= 0;
 	$oldElement	= new stdClass();
 
 	//copy an existing element
 	if($copy === true){
-		$element			= $simForms->getElementById($_POST['element-id']);
+		$element			= $forms->getElementById($_POST['element-id']);
 
 		$element->name		= $element->nicename;
 
@@ -422,7 +422,7 @@ function addFormElement($copy=false){
 
 		$element->id	= $_POST['element-id'];
 
-		$oldElement		= $simForms->getElementById($element->id);
+		$oldElement		= $forms->getElementById($element->id);
 
 		//$index			= $oldElement->index;
 	}
@@ -446,7 +446,7 @@ function addFormElement($copy=false){
 	$element->nicename	= ucfirst(trim($element->name, '[]'));
 
 	if(
-		in_array($element->type, $simForms->nonInputs) 		&& 	// this is a non-input
+		in_array($element->type, $forms->nonInputs) 		&& 	// this is a non-input
 		$element->type != 'datalist'						&& 	// but not a datalist
 		!str_contains($element->name, $element->type)			// and the type is not yet added to the name
 	){
@@ -455,7 +455,7 @@ function addFormElement($copy=false){
 	
 	//Get an unique name if needed
 	if(!$update || $element->name != $oldElement->name){
-		$element->name		= $simForms->getUniqueName($element, $update, $oldElement, $simForms);
+		$element->name		= $forms->getUniqueName($element, $update, $oldElement, $forms);
 		if(is_wp_error($element->name)){
 			return $element->name;
 		}
@@ -468,19 +468,19 @@ function addFormElement($copy=false){
 	
 	if($update){
 		$message								= "Succesfully updated '{$element->name}'";
-		$result									= $simForms->updateFormElement($element);
+		$result									= $forms->updateFormElement($element);
 		if(is_wp_error($result)){
 			return $result;
 		}
 	}else{
 		$message								= "Succesfully added '{$element->name}' to this form";
 		if(!is_numeric($_POST['insert-after'])){
-			$element->priority	= $wpdb->get_var( "SELECT COUNT(`id`) FROM `{$simForms->elTableName}` WHERE `form_id`={$element->form_id}") +1;
+			$element->priority	= $wpdb->get_var( "SELECT COUNT(`id`) FROM `{$forms->elTableName}` WHERE `form_id`={$element->form_id}") +1;
 		}else{
 			$element->priority	= $_POST['insert-after'] + 1;
 		}
 
-		$element->id	= $simForms->insertElement($element);
+		$element->id	= $forms->insertElement($element);
 
 		if(!empty($_POST['extra'])){
 			// The current indexes without the new element
@@ -490,7 +490,7 @@ function addFormElement($copy=false){
 			$newIndexes[$element->id]	= $newIndexes[-1];
 			unset($newIndexes[-1]);
 			
-			$simForms->reorderElements($newIndexes, $element);
+			$forms->reorderElements($newIndexes, $element);
 		}
 	}
 		

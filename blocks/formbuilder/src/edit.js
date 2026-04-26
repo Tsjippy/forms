@@ -16,7 +16,7 @@ const Edit = ({attributes, setAttributes, context}) => {
 		() => {
 			async function getHTML(){
 				if(formname != undefined){
-					let response = await apiFetch({path: `${sim.restApiPrefix}/forms/form_builder?formname=${formname}&post=${postId}`});
+					let response = await apiFetch({path: `${tsjippy.restApiPrefix}/forms/form_builder?formname=${formname}&post=${postId}`});
 					setHtml( response );
 				}
 			}
@@ -28,7 +28,7 @@ const Edit = ({attributes, setAttributes, context}) => {
 	function ShowResult(){
 		if(html == '' || !html){
 			return <InputControl
-				label={__('Form name', 'sim')}
+				label={__('Form name', 'tsjippy')}
 				isPressEnterToChange={true}
 				value={formname}
 				onChange={(value) => setAttributes({ formname: value })}
@@ -44,7 +44,7 @@ const Edit = ({attributes, setAttributes, context}) => {
 				<Panel>
 					<PanelBody>
 						<InputControl
-                            label={__('Form name', 'sim')}
+                            label={__('Form name', 'tsjippy')}
 							isPressEnterToChange={true}
                             value={formname}
                             onChange={(value) => setAttributes({ formname: value })}

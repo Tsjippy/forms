@@ -25,15 +25,15 @@ class AdminMenu extends ADMIN\SubAdminMenu{
     }
 
     public function data($parent=''){
-        $simForms	= new SaveFormSettings();
-        $simForms->getForms();
+        $forms	= new SaveFormSettings();
+        $forms->getForms();
 
         // sort the forms on name
-        usort($simForms->forms, function($a, $b){
+        usort($forms->forms, function($a, $b){
             return strcasecmp($a->name, $b->name);
         });
 
-        $table  = addElement('table', $parent, ['class' => 'sim table formoverview']);
+        $table  = addElement('table', $parent, ['class' => 'tsjippy table formoverview']);
         $thead  = addElement('thead', $table);
         $tr     = addElement('tr', $thead);
 
@@ -43,7 +43,7 @@ class AdminMenu extends ADMIN\SubAdminMenu{
 
         $tbody  = addElement('tbody', $table);
 
-        foreach($simForms->forms as $form){
+        foreach($forms->forms as $form){
             $formName	= $form->form_name;
             $formUrl	= $form->form_url;
             if(empty($formUrl)){
@@ -103,27 +103,27 @@ class AdminMenu extends ADMIN\SubAdminMenu{
         }
 
         if(isset($_POST['export']) && is_numeric($_POST['export'])){
-            $simForms	= new FormExport();
-            $simForms->exportForm($_POST['export']);
+            $forms	= new FormExport();
+            $forms->exportForm($_POST['export']);
 
             return;
         }
 
         if(isset($_POST['delete']) && is_numeric($_POST['delete'])){
-            $simForms	= new SaveFormSettings();
+            $forms	= new SaveFormSettings();
             
-            return $simForms->deleteForm($_POST['delete']);
+            return $forms->deleteForm($_POST['delete']);
         }
 
         if(isset($_GET['deleteall'])){
-            $simForms	= new SaveFormSettings();
+            $forms	= new SaveFormSettings();
 
             global $wpdb;
 
             $emptyForms	= $wpdb->get_results("SELECT * FROM {$wpdb->prefix}tsjippy_forms WHERE `version` = 1 and `button_text` IS NULL");
 
             foreach($emptyForms as $form){
-                $simForms->deleteForm($form->id);
+                $forms->deleteForm($form->id);
             }
 
             $count  = count($emptyForms);

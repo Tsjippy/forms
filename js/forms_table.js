@@ -629,7 +629,7 @@ document.addEventListener("DOMContentLoaded", function() {
 document.addEventListener('change', event=>{
 	let target = event.target;
 
-	if(target.id == 'sim-forms-selector'){
+	if(target.id == 'tsjippy-forms-selector'){
 		document.querySelectorAll('.main-form-wrapper').forEach(el=>{
 			el.classList.add('hidden');
 		});
@@ -637,7 +637,7 @@ document.addEventListener('change', event=>{
 		document.getElementById(target.value).classList.remove('hidden');
 
 		// position table
-		SimTableFunctions.positionTable();
+		TsjippyTableFunctions.positionTable();
 	}else if(target.matches(`.page-size`)){
 		getPage(target, 'size');
 	}else{

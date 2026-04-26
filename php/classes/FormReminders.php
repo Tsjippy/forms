@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class FormReminders extends SimForms{
+class FormReminders extends Forms{
     public $metaForms;
     public $defaultForms;
     public $reminders;

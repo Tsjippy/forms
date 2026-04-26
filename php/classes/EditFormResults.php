@@ -449,7 +449,7 @@ class EditFormResults extends DisplayFormResults{
 		);
 		
 		if($result === false){
-			return new \WP_Error('sim forms', "Submission removal failed");
+			return new \WP_Error('tsjippy forms', "Submission removal failed");
 		}
 
 		$this->sendEmail('removed');

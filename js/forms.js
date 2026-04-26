@@ -28,7 +28,7 @@ async function saveFormInput(target){
 }
 
 async function formbuilderSwitch(target){
-	let wrapper	= target.closest('.sim-form-wrapper');
+	let wrapper	= target.closest('.tsjippy-form-wrapper');
 	let button	= target.outerHTML;
 
 	let formData = new FormData();
@@ -39,7 +39,7 @@ async function formbuilderSwitch(target){
 		formData.append('formbuilder', true);
 		url.searchParams.set('formbuilder', true);
 
-		formId	= wrapper.querySelector('form.sim-form-wrapper').dataset.formId;
+		formId	= wrapper.querySelector('form.tsjippy-form-wrapper').dataset.formId;
 	}else{
 		url.searchParams.delete('formbuilder');
 		formId	= wrapper.querySelector('[name="form-id"]').value;
@@ -76,8 +76,8 @@ async function requestNewFormResults(target){
 	let button		= target.outerHTML;
 
 	let formData 	= new FormData();
-	let formId		= wrapper.querySelector('.sim-table.form-data-table').dataset.formId;
-	let shortcodeId	= wrapper.querySelector('.sim-table.form-data-table').dataset.shortcodeId;
+	let formId		= wrapper.querySelector('.tsjippy.table.form-data-table').dataset.formId;
+	let shortcodeId	= wrapper.querySelector('.tsjippy.table.form-data-table').dataset.shortcodeId;
 
 	formData.append('form-id', formId);
 	formData.append('shortcode-id', shortcodeId);
@@ -226,7 +226,7 @@ document.addEventListener('click', function(event) {
 		removeNode(target);
 	}
 
-	if(target.matches('.sim-form-wrapper [name="submit-form"]')){
+	if(target.matches('.tsjippy-form-wrapper [name="submit-form"]')){
 		event.stopPropagation();
 		
 		saveFormInput(target);

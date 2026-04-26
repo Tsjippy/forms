@@ -7,12 +7,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function checkFormExistence($formName){
-    $simForms    = new SimForms();
-    $simForms->getForms();
+    $forms    = new Forms();
+    $forms->getForms();
 
     // check if a form with this name already exists
     $found  = false;
-    foreach($simForms->forms as $form){
+    foreach($forms->forms as $form){
         if($form->name == $formName){
             $found  = true;
             break;
@@ -21,9 +21,9 @@ function checkFormExistence($formName){
 
     // Only add a new form if it does not exist yet
     if(!$found){
-        $simForms->insertForm($formName);
+        $forms->insertForm($formName);
 
-        return $simForms->formName;
+        return $forms->formName;
     }
 
     return $formName;
@@ -31,13 +31,13 @@ function checkFormExistence($formName){
 
 add_action( 'wp_after_insert_post', __NAMESPACE__.'\afterInsertPost', 10, 2);
 function afterInsertPost($postId, $post){
-    if(has_block('sim/formbuilder', $post)){
+    if(has_block('tsjippy/formbuilder', $post)){
         $hasFormbuilderShortcode    = true;
 
         $blocks                    = parse_blocks($post->post_content);
 
         foreach($blocks as $block){
-            if($block['blockName'] == 'sim/formbuilder' && !empty($block['attrs']['formname'])){
+            if($block['blockName'] == 'tsjippy/formbuilder' && !empty($block['attrs']['formname'])){
                 checkFormExistence($block['attrs']['formname']);
             }
         }
@@ -84,7 +84,7 @@ function afterInsertPost($postId, $post){
         }
     }
 
-    if($hasFormbuilderShortcode || has_shortcode($post->post_content, 'formselector') || has_block('sim/formbuilder', $post)){       
+    if($hasFormbuilderShortcode || has_shortcode($post->post_content, 'formselector') || has_block('tsjippy/formbuilder', $post)){       
         $pages  = SETTINGS['formbuilder-pages'] ?? [];
 
         $pages[]  = $postId;

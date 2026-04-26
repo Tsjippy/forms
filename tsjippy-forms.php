@@ -35,8 +35,8 @@ define(__NAMESPACE__ .'\SETTINGS', get_option('tsjippy_forms_settings', []));
 
 // run on activation
 register_activation_hook( __FILE__, function(){
-    $simForms = new SimForms();
-	$simForms->createDbTables();
+    $forms = new Forms();
+	$forms->createDbTables();
 
 	// Create frontend posting page
 	TSJIPPY\ADMIN\createDefaultPage(SETTINGS, 'forms-pages', 'Form selector', '[formselector]', SETTINGS);

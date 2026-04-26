@@ -24,7 +24,7 @@ function autoArchiveFormEntries(){
  */
 function formReminder(){
     // Also send a reminder for any mandatory forms
-    $simForms   = new FormReminders();
+    $forms   = new FormReminders();
 
-    $simForms->sendFormReminders();
+    $forms->sendFormReminders();
 }

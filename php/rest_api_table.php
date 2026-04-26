@@ -270,7 +270,7 @@ function deleteTablePrefs( \WP_REST_Request $request ) {
 }
 
 function saveColumnSettings($settings=[], $shortcodeId=''){
-	$simForms	= new SaveFormSettings($_POST);
+	$forms	= new SaveFormSettings($_POST);
 	
 	if($settings instanceof \WP_REST_Request){
 		$params			= $settings->get_params();
@@ -278,7 +278,7 @@ function saveColumnSettings($settings=[], $shortcodeId=''){
 		$settings 		= $params['column-settings'];
 	}
 
-	$result = $simForms->saveColumnSettings($settings, $shortcodeId);
+	$result = $forms->saveColumnSettings($settings, $shortcodeId);
 
 	if(is_wp_error($result)){
 		return $result;
@@ -300,9 +300,9 @@ function saveTableSettings(){
 	}
 
 	//update table settings
-	$simForms	= new SaveFormSettings($_POST);
+	$forms	= new SaveFormSettings($_POST);
 	
-	$result = $simForms->insertOrUpdateData($simForms->shortcodeTable, $tableSettings, ['id' => $_POST['shortcode-id']]);
+	$result = $forms->insertOrUpdateData($forms->shortcodeTable, $tableSettings, ['id' => $_POST['shortcode-id']]);
 
 	if(is_wp_error($result)){
 		return $result;
@@ -311,10 +311,10 @@ function saveTableSettings(){
 	//also update form setings if needed
 	$formSettings = $_POST['form-settings'];
 	if(is_array($formSettings) && is_numeric($_POST['form-id'])){
-		$simForms->getForm($_POST['form-id']);
+		$forms->getForm($_POST['form-id']);
 		
 		//update existing
-		$result = $simForms->insertOrUpdateData($simForms->tableName, $formSettings, ['id' => $simForms->formData->id]);
+		$result = $forms->insertOrUpdateData($forms->tableName, $formSettings, ['id' => $forms->formData->id]);
 
 		if(is_wp_error($result)){
 			return $result;
