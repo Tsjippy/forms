@@ -1,7 +1,11 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 use stdClass;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class FormBuilderForm extends DisplayForm{
 	public $isInDiv;
@@ -374,7 +378,7 @@ class FormBuilderForm extends DisplayForm{
 			$copyButton,
 			[
 				'class' 	=> 'copy copy-form-element',
-				'src'   	=> SIM\pathToUrl(PLUGINPATH.'pictures/copy_white.png'),
+				'src'   	=> TSJIPPY\pathToUrl(PLUGINPATH.'pictures/copy_white.png'),
 				'loading'	=> 'lazy'
 			]
 		);
@@ -611,7 +615,7 @@ class FormBuilderForm extends DisplayForm{
 						if(!empty($this->formData->form_url)){
 							$url	= $this->formData->form_url;
 						}else{
-							$url	= str_replace(['?formbuilder=yes', '&formbuilder=yes'], '', SIM\currentUrl(true));
+							$url	= str_replace(['?formbuilder=yes', '&formbuilder=yes'], '', TSJIPPY\currentUrl(true));
 						}
 
 						?>
@@ -804,7 +808,7 @@ class FormBuilderForm extends DisplayForm{
 							<br>
 							<h4>Select users with form edit rights</h4>
 							<?php
-							echo SIM\userSelect('', true, false, '', 'full_right_roles', [], $this->formData->full_right_roles, [1], 'select', '', true);
+							echo TSJIPPY\userSelect('', true, false, '', 'full_right_roles', [], $this->formData->full_right_roles, [1], 'select', '', true);
 							?>
 
 							<h4>Select roles who can submit the form on behalve of somebody else</h4>
@@ -824,13 +828,13 @@ class FormBuilderForm extends DisplayForm{
 
 							<h4>Select users who can submit the form on behalve of somebody else</h4>
 							<?php
-							echo SIM\userSelect('', true, false, '', 'submit_others_form', [], $this->formData->submit_others_form, [1], 'select', '', true);
+							echo TSJIPPY\userSelect('', true, false, '', 'submit_others_form', [], $this->formData->submit_others_form, [1], 'select', '', true);
 							?>
 						</div>
 					</div>
 				</div>
 				<?php
-				echo SIM\addSaveButton('submit-form-setting',  'Save form settings');
+				echo TSJIPPY\addSaveButton('submit-form-setting',  'Save form settings');
 				?>
 			</form>
 			<form method="POST" style='display: inline-block;'>
@@ -970,7 +974,7 @@ class FormBuilderForm extends DisplayForm{
 			<?php echo $this->warningConditionsForm('conditions', maybe_unserialize($this->formReminder->conditions));?>
 
 			<?php
-			echo SIM\addSaveButton('submit-form-reminder',  'Save form reminder');
+			echo TSJIPPY\addSaveButton('submit-form-reminder',  'Save form reminder');
 			?>
 		</form>
 		<?php
@@ -1505,7 +1509,7 @@ class FormBuilderForm extends DisplayForm{
 					</div>
 				</div>
 				<?php
-				echo SIM\addSaveButton('submit-form-emails','Save form email configuration');
+				echo TSJIPPY\addSaveButton('submit-form-emails','Save form email configuration');
 				?>
 			</form>
 		</div>
@@ -1869,7 +1873,7 @@ class FormBuilderForm extends DisplayForm{
 
 			echo $formContents;
 
-			echo SIM\addSaveButton('submit-form-element',"$text form element"); ?>
+			echo TSJIPPY\addSaveButton('submit-form-element',"$text form element"); ?>
 		</form>
 		<?php
 
@@ -2205,7 +2209,7 @@ class FormBuilderForm extends DisplayForm{
 				</div>
 			</div>
 			<?php
-			echo SIM\addSaveButton('submit-form-condition','Save conditions'); ?>
+			echo TSJIPPY\addSaveButton('submit-form-condition','Save conditions'); ?>
 		</form>
 		<?php
 		return ob_get_clean();

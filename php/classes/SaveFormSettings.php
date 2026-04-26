@@ -1,9 +1,13 @@
 <?php
-namespace SIM\FORMS;
+namespace TSJIPPY\FORMS;
 use ParseSplittedFormResults;
-use SIM;
+use TSJIPPY;
 use WP_Embed;
 use WP_Error;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class SaveFormSettings extends SimForms{
 	use CreateJs;
@@ -149,7 +153,7 @@ class SaveFormSettings extends SimForms{
 		foreach($data as $index => $value){
 			unset($data[$index]);
 
-			$value	= SIM\cleanUpNestedArray($value);
+			$value	= TSJIPPY\cleanUpNestedArray($value);
 
 			if(!empty($value)){
 				$value	= maybe_serialize($value);
@@ -463,7 +467,7 @@ class SaveFormSettings extends SimForms{
 		// Update each email
 		foreach($formEmails as $email){
 			$email['form_id']	= $formId;
-			$email['message']	= trim(SIM\deslash($email['message']));
+			$email['message']	= trim(TSJIPPY\deslash($email['message']));
 
 			$where				= [];
 

@@ -1,8 +1,12 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 use stdClass;
 use WP_Error;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 // Allow rest api urls for non-logged in users
 add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__.'\addRestUrls');
@@ -405,7 +409,7 @@ function addFormElement($copy=false){
 			if(is_array($val)){
 				$val	= serialize($val);
 			}else{
-				$val	= SIM\deslash($val);
+				$val	= TSJIPPY\deslash($val);
 			}
 		}
 	}

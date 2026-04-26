@@ -1,7 +1,11 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 use stdClass;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class FormExport extends FormBuilderForm{
     public function __construct(){
@@ -66,7 +70,7 @@ class FormExport extends FormBuilderForm{
 		}
 
 		$backupName = $this->formData->name.".sform";
-		SIM\clearOutput();
+		TSJIPPY\clearOutput();
 
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary");
@@ -315,7 +319,7 @@ class FormExport extends FormBuilderForm{
 					$this->insertOrUpdateData($this->formReminderTable, $reminder);
 				}
 			}else{
-				SIM\printArray("Unknown import type: $type");
+				TSJIPPY\printArray("Unknown import type: $type");
 				continue;
 			}
 		}

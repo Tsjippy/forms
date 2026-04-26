@@ -1,6 +1,10 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 function checkFormExistence($formName){
     $simForms    = new SimForms();
@@ -107,14 +111,14 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__.'\registerScripts');
 add_action( 'admin_enqueue_scripts', __NAMESPACE__.'\registerScripts');
 
 function registerScripts(){
-    wp_register_style( 'tsjippy_forms_style', SIM\pathToUrl(PLUGINPATH.'css/forms.min.css'), array(), PLUGINVERSION);
-    wp_register_style( 'tsjippy_formtable_style', SIM\pathToUrl(PLUGINPATH.'css/formtable.min.css'), array(), PLUGINVERSION);
+    wp_register_style( 'tsjippy_forms_style', TSJIPPY\pathToUrl(PLUGINPATH.'css/forms.min.css'), array(), PLUGINVERSION);
+    wp_register_style( 'tsjippy_formtable_style', TSJIPPY\pathToUrl(PLUGINPATH.'css/formtable.min.css'), array(), PLUGINVERSION);
 
-    wp_register_script('tsjippy_forms_script', SIM\pathToUrl(PLUGINPATH.'js/forms.min.js'), array('sweetalert', 'tsjippy_formsubmit_script', 'tsjippy_fileupload_script'), PLUGINVERSION, true);
+    wp_register_script('tsjippy_forms_script', TSJIPPY\pathToUrl(PLUGINPATH.'js/forms.min.js'), array('sweetalert', 'tsjippy_formsubmit_script', 'tsjippy_fileupload_script'), PLUGINVERSION, true);
 
-    wp_register_script( 'tsjippy_formbuilderjs', SIM\pathToUrl(PLUGINPATH.'js/formbuilder.min.js'), array('tsjippy_forms_script','sortable'), PLUGINVERSION, true);
+    wp_register_script( 'tsjippy_formbuilderjs', TSJIPPY\pathToUrl(PLUGINPATH.'js/formbuilder.min.js'), array('tsjippy_forms_script','sortable'), PLUGINVERSION, true);
     
-    wp_register_script('tsjippy_forms_table_script', SIM\pathToUrl(PLUGINPATH.'js/forms_table.min.js'), array('tsjippy_forms_script', 'tsjippy_table_script'), PLUGINVERSION, true);
+    wp_register_script('tsjippy_forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH.'js/forms_table.min.js'), array('tsjippy_forms_script', 'tsjippy_table_script'), PLUGINVERSION, true);
 
     if(is_numeric(get_the_ID())){
         $pages  = SETTINGS['formbuilder-pages'] ?? [];

@@ -1,6 +1,6 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 
 /**
  * Plugin Name:  		Tsjippy Forms
@@ -14,6 +14,7 @@ use SIM;
  * Plugin URI:			https://github.com/Tsjippy/forms/
  * Tested:				6.9
  * TextDomain:			tsjippy
+ * Requires Plugins:	tsjippy-shared-functionality
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
@@ -29,6 +30,7 @@ $pluginData = get_plugin_data(__FILE__, false, false);
 define(__NAMESPACE__ .'\PLUGIN', plugin_basename(__FILE__));
 define(__NAMESPACE__ .'\PLUGINPATH', __DIR__.'/');
 define(__NAMESPACE__ .'\PLUGINVERSION', $pluginData['Version']);
+define(__NAMESPACE__ .'\PLUGINSLUG', basename(__FILE__, '.php'));
 define(__NAMESPACE__ .'\SETTINGS', get_option('tsjippy_forms_settings', []));
 
 // run on activation
@@ -37,11 +39,11 @@ register_activation_hook( __FILE__, function(){
 	$simForms->createDbTables();
 
 	// Create frontend posting page
-	SIM\ADMIN\createDefaultPage(SETTINGS, 'forms-pages', 'Form selector', '[formselector]', SETTINGS);
+	TSJIPPY\ADMIN\createDefaultPage(SETTINGS, 'forms-pages', 'Form selector', '[formselector]', SETTINGS);
 
-	SIM\scheduleTask('auto_archive_action', 'daily');
+	TSJIPPY\scheduleTask('auto_archive_action', 'daily');
     
-    SIM\scheduleTask('form_reminder_action', 'daily');
+    TSJIPPY\scheduleTask('form_reminder_action', 'daily');
 });
 
 register_deactivation_hook( __FILE__, function(){

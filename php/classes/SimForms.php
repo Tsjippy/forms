@@ -1,8 +1,12 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 use stdClass;
 use WP_Error;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class SimForms{
 	
@@ -731,7 +735,7 @@ class SimForms{
 
 				$url	= get_page_link($post);
 
-				SIM\printArray("Form requested on {$post->post_type} on $url does not exist. Query used is '$query'");
+				TSJIPPY\printArray("Form requested on {$post->post_type} on $url does not exist. Query used is '$query'");
 				$this->insertForm();
 				$this->formData 	=  new \stdClass();
 			}else{
@@ -776,7 +780,7 @@ class SimForms{
 		}
 		
 		if($wpdb->last_error !== ''){
-			SIM\printArray($wpdb->print_error());
+			TSJIPPY\printArray($wpdb->print_error());
 		}
 		
 		$this->jsFileName	= plugin_dir_path(__DIR__)."../js/dynamic/{$this->formData->name}forms";
@@ -927,7 +931,7 @@ class SimForms{
 
 			$url	= get_page_link($post);
 
-			SIM\printArray("Element with id '$id' not found on form '{$this->formData->name}' with id  '{$this->formData->id}' on page $url", false);
+			TSJIPPY\printArray("Element with id '$id' not found on form '{$this->formData->name}' with id  '{$this->formData->id}' on page $url", false);
 			return false;
 		}
 		$elementIndex	= $this->formData->elementMapping['id'][$id];
@@ -995,7 +999,7 @@ class SimForms{
 
 				return $this->getElementByName($name, $key, $single);
 			}else{
-				//SIM\printArray("Element with name $name not found on form {$this->formData->name} with id {$this->formData->id}");
+				//TSJIPPY\printArray("Element with name $name not found on form {$this->formData->name} with id {$this->formData->id}");
 				return false;
 			}
 		}
@@ -1045,7 +1049,7 @@ class SimForms{
 		}
 
 		if(!isset($this->formData->elementMapping['type'][$type])){
-			//SIM\printArray("Element with id $type not found");
+			//TSJIPPY\printArray("Element with id $type not found");
 			return false;
 		}
 		
@@ -1281,7 +1285,7 @@ class SimForms{
 		}elseif(empty($formElements)){
 			$html	= "<div class='warning'>This form has no elements yet.<br>";
 				if($this->editRights){
-					$url	 = add_query_arg('formbuilder', 1, SIM\getCurrentUrl());
+					$url	 = add_query_arg('formbuilder', 1, TSJIPPY\getCurrentUrl());
 					$html	.= "<br><a href='$url' class='button small sim'>Start Building the form</a>";
 				}else{
 					$html	.= "Ask an user with the editor role to start working on it";
@@ -1434,7 +1438,7 @@ class SimForms{
 					$string = str_replace("%$match%", '', $string);
 
 					// mention it in the log
-					SIM\printArray("No value found for transform value '%$match%' on form '{$this->formData->name}' with id {$this->formData->id}");
+					TSJIPPY\printArray("No value found for transform value '%$match%' on form '{$this->formData->name}' with id {$this->formData->id}");
 				}
 				$string 		= str_replace("%$match%", $replaceValue, $string);
 			}

@@ -1,11 +1,15 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 add_filter('tsjippy_mandatory_html_filter', __NAMESPACE__.'\addChildFields', 10, 3);
 function addChildFields($html, $userId, $object){
 	// Add warnings for child fields
-	$family = new SIM\FAMILY\Family();
+	$family = new TSJIPPY\FAMILY\Family();
 
 	// Loop over children
 	foreach($family->getChildren($userId) as $child){

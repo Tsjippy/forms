@@ -1,10 +1,14 @@
 <?php
-namespace SIM\FORMS;
+namespace TSJIPPY\FORMS;
 
 use ParagonIE\Sodium\Core\Curve25519\Ge\P2;
-use SIM;
+use TSJIPPY;
 use stdClass;
 use WP_Error;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class DisplayFormResults extends DisplayForm{
 	use ExportFormResults;
@@ -45,7 +49,7 @@ class DisplayFormResults extends DisplayForm{
 
 		wp_enqueue_style('tsjippy_formtable_style');
 
-		$family							= new SIM\FAMILY\Family();
+		$family							= new TSJIPPY\FAMILY\Family();
 		$this->user->partnerId			= $family->getPartner($this->user->ID);
 
 		//Get personal visibility
@@ -226,8 +230,8 @@ class DisplayFormResults extends DisplayForm{
 		$query	= $baseQuery.implode(' AND ', $where);
 
 		if(count($values) != substr_count($query, '%')){
-			SIM\printArray($query);
-			SIM\printArray($values);
+			TSJIPPY\printArray($query);
+			TSJIPPY\printArray($values);
 		}
 
 		$metas		= $wpdb->get_results(
@@ -670,7 +674,7 @@ class DisplayFormResults extends DisplayForm{
 		);
 
 		if($wpdb->last_error !== ''){
-			SIM\printArray($wpdb->print_error());
+			TSJIPPY\printArray($wpdb->print_error());
 		}
 
 		/**
@@ -884,7 +888,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$rowHasContents	= false;
-		$iconUrl 		= SIM\pathToUrl(PLUGINPATH.'pictures/copy.png');
+		$iconUrl 		= TSJIPPY\pathToUrl(PLUGINPATH.'pictures/copy.png');
 		
 		foreach($this->columnSettings as $elementId => $columnSetting){
 			if(!is_array($columnSetting)){
@@ -1250,7 +1254,7 @@ class DisplayFormResults extends DisplayForm{
 							}else{
 								$visibility	= 'visible';
 							}
-							$icon			= "<img class='visibility-icon $visibility' src='".SIM\PICTURESURL."/$visibility.png' width='20px' loading='lazy' style='min-width:20px;'>";
+							$icon			= "<img class='visibility-icon $visibility' src='".TSJIPPY\PICTURESURL."/$visibility.png' width='20px' loading='lazy' style='min-width:20px;'>";
 							
 							?>
 							<tr class="column-setting-wrapper" data-element-id="<?php echo $elementIndex;?>">
@@ -1325,7 +1329,7 @@ class DisplayFormResults extends DisplayForm{
 					</tbody>
 				</table>
 				<?php
-				echo SIM\addSaveButton('submit_column_setting','Save table column settings');
+				echo TSJIPPY\addSaveButton('submit_column_setting','Save table column settings');
 				?>
 			</form>
 		</div>
@@ -1632,7 +1636,7 @@ class DisplayFormResults extends DisplayForm{
 							<br>
 							<h4>Select users with permission to VIEW the table</h4>
 							<?php
-							echo SIM\userSelect('', true, false, '', "table-settings[view-right-roles][]", [], $this->tableSettings->view_right_roles, [1], 'select', '', true);
+							echo TSJIPPY\userSelect('', true, false, '', "table-settings[view-right-roles][]", [], $this->tableSettings->view_right_roles, [1], 'select', '', true);
 							?>
 
 							<h4>Select roles with permission to edit ALL form submission data</h4>
@@ -1654,13 +1658,13 @@ class DisplayFormResults extends DisplayForm{
 							<br>
 							<h4>Select users with permission to EDIT the table</h4>
 							<?php
-							echo SIM\userSelect('', true, false, '', "table-settings[edit-right-roles][]", [], $this->tableSettings->edit_right_roles, [1], 'select', '', true);
+							echo TSJIPPY\userSelect('', true, false, '', "table-settings[edit-right-roles][]", [], $this->tableSettings->edit_right_roles, [1], 'select', '', true);
 							?>
 						</div>
 					</div>
 				</div>
 			<?php
-			echo SIM\addSaveButton('submit_table_setting','Save table settings');
+			echo TSJIPPY\addSaveButton('submit_table_setting','Save table settings');
 			?>
 			</form>
 		</div>
@@ -2295,7 +2299,7 @@ class DisplayFormResults extends DisplayForm{
 					if(!empty($this->hiddenColumns[$columnSetting['name']])){
 						$class	.= ' hidden';
 					}
-					$icon			= "<img class='visibility-icon visible' src='".SIM\PICTURESURL."/visible.png' width=20 height=20 loading='lazy' >";
+					$icon			= "<img class='visibility-icon visible' src='".TSJIPPY\PICTURESURL."/visible.png' width=20 height=20 loading='lazy' >";
 					
 					//Add a heading for each column
 					$style			= '';

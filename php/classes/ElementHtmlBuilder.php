@@ -1,7 +1,11 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 use WP_Error;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class ElementHtmlBuilder extends SubmitForm{
     public $defaultArrayValues;
@@ -107,7 +111,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
 
 		// Add family meta
-		$family		= new SIM\FAMILY\Family();
+		$family		= new TSJIPPY\FAMILY\Family();
 		$this->defaultValues['family_name']		= $family->getFamilyName($this->user->ID);
 		$this->defaultValues['family_picture']	= $family->getFamilyMeta($this->user, 'family_picture');
 		$this->defaultValues['family_partner']	= $family->getPartner($this->user);
@@ -120,7 +124,7 @@ class ElementHtmlBuilder extends SubmitForm{
 				
 		$this->defaultArrayValues	= [];
 
-		foreach(SIM\getUserAccounts(false, false, [], [], [], true) as $user){
+		foreach(TSJIPPY\getUserAccounts(false, false, [], [], [], true) as $user){
 			$this->defaultArrayValues['all_users'][$user->ID] = $user->display_name;
 		}
 
@@ -321,7 +325,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
 		//remove any paragraphs
 		$content 	= str_replace(['<p>', '</p>'], '', $text);
-		$content 	= SIM\deslash($content);
+		$content 	= TSJIPPY\deslash($content);
 		
 		$node		= $this->addElement('div', $parent, ['class' => 'info-box'], '', $dom);
 		$wrapper	= $this->addElement('div', $node, ['style' => "float:right"], '', $dom);
@@ -335,7 +339,7 @@ class ElementHtmlBuilder extends SubmitForm{
 				'role'		=> "img",
 				'class'		=> "emoji",
 				'alt'		=> "ℹ",
-				'src'		=> SIM\PICTURESURL.'/info.png',
+				'src'		=> TSJIPPY\PICTURESURL.'/info.png',
 				'loading'	=> "lazy"
 			], 
 			'', 
@@ -409,7 +413,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
 			$text	= "Link";
 
-			if(getimagesize(SIM\urlToPath($string)) !== false) {
+			if(getimagesize(TSJIPPY\urlToPath($string)) !== false) {
 				$text	= "<img src='$string' alt='form_upload' style='width:150px;' loading='lazy'>";
 			}
 			$output		= "<a href='$string'>$text</a>";
@@ -485,10 +489,10 @@ class ElementHtmlBuilder extends SubmitForm{
 			$node = $dom->createElement($type, $textContent );
 		} catch (\DOMException $e) {
 			// Catch the specific DOMException
-			SIM\printArray("Caught DOMException: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+			TSJIPPY\printArray("Caught DOMException: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
 		} catch (\Exception $e) {
 			// Catch any other general exceptions if needed
-			SIM\printArray( "Caught general Exception: " . $e->getMessage());
+			TSJIPPY\printArray( "Caught general Exception: " . $e->getMessage());
 		}
 
 		// Type should come first
@@ -501,10 +505,10 @@ class ElementHtmlBuilder extends SubmitForm{
 				$node->setAttribute($attribute, $value);
 			} catch (\DOMException $e) {
 				// Catch the specific DOMException
-				SIM\printArray("Caught DOMException for attribute '$attribute' " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+				TSJIPPY\printArray("Caught DOMException for attribute '$attribute' " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
 			} catch (\Exception $e) {
 				// Catch any other general exceptions if needed
-				SIM\printArray( "Caught general Exception: " . $e->getMessage());
+				TSJIPPY\printArray( "Caught general Exception: " . $e->getMessage());
 			}
 		}
 		
@@ -512,10 +516,10 @@ class ElementHtmlBuilder extends SubmitForm{
 			$parent->appendChild($node);
 		} catch (\DOMException $e) {
 			// Catch the specific DOMException
-			SIM\printArray("Caught DOMException: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
+			TSJIPPY\printArray("Caught DOMException: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
 		} catch (\Exception $e) {
 			// Catch any other general exceptions if needed
-			SIM\printArray( "Caught general Exception: " . $e->getMessage());
+			TSJIPPY\printArray( "Caught general Exception: " . $e->getMessage());
 		}
 
 		return $node;
@@ -566,7 +570,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		$removeMin	= false;
 
 		// do not have min values in a form table to allow to edit values for the past
-		if(get_class($this) == 'SIM\FORMS\DisplayFormResults'){
+		if(get_class($this) == 'TSJIPPY\FORMS\DisplayFormResults'){
 			$removeMin	= true;
 		}
 
@@ -871,7 +875,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			$userId		= $this->userId;
 		}
 		//Load js
-		$uploader 		= new SIM\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey]);
+		$uploader 		= new TSJIPPY\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey]);
 		
 		return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $optionHtml, $this->element->editimage);
 	}
@@ -1151,7 +1155,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		if(
 			empty($this->element->multiple) ||
 			in_array($this->element->type, ['file', 'image', 'text']) || 
-			get_class($this) === "SIM\FORMS\FormBuilderForm" 
+			get_class($this) === "TSJIPPY\FORMS\FormBuilderForm" 
 		){
 			return false;
 		}
@@ -1587,7 +1591,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		switch($this->element->type){
 			case 'p':
 				$content 	= wp_kses_post($this->element->text);
-				$content	= SIM\deslash($content);
+				$content	= TSJIPPY\deslash($content);
 
 				$node		= $this->addElement('div', $parent, ['name'=>$this->element->name]);
 
@@ -1662,7 +1666,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		 */ 
 		if(	
 			$this->multiwrapperFirstClone != '' && 					// We have something to clone
-			get_class($this) != "SIM\FORMS\FormBuilderForm" && 		// Do not clone on formbuilder pages
+			get_class($this) != "TSJIPPY\FORMS\FormBuilderForm" && 		// Do not clone on formbuilder pages
 			$element->type != 'multi-start' &&						// skip this one
 			!$element->wrap											// only clone when the wrapping is finished
 		){

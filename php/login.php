@@ -1,6 +1,10 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 add_filter('login_redirect', __NAMESPACE__.'\loginRedirect', 10, 3);
 function loginRedirect($redirect, $requestedRedirect, $user){
@@ -9,7 +13,7 @@ function loginRedirect($redirect, $requestedRedirect, $user){
         return $redirect;
     }
 
-    $accountPage  = SIM\ADMIN\getDefaultPageLink('usermanagement', 'account_page');
+    $accountPage  = TSJIPPY\ADMIN\getDefaultPageLink('usermanagement', 'account_page');
 
     if( empty($accountPage)){
         return $redirect;

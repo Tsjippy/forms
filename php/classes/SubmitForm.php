@@ -1,8 +1,12 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 use WP_Embed;
 use WP_Error;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class SubmitForm extends SaveFormSettings{
 	public $submission;
@@ -169,7 +173,7 @@ class SubmitForm extends SaveFormSettings{
 			}
 
 			if(empty($from)){
-				SIM\printArray("No from email found for email $key");
+				TSJIPPY\printArray("No from email found for email $key");
 			}
 							
 			$to		= '';
@@ -209,7 +213,7 @@ class SubmitForm extends SaveFormSettings{
 			}
 			
 			if(empty($recipients)){
-				SIM\printArray("No to email found for email $key on form {$this->formData->name} with id {$this->formData->id}");
+				TSJIPPY\printArray("No to email found for email $key on form {$this->formData->name} with id {$this->formData->id}");
 				continue;
 			}
 
@@ -248,8 +252,8 @@ class SubmitForm extends SaveFormSettings{
 			remove_filter('wp_mail', [$this, 'addFormData'], 1);
 
 			if($result === false){
-				SIM\printArray("Sending the e-mail failed");
-				SIM\printArray([
+				TSJIPPY\printArray("Sending the e-mail failed");
+				TSJIPPY\printArray([
 					$to,
 					$subject,
 					$message,
@@ -271,7 +275,7 @@ class SubmitForm extends SaveFormSettings{
 		foreach ($uploadedFiles as $key => $url){
 			$urlParts 	= explode('/',$url);
 			$fileName	= end($urlParts);
-			$path		= SIM\urlToPath($url);
+			$path		= TSJIPPY\urlToPath($url);
 			$targetDir	= str_replace($fileName,'',$path);
 			
 			//add input name to filename
@@ -327,7 +331,7 @@ class SubmitForm extends SaveFormSettings{
 				is_array($formresults[$matches[1]])
 			){
 				// remove empty entries
-				$results = SIM\cleanUpNestedArray($formresults[$matches[1]]);
+				$results = TSJIPPY\cleanUpNestedArray($formresults[$matches[1]]);
 
 				// loop over all the sub entries of the split field to see if they are empty
 				foreach($results as $index => $subValues){
@@ -433,7 +437,7 @@ class SubmitForm extends SaveFormSettings{
 				$result	= $this->submission->{$key}[0];
 			}
 
-			$result	= SIM\cleanUpNestedArray($result);
+			$result	= TSJIPPY\cleanUpNestedArray($result);
 
 			if(empty($result)){
 				continue;
@@ -489,7 +493,7 @@ class SubmitForm extends SaveFormSettings{
 
 			//remove empty elements from the array
 			if(is_array($result)){
-				$result	= SIM\cleanUpNestedArray($result);
+				$result	= TSJIPPY\cleanUpNestedArray($result);
 
 				//check if we should only update one entry of the array
 				$el	= $this->getElementByName($key.'['.array_keys($result)[0].']');

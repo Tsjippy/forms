@@ -1,6 +1,10 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class DisplayForm extends ElementHtmlBuilder{
 	use CreateJs;
@@ -212,7 +216,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		}
 
 		if(!file_exists($jsPath)){
-			//SIM\printArray("$jsPath does not exist!\nBuilding it now");
+			//TSJIPPY\printArray("$jsPath does not exist!\nBuilding it now");
 			
 			$path	= PLUGINPATH."js/dynamic";
 			if (!is_dir($path)) {
@@ -226,7 +230,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		wp_enqueue_script('tsjippy_forms_script');
 		//Only enqueue if there is content in the file
 		if(file_exists($jsPath) && filesize($jsPath) > 0){
-			wp_enqueue_script( "dynamic_{$this->formName}forms", SIM\pathToUrl($jsPath), array('tsjippy_forms_script'), $this->formData->version, true);
+			wp_enqueue_script( "dynamic_{$this->formName}forms", TSJIPPY\pathToUrl($jsPath), array('tsjippy_forms_script'), $this->formData->version, true);
 		}
 
 		$initialHtml	= apply_filters('tsjippy-forms-before-showing-form', '', $this);
@@ -251,7 +255,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		}
 
 		if(array_intersect($this->userRoles, $this->submitRoles) && !empty($this->formData->save_in_meta)){
-			$this->addRawHtml(SIM\userSelect("Select an user to show the data of:"), $this->formWrapper);
+			$this->addRawHtml(TSJIPPY\userSelect("Select an user to show the data of:"), $this->formWrapper);
 		}
 		$this->addRawHtml(apply_filters('tsjippy_before_form', '', $this->formName), $this->formWrapper);
 
@@ -293,7 +297,7 @@ class DisplayForm extends ElementHtmlBuilder{
 			'type'		=> 'hidden',
 			'class'		=> 'no-reset',
 			'name'		=> 'formurl',
-			'value'		=> SIM\currentUrl(true)
+			'value'		=> TSJIPPY\currentUrl(true)
 		];
 		$this->addElement('input', $form, $attributes);
 
@@ -377,7 +381,7 @@ class DisplayForm extends ElementHtmlBuilder{
 				$parent = $this->formStepControls($parent);
 			}
 			 
-			$this->addRawHtml(SIM\addSaveButton('submit-form', $buttonText, $hidden), $parent);
+			$this->addRawHtml(TSJIPPY\addSaveButton('submit-form', $buttonText, $hidden), $parent);
 		}
 
 		$html =  $this->dom->saveHTML();

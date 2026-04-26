@@ -1,6 +1,10 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class EditFormResults extends DisplayFormResults{
 	public $submissionId;
@@ -17,7 +21,7 @@ class EditFormResults extends DisplayFormResults{
 	public function updateSubmission($elementId, $value, $subId = null){
 		global $wpdb;
 
-		$value	= SIM\cleanUpNestedArray($value);
+		$value	= TSJIPPY\cleanUpNestedArray($value);
 
 		if(is_numeric($this->submissionId)){
 			$submissionId	= $this->submissionId;
@@ -26,7 +30,7 @@ class EditFormResults extends DisplayFormResults{
 		}elseif(is_numeric($_POST['submission-id'])){
 			$submissionId	= $_POST['submission-id'];
 		}else{
-			SIM\printArray('No submission id found');
+			TSJIPPY\printArray('No submission id found');
 			return false;
 		}
 
@@ -85,7 +89,7 @@ class EditFormResults extends DisplayFormResults{
 			if(defined('REST_REQUEST')){
 				return new \WP_Error('form error', $message);
 			}else{
-				SIM\printArray($message);
+				TSJIPPY\printArray($message);
 			}
 		}elseif(!$result){
 			$column		= array_keys($data)[0];
@@ -100,8 +104,8 @@ class EditFormResults extends DisplayFormResults{
 
 			if($curValue != $data[$column]){
 				$message	= "No row with id $submissionId found\nQuery used is '$wpdb->last_query'";
-				SIM\printArray($message);
-				SIM\printArray($this->submission);
+				TSJIPPY\printArray($message);
+				TSJIPPY\printArray($this->submission);
 			}
 		}
 
@@ -206,15 +210,15 @@ class EditFormResults extends DisplayFormResults{
 			if(defined('REST_REQUEST')){
 				return new \WP_Error('form error', $message);
 			}else{
-				SIM\printArray($message);
+				TSJIPPY\printArray($message);
 			}
 		}elseif(!$result){
 			$message	= "No row with id $submissionId found";
 			if(defined('REST_REQUEST')){
 				return new \WP_Error('form error', $message);
 			}else{
-				SIM\printArray($message);
-				SIM\printArray($this->submission);
+				TSJIPPY\printArray($message);
+				TSJIPPY\printArray($this->submission);
 			}
 		}	
 		
@@ -244,7 +248,7 @@ class EditFormResults extends DisplayFormResults{
 		}elseif(!empty($this->submission->id)){
 			$submissionId	= $this->submission->id;
 		}else{
-			SIM\printArray('No submission id found');
+			TSJIPPY\printArray('No submission id found');
 			return false;
 		}
 	
@@ -276,15 +280,15 @@ class EditFormResults extends DisplayFormResults{
 			if(defined('REST_REQUEST')){
 				return new \WP_Error('form error', $message);
 			}else{
-				SIM\printArray($message);
+				TSJIPPY\printArray($message);
 			}
 		}elseif(!$result){
 			$message	= "No row with id $submissionId found";
 			if(defined('REST_REQUEST')){
 				return new \WP_Error('form error', $message);
 			}else{
-				SIM\printArray($message);
-				SIM\printArray($this->submission);
+				TSJIPPY\printArray($message);
+				TSJIPPY\printArray($this->submission);
 			}
 		}else{
 			$message	= "Entry with id {$this->submissionId} succesfully " . ($archive ? 'archived' : 'unarchived');
@@ -335,7 +339,7 @@ class EditFormResults extends DisplayFormResults{
 			// Get all the replace patterns
 			preg_match_all($pattern, $triggerValue, $matches);
 			if(!is_array($matches[1])){
-				SIM\printArray($matches[1]);
+				TSJIPPY\printArray($matches[1]);
 			}else{
 				// Loop over all the replacements
 				foreach((array)$matches[1] as $keyword){

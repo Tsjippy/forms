@@ -1,6 +1,10 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 // update reminder cache after each form submission and reminder settings update
 add_action('tsjippy-after-form-submit', __NAMESPACE__.'\updateReminders');

@@ -1,8 +1,12 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 use stdClass;
 use WP_Error;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 // Allow rest api urls for non-logged in users
 add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__.'\addFormResultUrls');
@@ -406,7 +410,7 @@ function getInputHtml(){
 
 			if($datalist == $element){
 				$datalist	= $formTable->getElementByName($optionValue.'-list');
-				SIM\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
+				TSJIPPY\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
 			}
 
 			// Get the html of the datalist element

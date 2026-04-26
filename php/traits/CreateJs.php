@@ -1,6 +1,10 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 require( PLUGINPATH  . '/lib/vendor/autoload.php');
 
@@ -214,7 +218,7 @@ trait CreateJs{
                         ){
                             if(empty($rule['combinator'])){
                                 $rule['combinator'] = 'AND';
-                                SIM\printArray("Condition index $conditionIndex of $element->name is missing a combinator. I have set it to 'AND' for now");
+                                TSJIPPY\printArray("Condition index $conditionIndex of $element->name is missing a combinator. I have set it to 'AND' for now");
                             }
                             if($rule['combinator'] == 'AND'){
                                 $conditionIf .= " && ";
@@ -366,7 +370,7 @@ trait CreateJs{
                             }
                         }
                     }else{
-                        SIM\printArray("formbuilder.php writing js: missing action: '$action' for condition $conditionIndex of field {$element->name}");
+                        TSJIPPY\printArray("formbuilder.php writing js: missing action: '$action' for condition $conditionIndex of field {$element->name}");
                     }
                 }
             }
@@ -618,7 +622,7 @@ trait CreateJs{
         file_put_contents($this->jsFileName.'.min.js', $minifiedJs);
         
         if(!empty($errors)){
-            SIM\printArray($errors);
+            TSJIPPY\printArray($errors);
         }
 
         return $errors;

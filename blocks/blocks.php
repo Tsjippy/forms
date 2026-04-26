@@ -1,6 +1,6 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 
 add_action('init', __NAMESPACE__.'\initBlocks');
 function initBlocks() {
@@ -60,9 +60,9 @@ function initBlocks() {
 add_action( 'enqueue_block_assets', __NAMESPACE__.'\loadAssets');
 function loadAssets(){
 	if(is_admin()){
-		SIM\enqueueScripts();
+		TSJIPPY\enqueueScripts();
 
-		SIM\FILEUPLOAD\registerUploadScripts();
+		TSJIPPY\FILEUPLOAD\registerUploadScripts();
 
 		registerScripts();
 		

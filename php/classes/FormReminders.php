@@ -1,6 +1,10 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class FormReminders extends SimForms{
     public $metaForms;
@@ -53,7 +57,7 @@ class FormReminders extends SimForms{
         }
         
         //Retrieve all users
-        $this->userIds          			= SIM\getUserAccounts(false, false, 'ID');
+        $this->userIds          			= TSJIPPY\getUserAccounts(false, false, 'ID');
         
         $this->getMandatoryElements();
 
@@ -274,7 +278,7 @@ class FormReminders extends SimForms{
             return true;
         }
 
-        $conditions	= SIM\cleanUpNestedArray($conditions);
+        $conditions	= TSJIPPY\cleanUpNestedArray($conditions);
 
         // Check if the the roles overlap
         if(isset($conditions['roles'])){
@@ -411,7 +415,7 @@ class FormReminders extends SimForms{
 
                 $name		= $element->name;
                 if (str_contains($name, '[')){
-                    $value  = SIM\getMetaArrayValue($userId, $name, $value);
+                    $value  = TSJIPPY\getMetaArrayValue($userId, $name, $value);
                 }else{
                     $value  = get_user_meta($userId, $metakey, true);
                 }
@@ -444,7 +448,7 @@ class FormReminders extends SimForms{
      */
     public function getAllFormRemindersForToday($includeMandatoryForms=true){
         $today      = date('D');
-	    $family	    = new SIM\FAMILY\Family();
+	    $family	    = new TSJIPPY\FAMILY\Family();
         $reminders  = [];
 
         // Form element reminders
@@ -634,7 +638,7 @@ class FormReminders extends SimForms{
             return '';
         }
         
-	    $family	            = new SIM\FAMILY\Family();
+	    $family	            = new TSJIPPY\FAMILY\Family();
         $child				= $family->isChild($userId);
         $childName          = '';
         if($child){

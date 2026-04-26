@@ -1,9 +1,13 @@
 <?php
-namespace SIM\FORMS;
-use SIM;
+namespace TSJIPPY\FORMS;
+use TSJIPPY;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 trait ExportFormResults{
 	/**
@@ -86,7 +90,7 @@ trait ExportFormResults{
 			//loop over the cells
 			foreach ($row as $cell) {
 				if(is_array($cell)){
-					$cell	= SIM\cleanUpNestedArray($cell);
+					$cell	= TSJIPPY\cleanUpNestedArray($cell);
 					$cell	= implode(',', $cell);
 				} 
 				/* 
@@ -110,7 +114,7 @@ trait ExportFormResults{
 		$writer					= new Xlsx($spreadsheet);
 		//Download excel file here
 		if($download){
-			SIM\clearOutput();
+			TSJIPPY\clearOutput();
 			ob_start();
 			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 			header("Content-Disposition: attachment; filename=$fileName");
@@ -132,7 +136,7 @@ trait ExportFormResults{
 	 * @param	string	$fileName	the name of the downloaded file. 	Default the formname
 	 */
 	function exportPdf(){
-		$pdf = new SIM\PDF\PdfHtml();
+		$pdf = new TSJIPPY\PDF\PdfHtml();
 		$pdf->SetFont('Arial','B',15);
 
 		$this->cleanExportContent();
@@ -220,19 +224,19 @@ trait ExportFormResults{
 		if($minWidth > 180){
 			if($minWidth < 297){
 				//Landscape A4 pdf
-				$pdf = new SIM\PDF\PdfHtml('L');
+				$pdf = new TSJIPPY\PDF\PdfHtml('L');
 			}elseif($minWidth < 420){
 				//Landscape pdf A3 size
-				$pdf = new SIM\PDF\PdfHtml('L','mm','A3');
+				$pdf = new TSJIPPY\PDF\PdfHtml('L','mm','A3');
 			}elseif($minWidth < 594){
 				//Landscape pdf A2 size
-				$pdf = new SIM\PDF\PdfHtml('L','mm',array(594,420));
+				$pdf = new TSJIPPY\PDF\PdfHtml('L','mm',array(594,420));
 			}elseif($minWidth < 841){
 				//Landscape pdf A1 size
-				$pdf = new SIM\PDF\PdfHtml('L','mm',array(841,594));
+				$pdf = new TSJIPPY\PDF\PdfHtml('L','mm',array(841,594));
 			}else{
 				//Landscape pdf A0 size
-				$pdf = new SIM\PDF\PdfHtml('L','mm',array(1189,841));
+				$pdf = new TSJIPPY\PDF\PdfHtml('L','mm',array(1189,841));
 			}
 			
 			//Set font again
