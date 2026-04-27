@@ -706,7 +706,7 @@
 
 ### Added
 - newest js import version
-- 'sim-table-view-permissions' filter
+- 'tsjippy-table-view-permissions' filter
 - filter subid
 
 ### Changed

@@ -1,6 +1,6 @@
 @use '../../../plugins/tsjippy-shared-functionality/includes/css/scss/global' as *;
 
-.sim-form-wrapper{
+.tsjippy-form-wrapper{
 	input:disabled {
 		border: none;
 		padding: 0;
@@ -199,14 +199,14 @@
 	}
 }
 
-.sim-form-wrapper input[type="text"],
-.sim-form-wrapper input[type="email"],
-.sim-form-wrapper input[type="tel"],
-.sim-form-wrapper input[type="month"],
-.sim-form-wrapper input[type="password"],
-.sim-form-wrapper input[type="search"],
-.sim-form-wrapper input[type="number"],
-.sim-form-wrapper input[type="url"]
+.tsjippy-form-wrapper input[type="text"],
+.tsjippy-form-wrapper input[type="email"],
+.tsjippy-form-wrapper input[type="tel"],
+.tsjippy-form-wrapper input[type="month"],
+.tsjippy-form-wrapper input[type="password"],
+.tsjippy-form-wrapper input[type="search"],
+.tsjippy-form-wrapper input[type="number"],
+.tsjippy-form-wrapper input[type="url"]
 {
 	&:not(.column-settings, .element-condition){
 		width: 100%;
