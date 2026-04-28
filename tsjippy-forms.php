@@ -30,7 +30,7 @@ $pluginData = get_plugin_data(__FILE__, false, false);
 define(__NAMESPACE__ .'\PLUGIN', plugin_basename(__FILE__));
 define(__NAMESPACE__ .'\PLUGINPATH', __DIR__.'/');
 define(__NAMESPACE__ .'\PLUGINVERSION', $pluginData['Version']);
-define(__NAMESPACE__ .'\PLUGINSLUG', basename(__FILE__, '.php'));
+define(__NAMESPACE__ .'\PLUGINSLUG', str_replace('tsjippy-', '', basename(__FILE__, '.php')));
 define(__NAMESPACE__ .'\SETTINGS', get_option('tsjippy_forms_settings', []));
 
 // run on activation
@@ -38,8 +38,11 @@ register_activation_hook( __FILE__, function(){
     $forms = new Forms();
 	$forms->createDbTables();
 
+	$settings	= SETTINGS;
+
 	// Create frontend posting page
-	TSJIPPY\ADMIN\createDefaultPage(SETTINGS, 'forms-pages', 'Form selector', '[formselector]', SETTINGS);
+	$settings['forms-page']	= TSJIPPY\ADMIN\createDefaultPage('Form selector', '[formselector]');
+	update_option('tsjippy_forms_settings', $settings);
 
 	TSJIPPY\scheduleTask('auto_archive_action', 'daily');
     

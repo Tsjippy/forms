@@ -606,7 +606,7 @@ class FormReminders extends Forms{
             $secondTab	= $names[0];
         }
 
-        return "<li><a onclick='Main.changeUrl(this, `$secondTab`)' data-param-val='$mainTab' data-hash={$element->name} style='cursor:pointer'>$name</a></li>";
+        return "<li><a onclick='Main.changeUrl(this, `$secondTab`)' data-target='$mainTab' data-hash={$element->name} style='cursor:pointer'>$name</a></li>";
     }
 
     /**
