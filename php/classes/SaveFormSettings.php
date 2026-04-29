@@ -20,50 +20,50 @@ class SaveFormSettings extends Forms{
 		global $wpdb;
 
 		// Make sure we only are working on the name
-		$element->name	= end(explode('\\', $element->name));
+		$element->slug	= end(explode('\\', $element->slug));
 
 		// Replace spaces with _
-		$element->name	= str_replace(" ", "_", $element->name);
+		$element->slug	= str_replace(" ", "_", $element->slug);
 
 		// Make lowercase
-		$element->name	= strtolower($element->name);
+		$element->slug	= strtolower($element->slug);
 
 		// Keep only valid chars
-		$element->name = preg_replace('/[^a-zA-Z0-9_\[\]]/', '', $element->name);
+		$element->slug = preg_replace('/[^a-zA-Z0-9_\[\]]/', '', $element->slug);
 
 		// Remove ending _
-		$element->name	= trim($element->name, " \n\r\t\v\0_");
+		$element->slug	= trim($element->slug, " \n\r\t\v\0_");
 
 		// Make sure the first char is a letter or _
-		$element->name[0] = preg_replace('/[^a-zA-Z_]/', '_', $element->name[0]);
+		$element->slug[0] = preg_replace('/[^a-zA-Z_]/', '_', $element->slug[0]);
 
 		// Check if name is unique
 		// Get all elements with this name
-		$elements		= $this->getElementByName($element->name, '', false);
+		$elements		= $this->getElementBySlug($element->slug, '', false);
 		if(
-			str_contains($element->name, '[]') 	||  	// Doesn't need to be unique 
+			str_contains($element->slug, '[]') 	||  	// Doesn't need to be unique 
 			(
 				$update && 
-				$oldElement->name == $element->name && 	// Name didn't change
+				$oldElement->slug == $element->slug && 	// Name didn't change
 				$elements &&
 				count($elements) == 1
 			)
 		){
 
-			return $element->name;
+			return $element->slug;
 		}
 
-		$elementName = $element->name;
+		$elementName = $element->slug;
 		
 		$i = '';
 
-		// getElementByName returns false when no match found
+		// getElementBySlug returns false when no match found
 		while(true){
-			$existingElement	= $this->getElementByName($elementName);
+			$existingElement	= $this->getElementBySlug($elementName);
 
 			if(
 				!$existingElement || 							// No existing element found
-				$existingElement->name != $element->name ||		// Different name found
+				$existingElement->slug != $element->slug ||		// Different name found
 				( 
 					$update && 									// Updating existing element
 					$existingElement->id == $element->id 		// Same element
@@ -74,23 +74,23 @@ class SaveFormSettings extends Forms{
 
 			$i++;
 			
-			$elementName = "{$element->name}_$i";
+			$elementName = "{$element->slug}_$i";
 		}
 
 		//update the name
 		if($i != ''){
-			$element->name .= "_$i";
+			$element->slug .= "_$i";
 		}
 
 		// only update previous submissions when an update of the name of existing element took place
 		if(!$update){
-			return $element->name;
+			return $element->slug;
 		}
 
 		// Update the name in the form elements array
 		foreach($this->formElements as &$el){
 			if($el->id == $element->id){
-				$el->name	= $element->name;
+				$el->slug	= $element->slug;
 				break;
 			}
 		}
@@ -98,7 +98,7 @@ class SaveFormSettings extends Forms{
 		// update js
 		$this->createJs();
 
-		return $element->name;
+		return $element->slug;
 	}
 
 	/**

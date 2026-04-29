@@ -120,7 +120,7 @@ class FormReminders extends Forms{
         // Get the forms that have a stardate in the past
         $date				= date('Y-m-d');
 
-        $query				= "SELECT * FROM {$this->formReminderTable} WHERE reminder_startdate <= '$date'";
+        $query				= "SELECT * FROM {$this->formReminderTable} WHERE reminder_start_date <= '$date'";
 
         $results			= $wpdb->get_results($query);
 
@@ -132,7 +132,7 @@ class FormReminders extends Forms{
             $form	= $this->formData;
 
             // get the start day of the week
-            $day = date('D', strtotime($formReminder->reminder_startdate));
+            $day = date('D', strtotime($formReminder->reminder_start_date));
 
             // This is a form that saves its data in the user meta, so we use different logic for that
             if($this->formData->save_in_meta){
@@ -160,8 +160,8 @@ class FormReminders extends Forms{
         if(!empty($formReminder->frequency ) && !empty($formReminder->period)){
             // Get the re-submission intervals since the start
             $interval 		= \DateInterval::createFromDateString("$formReminder->frequency $formReminder->period"); 	// the interval between submissions
-            $daterange 		= new \DatePeriod(																			// the date range between startdate and today with the specified interval 
-                date_create($formReminder->reminder_startdate), 
+            $daterange 		= new \DatePeriod(																			// the date range between start_date and today with the specified interval 
+                date_create($formReminder->reminder_start_date), 
                 $interval , 
                 new \DateTime('now'),
                 false
@@ -173,7 +173,7 @@ class FormReminders extends Forms{
                 $currentReminderStart = $date1->format('Y-m-d');
             }
         }else{
-            $currentReminderStart = $formReminder->reminder_startdate;
+            $currentReminderStart = $formReminder->reminder_start_date;
         }
 
         // Do not continue if we already have notified the maximum amount
@@ -203,7 +203,7 @@ class FormReminders extends Forms{
             $interval 		= \DateInterval::createFromDateString("$formReminder->frequency $formReminder->period");
 
             // calculate the start of the current window
-            $daterange 		= new \DatePeriod(																			// the date range between startdate and today with the specified interval 
+            $daterange 		= new \DatePeriod(																			// the date range between start_date and today with the specified interval 
                 date_create($formReminder->window_start), 
                 $interval , 
                 new \DateTime('now'),
@@ -216,7 +216,7 @@ class FormReminders extends Forms{
                 $since = $date1->format('Y-m-d');
             }
 
-            $since = "AND timecreated >= '$since'";
+            $since = "AND time_created >= '$since'";
         }
 
         return $since;
@@ -238,7 +238,7 @@ class FormReminders extends Forms{
         // get all the users who have submitted the form after the currentIntervalStart date
         $usersWithSubmission	= [];
         foreach($submissions as $submission){
-            $usersWithSubmission[]	= $submission->userid;
+            $usersWithSubmission[]	= $submission->user_id;
         }
 
         $usersWithoutSubmission	= array_diff($this->userIds, $usersWithSubmission);		
@@ -347,15 +347,15 @@ class FormReminders extends Forms{
                 case 'submitted':
                     $result	= false;
 
-                    // check if the given userid has submitted the form already 
+                    // check if the given user_id has submitted the form already 
                     foreach($submissions as $submission){
                         if(is_array($value)){
-                            if(in_array($submission->userid, $value)){
+                            if(in_array($submission->user_id, $value)){
                                 $result	= true;
                                 break;
                             }
                         }else{
-                            if($submission->userid == $value){
+                            if($submission->user_id == $value){
                                 $result	= true;
                                 break;
                             }
@@ -404,7 +404,7 @@ class FormReminders extends Forms{
             // Unserialize the warning conditions
             $warningCondition	= maybe_unserialize($element->warning_conditions);
 
-            $metakey 	= explode('[', $element->name)[0];
+            $metakey 	= explode('[', $element->slug)[0];
 
             // Loop over the users
             foreach($this->userIds as $userId){
@@ -413,7 +413,7 @@ class FormReminders extends Forms{
                     continue;
                 }
 
-                $name		= $element->name;
+                $name		= $element->slug;
                 if (str_contains($name, '[')){
                     $value  = TSJIPPY\getMetaArrayValue($userId, $name, $value);
                 }else{
@@ -444,7 +444,7 @@ class FormReminders extends Forms{
      *
      * @param int    		$userId 	WP user id
      *
-     * @return string|array 			Returns html links to forms who are due for submission if a userid is given, an array of form => [userids] otherwise
+     * @return string|array 			Returns html links to forms who are due for submission if a user_id is given, an array of form => [user_ids] otherwise
      */
     public function getAllFormRemindersForToday($includeMandatoryForms=true){
         $today      = date('D');
@@ -589,24 +589,24 @@ class FormReminders extends Forms{
         
         // If the url has no hash or we are not on the same url
         if(
-            !isset($_GET['userid']) && 
+            !isset($_GET['user_id']) && 
             !str_contains($baseUrl, 'wp-json') &&
             (
                 empty($params['main-tab']) || 
                 !str_contains($formUrl, $baseUrl)
             )
         ){
-            return "<li><a href='$formUrl#{$element->name}'>$name</a></li>";
+            return "<li><a href='$formUrl#{$element->slug}'>$name</a></li>";
         }
 
         //We are on the same page, just change the hash
         $secondTab	= '';
-        $names		= explode('[', $element->name);
+        $names		= explode('[', $element->slug);
         if(count($names) > 1){
             $secondTab	= $names[0];
         }
 
-        return "<li><a onclick='Main.changeUrl(this, `$secondTab`)' data-target='$mainTab' data-hash={$element->name} style='cursor:pointer'>$name</a></li>";
+        return "<li><a onclick='Main.changeUrl(this, `$secondTab`)' data-target='$mainTab' data-hash={$element->slug} style='cursor:pointer'>$name</a></li>";
     }
 
     /**
@@ -617,7 +617,7 @@ class FormReminders extends Forms{
 
         $formUrl    = $this->formData->form_url;
 
-        $formName   = str_replace(['-', '_'], ' ', $this->formData->name);
+        $formName   = str_replace(['-', '_'], ' ', $this->formData->slug);
 
         $text       = "Fill in the $formName form";
         if(!empty($childName)){

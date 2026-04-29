@@ -69,7 +69,7 @@ class FormExport extends FormBuilderForm{
 			$content	.= "reminders: ".json_encode(serialize($reminders))."\n";
 		}
 
-		$backupName = $this->formData->name.".sform";
+		$backupName = $this->formData->slug.".sform";
 		TSJIPPY\clearOutput();
 
         header('Content-Type: application/octet-stream');
@@ -262,6 +262,11 @@ class FormExport extends FormBuilderForm{
 		global $wp_filesystem;
 
 		$contents 		= $wp_filesystem->get_contents($path);
+
+		if(!str_contains($contents, 'form: ') || !str_contains($contents, 'elements: ')){
+			return "<div class='error'>Invalid sform file!</div>";
+		}
+
 		$lines			= explode("\n", $contents);
 
 		$autoArchiveEl	= null;
@@ -271,19 +276,26 @@ class FormExport extends FormBuilderForm{
 				continue;
 			}
 
-			extract(array_combine(['type', 'data'], explode(': ', $line, 2)));
-			$object	= unserialize(json_decode($data));
+			$exploded	= explode(': ', $line, 2);
+			if(count($exploded) != 2){
+				continue;
+			}
+
+			$type		= $exploded[0];
+			$data		= $exploded[1];
+
+			$object		= unserialize(json_decode($data));
 
 			if($type	== 'form'){
 				$autoArchiveEl	= $object->autoarchive_el;
 
 				// add a new page
-				$formName	= ucfirst(str_replace('_', ' ', $object->name));
+				$formName	= ucfirst(str_replace('_', ' ', $object->slug));
 
 				$post = array(
 					'post_type'		=> 'page',
 					'post_title'    => "$formName form",
-					'post_content'  => "[formbuilder formname={$object->name}]",
+					'post_content'  => "[formbuilder formname={$object->slug}]",
 					'post_status'   => "publish",
 					'post_author'   => '1'
 				);

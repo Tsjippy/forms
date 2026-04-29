@@ -59,11 +59,11 @@ class FormBuilderForm extends DisplayForm{
 		foreach($elements as $element){
 			//do not include the element itself do not include non-input types
 			if($element->id != $elementId && !in_array($element->type, ['label', 'info', 'datalist', 'formstep', 'div-end'])){
-				$name = ucfirst(str_replace('_', ' ', $element->name));
+				$slug = ucfirst(str_replace('_', ' ', $element->slug));
 
 				// add the id if non-unique name
-				if(str_contains($name, '[]')){
-					$name	.= " ($element->id)";
+				if(str_contains($slug, '[]')){
+					$slug	.= " ($element->id)";
 				}
 				
 				//Check which option is the selected one
@@ -80,7 +80,7 @@ class FormBuilderForm extends DisplayForm{
 				}else{
 					$selected = '';
 				}
-				$html .= "<option value='{$element->id}' $selected>$name</option>";
+				$html .= "<option value='{$element->id}' $selected>$element->name</option>";
 			}
 		}
 		
@@ -284,11 +284,11 @@ class FormBuilderForm extends DisplayForm{
 		}
 
 		$text	= '';
-		$name	= ucfirst(str_replace('_', ' ', $element->name));
+		$name	= ucfirst(str_replace('_', ' ', $element->slug));
 		if($element->type == 'formstep'){
 			$text = ' ***Formstep element***';
 		}elseif($element->type == 'datalist'){
-			$text = " ***Datalist element $element->name***";
+			$text = " ***Datalist element $element->slug***";
 		}elseif($element->type == 'multi-start'){
 			$text = ' ***Multi answer start***';
 			$this->inMultiAnswer	= true;
@@ -299,7 +299,7 @@ class FormBuilderForm extends DisplayForm{
 			$text 			= " ***$name div container start***";
 			$this->isInDiv	= true;
 		}elseif($element->type == 'div-end'){
-			$name			= ucfirst(str_replace('_', ' ', $element->name));
+			$name			= ucfirst(str_replace('_', ' ', $element->slug));
 			$text 			= " ***$name div container end***";
 			$this->isInDiv	= false;
 		}
@@ -323,7 +323,7 @@ class FormBuilderForm extends DisplayForm{
 				'class' => "element-name $hidden",
 				'style' => 'font-size:xx-small;'
 			],
-			$element->name
+			$element->slug
 		);
 					
 		$this->addMetaSymbols($resizer, $element);
@@ -699,15 +699,15 @@ class FormBuilderForm extends DisplayForm{
 									
 									$pattern			= "/\[[0-9]+\]\[([^\]]+)\]/i";
 									
-									$name = $element->name;
-									if(preg_match($pattern, $element->name,$matches)){
+									$slug = $element->slug;
+									if(preg_match($pattern, $element->slug,$matches)){
 										//We found a keyword, check if we already got the same one
 										if(!in_array($matches[1], $processed)){
 											//Add to the processed array
 											$processed[]	= $matches[1];
 											
-											//replace the name
-											$name		= $matches[1];
+											//replace the slug
+											$slug		= $matches[1];
 										}else{
 											//do not show this element
 											continue;
@@ -720,7 +720,7 @@ class FormBuilderForm extends DisplayForm{
 									}else{
 										$selected = '';
 									}
-									echo "<option value='{$element->id}' $selected>$name</option>";
+									echo "<option value='{$element->id}' $selected>$slug</option>";
 								}
 								
 								?>
@@ -750,7 +750,7 @@ class FormBuilderForm extends DisplayForm{
 										$nextElement	= $this->formElements[$nextKey];
 
 										if(!in_array($nextElement->type, $this->nonInputs)){
-											$foundElements[$nextElement->id] = $nextElement->name;
+											$foundElements[$nextElement->id] = $nextElement->slug;
 										}
 
 										if($nextElement->type == 'multi-end'){
@@ -761,7 +761,7 @@ class FormBuilderForm extends DisplayForm{
 
 								$pattern = "/([^\[]+)\[[0-9]*\]/i";
 								
-								if(preg_match($pattern, $element->name, $matches)){
+								if(preg_match($pattern, $element->slug, $matches)){
 									//Only add if not found before
 									if(!in_array($matches[1], $foundElements)){
 										$foundElements[$element->id]	= $matches[1];
@@ -967,7 +967,7 @@ class FormBuilderForm extends DisplayForm{
 			<br>
 			<label>
 				<h4>Start reminding from </h4>
-				<input type='date' name='reminder-startdate' value='<?php echo $this->formReminder->reminder_startdate;?>' <?php echo "$min $max";?> >
+				<input type='date' name='reminder-start_date' value='<?php echo $this->formReminder->reminder_start_date;?>' <?php echo "$min $max";?> >
 			</label>
 
 			<h4>Warning Exclusions</h4>
@@ -1152,17 +1152,17 @@ class FormBuilderForm extends DisplayForm{
 					<span class='placeholders' title="Click to copy">%formurl%</span>
 					<span class='placeholders' title="Click to copy">%submissiondate%</span>
 					<span class='placeholders' title="Click to copy">%editdate%</span>
-					<span class='placeholders' title="Click to copy">%timecreated%</span>
-					<span class='placeholders' title="Click to copy">%timelastedited%</span>
+					<span class='placeholders' title="Click to copy">%time_created%</span>
+					<span class='placeholders' title="Click to copy">%time_last_edited%</span>
 					<span class='placeholders' title="Click to copy">%viewhash%</span>(include this in any url send to non-logged in users)
 					<br>
 					All your fieldvalues are available as well:
 					<select class='nonice placeholderselect'>
 						<option value=''>Select to copy to clipboard</option><?php
 						foreach($this->formElements as $element){
-							$element->name	= str_replace('[]', '', $element->name);
+							$element->slug	= str_replace('[]', '', $element->slug);
 							if(!in_array($element->type, ['label','info','button','datalist','formstep'])){
-								echo "<option>%{$element->name}%</option>";
+								echo "<option>%{$element->slug}%</option>";
 							}
 						}
 						do_action('tsjippy-add-email-placeholder-option', $this);
@@ -1477,7 +1477,7 @@ class FormBuilderForm extends DisplayForm{
 											'textarea_rows' => 10
 										);
 									
-										echo wp_editor(
+										wp_editor(
 											$email->message,
 											"{$this->formName}_email_message_$key",
 											$settings
@@ -1633,7 +1633,7 @@ class FormBuilderForm extends DisplayForm{
 			<div name='elementname' class='element-option wide reverse not-label not-php not-formstep button shouldhide' style='background-color: unset;'>
 				<label>
 					<div style='text-align: left;'>Specify a name for the element</div>
-					<input type="text" class="formbuilder wide" name="formfield[name]" value="<?php if($element != null){echo $element->name;}?>">
+					<input type="text" class="formbuilder wide" name="formfield[name]" value="<?php if($element != null){echo $element->slug;}?>">
 				</label>
 				<br><br>
 			</div>
@@ -1654,10 +1654,10 @@ class FormBuilderForm extends DisplayForm{
 				<br><br>
 			</div>
 
-			<div name='functionname' class='element-option wide hidden php'>
+			<div name='function_name' class='element-option wide hidden php'>
 				<label>
-					Specify the functionname
-					<input type="text" class="formbuilder wide" name="formfield[functionname]" value="<?php if($element != null){echo $element->functionname;}?>">
+					Specify the function_name
+					<input type="text" class="formbuilder wide" name="formfield[function_name]" value="<?php if($element != null){echo $element->function_name;}?>">
 				</label>
 				<br><br>
 			</div>
@@ -1678,7 +1678,7 @@ class FormBuilderForm extends DisplayForm{
 				<br><br>
 
 				<label>
-					<input type="checkbox" class="formbuilder" name="formfield[editimage]" value="1" <?php if($element != null && $element->editimage){echo 'checked';}?>>
+					<input type="checkbox" class="formbuilder" name="formfield[edit_image]" value="1" <?php if($element != null && $element->edit_image){echo 'checked';}?>>
 					Allow people to edit an image before uploading it
 				</label>
 				<br>
@@ -1686,7 +1686,7 @@ class FormBuilderForm extends DisplayForm{
 
 				<label>
 					Name of the folder the <span class='filetype'>file</span> should be uploaded to.<br>
-					<input type="text" class="formbuilder" name="formfield[foldername]" value="<?php if($element != null){echo $element->foldername;}?>">
+					<input type="text" class="formbuilder" name="formfield[folder_name]" value="<?php if($element != null){echo $element->folder_name;}?>">
 				</label>
 			</div>
 			
@@ -1717,9 +1717,9 @@ class FormBuilderForm extends DisplayForm{
 					}else{
 						$content	= $element->text;
 					}
-					echo wp_editor(
+					wp_editor(
 						$content,
-						$this->formData->name."_infotext",	//editor should always have an unique id
+						$this->formData->slug."_infotext",	//editor should always have an unique id
 						$settings
 					);
 					?>
@@ -1737,10 +1737,10 @@ class FormBuilderForm extends DisplayForm{
 				<br>
 			</div>
 			
-			<div name='valuelist' class='element-option datalist radio select checkbox hidden'>
+			<div name='value_list' class='element-option datalist radio select checkbox hidden'>
 				<label>
 					Specify the values, one per line
-					<textarea class="formbuilder" name="formfield[valuelist]"><?php if($element != null){echo trim($element->valuelist);}?></textarea>
+					<textarea class="formbuilder" name="formfield[value_list]"><?php if($element != null){echo trim($element->value_list);}?></textarea>
 				</label>
 				<br>
 			</div>
@@ -1940,7 +1940,7 @@ class FormBuilderForm extends DisplayForm{
 				$counter++;
 				?>
 				<div class="form-element-wrapper" data-element-id="<?php echo $el->id;?>" data-form-id="<?php echo $this->formData->id;?>">
-					<button type="button" class="edit-form-element button" title="Jump to conditions element">View conditions of '<?php echo $el->name;?>'</button>
+					<button type="button" class="edit-form-element button" title="Jump to conditions element">View conditions of '<?php echo $el->slug;?>'</button>
 				</div>
 				<?php
 			}
@@ -1975,7 +1975,9 @@ class FormBuilderForm extends DisplayForm{
 
 			<?php
 			// get the last numeric array key
-			$lastCondtionKey = end(array_filter(array_keys($conditions), 'is_int'));
+			$numericKeys	= array_filter(array_keys($conditions), 'is_int');
+			$lastCondtionKey = end($numericKeys);
+			
 			foreach($conditions as $conditionIndex=>$condition){
 				if(!is_numeric($conditionIndex)){
 					continue;
@@ -2194,7 +2196,7 @@ class FormBuilderForm extends DisplayForm{
 								$checked = '';
 							}
 
-							$name	= ucfirst(str_replace('_', ' ', $element->name));
+							$name	= ucfirst(str_replace('_', ' ', $element->slug));
 							if(str_contains($name, '[]')){
 								$name	.= " ($element->id)";
 							}

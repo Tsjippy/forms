@@ -10,10 +10,10 @@ function checkFormExistence($formName){
     $forms    = new Forms();
     $forms->getForms();
 
-    // check if a form with this name already exists
+    // check if a form with this slug already exists
     $found  = false;
     foreach($forms->forms as $form){
-        if($form->name == $formName){
+        if($form->slug == $formName){
             $found  = true;
             break;
         }

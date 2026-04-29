@@ -53,21 +53,21 @@ class EditFormResults extends DisplayFormResults{
 		}
 
 		/**
-		 * Update the main submission data if we are updating the userid or submitter_id, or if we are updating a field that is used in the auto archive settings
-		 * We also always update the timelastedited field to be able to track when the submission was last edited, and to trigger the auto archive if needed
+		 * Update the main submission data if we are updating the user_id or submitter_id, or if we are updating a field that is used in the auto archive settings
+		 * We also always update the time_last_edited field to be able to track when the submission was last edited, and to trigger the auto archive if needed
 		 */
 
-		// Always update the timelastedited
+		// Always update the time_last_edited
 		$data = [
-			'timelastedited'	=> date("Y-m-d H:i:s")
+			'time_last_edited'	=> date("Y-m-d H:i:s")
 		];
 
 		$formats = [
 			'%s'
 		];
 
-		if($elementId == 'userid'){
-			$data['userid']			= $value;
+		if($elementId == 'user_id'){
+			$data['user_id']			= $value;
 			$formats[]				= '%d';
 		}elseif($elementId == 'submitter_id'){
 			$data['submitter_id']	= $value;
@@ -114,7 +114,7 @@ class EditFormResults extends DisplayFormResults{
 		 */
 		// Filters if we should do the update, return false for no update
 		$continue	= apply_filters('tsjippy-forms-should-update-form-data', true, $elementId, $submissionId, $subId, $value, $this);
-		if($elementId != 'userid' && $elementId != 'submitter_id' && $continue){
+		if($elementId != 'user_id' && $elementId != 'submitter_id' && $continue){
 			//Update the submission data	
 			$where	= array(
 				'submission_id'	=> $submissionId,
@@ -263,7 +263,7 @@ class EditFormResults extends DisplayFormResults{
 		$result = $wpdb->update(
 			$this->submissionTableName,
 			array(
-				'timelastedited'	=> date("Y-m-d H:i:s"),
+				'time_last_edited'	=> date("Y-m-d H:i:s"),
 				'archived'			=> $archive
 			),
 			array(
@@ -319,7 +319,7 @@ class EditFormResults extends DisplayFormResults{
 
 			$this->formData	= $form;
 			$this->formId	= $form->id;
-			$this->formName	= $form->name;
+			$this->formName	= $form->slug;
 			$this->getForm($form->id);
 			
 			$triggerId		= $form->autoarchive_el;

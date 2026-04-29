@@ -37,7 +37,7 @@ function showFormSelector($atts=[]){
         }
         
         foreach($forms as $key=>$form){
-            if(in_array($form->name, $exclusions) || empty($form->name)){
+            if(in_array($form->slug, $exclusions) || empty($form->slug)){
                 unset($forms[$key]);
             }
 
@@ -50,7 +50,7 @@ function showFormSelector($atts=[]){
 
     //Sort form names by alphabeth
     usort($forms, function($a, $b) {
-        return strcasecmp($a->name, $b->name);
+        return strcasecmp($a->slug, $b->slug);
     });
 
     ?>
@@ -65,13 +65,13 @@ function showFormSelector($atts=[]){
                 <select id="tsjippy-forms-selector">
                     <?php
                         foreach($forms as $form){
-                            $name   = ucfirst(str_replace('_', ' ', $form->name));
-                            if($_REQUEST['form'] == $form->name || $_REQUEST['form'] == $form->id){
+                            $name   = ucfirst(str_replace('_', ' ', $form->slug));
+                            if($_REQUEST['form'] == $form->slug || $_REQUEST['form'] == $form->id){
                                 $selected = 'selected=selected';
                             }else{
                                 $selected = '';
                             }
-                            echo "<option value='$form->name' $selected>$name</option>";
+                            echo "<option value='$form->slug' $selected>$name</option>";
                         }
                     ?>
                 </select>
@@ -106,13 +106,13 @@ function showFormSelector($atts=[]){
             }
 
             //Check if this form should be displayed
-            if(isset($_REQUEST['form']) && ($_REQUEST['form'] == $form->name || $_REQUEST['form'] == $form->id)){
+            if(isset($_REQUEST['form']) && ($_REQUEST['form'] == $form->slug || $_REQUEST['form'] == $form->id)){
                 $hidden = '';
             }else{
                 $hidden = ' hidden';
             }
 
-            $id = strtolower(str_replace([' ', '_'], '-', $form->name));
+            $id = strtolower(str_replace([' ', '_'], '-', $form->slug));
 
             echo "<div id='$id' class='main-form-wrapper$hidden'>";
                 //only show button if not queried

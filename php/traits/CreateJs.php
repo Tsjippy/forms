@@ -34,7 +34,7 @@ trait CreateJs{
      * Builds the js files for the current form
     */
     function createJs(){
-        $this->formName     = $this->formData->name;
+        $this->formName     = $this->formData->slug;
         $this->objectName   = strtolower(str_replace('-', '', $this->formName));
 
         $checks = [];
@@ -74,12 +74,12 @@ trait CreateJs{
                         }
                         
                         if(!$conditionalElement){
-                            $errors[]   = "Element $element->name has an invalid rule";
+                            $errors[]   = "Element $element->slug has an invalid rule";
 
                             continue;
                         }
 
-                        $conditionalFieldName		= $conditionalElement->name;
+                        $conditionalFieldName		= $conditionalElement->slug;
                         $propCompare                = 'elName';
 
                         if(str_contains($conditionalFieldName, '[]')){
@@ -94,11 +94,11 @@ trait CreateJs{
                         if(is_numeric($rule['conditional-field-2'])){
                             $conditionalElement2		= $this->getElementById($rule['conditional-field-2']);
                             if(!$conditionalElement2){
-                                $errors[]   = "Element $element->name has an invalid rule";
+                                $errors[]   = "Element $element->slug has an invalid rule";
                                 continue;
                             }
 
-                            $conditionalField2Name	= $conditionalElement2->name;
+                            $conditionalField2Name	= $conditionalElement2->slug;
                             
                             if(str_contains($conditionalField2Name, '[]')){
                                 $propCompare            = 'el.id';
@@ -188,7 +188,7 @@ trait CreateJs{
                         }
                         
                         if(empty($equation)){
-                            return new \WP_Error('forms', "$element->name has a rule without equation set. Please check");
+                            return new \WP_Error('forms', "$element->slug has a rule without equation set. Please check");
                         }elseif($equation == 'checked'){
                             if(count($condition['rules'])==1){
                                 $conditionIf .= "el.checked";
@@ -218,7 +218,7 @@ trait CreateJs{
                         ){
                             if(empty($rule['combinator'])){
                                 $rule['combinator'] = 'AND';
-                                TSJIPPY\printArray("Condition index $conditionIndex of $element->name is missing a combinator. I have set it to 'AND' for now");
+                                TSJIPPY\printArray("Condition index $conditionIndex of $element->slug is missing a combinator. I have set it to 'AND' for now");
                             }
                             if($rule['combinator'] == 'AND'){
                                 $conditionIf .= " && ";
@@ -273,7 +273,7 @@ trait CreateJs{
                             $actionArray['querystrings'][$action] = [];
                         }
                         
-                        $name	= trim($element->name);
+                        $name	= trim($element->slug);
 
                         //formstep do not have an input-wrapper
                         if($element->type == 'formstep'){
@@ -300,13 +300,13 @@ trait CreateJs{
                             //find the element with the right id
                             $copyToElement	= $this->getElementById($fieldIndex);
                             if(!$copyToElement){
-                                $errors[]   = "Element $element->name has an invalid rule";
+                                $errors[]   = "Element $element->slug has an invalid rule";
                                 continue;
                             }
                             
                             //formstep do not have an input-wrapper
                             if($copyToElement->type == 'formstep'){
-                                $actionCode    = "form.querySelector('[name=\"$copyToElement->name\"]').classList.$action('hidden');";
+                                $actionCode    = "form.querySelector('[name=\"$copyToElement->slug\"]').classList.$action('hidden');";
                                 if(!in_array($actionCode, $actionArray)){
                                     $actionArray[] = $actionCode;
                                 }
@@ -334,11 +334,11 @@ trait CreateJs{
                             //find the element with the right id
                             $copyElement = $this->getElementById($copyfieldid);
                             if(!$copyElement){
-                                $errors[]   = "Element $element->name has an invalid rule";
+                                $errors[]   = "Element $element->slug has an invalid rule";
                                 continue;
                             }
 
-                            $copyFieldName	= $copyElement->name;
+                            $copyFieldName	= $copyElement->slug;
                             if(str_contains($copyFieldName, '[]')){
                                 $propCompare            = 'el.id';
                                 $copyFieldName	= 'E'.$copyElement->id;
@@ -370,7 +370,7 @@ trait CreateJs{
                             }
                         }
                     }else{
-                        TSJIPPY\printArray("formbuilder.php writing js: missing action: '$action' for condition $conditionIndex of field {$element->name}");
+                        TSJIPPY\printArray("formbuilder.php writing js: missing action: '$action' for condition $conditionIndex of field {$element->slug}");
                     }
                 }
             }
@@ -668,7 +668,7 @@ trait CreateJs{
 
     function getSelector($element){
         $queryById          = false;
-        $name				= trim($element->name);
+        $name				= trim($element->slug);
 
         if(str_contains($name, '[]')){
             $queryById          = true;

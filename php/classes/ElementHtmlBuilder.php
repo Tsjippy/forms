@@ -94,7 +94,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
 
 		if(empty($this->formName)){
-			$this->formName			= $this->formData->name;
+			$this->formName			= $this->formData->slug;
 		}
 
 		$this->defaultValues		= (array)$this->user->data;
@@ -102,7 +102,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			$this->defaultValues		= (array)get_userdata($this->userId)->data;
 		}
 		
-		//Change ID to userid because its a confusing name
+		//Change ID to user_id because its a confusing name
 		$this->defaultValues['user_id']	= $this->defaultValues['ID'];
 		unset($this->defaultValues['ID']);
 		
@@ -262,13 +262,13 @@ class ElementHtmlBuilder extends SubmitForm{
 		$this->buildDefaultsArray();
 
 		//get the elementName, remove [] and split on remaining [
-		$elementNames		= explode('[', trim($element->name, '[]'));
+		$elementNames		= explode('[', trim($element->slug, '[]'));
 
 		/**
 		 * Gets values from the element settings
 		 */
-		if(!empty($element->valuelist)){
-			$elementValues	= explode("\n", $element->valuelist);
+		if(!empty($element->value_list)){
+			$elementValues	= explode("\n", $element->value_list);
 
 			// split in value text pairs if needed
 			foreach($elementValues as $elementValue){
@@ -386,14 +386,14 @@ class ElementHtmlBuilder extends SubmitForm{
 		//open mail programm on click on email
 		if (str_contains($string, '@')) {
 			$name		= '';
-			if(isset($submission->name)){
+			if(isset($submission->slug)){
 				$name	= "Hi $submission->name,";
 			}elseif(isset($submission->your_name)){
 				$name	= "Hi $submission->your_name,";
 			}elseif(isset($submission->first_name)){
 				$name	= "Hi $submission->first_name,";
 			}
-			$output 	= "<a href='mailto:$string?subject=Regarding your {$this->formData->name} with id $submission->id&body={$name}'>$string</a>";
+			$output 	= "<a href='mailto:$string?subject=Regarding your {$this->formData->slug} with id $submission->id&body={$name}'>$string</a>";
 		//Convert link to clickable link if not already
 		}elseif(
 			(
@@ -426,8 +426,8 @@ class ElementHtmlBuilder extends SubmitForm{
 			$userIdKey	= false;
 			if(isset($submission->user_id)){
 				$userIdKey	= 'user_id';
-			}elseif(isset($submission->userid)){
-				$userIdKey	= 'userid';
+			}elseif(isset($submission->user_id)){
+				$userIdKey	= 'user_id';
 			}
 
 			if($userIdKey){
@@ -688,7 +688,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			 * Change the name
 			 */
 			// make sure we add the [] after the index if there was [] originally
-			$name				= str_replace('[]', '', $this->element->name, $replaceCount);
+			$name				= str_replace('[]', '', $this->element->slug, $replaceCount);
 			$indexString 		= "[$index]";
 			if($replaceCount){
 				$indexString	.= "[]";
@@ -776,7 +776,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			return $prevValues;
 		}
 
-		$valueIndexes	= explode('[', str_replace('[]', '', $this->element->name));
+		$valueIndexes	= explode('[', str_replace('[]', '', $this->element->slug));
 
 		foreach($valueIndexes as $i => $index){
 			// just one possible value found
@@ -835,7 +835,7 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * Gets the html for a file or image element
 	 */
 	protected function uploaderHtml(){
-		$name		= $this->element->name;
+		$name		= $this->element->slug;
 		
 		$options	= $this->attributes;
 		unset($options['name']);
@@ -847,11 +847,11 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
 			
 		// Element setting
-		if(!empty($this->element->foldername)){
-			if(str_contains($this->element->foldername, "private/")){
-				$targetDir	= $this->element->foldername;
+		if(!empty($this->element->folder_name)){
+			if(str_contains($this->element->folder_name, "private/")){
+				$targetDir	= $this->element->folder_name;
 			}else{
-				$targetDir	= "private/".$this->element->foldername;
+				$targetDir	= "private/".$this->element->folder_name;
 			}
 		}
 
@@ -877,7 +877,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		//Load js
 		$uploader 		= new TSJIPPY\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey]);
 		
-		return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $optionHtml, $this->element->editimage);
+		return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $optionHtml, $this->element->edit_image);
 	}
 
 	/**
@@ -899,14 +899,14 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * Determines the element name
 	 */
 	protected function getNameAttribute(){
-		$this->element->name	= trim($this->element->name, " \n\r\t\v\0_");
+		$this->element->slug	= trim($this->element->slug, " \n\r\t\v\0_");
 
 		// [] not yet added to name
-		if(in_array($this->element->type, ['radio','checkbox']) && !str_contains($this->element->name, '[]')) {
-			$this->element->name .= '[]';
+		if(in_array($this->element->type, ['radio','checkbox']) && !str_contains($this->element->slug, '[]')) {
+			$this->element->slug .= '[]';
 		}
 
-		$this->attributes["name"] = $this->element->name;
+		$this->attributes["name"] = $this->element->slug;
 	}
 
 	/**
@@ -915,10 +915,10 @@ class ElementHtmlBuilder extends SubmitForm{
 	protected function getElementId(){
 		//datalist needs an id to work as well as mandatory elements for use in anchor links
 		if($this->element->type == 'datalist' || $this->element->mandatory || $this->element->recommended){
-			$this->attributes["id"] = $this->element->name;
+			$this->attributes["id"] = $this->element->slug;
 		}
 
-		if(str_contains($this->element->name, '[]')){
+		if(str_contains($this->element->slug, '[]')){
 			$this->attributes["id"] = "E{$this->element->id}";
 		}
 	}
@@ -982,9 +982,9 @@ class ElementHtmlBuilder extends SubmitForm{
 				$this->selectedValue		= $this->elementValues['defaults'];
 			}elseif(!empty($this->elementValues['metavalue'])){
 				$elIndex	= 0;
-				if(str_contains($this->element->name, '[]')){
+				if(str_contains($this->element->slug, '[]')){
 					// Check if there are multiple elements with the same name
-					$elements	= $this->getElementByName($this->element->name, '', false);
+					$elements	= $this->getElementBySlug($this->element->slug, '', false);
 
 					foreach($elements as $elIndex=>$el){
 						if($el->id == $this->element->id){
@@ -1007,7 +1007,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
 			// if there is a datalist attached to this element we should use the corresponding name
 			if(in_array('list', array_keys($this->attributes))){
-				$listElement	= $this->getElementByName($this->attributes['list']);
+				$listElement	= $this->getElementBySlug($this->attributes['list']);
 
 				if($listElement && !empty($this->defaultArrayValues[$listElement->default_array_value])){
 					// Get the list values
@@ -1074,7 +1074,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			}
 		}
 
-		$elName	= $this->element->name;
+		$elName	= $this->element->slug;
 		if(!str_contains($elName, '[]')){
 			$elName	.= '[]';
 		}
@@ -1093,7 +1093,7 @@ class ElementHtmlBuilder extends SubmitForm{
 				if(empty($this->submissions)){
 					$this->submissions	= $this->submissions;
 				}
-				$transValue		= $this->transformInputData($v, $this->element->name, $this->submissions[0]);
+				$transValue		= $this->transformInputData($v, $this->element->slug, $this->submissions[0]);
 			}else{
 				$transValue		= $v;
 			}
@@ -1391,7 +1391,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			
 			// Other attributes
 			$attributes['type'] 	= $this->element->type;
-			$attributes['name'] 	= $this->element->name;
+			$attributes['name'] 	= $this->element->slug;
 			$attributes['value']	= $key;
 
 			// Add the input
@@ -1450,9 +1450,9 @@ class ElementHtmlBuilder extends SubmitForm{
 			}else{
 				$valueCount	= count(array_values($values)[0]);
 
-				// Do not count the valuelist values
-				if(!empty($this->formElements[$i]->valuelist)){
-					$elementValues	= explode("\n", $this->formElements[$i]->valuelist);
+				// Do not count the value_list values
+				if(!empty($this->formElements[$i]->value_list)){
+					$elementValues	= explode("\n", $this->formElements[$i]->value_list);
 					$valueCount		= $valueCount - count($elementValues);
 				}
 			}
@@ -1463,7 +1463,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
 		
 		// Get the name
-		$name		= $this->element->name;
+		$name		= $this->element->slug;
 
 		$attributes	=  [
 			'class' => 'clone-divs-wrapper', 
@@ -1593,13 +1593,13 @@ class ElementHtmlBuilder extends SubmitForm{
 				$content 	= wp_kses_post($this->element->text);
 				$content	= TSJIPPY\deslash($content);
 
-				$node		= $this->addElement('div', $parent, ['name'=>$this->element->name]);
+				$node		= $this->addElement('div', $parent, ['name'=>$this->element->slug]);
 
 				$this->addRawHtml($content, $node);
 				break;
 			case 'php':
-				//we store the functionname in the html variable replace any double \ with a single \
-				$functionName 	= str_replace('\\\\', '\\', $this->element->functionname);
+				//we store the function_name in the html variable replace any double \ with a single \
+				$functionName 	= str_replace('\\\\', '\\', $this->element->function_name);
 
 				//only continue if the function exists
 				if (function_exists( $functionName ) ){
@@ -1610,7 +1610,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
 				break;
 			case 'div-start':
-				$attributes	= ['name'=> $this->element->name];
+				$attributes	= ['name'=> $this->element->slug];
 				if($this->element->hidden){
 					$attributes["class"] = 'hidden';
 				}

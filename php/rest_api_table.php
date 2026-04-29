@@ -373,7 +373,7 @@ function getInputHtml(){
 	// Get the form id from the submission and load the form
 	$formTable->getForm($formTable->submission->form_id);
 
-	$userId											= $formTable->submission->userid;
+	$userId											= $formTable->submission->user_id;
 
 	$formTable->userId								= $userId;
 
@@ -406,10 +406,10 @@ function getInputHtml(){
 
 		// This option is a list option
 		if($optionType == 'list'){
-			$datalist	= $formTable->getElementByName($optionValue);
+			$datalist	= $formTable->getElementBySlug($optionValue);
 
 			if($datalist == $element){
-				$datalist	= $formTable->getElementByName($optionValue.'-list');
+				$datalist	= $formTable->getElementBySlug($optionValue.'-list');
 				TSJIPPY\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
 			}
 

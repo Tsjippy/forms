@@ -68,7 +68,7 @@ class DisplayForm extends ElementHtmlBuilder{
 				'div', 
 				$parent, 
 				[
-					'name'	=> $element->name,
+					'name'	=> $element->slug,
 					'class'	=> $class
 				]
 			);
@@ -429,13 +429,13 @@ class DisplayForm extends ElementHtmlBuilder{
 		// Loop over all elements to find splitted ones
 		foreach ($this->formElements as $element){
 			// Check if this is an indexed splitted element basename[index][keyname]
-			if(str_contains($element->name, '[')){
+			if(str_contains($element->slug, '[')){
 				// loop over all base names that data should be splitted on
 				foreach($baseNames as $baseName){
 					// Check if this name belongs to this splitted element
 					$pattern		= "/$baseName\[[0-9]+\]\[([^\]]+)\]/i";
 
-					if( preg_match($pattern, $element->name, $matches)){
+					if( preg_match($pattern, $element->slug, $matches)){
 						$name			= $matches[1];
 						
 						// store found element ids by basename
@@ -448,7 +448,7 @@ class DisplayForm extends ElementHtmlBuilder{
 						}
 
 						// Add the current element id
-						$elementIds[$baseName][$name][$element->name]	= $element->id;
+						$elementIds[$baseName][$name][$element->slug]	= $element->id;
 						break;
 					}
 				}

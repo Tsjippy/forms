@@ -81,12 +81,12 @@ class DisplayFormResults extends DisplayForm{
 			// -6 = archived indexes
 			// -7 = hash
 			-4 => [
-				'name'				=> 'timelastedited',
+				'name'				=> 'time_last_edited',
 				'nicename'			=> 'Last edit time',
 				'type'				=> 'date'
 			],
 			-3 => [
-				'name'				=> 'timecreated',
+				'name'				=> 'time_created',
 				'nicename'			=> 'Submission date',
 				'type'				=> 'date'
 			],
@@ -122,7 +122,7 @@ class DisplayFormResults extends DisplayForm{
 			}else{
 				$element->type		= 'text';
 			}
-			$element->name			= $newElement['name'];
+			$element->slug			= $newElement['name'];
 			$element->nicename		= $newElement['nicename'];
 
 			// Add to the front of the array
@@ -159,7 +159,7 @@ class DisplayFormResults extends DisplayForm{
 		// Loop over all form elements to see which metas/userdata we need to get
 		foreach($this->formElements as $element){
 			if(!in_array($element->type, $this->nonInputs) && $element->id >= 0){
-				$name			= trim($element->name, '[]');
+				$name			= trim($element->slug, '[]');
 
 				if(in_array($name, $colNames)){
 					$usedCols[]	= $name;
@@ -195,11 +195,11 @@ class DisplayFormResults extends DisplayForm{
 			$submission->form_id			= $this->formData->id;
 
 			// Base submission data
-			$submission->timecreated		= $user->user_registered;
-			$submission->timelastedited		= $user->user_registered;
+			$submission->time_created		= $user->user_registered;
+			$submission->time_last_edited		= $user->user_registered;
 			unset($usedCols['user_registered']);
 
-			$submission->userid				= $user->ID;
+			$submission->user_id				= $user->ID;
 			$submission->submitter_id		= $user->ID;
 			unset($usedCols['ID']);
 
@@ -303,7 +303,7 @@ class DisplayFormResults extends DisplayForm{
 			/**
 			 * Check if we are filtering on a indexed element
 			 */
-			$exploded			= explode('[', $filterElement->name);
+			$exploded			= explode('[', $filterElement->slug);
 			if(count($exploded) > 1){
 				$filterIndex		= str_replace(']', '', end($exploded));
 
@@ -413,7 +413,7 @@ class DisplayFormResults extends DisplayForm{
 		 * Build the Common Table Expressions (CTE) needed to make the pivot query
 		 */
 		$splitElements		= $this->formData->split ?? [];
-		$existingColumns	= ['id', 'form_id', 'timecreated', 'timelastedited', 'userid', 'archived', 'submitter_id'];
+		$existingColumns	= ['id', 'form_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
 
 		$columns			= $existingColumns;
 
@@ -511,7 +511,7 @@ class DisplayFormResults extends DisplayForm{
 	public function getSubmissions($userId=null, $submissionId=null, $all=false, $where	= [], $values = []){
 		global $wpdb;
 
-		$userId	= apply_filters('tsjippy-forms-userids-to-retrieve', $userId, $this);
+		$userId	= apply_filters('tsjippy-forms-user_ids-to-retrieve', $userId, $this);
 
 		if(isset($_REQUEST['all'])){
 			$all	= true;
@@ -567,7 +567,7 @@ class DisplayFormResults extends DisplayForm{
 		 * Specific Users
 		 */
 		if(is_numeric($userId)){
-			$where[]	= "S.userid=%d";
+			$where[]	= "S.user_id=%d";
 			$values[]	= $userId; 
 		}
 
@@ -575,7 +575,7 @@ class DisplayFormResults extends DisplayForm{
 			$q	= [];
 			foreach($userId as $id){
 				if(is_numeric($id)){
-					$q[]		= "S.userid=%d";
+					$q[]		= "S.user_id=%d";
 					$values[]	= $id;
 				}
 			}
@@ -733,8 +733,8 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$this->columnSettings[$element->id] = [
-			'name'				=> $element->name,
-			'nice_name'			=> empty($element->nicename) ? $element->name : $element->nicename,
+			'name'				=> $element->slug,
+			'name'			=> empty($element->nicename) ? $element->slug : $element->nicename,
 			'show'				=> 1,
 			'edit_right_roles'	=> [],
 			'view_right_roles'	=> []
@@ -844,7 +844,7 @@ class DisplayFormResults extends DisplayForm{
 			if(!isset($this->columnSettings[$action]) || !is_array($this->columnSettings[$action])){
 				$this->columnSettings[$action] = [
 					'name'				=> $action,
-					'nice_name'			=> $action,
+					'name'			=> $action,
 					'show'				=> 1,
 					'edit_right_roles'	=> [],
 					'view_right_roles'	=> []
@@ -881,7 +881,7 @@ class DisplayFormResults extends DisplayForm{
 		$rowContents	= '';
 		$excelRow		= [];
 
-		if($this->submission->userid == $this->user->ID || $this->submission->userid == $this->user->partnerId){
+		if($this->submission->user_id == $this->user->ID || $this->submission->user_id == $this->user->partnerId){
 			$ownEntry	= true;
 		}else{
 			$ownEntry	= false;
@@ -1137,7 +1137,7 @@ class DisplayFormResults extends DisplayForm{
 			foreach($buttonsHtml as $action => $button){
 				if(
 					$this->tableEditPermissions || 			// if we are allowed to do all actions
-					$this->submission->userid == $this->user->ID || // or this is our own entry
+					$this->submission->user_id == $this->user->ID || // or this is our own entry
 					(
 						isset($this->columnSettings[$action]['edit_right_roles']) && 
 						array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])
@@ -1242,7 +1242,7 @@ class DisplayFormResults extends DisplayForm{
 								continue;
 							}
 
-							$niceName	= $columnSetting['nice_name'];
+							$niceName	= $columnSetting['name'];
 							if(empty($niceName)){
 								$niceName = ucfirst(str_replace('_', ' ', $columnSetting['name']));
 							}
@@ -1361,7 +1361,7 @@ class DisplayFormResults extends DisplayForm{
 								continue;
 							}
 
-							$name = $columnSetting['nice_name'];
+							$name = $columnSetting['name'];
 							
 							//Check which option is the selected one
 							if($this->tableSettings->default_sort != '' && $this->tableSettings->default_sort == $key){
@@ -1406,7 +1406,7 @@ class DisplayFormResults extends DisplayForm{
 												continue;
 											}
 
-											$name = $columnSetting['nice_name'];
+											$name = $columnSetting['name'];
 											
 											//Check which option is the selected one
 											if($this->tableSettings->filter[$index]['element'] == $key){
@@ -1463,7 +1463,7 @@ class DisplayFormResults extends DisplayForm{
 							continue;
 						}
 
-						$name = $columnSetting['nice_name'];
+						$name = $columnSetting['name'];
 						
 						//Check which option is the selected one
 						if($this->tableSettings->hide_row == $columnSetting['name']){
@@ -1549,7 +1549,7 @@ class DisplayFormResults extends DisplayForm{
 									continue;
 								}
 
-								$name = $columnSetting['nice_name'];
+								$name = $columnSetting['name'];
 								
 								//Check which option is the selected one
 								if($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key){
@@ -1584,7 +1584,7 @@ class DisplayFormResults extends DisplayForm{
 								$pattern = "/([^\[]+)\[[0-9]*\]/i";
 								
 								if(
-									preg_match($pattern, $element->name, $matches)	&&		// preg match was succesfull
+									preg_match($pattern, $element->slug, $matches)	&&		// preg match was succesfull
 									!in_array($matches[1], $foundElements)					// the match is not yet in the found elements
 								){
 									$foundElements[$element->id]	= $matches[1];
@@ -1821,7 +1821,7 @@ class DisplayFormResults extends DisplayForm{
 			$elementHtml	= $this->getElementHtml($filterElement, $parent, $filterValue);
 			
 			// make sure the name is not the element name but the filtername
-			$elementHtml	= str_replace("name=\"{$filterElement->name}\"", "name='$filterKey'", $elementHtml);
+			$elementHtml	= str_replace("name=\"{$filterElement->slug}\"", "name='$filterKey'", $elementHtml);
 
 			$filterOption	.= "<span class='filter-option'>";
 				$filterOption	.= "<label>".ucfirst($filterKey).": </label>";
@@ -1934,7 +1934,7 @@ class DisplayFormResults extends DisplayForm{
 				$allRowsEmpty	= true;
 				foreach($submissions as $this->submission){
 					// Skip if needed
-					if($type == 'others' && $this->submission->userid == $this->user->ID){
+					if($type == 'others' && $this->submission->user_id == $this->user->ID){
 						continue;
 					}
 						
@@ -2074,7 +2074,7 @@ class DisplayFormResults extends DisplayForm{
 
 				// check if this is an sub id, use all elements in that case
 				if($sortElement){
-					$exploded			= explode('[', $sortElement->name);
+					$exploded			= explode('[', $sortElement->slug);
 
 					if(count($exploded) > 1){
 						$sort				= str_replace(']', '', end($exploded));
@@ -2113,10 +2113,10 @@ class DisplayFormResults extends DisplayForm{
 			foreach($this->submissions as $submission){				
 				//Our own entry or one of our partner
 				if(
-					!empty($submission->userid) &&
+					!empty($submission->user_id) &&
 					(
-						$submission->userid == $this->user->ID || 
-						$submission->userid == $this->user->partnerId
+						$submission->user_id == $this->user->ID || 
+						$submission->user_id == $this->user->partnerId
 					)
 				){
 					$this->ownData = true;
@@ -2273,7 +2273,7 @@ class DisplayFormResults extends DisplayForm{
 						continue;
 					}
 					
-					$niceName			= $columnSetting['nice_name'];
+					$niceName			= $columnSetting['name'];
 
 					//Determine class for sorting
 					if( 
@@ -2337,12 +2337,12 @@ class DisplayFormResults extends DisplayForm{
 								//we have permission on this row for this button
 								if(
 									(
-										isset($submission->userid) &&				// formresults contains a userid
-										$submission->userid == $this->user->ID		// userid is the current user
+										isset($submission->user_id) &&				// formresults contains a user_id
+										$submission->user_id == $this->user->ID		// user_id is the current user
 									) ||
 									(
-										!isset($submission->userid) &&				// formresults don't contain a userid
-										$submission->userid == $this->user->ID						// current user submitted the form
+										!isset($submission->user_id) &&				// formresults don't contain a user_id
+										$submission->user_id == $this->user->ID						// current user submitted the form
 									)
 								){
 									$addHeading	= true;

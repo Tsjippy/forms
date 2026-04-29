@@ -30,7 +30,7 @@ class AdminMenu extends ADMIN\SubAdminMenu{
 
         // sort the forms on name
         usort($forms->forms, function($a, $b){
-            return strcasecmp($a->name, $b->name);
+            return strcasecmp($a->slug, $b->slug);
         });
 
         $table  = addElement('table', $parent, ['class' => 'tsjippy table formoverview']);

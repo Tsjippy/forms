@@ -30,7 +30,7 @@ class Forms{
 	public $formId;
 	public $formElements;
 	public $jsFileName;
-	public $names;
+	public $slugs;
 	public $shortcodeId;
 	public $onlyOwn;
 	public $all;
@@ -125,12 +125,12 @@ class Forms{
 		//Main table
 		$sql = "CREATE TABLE {$this->tableName} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			name tinytext NOT NULL,
+			slug tinytext NOT NULL,
 			version text NOT NULL,
 			button_text text,
 			succes_message text,
 			include_id boolean,
-			formname text,
+			form_name text,
 			save_in_meta boolean,
 			form_url text,
 			actions text,
@@ -152,7 +152,7 @@ class Forms{
 			form_id int,
 			frequency int,
 			period text,
-			reminder_startdate date,
+			reminder_start_date date,
 			reminder_amount int,
 			reminder_period text,
 			window_start date,
@@ -171,13 +171,13 @@ class Forms{
 			type text NOT NULL,
 			priority int,
 			width int default 100,
-			functionname text,
-			foldername text,
-			name text,
-			nicename text,
+			function_name text,
+			folder_name text,
+			slug text,
+			nametext,
 			text text,
 			html text,
-			valuelist text,
+			value_list text,
 			default_value text,
 			default_array_value text,
 			options text,
@@ -188,7 +188,7 @@ class Forms{
 			hidden boolean default False,
 			multiple boolean default False,
 			library boolean default False,
-			editimage boolean default False,
+			edit_image boolean default False,
 		  	conditions longtext,
 			warning_conditions longtext,
 			`add` longtext,
@@ -250,8 +250,8 @@ class Forms{
 			width mediumint(9),
 			element_id tinytext,
 			`show` boolean,
+			slug tinytext,
 			name tinytext,
-			nice_name tinytext,
 			`priority` mediumint(9),
 			view_right_roles longtext,
 			edit_right_roles longtext,
@@ -264,9 +264,9 @@ class Forms{
 		$sql = "CREATE TABLE {$this->submissionTableName} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			form_id	int NOT NULL,
-			timecreated datetime DEFAULT NULL,
-			timelastedited datetime DEFAULT NULL,
-			userid mediumint(9),
+			time_created datetime DEFAULT NULL,
+			time_last_edited datetime DEFAULT NULL,
+			user_id mediumint(9),
 			submitter_id mediumint(9),
 			archived BOOLEAN,
 			PRIMARY KEY  (id)
@@ -318,7 +318,7 @@ class Forms{
 			'form_id'				=> '%d',
 			'frequency'				=> '%d',
 			'period'				=> '%s',
-			'reminder_startdate'	=> '%s',
+			'reminder_start_date'	=> '%s',
 			'reminder_amount'		=> '%d',
 			'reminder_period'		=> '%s',
 			'window_start'			=> '%s',
@@ -334,13 +334,13 @@ class Forms{
 			'type'					=> '%s',
 			'priority'				=> '%d',
 			'width'					=> '%d',
-			'functionname'			=> '%s',
-			'foldername'			=> '%s',
+			'function_name'			=> '%s',
+			'folder_name'			=> '%s',
 			'name'					=> '%s',
 			'nicename'				=> '%s',
 			'text'					=> '%s',
 			'html'					=> '%s',
-			'valuelist'				=> '%s',
+			'value_list'				=> '%s',
 			'default_value'			=> '%s',
 			'default_array_value'	=> '%s',
 			'options'				=> '%s',
@@ -351,7 +351,7 @@ class Forms{
 			'hidden'				=> '%d',
 			'multiple'				=> '%d',
 			'library'				=> '%d',
-			'editimage'				=> '%d',
+			'edit_image'				=> '%d',
 		  	'conditions'			=> '%s',
 			'remove'				=> '%s',
 			'add'					=> '%s',
@@ -386,9 +386,9 @@ class Forms{
 		// Form Submissions
 		$formats	= [
 			'form_id'				=> '%d',	
-			'timecreated'			=> '%s',	
-			'timelastedited'		=> '%s',	
-			'userid'				=> '%d',	
+			'time_created'			=> '%s',	
+			'time_last_edited'		=> '%s',	
+			'user_id'				=> '%d',	
 			'submitter_id'			=> '%d',
 			'archived'				=> '%d'
 		];
@@ -429,7 +429,7 @@ class Forms{
 			'width'					=> '%d',
 			'show'					=> '%d',	
 			'name'					=> '%s',	
-			'nice_name'				=> '%s',
+			'name'				=> '%s',
 			'priority'				=> '%d',
 			'copy'					=> '%d',	
 			'view_right_roles'		=> '%s',
@@ -513,7 +513,7 @@ class Forms{
 		$elements = [
 			array(
 				'type' 					=> 'number',
-				'name'					=> 'userid',
+				'name'					=> 'user_id',
 			 	'default_value' 		=> 'user_id',
 				'hidden'				=> true,
 				'conditions'			=> serialize([
@@ -642,14 +642,14 @@ class Forms{
 		);
 
 		// update or delete posts with this form
-		$query		= "SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[formbuilder formname={$this->formData->name}]%'";
+		$query		= "SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[formbuilder formname={$this->formData->slug}]%'";
 		$results	= $wpdb->get_results ($query);
 
 		// remove the shortcode from the page
 		foreach($results as $postId){
 			$post	= get_post($postId);
 
-			$post->post_content	= str_replace("[formbuilder formname={$this->formData->name}]", '', $post->post_content);
+			$post->post_content	= str_replace("[formbuilder formname={$this->formData->slug}]", '', $post->post_content);
 
 			// delete post
 			if(empty($post->post_content)){
@@ -708,7 +708,7 @@ class Forms{
 			)	||
 			(
 				!empty($this->formName)		&&
-				$this->formData->name	!= $this->formName
+				$this->formData->slug	!= $this->formName
 			)	||
 			(
 				empty($this->formId)		&&
@@ -783,7 +783,7 @@ class Forms{
 			TSJIPPY\printArray($wpdb->print_error());
 		}
 		
-		$this->jsFileName	= plugin_dir_path(__DIR__)."../js/dynamic/{$this->formData->name}forms";
+		$this->jsFileName	= plugin_dir_path(__DIR__)."../js/dynamic/{$this->formData->slug}forms";
 
 		return true;
 	}
@@ -868,13 +868,13 @@ class Forms{
 		//used to find the index of an element based on its unique id, type or name
 		$this->formData->elementMapping									= [];
 		$this->formData->elementMapping['type']							= [];
-		$this->formData->elementMapping['name']							= [];
+		$this->formData->elementMapping['slug']							= [];
 
 		$this->getAllFormElements('priority', $this->formData->id, true);
 
 		foreach($this->formElements as $index => $element){
 			$this->formData->elementMapping['id'][$element->id]			= $index;
-			$this->formData->elementMapping['name'][$element->name][] 	= $index;
+			$this->formData->elementMapping['slug'][$element->slug][] 	= $index;
 			$this->formData->elementMapping['type'][$element->type][] 	= $index;
 		}
 	}
@@ -887,14 +887,14 @@ class Forms{
 	public function formSelect(){
 		$this->getForms();
 		
-		$this->names				= [];
+		$this->slugs				= [];
 		foreach($this->forms as $form){
-			$this->names[]			= $form->name;
+			$this->slugs[]			= $form->slug;
 		}
 		
 		$html = "<select name='form-selector'>";
 			$html .= "<option value=''>---</option>";
-			foreach ($this->names as $name){
+			foreach ($this->slugs as $name){
 				$html .= "<option value='$name'>$name</option>";
 			}
 		$html .= "</select>";
@@ -918,7 +918,7 @@ class Forms{
 		}
 
 		if(!is_numeric($id) && gettype($id) == 'string'){
-			return $this->getElementByName($id, $key);
+			return $this->getElementBySlug($id, $key);
 		}
 		
 		//load if needed
@@ -931,7 +931,7 @@ class Forms{
 
 			$url	= get_page_link($post);
 
-			TSJIPPY\printArray("Element with id '$id' not found on form '{$this->formData->name}' with id  '{$this->formData->id}' on page $url", false);
+			TSJIPPY\printArray("Element with id '$id' not found on form '{$this->formData->slug}' with id  '{$this->formData->id}' on page $url", false);
 			return false;
 		}
 		$elementIndex	= $this->formData->elementMapping['id'][$id];
@@ -951,16 +951,16 @@ class Forms{
 	}
 
 	/**
-	 * Finds an element by its name
+	 * Finds an element by its slug
 	 *
-	 * @param	string	$name	The element name
+	 * @param	string	$slug	The element slug
 	 * @param	string	$key	A specific element attribute to return. Default empty
 	 * @param	bool	$single	Wheter to return a singel element, default true
 	 *
 	 * @return	object|array|string|false			The element or an array of elements or an element property of false if not found
 	 */
-	public function getElementByName($name, $key='', $single=true){
-		if(empty($name)){
+	public function getElementBySlug($slug, $key='', $single=true){
+		if(empty($slug)){
 			return false;
 		}
 		
@@ -973,37 +973,38 @@ class Forms{
 			}
 		}
 
-		if(!isset($this->formData->elementMapping['name'][$name])){
+		if(!isset($this->formData->elementMapping['slug'][slug])){
 			// first part of the name, remove anything after [
-			$nameNew	= explode('[', $name)[0];
+			$slugNew	= explode('[', $slug)[0];
 
-			if(isset($this->formData->elementMapping['name'][$nameNew])){
+			if(isset($this->formData->elementMapping['name'][$slugNew])){
 				// remove '[]'
-				$name	.= $nameNew;
-			}elseif(isset($this->formData->elementMapping['name'][$name.'[]'])){
+				$slug	.= $slugNew;
+			}elseif(isset($this->formData->elementMapping['name'][$slug.'[]'])){
 				// add []
-				$name	.= '[]';
+				$slug	.= '[]';
 			}elseif(!empty($this->formData->split)){
 				// only the last part of a splitted name is given
 				$mainName	= explode('[', $this->getElementById($this->formData->split[0], 'name'))[0];
 
 				// we already tried adding splits, did not work
-				if(str_contains($name, $mainName.'[1][')){
+				if(str_contains($slug, $mainName.'[1][')){
 					return false;
-				}elseif($mainName == $nameNew){
-					$orgName	= trim(end(explode('[',$name)), ']');
-					$name		= $mainName."[1][$orgName]";
+				}elseif($mainName == $slugNew){
+					$exploded	= explode('[', $slug);
+					$orgName	= trim(end($exploded), ']');
+					$slug		= $mainName."[1][$orgName]";
 				}else{
-					$name		= $mainName."[0][$name]";
+					$slug		= $mainName."[0][$slug]";
 				}
 
-				return $this->getElementByName($name, $key, $single);
+				return $this->getElementBySlug($slug, $key, $single);
 			}else{
-				//TSJIPPY\printArray("Element with name $name not found on form {$this->formData->name} with id {$this->formData->id}");
+				//TSJIPPY\printArray("Element with slug $slug not found on form {$this->formData->slug} with id {$this->formData->id}");
 				return false;
 			}
 		}
-		$elementIndexes	= $this->formData->elementMapping['name'][$name];
+		$elementIndexes	= $this->formData->elementMapping['slug'][$slug];
 	
 		$elements		= [];
 		
@@ -1075,13 +1076,13 @@ class Forms{
 		// find the user id element
 		$userNameKey	= false;
 
-		if($this->getElementByName('name')){
+		if($this->getElementBySlug('name')){
 			$userNameKey	= 'name';
-		}elseif($this->getElementByName('fullname')){
+		}elseif($this->getElementBySlug('fullname')){
 			$userNameKey	= 'fullname';
-		}elseif($this->getElementByName('firstname')){
+		}elseif($this->getElementBySlug('firstname')){
 			$userNameKey	= 'firstname';
-		}elseif($this->getElementByName('lasttname')){
+		}elseif($this->getElementBySlug('lasttname')){
 			$userNameKey	= 'lasttname';
 		}
 
@@ -1097,9 +1098,9 @@ class Forms{
 		// find the user id element
 		$phonenumberKey	= false;
 
-		if($this->getElementByName('phone')){
+		if($this->getElementBySlug('phone')){
 			$phonenumberKey	= 'phone';
-		}elseif($this->getElementByName('phonenumber')){
+		}elseif($this->getElementBySlug('phonenumber')){
 			$phonenumberKey	= 'phonenumber';
 		}
 
@@ -1115,9 +1116,9 @@ class Forms{
 		// find the user id element
 		$emailKey	= false;
 
-		if($this->getElementByName('email')){
+		if($this->getElementBySlug('email')){
 			$emailKey	= 'email';
-		}elseif($this->getElementByName('e-mail')){
+		}elseif($this->getElementBySlug('e-mail')){
 			$emailKey	= 'e-mail';
 		}
 
@@ -1185,7 +1186,7 @@ class Forms{
 					'formname'		=> '',
 					'form-name'		=> '',
 					'name'			=> '',
-					'userid'		=> '',
+					'user_id'		=> '',
 					'user-id'		=> '',
 					'search'		=> '',
 					'shortcodeid'	=> '',
@@ -1210,7 +1211,7 @@ class Forms{
 			}
 
 			if(empty($atts['user-id'])){
-				$atts['user-id']	= $atts['userid'];
+				$atts['user-id']	= $atts['user_id'];
 			}
 
 			if(empty($atts['shortcode-id'])){
@@ -1339,7 +1340,7 @@ class Forms{
 		/**
 		 * Add the metas to the submissions
 		 */
-		extract(apply_filters(
+		$filtered	= apply_filters(
 			'tsjippy_formdata_retrieval_query', 
 			[
 				'baseQuery'	=> $baseQuery,
@@ -1348,7 +1349,9 @@ class Forms{
 			],
 			$this->userId,
 			$this
-		));
+		);
+
+		extract($filtered);
 
 		$query	= $baseQuery.implode(' AND ', $where);
 		
@@ -1406,8 +1409,8 @@ class Forms{
 			}
 
 			if(empty($this->submission->submissiondate)){
-				$this->submission->submissiondate	= date('d F y', strtotime($this->submission->timecreated));
-				$this->submission->editdate			= date('d F y', strtotime($this->submission->timelastedited));
+				$this->submission->submissiondate	= date('d F y', strtotime($this->submission->time_created));
+				$this->submission->editdate			= date('d F y', strtotime($this->submission->time_last_edited));
 			}
 			
 			if(isset($_REQUEST['subid']) && empty($this->submission->sub_id)){
@@ -1438,7 +1441,7 @@ class Forms{
 					$string = str_replace("%$match%", '', $string);
 
 					// mention it in the log
-					TSJIPPY\printArray("No value found for transform value '%$match%' on form '{$this->formData->name}' with id {$this->formData->id}");
+					TSJIPPY\printArray("No value found for transform value '%$match%' on form '{$this->formData->slug}' with id {$this->formData->id}");
 				}
 				$string 		= str_replace("%$match%", $replaceValue, $string);
 			}

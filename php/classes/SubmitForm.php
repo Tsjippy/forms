@@ -113,16 +113,16 @@ class SubmitForm extends SaveFormSettings{
 
 			// get element and the form result of that element
 			$element	= $this->getElementById($email->submitted_trigger['element']);
-			if(empty($this->submission->{$element->name})){
+			if(empty($this->submission->{$element->slug})){
 				$elValue	= '';
 			}else{
-				$elValue	= $this->submission->{$element->name};
+				$elValue	= $this->submission->{$element->slug};
 			}
 			
 			// get the value to compare with
 			if(is_numeric($email->submitted_trigger['value-element'])){
 				$compareElement	= $this->getElementById($email->submitted_trigger['value-element']);
-				$compareElValue	= $this->submission->{$compareElement->name};
+				$compareElValue	= $this->submission->{$compareElement->slug};
 			}else{
 				$compareElValue	= $email->submitted_trigger['value'];
 			}
@@ -213,7 +213,7 @@ class SubmitForm extends SaveFormSettings{
 			}
 			
 			if(empty($recipients)){
-				TSJIPPY\printArray("No to email found for email $key on form {$this->formData->name} with id {$this->formData->id}");
+				TSJIPPY\printArray("No to email found for email $key on form {$this->formData->slug} with id {$this->formData->id}");
 				continue;
 			}
 
@@ -341,7 +341,7 @@ class SubmitForm extends SaveFormSettings{
 						}
 
 						// Find the element id
-						$elementId	= $this->getElementByName($matches[1]."[$index][$subKey]", 'id');
+						$elementId	= $this->getElementBySlug($matches[1]."[$index][$subKey]", 'id');
 
 						// insert the value
 						$wpdb->insert(
@@ -374,7 +374,7 @@ class SubmitForm extends SaveFormSettings{
 						continue;
 					}
 
-					$elementId = $this->getElementByName($name.'['.$key.']', 'id');
+					$elementId = $this->getElementBySlug($name.'['.$key.']', 'id');
 
 					$wpdb->insert(
 						$this->submissionValuesTableName,
@@ -446,7 +446,7 @@ class SubmitForm extends SaveFormSettings{
 			if($key == 'viewhash'){
 				$elementId = -7;
 			}else{
-				$elementId	= $this->getElementByName($key, 'id');
+				$elementId	= $this->getElementBySlug($key, 'id');
 				if(!$elementId){
 					continue;
 				}
@@ -496,7 +496,7 @@ class SubmitForm extends SaveFormSettings{
 				$result	= TSJIPPY\cleanUpNestedArray($result);
 
 				//check if we should only update one entry of the array
-				$el	= $this->getElementByName($key.'['.array_keys($result)[0].']');
+				$el	= $this->getElementBySlug($key.'['.array_keys($result)[0].']');
 				if(count(array_keys($result)) == 1 && $el){
 					$subKey	= array_keys($result)[0];
 				}
@@ -559,7 +559,7 @@ class SubmitForm extends SaveFormSettings{
 		// The user id of the current user
 		$this->userId						= $this->user->ID;
 
-		$userId								= $_POST['userid'] ? $_POST['userid'] : $_POST['user-id'];
+		$userId								= $_POST['user_id'] ? $_POST['user_id'] : $_POST['user-id'];
 
 		// Check if we are submitting for another user
 		if(is_numeric($userId)){
@@ -576,19 +576,19 @@ class SubmitForm extends SaveFormSettings{
 
 		$formresults 						= $_POST;
 
-		$this->submission->timecreated		= date("Y-m-d H:i:s");
+		$this->submission->time_created		= date("Y-m-d H:i:s");
 
-		$this->submission->timelastedited	= date("Y-m-d H:i:s");
+		$this->submission->time_last_edited	= date("Y-m-d H:i:s");
 		
-		$this->submission->userid			= $userId;
+		$this->submission->user_id			= $userId;
 		
 		$this->submission->submitter_id		= $this->userId;
 
 		// check for required empty elements
 		foreach($this->formElements as $element){
 			// element is required but has no value
-			if($element->required && $formresults[$element->name] === '' ){
-				return new \WP_Error('Error', "$element->nicename is required!");
+			if($element->required && $formresults[$element->slug] === '' ){
+				return new \WP_Error('Error', "$element->nameis required!");
 			}
 		}
 
@@ -599,7 +599,7 @@ class SubmitForm extends SaveFormSettings{
 		//remove the action and the formname
 		unset($formresults['formname']);
 		unset($formresults['fileupload']);
-		unset($formresults['userid']);		
+		unset($formresults['user_id']);		
 		unset($formresults['form-id']);
 		unset($formresults['_wpnonce']);
 		unset($formresults['formurl']);

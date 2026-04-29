@@ -384,7 +384,7 @@ function addFormElement($copy=false){
 	if($copy === true){
 		$element			= $forms->getElementById($_POST['element-id']);
 
-		$element->name		= $element->nicename;
+		$element->slug		= $element->nicename;
 
 		$element->infotext	= $element->text;
 	}
@@ -428,36 +428,36 @@ function addFormElement($copy=false){
 	}
 	
 	if($element->type == 'php'){
-		//we store the functionname in the html variable replace any double \ with a single \
-		$element->name			= $element->functionname;
+		//we store the function_name in the html variable replace any double \ with a single \
+		$element->slug			= $element->function_name;
 		
 		//only continue if the function exists
-		if ( ! function_exists( $element->functionname ) ){
-			return new WP_Error('forms', "A function with name $element->functionname does not exist!");
+		if ( ! function_exists( $element->function_name ) ){
+			return new WP_Error('forms', "A function with name $element->function_name does not exist!");
 		}
 	}
 	
 	if(in_array($element->type, ['label', 'button', 'formstep'])){
-		$element->name	= $element->text;
-	}elseif(empty($element->name)){
+		$element->slug	= $element->text;
+	}elseif(empty($element->slug)){
 		return new \WP_Error('Error', "Please enter a formfieldname");
 	}
 
-	$element->nicename	= ucfirst(trim($element->name, '[]'));
+	$element->nicename	= ucfirst(trim($element->slug, '[]'));
 
 	if(
 		in_array($element->type, $forms->nonInputs) 		&& 	// this is a non-input
 		$element->type != 'datalist'						&& 	// but not a datalist
-		!str_contains($element->name, $element->type)			// and the type is not yet added to the name
+		!str_contains($element->slug, $element->type)			// and the type is not yet added to the name
 	){
-		$element->name	.= '_'.$element->type;
+		$element->slug	.= '_'.$element->type;
 	}
 	
 	//Get an unique name if needed
-	if(!$update || $element->name != $oldElement->name){
-		$element->name		= $forms->getUniqueName($element, $update, $oldElement, $forms);
-		if(is_wp_error($element->name)){
-			return $element->name;
+	if(!$update || $element->slug != $oldElement->slug){
+		$element->slug		= $forms->getUniqueName($element, $update, $oldElement, $forms);
+		if(is_wp_error($element->slug)){
+			return $element->slug;
 		}
 	}
 
@@ -467,13 +467,13 @@ function addFormElement($copy=false){
 	}
 	
 	if($update){
-		$message								= "Succesfully updated '{$element->name}'";
+		$message								= "Succesfully updated '{$element->slug}'";
 		$result									= $forms->updateFormElement($element);
 		if(is_wp_error($result)){
 			return $result;
 		}
 	}else{
-		$message								= "Succesfully added '{$element->name}' to this form";
+		$message								= "Succesfully added '{$element->slug}' to this form";
 		if(!is_numeric($_POST['insert-after'])){
 			$element->priority	= $wpdb->get_var( "SELECT COUNT(`id`) FROM `{$forms->elTableName}` WHERE `form_id`={$element->form_id}") +1;
 		}else{
@@ -613,11 +613,11 @@ function saveElementConditions(){
 	if(empty($elementConditions)){
 		$element->conditions	= '';
 		
-		$message = "Succesfully removed all conditions for {$element->name}";
+		$message = "Succesfully removed all conditions for {$element->slug}";
 	}else{
 		$element->conditions 	= $elementConditions;
 		
-		$message 				= "Succesfully updated conditions for {$element->name}";
+		$message 				= "Succesfully updated conditions for {$element->slug}";
 	}
 
 	$formBuilder->updateFormElement($element);
