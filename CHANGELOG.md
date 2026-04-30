@@ -13,6 +13,7 @@
 - PLUGINCONSTANT value
 - lib updates
 - table columns
+- open url in new tab
 
 ### Fixed
 - show archived submissions
