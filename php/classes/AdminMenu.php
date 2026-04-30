@@ -49,7 +49,7 @@ class AdminMenu extends ADMIN\SubAdminMenu{
             if(empty($formUrl)){
                 $formUrl	.= "Not set";
             }else{
-                $formUrl	.= "<a href='$formUrl'>Link</a>";
+                $formUrl	.= "<a href='$formUrl' target='_blank'>Link</a>";
             }
 
             $formName	= str_replace('_', ' ', ucfirst($formName));
