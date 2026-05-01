@@ -15,6 +15,7 @@
 - table columns
 - open url in new tab
 - exclude .vscode from releases
+- updated github workflow versions
 
 ### Fixed
 - show archived submissions
