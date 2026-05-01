@@ -14,6 +14,7 @@
 - lib updates
 - table columns
 - open url in new tab
+- exclude .vscode from releases
 
 ### Fixed
 - show archived submissions
