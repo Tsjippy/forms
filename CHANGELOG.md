@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [11.0.1] - 2026-05-01
+
+
+### Added
 - redirection to settings page on plugin activation
 
 ### Changed
@@ -19,8 +30,6 @@
 
 ### Fixed
 - show archived submissions
-
-### Updated
 
 ## [10.0.8] - 2026-04-16
 
