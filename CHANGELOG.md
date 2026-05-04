@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- fixed activation error
 
 ### Fixed
 
