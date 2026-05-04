@@ -4,11 +4,13 @@
 ### Added
 
 ### Changed
-- fixed activation error
 
 ### Fixed
 
 ### Updated
+
+## [11.0.3] - 2026-05-04
+
 
 ## [11.0.2] - 2026-05-03
 
