@@ -151,7 +151,7 @@ class FormExport extends FormBuilderForm{
 			$oldElementId	= $element->id;
 			unset($element->id);
 
-			$element->form_id	= $this->formId;
+			$element->form_id	= $this->formData->id;
 			$elementId 		= $this->insertOrUpdateData($this->elTableName, $element);
 
 			if(is_wp_error($elementId)){
@@ -181,7 +181,7 @@ class FormExport extends FormBuilderForm{
 		// Form elements
 		foreach($formEmails as $email){
 
-			$email->form_id	= $this->formId;
+			$email->form_id	= $this->formData->id;
 
 			if(!empty($email->submitted_trigger)){
 				$triggers	= maybe_unserialize($email->submitted_trigger);
@@ -324,7 +324,7 @@ class FormExport extends FormBuilderForm{
 						continue;
 					}
 
-					$reminder->form_id	= $this->formId;
+					$reminder->form_id	= $this->formData->id;
 
 					$this->insertOrUpdateData($this->formReminderTable, $reminder);
 				}

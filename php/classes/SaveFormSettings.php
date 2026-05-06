@@ -322,12 +322,12 @@ class SaveFormSettings extends Forms{
 	 * @param	object			$element		The element to change the priority of
 	 */
 	public function reorderElements(array $newIndexes, $element) {
-		if(!isset($this->formId) && !empty($element) && isset($element->form_id)){
-			$this->formId	= $element->form_id;
+		if(!isset($this->formData->id) && !empty($element) && isset($element->form_id)){
+			$this->formData->id	= $element->form_id;
 		}
 
 		// Get all elements of this form
-		$this->getAllFormElements('priority', $this->formId, true);
+		$this->getAllFormElements('priority', $this->formData->id, true);
 
 		foreach($this->formElements	as &$element){
 			if(is_numeric($newIndexes[$element->id]) && $element->priority != $newIndexes[$element->id]){

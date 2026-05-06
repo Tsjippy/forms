@@ -700,17 +700,10 @@ class Forms{
 		global $wpdb;
 
 		// first check if needed
-		if(empty($this->formData) || (
+		if(
+			!isset($this->formData->version) || (
 			(
-				!empty($this->formId)		&&
-				$this->formData->id	!= $this->formId
-			)	||
-			(
-				!empty($this->formSlug)		&&
-				$this->formData->slug	!= $this->formSlug
-			)	||
-			(
-				empty($this->formId)		&&
+				empty($this->formData->id)		&&
 				!empty($formId)
 			)
 		)){
@@ -718,10 +711,10 @@ class Forms{
 			$query				= "SELECT * FROM {$this->tableName} WHERE ";
 			if(is_numeric($formId)){
 				$query	.= "id= '$formId'";
-			}elseif(is_numeric($this->formId)){
-				$query	.= "id= '$this->formId'";
-			}elseif(!empty($this->formSlug)){
-				$query	.= "slug= '$this->formSlug'";
+			}elseif(is_numeric($this->formData->id)){
+				$query	.= "id= '{$this->formData->id}'";
+			}elseif(!empty($this->formData->slug)){
+				$query	.= "slug= '{$this->formData->slug}'";
 			}else{
 				return new \WP_Error('forms', 'No form name or id given');
 			}
@@ -743,9 +736,7 @@ class Forms{
 				$this->formData->split				= maybe_unserialize($this->formData->split);
 				$this->formData->full_right_roles	= maybe_unserialize($this->formData->full_right_roles);
 				$this->formData->submit_others_form	= maybe_unserialize($this->formData->submit_others_form);				
-				
-				$formId								= $this->formData->id;
-
+			
 				/**
 				 * Filters the elements the submission data should be splitted on
 				 * 
@@ -1142,8 +1133,8 @@ class Forms{
 			$formId	= $this->formData->id;
 		}
 
-		if(!is_numeric($formId) && isset($this->formId) && is_numeric($this->formId)){
-			$formId	= $this->formId;
+		if(!is_numeric($formId) && isset($this->formData->id) && is_numeric($this->formData->id)){
+			$formId	= $this->formData->id;
 		}
 
 		if(!is_numeric($formId)){
