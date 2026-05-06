@@ -24,8 +24,6 @@ class Forms{
 	public $submitRoles;
 	public $showArchived;
 	public $editRights;
-	public $formName;
-	public string $formSlug;
 	public $formData;
 	public $forms;
 	public $formId;
@@ -127,13 +125,13 @@ class Forms{
 		$sql = "CREATE TABLE {$this->tableName} (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			slug tinytext NOT NULL,
+			name text,
 			version text NOT NULL,
 			button_text text,
 			succes_message text,
 			include_id boolean,
-			form_name text,
 			save_in_meta boolean,
-			form_url text,
+			url text,
 			actions text,
 			autoarchive boolean,
 			autoarchive_el integer,
@@ -294,14 +292,14 @@ class Forms{
 		private function tableFormats(){
 		// Form Settings
 		$formats			= [
-			'name'					=> '%s',
+			'slug'					=> '%s',
 			'version'				=> '%s',
 			'button_text'			=> '%s',
 			'succes_message'		=> '%s',
 			'include_id'			=> '%d',
-			'form_name'				=> '%s',
+			'name'					=> '%s',
 			'save_in_meta'			=> '%d',
-			'form_url'				=> '%s',
+			'url'					=> '%s',
 			'actions'				=> '%s',
 			'autoarchive'			=> '%d',
 			'autoarchive_el'		=> '%d',
@@ -337,11 +335,11 @@ class Forms{
 			'width'					=> '%d',
 			'function_name'			=> '%s',
 			'folder_name'			=> '%s',
+			'slug'					=> '%s',
 			'name'					=> '%s',
-			'nicename'				=> '%s',
 			'text'					=> '%s',
 			'html'					=> '%s',
-			'value_list'				=> '%s',
+			'value_list'			=> '%s',
 			'default_value'			=> '%s',
 			'default_array_value'	=> '%s',
 			'options'				=> '%s',
@@ -352,7 +350,7 @@ class Forms{
 			'hidden'				=> '%d',
 			'multiple'				=> '%d',
 			'library'				=> '%d',
-			'edit_image'				=> '%d',
+			'edit_image'			=> '%d',
 		  	'conditions'			=> '%s',
 			'remove'				=> '%s',
 			'add'					=> '%s',
@@ -429,8 +427,8 @@ class Forms{
 			'element_id'			=> '%s',
 			'width'					=> '%d',
 			'show'					=> '%d',	
-			'name'					=> '%s',	
-			'name'				=> '%s',
+			'slug'					=> '%s',	
+			'name'					=> '%s',
 			'priority'				=> '%d',
 			'copy'					=> '%d',	
 			'view_right_roles'		=> '%s',
@@ -456,7 +454,7 @@ class Forms{
 		global $wpdb;
 
 		if(empty($slug)){
-			$slug = $this->formName;
+			$slug = $this->formData->slug;
 		}
 
 		$slug	= str_replace(' ', '-', strtolower($slug));
@@ -476,12 +474,12 @@ class Forms{
 			$i++;
 		}
 
-		$this->formName	= $newName;
+		$this->formData->slug	= $newName;
 
 		$wpdb->insert(
 			$this->tableName,
 			array(
-				'slug'			=> $this->formName,
+				'slug'			=> $this->formData->slug,
 				'version' 		=> 1
 			)
 		);
@@ -563,11 +561,11 @@ class Forms{
 	public function maybeInsertForm($formId=''){
 		global $wpdb;
 
-		if(!isset($this->formName)){
-			return new WP_ERROR('forms', 'No formname given');
+		if(!isset($this->formData->slug)){
+			return new WP_ERROR('forms', 'No form slug given');
 		}
 		
-		$query	= "SELECT * FROM {$this->tableName} WHERE `slug` = '{$this->formName}'";
+		$query	= "SELECT * FROM {$this->tableName} WHERE `slug` = '{$this->formData->slug}'";
 		if(is_numeric($formId)){
 			$query	.= " OR id=$formId";
 		}
@@ -643,14 +641,14 @@ class Forms{
 		);
 
 		// update or delete posts with this form
-		$query		= "SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[formbuilder formname={$this->formData->slug}]%'";
+		$query		= "SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[formbuilder slug={$this->formData->slug}]%'";
 		$results	= $wpdb->get_results ($query);
 
 		// remove the shortcode from the page
 		foreach($results as $postId){
 			$post	= get_post($postId);
 
-			$post->post_content	= str_replace("[formbuilder formname={$this->formData->slug}]", '', $post->post_content);
+			$post->post_content	= str_replace("[formbuilder slug={$this->formData->slug}]", '', $post->post_content);
 
 			// delete post
 			if(empty($post->post_content)){
@@ -1181,7 +1179,11 @@ class Forms{
 	 * Parses all WP Shortcode attributes
 	 */
 	public function processAtts($atts){
-		if(!isset($this->formName)){
+		if(empty($this->formData)){
+			$this->formData	= new stdClass();
+		}
+
+		if(!isset($this->formData->slug)){
 			$atts	= shortcode_atts(
 				array(
 					'slug'			=> '',
@@ -1207,8 +1209,10 @@ class Forms{
 			if(empty($atts['form-name'])){
 				if(!empty($atts['formname'])){
 					$atts['form-name']	= $atts['formname'];
-				}else{
+				}elseif(!empty($atts['name'])){
 					$atts['form-name']	= $atts['name'];
+				}elseif(!empty($atts['slug'])){
+					$atts['form-name']	= ucfirst(str_replace('-', ' ', $atts['slug']));
 				}
 			}
 
@@ -1256,9 +1260,9 @@ class Forms{
 				$this->userId	= $atts['user-id'];
 			}
 
-			$this->formName 	= sanitize_text_field($atts['form-name']);
-			$this->formSlug 	= sanitize_text_field($atts['slug']);
-			$this->formId		= sanitize_text_field($atts['form-id']);
+			$this->formData->name 	= sanitize_text_field($atts['form-name']);
+			$this->formData->slug 	= sanitize_text_field($atts['slug']);
+			$this->formData->id		= sanitize_text_field($atts['form-id']);
 
 			$this->getForm();
 		}
@@ -1276,10 +1280,10 @@ class Forms{
 
 		$query				= "SELECT * FROM {$this->elTableName} WHERE `form_id`=";
 
-		if(is_numeric($this->formId)){
-			$query	.= $this->formId;
-		}elseif(!empty($this->formName)){
-			$query	.= "(SELECT `id` FROM {$this->tableName} WHERE name='$this->formName' LIMIT 1)";
+		if(is_numeric($this->formData->id)){
+			$query	.= $this->formData->id;
+		}elseif(!empty($this->formData->slug)){
+			$query	.= "(SELECT `id` FROM {$this->tableName} WHERE slug='{$this->formData->slug}' LIMIT 1)";
 		}else{
 			return new WP_Error('forms', 'Which form do you have?');
 		}

@@ -643,14 +643,18 @@ function saveFormSettings(){
 	unset($formSettings['_wpnonce']);
 	unset($formSettings['form-id']);
 
-	$formBuilder->formName	= $formSettings['form_name'];
+	if(empty($formBuilder->formData)){
+		$formBuilder->formData	= new stdClass();
+	}
+
+	$formBuilder->formData->slug	= sanitize_text_field($formSettings['name']);
 	
 	//remove double slashes
 	$formSettings['upload_path']	= str_replace('\\\\', '\\', $formSettings['upload_path']);
 	
-	$formBuilder->maybeInsertForm($_POST['form-id']);
+	$formBuilder->maybeInsertForm((int) $_POST['form-id']);
 	
-	$result	= $formBuilder->updateFormSettings($_POST['form-id'], $formSettings);
+	$result	= $formBuilder->updateFormSettings((int) $_POST['form-id'], $formSettings);
 	
 	if(is_wp_error($result)){
 		return $result;

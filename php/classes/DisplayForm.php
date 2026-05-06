@@ -230,7 +230,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		wp_enqueue_script('tsjippy_forms_script');
 		//Only enqueue if there is content in the file
 		if(file_exists($jsPath) && filesize($jsPath) > 0){
-			wp_enqueue_script( "dynamic_{$this->formName}forms", TSJIPPY\pathToUrl($jsPath), array('tsjippy_forms_script'), $this->formData->version, true);
+			wp_enqueue_script( "dynamic_{$this->formData->slug}forms", TSJIPPY\pathToUrl($jsPath), array('tsjippy_forms_script'), $this->formData->version, true);
 		}
 
 		$initialHtml	= apply_filters('tsjippy-forms-before-showing-form', '', $this);
@@ -249,7 +249,7 @@ class DisplayForm extends ElementHtmlBuilder{
 			$this->addElement('button', $this->formWrapper, $attributes, 'Switch to formbuilder');
 		}
 	
-		$formName	= $this->formData->form_name;
+		$formName	= $this->formData->name;
 		if(!empty($formName)){
 			$this->addElement("h3", $this->formWrapper, [], $formName);
 		}
@@ -257,7 +257,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		if(array_intersect($this->userRoles, $this->submitRoles) && !empty($this->formData->save_in_meta)){
 			$this->addRawHtml(TSJIPPY\userSelect("Select an user to show the data of:"), $this->formWrapper);
 		}
-		$this->addRawHtml(apply_filters('tsjippy_before_form', '', $this->formName), $this->formWrapper);
+		$this->addRawHtml(apply_filters('tsjippy_before_form', '', $this->formData->slug), $this->formWrapper);
 
 		/**
 		 * Form container

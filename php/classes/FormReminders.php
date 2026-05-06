@@ -571,7 +571,7 @@ class FormReminders extends Forms{
             return '';
         }
 
-        $formUrl    = $this->formData->form_url;
+        $formUrl    = $this->formData->url;
 
         parse_str(parse_url($formUrl, PHP_URL_QUERY), $params);
 
@@ -615,7 +615,7 @@ class FormReminders extends Forms{
     protected function getFormReminderHtml($formId, $childName){
         $this->getForm($formId);
 
-        $formUrl    = $this->formData->form_url;
+        $formUrl    = $this->formData->url;
 
         $formName   = str_replace(['-', '_'], ' ', $this->formData->slug);
 
@@ -772,7 +772,7 @@ class FormReminders extends Forms{
             $msg      = $this->processPlaceholders(
                 $message,
                 [
-                    'formurl'   => $this->formData->form_url,
+                    'formurl'   => $this->formData->url,
                     'name'      => $user->first_name,
                     'email'     => $user->user_email,
                     'reminders' => $html

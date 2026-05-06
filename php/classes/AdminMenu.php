@@ -44,19 +44,17 @@ class AdminMenu extends ADMIN\SubAdminMenu{
         $tbody  = addElement('tbody', $table);
 
         foreach($forms->forms as $form){
-            $formName	= $form->form_name;
-            $formUrl	= $form->form_url;
+            $formSlug	= $form->slug;
+            $formUrl	= $form->url;
             if(empty($formUrl)){
                 $formUrl	.= "Not set";
             }else{
                 $formUrl	.= "<a href='$formUrl' target='_blank'>Link</a>";
             }
 
-            $formName	= str_replace('_', ' ', ucfirst($formName));
-
             $tr     = addElement('tr', $tbody);
             addElement('td', $tr, [], $form->id);
-            addElement('td', $tr, [], $formName);
+            addElement('td', $tr, [], $formSlug);
             addElement('td', $tr, [], $formUrl);
 
             

@@ -25,7 +25,7 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
                 "ALTER TABLE `{$wpdb->prefix}tsjippy_form_elements`
                 RENAME COLUMN `functionname` to `function_name`,
                 RENAME COLUMN `foldername` to `folder_name`,
-                RENAME COLUMN `name` to `slu`,
+                RENAME COLUMN `name` to `slug`,
                 RENAME COLUMN `nicename` to `name`,
                 RENAME COLUMN `editimage` to `edit_image`,
                 RENAME COLUMN `valuelist` to `value_list`;"

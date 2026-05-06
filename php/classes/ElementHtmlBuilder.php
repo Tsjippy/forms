@@ -93,10 +93,6 @@ class ElementHtmlBuilder extends SubmitForm{
 			return;
 		}
 
-		if(empty($this->formName)){
-			$this->formName			= $this->formData->slug;
-		}
-
 		$this->defaultValues		= (array)$this->user->data;
 		if($this->userId != $this->user->ID){
 			$this->defaultValues		= (array)get_userdata($this->userId)->data;
@@ -118,7 +114,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		$this->defaultValues['weddingdate']		= $family->getWeddingDate($this->user);
 		
 		//get defaults from filters
-		$this->defaultValues		= apply_filters('tsjippy_add_form_defaults', $this->defaultValues, $this->userId, $this->formName);
+		$this->defaultValues		= apply_filters('tsjippy_add_form_defaults', $this->defaultValues, $this->userId, $this->formData->slug);
 		
 		ksort($this->defaultValues);
 				
@@ -181,7 +177,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		$this->defaultArrayValues['family_member_names']			= $familyNames;
 		$this->defaultArrayValues['family_member_names_and_age']	= $familyNamesWithChildAge;
 
-		$this->defaultArrayValues	= apply_filters('tsjippy_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formName);
+		$this->defaultArrayValues	= apply_filters('tsjippy_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formData->slug);
 		
 		ksort($this->defaultArrayValues);
 	}
@@ -438,7 +434,7 @@ class ElementHtmlBuilder extends SubmitForm{
 				if($userIdKey && $number == $signalNumber){
 					$output	.= "<a href='https://signal.me/#p/$number'>$number</a><br>";
 				}else{
-					$output	.= "<a href='https://api.whatsapp.com/send?phone=$number&text=Regarding%20your%20submission%20of%20{$this->formData->form_name}%20with%20id%20$submission->id'>$number</a><br>";
+					$output	.= "<a href='https://api.whatsapp.com/send?phone=$number&text=Regarding%20your%20submission%20of%20{$this->formData->name}%20with%20id%20$submission->id'>$number</a><br>";
 				}
 			}
 		//display dates in a nice way
@@ -862,7 +858,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
 		// Default setting
 		if(empty($targetDir)){
-			$targetDir = 'form_uploads/'.$this->formData->form_name;
+			$targetDir = 'form_uploads/'.$this->formData->slug;
 		}
 
 		if(empty($this->formData->save_in_meta)){

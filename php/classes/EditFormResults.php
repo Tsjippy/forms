@@ -317,9 +317,6 @@ class EditFormResults extends DisplayFormResults{
 				continue;
 			}
 
-			$this->formData	= $form;
-			$this->formId	= $form->id;
-			$this->formName	= $form->slug;
 			$this->getForm($form->id);
 			
 			$triggerId		= $form->autoarchive_el;

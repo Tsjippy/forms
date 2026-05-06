@@ -65,12 +65,12 @@ trait ExportFormResults{
 	/**
 	 * Export the current table to excel
 	 *
-	 * @param	string	$fileName	the name of the downloaded file. 	Default the formname
+	 * @param	string	$fileName	the name of the downloaded file. 	Default the form slug
 	 * @param	bool	$download	Whether to download the excel or print it to screen
 	 */
 	function exportExcel($fileName="", $download=true){
 		if(empty($fileName)){
-			$fileName = get_the_title($this->form_id).".xlsx";
+			$fileName = get_the_title($this->formData->slug).".xlsx";
 		}
 
 		$spreadsheet = new Spreadsheet();
@@ -132,8 +132,6 @@ trait ExportFormResults{
 
 	/**
 	 * Export the current table to PDF
-	 * 
-	 * @param	string	$fileName	the name of the downloaded file. 	Default the formname
 	 */
 	function exportPdf(){
 		$pdf = new TSJIPPY\PDF\PdfHtml();
@@ -147,7 +145,7 @@ trait ExportFormResults{
 		
 		$header		= array_map('ucfirst', $this->excelContent[0]);
 
-		$title		= ucfirst($this->formName);
+		$title		= ucfirst($this->formData->name);
 		if(empty($title)){
 			$title = 'Form';
 		}

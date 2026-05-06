@@ -216,7 +216,7 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * Add the metas to the submissions
 		 */
-		extract(apply_filters(
+		$filtered	= apply_filters(
 			'tsjippy_formdata_retrieval_query', 
 			[
 				'baseQuery'	=> $baseQuery,
@@ -225,7 +225,8 @@ class DisplayFormResults extends DisplayForm{
 			],
 			$userId,
 			$this
-		));
+		);
+		extract($filtered);
 
 		$query	= $baseQuery.implode(' AND ', $where);
 
@@ -594,7 +595,7 @@ class DisplayFormResults extends DisplayForm{
 		 * @var array	$where		Array of where statements
 		 * @var array	$values		Array of values for the where statements
 		 */
-		extract(apply_filters(
+		$filtered	= apply_filters(
 			'tsjippy_formdata_retrieval_query', 
 			[
 				'query'		=> '',
@@ -603,7 +604,9 @@ class DisplayFormResults extends DisplayForm{
 			],
 			$userId,
 			$this
-		));
+		);
+
+		extract($filtered);
 
 		/**
 		 * Build the main query
@@ -2391,7 +2394,7 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	public function checkForFormShortcode($data) {		
 		//find any formresults shortcode
-		$pattern = "/\[formresults([^\]]*formname=(.*)[^\]]*)\]/s";
+		$pattern = "/\[formresults([^\]]*{formname,slug}=(.*)[^\]]*)\]/s";
 		
 		//if there are matches
 		if(preg_match_all($pattern, $data['post_content'], $matches)) {
@@ -2399,9 +2402,9 @@ class DisplayFormResults extends DisplayForm{
 			foreach($matches[1] as $key=>$shortcodeAtts){
 				//this shortcode has no id attribute
 				if (!str_contains($shortcodeAtts, ' id=')) {
-					$shortcode		= $matches[0][$key];
+					$shortcode				= $matches[0][$key];
 					
-					$this->formName = $matches[2][$key];
+					$this->formData->slug 	= $matches[2][$key];
 
 					$this->getForm();
 					

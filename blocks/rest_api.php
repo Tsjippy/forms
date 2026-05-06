@@ -89,13 +89,13 @@ function showFormBuilder($attributes){
 		$isRest	= true;
 		if(!empty($_REQUEST['formname'])){
 			$attributes = ['formname' => $_REQUEST['formname']];
+		}elseif(!empty($_REQUEST['slug'])){
+			$attributes = ['slug' => $_REQUEST['slug']];
 		}elseif(!empty($_REQUEST['form-id'])){
 			$attributes = ['form-id' => $_REQUEST['form-id']];
 		}else{
 			return false;
 		}
-	}elseif(!isset($attributes['formname'])){
-		return false;
 	}
 	
 	$forms = new Forms();

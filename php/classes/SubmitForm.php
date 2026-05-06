@@ -596,8 +596,8 @@ class SubmitForm extends SaveFormSettings{
 
 		$formUrl							= $formresults['formurl'];
 			
-		//remove the action and the formname
-		unset($formresults['formname']);
+		// remove the action and other unnecary info
+		unset($formresults['form-slug']);
 		unset($formresults['fileupload']);
 		unset($formresults['user_id']);		
 		unset($formresults['form-id']);

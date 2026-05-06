@@ -28,7 +28,7 @@ function checkFormExistence($slug){
     if(!$found){
         $forms->insertForm($slug);
 
-        return $forms->formName;
+        return $forms->formData->slug;
     }
 
     return $slug;

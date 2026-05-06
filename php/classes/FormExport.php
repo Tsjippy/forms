@@ -23,7 +23,7 @@ class FormExport extends FormBuilderForm{
 		/**
 		 * Form Settings
 		 */
-		unset($this->formData->form_url);
+		unset($this->formData->url);
 
 		// Remove the id
 		unset($this->formData->id);
@@ -290,24 +290,22 @@ class FormExport extends FormBuilderForm{
 				$autoArchiveEl	= $object->autoarchive_el;
 
 				// add a new page
-				$formName	= ucfirst(str_replace('_', ' ', $object->slug));
-
 				$post = array(
 					'post_type'		=> 'page',
-					'post_title'    => "$formName form",
-					'post_content'  => "[formbuilder formname={$object->slug}]",
+					'post_title'    => "$object->name form",
+					'post_content'  => "[formbuilder slug={$object->slug}]",
 					'post_status'   => "publish",
 					'post_author'   => '1'
 				);
 				$url	= get_permalink(wp_insert_post( $post, true, false));
 
 				// Form data
-				$object->form_url	= $url;
+				$object->url	= $url;
 
-				$this->formId 			= $this->insertOrUpdateData($this->tableName, $object);
+				$this->formData->id 	= $this->insertOrUpdateData($this->tableName, $object);
 
-				if(is_wp_error($this->formId)){
-					return $this->formId;
+				if(is_wp_error($this->formData->id)){
+					return $this->formData->id;
 				}
 
 			}elseif($type	== 'elements'){
@@ -349,6 +347,6 @@ class FormExport extends FormBuilderForm{
 			);
 		}
 
-		return "<div class='success'>Import of the form '$formName' finished successfully.<br>Visit the created form <a href='$url' target='_blank'>here</a></div>";
+		return "<div class='success'>Import of the form '{$object->formData->slug}' finished successfully.<br>Visit the created form <a href='$url' target='_blank'>here</a></div>";
 	}
 }

@@ -34,8 +34,7 @@ trait CreateJs{
      * Builds the js files for the current form
     */
     function createJs(){
-        $this->formName     = $this->formData->slug;
-        $this->objectName   = strtolower(str_replace('-', '', $this->formName));
+        $this->objectName   = strtolower(str_replace('-', '', $this->formData->slug));
 
         $checks = [];
         $errors = [];
@@ -461,7 +460,7 @@ trait CreateJs{
         // Process get variables in the url
         $newJs    = "\n
     init = () => {
-        console.log('Dynamic $this->formName forms js loaded');
+        console.log('Dynamic {$this->formData->slug} forms js loaded');
 
         window.addEventListener('click', this.listener);
         window.addEventListener('input', this.listener);

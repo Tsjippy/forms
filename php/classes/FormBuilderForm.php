@@ -469,7 +469,7 @@ class FormBuilderForm extends DisplayForm{
 			?>
 			<div name="formbuildbutton">
 				<p>No formfield defined yet.</p>
-				<button name='createform' class='button' data-formname='<?php echo $this->formName;?>'>Add fields to this form</button>
+				<button name='createform' class='button' data-slug='<?php echo $this->formData->slug;?>'>Add fields to this form</button>
 			</div>
 			<?php
 		}else{
@@ -592,7 +592,7 @@ class FormBuilderForm extends DisplayForm{
 					
 					<label class="block">
 						<h4>Form name</h4>
-						<input type='text' class='formbuilder form-element-setting' name='form-name' value="<?php echo $this->formData->form_name?>">
+						<input type='text' class='formbuilder form-element-setting' name='form-name' value="<?php echo $this->formData->name?>">
 					</label>
 					<br>
 					
@@ -612,8 +612,8 @@ class FormBuilderForm extends DisplayForm{
 					<label class="block">
 						<h4>Form url</h4>
 						<?php
-						if(!empty($this->formData->form_url)){
-							$url	= $this->formData->form_url;
+						if(!empty($this->formData->url)){
+							$url	= $this->formData->url;
 						}else{
 							$url	= str_replace(['?formbuilder=yes', '&formbuilder=yes'], '', TSJIPPY\currentUrl(true));
 						}
@@ -1479,7 +1479,7 @@ class FormBuilderForm extends DisplayForm{
 									
 										wp_editor(
 											$email->message,
-											"{$this->formName}_email_message_$key",
+											"{$this->formData->slug}_email_message_$key",
 											$settings
 										);
 										?>
