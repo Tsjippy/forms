@@ -447,24 +447,24 @@ class Forms{
 	/**
 	 * Inserts a new form in the db
 	 *
-	 * @param	string	$name	The form name
+	 * @param	string	$slug	The form slug
 	 *
 	 * @return	int|WP_Error	The form id or error ion failure
 	 */
-	public function insertForm($name=''){
+	public function insertForm($slug=''){
 		global $wpdb;
 
-		if(empty($name)){
+		if(empty($slug)){
 			$name = $this->formName;
 		}
 
-		$name	= strtolower($name);
+		$slug	= strtolower($slug);
 
 		// Check if name already exists
-		$newName	= $name;
+		$newName	= $slug;
 		$i			= 1;
 		while(true){
-			$query	= "SELECT * FROM {$this->tableName} WHERE name = '$newName'";
+			$query	= "SELECT * FROM {$this->tableName} WHERE slug = '$newName'";
 			$result	= $wpdb->get_results($query);
 
 			if(empty($result)){
@@ -480,7 +480,7 @@ class Forms{
 		$wpdb->insert(
 			$this->tableName,
 			array(
-				'name'			=> $this->formName,
+				'slug'			=> $this->formName,
 				'version' 		=> 1
 			)
 		);
@@ -501,7 +501,7 @@ class Forms{
 			array(
 				'form_id' 		=> $formId,
 				'type' 			=> 'text',
-				'name'			=> 'name',
+				'slug'			=> 'name',
 				'options' 		=> 'list=users',
 				'default_value' => 'display_name',
 				'priority'		=> 3
@@ -513,7 +513,7 @@ class Forms{
 		$elements = [
 			array(
 				'type' 					=> 'number',
-				'name'					=> 'user_id',
+				'slug'					=> 'user_id',
 			 	'default_value' 		=> 'user_id',
 				'hidden'				=> true,
 				'conditions'			=> serialize([
@@ -533,14 +533,14 @@ class Forms{
 			),
 			array(
 				'type' 					=> 'label',
-				'name'					=> 'name-label',
+				'slug'					=> 'name-label',
 				'text' 					=> 'Your Name',
 				'wrap'					=> true,
 				'priority'				=> 2
 			),
 			array(
 				'type' 					=> 'datalist',
-				'name'					=> 'users',
+				'slug'					=> 'users',
 				'default_array_value' 	=> 'all_users',
 				'priority'				=> 4
 			)
@@ -566,7 +566,7 @@ class Forms{
 			return new WP_ERROR('forms', 'No formname given');
 		}
 		
-		$query	= "SELECT * FROM {$this->tableName} WHERE `name` = '{$this->formName}'";
+		$query	= "SELECT * FROM {$this->tableName} WHERE `slug` = '{$this->formName}'";
 		if(is_numeric($formId)){
 			$query	.= " OR id=$formId";
 		}
