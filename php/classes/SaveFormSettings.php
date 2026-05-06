@@ -20,7 +20,8 @@ class SaveFormSettings extends Forms{
 		global $wpdb;
 
 		// Make sure we only are working on the name
-		$element->slug	= end(explode('\\', $element->slug));
+		$exploded		= explode('\\', $element->slug);
+		$element->slug	= end($exploded);
 
 		// Replace spaces with _
 		$element->slug	= str_replace(" ", "_", $element->slug);

@@ -236,7 +236,7 @@ async function getPage(target, action){
 		// Only get the table wrapper to the target
 		tableWrapper	= target.closest('.form-results-wrapper');
 	}
-	let table			= tableWrapper.querySelector('.form-data-table:not(.hidden)');
+	let table			= tableWrapper.querySelector('.form-data.table:not(.hidden)');
 
 	// Get the details
 	let formId			= table.dataset.formId;
@@ -352,7 +352,7 @@ async function getPage(target, action){
 				const doc 		= parser.parseFromString(tableHtml, "text/html");
 
 				// append the new page to the existing pages
-				tableHtml		= doc.querySelector("table.form-data-table").outerHTML; 
+				tableHtml		= doc.querySelector("table.form-data.table").outerHTML; 
 
 				tableWrapper.querySelector(`.loader-wrapper`).outerHTML = tableHtml;
 			}
@@ -621,7 +621,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		});
 	}
 
-	document.querySelectorAll('.form-data-table th').forEach(cell=>{
+	document.querySelectorAll('.form-data.table th').forEach(cell=>{
 		cell.style.minWidth		= parseFloat(window.getComputedStyle(cell).width) + 20 + 'px';
 	});
 });
@@ -672,7 +672,7 @@ document.addEventListener("table-content-before-update", async event => {
 document.addEventListener("table-content-before-column-hide", async event => {
 	let target	= event.target;
 
-	if( target.closest('.column-setting-wrapper') != null || target.closest('.form-data-table' ) != null){
+	if( target.closest('.column-setting-wrapper') != null || target.closest('.form-data.table' ) != null){
 		event.preventDefault();
 
 		hideColumn(target);

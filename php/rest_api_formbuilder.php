@@ -384,7 +384,7 @@ function addFormElement($copy=false){
 	if($copy === true){
 		$element			= $forms->getElementById($_POST['element-id']);
 
-		$element->slug		= $element->nicename;
+		$element->slug		= $element->name;
 
 		$element->infotext	= $element->text;
 	}
@@ -443,7 +443,7 @@ function addFormElement($copy=false){
 		return new \WP_Error('Error', "Please enter a formfieldname");
 	}
 
-	$element->nicename	= ucfirst(trim($element->slug, '[]'));
+	$element->name	= ucfirst(trim($element->slug, '[]'));
 
 	if(
 		in_array($element->type, $forms->nonInputs) 		&& 	// this is a non-input

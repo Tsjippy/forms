@@ -76,8 +76,8 @@ async function requestNewFormResults(target){
 	let button		= target.outerHTML;
 
 	let formData 	= new FormData();
-	let formId		= wrapper.querySelector('.tsjippy.table.form-data-table').dataset.formId;
-	let shortcodeId	= wrapper.querySelector('.tsjippy.table.form-data-table').dataset.shortcodeId;
+	let formId		= wrapper.querySelector('.tsjippy.table.form-data.table').dataset.formId;
+	let shortcodeId	= wrapper.querySelector('.tsjippy.table.form-data.table').dataset.shortcodeId;
 
 	formData.append('form-id', formId);
 	formData.append('shortcode-id', shortcodeId);

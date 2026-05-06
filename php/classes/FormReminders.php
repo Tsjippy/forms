@@ -576,7 +576,7 @@ class FormReminders extends Forms{
         parse_str(parse_url($formUrl, PHP_URL_QUERY), $params);
 
         //Show a nice name
-        $name	= str_replace(['[]', '_'], ['', ' '], $element->nicename);
+        $name	= str_replace(['[]', '_'], ['', ' '], $element->name);
         $name	= ucfirst(str_replace(['[', ']'], [': ',''], $name));
 
         $baseUrl	= explode('main-tab=', $_SERVER['REQUEST_URI'])[0];

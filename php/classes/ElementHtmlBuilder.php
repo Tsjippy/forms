@@ -1509,7 +1509,7 @@ class ElementHtmlBuilder extends SubmitForm{
 						'data-target'	=> "$name-$index",
 						'style' 		=> 'margin-right:4px;'
 					],
-					"{$this->element->nicename} $index"
+					"{$this->element->name} $index"
 				);
 
 				// Extra class for each clone-div 

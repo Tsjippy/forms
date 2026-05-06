@@ -122,8 +122,8 @@ class DisplayFormResults extends DisplayForm{
 			}else{
 				$element->type		= 'text';
 			}
-			$element->slug			= $newElement['name'];
-			$element->nicename		= $newElement['nicename'];
+			$element->slug			= $newElement['slug'];
+			$element->name			= $newElement['name'];
 
 			// Add to the front of the array
 			array_unshift($elements, $element);
@@ -736,8 +736,8 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		$this->columnSettings[$element->id] = [
-			'name'				=> $element->slug,
-			'name'			=> empty($element->nicename) ? $element->slug : $element->nicename,
+			'slug'				=> $element->slug,
+			'name'				=> empty($element->name) ? $element->slug : $element->name,
 			'show'				=> 1,
 			'edit_right_roles'	=> [],
 			'view_right_roles'	=> []
@@ -969,7 +969,7 @@ class DisplayFormResults extends DisplayForm{
 			/*
 				Write the content to the cell, convert to something if needed
 			*/
-			$class 			= $columnSetting['name'];
+			$class 			= $columnSetting['slug'];
 
 			$elementName	= $columnSetting['name'];
 
@@ -998,8 +998,8 @@ class DisplayFormResults extends DisplayForm{
 					$value	= $this->submission->{$elementId};
 				}elseif(isset($this->submission->{$elementName})){
 					$value	= $this->submission->{$elementName};
-				}elseif(isset($this->submission->{str_replace('-', '_', $elementName)})){
-					$value	= $this->submission->{str_replace('-', '_', $elementName)};
+				}elseif(isset($this->submission->{$class})){
+					$value	= $this->submission->{$class};
 				}else{
 					$value	= 'X';
 				}
@@ -1225,7 +1225,7 @@ class DisplayFormResults extends DisplayForm{
 				<input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo $this->shortcodeId;?>'>
 				<input type='hidden' class='no-reset' name='form-id' value='<?php echo $this->formData->id;?>'>
 				
-				<table class='tsjippy-table' style='display:table'>
+				<table class='tsjippy table' style='display:table'>
 					<thead class="column-setting-wrapper">
 						<tr>
 							<th class="columnheading formfield-button">Sort</th>
@@ -1903,7 +1903,7 @@ class DisplayFormResults extends DisplayForm{
 		ob_start();
 
 		?>
-		<table class='tsjippy-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>'>
+		<table class='tsjippy table form-data-' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>'>
 			<td>No records found</td>
 		</table>
 
@@ -1927,7 +1927,7 @@ class DisplayFormResults extends DisplayForm{
     			white-space: normal;
 			}
 		</style>
-		<table class='tsjippy-table form-data-table' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>' data-type='<?php echo $type;?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
+		<table class='tsjippy table form-data' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>' data-type='<?php echo $type;?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
 			<?php
 			$this->resultTableHead($type);
 			?>

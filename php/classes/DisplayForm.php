@@ -407,17 +407,17 @@ class DisplayForm extends ElementHtmlBuilder{
 		
 		// loop over all element ids that data should be splitted on
 		foreach($this->formData->split as $splitElementId){
-			// Get the element name
-			$name	= $this->getElementById($splitElementId, 'name');
+			// Get the element slug
+			$slug	= $this->getElementById($splitElementId, 'slug');
 
-			// Find the base name keyword followed by one or more numbers between [] followed by a keyword between []
+			// Find the base slug keyword followed by one or more numbers between [] followed by a keyword between []
 			$pattern	= "/(.*?)\[[0-9]+\]\[([^\]]+)\]/i";
 
-			// This is name matches the pattern
-			if( preg_match($pattern, $name, $matches)){
+			// This slug matches the pattern
+			if( preg_match($pattern, $slug, $matches)){
 				$baseNames[]	= $matches[1];
 			}else{
-				// Splitted element with just normal multiple values name[index]
+				// Splitted element with just normal multiple values slug[index]
 				$elementIds[]	= $splitElementId;
 			}
 		}
