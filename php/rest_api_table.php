@@ -473,9 +473,9 @@ function editValue(){
 	}
 
 	//get transformed value
-	$elementName	= $formTable->getElementById($elementId, ' name' );
+	$elementSlug	= $formTable->getElementById($elementId, 'slug' );
 	$submissions	= $formTable->getSubmissions('', $formTable->submissionId);
-	$transValue		= $formTable->transformInputData($newValue, $elementName, $submissions[0]);
+	$transValue		= $formTable->transformInputData($newValue, $elementSlug, $submissions[0]);
 
 	//send message back to js
 	return [

@@ -81,31 +81,31 @@ class DisplayFormResults extends DisplayForm{
 			// -6 = archived indexes
 			// -7 = hash
 			-4 => [
-				'name'				=> 'time_last_edited',
-				'nicename'			=> 'Last edit time',
+				'slug'				=> 'time_last_edited',
+				'name'			=> 'Last edit time',
 				'type'				=> 'date'
 			],
 			-3 => [
-				'name'				=> 'time_created',
-				'nicename'			=> 'Submission date',
+				'slug'				=> 'time_created',
+				'name'			=> 'Submission date',
 				'type'				=> 'date'
 			],
 			-2 => [
-				'name'				=> 'submitter_id',
-				'nicename'			=> 'Submitted By',
+				'slug'				=> 'submitter_id',
+				'name'			=> 'Submitted By',
 				'type'				=> 'number'
 			],
 			-1 => [
-				'name'				=> 'id',
-				'nicename'			=> 'ID',
+				'slug'				=> 'id',
+				'name'			=> 'ID',
 				'type'				=> 'number'
 			]			
 		];
 
 		if(!empty($this->formData->split)){
 			$this->extraElements[-5] = [
-				'name'				=> 'sub_id',
-				'nicename'			=> 'Sub-Id',
+				'slug'				=> 'sub_id',
+				'name'			=> 'Sub-Id',
 				'type'				=> 'number'
 			];
 		}
@@ -1012,7 +1012,7 @@ class DisplayFormResults extends DisplayForm{
 				$orgFieldValue	= $value;
 
 				$value 			= apply_filters('tsjippy-form-result-table-value', $value, $columnSetting, $this->submission, $this);
-				$value 			= $this->transformInputData($value, $elementName, $this->submission);
+				$value 			= $this->transformInputData($value, $class, $this->submission);
 				
 				//show original email in excel
 				if(gettype($value) == 'string' && str_contains($value, '@')){
@@ -1241,13 +1241,13 @@ class DisplayFormResults extends DisplayForm{
 					<tbody>
 						<?php
 						foreach ($this->columnSettings as $elementIndex => $columnSetting){
-							if(!isset($columnSetting['name'])){
+							if(!isset($columnSetting['slug'])){
 								continue;
 							}
 
-							$niceName	= $columnSetting['name'];
-							if(empty($niceName)){
-								$niceName = ucfirst(str_replace('_', ' ', $columnSetting['name']));
+							$name	= $columnSetting['name'];
+							if(empty($name)){
+								$name = ucfirst(str_replace('-', ' ', $columnSetting['name']));
 							}
 
 							$width		= empty($columnSetting['width']) ? 200 : $columnSetting['width'];
@@ -1262,17 +1262,17 @@ class DisplayFormResults extends DisplayForm{
 							?>
 							<tr class="column-setting-wrapper" data-element-id="<?php echo $elementIndex;?>">
 								<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][column-id]"	value="<?php echo $columnSetting['id'];?>">
-								<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][name]"		value="<?php echo $columnSetting['name'];?>">
+								<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][slug]"		value="<?php echo $columnSetting['slug'];?>">
 								<td>
 									<span class="movecontrol formfield-button" aria-hidden="true">:::</span>
 								</td>
 								<td>
 									<span class="column-settings" style="margin-right:0px;">
-										<?php echo $columnSetting['name'];?>
+										<?php echo $columnSetting['slug'];?>
 									</span>
 								</td>
 								<td>
-									<input type="text" class="column-settings" name="column-settings[<?php echo $elementIndex;?>][nice-name]" value="<?php echo $niceName;?>" style="margin-right:0px;">
+									<input type="text" class="column-settings" name="column-settings[<?php echo $elementIndex;?>][nice-name]" value="<?php echo $name;?>" style="margin-right:0px;">
 								</td>
 								<td>
 									<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][show]" value="<?php echo $columnSetting['show'];?>">
@@ -2276,11 +2276,11 @@ class DisplayFormResults extends DisplayForm{
 						continue;
 					}
 					
-					$niceName			= $columnSetting['name'];
+					$name			= $columnSetting['name'];
 
 					//Determine class for sorting
 					if( 
-						in_array($columnSetting['name'], $this->sortElementIds) ||
+						in_array($columnSetting['slug'], $this->sortElementIds) ||
 						(
 							!empty($columnSetting['elementIds']) &&
 							array_intersect($columnSetting['elementIds'], $this->sortElementIds)
@@ -2299,7 +2299,7 @@ class DisplayFormResults extends DisplayForm{
 						$class	= strtolower($this->sortDirection). ' defaultsort';
 					}
 
-					if(!empty($this->hiddenColumns[$columnSetting['name']])){
+					if(!empty($this->hiddenColumns[$columnSetting['slug']])){
 						$class	.= ' hidden';
 					}
 					$icon			= "<img class='visibility-icon visible' src='".TSJIPPY\PICTURESURL."/visible.png' width=20 height=20 loading='lazy' >";
@@ -2310,9 +2310,9 @@ class DisplayFormResults extends DisplayForm{
 						$style	= "style='max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;'";
 					}
 
-					echo "<th class='$class' id='{$columnSetting['name']}' data-nice-name='$niceName' $style>$niceName $icon</th>";
+					echo "<th class='$class' id='{$columnSetting['slug']}' data-nice-name='$name' $style>$name $icon</th>";
 					
-					$excelRow[]	= $niceName;
+					$excelRow[]	= $name;
 				}
 				
 				//write header to excel

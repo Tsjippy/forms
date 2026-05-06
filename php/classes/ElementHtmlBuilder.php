@@ -355,12 +355,12 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * Transforms a given string to hyperlinks or other formats
 	 *
 	 * @param 	string	$string			the string to convert
-	 * @param	string	$elementName	The name of the element the string value belongs to
+	 * @param	string	$elementSlug	The slug of the element the string value belongs to
 	 * @param	object	$submission		The submission this string belongs to
 	 *
 	 * @return	string					The transformed string
 	 */
-	public function transformInputData($string, $elementName, $submission){
+	public function transformInputData($string, $elementSlug, $submission){
 		if(empty($string)){
 			return $string;
 		}
@@ -373,7 +373,7 @@ class ElementHtmlBuilder extends SubmitForm{
 				if(!empty($output)){
 					$output .= "<br>";
 				}
-				$output .= $this->transformInputData($sub, $elementName, $submission);
+				$output .= $this->transformInputData($sub, $elementSlug, $submission);
 			}
 			return $output;
 		}
@@ -454,7 +454,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			}
 		}
 	
-		$output = apply_filters('tsjippy_transform_formtable_data', $output, $elementName);
+		$output = apply_filters('tsjippy_transform_formtable_data', $output, $elementSlug);
 		return $output;
 	}
 
