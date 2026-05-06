@@ -8,6 +8,7 @@
 - ->formId to ->formData->id
 
 ### Fixed
+- use slug and not name
 
 ### Updated
 
