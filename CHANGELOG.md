@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- form to slug
 
 ### Fixed
 
