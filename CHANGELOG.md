@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- do not use formData->name instead of ->formName
 
 ### Fixed
 
