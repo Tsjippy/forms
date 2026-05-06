@@ -9,6 +9,7 @@
 
 ### Fixed
 - use slug and not name
+- transform by slug
 
 ### Updated
 
