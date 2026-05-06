@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- form to slug
 
 ### Fixed
 
 ### Updated
+
+## [11.0.5] - 2026-05-06
+
+
+### Changed
+- form to slug
 
 ## [11.0.4] - 2026-05-05
 
