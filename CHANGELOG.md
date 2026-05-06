@@ -4,14 +4,21 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.0.7] - 2026-05-06
+
+
+### Changed
 - do not use formData->name instead of ->formName
 - ->formId to ->formData->id
 
 ### Fixed
 - use slug and not name
 - transform by slug
-
-### Updated
 
 ## [11.0.6] - 2026-05-06
 
