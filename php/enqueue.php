@@ -6,14 +6,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-function checkFormExistence($formName){
-    $forms    = new Forms();
+/**
+ * Checks if a form exists
+ * @param   string  $slug   The form slug or form name
+ */
+function checkFormExistence($slug){
+    $slug   = strtolower(str_replace(' ', '-', $slug));
+    $forms  = new Forms();
     $forms->getForms();
 
     // check if a form with this slug already exists
     $found  = false;
     foreach($forms->forms as $form){
-        if($form->slug == $formName){
+        if($form->slug == $slug){
             $found  = true;
             break;
         }
@@ -21,12 +26,12 @@ function checkFormExistence($formName){
 
     // Only add a new form if it does not exist yet
     if(!$found){
-        $forms->insertForm($formName);
+        $forms->insertForm($slug);
 
         return $forms->formName;
     }
 
-    return $formName;
+    return $slug;
 }
 
 add_action( 'wp_after_insert_post', __NAMESPACE__.'\afterInsertPost', 10, 2);
@@ -61,6 +66,9 @@ function afterInsertPost($postId, $post){
                     $formName       = shortcode_parse_atts($shortcode[3])['formname'];
                     if(empty($formName)){
                         $formName       = shortcode_parse_atts($shortcode[3])['name'];
+                    }
+                    if(empty($formName)){
+                        $formName       = shortcode_parse_atts($shortcode[3])['slug'];
                     }
 
                     $newFormName    = checkFormExistence($formName);

@@ -25,6 +25,7 @@ class Forms{
 	public $showArchived;
 	public $editRights;
 	public $formName;
+	public string $formSlug;
 	public $formData;
 	public $forms;
 	public $formId;
@@ -455,10 +456,10 @@ class Forms{
 		global $wpdb;
 
 		if(empty($slug)){
-			$name = $this->formName;
+			$slug = $this->formName;
 		}
 
-		$slug	= strtolower($slug);
+		$slug	= str_replace(' ', '-', strtolower($slug));
 
 		// Check if name already exists
 		$newName	= $slug;
@@ -471,7 +472,7 @@ class Forms{
 				break;
 			}
 
-			$newName	= "$name$i";
+			$newName	= "$slug$i";
 			$i++;
 		}
 
@@ -707,8 +708,8 @@ class Forms{
 				$this->formData->id	!= $this->formId
 			)	||
 			(
-				!empty($this->formName)		&&
-				$this->formData->slug	!= $this->formName
+				!empty($this->formSlug)		&&
+				$this->formData->slug	!= $this->formSlug
 			)	||
 			(
 				empty($this->formId)		&&
@@ -721,8 +722,8 @@ class Forms{
 				$query	.= "id= '$formId'";
 			}elseif(is_numeric($this->formId)){
 				$query	.= "id= '$this->formId'";
-			}elseif(!empty($this->formName)){
-				$query	.= "name= '$this->formName'";
+			}elseif(!empty($this->formSlug)){
+				$query	.= "slug= '$this->formSlug'";
 			}else{
 				return new \WP_Error('forms', 'No form name or id given');
 			}
@@ -1183,6 +1184,7 @@ class Forms{
 		if(!isset($this->formName)){
 			$atts	= shortcode_atts(
 				array(
+					'slug'			=> '',
 					'formname'		=> '',
 					'form-name'		=> '',
 					'name'			=> '',
@@ -1208,6 +1210,10 @@ class Forms{
 				}else{
 					$atts['form-name']	= $atts['name'];
 				}
+			}
+
+			if(empty($atts['slug'])){
+				$atts['slug']	= str_replace(' ', '-', strtolower($atts['form-name']));
 			}
 
 			if(empty($atts['user-id'])){
@@ -1250,7 +1256,8 @@ class Forms{
 				$this->userId	= $atts['user-id'];
 			}
 
-			$this->formName 	= strtolower(sanitize_text_field($atts['form-name']));
+			$this->formName 	= sanitize_text_field($atts['form-name']);
+			$this->formSlug 	= sanitize_text_field($atts['slug']);
 			$this->formId		= sanitize_text_field($atts['form-id']);
 
 			$this->getForm();
