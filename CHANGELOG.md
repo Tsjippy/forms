@@ -7,6 +7,7 @@
 - replaced sweetalert
 
 ### Fixed
+- reset table visibility
 
 ### Updated
 
