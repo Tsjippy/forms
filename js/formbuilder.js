@@ -366,17 +366,11 @@ async function reorderformelements(event){
 			Main.displayMessage(response);
 		}
 	}else{
-		let options = {
-			icon: 'error',
-			title: 'ordering already in progress, please wait',
-			confirmButtonColor: "#bd2919",
+		let options	= {
+			title: 'Ordering already in progress, please wait',
 		};
 
-		if(document.fullscreenElement != null){
-			options['target']	= document.fullscreenElement;
-		}
-
-		Swal.fire(options);
+		new Main.Alert(text+"?", 'error', options);
 	}
 }
 
@@ -531,29 +525,16 @@ function showOrHideName(target){
 	window.history.pushState({}, '', url);
 }
 
-function maybeRemoveElement(target){
-	if(typeof(Swal)=='undefined'){
+async function maybeRemoveElement(target){
+	let options	= {
+		title: 'Are you sure?',
+		ConfirmButtonText: 'Yes, delete it!'
+	};
+
+	let response = await new Main.Alert("This will remove this element", 'warning', options);
+
+	if (response == 'confirm') {
 		removeElement(target);
-	}else{
-		let options = {
-			title: 'Are you sure?',
-			text: "This will remove this element",
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonColor: '#3085d6',
-			cancelButtonColor: '#d33',
-			confirmButtonText: 'Yes, delete it!'
-		}
-
-		if(document.fullscreenElement != null){
-			options['target']	= document.fullscreenElement;
-		}
-
-		Swal.fire(options).then((result) => {
-			if (result.isConfirmed) {
-				removeElement(target);
-			}
-		})
 	}
 }
 
@@ -614,26 +595,19 @@ async function addConditionRule(target){
 				opposite	= 'OR';
 			}
 
-			let options = {
+			let options	= {
 				title: 'What do you want to do?',
-				showDenyButton: true,
-				showCancelButton: true,
-				confirmButtonText: `Change ${current} to ${opposite}`,
-				denyButtonText: 'Add a new rule',
+				ConfirmButtonText: `Change ${current} to ${opposite}`,
+				CustomButtonText: `Add a new rule`,
 			};
-	
-			if(document.fullscreenElement != null){
-				options['target']	= document.fullscreenElement;
-			}
-			
-			result	= await Swal.fire(options)
 
-			//swap and/or
-			if (result.isConfirmed) {
+			let response = await new Main.Alert("This will remove this element", 'warning', options);
+
+			if (response == 'confirm') {
 				//make other button inactive
 				activeButton.classList.remove('active');
 			//add new rule after this one
-			}else if (result.isDenied) {
+			}else if (response == 'custom') {
 				addRuleRow(row);
 				makeActive	= false;
 			}
@@ -675,7 +649,7 @@ function addRuleRow(row){
 function addOppositeCondition(clone, target){
 	//Set values to opposite
 	clone.querySelectorAll('.element-condition').forEach(function(el){
-		if(el.matches('select:not(.nonice,.swal2-select)')){
+		if(el.matches('select:not(.nonice)')){
 			Main.attachNiceSelect(select);
 		}
 		
@@ -770,75 +744,58 @@ function addCondition(target){
 	target.style.display = 'none';
 }
 
-function removeConditionRule(target){
+async function removeConditionRule(target){
 	let conditionRow = target.closest('.condition-row');
 	
 	//count rule rows in this condition row
 	if(conditionRow.querySelectorAll('.rule-row').length > 1){
-		let options = {
+		let options	= {
 			title: 'What do you want to remove?',
-			showDenyButton: true,
-			showCancelButton: true,
-			confirmButtonText: `One condition rule`,
-			denyButtonText: `The whole condition`,
-			confirmButtonColor: "#bd2919",
+			ConfirmButtonText: `One condition rule`,
+			CustomButtonText: `The whole condition`,
 		};
 
-		if(document.fullscreenElement != null){
-			options['target']	= document.fullscreenElement;
-		}
+		let response = await new Main.Alert("This will remove this element", 'warning', options);
 
-		Swal.fire(options).then((result) => {
-			//remove a rule rowe
-			if (result.isConfirmed) {
-				//get the current row
-				let ruleRow		= target.closest('.rule-row');
-				
-				//get the current row index
-				let ruleRowIndex	= parseInt(ruleRow.dataset.ruleIndex);
-				
-				//Get previous row
-				let prevRow		= conditionRow.querySelector('[data-rule-index="'+(ruleRowIndex - 1)+'"]');
-				
-				if(prevRow != null){
-					//remove the active class from row above if there is no row after this one
-					if(conditionRow.querySelector(`[data-rule-index="${ruleRowIndex + 1}"]`) == null){
-						prevRow.querySelectorAll('.active').forEach(el=>el.classList.remove('active'));
-					}
-					
-					//clear the hidden input
-					prevRow.querySelector('.combinator').value	= '';
+		if (response == 'confirm') {
+			//get the current row
+			let ruleRow		= target.closest('.rule-row');
+			
+			//get the current row index
+			let ruleRowIndex	= parseInt(ruleRow.dataset.ruleIndex);
+			
+			//Get previous row
+			let prevRow		= conditionRow.querySelector('[data-rule-index="'+(ruleRowIndex - 1)+'"]');
+			
+			if(prevRow != null){
+				//remove the active class from row above if there is no row after this one
+				if(conditionRow.querySelector(`[data-rule-index="${ruleRowIndex + 1}"]`) == null){
+					prevRow.querySelectorAll('.active').forEach(el=>el.classList.remove('active'));
 				}
 				
-				target.closest('.rule-row').remove();
-				
-				fixRuleNumbering(conditionRow);
-			} else if (result.isDenied) {
-				conditionRow.remove();
-				fixConditionNumbering();
+				//clear the hidden input
+				prevRow.querySelector('.combinator').value	= '';
 			}
-		});
+			
+			target.closest('.rule-row').remove();
+			
+			fixRuleNumbering(conditionRow);
+		} else if (response == 'custom') {
+			conditionRow.remove();
+			fixConditionNumbering();
+		}
 	}else{
-		let options = {
+		let options	= {
 			title: 'Are you sure?',
-			text: "This will remove this condition",
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonColor: "#bd2919",
-			cancelButtonColor: '#d33',
-			confirmButtonText: 'Yes, delete it!'
+			ConfirmButtonText: `Yes, delete it!`
 		};
 
-		if(document.fullscreenElement != null){
-			options['target']	= document.fullscreenElement;
-		}
+		let response = await new Main.Alert("This will remove this condition", 'warning', options);
 
-		Swal.fire(options).then((result) => {
-			if (result.isConfirmed) {
-				conditionRow.remove();
-				fixConditionNumbering();
-			}
-		});
+		if (response == 'confirm') {
+			conditionRow.remove();
+			fixConditionNumbering();
+		}
 	}
 }
 
@@ -945,18 +902,13 @@ function placeholderSelect(target){
 	}
 	
 	if(value != ''){
-		let options = {
-			icon: 'success',
-			title: 'Copied '+value,
-			showConfirmButton: false,
+		let options	= {
+			title: 'Success',
+			ConfirmButtonText: `Yes, delete it!`,
 			timer: 1500
 		};
 
-		if(document.fullscreenElement != null){
-			options['target']	= document.fullscreenElement;
-		}
-
-		Swal.fire(options);
+		new Main.Alert('Copied '+value, 'success', options);
 
 		navigator.clipboard.writeText(value);
 	}

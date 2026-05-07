@@ -35,26 +35,16 @@ async function saveTableSettings(target){
 }
 
 async function askConfirmation(text){
+
 	let options	= {
-		title: 'Are you sure?',
-		text: `Are you sure you want to ${text} this?`,
-		icon: 'warning',
-		showCancelButton: true,
-		confirmButtonColor: "#bd2919",
-		cancelButtonColor: '#d33',
-		confirmButtonText: `Yes, ${text} it!`,
+		title: `Are you sure?`,
+		ConfirmButtonText: `Yes, ${text} it!`,
+		CancelButtonText: 'Cancel'
 	};
 
-	if(document.fullscreenElement != null){
-		options['target']	= document.fullscreenElement;
-	}
+	let response = await new Main.Alert(`Are you sure you want to ${text} this?`, 'question', options);
 
-	let result	= await Swal.fire(options);
-
-
-	document.fullscreenElement
-
-	return result.isConfirmed;
+	return response == 'confirm';
 }
 
 async function removeSubmission(target){
@@ -83,7 +73,6 @@ async function archiveSubmission(target){
 	let table			= target.closest('table');
 	let tableRow		= target.closest('tr');
 	let submissionId	= tableRow.dataset.submissionId;
-	let showSwal		= true;
 	let action			= target.value;
 	let response;
 
@@ -94,39 +83,27 @@ async function archiveSubmission(target){
 	
 	// Ask whether to archive one piece or the whole
 	if(tableRow.dataset.subid != undefined){
-		showSwal = false;
 
 		let options	= {
 			title: `What do you want to ${action}?`,
-			text: `Do you want to ${action} just this one or the whole request?`,
-			icon: 'question',
-			showDenyButton: true,
-			showCancelButton: true,
-			confirmButtonText: 'Just this one',
-			denyButtonText: 'The whole request',
-			confirmButtonColor: "#bd2919"
+			ConfirmButtonText: 'Just this one',
+			CancelButtonText: 'Cancel',
+			CancelButtonPosition:3,
+			CustomButtonText: 'The whole request',
+			CustomButtonPosition: 2
 		};
-	
-		if(document.fullscreenElement != null){
-			options['target']	= document.fullscreenElement;
-		}
-		
-		response = await Swal.fire(options);
 
-		if (response.isConfirmed) {
+		response = await new Main.Alert(`Do you want to ${action} just this one or the whole request?`, 'question', options);
+
+		if (response == 'custom') {
 			formData.append('subid', tableRow.dataset.subid);
-		}
-		
-		// skip if denied
-		if(response.isDismissed){
+		}else if(response == 'cancel'){
 			return;
 		}
 	}
 	
-	if(showSwal){
-		if(!await askConfirmation(action)){
-			return;
-		}
+	if(!await askConfirmation(action)){
+		return;
 	}
 
 	//display loading gif
@@ -363,7 +340,7 @@ async function getPage(target, action){
 			}
 		}
 
-		document.querySelectorAll('select:not(.nonice,.swal2-select)').forEach(select => Main.attachNiceSelect(select));
+		document.querySelectorAll('select:not(.nonice)').forEach(select => Main.attachNiceSelect(select));
 	}else{
 		// restore prev data
 		wrapper.innerHTML	= orgContent;
@@ -497,14 +474,13 @@ async function processFormsTableInput(target){
 const copyContent = async (target) => {
 	let text	= target.closest('td').innerText;
     try {
-		let options = {
-			icon: 'success',
-			title: `Copied '${text}'`,
-			showConfirmButton: false,
+		let options	= {
+			title: `Success`,
+			ConfirmButtonText: `Yes, delete it!`,
 			timer: 3000
 		};
 
-		Swal.fire(options);
+		new Main.Alert(`Copied '${text}'`, 'success', options);
 
 		navigator.clipboard.writeText(text);
     } catch (err) {

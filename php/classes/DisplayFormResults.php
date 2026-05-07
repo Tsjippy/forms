@@ -1153,7 +1153,7 @@ class DisplayFormResults extends DisplayForm{
 
 		if(!empty($rowContents)){
 			?>
-			<tr class='table-row' data-submission-id='<?php echo esc_attr($this->submission->id);?>' >
+			<tr class='table-row' data-submission-id='<?php echo esc_attr($this->submission->id);?>' <?php if(isset($this->submission->sub_id)){echo esc_attr("data-subid={$this->submission->sub_id}");}?> >
 				<?php
 				echo $rowContents;
 				if(!empty($buttons)){
