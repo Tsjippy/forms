@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.0.8] - 2026-05-07
+
+
+### Changed
 - replaced sweetalert
 
 ### Fixed
 - reset table visibility
-
-### Updated
 
 ## [11.0.7] - 2026-05-06
 
