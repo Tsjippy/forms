@@ -574,9 +574,7 @@ document.addEventListener("click", event=>{
 		target.closest('div').querySelector('.permission-wrapper').classList.toggle('hidden');
 	}
 
-	else if(target.matches('.reset-col-vis')){
-		showHiddenColumns(target);
-	}else{
+	else{
 		return;
 	}
 
@@ -672,3 +670,5 @@ document.addEventListener("table-sorted", async event => {
 		getPage(target, 'sort');
 	}
 });
+
+document.addEventListener("column-visibility-reset", event => showHiddenColumns(event.target));
