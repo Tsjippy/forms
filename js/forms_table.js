@@ -461,7 +461,7 @@ async function processFormsTableInput(target){
 				cell.innerHTML = newValue;
 			}
 	
-			Main.displayMessage(response.message.replace('_', ' '));
+			Main.displayMessage(response.message.replace('_', ' '), 'success', 2000);
 
 			return;
 		}

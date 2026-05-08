@@ -111,7 +111,7 @@ class DisplayFormResults extends DisplayForm{
 		}
 
 		foreach($this->extraElements as $id => $newElement){
-			if(isset($this->formData->elementMapping['id'][$id])){
+			if(isset($this->elementMapping['id'][$id])){
 				continue;
 			}
 			$element 				= new \stdClass();
@@ -1202,7 +1202,7 @@ class DisplayFormResults extends DisplayForm{
 			if(
 				is_numeric($setting['element_id']) && 
 				$setting['element_id']	> -1 &&
-				!isset($this->formData->elementMapping['id'][$setting['element_id']])
+				!isset($this->elementMapping['id'][$setting['element_id']])
 			){
 				continue;
 			}

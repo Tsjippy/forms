@@ -25,6 +25,7 @@ class Forms{
 	public $showArchived;
 	public $editRights;
 	public $formData;
+	public array $elementMapping;
 	public $forms;
 	public $formId;
 	public $formElements;
@@ -847,8 +848,8 @@ class Forms{
 		if(
 			empty($this->formData) || 
 			(
-				isset($this->formData->elementMapping) && 
-				!empty($this->formData->elementMapping['type']) && 
+				isset($this->elementMapping) && 
+				!empty($this->elementMapping['type']) && 
 				!$force
 			)
 		){
@@ -856,16 +857,16 @@ class Forms{
 		}
 
 		//used to find the index of an element based on its unique id, type or name
-		$this->formData->elementMapping									= [];
-		$this->formData->elementMapping['type']							= [];
-		$this->formData->elementMapping['slug']							= [];
+		$this->elementMapping									= [];
+		$this->elementMapping['type']							= [];
+		$this->elementMapping['slug']							= [];
 
 		$this->getAllFormElements('priority', $this->formData->id, true);
 
 		foreach($this->formElements as $index => $element){
-			$this->formData->elementMapping['id'][$element->id]			= $index;
-			$this->formData->elementMapping['slug'][$element->slug][] 	= $index;
-			$this->formData->elementMapping['type'][$element->type][] 	= $index;
+			$this->elementMapping['id'][$element->id]			= $index;
+			$this->elementMapping['slug'][$element->slug][] 	= $index;
+			$this->elementMapping['type'][$element->type][] 	= $index;
 		}
 	}
 
@@ -912,11 +913,11 @@ class Forms{
 		}
 		
 		//load if needed
-		if(empty($this->formData->elementMapping)){
+		if(empty($this->elementMapping)){
 			$this->getForm();
 		}
 		
-		if(!isset($this->formData->elementMapping['id'][$id])){
+		if(!isset($this->elementMapping['id'][$id])){
 			$this->elementMapper(true);
 
 			$url	= get_page_link($post);
@@ -924,7 +925,7 @@ class Forms{
 			TSJIPPY\printArray("Element with id '$id' not found on form '{$this->formData->slug}' with id  '{$this->formData->id}' on page $url", false);
 			return false;
 		}
-		$elementIndex	= $this->formData->elementMapping['id'][$id];
+		$elementIndex	= $this->elementMapping['id'][$id];
 					
 		$element		= $this->formElements[$elementIndex];
 		if(empty($element)){
@@ -955,7 +956,7 @@ class Forms{
 		}
 		
 		//load if needed
-		if(empty($this->formData->elementMapping)){
+		if(empty($this->elementMapping)){
 			$result	= $this->getForm();
 
 			if(is_wp_error($result)){
@@ -963,14 +964,14 @@ class Forms{
 			}
 		}
 
-		if(!isset($this->formData->elementMapping['slug'][slug])){
+		if(!isset($this->elementMapping['slug'][$slug])){
 			// first part of the name, remove anything after [
 			$slugNew	= explode('[', $slug)[0];
 
-			if(isset($this->formData->elementMapping['name'][$slugNew])){
+			if(isset($this->elementMapping['name'][$slugNew])){
 				// remove '[]'
 				$slug	.= $slugNew;
-			}elseif(isset($this->formData->elementMapping['name'][$slug.'[]'])){
+			}elseif(isset($this->elementMapping['name'][$slug.'[]'])){
 				// add []
 				$slug	.= '[]';
 			}elseif(!empty($this->formData->split)){
@@ -994,7 +995,7 @@ class Forms{
 				return false;
 			}
 		}
-		$elementIndexes	= $this->formData->elementMapping['slug'][$slug];
+		$elementIndexes	= $this->elementMapping['slug'][$slug];
 	
 		$elements		= [];
 		
@@ -1031,7 +1032,7 @@ class Forms{
 		}
 		
 		//load if needed
-		if(empty($this->formData->elementMapping['type']) && $load){
+		if(empty($this->elementMapping['type']) && $load){
 			$result	= $this->getForm();
 
 			if(is_wp_error($result)){
@@ -1039,12 +1040,12 @@ class Forms{
 			}
 		}
 
-		if(!isset($this->formData->elementMapping['type'][$type])){
+		if(!isset($this->elementMapping['type'][$type])){
 			//TSJIPPY\printArray("Element with id $type not found");
 			return false;
 		}
 		
-		$elementIndexes	= $this->formData->elementMapping['type'][$type];
+		$elementIndexes	= $this->elementMapping['type'][$type];
 
 		$elements		= [];
 		
