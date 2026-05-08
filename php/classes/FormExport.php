@@ -186,13 +186,23 @@ class FormExport extends FormBuilderForm{
 			if(!empty($email->submitted_trigger)){
 				$triggers	= maybe_unserialize($email->submitted_trigger);
 
-				foreach($triggers as &$trigger){
-					if(is_numeric($trigger['element'])){
-						$trigger['element']	= $elementIdMapping[$trigger['element']];
+				if(isset($triggers['element'])){
+					if(is_numeric($triggers['element'])){
+						$trigger['elements']	= $elementIdMapping[$trigger['element']];
 					}
 
-					if(is_numeric($trigger['valueelement'])){
-						$trigger['valueelement']	= $elementIdMapping[$trigger['valueelement']];
+					if(is_numeric($triggers['valueelement'])){
+						$triggers['valueelement']	= $elementIdMapping[$trigger['valueelement']];
+					}
+				}else{
+					foreach($triggers as &$trigger){
+						if(is_numeric($trigger['element'])){
+							$trigger['element']	= $elementIdMapping[$trigger['element']];
+						}
+
+						if(is_numeric($trigger['valueelement'])){
+							$trigger['valueelement']	= $elementIdMapping[$trigger['valueelement']];
+						}
 					}
 				}
 
