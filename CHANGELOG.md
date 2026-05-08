@@ -7,6 +7,7 @@
 - js update
 
 ### Fixed
+- account page retrieval
 
 ### Updated
 
