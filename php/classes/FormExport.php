@@ -302,6 +302,10 @@ class FormExport extends FormBuilderForm{
 				// Form data
 				$object->url	= $url;
 
+				if(empty($this->formData)){
+					$this->formData	= new stdClass();
+				}
+
 				$this->formData->id 	= $this->insertOrUpdateData($this->tableName, $object);
 
 				if(is_wp_error($this->formData->id)){
