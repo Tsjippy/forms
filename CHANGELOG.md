@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- show submissions without split on slitted forms
 
 ### Updated
+
+## [11.1.0] - 2026-05-08
+
+
+### Fixed
+- show submissions without split on slitted forms
 
 ## [11.0.9] - 2026-05-08
 
