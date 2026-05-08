@@ -344,7 +344,7 @@ class DisplayFormResults extends DisplayForm{
 			return;
 		}
 
-		$innerJoinString	= "\n\tINNER JOIN SubIdValues as V ON E.id = V.Sid";
+		$innerJoinString	= "\n\tLEFT JOIN SubIdValues as V ON E.id = V.Sid";
 
 		$ect 			   	= ",\nSubIdValues AS (\n\tSELECT \n\t\tid AS Sid, \n\t\tsub_id,\n\t\t";
 

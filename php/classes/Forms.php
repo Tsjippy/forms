@@ -34,7 +34,7 @@ class Forms{
 	public $shortcodeId;
 	public $onlyOwn;
 	public $all;
-	public $submission;
+	public object $submission;
 	public $submissions;
 	public $tableName;
 	public $formReminderTable;
@@ -944,11 +944,11 @@ class Forms{
 	/**
 	 * Finds an element by its slug
 	 *
-	 * @param	string	$slug	The element slug
-	 * @param	string	$key	A specific element attribute to return. Default empty
-	 * @param	bool	$single	Wheter to return a singel element, default true
+	 * @param	string	$slug				The element slug
+	 * @param	string	$key				A specific element attribute to return. Default empty
+	 * @param	bool	$single				Wheter to return a singel element, default true
 	 *
-	 * @return	object|array|string|false			The element or an array of elements or an element property of false if not found
+	 * @return	object|array|string|false	The element or an array of elements or an element property of false if not found
 	 */
 	public function getElementBySlug($slug, $key='', $single=true){
 		if(empty($slug)){
@@ -968,10 +968,10 @@ class Forms{
 			// first part of the name, remove anything after [
 			$slugNew	= explode('[', $slug)[0];
 
-			if(isset($this->elementMapping['name'][$slugNew])){
+			if(isset($this->elementMapping['slug'][$slugNew])){
 				// remove '[]'
 				$slug	.= $slugNew;
-			}elseif(isset($this->elementMapping['name'][$slug.'[]'])){
+			}elseif(isset($this->elementMapping['slug'][$slug.'[]'])){
 				// add []
 				$slug	.= '[]';
 			}elseif(!empty($this->formData->split)){

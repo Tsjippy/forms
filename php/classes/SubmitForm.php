@@ -9,8 +9,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class SubmitForm extends SaveFormSettings{
-	public $submission;
-
 	public function __construct($formData=''){
 		parent::__construct();
 		
@@ -59,7 +57,12 @@ class SubmitForm extends SaveFormSettings{
 	}
 
 	/**
-	 * check if an e-mail should be send
+	 * Check if an e-mail should be send
+	 * 
+	 * @param	object	$email		The e-mail data
+	 * @param	string	$trigger	The trigger string
+	 * 
+	 * @return	bool				False if no match ture otherwise
 	 */
 	private function checkEmailConditions($email, $trigger){
 		if(
@@ -233,6 +236,7 @@ class SubmitForm extends SaveFormSettings{
 				$headers[]	= "Reply-To: $from";
 			}
 			
+			$files		= [];
 			if(is_string($email->files)){
 				$files		= $this->processPlaceholders($email->files, $replaceValues);
 
@@ -269,6 +273,9 @@ class SubmitForm extends SaveFormSettings{
 
 	/**
 	 * Rename any existing files to include the form id.
+	 * 
+	 * @param	array	$uploadedFiles		The array of filepaths
+	 * @param	string	$inputName			The name for the file
 	 */
 	public function processFiles($uploadedFiles, $inputName){
 		//loop over all files uploaded in this fileinput
@@ -322,11 +329,11 @@ class SubmitForm extends SaveFormSettings{
 		// loop over all split elements
 		foreach($this->formData->split as $index => $id){
 			// get the name of the split element
-			$name	= $this->getElementById($id, 'name');
+			$slug	= $this->getElementById($id, 'slug');
 
 			// Check if we are dealing with an split element with form name[X]name
 			if(
-				preg_match('/(.*?)\[[0-9]\](\[.*?\])/', $name, $matches) && 
+				preg_match('/(.*?)\[[0-9]\](\[.*?\])/', $slug, $matches) && 
 				isset($matches[1]) && 
 				is_array($formresults[$matches[1]])
 			){
@@ -334,21 +341,21 @@ class SubmitForm extends SaveFormSettings{
 				$results = TSJIPPY\cleanUpNestedArray($formresults[$matches[1]]);
 
 				// loop over all the sub entries of the split field to see if they are empty
-				foreach($results as $index => $subValues){
+				foreach($results as $in => $subValues){
 					foreach($subValues as $subKey => $subValue){
 						if(empty($subValue)){
 							continue;
 						}
 
 						// Find the element id
-						$elementId	= $this->getElementBySlug($matches[1]."[$index][$subKey]", 'id');
+						$elementId	= $this->getElementBySlug($matches[1]."[$in][$subKey]", 'id');
 
 						// insert the value
 						$wpdb->insert(
 							$this->submissionValuesTableName,
 							[
 								'submission_id' => $this->submission->id,
-								'sub_id'        => $index,
+								'sub_id'        => $in,
 								'element_id'    => $elementId,
 								'value'         => maybe_serialize($subValue)
 							],
@@ -369,12 +376,12 @@ class SubmitForm extends SaveFormSettings{
 			// single value for the split entry
 			else{
 				// loop over all the sub entries of the split field to see if they are empty
-				foreach($formresults[$name] as $key => $subValue){
+				foreach($formresults[$slug] as $key => $subValue){
 					if(empty($subValue)){
 						continue;
 					}
 
-					$elementId = $this->getElementBySlug($name.'['.$key.']', 'id');
+					$elementId = $this->getElementBySlug($slug.'['.$key.']', 'id');
 
 					$wpdb->insert(
 						$this->submissionValuesTableName,
@@ -393,13 +400,19 @@ class SubmitForm extends SaveFormSettings{
 					);
 				}
 
-				unset($formresults[$name]);
+				unset($formresults[$slug]);
 			}
 		}
 	}
 
 	/**
 	 * Save a form submission to the submission table
+	 * 
+	 * @param	array	$formresults	the form result from post
+	 * @param	string	$formUrl		The url of the form
+	 * @param	string	$message		The message passed by reference to adjust
+	 * 
+	 * @return	WP_Error|true			The error if one exists or true
 	 */
 	public function saveToSubmissionTable($formresults, $formUrl, &$message){
 		global $wpdb;
@@ -478,14 +491,19 @@ class SubmitForm extends SaveFormSettings{
 		if($wpdb->last_error !== ''){
 			$message	=  new \WP_Error('error', $wpdb->last_error);
 		}elseif(empty($this->formData->include_id) || $this->formData->include_id){
-			$message	.= "\nYour id is {$this->submission->id}";
+			$message	.= "<br>Your id is {$this->submission->id}";
 		}
+
+		return true;
 	}
 
 	/**
 	 * Saves a submission to the user meta table
+	 * @param	array	$formresults	The form results to be saved
 	 */
 	public function saveToUserMetaTable($formresults){
+		$updateuserData	= false;
+
 		//get user data as array
 		$userData		= (array)get_userdata($this->userId)->data;
 		foreach($formresults as $key => &$result){
@@ -544,6 +562,8 @@ class SubmitForm extends SaveFormSettings{
 		if($updateuserData){
 			wp_update_user($userData);
 		}
+
+		return true;
 	}
 
 	/**
@@ -552,7 +572,7 @@ class SubmitForm extends SaveFormSettings{
 	public function formSubmit(){
 		$this->submission					= new \stdClass();
 
-		$this->submission->form_id			= $_POST['form-id'];
+		$this->submission->form_id			= (int) $_POST['form-id'];
 		
 		$this->getForm($this->submission->form_id);
 
