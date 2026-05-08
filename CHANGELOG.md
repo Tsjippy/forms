@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.1.2] - 2026-05-08
+
+
+### Changed
 - js update
 
 ### Fixed
 - account page retrieval
-
-### Updated
 
 ## [11.1.1] - 2026-05-08
 
