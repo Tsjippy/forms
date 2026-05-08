@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- show submissions without split on slitted forms
 
 ### Updated
 
