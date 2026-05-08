@@ -6,7 +6,6 @@
 ### Changed
 
 ### Fixed
-- form email import
 
 ### Updated
 
