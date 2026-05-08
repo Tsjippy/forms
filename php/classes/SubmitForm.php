@@ -579,7 +579,13 @@ class SubmitForm extends SaveFormSettings{
 		// The user id of the current user
 		$this->userId						= $this->user->ID;
 
-		$userId								= $_POST['user_id'] ? $_POST['user_id'] : $_POST['user-id'];
+		$userId	= '';
+		foreach(['user-id', 'userid', 'user_id'] as $key){
+			if(isset($_POST[$key])){
+				$userId	= (int) $_POST[$key];
+				break;
+			}
+		}
 
 		// Check if we are submitting for another user
 		if(is_numeric($userId)){
