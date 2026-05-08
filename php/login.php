@@ -13,19 +13,22 @@ function loginRedirect($redirect, $requestedRedirect, $user){
         return $redirect;
     }
 
-    $accountPage  = TSJIPPY\ADMIN\getDefaultPageLink('usermanagement', 'account_page');
+    $url			= false;
+    if(defined('TSJIPPY\USERMANAGEMENT\SETTINGS') && !empty(TSJIPPY\USERMANAGEMENT\SETTINGS['account_page'])){
+        $url			= get_permalink(TSJIPPY\USERMANAGEMENT\SETTINGS['account_page']);
+    }
 
-    if( empty($accountPage)){
+    if( !$url){
         return $redirect;
     }
 
     // Get mandatory or recommended fields
     $forms      = new FormReminders();
-    $fieldList  = $forms->getUserFormReminders($user->ID, 'all');
+    $fieldList  = $forms->getUserFormReminders($user->ID);
 
     //redirect to account page to fill in required fields
     if (!empty($fieldList)){
-        $redirect   = $accountPage;
+        $redirect   = $url;
     }
 
     return $redirect;
