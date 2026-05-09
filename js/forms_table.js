@@ -1,3 +1,5 @@
+import Sortable from 'sortablejs';
+
 /**
  * We need to be carefull with this script as it has overlap with the main table.js
  */
@@ -582,18 +584,15 @@ document.addEventListener("click", event=>{
 });
 
 document.addEventListener("DOMContentLoaded", function() {
-	
-	if(typeof(Sortable) != 'undefined'){
-		//Make the sortable-column-settings-rows div sortable
-		let options = {
-			handle: '.movecontrol',
-			animation: 150,
-		};
+	//Make the sortable-column-settings-rows div sortable
+	let options = {
+		handle: '.movecontrol',
+		animation: 150,
+	};
 
-		document.querySelectorAll('.sortable-column-settings-rows tbody').forEach(el=>{
-			Sortable.create(el, options);
-		});
-	}
+	document.querySelectorAll('.sortable-column-settings-rows tbody').forEach(el=>{
+		Sortable.create(el, options);
+	});
 
 	document.querySelectorAll('.form-data.table th').forEach(cell=>{
 		cell.style.minWidth		= parseFloat(window.getComputedStyle(cell).width) + 20 + 'px';

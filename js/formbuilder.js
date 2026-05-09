@@ -1,3 +1,5 @@
+import Sortable from 'sortablejs';
+
 var reorderingBusy, formWrapper, formElementWrapper, modal;
 
 console.log("Formbuilder.js loaded");
@@ -1154,21 +1156,21 @@ window.addEventListener('change', ev=>{
 			target.closest('.condition-form').querySelectorAll('.addition .days:not(.hidden)').forEach(el=>el.classList.add('hidden'));
 		}
 	}else if(target.matches("[name*='[submitted-trigger][equation]']")){
-		let parent	= target.closest('.submitted-trigger-type');
-		let static	= parent.querySelector('.staticvalue');
-		let dynamic	= parent.querySelector('div.dynamicvalue');
+		let parent		= target.closest('.submitted-trigger-type');
+		let staticEl	= parent.querySelector('.staticvalue');
+		let dynamic		= parent.querySelector('div.dynamicvalue');
 
 		if(dynamic != null){
 		
 			if(target.value == '==' || target.value == '!=' || target.value == '>' || target.value == '<'){
-				static.classList.remove('hidden');
+				staticEl.classList.remove('hidden');
 				dynamic.classList.add('hidden');
 			}else if(target.value == 'checked' || target.value == '!checked'){
 				dynamic.classList.add('hidden');
-				static.classList.add('hidden');
+				staticEl.classList.add('hidden');
 			}else{
 				dynamic.classList.remove('hidden');
-				static.classList.add('hidden');
+				staticEl.classList.add('hidden');
 			}
 		}
 	}else if(target.name != undefined && target.name.includes('[equation')){
