@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- replaced sortable by np install
 
 ### Fixed
 - update comparisson
