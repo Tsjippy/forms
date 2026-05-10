@@ -124,7 +124,7 @@ function registerScripts(){
 
     wp_register_script('tsjippy_forms_script', TSJIPPY\pathToUrl(PLUGINPATH.'js/forms.min.js'), array('tsjippy_formsubmit_script', 'tsjippy_fileupload_script'), PLUGINVERSION, true);
 
-    wp_register_script( 'tsjippy_formbuilderjs', TSJIPPY\pathToUrl(PLUGINPATH.'js/formbuilder.min.js'), array('tsjippy_forms_script','sortable'), PLUGINVERSION, true);
+    wp_register_script( 'tsjippy_formbuilderjs', TSJIPPY\pathToUrl(PLUGINPATH.'js/formbuilder.min.js'), array('tsjippy_forms_script'), PLUGINVERSION, true);
     
     wp_register_script('tsjippy_forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH.'js/forms_table.min.js'), array('tsjippy_forms_script', 'tsjippy_table_script'), PLUGINVERSION, true);
 

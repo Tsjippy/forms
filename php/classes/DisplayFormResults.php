@@ -2040,6 +2040,12 @@ class DisplayFormResults extends DisplayForm{
 		// Ob_start here in case the filter is echoing something
 		ob_start();
 
+		/**
+		 * Filter whether or not to show the table, this can be used to for example show a message instead of the table when there are no submissions or when the user has no permissions
+		 * @param	bool	$shouldShow	Whether or not to show the table, default true
+		 * @param	object	$this			The current instance of the form table class, can be used to get more information about the form and the user to decide whether or not to show the table
+		 * @param	string	$type			The type of results that would be shown, either 'own', 'others' or 'all'
+		 */
 		$shouldShow	= apply_filters('tsjippy-formstable-should-show', true, $this, $type);
 
 		if($shouldShow !== true){
