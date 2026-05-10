@@ -9,6 +9,7 @@
 
 ### Fixed
 - update comparisson
+- hide columns that should be hidden
 
 ### Updated
 
