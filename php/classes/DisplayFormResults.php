@@ -894,6 +894,7 @@ class DisplayFormResults extends DisplayForm{
 		$iconUrl 		= TSJIPPY\pathToUrl(PLUGINPATH.'pictures/copy.png');
 		
 		foreach($this->columnSettings as $elementId => $columnSetting){
+
 			if(!is_array($columnSetting)){
 				continue;
 			}
@@ -919,13 +920,13 @@ class DisplayFormResults extends DisplayForm{
 			if(
 				(
 					!$ownEntry ||
-					(																						//not our own entry
-						$ownEntry &&																		//or it is our own
-						!in_array('own', (array)$columnSetting['view_right_roles'])							//but we are not allowed to see it
+					(																			//not our own entry
+						$ownEntry &&															//or it is our own
+						!in_array('own', (array)$columnSetting['view_right_roles'])				//but we are not allowed to see it
 					)
 				)	&&
-				!$this->tableEditPermissions &&															//no permission to edit the table and
-				!empty($columnSetting['view_right_roles']) && 											// there are view right permissions defined
+				!$this->tableEditPermissions &&													//no permission to edit the table and
+				!empty($columnSetting['view_right_roles']) && 									// there are view right permissions defined
 				!array_intersect($this->userRoles, $columnSetting['view_right_roles'])			// and we do not have the view right role
 			){
 				//later on there will be a row with data in this column
@@ -1046,7 +1047,7 @@ class DisplayFormResults extends DisplayForm{
 				$class .= ' sticky';
 			}
 
-			if(!empty($this->hiddenColumns[$columnSetting['name']])){
+			if(!empty($this->hiddenColumns[$columnSetting['slug']])){
 				$class	.= ' hidden';
 			}
 
@@ -2272,7 +2273,7 @@ class DisplayFormResults extends DisplayForm{
 							!$this->ownData				|| 													//The table does not contain data of our own
 							(
 								$this->ownData			&& 													//or it does contain our own data but
-								!in_array('own', $columnSetting['view_right_roles'])							//we are not allowed to see it
+								!in_array('own', $columnSetting['view_right_roles'])						//we are not allowed to see it
 							)
 						) &&
 						!$this->tableEditPermissions 				&&										//no permission to edit the table and
