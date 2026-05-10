@@ -5,6 +5,7 @@
 
 ### Changed
 - replaced sortable by np install
+- removed soratbel dependicy
 
 ### Fixed
 - update comparisson
