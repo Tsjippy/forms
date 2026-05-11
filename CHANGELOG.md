@@ -4,6 +4,15 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.1.5] - 2026-05-11
+
+
+### Changed
 - replaced sortable by np install
 - removed soratbel dependicy
 - defined type of class properties
