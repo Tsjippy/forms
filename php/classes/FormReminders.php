@@ -7,13 +7,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class FormReminders extends Forms{
-    public $metaForms;
-    public $defaultForms;
-    public $reminders;
-    public $html;
-    private $userIds;
-    public $mandatoryElements;
-    public $userReminders;
+    public array $metaForms;
+    public array $defaultForms;
+    public array $reminders;
+    public string $html;
+    private array $userIds;
+    public array $mandatoryElements;
+    public array $userReminders;
 
     public function __construct(){
         parent::__construct();
@@ -89,11 +89,23 @@ class FormReminders extends Forms{
 
     /**
      * Updates the cache for a specific form
+     * 
+     * @param   int     $formId    The form id to update the cache for
+     * @param   int     $userId    The user id to update the cache for
+     * 
+     * @return  void
      */
     public function updateFormCache($formId, $userId=''){
         $this->getForm($formId);
     }
 
+    /**
+     * Gets the reminders for a given user id
+     * 
+     * @param   int $userId    The user id to get the reminders for
+     * 
+     * @return  array           The reminders for the given user id
+     */
     public function getUserFormReminders($userId){
         if(empty($this->userReminders[$userId])){
             return '';
@@ -189,6 +201,10 @@ class FormReminders extends Forms{
 
     /**
      * Get the minimum form submission date
+     * 
+     * @param   object  $formReminder   The form reminder obejct
+     * 
+     * @return  string                  The minimum date for form submissions to be included in the reminders
      */
     protected function getMinimumDate($formReminder){
         $since	= '';
@@ -224,6 +240,10 @@ class FormReminders extends Forms{
 
     /**
      * Checks a given form for pending reminders
+     * 
+     * @param   object  $formReminder   The form reminder object
+     * 
+     * @return  void
      */
     protected function processDefaultForm($formReminder){
         global $wpdb;
@@ -294,6 +314,8 @@ class FormReminders extends Forms{
             }
             unset($conditions['roles']);
         }
+
+        $applies = false;
 
         foreach($conditions as $check){
             // get the user value
@@ -374,8 +396,6 @@ class FormReminders extends Forms{
                 if(!empty($check['combinator']) && $check['combinator'] == 'or'){
                     break;
                 }
-            }else{
-                $applies = false;
             }
         }
         
@@ -384,9 +404,6 @@ class FormReminders extends Forms{
 
     /**
      * Checks if a given elements needs some input of a given user and returns html links for each element that needs input
-     *
-     * @param	array	$elements	The elements
-     * @param	int		$userId		The id of the user
      *
      * @return	string				The html
      */
@@ -442,8 +459,8 @@ class FormReminders extends Forms{
     /**
      * Gets all mandatory forms for today as html links
      *
-     * @param int    		$userId 	WP user id
-     *
+     * @param   bool    $includeMandatoryForms    Whether to include mandatory forms without element reminders as well
+     * 
      * @return string|array 			Returns html links to forms who are due for submission if a user_id is given, an array of form => [user_ids] otherwise
      */
     public function getAllFormRemindersForToday($includeMandatoryForms=true){
@@ -560,6 +577,12 @@ class FormReminders extends Forms{
 
     /**
      * Get the html for a specific element
+     * 
+     * @param   int     $elementId     The element id to get the html for
+     * @param   string  $type          The type of reminder to get the html for
+     * @param   string  $childName     The name of the child to include in the reminder text if applicable
+     * @return  string                  The html for the element reminder
+     * 
      */
     protected function getElementReminderHtml($elementId, $type='all', $childName=''){
         $element    = $this->getElementById($elementId);
@@ -611,6 +634,9 @@ class FormReminders extends Forms{
 
     /**
      * Gets the html for a form reminder
+     * @param   int     $formId        The form id to get the html for
+     * @param   string  $childName     The name of the child to include in the reminder text if applicable
+     * @return  string                  The html for the form reminder
      */
     protected function getFormReminderHtml($formId, $childName){
         $this->getForm($formId);
@@ -631,6 +657,9 @@ class FormReminders extends Forms{
      * Gets the reminder html for a given user id
      * 
      * @param   int $userId     The user id to get the reminder html for
+     * @param   string $type    The type of reminders to include in the html, either 'mandatory', 'recommended' or 'all'
+      * 
+      * @return  string          The reminder html for the given user id
      */
     public function getReminderHtml($userId, $type){
         // Nothing to do
@@ -722,6 +751,12 @@ class FormReminders extends Forms{
         }
     }
 
+    /**
+     * Sends an e-mail reminder to a user
+     * 
+     * @param   int     $userId        The user id to send the e-mail to
+     * @param   string  $html          The html content for the e-mail
+     */
     protected function sendEmail($userId, $html=''){   
         $user   = get_userdata($userId);
         
