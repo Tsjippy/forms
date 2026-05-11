@@ -10,49 +10,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Forms{
 	
-	public $isFormStep;
-	public $isMultiStepForm;
-	protected $clonableFormStep;
-	public $formStepCounter;
-	public $nonInputs;
-	public $multiInputsHtml;
-	public $user;
-	public $userRoles;
-	public $userId;
-	public $pageSize;
-	public $multiwrap;
-	public $submitRoles;
-	public $showArchived;
-	public $editRights;
-	public $formData;
+	public bool $isFormStep;
+	public bool $isMultiStepForm;
+	protected bool $clonableFormStep;
+	public int $formStepCounter;
+	public array $nonInputs;
+	public array $multiInputsHtml;
+	public \WP_User $user;
+	public array $userRoles;
+	public int $userId;
+	public int $pageSize;
+	public bool $multiwrap;
+	public array $submitRoles;
+	public bool $showArchived;
+	public bool $editRights;
+	public object $formData;
 	public array $elementMapping;
-	public $forms;
-	public $formId;
-	public $formElements;
-	public $jsFileName;
-	public $slugs;
-	public $shortcodeId;
-	public $onlyOwn;
-	public $all;
+	public array $forms;
+	public int $formId;
+	public array $formElements;
+	public string $jsFileName;
+	public array $slugs;
+	public int $shortcodeId;
+	public bool $onlyOwn;
 	public object $submission;
-	public $submissions;
-	public $tableName;
-	public $formReminderTable;
-	public $elTableName;
-	public $submissionTableName;
-	public $submissionValuesTableName;
-	public $formEmailTable;
-	public $shortcodeTable;
-	public $shortcodeColumnSettingsTable;
-	public $emailSettings;
-	public $formReminder;
-	protected $userIdElementName;
-	protected $tableFormats;
+	public array $submissions;
+	public string $tableName;
+	public string $formReminderTable;
+	public string $elTableName;
+	public string $submissionTableName;
+	public string $submissionValuesTableName;
+	public string $formEmailTable;
+	public string $shortcodeTable;
+	public string $shortcodeColumnSettingsTable;
+	public array $emailSettings;
+	public object $formReminder;
+	protected string $userIdElementName;
+	protected array $tableFormats;
+	public string $objectName;
+	public bool $all;			// do not page submissions
 
 	public function __construct(){
 		global $wpdb;
 		
-		$this->isMultiStepForm				= '';
+		$this->isMultiStepForm				= false;
 		$this->formStepCounter				= 0;
 		$this->submissionTableName			= $wpdb->prefix . 'tsjippy_form_submissions';
 		$this->submissionValuesTableName	= $wpdb->prefix . 'tsjippy_form_submission_values';
@@ -454,8 +455,10 @@ class Forms{
 	public function insertForm($slug=''){
 		global $wpdb;
 
-		if(empty($slug)){
+		if(empty($slug) && !empty($this->formData->slug)){
 			$slug = $this->formData->slug;
+		}else{
+			return new WP_Error('forms', 'No form slug given');
 		}
 
 		$slug	= str_replace(' ', '-', strtolower($slug));
@@ -673,7 +676,11 @@ class Forms{
 		$this->forms					= $wpdb->get_results($query);
 	}
 
-	// Get a form by name
+	/**
+	 * Get a form by submission id
+	 * @param	int			$submisisonId	The id of the submission for which to retrieve the form	
+	 * @return	object						The form data object or WP_Error on failure
+	 */
 	public function getFormBySubmissionId($submisisonId){
 		global $wpdb;
 		
@@ -847,6 +854,7 @@ class Forms{
 	public function elementMapper($force = false){
 		if(
 			empty($this->formData) || 
+			empty($this->formElements) ||
 			(
 				isset($this->elementMapping) && 
 				!empty($this->elementMapping['type']) && 
@@ -1169,6 +1177,8 @@ class Forms{
 
 	/**
 	 * Parses all WP Shortcode attributes
+	 * 
+	 * @param	array	$atts	The shortcode attributes
 	 */
 	public function processAtts($atts){
 		if(empty($this->formData)){
@@ -1182,14 +1192,14 @@ class Forms{
 					'formname'		=> '',
 					'form-name'		=> '',
 					'name'			=> '',
-					'user_id'		=> '',
-					'user-id'		=> '',
+					'user_id'		=> 0,
+					'user-id'		=> 0,
 					'search'		=> '',
-					'shortcodeid'	=> '',
-					'shortcode-id'	=> '',
-					'id'			=> '',
-					'formid'		=> '',
-					'form-id'		=> '',
+					'shortcodeid'	=> -1,
+					'shortcode-id'	=> -1,
+					'id'			=> -1,
+					'formid'		=> -1,
+					'form-id'		=> -1,
 					'only-own'		=> false,
 					'onlyown'		=> false,
 					'archived'		=> false,
@@ -1212,15 +1222,15 @@ class Forms{
 				$atts['slug']	= str_replace(' ', '-', strtolower($atts['form-name']));
 			}
 
-			if(empty($atts['user-id'])){
+			if($atts['user-id'] == 0 && $atts['user_id'] !== 0){
 				$atts['user-id']	= $atts['user_id'];
 			}
 
-			if(empty($atts['shortcode-id'])){
+			if($atts['shortcode-id'] == -1 && $atts['shortcodeid'] !== -1){
 				$atts['shortcode-id']	= $atts['shortcodeid'];
 			}
 
-			if(empty($atts['form-id'])){
+			if($atts['form-id'] == -1 && $atts['formid'] !== -1){
 				$atts['form-id']	= $atts['formid'];
 			}
 
@@ -1229,7 +1239,7 @@ class Forms{
 			}
 
 			$this->shortcodeId	= $atts['shortcode-id'];
-			if(empty($this->shortcodeId)){
+			if($this->shortcodeId == -1 && $atts['id'] !== -1){
 				$this->shortcodeId	= $atts['id'];
 			}
 
@@ -1262,6 +1272,8 @@ class Forms{
 
 	/**
 	 * Check if we should show the formbuilder or the form itself
+	 * 
+	 * @param	array	$atts	The shortcode attributes
 	 */
 	public function determineForm($atts){
 		global $wpdb;
@@ -1382,6 +1394,8 @@ class Forms{
 
 	/**
      * Add signal data to wp_mail args
+	 * 
+	 * @param	array	$args	The wp_mail args
      */
     public function addFormData($args){
         $args['submission'] = $this->submission;

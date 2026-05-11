@@ -318,6 +318,7 @@ trait CreateJs{
                         //set the attribute value of one field to the value of another field
                         $selector		= $this->getSelector($element);
                         
+                        $varName         = '';
                         //fixed prop value
                         if($action == 'value'){
                             $propertyName	                        = $condition['property-name1'];
@@ -357,6 +358,7 @@ trait CreateJs{
                         if(!empty($condition['addition'])){
                             $addition       = $condition['addition'];
                         }
+
                         if($propertyName == 'value'){
                             $actionCode    = "this.change_field_value('$selector', $varName, {$this->objectName}.processFields, form, $addition);";
                             if(!in_array($actionCode, $actionArray)){
@@ -519,7 +521,7 @@ trait CreateJs{
                     }
                 }
 
-                foreach($check['actions'] as $index=>$action){
+                foreach($check['actions'] as $index => $action){
                     if($index === 'querystrings'){
                         $newJs  .= $this->buildQuerySelector($action, "\t\t\t");
                     }else{
@@ -528,7 +530,7 @@ trait CreateJs{
                 }
 
                 $prevVar   = [];
-                foreach($check['condition_ifs'] as $if=>$prop){
+                foreach($check['condition_ifs'] as $i => $prop){
                     foreach($prop['variables'] as $variable){
                         //Only write same var definition once
                         $varParts  = explode(' = ', $variable);
@@ -539,8 +541,8 @@ trait CreateJs{
                     }
 
                     if(!empty($prop['actions'])){
-                        $newJs  .= "\n\t\t\t$if\n";
-                        foreach($prop['actions'] as $index=>$action){
+                        $newJs  .= "\n\t\t\t$i\n";
+                        foreach($prop['actions'] as $index => $action){
                             if($index === 'querystrings'){
                                 $newJs  .= $this->buildQuerySelector($action, "\t\t\t\t");
                             }else{
@@ -566,9 +568,13 @@ trait CreateJs{
         $js         = "class $className {".$js."\n};\n\nlet $this->objectName = new $className();\n\n$this->objectName.init();\n";
         $minifiedJs = "class $className {".$minifiedJs."\n};\n\nlet $this->objectName = new $className();\n\n$this->objectName.init();\n";
 
-        /*
-        ** EXTERNAL JS
-        */
+        /**
+        * EXTERNAL JS Filter
+        * Allows to add extra js to the form, for example for custom conditions or actions that are not supported by the form builder yet. The js will be added to both the normal and minified version of the js file. The filter passes the current form object as a parameter, so you can check for the form slug or id to only add the js to specific forms.
+        * @param string $extraJs The extra js code to add to the form
+        * @param object $form The current form object
+        * @param bool   $minified Whether the js code will be added to the minified version of the js file or the normal version
+        **/
         $extraJs   = apply_filters('tsjippy_form_extra_js', '', $this, false);
         if(!empty($extraJs)){
             if(empty($checks)){
@@ -627,14 +633,19 @@ trait CreateJs{
         return $errors;
     }
 
+    /**
+     * Builds the js code for the show, hide and toggle actions based on the given query strings. It also makes sure that we only apply the action to the most outer wrapper element to prevent conflicts with nested conditions. The function returns the js code as a string.
+     * @param array $queryStrings The query strings for the show, hide and toggle actions
+     * @param string $prefix The prefix to add to each line of the js code, for example to add extra tabs for nested if statements
+     */
     function buildQuerySelector($queryStrings, $prefix){
         $actionCode    = '';
-        foreach($queryStrings as $action=>$elements){
+        foreach($queryStrings as $action => $elements){
             //multiple
             if(count($elements) > 1){
                 $actionCode    .= "{$prefix}form.querySelectorAll(`";
                 $last           = array_key_last($elements);
-                foreach($elements as $key=>$element){
+                foreach($elements as $key => $element){
                     $actionCode     .= $this->getSelector($element);
 
                     if($key != $last){
@@ -665,6 +676,14 @@ trait CreateJs{
         return $actionCode;
     }
 
+    /**
+     * Returns the css selector for the given element based on the element type and slug. For example, if the element is a radio button with the slug "gender", the function will return "[name='gender[]']" to select all radio buttons with
+     * the name "* gender[]". If the element is a file input with the slug "resume", the function will return "[name='resume_files[]']" to select the file input. If the element is a checkbox with the slug "interests[]", the function will return "[id^='E123']" (assuming the element id is 123) to select all checkboxes with an id that starts with "E123". The function takes into account different input types and naming conventions to generate the correct selector for each element.
+     * 
+     * @param object $element The form element for which to generate the selector
+     * 
+     * @return string The css selector for the given element
+     */
     function getSelector($element){
         $queryById          = false;
         $name				= trim($element->slug);

@@ -1,5 +1,7 @@
 <?php
 namespace TSJIPPY\FORMS;
+
+use DOMElement;
 use TSJIPPY;
 use WP_Error;
 
@@ -8,31 +10,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class ElementHtmlBuilder extends SubmitForm{
-    public $defaultArrayValues;
-    public $prevElement;
-	public $nextElement;
-	public $currentElement;
-    public $multiWrapValueCount;
-    public $wrap;
-    public $defaultValues;
-    public $element;
-	private $requestedValue;
-	private $elementValues;
-	private $tagType;
-	private $selectedValue;
-	public $html;
-	public $formData;
-	public $formElements;
-	public $usermeta;
-	public $submissions;
-	public $attributes;
-	public $multiwrapperFirstClone;
-	public $multiWrapElementCount;
-	public $minElForTabs;
-	public $elementHtmlBuilder;
-	public $nonWrappable;
-	public $dom;
-	public $formWrapper;
+    public array $defaultArrayValues;
+    public object $element;
+    public object|null $prevElement;
+	public object|null $nextElement;
+	public object $currentElement;
+    public int $multiWrapValueCount;
+    public bool $wrap;
+    public array $defaultValues;
+    public \WP_User $user;
+	private mixed $requestedValue;
+	private array $elementValues;
+	private string $tagType;
+	private mixed $selectedValue;
+	public string $html;
+	public object $formData;
+	public array $formElements;
+	public array $usermeta;
+	public array $submissions;
+	public array $attributes;
+	public object|null $multiwrapperFirstClone;
+	public int $multiWrapElementCount;
+	public int $minElForTabs;
+	public object $elementHtmlBuilder;
+	public array $nonWrappable;
+	public object $dom;
+	public DOMElement $formWrapper;
 
     public function __construct(){
 		parent::__construct();
@@ -184,6 +187,8 @@ class ElementHtmlBuilder extends SubmitForm{
 
 	/**
 	 * Gets the meta value from for an element
+	 * 
+	 * @param	array	$elementNames	The names of the element, split in case of arrays
 	 */
     function getMetaElementValue($elementNames){
 		if(empty($this->formData->save_in_meta)){
@@ -308,8 +313,11 @@ class ElementHtmlBuilder extends SubmitForm{
 
 	/**
 	 * Returns the html for an info element
+	 * 
+	 * @param	string			$text	The text to show in the info box
+	 * @param	null|DOMElement	$parent	The parent element to add the info box to, if empty it will return the html as a string
 	 */
-	public function infoBoxHtml($text, $parent=''){
+	public function infoBoxHtml($text, $parent=null){
 		$returnHtml	 	= false;
 		$dom			= '';
 
@@ -608,6 +616,8 @@ class ElementHtmlBuilder extends SubmitForm{
 
 	/**
 	 * Renders the add and remove buttons for a multi-answer group
+	 * 
+	 * @param	DOMElement	$parent	The parent node to add the buttons to
 	 */
 	protected function renderButtons($parent){
 		ob_start();
@@ -671,8 +681,8 @@ class ElementHtmlBuilder extends SubmitForm{
 			$nodes	= $node->getElementsByTagName('*');
 		}
 
-		foreach($nodes as $node){
-			if(!in_array($node->tagName, ['input', 'textarea', 'select'])){
+		foreach($nodes as $curNode){
+			if(!in_array($curNode->tagName, ['input', 'textarea', 'select'])){
 				continue;
 			}
 
@@ -691,21 +701,21 @@ class ElementHtmlBuilder extends SubmitForm{
 			}
 
 			// Add the index to the name
-			$node->setAttribute('name', $name.$indexString);
+			$curNode->setAttribute('name', $name.$indexString);
 
 			/**
 			 * Change the id
 			 */
-			if(!empty($node->attributes['id']->value)){
+			if(!empty($curNode->attributes['id']->value)){
 				// Add the index to the id
-				$node->setAttribute('id', $name."[$index]");
+				$curNode->setAttribute('id', $name."[$index]");
 			}
 						
 			/**
 			 * Change selected option
 			 */
 			if($this->element->type == 'select'){
-				$options = $node->getElementsByTagName('option');
+				$options = $curNode->getElementsByTagName('option');
 				
 				foreach($options as $option){
 					if($option->attributes['value'] == $value){
@@ -719,13 +729,13 @@ class ElementHtmlBuilder extends SubmitForm{
 			 * Change selected checkbox
 			 */
 			elseif(in_array($this->element->type, ['radio', 'checkbox'])){
-				$nodes = $node->getElementsByTagName($this->element->type);
+				$nodes = $curNode->getElementsByTagName($this->element->type);
 				
-				foreach($nodes as $node){
-					if($node->attributes['value'] == $value){
-						$node->setAttribute('checked', 'checked');
+				foreach($nodes as $nd){
+					if($nd->attributes['value'] == $value){
+						$nd->setAttribute('checked', 'checked');
 					}else
-						$node->removeAttribute('checked');
+						$nd->removeAttribute('checked');
 					}
 			}
 
@@ -733,12 +743,12 @@ class ElementHtmlBuilder extends SubmitForm{
 			 *  Element value
 			 */ 
 			elseif($this->element->type == 'textarea'){
-				$node->nodeValue = $value;
+				$curNode->nodeValue = $value;
 			}
 			elseif(is_array($value)){
-				$node->setAttribute('value', $value[$index]);
+				$curNode->setAttribute('value', $value[$index]);
 			}elseif(!empty($value)){
-				$node->setAttribute('value', $value);
+				$curNode->setAttribute('value', $value);
 			}
 
 			// Add the index to the label if we are not displaying it on seperate tabs
@@ -747,7 +757,7 @@ class ElementHtmlBuilder extends SubmitForm{
 				$this->multiWrapElementCount < $this->minElForTabs
 			){
 				$nr					 = $index + 1;
-				$node->nodeValue	.= " $nr";
+				$curNode->nodeValue	.= " $nr";
 			}
 		}
 	}
@@ -1021,6 +1031,8 @@ class ElementHtmlBuilder extends SubmitForm{
 
 	/**
 	 * Get the tag content of an element, i.e. the content between the openening and closing tag
+	 * 
+	 * @param	DOMElement	$node	The node to add the content to
 	 */
 	protected function getTagContent($node){
 		switch($this->element->type){
@@ -1060,6 +1072,8 @@ class ElementHtmlBuilder extends SubmitForm{
 
 	/**
 	 * Add the nodes needed for a multi text
+	 * 
+	 * @param	DOMElement	$parent	The parent node to add the content to
 	 */
 	protected function getMultiTextInputHtml($parent){
 		if(empty($this->requestedValue) && !empty($this->defaultArrayValues[$this->element->default_value])){
@@ -1146,6 +1160,8 @@ class ElementHtmlBuilder extends SubmitForm{
 
 	/**
 	 * Gets the html for elements with multiple instances
+	 * 
+	 * @param	DOMElement	$node	The node to add the multiple elements to
 	 */
 	protected function getMultiElementHtml($node){
 		if(
@@ -1162,6 +1178,8 @@ class ElementHtmlBuilder extends SubmitForm{
 		if(get_class($parent) == "DOMDocument"){
 			return;
 		}
+
+		$values	= [];
 		
         if(
 			empty($this->formData->save_in_meta) && 
@@ -1224,6 +1242,8 @@ class ElementHtmlBuilder extends SubmitForm{
 	/**
 	 * Options for a select element
 	 * Adds all the options of a select element
+	 * 
+	 * @param	DOMElement	$node	The node to add the options to
 	 */
 	public function addSelectOptions($node){
 		// Empty option on the top
@@ -1262,6 +1282,8 @@ class ElementHtmlBuilder extends SubmitForm{
 
 	/**
 	 * Adds the options to a datalist element
+	 * 
+	 * @param	DOMElement	$node	The node to add the options to
 	 */
 	public function addDatalistOptions($node){
 		foreach($this->elementValues['defaults'] as $key => $option){
@@ -1290,6 +1312,8 @@ class ElementHtmlBuilder extends SubmitForm{
 
 	/**
 	 * Adds all the checkboaxes or radios
+	 * 
+	 * @param	DOMElement	$parent	The node to add the checkboxes or radios to
 	 *
 	 */
 	public function addCheckboxes($parent){
@@ -1417,6 +1441,8 @@ class ElementHtmlBuilder extends SubmitForm{
 	/**
 	 * Calculates the amount of clones needed
 	 * and creates the wrapper for each clone
+	 * 
+	 * 	@param	DOMElement	$parent	The parent node to add the clone wrappers to
 	 */
 	public function multiwrapStart($parent){
 		/**
@@ -1542,7 +1568,7 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * @param	object			$parent			The parent node to append to, default empty to return html string
 	 * @param	string|false	$requestedValue	The value the element should have, false for no value, default empty
 	 *
-	 * @return	object|string| WP error			A DomDocumentNode or the raw html
+	 * @return	object|string|WP_Error			A DomDocumentNode or the raw html
 	 */
 	public function getElementHtml($element, $parent='', $requestedValue =''){
 		$this->reset();
@@ -1619,7 +1645,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			case 'div-end':
 				break;
 			case 'multi-end':
-				$this->multiwrapperFirstClone = '';
+				$this->multiwrapperFirstClone = null;
 
 				// nothing to do
 				if($this->multiWrapElementCount < $this->minElForTabs){
@@ -1661,7 +1687,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		 *  Process elements in a multi-wrap
 		 */ 
 		if(	
-			$this->multiwrapperFirstClone != '' && 					// We have something to clone
+			!empty($this->multiwrapperFirstClone) && 					// We have something to clone
 			get_class($this) != "TSJIPPY\FORMS\FormBuilderForm" && 		// Do not clone on formbuilder pages
 			$element->type != 'multi-start' &&						// skip this one
 			!$element->wrap											// only clone when the wrapping is finished
@@ -1711,7 +1737,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
 		
 		//check if we need to transform a keyword to date
-		preg_match_all('/%([^%;]*)%/i', $this->html, $matches);
+		/* preg_match_all('/%([^%;]*)%/i', $this->html, $matches);
 		foreach($matches[1] as $key => $keyword){
 			$keyword = str_replace('_',' ', $keyword);
 			
@@ -1723,7 +1749,7 @@ class ElementHtmlBuilder extends SubmitForm{
 				//update form element
 				$this->html = str_replace($matches[0][$key], $dateString, $this->html);
 			}
-		}
+		} */
 
 		$node = apply_filters('tsjippy-form-element-html', $node, $this);
 		

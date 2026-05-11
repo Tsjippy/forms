@@ -13,25 +13,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DisplayFormResults extends DisplayForm{
 	use ExportFormResults;
 
-	public $shortcodeTable;
-	public $enriched;
-	public $excelContent;
-	public $currentPage;
-	public $total;
-	public $hiddenColumns;
-	public $columnSettings;
-	public $tableSettings;
-	public $ownData;
-	public $formEditPermissions;
-	public $tableViewPermissions;
-	public $tableEditPermissions;
-	public $sortElementIds;
-	public $sortDirection;
-	public $sortColumn;
-	public $spliced;
-	public $subElements;
-	public $extraElements;
+	public string $shortcodeTable;
+	public bool $enriched;
+	public array $excelContent;
+	public int $currentPage;
+	public int $total;
+	public array $hiddenColumns;
+	public array $columnSettings;
+	public object $tableSettings;
+	public bool $ownData;
+	public bool $formEditPermissions;
+	public bool $tableViewPermissions;
+	public bool $tableEditPermissions;
+	public array $sortElementIds;
+	public string $sortDirection;
+	public string $sortColumn;
+	public bool $spliced;
+	public array $subElements;
+	public array $extraElements;
 
+	/**
+	 * Constructor for the DisplayFormResults class
+	 * @param array $atts The attributes passed to the shortcode
+	 */
 	public function __construct($atts){
 		global $wpdb;
 		
@@ -55,8 +59,10 @@ class DisplayFormResults extends DisplayForm{
 		//Get personal visibility
 		if(empty($this->formData)){
 			$this->hiddenColumns		= [];
+		}elseif(!empty($this->formData->id)){
+			$this->hiddenColumns		= get_user_meta($this->user->ID, 'hidden_columns_'.$this->formData->id, true) ?? [];
 		}else{
-			$this->hiddenColumns		= get_user_meta($this->user->ID, 'hidden_columns_'.$this->formData->id, true);
+			return new WP_Error('forms', 'No form data found for the given form results shortcode');
 		}
 		
 		if(function_exists('is_user_logged_in') && is_user_logged_in()){
@@ -74,6 +80,11 @@ class DisplayFormResults extends DisplayForm{
 
 	/**
 	 * Function to add the elements for submission meta
+	 * 
+	 * @param array $elements The current array of elements
+	 * @param object $object The form or shortcode object for which the elements are being retrieved
+	 * @param bool $force Whether to force adding the extra elements even if they already exist
+	 * @return array The updated array of elements with the extra elements added
 	 */
 	public function addExtraElements($elements, $object, $force){
 		// Build the array of element details
@@ -278,6 +289,11 @@ class DisplayFormResults extends DisplayForm{
 
 	/**
 	 * Add filter querys 
+	 * 
+	 * @param array $where The array of where statements to add the filter querys to
+	 * @param array $values The array of values for the where statements to add the filter values to
+	 * 
+	 * @return void
 	 */
 	protected function addFilterQueries(&$where, &$values){
 		global $wpdb;
@@ -335,6 +351,7 @@ class DisplayFormResults extends DisplayForm{
 	 * Transpose all splitted value rows to columns
 	 * 
 	 * @param array $finalWhere			The array of where statements to add the sub_id where statement to
+	 * @param string $innerJoinString	The inner join string to add the splitted values inner join to
 	 * 
 	 * @return string					The updated Common Table Expressions string with the splitted values queries added
 	 */
@@ -846,8 +863,8 @@ class DisplayFormResults extends DisplayForm{
 		foreach($actions as $action){
 			if(!isset($this->columnSettings[$action]) || !is_array($this->columnSettings[$action])){
 				$this->columnSettings[$action] = [
+					'slug'				=> $action,
 					'name'				=> $action,
-					'name'			=> $action,
 					'show'				=> 1,
 					'edit_right_roles'	=> [],
 					'view_right_roles'	=> []
@@ -987,9 +1004,9 @@ class DisplayFormResults extends DisplayForm{
 					$subIdString = "data-subid='{$this->submission->sub_id}'";
 					
 					// Find the splitted value
-					foreach($columnSetting['elementIds'] as $elementId){
-						if(!empty($this->submission->{$elementId})){
-							$value	= $this->submission->{$elementId};
+					foreach($columnSetting['elementIds'] as $id){
+						if(!empty($this->submission->{$id})){
+							$value	= $this->submission->{$id};
 							break;
 						}
 					}
@@ -1180,7 +1197,7 @@ class DisplayFormResults extends DisplayForm{
 	public function loadShortcodeData(){
 		global $wpdb;
 
-		if(!is_numeric($this->shortcodeId)){
+		if(!isset($this->shortcodeId) || !is_numeric($this->shortcodeId)){
 			if(!empty($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])){
 				$this->shortcodeId	= $_POST['shortcode-id'];
 			}else{
@@ -1219,6 +1236,15 @@ class DisplayFormResults extends DisplayForm{
 		return true;
 	}
 
+	/**
+	 * Show the column settings form
+	 * 
+	 * @param string $class			Optional class to add to the form
+	 * @param array $viewRoles		Array of roles that can be selected for view permissions
+	 * @param array $editRoles		Array of roles that can be selected for edit permissions
+	 * 
+	 * @return void
+	 */
 	protected function columnSettingsForm($class, $viewRoles, $editRoles){
 		?>
 		<div class="tabcontent" id="column-settings-<?php echo $this->shortcodeId;?>">
@@ -1340,6 +1366,15 @@ class DisplayFormResults extends DisplayForm{
 		<?php
 	}
 
+	/**
+	 * Show the table settings form
+	 * 
+	 * @param string $class			Optional class to add to the form
+	 * @param array $viewRoles		Array of roles that can be selected for view permissions
+	 * @param array $editRoles		Array of roles that can be selected for edit permissions
+	 * 
+	 * @return void
+	 */
 	protected function tableSettingsForm($class, $viewRoles, $editRoles){
 		?>
 		<div class="tabcontent <?php echo $class;?>" id="table-rights-<?php echo $this->shortcodeId;?>">
@@ -2014,7 +2049,6 @@ class DisplayFormResults extends DisplayForm{
 	 * Writes a result table to the screen
 	 *
 	 * @param	string		$type		Either 'own', 'others' or 'all'
-	 * @param	bool		$justTable	Only give the table not the heading and filter form
 	 * @param	bool		$force		Whether to retrieve submissions even if already done
 	 * @param	bool		$all		Retrieve all bookings or paged, default false for paged
 	 *

@@ -305,7 +305,7 @@ class DisplayForm extends ElementHtmlBuilder{
 		 * Loop over all form elements and add the nodes
 		 */
 		$parents 			= ['root' => $form];
-		$this->prevElement	= '';
+		$this->prevElement	= null;
 		foreach($this->formElements as $index => $element){
 			/**
 			 * Store the current and the next elements
@@ -313,7 +313,7 @@ class DisplayForm extends ElementHtmlBuilder{
 			if(isset($this->formElements[$index + 1])){
 				$this->nextElement		= $this->formElements[$index + 1];
 			}else{
-				$this->nextElement		= '';
+				$this->nextElement		= null;
 			}
 
 			$this->currentElement	= $element;

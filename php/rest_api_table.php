@@ -26,7 +26,13 @@ function restApiInitTable() {
 		array(
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\saveTablePrefs',
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> function($request){
+				$formId	= $request['form-id'];
+				$forms		= new DisplayFormResults([]);
+				$forms->getForm($formId);
+
+				return $forms->tableEditPermissions;
+			},
 			'args'					=> array(
 				'form-id'		=> array(
 					'required'	=> true,
