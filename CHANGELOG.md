@@ -15,6 +15,7 @@
 - do not load form on shortcode results table
 
 ### Updated
+- css
 
 ## [11.1.4] - 2026-05-08
 
