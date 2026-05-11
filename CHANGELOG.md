@@ -6,6 +6,7 @@
 ### Changed
 - replaced sortable by np install
 - removed soratbel dependicy
+- defined type of class properties
 
 ### Fixed
 - update comparisson
