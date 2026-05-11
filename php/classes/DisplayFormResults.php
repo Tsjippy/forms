@@ -49,6 +49,7 @@ class DisplayFormResults extends DisplayForm{
 		add_filter('tsjippy-forms-elements', [$this, 'addExtraElements'], 10, 3);
 		
 		// call parent constructor
+		unset($atts['shortcode-id']);
 		parent::__construct($atts);
 
 		wp_enqueue_style('tsjippy_formtable_style');
@@ -2340,7 +2341,7 @@ class DisplayFormResults extends DisplayForm{
 						$class	= strtolower($this->sortDirection). ' defaultsort';
 					}
 
-					if(!empty($this->hiddenColumns[$columnSetting['slug']])){
+					if(!empty($this->hiddenColumns) && !empty($this->hiddenColumns[$columnSetting['slug']])){
 						$class	.= ' hidden';
 					}
 					$icon			= "<img class='visibility-icon visible' src='".TSJIPPY\PICTURESURL."/visible.png' width=20 height=20 loading='lazy' >";

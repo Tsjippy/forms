@@ -68,6 +68,8 @@ class Forms{
 		$this->user 						= wp_get_current_user();
 		$this->userRoles					= $this->user->roles;
 		$this->userId						= $this->user->ID;
+		$this->formElements					= [];
+		
 		if(isset($_REQUEST['all'])){
 			$this->pageSize					= 99999;
 		}elseif(isset($_REQUEST['pagesize']) && is_numeric($_REQUEST['pagesize'])){
