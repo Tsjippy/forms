@@ -11,6 +11,7 @@
 ### Fixed
 - update comparisson
 - hide columns that should be hidden
+- do not load form on shortcode results table
 
 ### Updated
 
