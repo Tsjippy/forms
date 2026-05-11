@@ -7,6 +7,7 @@
 - replaced sortable by np install
 - removed soratbel dependicy
 - defined type of class properties
+- removed admin login for cron
 
 ### Fixed
 - update comparisson
