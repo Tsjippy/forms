@@ -50,11 +50,6 @@ class FormReminders extends Forms{
             'metaforms'    => [],
             'defaultforms' => []  
         ];
-
-        //Change the user to the admin account otherwise get_users will not work
-        if(wp_doing_cron()){
-            wp_set_current_user(1);
-        }
         
         //Retrieve all users
         $this->userIds          			= TSJIPPY\getUserAccounts(false, false, 'ID');
