@@ -11,7 +11,7 @@ function restApiInit() {
 		array(
 			'methods' 				=> 'GET',
 			'callback' 				=> 	__NAMESPACE__.'\showFormSelector',
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> '__return_true',							// Allow public access
 		)
 	);
 
@@ -22,7 +22,7 @@ function restApiInit() {
 		array(
 			'methods' 				=> 'POST,GET',
 			'callback' 				=> 	__NAMESPACE__.'\showFormBuilder',
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> '__return_true',						// Allow public access to be able access public available forms
 		)
 	);
 
@@ -33,7 +33,7 @@ function restApiInit() {
 		array(
 			'methods' 				=> 'POST,GET',
 			'callback' 				=> 	__NAMESPACE__.'\getAllForms',
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> '__return_true',				// Allow public access to be able access public available forms	
 		)
 	);
 
@@ -44,21 +44,7 @@ function restApiInit() {
 		array(
 			'methods' 				=> 'POST,GET',
 			'callback' 				=> 	__NAMESPACE__.'\showFormResults',
-			'permission_callback' 	=> '__return_true',
-		)
-	);
-
-	// Add new form table
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/add_form_table',
-		array(
-			'methods' 				=> 'POST,GET',
-			'callback' 				=> 	function(){
-				$displayFormResults	= new DisplayFormResults([]);
-				return $displayFormResults->insertInDb($_REQUEST['form-id']);
-			},
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> '__return_true',			// Allow public access to be able access public available forms results, the function itself will check if the form is public or not and if the user has access to the results or not
 		)
 	);
 
@@ -78,11 +64,18 @@ function restApiInit() {
 				}
 				return $result;
 			},
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> function($rest){
+				return current_user_can('read');		// Allow access to logged in users, the function itself will check if the user has access to the form and the fields or not
+			},
 		)
 	);
 }
 
+/**
+ * Show the form builder block
+ * 
+ * @param \WP_REST_Request|array $attributes	The parameters for the block, either as an array or as a WP_REST_Request object
+ */
 function showFormBuilder($attributes){
 	$isRest	= false;
 	if($attributes instanceof \WP_REST_Request){
@@ -139,6 +132,10 @@ function showFormBuilder($attributes){
 	];
 }
 
+/**
+ * Show form results
+ * @param \WP_REST_Request|array $attributes	The parameters for the block, either as an array or as a WP_REST_Request object
+ */
 function showFormResults($attributes){
 
  	if($attributes instanceof \WP_REST_Request){

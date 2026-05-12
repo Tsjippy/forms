@@ -10,6 +10,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Allow rest api urls for non-logged in users
 add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__.'\addFormResultUrls');
+
+/**
+ * Add form result URLs to the list of allowed REST API URLs
+ *
+ * @param array $urls The list of allowed REST API URLs
+ * @return array The updated list of allowed REST API URLs
+ */
 function addFormResultUrls($urls){
     $urls[] = RESTAPIPREFIX.'/forms/edit_value';
 	$urls[] = RESTAPIPREFIX.'/forms/get_input_html';
@@ -27,11 +34,7 @@ function restApiInitTable() {
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\saveTablePrefs',
 			'permission_callback' 	=> function($request){
-				$formId	= $request['form-id'];
-				$forms		= new DisplayFormResults([]);
-				$forms->getForm($formId);
-
-				return $forms->tableEditPermissions;
+				return current_user_can('read');		// Allow access to logged in users, tto be able to save theire column visibility preferences
 			},
 			'args'					=> array(
 				'form-id'		=> array(
@@ -52,7 +55,9 @@ function restApiInitTable() {
 		array(
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\deleteTablePrefs',
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> function($request){
+				return current_user_can('read');		// Allow access to logged in users, to be able to reset theire column visibility preferences
+			},
 			'args'					=> array(
 				'form-id'		=> array(
 					'required'	=> true,
@@ -121,7 +126,10 @@ function restApiInitTable() {
 		array(
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\removeSubmission',
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> function(){
+				$formsTable		= new DisplayFormResults($_POST);
+				return $formsTable->tableEditPermissions;
+			},
 			'args'					=> array(
 				'submission-id'		=> array(
 					'required'	=> true,
@@ -140,7 +148,10 @@ function restApiInitTable() {
 		array(
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\archiveSubmission',
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> function(){
+				$formsTable		= new DisplayFormResults($_POST);
+				return $formsTable->tableEditPermissions;
+			},
 			'args'					=> array(
 				'form-id'		=> array(
 					'required'	=> true,
@@ -165,7 +176,7 @@ function restApiInitTable() {
 		array(
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\editValue',
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> '__return_true', 	// Allow public access, the function itself will check if the user has permissions to edit the value or not
 			'args'					=> array(
 				'submission-id'		=> array(
 					'required'	=> true,
@@ -193,7 +204,7 @@ function restApiInitTable() {
 		array(
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\getInputHtml',
-			'permission_callback' 	=> '__return_true',
+			'permission_callback' 	=> '__return_true',						// Allow public access, the function itself will check if the user has permissions to view the input or not
 			'args'					=> array(
 				'element-id'		=> array(
 					'required'	=> true,
@@ -215,8 +226,8 @@ function restApiInitTable() {
 		array(
 			'methods' 				=> \WP_REST_Server::CREATABLE,
 			'callback' 				=> __NAMESPACE__.'\getPage',
-			'permission_callback' 	=> '__return_true',
-			'args'					=> array(
+			'permission_callback' 	=> '__return_true',						// Allow public access
+			'args'					=> array(	
 				'form-id'		=> array(
 					'required'	=> true,
 					'validate_callback' => function($formId){
@@ -248,35 +259,27 @@ function getPage(){
 }
 
 function saveTablePrefs( \WP_REST_Request $request ) {
-	if (is_user_logged_in()) {
-		$columnName					= $request['column-name'];
+	$columnName					= $request['column-name'];
 
-		$userId						= get_current_user_id();
-		$hiddenColumns				= (array)get_user_meta($userId, 'hidden_columns_'.$request['form-id'], true);
+	$userId						= get_current_user_id();
+	$hiddenColumns				= (array)get_user_meta($userId, 'hidden_columns_'.$request['form-id'], true);
 
-		$hiddenColumns[$columnName]	= 'hidden';
+	$hiddenColumns[$columnName]	= 'hidden';
 
-		update_user_meta($userId, 'hidden_columns_'.$request['form-id'], $hiddenColumns);
+	update_user_meta($userId, 'hidden_columns_'.$request['form-id'], $hiddenColumns);
 
-		return 'Succesfully updated column settings';
-	}else{
-		return new \WP_Error('Error','You are not logged in');
-	}
+	return 'Succesfully updated column settings';
 }
 
 function deleteTablePrefs( \WP_REST_Request $request ) {
-	if (is_user_logged_in()) {
-		$userId		= get_current_user_id();
-		delete_user_meta($userId, 'hidden_columns_'.$request['form-id']);
+	$userId		= get_current_user_id();
+	delete_user_meta($userId, 'hidden_columns_'.$request['form-id']);
 
-		return 'Succesfully reset column visibility';
-	}else{
-		return new \WP_Error('error','You are not logged in');
-	}
+	return 'Succesfully reset column visibility';
 }
 
 function saveColumnSettings($settings=[], $shortcodeId=''){
-	$forms	= new SaveFormSettings($_POST);
+	$forms	= new SaveFormSettings();
 	
 	if($settings instanceof \WP_REST_Request){
 		$params			= $settings->get_params();
@@ -306,7 +309,7 @@ function saveTableSettings(){
 	}
 
 	//update table settings
-	$forms	= new SaveFormSettings($_POST);
+	$forms	= new SaveFormSettings();
 	
 	$result = $forms->insertOrUpdateData($forms->shortcodeTable, $tableSettings, ['id' => $_POST['shortcode-id']]);
 
@@ -333,13 +336,13 @@ function saveTableSettings(){
 function removeSubmission(){
 	$formTable	= new EditFormResults($_POST);
 
-	$result		= $formTable->deleteSubmission($_POST['submission-id']);
+	$result		= $formTable->deleteSubmission((int) $_POST['submission-id']);
 	
 	if(is_wp_error($result)){
 		return $result;
 	}
 
-	do_action('tsjippy-forms-entry-removed', $formTable, $_POST['submission-id']);
+	do_action('tsjippy-forms-entry-removed', $formTable, (int) $_POST['submission-id']);
 
 	return "Entry with id {$_POST['submission-id']} succesfully removed";
 }
@@ -349,7 +352,7 @@ function removeSubmission(){
  */
 function archiveSubmission(){
 	$formTable					= new EditFormResults($_POST);
-	$formTable->submissionId	= $_POST['submission-id'];
+	$formTable->submissionId	= (int) $_POST['submission-id'];
 	$action						= $_POST['action'];
 
 	if($action	== 'archive'){

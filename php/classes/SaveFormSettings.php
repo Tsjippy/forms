@@ -16,6 +16,14 @@ class SaveFormSettings extends Forms{
 		parent::__construct();
 	}
 
+	/**
+	 * Gets a unique name for a form element
+	 *
+	 * @param object $element The form element
+	 * @param bool $update Whether this is an update operation
+	 * @param object $oldElement The old form element
+	 * @return string The unique name
+	 */
 	public function getUniqueName($element, $update, $oldElement){
 		global $wpdb;
 
@@ -107,7 +115,6 @@ class SaveFormSettings extends Forms{
 	 * 
 	 * @param	string			$table		The table to insert/update the data into	
 	 * @param 	object|array	$data		The data to be stored
-	 * @param	array			$formats	The format the data should follow
 	 * @param	array			$where		The where clause for updates
 	 * @param	array			$whereFormat The format of the where clause
 	 * 
@@ -330,17 +337,22 @@ class SaveFormSettings extends Forms{
 		// Get all elements of this form
 		$this->getAllFormElements('priority', $this->formData->id, true);
 
-		foreach($this->formElements	as &$element){
-			if(is_numeric($newIndexes[$element->id]) && $element->priority != $newIndexes[$element->id]){
-				$element->priority	= $newIndexes[$element->id];
+		foreach($this->formElements	as &$el){
+			if(is_numeric($newIndexes[$el->id]) && $el->priority != $newIndexes[$el->id]){
+				$el->priority	= $newIndexes[$el->id];
 
-				$this->updatePriority($element);
+				$this->updatePriority($el);
 			}
 		}
 	}
 
 	/**
 	 * Update form settings
+	 * 
+	 * @param	int|string	$formId	The id of the form to update the settings for
+	 * @param	array		$settings	The settings to update, this should be an associative array where the keys are the column names in the db and the values are the values to update
+	 * 
+	 * @return	true|WP_Error				The result or error on failure
 	 */
 	public function updateFormSettings($formId='', $settings=''){
 		if(empty($formId)){
@@ -367,6 +379,11 @@ class SaveFormSettings extends Forms{
 
 	/**
 	 * Stores the form reminder settings in the db
+	 * 
+	 * @param	int|string	$formId	The id of the form to update the reminder settings for
+	 * @param	array		$settings	The reminder settings to update, this should be an
+	 * 
+	 * return	true|WP_Error				The result or error on failure
 	 */
 	public function updateFormReminder($formId, $settings){
 		if(empty($formId)){
@@ -447,6 +464,11 @@ class SaveFormSettings extends Forms{
 
 	/**
 	 * Updates the form e-mails in the db
+	 * 
+	 * @param	array		$formEmails	The form e-mails to be saved, this should be an array of associative arrays where the keys are the column names in the db and the values are the values to update
+	 * @param	int|string	$formId		The id of the form to update the e-mails for
+	 * 
+	 * @return	true|WP_Error					The result or error on failure
 	 */
 	public function saveFormEmails($formEmails, $formId){
 		global $wpdb;
@@ -463,7 +485,9 @@ class SaveFormSettings extends Forms{
 			$idsToDelete	= implode(',', $emailsToDelete);
 
 			$wpdb->query("DELETE FROM {$this->formEmailTable} WHERE id IN ($idsToDelete)");
-		}	
+		}
+
+		$result	= true;
 		
 		// Update each email
 		foreach($formEmails as $email){
