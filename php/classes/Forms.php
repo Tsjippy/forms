@@ -457,6 +457,10 @@ class Forms{
 	public function insertForm($slug=''){
 		global $wpdb;
 
+		if(empty($this->formData)){
+			$this->formData 	=  new \stdClass();
+		}
+
 		if(empty($slug) && !empty($this->formData->slug)){
 			$slug = $this->formData->slug;
 		}else{
@@ -739,7 +743,6 @@ class Forms{
 
 				TSJIPPY\printArray("Form requested on {$post->post_type} on $url does not exist. Query used is '$query'");
 				$this->insertForm();
-				$this->formData 	=  new \stdClass();
 			}else{
 				$this->formData 					= (object)$result[0];
 				$this->formData->actions			= maybe_unserialize($this->formData->actions);
