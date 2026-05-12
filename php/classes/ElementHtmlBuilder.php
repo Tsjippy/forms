@@ -48,6 +48,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		$this->tagType					= '';
 		$this->selectedValue			= '';
 		$this->attributes				= ['class' => ''];
+		$this->usermeta					= [];
 	}
 
 	/**
@@ -198,7 +199,6 @@ class ElementHtmlBuilder extends SubmitForm{
 		//only load usermeta once
 		if(!is_array($this->usermeta)){
 			//usermeta comes as arrays, only keep the first
-			$this->usermeta	= [];
 			foreach(get_user_meta($this->userId) as $key => $meta){
 				$this->usermeta[$key]	= $meta[0];
 			}
@@ -1099,10 +1099,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
 		// Add all the list items
 		foreach($this->requestedValue as $v){
-			if(method_exists($this, 'transformInputData')){
-				if(empty($this->submissions)){
-					$this->submissions	= $this->submissions;
-				}
+			if(method_exists($this, 'transformInputData') && !empty($this->submissions)){
 				$transValue		= $this->transformInputData($v, $this->element->slug, $this->submissions[0]);
 			}else{
 				$transValue		= $v;

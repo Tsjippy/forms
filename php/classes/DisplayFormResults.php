@@ -44,6 +44,11 @@ class DisplayFormResults extends DisplayForm{
 		$this->sortElementIds			= [];
 		$this->sortDirection			= 'ASC';
 		$this->spliced					= false;
+		$this->currentPage				= 0;
+		$this->ownData					= false;
+		$this->formEditPermissions		= false;
+		$this->tableViewPermissions		= false;
+		$this->tableEditPermissions		= false;
 
 		// add the elements filter before the parent construct, as that will apply the filter
 		add_filter('tsjippy-forms-elements', [$this, 'addExtraElements'], 10, 3);
@@ -96,24 +101,24 @@ class DisplayFormResults extends DisplayForm{
 			// -6 = archived indexes
 			// -7 = hash
 			-4 => [
-				'slug'				=> 'time_last_edited',
-				'name'			=> 'Last edit time',
-				'type'				=> 'date'
+				'slug'	=> 'time_last_edited',
+				'name'	=> 'Last edit time',
+				'type'	=> 'date'
 			],
 			-3 => [
-				'slug'				=> 'time_created',
-				'name'			=> 'Submission date',
-				'type'				=> 'date'
+				'slug'	=> 'time_created',
+				'name'	=> 'Submission date',
+				'type'	=> 'date'
 			],
 			-2 => [
-				'slug'				=> 'submitter_id',
-				'name'			=> 'Submitted By',
-				'type'				=> 'number'
+				'slug'	=> 'submitter_id',
+				'name'	=> 'Submitted By',
+				'type'	=> 'number'
 			],
 			-1 => [
-				'slug'				=> 'id',
-				'name'			=> 'ID',
-				'type'				=> 'number'
+				'slug'	=> 'id',
+				'name'	=> 'ID',
+				'type'	=> 'number'
 			]			
 		];
 
@@ -434,7 +439,7 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * Build the Common Table Expressions (CTE) needed to make the pivot query
 		 */
-		$splitElements		= $this->formData->split ?? [];
+		$splitElements		= (array) $this->formData->split ?? [];
 		$existingColumns	= ['id', 'form_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
 
 		$columns			= $existingColumns;
@@ -675,7 +680,7 @@ class DisplayFormResults extends DisplayForm{
 			$sortables	= [];
 			foreach($this->sortElementIds as $elementId){
 				if($elementId < 0){
-					$elementId 	= $this->extraElements[$elementId]['name'];
+					$elementId 	= $this->extraElements[$elementId]['slug'];
 				}
 
 				$sortables[] = "`$elementId` $this->sortDirection";

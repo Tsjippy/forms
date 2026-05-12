@@ -51,7 +51,8 @@ class DisplayForm extends ElementHtmlBuilder{
 	/**
 	 * Build all html for a particular element including edit controls.
 	 *
-	 * @param	object	$element		The element
+	 * @param	object		$element		The element
+	 * @param	\DOMElement	$parent			The parent node to which the element should be added
 	 *
 	 * @return	string					The html
 	 */
@@ -158,50 +159,59 @@ class DisplayForm extends ElementHtmlBuilder{
 		return $node;
 	}
 	
+	/**
+	 * Adds form step controls to the form
+	 *
+	 * @param	\DOMElement	$parent		The parent node to which the controls should be added
+	 *
+	 * @return	\DOMELEMENT				The next button node, needed for formstep logic in the js
+	 */
 	public function formStepControls($parent){
 		// formstep buttons
-		if($this->isFormStep){
-			$formstepButtonWrapper 	= $this->addElement("div", $parent, ['class' => 'multi-step-controls hidden']);
-			$wrapper 				= $this->addElement("div", $formstepButtonWrapper, ['class' => 'multi-step-controls-wrapper']);
-			$prevWrapper 			= $this->addElement('div', $wrapper,	['style' => 'flex:1;']);
-			
-			/**
-			 * Previous button
-			 */
-			$this->addElement(	
-				"button", 
-				$prevWrapper, 
-				[
-					'type' => 'button', 
-					'class' =>'button',
-					'name' => 'previous-button'
-				],
-				'Previous'
-			);
-			
-			//Circles which indicates the steps of the form:
-			$indicatorWrapper = $this->addElement('div', $wrapper,	['class' => 'step-wrapper', 'style' => 'flex:1;text-align:center;margin:auto;']);
-			for ($x = 1; $x <= $this->formStepCounter; $x++) {
-				$this->addElement('span', $indicatorWrapper, [ 'class' => 'step']);
-			}
-		
-			/**
-			 * Next button
-			 */
-			$nextWrapper = $this->addElement("div", $wrapper, ['style' => 'flex:1;']);
-			$this->addElement(
-				'button', 
-				$nextWrapper,
-				[
-					'type'	=> 'button', 
-					'class' => 'button next-button', 
-					'name'	=> 'next-button'
-				],
-				'Next'
-			);
- 
-		return $nextWrapper;
+		if(!$this->isFormStep){
+			return $parent;
 		}
+		
+		$formstepButtonWrapper 	= $this->addElement("div", $parent, ['class' => 'multi-step-controls hidden']);
+		$wrapper 				= $this->addElement("div", $formstepButtonWrapper, ['class' => 'multi-step-controls-wrapper']);
+		$prevWrapper 			= $this->addElement('div', $wrapper,	['style' => 'flex:1;']);
+		
+		/**
+		 * Previous button
+		 */
+		$this->addElement(	
+			"button", 
+			$prevWrapper, 
+			[
+				'type' => 'button', 
+				'class' =>'button',
+				'name' => 'previous-button'
+			],
+			'Previous'
+		);
+		
+		//Circles which indicates the steps of the form:
+		$indicatorWrapper = $this->addElement('div', $wrapper,	['class' => 'step-wrapper', 'style' => 'flex:1;text-align:center;margin:auto;']);
+		for ($x = 1; $x <= $this->formStepCounter; $x++) {
+			$this->addElement('span', $indicatorWrapper, [ 'class' => 'step']);
+		}
+	
+		/**
+		 * Next button
+		 */
+		$nextWrapper = $this->addElement("div", $wrapper, ['style' => 'flex:1;']);
+		$this->addElement(
+			'button', 
+			$nextWrapper,
+			[
+				'type'	=> 'button', 
+				'class' => 'button next-button', 
+				'name'	=> 'next-button'
+			],
+			'Next'
+		);
+
+		return $nextWrapper;
 }
 				
 	/**

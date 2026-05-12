@@ -8,16 +8,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class FormBuilderForm extends DisplayForm{
-	public $isInDiv;
-	public $defaultArrayValues;
-	public $defaultValues;
-	public $nextElement;
-	public $prevElement;
-	public $currentElement;
-	public $elementHtmlBuilder;
-	protected $inMultiAnswer;
-	public $reminders;
-	public $usermeta;
+	public bool $inMultiAnswer;
+	public bool $isInDiv;
+	
 
 	public function __construct($atts=[]){
 		parent::__construct();
@@ -29,6 +22,7 @@ class FormBuilderForm extends DisplayForm{
 		}
 
 		$this->inMultiAnswer	= false;
+		$this->isInDiv			= false;
 	}
 
 	/**
@@ -87,6 +81,12 @@ class FormBuilderForm extends DisplayForm{
 		return $html;
 	}
 
+	/**
+	 * Adds meta symbols to an element based on its properties
+	 *
+	 * @param	object	$parent	The parent node
+	 * @param	object	$element	The element to add symbols to
+	 */
 	protected function addMetaSymbols($parent, $element){
 		//Add a symbol if this field has conditions or is required
 		if(empty($element->conditions) && !$element->required && !$element->mandatory){
@@ -392,8 +392,6 @@ class FormBuilderForm extends DisplayForm{
 
 	/**
 	 * Main function to show all
-	 *
-	 * @param	array	$atts	The attribute array of the WP Shortcode
 	 */
 	public function showForm(){
 		if(!is_user_logged_in()){
@@ -507,12 +505,12 @@ class FormBuilderForm extends DisplayForm{
 			]
 		);
 	
-		$this->nextElement		= '';
+		$this->nextElement		= null;
 		foreach($this->formElements as $key => $element){
 			if(isset($this->formElements[$key + 1])){
 				$this->nextElement		= $this->formElements[$key + 1];
 			}else{
-				$this->nextElement		= '';
+				$this->nextElement		= null;
 			}
 
 			$this->currentElement	= $element;
@@ -869,6 +867,9 @@ class FormBuilderForm extends DisplayForm{
 			}
 		}
 
+		$min='';
+		$max='';
+
 		if(!$triggerFound){
 			?>
 			<div class='warning'>
@@ -917,8 +918,6 @@ class FormBuilderForm extends DisplayForm{
 							<?php
 						}
 						
-						$min='';
-						$max='';
 						if(!empty($this->formReminder->frequency) && !empty($this->formReminder->period)){
 							// Selected data can not be in a previous window
 							$min = 'min="'.date("Y-m-d", strtotime("-{$this->formReminder->frequency} {$this->formReminder->period} + 1 day")).'"';
@@ -1907,12 +1906,13 @@ class FormBuilderForm extends DisplayForm{
 	 * @param int	$elementId	The id of the element. Default -1 for empty
 	 */
 	public function elementConditionsForm($elementId = -1){
+		$element	= null;
 		if($elementId != -1){
 			$element	= $this->getElementById($elementId);
 		}
 
 		if($elementId == -1 || empty($element->conditions)){
-			if(gettype($element) != 'object'){
+			if($elementId == -1 || gettype($element) != 'object'){
 				$element	= new stdClass();
 			}
 

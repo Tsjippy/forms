@@ -69,6 +69,8 @@ class Forms{
 		$this->userRoles					= $this->user->roles;
 		$this->userId						= $this->user->ID;
 		$this->formElements					= [];
+		$this->onlyOwn						= false;
+		$this->all							= false;
 		
 		if(isset($_REQUEST['all'])){
 			$this->pageSize					= 99999;
@@ -293,7 +295,7 @@ class Forms{
 	/**
 	 * Defines the formats of each column in each table for use in $wpdb->insert and $wpdb->update
 	 */
-		private function tableFormats(){
+	private function tableFormats(){
 		// Form Settings
 		$formats			= [
 			'slug'					=> '%s',
@@ -859,7 +861,6 @@ class Forms{
 	public function elementMapper($force = false){
 		if(
 			empty($this->formData) || 
-			empty($this->formElements) ||
 			(
 				isset($this->elementMapping) && 
 				!empty($this->elementMapping['type']) && 
