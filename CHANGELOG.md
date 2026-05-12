@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- empty formdata error
 
 ### Updated
+
+## [11.1.8] - 2026-05-12
+
+
+### Fixed
+- empty formdata error
 
 ## [11.1.7] - 2026-05-12
 
