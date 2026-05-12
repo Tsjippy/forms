@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class FormReminders extends Forms{
     public array $metaForms;
     public array $defaultForms;
-    public array $reminders;
+    public array|bool $reminders;
     public string $html;
     private array $userIds;
     public array $mandatoryElements;

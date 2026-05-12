@@ -61,7 +61,10 @@ class DisplayFormResults extends DisplayForm{
 		if(empty($this->formData)){
 			$this->hiddenColumns		= [];
 		}elseif(!empty($this->formData->id)){
-			$this->hiddenColumns		= get_user_meta($this->user->ID, 'hidden_columns_'.$this->formData->id, true) ?? [];
+			$hiddenColumns		= get_user_meta($this->user->ID, 'hidden_columns_'.$this->formData->id, true);
+			if(empty($hiddenColumns)){
+				$this->hiddenColumns	= [];
+			}
 		}else{
 			return new WP_Error('forms', 'No form data found for the given form results shortcode');
 		}
@@ -1198,7 +1201,11 @@ class DisplayFormResults extends DisplayForm{
 	public function loadShortcodeData(){
 		global $wpdb;
 
-		if(!isset($this->shortcodeId) || !is_numeric($this->shortcodeId)){
+		if(
+			!isset($this->shortcodeId) || 
+			!is_numeric($this->shortcodeId) ||
+			$this->shortcodeId == -1
+		){
 			if(!empty($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])){
 				$this->shortcodeId	= $_POST['shortcode-id'];
 			}else{

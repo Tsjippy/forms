@@ -138,6 +138,13 @@ function showFormSelector($atts=[]){
 
 //shortcode to make forms
 add_shortcode( 'formbuilder', __NAMESPACE__.'\showForm');
+/**
+ * Displays a form based on the provided attributes
+ *
+ * @param   array   $atts    The shortcode attributes
+ *
+ * @return  string            The HTML for the form
+ */
 function showForm($atts){
     $forms   = new Forms();
     $html       = $forms->determineForm($atts);
@@ -149,6 +156,13 @@ function showForm($atts){
 }
 
 add_shortcode( 'formresults', __NAMESPACE__.'\formResults' );
+/**
+ * Displays form results based on the provided attributes
+ *
+ * @param   array   $atts    The shortcode attributes
+ *
+ * @return  string            The HTML for the form results
+ */
 function formResults($atts){
 	$displayFormResults = new DisplayFormResults($atts);
 	$html   = $displayFormResults->showFormresultsTable();
@@ -163,6 +177,13 @@ function formResults($atts){
 //Shortcode for recommended fields
 add_shortcode("missing_form_fields", __NAMESPACE__.'\missingFormFields');
 
+/**
+ * Displays recommended form fields based on the provided attributes
+ *
+ * @param   array   $atts    The shortcode attributes
+ *
+ * @return  string            The HTML for the recommended form fields
+ */
 function missingFormFields($atts){
     $a = shortcode_atts( array(
         'type'   => 'mandatory'
@@ -185,10 +206,18 @@ function missingFormFields($atts){
 }
 
 add_filter( 'wp_insert_post_data', __NAMESPACE__.'\insertPostData', 10, 2 );
+/**
+ * Checks if the content contains a form shortcode and if so, creates the form and replaces the shortcode with the form
+ *
+ * @param   array   $data       The post data to be inserted into the database
+ * @param   array   $postarr    The original post data before it was modified by this filter
+ *
+ * @return  array   The modified post data to be inserted into the database
+ */
 function insertPostData($data , $postarr){
 	if(function_exists('wp_get_current_user')){
 		$formtable  = new DisplayFormResults($_POST);
-        return $formtable->checkForFormShortcode($data , $postarr);
+        return $formtable->checkForFormShortcode($data);
 	}
 
 	return $data;
