@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- initializing error
 
 ### Updated
+
+## [11.2.1] - 2026-05-13
+
+
+### Fixed
+- initializing error
 
 ## [11.1.9] - 2026-05-12
 
