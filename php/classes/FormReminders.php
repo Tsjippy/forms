@@ -125,7 +125,7 @@ class FormReminders extends Forms{
         }
 
         // Get the forms that have a stardate in the past
-        $date				= date('Y-m-d');
+        $date				= gmdate('Y-m-d');
 
         $query				= "SELECT * FROM {$this->formReminderTable} WHERE reminder_start_date <= '$date'";
 
@@ -139,7 +139,7 @@ class FormReminders extends Forms{
             $form	= $this->formData;
 
             // get the start day of the week
-            $day = date('D', strtotime($formReminder->reminder_start_date));
+            $day = gmdate('D', strtotime($formReminder->reminder_start_date));
 
             // This is a form that saves its data in the user meta, so we use different logic for that
             if($this->formData->save_in_meta){
@@ -342,8 +342,8 @@ class FormReminders extends Forms{
             if(isset($check['conditional-value'])){
                 $checkValue			= $check['conditional-value'];
                 $conditionalValue	= strtotime($check['conditional-value']);
-                if($conditionalValue && Date('Y', $conditionalValue) < 2200){
-                    $checkValue	= Date('Y-m-d', $conditionalValue);
+                if($conditionalValue && gmdate('Y', $conditionalValue) < 2200){
+                    $checkValue	= gmdate('Y-m-d', $conditionalValue);
                 }
             }
 
@@ -459,7 +459,7 @@ class FormReminders extends Forms{
      * @return string|array 			Returns html links to forms who are due for submission if a user_id is given, an array of form => [user_ids] otherwise
      */
     public function getAllFormRemindersForToday($includeMandatoryForms=true){
-        $today      = date('D');
+        $today      = gmdate('D');
 	    $family	    = new TSJIPPY\FAMILY\Family();
         $reminders  = [];
 
@@ -707,7 +707,7 @@ class FormReminders extends Forms{
      * Sends reminders by e-mail to submit or update a form
      */
     public function sendFormReminders(){
-        $today  = date('D');
+        $today  = gmdate('D');
 
         // Send e-mails for forms to be submitted
         foreach($this->defaultForms[$today] as $formDetails){

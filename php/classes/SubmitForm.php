@@ -602,9 +602,9 @@ class SubmitForm extends SaveFormSettings{
 
 		$formresults 						= $_POST;
 
-		$this->submission->time_created		= date("Y-m-d H:i:s");
+		$this->submission->time_created		= gmdate("Y-m-d H:i:s");
 
-		$this->submission->time_last_edited	= date("Y-m-d H:i:s");
+		$this->submission->time_last_edited	= gmdate("Y-m-d H:i:s");
 		
 		$this->submission->user_id			= $userId;
 		

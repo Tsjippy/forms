@@ -59,7 +59,7 @@ class EditFormResults extends DisplayFormResults{
 
 		// Always update the time_last_edited
 		$data = [
-			'time_last_edited'	=> date("Y-m-d H:i:s")
+			'time_last_edited'	=> gmdate("Y-m-d H:i:s")
 		];
 
 		$formats = [
@@ -263,7 +263,7 @@ class EditFormResults extends DisplayFormResults{
 		$result = $wpdb->update(
 			$this->submissionTableName,
 			array(
-				'time_last_edited'	=> date("Y-m-d H:i:s"),
+				'time_last_edited'	=> gmdate("Y-m-d H:i:s"),
 				'archived'			=> $archive
 			),
 			array(
@@ -343,7 +343,7 @@ class EditFormResults extends DisplayFormResults{
 					//If the keyword is a valid date keyword
 					if(strtotime($keyword)){
 						//convert to date
-						$triggerValue = date("Y-m-d", strtotime(str_replace('%', '', $triggerValue)));
+						$triggerValue = gmdate("Y-m-d", strtotime(str_replace('%', '', $triggerValue)));
 					}
 				}
 			}

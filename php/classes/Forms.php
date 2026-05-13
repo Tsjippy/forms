@@ -1432,8 +1432,8 @@ class Forms{
 			}
 
 			if(empty($this->submission->submissiondate)){
-				$this->submission->submissiondate	= date('d F y', strtotime($this->submission->time_created));
-				$this->submission->editdate			= date('d F y', strtotime($this->submission->time_last_edited));
+				$this->submission->submissiondate	= gmdate('d F y', strtotime($this->submission->time_created));
+				$this->submission->editdate			= gmdate('d F y', strtotime($this->submission->time_last_edited));
 			}
 			
 			if(isset($_REQUEST['subid']) && empty($this->submission->sub_id)){
@@ -1488,7 +1488,7 @@ class Forms{
 				if(is_array($replaceValue)){
 					$replaceValue	= apply_filters('tsjippy-forms-transform-array', implode(',', $replaceValue), $replaceValue, $this, $match);
 				}elseif(preg_match('/^(\d{4}-\d{2}-\d{2})$/', $replaceValue, $matches)){
-					$replaceValue	= date(get_option('date_format'), strtotime((string)$matches[1]));
+					$replaceValue	= gmdate(get_option('date_format'), strtotime((string)$matches[1]));
 				}
 
 				//replace the placeholder with the value
