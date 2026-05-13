@@ -316,6 +316,8 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * 
 	 * @param	string			$text	The text to show in the info box
 	 * @param	null|DOMElement	$parent	The parent element to add the info box to, if empty it will return the html as a string
+	 * 
+	 * @return	string|DOMElement		The info box html or the created DOMElement
 	 */
 	public function infoBoxHtml($text, $parent=null){
 		$returnHtml	 	= false;

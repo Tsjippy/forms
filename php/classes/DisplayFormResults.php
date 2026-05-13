@@ -49,6 +49,7 @@ class DisplayFormResults extends DisplayForm{
 		$this->formEditPermissions		= false;
 		$this->tableViewPermissions		= false;
 		$this->tableEditPermissions		= false;
+		$this->tableSettings			= new stdClass();
 
 		// add the elements filter before the parent construct, as that will apply the filter
 		add_filter('tsjippy-forms-elements', [$this, 'addExtraElements'], 10, 3);
