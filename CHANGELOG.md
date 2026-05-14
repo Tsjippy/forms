@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.2.2] - 2026-05-14
+
+
+### Changed
 - date( to gmdate(
 
 ### Fixed
 - initialization bug
-
-### Updated
 
 ## [11.2.1] - 2026-05-13
 
