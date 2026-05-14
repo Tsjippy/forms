@@ -9,68 +9,87 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Forms{
-	
+
+	public bool $all;			// do not page submissions
+	protected bool $clonableFormStep;
+	public bool $editRights;
+	public array $elementMapping;
+	public string $elTableName;
+	public array $emailSettings;
+	public object $formData;
+	public array $formElements;
+	public string $formEmailTable;
+	public int $formId;
+	public object|null $formReminder;
+	public string $formReminderTable;
+	public array $forms;
+	public int $formStepCounter;
 	public bool $isFormStep;
 	public bool $isMultiStepForm;
-	protected bool $clonableFormStep;
-	public int $formStepCounter;
-	public array $nonInputs;
-	public array $multiInputsHtml;
-	public \WP_User $user;
-	public array $userRoles;
-	public int $userId;
-	public int $pageSize;
-	public bool $multiwrap;
-	public array $submitRoles;
-	public bool $showArchived;
-	public bool $editRights;
-	public object $formData;
-	public array $elementMapping;
-	public array $forms;
-	public int $formId;
-	public array $formElements;
 	public string $jsFileName;
-	public array $slugs;
-	public int $shortcodeId;
+	public array $multiInputsHtml;
+	public bool $multiwrap;
+	public array $nonInputs;
+	public string $objectName;
 	public bool $onlyOwn;
-	public object $submission;
+	public int $pageSize;
+	public string $shortcodeColumnSettingsTable;
+	public int $shortcodeId;
+	public string $shortcodeTable;
+	public bool $showArchived;
+	public array $slugs;
+	public object|null $submission;
 	public array $submissions;
-	public string $tableName;
-	public string $formReminderTable;
-	public string $elTableName;
 	public string $submissionTableName;
 	public string $submissionValuesTableName;
-	public string $formEmailTable;
-	public string $shortcodeTable;
-	public string $shortcodeColumnSettingsTable;
-	public array $emailSettings;
-	public object $formReminder;
-	protected string $userIdElementName;
+	public array $submitRoles;
 	protected array $tableFormats;
-	public string $objectName;
-	public bool $all;			// do not page submissions
+	public string $tableName;
+	public \WP_User $user;
+	public int $userId;
+	protected string $userIdElementName;
+	public array $userRoles;
 
 	public function __construct(){
 		global $wpdb;
-		
-		$this->isMultiStepForm				= false;
+
+		$this->all							= false;
+		$this->clonableFormStep				= false;
+		$this->elementMapping				= [];
+		$this->elTableName					= $wpdb->prefix . 'tsjippy_form_elements';
+		$this->emailSettings 				= [];
+		$this->formData						= new stdClass();
+		$this->formEmailTable				= $wpdb->prefix . 'tsjippy_form_emails';
+		$this->formElements					= [];
+		$this->formId						= -1;
+		$this->formReminder 				= null;
+		$this->formReminderTable			= $wpdb->prefix . 'tsjippy_form_reminders';
+		$this->forms						= [];
 		$this->formStepCounter				= 0;
+		$this->isFormStep					= false;
+		$this->isMultiStepForm				= false;
+		$this->jsFileName 					= '';
+		$this->multiInputsHtml				= [];
+		$this->multiwrap					= false;
+		$this->nonInputs					= ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi-start', 'multi-end', 'div-start', 'div-end'];
+		$this->objectName 					= '';
+		$this->onlyOwn						= false;
+		$this->shortcodeColumnSettingsTable	= $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
+		$this->shortcodeId 					= -1;
+		$this->shortcodeTable				= $wpdb->prefix . 'tsjippy_form_shortcodes';
+		$this->showArchived					= false;
+		$this->slugs 						= [];
+		$this->submission 					= null;
+		$this->submissions 					= [];
 		$this->submissionTableName			= $wpdb->prefix . 'tsjippy_form_submissions';
 		$this->submissionValuesTableName	= $wpdb->prefix . 'tsjippy_form_submission_values';
+		$this->submitRoles					= [];
+		$this->tableFormats 				= [];
 		$this->tableName					= $wpdb->prefix . 'tsjippy_forms';
-		$this->formReminderTable			= $wpdb->prefix . 'tsjippy_form_reminders';
-		$this->elTableName					= $wpdb->prefix . 'tsjippy_form_elements';
-		$this->formEmailTable				= $wpdb->prefix . 'tsjippy_form_emails';
-		$this->shortcodeColumnSettingsTable	= $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
-		$this->shortcodeTable				= $wpdb->prefix . 'tsjippy_form_shortcodes';
-		$this->nonInputs					= ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi-start', 'multi-end', 'div-start', 'div-end'];
-		$this->multiInputsHtml				= [];
 		$this->user 						= wp_get_current_user();
-		$this->userRoles					= $this->user->roles;
 		$this->userId						= $this->user->ID;
-		$this->formElements					= [];
-		$this->onlyOwn						= false;
-		$this->all							= false;
+		$this->userIdElementName 			= '';
+		$this->userRoles					= $this->user->roles;
 		
 		if(isset($_REQUEST['all'])){
 			$this->pageSize					= 99999;
@@ -79,10 +98,6 @@ class Forms{
 		}else{
 			$this->pageSize					= 50;
 		}
-
-		$this->multiwrap					= false;
-		$this->submitRoles					= [];
-		$this->showArchived					= false;
 
 		//calculate full form rights
 		$object		= get_queried_object();
@@ -892,7 +907,6 @@ class Forms{
 	public function formSelect(){
 		$this->getForms();
 		
-		$this->slugs				= [];
 		foreach($this->forms as $form){
 			$this->slugs[]			= $form->slug;
 		}
