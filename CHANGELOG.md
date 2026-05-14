@@ -7,6 +7,7 @@
 - date( to gmdate(
 
 ### Fixed
+- initialization bug
 
 ### Updated
 
