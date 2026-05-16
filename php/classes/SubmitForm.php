@@ -139,7 +139,7 @@ class SubmitForm extends SaveFormSettings{
 			}
 
 			// Do the comparisson, do not proceed if no match
-			if(!version_compare($elValue, $compareElValue, $email->submitted_trigger['equation'])){
+			if(version_compare($elValue, $compareElValue, $email->submitted_trigger['equation']) !== 1){
 				return false;
 			}
 		}
