@@ -7,7 +7,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class EditFormResults extends DisplayFormResults{
-	public $submissionId;
+	public int|false $submissionId;
+
+	public function __construct(){
+		$this->submissionId	= false;
+	}
 	
 	/**
 	 * Update an existing form submission
@@ -16,7 +20,7 @@ class EditFormResults extends DisplayFormResults{
 	 * @param	mixed	$value		The value to set
 	 * @param	int		$subId		The sub id in case of multiple values for the same key, default null
 	 *
-	 * @return	true|WP_Error		The result or error on failure
+	 * @return	true|\WP_Error		The result or error on failure
 	 */
 	public function updateSubmission($elementId, $value, $subId = null){
 		global $wpdb;

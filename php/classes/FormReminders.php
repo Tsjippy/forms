@@ -21,6 +21,8 @@ class FormReminders extends Forms{
         $this->metaForms         = [];
         $this->defaultForms      = [];
         $this->html              = '';
+        $this->mandatoryElements = [];
+        $this->userReminders     = [];
 
         $this->getFormsWithReminders();
 

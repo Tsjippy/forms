@@ -13,24 +13,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DisplayFormResults extends DisplayForm{
 	use ExportFormResults;
 
-	public string $shortcodeTable;
-	public bool $enriched;
-	public array $excelContent;
-	public int $currentPage;
-	public int $total;
-	public array $hiddenColumns;
-	public array $columnSettings;
-	public object $tableSettings;
-	public bool $ownData;
-	public bool $formEditPermissions;
-	public bool $tableViewPermissions;
-	public bool $tableEditPermissions;
-	public array $sortElementIds;
-	public string $sortDirection;
-	public string $sortColumn;
-	public bool $spliced;
-	public array $subElements;
-	public array $extraElements;
+	public array 	$columnSettings;
+	public int 		$currentPage;
+	public bool 	$enriched;
+	public array 	$excelContent;
+	public array 	$extraElements;
+	public bool 	$formEditPermissions;
+	public array 	$hiddenColumns;
+	public bool 	$ownData;
+	public string 	$shortcodeTable;
+	public string 	$sortColumn;
+	public string 	$sortDirection;
+	public array 	$sortElementIds;
+	public bool 	$spliced;
+	public array 	$subElements;
+	public bool 	$tableEditPermissions;
+	public object 	$tableSettings;
+	public bool 	$tableViewPermissions;
+	public int 		$total;
 
 	/**
 	 * Constructor for the DisplayFormResults class
@@ -39,29 +39,12 @@ class DisplayFormResults extends DisplayForm{
 	public function __construct($atts){
 		global $wpdb;
 		
-		$this->shortcodeTable			= $wpdb->prefix . 'tsjippy_form_shortcodes';
-		$this->enriched					= false;
-		$this->sortElementIds			= [];
-		$this->sortDirection			= 'ASC';
-		$this->spliced					= false;
+		$this->columnSettings			= [];
 		$this->currentPage				= 0;
-		$this->ownData					= false;
+		$this->enriched					= false;
+		$this->excelContent				= [];
+		$this->extraElements			= [];
 		$this->formEditPermissions		= false;
-		$this->tableViewPermissions		= false;
-		$this->tableEditPermissions		= false;
-		$this->tableSettings			= new stdClass();
-
-		// add the elements filter before the parent construct, as that will apply the filter
-		add_filter('tsjippy-forms-elements', [$this, 'addExtraElements'], 10, 3);
-		
-		// call parent constructor
-		unset($atts['shortcode-id']);
-		parent::__construct($atts);
-
-		wp_enqueue_style('tsjippy_formtable_style');
-
-		$family							= new TSJIPPY\FAMILY\Family();
-		$this->user->partnerId			= $family->getPartner($this->user->ID);
 
 		//Get personal visibility
 		if(empty($this->formData)){
@@ -74,10 +57,33 @@ class DisplayFormResults extends DisplayForm{
 		}else{
 			return new WP_Error('forms', 'No form data found for the given form results shortcode');
 		}
+
+		$this->ownData					= false;
+		$this->shortcodeTable			= $wpdb->prefix . 'tsjippy_form_shortcodes';
+		$this->sortColumn				= '';
+		$this->sortDirection			= 'ASC';
+		$this->sortElementIds			= [];
+		$this->spliced					= false;
+		$this->subElements				= [];
+		$this->tableEditPermissions		= false;
+		$this->tableSettings			= new stdClass();
+		$this->tableViewPermissions		= false;
+		$this->total					= 0;
+
+		// add the elements filter before the parent construct, as that will apply the filter
+		add_filter('tsjippy-forms-elements', [$this, 'addExtraElements'], 10, 3);
+		
+		// call parent constructor
+		unset($atts['shortcode-id']);
+		parent::__construct($atts);
+
+		wp_enqueue_style('tsjippy_formtable_style');
+
+		$family							= new TSJIPPY\FAMILY\Family();
+		$this->user->partnerId			= $family->getPartner($this->user->ID);
 		
 		if(function_exists('is_user_logged_in') && is_user_logged_in()){
 			$this->userRoles[]	= 'everyone';//used to indicate view rights on permissions
-			$this->excelContent	= [];
 		}
 
 		$result	= $this->enrichColumnSettings();

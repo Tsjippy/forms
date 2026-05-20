@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class SubmitForm extends SaveFormSettings{
-	public function __construct($formData=''){
+	public function __construct($formData=null){
 		parent::__construct();
 		
 		if(!empty($formData)){

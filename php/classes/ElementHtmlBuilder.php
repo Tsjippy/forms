@@ -2,6 +2,7 @@
 namespace TSJIPPY\FORMS;
 
 use DOMElement;
+use stdClass;
 use TSJIPPY;
 use WP_Error;
 
@@ -10,35 +11,57 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class ElementHtmlBuilder extends SubmitForm{
-    public array $defaultArrayValues;
-    public object $element;
-    public object|null $prevElement;
-	public object|null $nextElement;
+	public array $attributes;
 	public object $currentElement;
-    public int $multiWrapValueCount;
-    public bool $wrap;
-    public array $defaultValues;
-    public \WP_User $user;
-	private mixed $requestedValue;
-	private array $elementValues;
-	private string $tagType;
-	private mixed $selectedValue;
-	public string $html;
+	public array $defaultArrayValues;
+	public array $defaultValues;
+	public object $dom;
+	public object $element;
+	public object $elementHtmlBuilder;
 	public object $formData;
 	public array $formElements;
-	public array $usermeta;
-	public array $submissions;
-	public array $attributes;
-	public object|null $multiwrapperFirstClone;
-	public int $multiWrapElementCount;
-	public int $minElForTabs;
-	public object $elementHtmlBuilder;
-	public array $nonWrappable;
-	public object $dom;
 	public DOMElement $formWrapper;
+	public string $html;
+	public int $minElForTabs;
+	public int $multiWrapElementCount;
+	public object|null $multiwrapperFirstClone;
+	public int $multiWrapValueCount;
+	public object|null $nextElement;
+	public array $nonWrappable;
+	public object|null $prevElement;
+	public array $submissions;
+	public array $usermeta;
+	public \WP_User $user;
+	public bool $wrap;
+	private array $elementValues;
+	private mixed $requestedValue;
+	private mixed $selectedValue;
+	private string $tagType;
 
     public function __construct(){
 		parent::__construct();
+
+	$this->currentElement;
+		$this->defaultArrayValues		= [];
+		$this->defaultValues			= [];
+		$this->dom						= new \DOMDocument();
+		$this->element					= new stdClass();
+		$this->elementHtmlBuilder		= new stdClass();
+		$this->formData					= new stdClass();
+		$this->formElements				= [];
+		$this->formWrapper				= new \DOMElement('');
+		$this->html						= '';
+		$this->minElForTabs				= -1;
+		$this->multiWrapElementCount	= -1;
+		$this->multiwrapperFirstClone	= null;
+		$this->multiWrapValueCount		= -1;
+		$this->nextElement				= null;
+		$this->nonWrappable				= [];
+		$this->prevElement				= null;
+		$this->submissions				= [];
+		$this->user						= new \WP_User();
+		$this->wrap						= false;
+		$this->requestedValue			= null;
         
 		$this->reset();
     }
