@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- class attribute fixes
 
 ### Updated
 
