@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- class attribute fixes
 
 ### Updated
+
+## [11.2.4] - 2026-05-20
+
+
+### Fixed
+- class attribute fixes
 
 ## [11.2.3] - 2026-05-16
 
