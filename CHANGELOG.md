@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- test if objects are not null
 
 ### Updated
 
