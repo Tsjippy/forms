@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- test if objects are not null
-- bugs
 
 ### Updated
+
+## [11.2.5] - 2026-05-21
+
+
+### Fixed
+- test if objects are not null
+- bugs
 
 ## [11.2.4] - 2026-05-20
 
