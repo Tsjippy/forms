@@ -82,12 +82,15 @@ class DisplayForm extends ElementHtmlBuilder{
 		 * in a div container, except for formsteps
 		 */
 		if(
-			!$this->isClonableFormStep() && 	// this is a clonable formstep and a multi-start element
-			!$this->prevElement->wrap &&		// this element is not wrapped in a previous element
+			!$this->isClonableFormStep() && 
+			(
+				empty($this->prevElement) ||	// this is a clonable formstep and a multi-start element
+				!$this->prevElement->wrap 
+			) &&		// this element is not wrapped in a previous element
 			$element->type != 'formstep'		// this is not a formstep
 		){
 			//Set the element width to 85 percent so that the info icon floats next to it
-			if($elementIndex != 0 && $this->prevElement->type == 'info'){
+			if($elementIndex != 0  && $this->prevElement->type == 'info'){
 				$width = 85;
 			//We are dealing with a label which is wrapped around the next element
 			}elseif($element->type == 'label' && !isset($element->wrap) && is_numeric($this->nextElement->width)){
@@ -360,7 +363,8 @@ class DisplayForm extends ElementHtmlBuilder{
 			// we finished wrapping remove last parent
 			elseif(
 				(
-					!$element->wrap && 
+					!$element->wrap &&
+					!empty($this->formElements[$index - 1]) && 
 					$this->formElements[$index - 1]->wrap
 				) ||
 				in_array($element->type, ['div-end', 'multi-end'])

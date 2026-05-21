@@ -15,12 +15,12 @@ class ElementHtmlBuilder extends SubmitForm{
 	public object $currentElement;
 	public array $defaultArrayValues;
 	public array $defaultValues;
-	public object $dom;
+	public object|null $dom;
 	public object $element;
 	public object $elementHtmlBuilder;
 	public object $formData;
 	public array $formElements;
-	public DOMElement $formWrapper;
+	public DOMElement|null $formWrapper;
 	public string $html;
 	public int $minElForTabs;
 	public int $multiWrapElementCount;
@@ -31,7 +31,6 @@ class ElementHtmlBuilder extends SubmitForm{
 	public object|null $prevElement;
 	public array $submissions;
 	public array $usermeta;
-	public \WP_User $user;
 	public bool $wrap;
 	private array $elementValues;
 	private mixed $requestedValue;
@@ -41,15 +40,15 @@ class ElementHtmlBuilder extends SubmitForm{
     public function __construct(){
 		parent::__construct();
 
-	$this->currentElement;
+		$this->currentElement			= new stdClass();
 		$this->defaultArrayValues		= [];
 		$this->defaultValues			= [];
-		$this->dom						= new \DOMDocument();
+		$this->dom						= null;
 		$this->element					= new stdClass();
 		$this->elementHtmlBuilder		= new stdClass();
 		$this->formData					= new stdClass();
 		$this->formElements				= [];
-		$this->formWrapper				= new \DOMElement('');
+		$this->formWrapper				= null;
 		$this->html						= '';
 		$this->minElForTabs				= -1;
 		$this->multiWrapElementCount	= -1;
@@ -59,7 +58,6 @@ class ElementHtmlBuilder extends SubmitForm{
 		$this->nonWrappable				= [];
 		$this->prevElement				= null;
 		$this->submissions				= [];
-		$this->user						= new \WP_User();
 		$this->wrap						= false;
 		$this->requestedValue			= null;
         
@@ -82,6 +80,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
 		if(
 			(
+				!empty($this->nextElement) &&
 				$this->nextElement->type == 'multi-start' && 
 				$this->currentElement->type == 'formstep'
 			) ||

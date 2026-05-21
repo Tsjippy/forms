@@ -7,13 +7,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class FormReminders extends Forms{
-    public array $metaForms;
-    public array $defaultForms;
-    public array|bool $reminders;
-    public string $html;
-    private array $userIds;
-    public array $mandatoryElements;
-    public array $userReminders;
+    public array        $metaForms;
+    public array        $defaultForms;
+    public array|bool   $reminders;
+    public string       $html;
+    private array       $userIds;
+    public array        $mandatoryElements;
+    public array        $userReminders;
 
     public function __construct(){
         parent::__construct();
