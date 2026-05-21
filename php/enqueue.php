@@ -18,7 +18,7 @@ function checkFormExistence($slug){
     // check if a form with this slug already exists
     $found  = false;
     foreach($forms->forms as $form){
-        if($form->slug == $slug){
+        if($form->slug == $slug || $form->id == $slug){
             $found  = true;
             break;
         }
@@ -62,13 +62,16 @@ function afterInsertPost($postId, $post){
             foreach($shortcodes as $shortcode){
                 // Only continue if the current shortcode is a formbuilder shortcode
                 if($shortcode[2] == 'formbuilder'){
+                    $atts   = shortcode_parse_atts($shortcode[3]);
                     // Get the formbuilder name from the shortcode
-                    $formName       = shortcode_parse_atts($shortcode[3])['formname'];
-                    if(empty($formName)){
-                        $formName       = shortcode_parse_atts($shortcode[3])['name'];
-                    }
-                    if(empty($formName)){
-                        $formName       = shortcode_parse_atts($shortcode[3])['slug'];
+                    if(!empty($atts['formname'])){
+                        $formName       = $atts['formname'];
+                    }elseif(!empty($atts['name'])){
+                        $formName       = $atts['name'];
+                    }elseif(!empty($atts['slug'])){
+                        $formName       = $atts['slug'];
+                    }elseif(!empty($atts['id'])){
+                        $formName       = $atts['id'];
                     }
 
                     $newFormName    = checkFormExistence($formName);

@@ -216,7 +216,7 @@ add_filter( 'wp_insert_post_data', __NAMESPACE__.'\insertPostData', 10, 2 );
  */
 function insertPostData($data , $postarr){
 	if(function_exists('wp_get_current_user')){
-		$formtable  = new DisplayFormResults($_POST);
+		$formtable  = new DisplayFormResults([]);
         return $formtable->checkForFormShortcode($data);
 	}
 

@@ -1304,7 +1304,7 @@ class Forms{
 
 		$query				= "SELECT * FROM {$this->elTableName} WHERE `form_id`=";
 
-		if(is_numeric($this->formData->id)){
+		if(is_numeric($this->formData->id) && $this->formData->id > -1){
 			$query	.= $this->formData->id;
 		}elseif(!empty($this->formData->slug)){
 			$query	.= "(SELECT `id` FROM {$this->tableName} WHERE slug='{$this->formData->slug}' LIMIT 1)";
