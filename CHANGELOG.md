@@ -7,6 +7,7 @@
 
 ### Fixed
 - test if objects are not null
+- bugs
 
 ### Updated
 
