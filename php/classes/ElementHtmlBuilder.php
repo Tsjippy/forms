@@ -1121,39 +1121,41 @@ class ElementHtmlBuilder extends SubmitForm{
 		// The unoredered list for choices made
 		$selectionList	= $this->addElement("ul", $wrapper, ['class' => 'list-selection-list']);
 
-		// Add all the list items
-		foreach($this->requestedValue as $v){
-			if(method_exists($this, 'transformInputData') && !empty($this->submissions)){
-				$transValue		= $this->transformInputData($v, $this->element->slug, $this->submissions[0]);
-			}else{
-				$transValue		= $v;
+		if(!empty($this->requestedValue)){
+			// Add all the list items
+			foreach($this->requestedValue as $v){
+				if(method_exists($this, 'transformInputData') && !empty($this->submissions)){
+					$transValue		= $this->transformInputData($v, $this->element->slug, $this->submissions[0]);
+				}else{
+					$transValue		= $v;
+				}
+
+				$listItem	= $this->addElement('li', $selectionList, ['class' => 'list-selection']);
+
+				$button		= $this->addElement(
+					'button', 
+					$listItem, 
+					[
+						'type'	=> 'button',
+						'class'	=> 'small remove-list-selection'
+					]
+				);
+
+				$this->addElement('span', $button, ['class' => 'remove-list-selection'], '×');
+
+				$this->addElement(
+					'input',
+					$listItem,
+					[
+						'type'	=> 'hidden',
+						'class'	=> 'no-reset',
+						'name'	=> $elName,
+						'value'	=> $v
+					]
+				);
+
+				$this->addElement('span', $listItem, ['class' => 'selected-name'], $transValue);
 			}
-
-			$listItem	= $this->addElement('li', $selectionList, ['class' => 'list-selection']);
-
-			$button		= $this->addElement(
-				'button', 
-				$listItem, 
-				[
-					'type'	=> 'button',
-					'class'	=> 'small remove-list-selection'
-				]
-			);
-
-			$this->addElement('span', $button, ['class' => 'remove-list-selection'], '×');
-
-			$this->addElement(
-				'input',
-				$listItem,
-				[
-					'type'	=> 'hidden',
-					'class'	=> 'no-reset',
-					'name'	=> $elName,
-					'value'	=> $v
-				]
-			);
-
-			$this->addElement('span', $listItem, ['class' => 'selected-name'], $transValue);
 		}
 
 		/**

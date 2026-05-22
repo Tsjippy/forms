@@ -51,7 +51,7 @@ trait CreateJs{
             //Loop over the conditions
             foreach($conditions as $conditionIndex => $condition){
                 //if there are rules build some javascript
-                if(is_array($condition['rules'])){
+                if(!empty($condition['rules']) && is_array($condition['rules'])){
                     //Open the if statemenet
                     $lastRuleKey			= array_key_last($condition['rules']);
                     $fieldCheckIf 		    = "";
@@ -61,9 +61,10 @@ trait CreateJs{
                     
                     //Loop over the rules
                     foreach($condition['rules'] as $ruleIndex => $rule){
-                        $fieldNumber1	= $ruleIndex * 2  + 1;
-                        $fieldNumber2	= $fieldNumber1 + 1;
-                        $equation		= str_replace(' value', '', $rule['equation']);
+                        $fieldNumber1	        = $ruleIndex * 2  + 1;
+                        $fieldNumber2	        = $fieldNumber1 + 1;
+                        $equation		        = str_replace(' value', '', $rule['equation']);
+                        $conditionalField2Name  = '';
                         
                         //Get field names of the fields who's value we are checking
                         if(is_numeric($rule['conditional-field'])){
@@ -291,7 +292,7 @@ trait CreateJs{
                             }
                         }
 
-                        foreach($conditions['copyto'] as $fieldIndex){
+                        foreach($conditions['copyto'] ?? [] as $fieldIndex){
                             if(!is_numeric($fieldIndex)){
                                 continue;
                             }
@@ -515,7 +516,7 @@ trait CreateJs{
                 foreach($check['variables'] as $variable){
                     //Only write same var definition once
                     $varParts  = explode(' = ', $variable);
-                    if($prevVar[$varParts[0]] != $varParts[1]){
+                    if(!isset($prevVar[$varParts[0]]) || $prevVar[$varParts[0]] != $varParts[1]){
                         $newJs  .= "\t\t\t$variable\n";
                         $prevVar[$varParts[0]] = $varParts[1];
                     }
@@ -547,7 +548,7 @@ trait CreateJs{
                                 $newJs  .= $this->buildQuerySelector($action, "\t\t\t\t");
                             }else{
                                 $newJs  .= "\t\t\t\t$action\n";
-                                if(str_contains($action, 'formstep')){
+                                if(str_contains((string) $action, 'formstep')){
                                     $newJs  .= "\t\t\t\tFormFunctions.updateMultiStepControls(form);\n";
                                 }
                             }

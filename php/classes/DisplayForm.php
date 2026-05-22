@@ -90,7 +90,7 @@ class DisplayForm extends ElementHtmlBuilder{
 			$element->type != 'formstep'		// this is not a formstep
 		){
 			//Set the element width to 85 percent so that the info icon floats next to it
-			if($elementIndex != 0  && $this->prevElement->type == 'info'){
+			if($elementIndex != 0  && !empty($this->prevElement) && $this->prevElement->type == 'info'){
 				$width = 85;
 			//We are dealing with a label which is wrapped around the next element
 			}elseif($element->type == 'label' && !isset($element->wrap) && is_numeric($this->nextElement->width)){
