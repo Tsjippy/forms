@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- bugs
-- undeined error
 
 ### Updated
+
+## [11.2.6] - 2026-05-22
+
+
+### Fixed
+- bugs
+- undeined error
 
 ## [11.2.5] - 2026-05-21
 
