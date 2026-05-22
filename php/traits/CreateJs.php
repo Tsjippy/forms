@@ -269,7 +269,7 @@ trait CreateJs{
                             $action = 'add';
                         }
 
-                        if(!is_array($actionArray['querystrings'][$action])){
+                        if(empty($actionArray['querystrings'][$action]) || !is_array($actionArray['querystrings'][$action])){
                             $actionArray['querystrings'][$action] = [];
                         }
                         
