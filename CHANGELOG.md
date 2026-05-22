@@ -7,6 +7,7 @@
 
 ### Fixed
 - bugs
+- undeined error
 
 ### Updated
 
