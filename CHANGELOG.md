@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- empty prev el error
 
 ### Updated
+
+## [11.2.7] - 2026-05-23
+
+
+### Fixed
+- empty prev el error
 
 ## [11.2.6] - 2026-05-22
 
