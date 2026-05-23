@@ -125,7 +125,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
 		
 		//Change ID to user_id because its a confusing name
-		$this->defaultValues['user_id']	= $this->defaultValues['ID'];
+		$this->defaultValues['user_id']	= $this->defaultValues['ID'] ?? 0;
 		unset($this->defaultValues['ID']);
 		
 		foreach(['user_pass', 'user_activation_key', 'user_status', 'user_level'] as $field){
@@ -510,6 +510,10 @@ class ElementHtmlBuilder extends SubmitForm{
 			$dom	= $this->dom;
 		}
 
+		if(empty($textContent)){
+			$textContent	= '';
+		}
+
 		try {
 			// Text content should not contain <br> tags, replace them with new line characters
 			$textContent = str_replace('<br>', "\n", $textContent);
@@ -529,6 +533,10 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
 
 		foreach($attributes as $attribute => $value){
+			if($value == null){
+				continue;
+			}
+
 			try{
 				$node->setAttribute($attribute, $value);
 			} catch (\DOMException $e) {

@@ -347,7 +347,10 @@ class DisplayForm extends ElementHtmlBuilder{
 				(
 					(
 						$element->wrap &&													// this is the first wraping element
-						!$this->formElements[$index - 1]->wrap
+						(	
+							empty($this->formElements[$index - 1]) ||
+							!$this->formElements[$index - 1]->wrap
+						)
 					) || 
 					in_array($element->type, ['formstep', 'div-start', 'multi-start']) ||	// this is a wrapping element type
 					$this->clonableFormStep													// this is a clonable forstep multi-start
