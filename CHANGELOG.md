@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- empty prev el error
 
 ### Updated
 
