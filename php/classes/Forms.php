@@ -10,45 +10,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Forms{
 
-	public bool $all;			// do not page submissions
-	protected bool $clonableFormStep;
-	public bool $editRights;
-	public array $elementMapping;
-	public string $elTableName;
-	public array $emailSettings;
-	public object $formData;
-	public array $formElements;
-	public string $formEmailTable;
-	public int $formId;
-	public object|null $formReminder;
-	public string $formReminderTable;
-	public array $forms;
-	public int $formStepCounter;
-	public bool $isFormStep;
-	public bool $isMultiStepForm;
-	public string $jsFileName;
-	public array $multiInputsHtml;
-	public bool $multiwrap;
-	public array $nonInputs;
-	public string $objectName;
-	public bool $onlyOwn;
-	public int $pageSize;
-	public string $shortcodeColumnSettingsTable;
-	public int $shortcodeId;
-	public string $shortcodeTable;
-	public bool $showArchived;
-	public array $slugs;
-	public object|null $submission;
-	public array $submissions;
-	public string $submissionTableName;
-	public string $submissionValuesTableName;
-	public array $submitRoles;
-	protected array $tableFormats;
-	public string $tableName;
-	public \WP_User $user;
-	public int $userId;
-	protected string $userIdElementName;
-	public array $userRoles;
+	public bool 		$all;			// do not page submissions
+	protected bool 		$clonableFormStep;
+	public bool 		$editRights;
+	public array 		$elementMapping;
+	public string 		$elTableName;
+	public array 		$emailSettings;
+	public object 		$formData;
+	public array 		$formElements;
+	public string 		$formEmailTable;
+	public int 			$formId;
+	public object|null 	$formReminder;
+	public string 		$formReminderTable;
+	public array 		$forms;
+	public int 			$formStepCounter;
+	public bool 		$isFormStep;
+	public bool 		$isMultiStepForm;
+	public string 		$jsFileName;
+	public array 		$multiInputsHtml;
+	public bool 		$multiwrap;
+	public array 		$nonInputs;
+	public string 		$objectName;
+	public bool 		$onlyOwn;
+	public int 			$pageSize;
+	public string 		$shortcodeColumnSettingsTable;
+	public int 			$shortcodeId;
+	public string 		$shortcodeTable;
+	public bool 		$showArchived;
+	public array 		$slugs;
+	public object|null 	$submission;
+	public array 		$submissions;
+	public string 		$submissionTableName;
+	public string 		$submissionValuesTableName;
+	public array 		$submitRoles;
+	protected array 	$tableFormats;
+	public string 		$tableName;
+	public \WP_User 	$user;
+	public int 			$userId;
+	protected string	$userIdElementName;
+	public array 		$userRoles;
 
 	public function __construct(){
 		global $wpdb;

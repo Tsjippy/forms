@@ -10,6 +10,8 @@ class EditFormResults extends DisplayFormResults{
 	public int|false $submissionId;
 
 	public function __construct(){
+		parent::__construct([]);
+
 		$this->submissionId	= false;
 	}
 	

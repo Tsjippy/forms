@@ -37,6 +37,8 @@ class DisplayFormResults extends DisplayForm{
 	 * @param array $atts The attributes passed to the shortcode
 	 */
 	public function __construct($atts){
+		parent::__construct();
+
 		global $wpdb;
 		
 		$this->columnSettings			= [];
@@ -314,6 +316,10 @@ class DisplayFormResults extends DisplayForm{
 	protected function addFilterQueries(&$where, &$values){
 		global $wpdb;
 
+		if(empty($this->tableSettings->filter)){
+			return;
+		}
+
 		foreach($this->tableSettings->filter as $filter){
 			
 			$filterKey		= strtolower($filter['name']);
@@ -573,7 +579,7 @@ class DisplayFormResults extends DisplayForm{
 			$this->getFormBySubmissionId($submissionId);
 		}
 
-		if($this->formData->save_in_meta){
+		if(!empty($this->formData->save_in_meta)){
 			return $this->getMetaKeyFormSubmissions($userId, $all);
 		}
 		
