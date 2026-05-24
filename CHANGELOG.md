@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- constructor bug
 
 ### Updated
+
+## [11.2.8] - 2026-05-24
+
+
+### Fixed
+- constructor bug
 
 ## [11.2.7] - 2026-05-23
 
