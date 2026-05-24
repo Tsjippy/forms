@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- constructor bug
 
 ### Updated
 
