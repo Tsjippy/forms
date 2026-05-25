@@ -6,11 +6,16 @@
 ### Changed
 
 ### Fixed
+
+### Updated
+
+## [11.2.9] - 2026-05-25
+
+
+### Fixed
 - form results constructor
 - bug when column setting has no id
 - error when not formdata id set
-
-### Updated
 
 ## [11.2.8] - 2026-05-24
 
