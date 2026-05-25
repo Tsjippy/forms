@@ -8,6 +8,7 @@
 ### Fixed
 - form results constructor
 - bug when column setting has no id
+- error when not formdata id set
 
 ### Updated
 
