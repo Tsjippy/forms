@@ -1312,8 +1312,8 @@ class DisplayFormResults extends DisplayForm{
 							
 							?>
 							<tr class="column-setting-wrapper" data-element-id="<?php echo $elementIndex;?>">
-								<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][column-id]"	value="<?php echo $columnSetting['id'];?>">
-								<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][slug]"		value="<?php echo $columnSetting['slug'];?>">
+								<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][column-id]"	value="<?php echo $columnSetting['id'] ?? -9;?>">
+								<input type="hidden" class="no-reset" name="column-settings[<?php echo $elementIndex;?>][slug]"			value="<?php echo $columnSetting['slug'] ?? '';?>">
 								<td>
 									<span class="movecontrol formfield-button" aria-hidden="true">:::</span>
 								</td>
