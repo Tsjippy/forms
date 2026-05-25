@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- form results constructor
 
 ### Updated
 
