@@ -37,7 +37,9 @@ class DisplayFormResults extends DisplayForm{
 	 * @param array $atts The attributes passed to the shortcode
 	 */
 	public function __construct($atts){
-		parent::__construct();
+		// call parent constructor
+		unset($atts['shortcode-id']);
+		parent::__construct($atts);
 
 		global $wpdb;
 		
@@ -74,10 +76,6 @@ class DisplayFormResults extends DisplayForm{
 
 		// add the elements filter before the parent construct, as that will apply the filter
 		add_filter('tsjippy-forms-elements', [$this, 'addExtraElements'], 10, 3);
-		
-		// call parent constructor
-		unset($atts['shortcode-id']);
-		parent::__construct($atts);
 
 		wp_enqueue_style('tsjippy_formtable_style');
 
@@ -1174,7 +1172,7 @@ class DisplayFormResults extends DisplayForm{
 				}
 				$buttonsHtml[$action]	= "<button class='$action button forms-table-action' name='{$action}-action' value='$action'/>".ucfirst($action)."</button>";
 			}
-			$buttonsHtml = apply_filters('tsjippy_form_actions_html', $buttonsHtml, $this->submission, $this->submission->sub_id, $this);
+			$buttonsHtml = apply_filters('tsjippy_form_actions_html', $buttonsHtml, $this->submission, $this->submission->sub_id ?? null, $this);
 
 			//we have te html now, check for which one we have permission
 			foreach($buttonsHtml as $action => $button){

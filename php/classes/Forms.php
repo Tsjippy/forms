@@ -87,7 +87,7 @@ class Forms{
 		$this->tableFormats 				= [];
 		$this->tableName					= $wpdb->prefix . 'tsjippy_forms';
 		$this->user 						= wp_get_current_user();
-		$this->userId						= $this->user->ID;
+		$this->userId						= $this->user->ID;  // The user id for who we retrieve a form (results)
 		$this->userIdElementName 			= '';
 		$this->userRoles					= $this->user->roles;
 		

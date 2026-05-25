@@ -120,6 +120,8 @@ class ElementHtmlBuilder extends SubmitForm{
 		}
 
 		$this->defaultValues		= (array)$this->user->data;
+
+		// We are getting the form results not for ourselves
 		if($this->userId != $this->user->ID){
 			$this->defaultValues		= (array)get_userdata($this->userId)->data;
 		}
