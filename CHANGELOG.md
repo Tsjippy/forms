@@ -7,6 +7,7 @@
 
 ### Fixed
 - form results constructor
+- bug when column setting has no id
 
 ### Updated
 
