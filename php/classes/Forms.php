@@ -742,7 +742,7 @@ class Forms{
 			$query				= "SELECT * FROM {$this->tableName} WHERE ";
 			if(is_numeric($formId)){
 				$query	.= "id= '$formId'";
-			}elseif(is_numeric($this->formData->id) && $this->formData->id > -1){
+			}elseif(is_numeric($this->formData->id ?? '') && $this->formData->id > -1){
 				$query	.= "id= '{$this->formData->id}'";
 			}elseif(!empty($this->formData->slug)){
 				$query	.= "slug= '{$this->formData->slug}'";
