@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- non exiting array index bug
 
 ### Updated
+
+## [11.3.0] - 2026-05-26
+
+
+### Fixed
+- non exiting array index bug
 
 ## [11.2.9] - 2026-05-25
 
