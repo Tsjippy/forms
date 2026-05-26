@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- html parsing errors
 
 ### Updated
+
+## [11.3.1] - 2026-05-26
+
+
+### Fixed
+- html parsing errors
 
 ## [11.3.0] - 2026-05-26
 
