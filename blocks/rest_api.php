@@ -172,7 +172,6 @@ function showFormResults($attributes){
 	}
 	 
 	$displayFormResults = new DisplayFormResults($attributes);
-    $displayFormResults->processAtts($attributes);
 	
 	$html	= $displayFormResults->showFormresultsTable();
 	

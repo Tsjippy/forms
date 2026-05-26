@@ -49,6 +49,17 @@ class DisplayFormResults extends DisplayForm{
 		$this->excelContent				= [];
 		$this->extraElements			= [];
 		$this->formEditPermissions		= false;
+		$this->ownData					= false;
+		$this->shortcodeTable			= $wpdb->prefix . 'tsjippy_form_shortcodes';
+		$this->sortColumn				= '';
+		$this->sortDirection			= 'ASC';
+		$this->sortElementIds			= [];
+		$this->spliced					= false;
+		$this->subElements				= [];
+		$this->tableEditPermissions		= false;
+		$this->tableSettings			= new stdClass();
+		$this->tableViewPermissions		= false;
+		$this->total					= 0;
 
 		//Get personal visibility
 		if(empty($this->formData)){
@@ -61,18 +72,6 @@ class DisplayFormResults extends DisplayForm{
 		}else{
 			return new WP_Error('forms', 'No form data found for the given form results shortcode');
 		}
-
-		$this->ownData					= false;
-		$this->shortcodeTable			= $wpdb->prefix . 'tsjippy_form_shortcodes';
-		$this->sortColumn				= '';
-		$this->sortDirection			= 'ASC';
-		$this->sortElementIds			= [];
-		$this->spliced					= false;
-		$this->subElements				= [];
-		$this->tableEditPermissions		= false;
-		$this->tableSettings			= new stdClass();
-		$this->tableViewPermissions		= false;
-		$this->total					= 0;
 
 		// add the elements filter before the parent construct, as that will apply the filter
 		add_filter('tsjippy-forms-elements', [$this, 'addExtraElements'], 10, 3);

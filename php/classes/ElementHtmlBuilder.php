@@ -579,7 +579,14 @@ class ElementHtmlBuilder extends SubmitForm{
 		$html		= trim(force_balance_tags($html));
 
 		$dom 		= new \DOMDocument();
+
+		// Surpress errors
+		libxml_use_internal_errors(true);
+
 		$dom->loadHTML($html);
+
+		// Clear any errors
+		libxml_clear_errors();
 
 		// Import the node
 		foreach ($dom->getElementsByTagName('body')->item(0)->childNodes as $node) {
