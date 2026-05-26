@@ -78,7 +78,7 @@ class SubmitForm extends SaveFormSettings{
 			return false;
 		}
 
-		$changedElementId	= $_POST['element-id'];
+		$changedElementId	= $_POST['element-id'] ?? '';
 		
 		// check if a certain element is changed to a certain value
 		if( $trigger == 'fieldchanged' ){
@@ -123,7 +123,7 @@ class SubmitForm extends SaveFormSettings{
 			}
 			
 			// get the value to compare with
-			if(is_numeric($email->submitted_trigger['value-element'])){
+			if(is_numeric($email->submitted_trigger['value-element'] ?? '')){
 				$compareElement	= $this->getElementById($email->submitted_trigger['value-element']);
 				$compareElValue	= $this->submission->{$compareElement->slug};
 			}else{
@@ -613,7 +613,7 @@ class SubmitForm extends SaveFormSettings{
 		// check for required empty elements
 		foreach($this->formElements as $element){
 			// element is required but has no value
-			if($element->required && $formresults[$element->slug] === '' ){
+			if($element->required && $formresults[$element->slug] ?? '' === '' ){
 				return new \WP_Error('Error', "$element->nameis required!");
 			}
 		}
@@ -632,7 +632,9 @@ class SubmitForm extends SaveFormSettings{
 		unset($formresults['form-id']);
 
 		// Add a security hash for submissions from outside
-		$formresults['viewhash']		= wp_hash($this->submission->id);
+		if(!empty($this->submission->id)){
+			$formresults['viewhash']		= wp_hash($this->submission->id);
+		}
 		
 		/**
 		 * Filters the form results

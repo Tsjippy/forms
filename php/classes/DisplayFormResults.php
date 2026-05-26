@@ -30,7 +30,7 @@ class DisplayFormResults extends DisplayForm{
 	public bool 	$tableEditPermissions;
 	public object 	$tableSettings;
 	public bool 	$tableViewPermissions;
-	public int 		$total;
+	public int|null	$total;
 
 	/**
 	 * Constructor for the DisplayFormResults class
@@ -2360,7 +2360,7 @@ class DisplayFormResults extends DisplayForm{
 						$class	= "";
 					}
 
-					if(in_array($columnSetting['element_id'], $this->sortElementIds)){
+					if(in_array($columnSetting['element_id'] ?? [], $this->sortElementIds)){
 						$class	= strtolower($this->sortDirection). ' defaultsort';
 					}
 
@@ -2385,7 +2385,7 @@ class DisplayFormResults extends DisplayForm{
 				
 				//add a Actions heading if needed
 				$actions = [];
-				foreach($this->formData->actions as $action){
+				foreach($this->formData->actions ?? [] as $action){
 					$actions[]	= $action;
 				}
 				$actions = apply_filters('tsjippy_form_actions', $actions);

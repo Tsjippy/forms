@@ -114,8 +114,11 @@ class DisplayForm extends ElementHtmlBuilder{
 				!empty($element->mandatory)		||
 				$element->type == 'label'		&&
 				(
-					$this->nextElement->required	||
-					$this->nextElement->mandatory
+					!empty($this->nextElement) &&
+					(
+						$this->nextElement->required	||
+						$this->nextElement->mandatory
+					)
 				)
 			){
 				$class .= ' required';

@@ -915,7 +915,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			$userId		= $this->userId;
 		}
 		//Load js
-		$uploader 		= new TSJIPPY\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey]);
+		$uploader 		= new TSJIPPY\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey] ?? '');
 		
 		return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $optionHtml, $this->element->edit_image);
 	}

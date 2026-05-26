@@ -182,7 +182,7 @@ trait CreateJs{
                         if(!in_array($equation, ['changed', 'clicked', 'checked', '!checked', 'visible', 'invisible'])){
                             $conditionVariables[]      = "var value_$fieldNumber1 = this.get_field_value('$conditionalFieldName', form, true, $compareValue2, true);";
                             
-                            if(is_numeric($rule['conditional-field-2'])){
+                            if(is_numeric($rule['conditional-field-2'] ?? '')){
                                 $conditionVariables[]  = "var value_$fieldNumber2 = this.get_field_value('$conditionalField2Name', form, true, $compareValue2, true);";
                             }
                         }

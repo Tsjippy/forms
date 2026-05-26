@@ -948,7 +948,11 @@ class Forms{
 		if(!isset($this->elementMapping['id'][$id])){
 			$this->elementMapper(true);
 
-			$url	= get_page_link($post);
+			if(empty($post)){
+				$url	= $_SERVER['REQUEST_URI'];
+			}else{
+				$url	= get_page_link($post);
+			}
 
 			TSJIPPY\printArray("Element with id '$id' not found on form '{$this->formData->slug}' with id  '{$this->formData->id}' on page $url", false);
 			return false;
@@ -1473,12 +1477,15 @@ class Forms{
 			// Empty
 			if(empty($replaceValue)){
 				$replaceValue	= apply_filters('tsjippy-forms-transform-empty', $replaceValue, $match, $replaceValues, $this);
+				
 				if(empty($replaceValue)){
 					//remove the placeholder, there is no value
 					$string = str_replace("%$match%", '', $string);
 
 					// mention it in the log
 					TSJIPPY\printArray("No value found for transform value '%$match%' on form '{$this->formData->slug}' with id {$this->formData->id}");
+
+					$replaceValue	= '';
 				}
 				$string 		= str_replace("%$match%", $replaceValue, $string);
 			}
