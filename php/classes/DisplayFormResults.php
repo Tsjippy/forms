@@ -2224,7 +2224,7 @@ class DisplayFormResults extends DisplayForm{
 						<button class="button button-primary" type="submit" name="export-xls">Export data to excel</button>
 					</form>
 					<?php
-					if(SETTINGS['pdf'] ?? '' ==  'enable'){
+					if((SETTINGS['pdf'] ?? '') ==  'enable'){
 						?>
 						<form method="post" class="export-form" id="export-pdf">
 							<button class="button button-primary" type="submit" name="export-pdf">Export data to pdf</button>
