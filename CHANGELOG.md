@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- shortcode settings bug
 
 ### Updated
 
