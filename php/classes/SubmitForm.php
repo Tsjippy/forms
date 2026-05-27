@@ -432,6 +432,9 @@ class SubmitForm extends SaveFormSettings{
 		//remove empty splitted entries
 		$this->parseSplittedData($formresults);
 
+		// Add a security hash for submissions from outside
+		$formresults['viewhash']		= wp_hash($this->submission->id);
+
 		//sort arrays
 		foreach($formresults as $key => &$result){
 			if(is_array($result)){
@@ -630,11 +633,6 @@ class SubmitForm extends SaveFormSettings{
 		unset($formresults['_wpnonce']);
 		unset($formresults['formurl']);
 		unset($formresults['form-id']);
-
-		// Add a security hash for submissions from outside
-		if(!empty($this->submission->id)){
-			$formresults['viewhash']		= wp_hash($this->submission->id);
-		}
 		
 		/**
 		 * Filters the form results
