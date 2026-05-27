@@ -193,7 +193,7 @@ class Forms{
 			width int default 100,
 			function_name text,
 			folder_name text,
-			slug text,
+			slug text NOT NULL,
 			nametext,
 			text text,
 			html text,
@@ -732,12 +732,13 @@ class Forms{
 
 		// first check if needed
 		if(
-			!isset($this->formData->version) || (
+			!isset($this->formData->version) || 
 			(
-				empty($this->formData->id)		&&
-				!empty($formId)
+				!empty($this->formData->id)		&&
+				!empty($formId) && 
+				$this->formData->id != $formId
 			)
-		)){
+		){
 			// Get the form data
 			$query				= "SELECT * FROM {$this->tableName} WHERE ";
 			if(is_numeric($formId)){

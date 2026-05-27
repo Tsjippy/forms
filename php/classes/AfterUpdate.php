@@ -84,6 +84,20 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
                     'slug'	=> 'user_id'
                 ),
             );
+
+            $wpdb->query(
+                "UPDATE $forms->elTableName
+                SET slug = LOWER(name)
+                WHERE slug IS NULL"
+            );
+
+            $wpdb->delete(
+                $forms->elTableName,
+                [
+                    'slug' => null,
+                    'name' => null
+                ]
+            );
         }
     }
 }
