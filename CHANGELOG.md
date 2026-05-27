@@ -8,6 +8,7 @@
 ### Fixed
 - update actions
 - ?? bug
+- viewhash
 
 ### Updated
 
