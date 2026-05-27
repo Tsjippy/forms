@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- update actions
 
 ### Updated
+
+## [11.3.4] - 2026-05-27
+
+
+### Fixed
+- update actions
 
 ## [11.3.3] - 2026-05-27
 
