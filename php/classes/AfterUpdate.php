@@ -50,7 +50,7 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
             );
         }
 
-        if(version_compare('11.3.2', $oldVersion) === 1){
+        if(version_compare('11.3.4', $oldVersion) === 1){
             global $wpdb;
 
             $forms      = new Forms();
