@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- shortcode settings bug
 
 ### Updated
+
+## [11.3.2] - 2026-05-27
+
+
+### Fixed
+- shortcode settings bug
 
 ## [11.3.1] - 2026-05-26
 
