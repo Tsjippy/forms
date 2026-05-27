@@ -449,7 +449,7 @@ class DisplayFormResults extends DisplayForm{
 		/**
 		 * Build the Common Table Expressions (CTE) needed to make the pivot query
 		 */
-		$splitElements		= (array) $this->formData->split ?? [];
+		$splitElements		= (array) ($this->formData->split ?? []);
 		$existingColumns	= ['id', 'form_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
 
 		$columns			= $existingColumns;

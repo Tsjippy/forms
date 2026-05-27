@@ -114,8 +114,8 @@ class ElementHtmlBuilder extends SubmitForm{
 	 * Builds the array with default values for the current user
 	 */
 	function buildDefaultsArray(){
-		//Only create one time
-		if(!empty($this->defaultValues)){
+		//Only create one time, and only for logged in users
+		if(!empty($this->defaultValues) || $this->user->ID === 0){
 			return;
 		}
 
