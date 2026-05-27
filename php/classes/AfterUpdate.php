@@ -49,5 +49,41 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
                 RENAME COLUMN `userid` to `user_id`;"
             );
         }
+
+        if(version_compare('11.3.2', $oldVersion) === 1){
+            global $wpdb;
+
+            $forms      = new Forms();
+
+            $wpdb->update(
+                $forms->shortcodeColumnSettingsTable,
+                [
+                    'slug'  => 'time_created'
+                ],
+                array(
+                    'slug'	=> 'timecreated'
+                ),
+            );
+
+            $wpdb->update(
+                $forms->shortcodeColumnSettingsTable,
+                [
+                    'slug'  => 'time_last_edited'
+                ],
+                array(
+                    'slug'	=> 'timelastedited'
+                ),
+            );
+
+            $wpdb->update(
+                $forms->shortcodeColumnSettingsTable,
+                [
+                    'slug'  => 'userid'
+                ],
+                array(
+                    'slug'	=> 'user_id'
+                ),
+            );
+        }
     }
 }

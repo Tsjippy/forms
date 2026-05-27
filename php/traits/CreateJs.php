@@ -141,7 +141,7 @@ trait CreateJs{
                             // do not add the same element name twice
                             if(!str_contains($fieldCheckIf, "$propCompare == '$conditionalField2Name'")){
                                 //If there is an extra field to check
-                                if(is_numeric($rule['conditional-field-2'])){
+                                if(is_numeric($rule['conditional-field-2'] ?? '')){
                                     $fieldCheckIf .= " || $propCompare == '$conditionalField2Name'";
                                 }
                             }
