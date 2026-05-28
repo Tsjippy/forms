@@ -10,6 +10,7 @@
 - ?? bug
 - viewhash
 - bugs when using invalid userid
+- js creation bug
 
 ### Updated
 
