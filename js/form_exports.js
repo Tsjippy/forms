@@ -65,6 +65,10 @@ export function cloneNode(originalNode, clear=true){
 }
 
 export function copyFormInput(originalNode){
+	if(originalNode == null){
+		return false;
+	}
+	
 	originalNode.querySelectorAll('.remove.hidden').forEach( el => el.classList.remove('hidden'));
 
 	let newNode = cloneNode(originalNode);
