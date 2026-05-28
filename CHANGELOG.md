@@ -9,6 +9,7 @@
 - update actions
 - ?? bug
 - viewhash
+- bugs when using invalid userid
 
 ### Updated
 
