@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- store form slug
 
 ### Updated
 
