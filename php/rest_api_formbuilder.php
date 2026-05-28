@@ -438,12 +438,14 @@ function addFormElement($copy=false){
 	}
 	
 	if(in_array($element->type, ['label', 'button', 'formstep'])){
-		$element->slug	= $element->text;
-	}elseif(empty($element->slug)){
-		return new \WP_Error('Error', "Please enter a formfieldname");
+		$element->name	= $element->text;
+	}elseif(empty($element->name)){
+		return new \WP_Error('Error', "Please enter a name");
 	}
 
-	$element->name	= ucfirst(trim($element->slug, '[]'));
+	$element->name	= ucfirst(trim($element->name, '[]'));
+
+	$element->slug	= str_replace(' ', '-', strtolower($element->name));
 
 	if(
 		in_array($element->type, $forms->nonInputs) 		&& 	// this is a non-input

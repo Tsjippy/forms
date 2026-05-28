@@ -1547,13 +1547,13 @@ class FormBuilderForm extends DisplayForm{
 		ob_start();
 		?>
 		<div class="form-wrapper">
-			<h4><?php echo $heading;?></h4><br>
+			<h4><?php echo wp_kses_post($heading);?></h4><br>
 
-			<input type="hidden" class="no-reset" name="form-id" value="<?php echo $this->formData->id;?>">
+			<input type="hidden" class="no-reset" name="form-id" value="<?php echo esc_attr($this->formData->id);?>">
 
-			<input type="hidden" class="no-reset" name="formfield[form-id]" value="<?php echo $this->formData->id;?>">
+			<input type="hidden" class="no-reset" name="formfield[form-id]" value="<?php echo esc_attr($this->formData->id);?>">
 			
-			<input type="hidden" class="no-reset" name="element-id" value="<?php if( $element != null){echo $element->id;}?>">
+			<input type="hidden" class="no-reset" name="element-id" value="<?php if( $element != null){echo esc_attr($element->id);}?>">
 			
 			<input type="hidden" class="no-reset" name="insert-after">
 			
@@ -1587,12 +1587,11 @@ class FormBuilderForm extends DisplayForm{
 					];
 
 					foreach($options as $key=>$option){
-						if($element != null && $element->type == $key){
-							$selected = 'selected="selected"';
-						}else{
-							$selected = '';
-						}
-						echo "<option value='$key' $selected>$option</option>";
+						?>
+						<option value='<?php echo esc_attr($key);?>' <?php if($element != null && $element->type == $key){ echo 'selected="selected"';}?>>
+							<?php echo wp_kses_post($option);?>
+						</option>
+						<?php
 					}
 					?>
 					
@@ -1617,12 +1616,12 @@ class FormBuilderForm extends DisplayForm{
 					$options	= apply_filters('tsjippy-special-form-elements', $options);
 
 					foreach($options as $key=>$option){
-						if($element != null && $element->type == $key){
-							$selected = 'selected="selected"';
-						}else{
-							$selected = '';
-						}
-						echo "<option value='$key' $selected>$option</option>";
+
+						?>
+						<option value='<?php echo esc_attr($key);?>' <?php if($element != null && $element->type == $key){ echo 'selected="selected"';}?>>
+							<?php echo wp_kses_post($option);?>
+						</option>
+						<?php
 					}
 					?>
 				</optgroup>
@@ -1632,7 +1631,7 @@ class FormBuilderForm extends DisplayForm{
 			<div name='elementname' class='element-option wide reverse not-label not-php not-formstep button shouldhide' style='background-color: unset;'>
 				<label>
 					<div style='text-align: left;'>Specify a name for the element</div>
-					<input type="text" class="formbuilder wide" name="formfield[name]" value="<?php if($element != null){echo $element->slug;}?>">
+					<input type="text" class="formbuilder wide" name="formfield[name]" value="<?php echo esc_attr($element->slug ?? '');?>">
 				</label>
 				<br><br>
 			</div>
@@ -1640,7 +1639,7 @@ class FormBuilderForm extends DisplayForm{
 			<div name='add-text' class='element-option multi-start shouldhide'>
 				<label>
 					<div style='text-align: left;'>Specify the text for the 'add' button</div>
-					<input type="text" class="formbuilder wide" name="formfield[add]" value="<?php if($element != null && $element->add != null){echo $element->add;}else{echo '+';}?>">
+					<input type="text" class="formbuilder wide" name="formfield[add]" value="<?php echo esc_attr($element->add ?? '+');?>">
 				</label>
 				<br><br>
 			</div>
@@ -1648,7 +1647,7 @@ class FormBuilderForm extends DisplayForm{
 			<div name='remove-text' class='element-option multi-start shouldhide'>
 				<label>
 					<div style='text-align: left;'>Specify the text for the 'remove' button</div>
-					<input type="text" class="formbuilder wide" name="formfield[remove]" value="<?php if($element != null && $element->remove != null){echo $element->remove;}else{echo '-';}?>">
+					<input type="text" class="formbuilder wide" name="formfield[remove]" value="<?php echo esc_attr($element->remove ?? '-');?>">
 				</label>
 				<br><br>
 			</div>
@@ -1656,7 +1655,7 @@ class FormBuilderForm extends DisplayForm{
 			<div name='function_name' class='element-option wide hidden php'>
 				<label>
 					Specify the function_name
-					<input type="text" class="formbuilder wide" name="formfield[function_name]" value="<?php if($element != null){echo $element->function_name;}?>">
+					<input type="text" class="formbuilder wide" name="formfield[function_name]" value="<?php echo esc_attr($element->function_name ?? '');?>">
 				</label>
 				<br><br>
 			</div>
@@ -1664,7 +1663,7 @@ class FormBuilderForm extends DisplayForm{
 			<div name='label-text' class='element-option label button formstep hidden wide' style='background-color: unset;'>
 				<label>
 					<div style='text-align: left;'>Specify the <span class='element-type '>label</span> text</div>
-					<input type="text" class="formbuilder wide" name="formfield[text]" value="<?php if($element != null){echo $element->text;}?>">
+					<input type="text" class="formbuilder wide" name="formfield[text]" value="<?php echo esc_attr($element->text ?? '');?>">
 				</label>
 				<br><br>
 			</div>
@@ -1685,7 +1684,7 @@ class FormBuilderForm extends DisplayForm{
 
 				<label>
 					Name of the folder the <span class='filetype'>file</span> should be uploaded to.<br>
-					<input type="text" class="formbuilder" name="formfield[folder_name]" value="<?php if($element != null){echo $element->folder_name;}?>">
+					<input type="text" class="formbuilder" name="formfield[folder_name]" value="<?php echo esc_attr($element->folder_name ?? '');?>">
 				</label>
 			</div>
 			
@@ -1727,7 +1726,7 @@ class FormBuilderForm extends DisplayForm{
 				<br>
 			</div>
 			
-			<div name='multiple' class='element-option reverse <?php echo $nonInputClasses;?> shouldhide'>
+			<div name='multiple' class='element-option reverse <?php echo esc_attr($nonInputClasses);?> shouldhide'>
 				<label>
 					<input type="checkbox" class="formbuilder" name="formfield[multiple]" value="1" <?php if($element != null && $element->multiple){echo 'checked';}?>>
 					Allow multiple answers
@@ -1739,7 +1738,7 @@ class FormBuilderForm extends DisplayForm{
 			<div name='value_list' class='element-option datalist radio select checkbox hidden'>
 				<label>
 					Specify the values, one per line
-					<textarea class="formbuilder" name="formfield[value_list]"><?php if($element != null){echo trim($element->value_list);}?></textarea>
+					<textarea class="formbuilder" name="formfield[value_list]"><?php echo esc_attr(trim($element->value_list ?? ''));?></textarea>
 				</label>
 				<br>
 			</div>
@@ -1750,29 +1749,32 @@ class FormBuilderForm extends DisplayForm{
 					/*<option value="">---</option>*/
 					<?php
 					$this->buildDefaultsArray();
-					foreach($this->defaultArrayValues as $key=>$field){
-						if($element != null && $element->default_array_value == $key){
-							$selected = 'selected="selected"';
-						}else{
-							$selected = '';
-						}
-						$optionName	= ucfirst(str_replace('_', ' ', $key));
-						echo "<option value='$key' $selected>$optionName</option>";
+					foreach($this->defaultArrayValues as $key => $field){
+						?>
+						<option value='<?php echo $key;?>' <?php if(($element->default_array_value ?? '') == $key){ echo 'selected="selected"';}?>>
+							<?php echo esc_attr(ucfirst(str_replace('_', ' ', $key)));?>
+						</option>
+						<?php
 					}
 					?>
 				</select>
 			</div>
 
-			<div name='defaults' class='element-option reverse not-php not-file <?php echo $nonInputClasses;?> shouldhide'>
-				<label class='block'>Specify a default value if desired</label>
+			<div name='defaults' class='element-option reverse not-php not-file <?php echo esc_attr($nonInputClasses);?> shouldhide'>
+				<label class='block'>
+					Specify a default value if desired
+				</label>
 
-				<input type='text' class="formbuilder" name="formfield[default-value]" list='defaults' value='<?php if($element != null){echo trim($element->default_value);}?>'>
+				<input type='text' class="formbuilder" name="formfield[default-value]" list='defaults' value='<?php echo esc_attr(trim($element->default_value ?? ''));?>'>
 
 				<datalist id='defaults'>
 					<?php
-					foreach($this->defaultValues as $key=>$field){
-						$optionName	= ucfirst(str_replace('_',' ',$key));
-						echo "<option value='$key'>$optionName</option>";
+					foreach($this->defaultValues as $key => $field){
+						?>
+						<option value='<?php echo $key;?>'>
+							<?php echo esc_attr(ucfirst(str_replace('_', ' ', $key)));?>
+						</option>
+						<?php
 					}
 					?>
 				</datalist>
@@ -1785,17 +1787,12 @@ class FormBuilderForm extends DisplayForm{
 			<div name='element-options' class='element-option reverse not-php <?php echo $nonInputClasses;?> shouldhide'>
 				<label>
 					Specify any options like styling
-					<textarea class="formbuilder" name="formfield[options]"><?php if($element != null){echo trim($element->options);}?></textarea>
+					<textarea class="formbuilder" name="formfield[options]"><?php echo esc_attr(trim($element->options?? ''));?></textarea>
 				</label><br>
 				<br>
 				
 				<?php
-				$meta	= false;
 				if(!empty($this->formData->save_in_meta)){
-					$meta	= true;
-				}
-
-				if($meta){
 					?>
 					<h3>Warning conditions</h3>
 					<label class="option-label">
@@ -1817,7 +1814,7 @@ class FormBuilderForm extends DisplayForm{
 						}else{
 							$conditions = $element->warning_conditions;
 						}
-						echo $this->warningConditionsForm('formfield[warning-conditions]', $conditions);
+						echo wp_kses_post($this->warningConditionsForm('formfield[warning-conditions]', $conditions));
 						?>
 					</div>
 					<?php
@@ -1870,9 +1867,9 @@ class FormBuilderForm extends DisplayForm{
 			<div style="display: none;" class="error"></div>
 			<?php
 
-			echo $formContents;
+			echo wp_kses_post($formContents);
 
-			echo TSJIPPY\addSaveButton('submit-form-element',"$text form element"); ?>
+			echo wp_kses_post(TSJIPPY\addSaveButton('submit-form-element',"$text form element")); ?>
 		</form>
 		<?php
 

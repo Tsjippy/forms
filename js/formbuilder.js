@@ -207,6 +207,7 @@ async function addFormElement(target, copying=false){
 	}
 	
 	let wrapper;
+	let priority;
 
 	let referenceNode	= document.querySelector('.form-elements .clicked');
 	
