@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- bug when cloning empty node
 
 ### Updated
 
