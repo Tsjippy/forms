@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- store form slug
 
 ### Updated
+
+## [11.3.7] - 2026-05-28
+
+
+### Fixed
+- store form slug
 
 ## [11.3.6] - 2026-05-28
 
