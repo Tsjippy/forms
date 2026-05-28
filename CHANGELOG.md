@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- bug when cloning empty node
 
 ### Updated
+
+## [11.3.6] - 2026-05-28
+
+
+### Fixed
+- bug when cloning empty node
 
 ## [11.3.5] - 2026-05-28
 
