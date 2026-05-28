@@ -157,7 +157,7 @@ class ElementHtmlBuilder extends SubmitForm{
 		 */ 
 		// Our own details
 		$familyNames				= [
-			$this->user->ID => get_userdata($this->user->ID)->display_name
+			$this->user->ID => $this->user->display_name
 		];
 
 		// Partner
@@ -169,7 +169,13 @@ class ElementHtmlBuilder extends SubmitForm{
 		// Siblings
 		$siblings	= $family->getSiblings($this->user->ID);
 		foreach($siblings as $sibling){
-			$familyNames[$sibling]				= get_userdata($sibling)->display_name;
+			$siblingData	= get_userdata($sibling);
+
+			if(!$siblingData){
+				continue;
+			}
+
+			$familyNames[$sibling]				= $siblingData->display_name;
 		}
 
 		$familyNamesWithChildAge				= $familyNames;
@@ -179,7 +185,12 @@ class ElementHtmlBuilder extends SubmitForm{
 		$childrenNames	= [];
 		$childrenAges	= [];
 		foreach($children as $child){
-			$name								= get_userdata($child)->display_name;
+			$childData							= get_userdata($child);
+			if(!$childData){
+				continue;
+			}
+			
+			$name								= $childData->display_name;
 			$birthDateString					= get_user_meta($child, 'birthday', true);
 
 			$birthDate 							= new \DateTime($birthDateString);
