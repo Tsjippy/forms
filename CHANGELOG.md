@@ -6,13 +6,18 @@
 ### Changed
 
 ### Fixed
+
+### Updated
+
+## [11.3.5] - 2026-05-28
+
+
+### Fixed
 - update actions
 - ?? bug
 - viewhash
 - bugs when using invalid userid
 - js creation bug
-
-### Updated
 
 ## [11.3.3] - 2026-05-27
 
