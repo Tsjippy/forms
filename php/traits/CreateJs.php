@@ -91,7 +91,7 @@ trait CreateJs{
 
                         $conditionalFieldType		= $conditionalElement->type;
 
-                        if(is_numeric($rule['conditional-field-2'])){
+                        if(is_numeric($rule['conditional-field-2'] ?? '')){
                             $conditionalElement2		= $this->getElementById($rule['conditional-field-2']);
                             if(!$conditionalElement2){
                                 $errors[]   = "Element $element->slug has an invalid rule";
@@ -109,7 +109,7 @@ trait CreateJs{
                         }
                         
                         //Check if we are calculating a value based on two field values
-                        if(($equation == '+' || $equation == '-') && is_numeric($rule['conditional-field-2']) && !empty($rule['equation-2'])){
+                        if(($equation == '+' || $equation == '-') && is_numeric($rule['conditional-field-2'] ?? '') && !empty($rule['equation-2'])){
                             $calc = true;
                         }else{
                             $calc = false;
