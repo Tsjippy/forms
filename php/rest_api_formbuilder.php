@@ -647,10 +647,11 @@ function saveFormSettings(){
 		$formBuilder->formData	= new stdClass();
 	}
 
-	$formBuilder->formData->slug	= sanitize_text_field($formSettings['name']);
+	$formBuilder->formData->name	= sanitize_text_field($formSettings['form-name']);
+	$formBuilder->formData->slug	= str_replace(' ', '-', strtolower($formBuilder->formData->name));
 	
 	//remove double slashes
-	$formSettings['upload_path']	= str_replace('\\\\', '\\', $formSettings['upload_path']);
+	$formSettings['upload_path']	= str_replace('\\\\', '\\', $formSettings['upload_path'] ?? '');
 	
 	$formBuilder->maybeInsertForm((int) $_POST['form-id']);
 	
