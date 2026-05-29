@@ -262,16 +262,9 @@ class FormExport extends FormBuilderForm{
 		}
 		global $wpdb;
 
-		// Include the necessary file for the backend
-		require_once(ABSPATH . 'wp-admin/includes/file.php');
+		$wpFileSystem   = TSJIPPY\loadWpFileSystem();
 
-		// Initialize the filesystem
-		WP_Filesystem();
-
-		// Access global variable
-		global $wp_filesystem;
-
-		$contents 		= $wp_filesystem->get_contents($path);
+		$contents 		= $wpFileSystem->get_contents($path);
 
 		if(!str_contains($contents, 'form: ') || !str_contains($contents, 'elements: ')){
 			return "<div class='error'>Invalid sform file!</div>";
