@@ -9,8 +9,6 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
     public function afterPluginUpdate($oldVersion){
         global $wpdb;
 
-        TSJIPPY\printArray('Running update actions');
-
         if(version_compare('11.0.6', $oldVersion) === 1){
             /**
              * Rename tables to tsjippy_
