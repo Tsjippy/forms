@@ -649,7 +649,7 @@ function saveFormSettings(){
 		$formBuilder->formData	= new stdClass();
 	}
 
-	$formBuilder->formData->name	= sanitize_text_field($formSettings['form-name']);
+	$formBuilder->formData->name	= sanitize_text_field( wp_unslash( $formSettings['form-name']));
 	$formBuilder->formData->slug	= str_replace(' ', '-', strtolower($formBuilder->formData->name));
 	
 	//remove double slashes

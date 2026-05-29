@@ -386,7 +386,7 @@ function getInputHtml(){
 
 	$formTable->userId								= $userId;
 
-	$elementId										= sanitize_text_field($_POST['element-id']);
+	$elementId										= sanitize_text_field( wp_unslash( $_POST['element-id']));
 
 	$element										= $formTable->getElementById($elementId);
 
@@ -457,9 +457,9 @@ function editValue(){
 		
 	$formTable->submissionId	= $_POST['submission-id'];
 
-	$elementId					= sanitize_text_field($_POST['element-id']);
+	$elementId					= sanitize_text_field( wp_unslash( $_POST['element-id']));
 
-	$subId						= sanitize_text_field($_POST['subid']);
+	$subId						= sanitize_text_field( wp_unslash( $_POST['subid']));
 	if($subId == ''){
 		$subId	= null;
 	}

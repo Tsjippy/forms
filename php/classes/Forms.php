@@ -1287,9 +1287,9 @@ class Forms{
 				$this->userId	= $atts['user-id'];
 			}
 
-			$this->formData->name 	= sanitize_text_field($atts['form-name']);
-			$this->formData->slug 	= sanitize_text_field($atts['slug']);
-			$this->formData->id		= sanitize_text_field($atts['form-id']);
+			$this->formData->name 	= sanitize_text_field( wp_unslash( $atts['form-name']));
+			$this->formData->slug 	= sanitize_text_field( wp_unslash( $atts['slug']));
+			$this->formData->id		= sanitize_text_field( wp_unslash( $atts['form-id']));
 
 			$this->getForm();
 		}

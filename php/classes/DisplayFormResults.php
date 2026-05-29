@@ -327,7 +327,7 @@ class DisplayFormResults extends DisplayForm{
 			}
 
 			// Get the data for the current filter
-			$filterValue	= sanitize_text_field($_POST[$filterKey]);
+			$filterValue	= sanitize_text_field( wp_unslash( $_POST[$filterKey]));
 
 			$filterElement	= $this->getElementById($filter['element']);
 
