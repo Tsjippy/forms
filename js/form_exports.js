@@ -107,13 +107,16 @@ export function copyFormInput(originalNode){
 
 		// Add button for the new one
 		let orgButton	= originalNode.closest('.clone-divs-wrapper').querySelector(`.tablink.active`);
-		let newButton	= cloneNode(orgButton);
+		if(orgButton != null){
+		
+			let newButton	= cloneNode(orgButton);
 
-		// make the org butto inactive
-		orgButton.classList.remove('active');
+			// make the org butto inactive
+			orgButton.classList.remove('active');
 
-		//Insert the clone
-		orgButton.parentNode.insertBefore(newButton, orgButton.nextSibling);
+			//Insert the clone
+			orgButton.parentNode.insertBefore(newButton, orgButton.nextSibling);
+		}
 	}
 	
 	//Insert the clone

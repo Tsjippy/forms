@@ -1698,7 +1698,7 @@ class DisplayFormResults extends DisplayForm{
 							<br>
 							<h4>Select users with permission to VIEW the table</h4>
 							<?php
-							echo TSJIPPY\userSelect('', true, false, '', "table-settings[view-right-roles][]", [], $this->tableSettings->view_right_roles, [1], 'select', '', true);
+							TSJIPPY\userSelect(onlyAdults:true, id:"table-settings[view-right-roles][]", userId: $this->tableSettings->view_right_roles, excludeIds:[1], multiple: true, echo: true);
 							?>
 
 							<h4>Select roles with permission to edit ALL form submission data</h4>
@@ -1720,7 +1720,7 @@ class DisplayFormResults extends DisplayForm{
 							<br>
 							<h4>Select users with permission to EDIT the table</h4>
 							<?php
-							echo TSJIPPY\userSelect('', true, false, '', "table-settings[edit-right-roles][]", [], $this->tableSettings->edit_right_roles, [1], 'select', '', true);
+							TSJIPPY\userSelect(onlyAdults: true, id: "table-settings[edit-right-roles][]", userId: $this->tableSettings->edit_right_roles, excludeIds:[1], multiple:true, echo:true);
 							?>
 						</div>
 					</div>

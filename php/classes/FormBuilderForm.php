@@ -806,7 +806,7 @@ class FormBuilderForm extends DisplayForm{
 							<br>
 							<h4>Select users with form edit rights</h4>
 							<?php
-							echo TSJIPPY\userSelect('', true, false, '', 'full_right_roles', [], $this->formData->full_right_roles, [1], 'select', '', true);
+							TSJIPPY\userSelect(onlyAdults:true, id: 'full_right_roles', userId: $this->formData->full_right_roles, excludeIds:[1], multiple:true, echo: true);
 							?>
 
 							<h4>Select roles who can submit the form on behalve of somebody else</h4>
@@ -826,7 +826,7 @@ class FormBuilderForm extends DisplayForm{
 
 							<h4>Select users who can submit the form on behalve of somebody else</h4>
 							<?php
-							echo TSJIPPY\userSelect('', true, false, '', 'submit_others_form', [], $this->formData->submit_others_form, [1], 'select', '', true);
+							TSJIPPY\userSelect(onlyAdults:true, id:'submit_others_form', userId:$this->formData->submit_others_form, excludeIds:[1], multiple:true, echo:true);
 							?>
 						</div>
 					</div>
