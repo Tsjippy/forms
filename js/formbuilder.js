@@ -534,7 +534,8 @@ async function maybeRemoveElement(target){
 		ConfirmButtonText: 'Yes, delete it!'
 	};
 
-	let response = await new Main.Alert("This will remove this element", 'warning', options);
+	let alerter		= new Main.Alert("This will remove this element", 'warning', options);
+	let response	= await alerter.promise; 
 
 	if (response == 'confirm') {
 		removeElement(target);
@@ -604,8 +605,8 @@ async function addConditionRule(target){
 				CustomButtonText: `Add a new rule`,
 			};
 
-			let response = await new Main.Alert("This will remove this element", 'warning', options);
-
+			let alerter = new Main.Alert("This will remove this element", 'warning', options);
+			let response	= await alerter.promise;
 			if (response == 'confirm') {
 				//make other button inactive
 				activeButton.classList.remove('active');
@@ -758,7 +759,8 @@ async function removeConditionRule(target){
 			CustomButtonText: `The whole condition`,
 		};
 
-		let response = await new Main.Alert("This will remove this element", 'warning', options);
+		let alerter 		= new Main.Alert("This will remove this element", 'warning', options);
+		let response	= await alerter.promise;
 
 		if (response == 'confirm') {
 			//get the current row
@@ -793,7 +795,7 @@ async function removeConditionRule(target){
 			ConfirmButtonText: `Yes, delete it!`
 		};
 
-		let response = await new Main.Alert("This will remove this condition", 'warning', options);
+		let alerter = new Main.Alert("This will remove this condition", 'warning', options);
 
 		if (response == 'confirm') {
 			conditionRow.remove();

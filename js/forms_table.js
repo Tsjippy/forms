@@ -44,7 +44,8 @@ async function askConfirmation(text){
 		CancelButtonText: 'Cancel'
 	};
 
-	let response = await new Main.Alert(`Are you sure you want to ${text} this?`, 'question', options);
+	let alerter 		= new Main.Alert(`Are you sure you want to ${text} this?`, 'question', options);
+	let response	= await alerter.promise;
 
 	return response == 'confirm';
 }
@@ -95,7 +96,8 @@ async function archiveSubmission(target){
 			CustomButtonPosition: 2
 		};
 
-		response = await new Main.Alert(`Do you want to ${action} just this one or the whole request?`, 'question', options);
+		let alerter = new Main.Alert(`Do you want to ${action} just this one or the whole request?`, 'question', options);
+		response	= await alerter.promise;
 
 		if (response == 'custom') {
 			formData.append('subid', tableRow.dataset.subid);
