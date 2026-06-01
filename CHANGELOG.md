@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.4.1] - 2026-06-01
+
+
+### Changed
 - use named params for userSelect function
 
 ### Fixed
 - cloning tabbed contents
-
-### Updated
 
 ## [11.4.0] - 2026-05-30
 
