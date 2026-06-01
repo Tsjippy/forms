@@ -7,6 +7,7 @@
 - use named params for userSelect function
 
 ### Fixed
+- cloning tabbed contents
 
 ### Updated
 
