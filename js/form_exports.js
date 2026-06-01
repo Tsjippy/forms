@@ -142,7 +142,11 @@ export function copyFormInput(originalNode){
 }
 
 export function fixNumbering(wrapper){
-	wrapper.querySelectorAll(':scope > .clone-div, :scope > .tablink').forEach(updateNumbers);
+	// Run for clone divs
+	wrapper.querySelectorAll(':scope > .clone-div').forEach(updateNumbers);
+
+	// Run for tablinks seperately so the index starts over
+	wrapper.querySelectorAll(':scope > .tablink').forEach(updateNumbers);
 
 	function updateNumbers(clone, index){
 		//Update the new number	
