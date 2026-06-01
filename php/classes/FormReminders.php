@@ -600,7 +600,7 @@ class FormReminders extends Forms{
         $name	= ucfirst(str_replace(['[', ']'], [': ',''], $name));
 
         $baseUrl	= explode('main-tab=', $_SERVER['REQUEST_URI'])[0];
-        $mainTab	= $params['main-tab'];
+        $mainTab	= $params['main-tab'] ?? '';
         if(!empty($childName)){
             $name 		.= " for $childName";
             $mainTab	 = strtolower($childName);
