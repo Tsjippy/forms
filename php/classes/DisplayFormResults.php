@@ -1073,7 +1073,7 @@ class DisplayFormResults extends DisplayForm{
 				}
 				
 				//Limit url cell width, for strings with a visible length of more then 30 characters
-				if(strlen(strip_tags($value)) > 30 && !str_contains($value, 'https://')){
+				if(strlen(wp_strip_all_tags($value)) > 30 && !str_contains($value, 'https://')){
 					$class .= ' limit-length';
 				}
 			}
