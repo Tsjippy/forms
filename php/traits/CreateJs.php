@@ -6,8 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require( PLUGINPATH  . '/lib/vendor/autoload.php');
-
 trait CreateJs{
     	/**
 	 * Checks if the current form is a multi step form
