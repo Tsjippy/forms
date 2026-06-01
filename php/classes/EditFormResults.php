@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class EditFormResults extends DisplayFormResults{
 	public int|false $submissionId;
 
-	public function __construct(){
-		parent::__construct([]);
+	public function __construct($atts=[]){
+		parent::__construct($atts);
 
 		$this->submissionId	= false;
 	}

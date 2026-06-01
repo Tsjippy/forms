@@ -411,6 +411,11 @@ function getInputHtml(){
 		$option 		= explode('=', trim($option));
 
 		$optionType		= $option[0];
+
+		if(empty($option[1])){
+			TSJIPPY\printArray(["Option '$optionType' has no value, skipping", $option]);
+			continue;
+		}
 		$optionValue	= str_replace('\\\\', '\\', $option[1]);
 
 		// This option is a list option

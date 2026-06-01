@@ -14,9 +14,12 @@ trait ExportFormResults{
 	 * Clean excel Content from currenlty hidden columns
 	 */
 	function cleanExportContent(){
-		$hiddenColumns		= get_user_meta($this->user->ID, 'hidden_columns_'.$this->formData->id, true);
+		$hiddenColumns		= [];
+		if(!empty($this->user->ID)){
+			$hiddenColumns		= get_user_meta($this->user->ID, 'hidden_columns_'.$this->formData->id, true);
+		}
 
-		$excludeIndexes	= [];
+		$excludeIndexes		= [];
 
 		$header				= $this->excelContent[0];
 
@@ -37,7 +40,7 @@ trait ExportFormResults{
 		}
 
 		// There is a custom sort column defined
-		if(is_numeric($this->tableSettings->default_sort)){
+		if(is_numeric($this->tableSettings->default_sort ?? null)){
 			$sortElementId		= $this->tableSettings->default_sort;
 			$sortElement		= $this->getElementById($sortElementId);
 			$sortElementType	= $sortElement->type;

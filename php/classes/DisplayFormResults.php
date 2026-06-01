@@ -1438,11 +1438,11 @@ class DisplayFormResults extends DisplayForm{
 
 					<h4>Select the sort direction</h4>
 					<label>
-						<input type='radio' name='table-settings[sort-direction]' id='sort-direction' value='asc' <?php if($this->tableSettings->sort_direction == 'asc'){echo 'checked';}?>>
+						<input type='radio' name='table-settings[sort-direction]' id='sort-direction' value='asc' <?php if(($this->tableSettings->sort_direction ?? '') == 'asc'){echo 'checked';}?>>
 						Ascending
 					</label>
 					<label>
-						<input type='radio' name='table-settings[sort-direction]' id='sort-direction' value='dsc' <?php if($this->tableSettings->sort_direction == 'dsc'){echo 'checked';}?>>
+						<input type='radio' name='table-settings[sort-direction]' id='sort-direction' value='dsc' <?php if(($this->tableSettings->sort_direction ?? '') == 'dsc'){echo 'checked';}?>>
 						Decending
 					</label>
 				</div>
@@ -1453,15 +1453,17 @@ class DisplayFormResults extends DisplayForm{
 						<?php
 						$filters	= $this->tableSettings->filter;
 
-						if(!is_array($this->tableSettings->filter)){
+						if(!is_array($this->tableSettings->filter ?? '')){
 							$this->tableSettings->filter	= [];
 							$filters	= [''];
 						}
 
-						foreach($filters as $index=>$filter){
-							echo "<tr class='clone-div' data-div-id='$index' style='border: none;'>";
-								echo "<td style='border: none;'>";
-									echo "<select name='table-settings[filter][$index][element]' class='inline'>";
+						foreach($filters as $index => $filter){
+							?>
+							<tr class='clone-div' data-div-id='<?php echo esc_attr($index); ?>' style='border: none;'>
+								<td style='border: none;'>
+									<select name='table-settings[filter][<?php echo esc_attr($index); ?>][element]' class='inline'>
+										<?php
 										foreach($this->columnSettings as $key => $columnSetting){
 
 											if(!is_array($columnSetting)){
@@ -1471,37 +1473,58 @@ class DisplayFormResults extends DisplayForm{
 											$name = $columnSetting['name'];
 											
 											//Check which option is the selected one
-											if($this->tableSettings->filter[$index]['element'] == $key){
-												$selected = 'selected="selected"';
-											}else{
-												$selected = '';
-											}
-											echo "<option value='$key' $selected>$name</option>";
+											?>
+											<option value='<?php echo esc_attr($key); ?>' <?php if($this->tableSettings->filter[$index]['element'] == $key){ echo 'selected="selected"';} ?>>
+												<?php echo esc_html($name); ?>
+											</option>
+											<?php
 										}
-									echo "</select>";
-								echo "</td>";
+									?>
+									</select>
+								</td>
 
-								echo "<td style='border: none;'>";
-									echo "   filter type";
-									echo "<select name='table-settings[filter][$index][type]' class='inline'>";
+								<td style='border: none;'>
+									filter type
+									<select name='table-settings[filter][<?php echo esc_attr($index); ?>][type]' class='inline'>
+										<?php
 										foreach(['>=', '<', '==', 'like'] as $type){
-											if($this->tableSettings->filter[$index]['type'] == $type){
-												$selected = 'selected="selected"';
-											}else{
-												$selected = '';
-											}
-											echo "<option value='$type' $selected>$type</option>";
+											?>
+											<option value='<?php echo esc_attr($type); ?>' <?php if($this->tableSettings->filter[$index]['type'] == $type){ echo 'selected="selected"';} ?>>
+												<?php echo esc_html($type); ?>
+											</option>
+											<?php
 										}
-									echo "</select>";
-								echo "</td>";
+									?>
+									</select>
+								</td>
 
-								echo "<td style='border: none;'>";
-									echo "   Filter name  ";
-									echo "<input name='table-settings[filter][$index][name]' value='{$this->tableSettings->filter[$index]['name']}'>";
-								echo "</td>";
-								echo "<td style='border: none;'><button type='button' class='add button'>+</button></td>";
-								echo "<td style='border: none;'><button type='button' class='remove button'>-</button></td>";
-							echo "</tr>";
+								<td style='border: none;'>
+									filter type
+									<select name='table-settings[filter][<?php echo esc_attr($index); ?>][type]' class='inline'>
+										<?php
+										foreach(['>=', '<', '==', 'like'] as $type){
+											?>
+											<option value='<?php echo esc_attr($type); ?>' <?php if($this->tableSettings->filter[$index]['type'] == $type){ echo 'selected="selected"';} ?>>
+												<?php echo esc_html($type); ?>
+											</option>
+											<?php
+										}
+									?>
+									</select>
+								</td>
+
+								<td style='border: none;'>
+									Filter name
+									<input name='table-settings[filter][<?php echo esc_attr($index); ?>][name]' value='<?php echo esc_attr($this->tableSettings->filter[$index]['name']); ?>'>
+								</td>
+								<td style='border: none;'>
+									<button type='button' class='add button'>+</button>
+								</td>
+								<td style='border: none;'>
+									<button type='button' class='remove button'>-</button>
+								</td>
+							</tr>
+							<?php
 						}
 						?>
 					</table>
@@ -1514,7 +1537,7 @@ class DisplayFormResults extends DisplayForm{
 					</label>
 					<select name="table-settings[hide-row]">
 					<?php
-					if($this->tableSettings->hide_row == ''){
+					if(($this->tableSettings->hide_row ?? '') == ''){
 						?><option value='' selected>---</option><?php
 					}else{
 						?><option value=''>---</option><?php
@@ -1528,7 +1551,7 @@ class DisplayFormResults extends DisplayForm{
 						$name = $columnSetting['name'];
 						
 						//Check which option is the selected one
-						if($this->tableSettings->hide_row == $columnSetting['name']){
+						if(($this->tableSettings->hide_row ?? '') == $columnSetting['name']){
 							$selected = 'selected="selected"';
 						}else{
 							$selected = '';
@@ -1542,8 +1565,8 @@ class DisplayFormResults extends DisplayForm{
 				<div class="table-rights-wrapper">
 					<h4>Select which results to display</h4>
 					<select name="table-settings[result-type]">
-						<option value="personal" <?php if($this->tableSettings->result_type == 'personal'){echo 'selected';}?>>Only personal</option>
-						<option value="all" <?php if($this->tableSettings->result_type == 'all'){echo 'selected';}?>>All the viewer has permission for</option>
+						<option value="personal" <?php if(($this->tableSettings->result_type ?? '') == 'personal'){echo 'selected';}?>>Only personal</option>
+						<option value="all" <?php if(($this->tableSettings->result_type ?? '') == 'all'){echo 'selected';}?>>All the viewer has permission for</option>
 					</select>
 					<br>
 					<label>
@@ -1556,7 +1579,7 @@ class DisplayFormResults extends DisplayForm{
 				<div class="table-rights-wrapper">
 					<h4 class="label">Select if you want to view archived results by default</h4>
 					<?php
-					if($this->tableSettings->archived){
+					if($this->tableSettings->archived ?? false){
 						$checked1	= 'checked';
 						$checked2	= '';
 					}else{
@@ -1578,7 +1601,7 @@ class DisplayFormResults extends DisplayForm{
 				<div class="table-rights-wrapper">
 					<h4 class="label">Auto archive results</h4>
 					<?php
-					if($this->formData->autoarchive){
+					if($this->formData->autoarchive ?? false){
 						$checked1	= 'checked';
 						$checked2	= '';
 					}else{
@@ -1624,7 +1647,7 @@ class DisplayFormResults extends DisplayForm{
 							?>
 						</select>
 						<label style="margin:0 10px;">equals</label>
-						<input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo $this->formData->autoarchive_value;?>" style='max-width:200px;'>
+						<input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo $this->formData->autoarchive_value ?? '';?>" style='max-width:200px;'>
 						
 						<?php
 						echo $this->infoBoxHtml("You can use placeholders like '%today%+3days' for a value");
@@ -1720,7 +1743,7 @@ class DisplayFormResults extends DisplayForm{
 							<br>
 							<h4>Select users with permission to EDIT the table</h4>
 							<?php
-							TSJIPPY\userSelect(onlyAdults: true, id: "table-settings[edit-right-roles][]", userId: $this->tableSettings->edit_right_roles, excludeIds:[1], multiple:true, echo:true);
+							TSJIPPY\userSelect(onlyAdults: true, id: "table-settings[edit-right-roles][]", userId: $this->tableSettings->edit_right_roles ?? [], excludeIds:[1], multiple:true, echo:true);
 							?>
 						</div>
 					</div>
@@ -1839,7 +1862,7 @@ class DisplayFormResults extends DisplayForm{
 		if(
 			$this->onlyOwn											||
 			(
-				$this->tableSettings->result_type == 'personal'	&&
+				($this->tableSettings->result_type ?? '') == 'personal'	&&
 				!$this->all
 			)	||
 			!$this->tableEditPermissions							&&
@@ -1927,7 +1950,7 @@ class DisplayFormResults extends DisplayForm{
 			if(
 				$this->tableViewPermissions &&
 				$this->onlyOwn || 
-				( $this->tableSettings->result_type == 'personal' && !$this->all)
+				( ($this->tableSettings->result_type ?? '') == 'personal' && !$this->all)
 			){
 				$html	.= "<button class='button tsjippy small only-own-switch-all'>Show all entries</button>";
 			}elseif(
@@ -1935,7 +1958,7 @@ class DisplayFormResults extends DisplayForm{
 				(
 					!$this->onlyOwn	||
 					$this->all		||
-					$this->tableSettings->result_type != 'personal'
+					($this->tableSettings->result_type ?? '') != 'personal'
 				)
 			){
 				$html	.= "<button class='button tsjippy small only-own-switch-on'>Show only my own entries</button>";
@@ -2279,9 +2302,9 @@ class DisplayFormResults extends DisplayForm{
 		?>
 		<div class='form table-wrapper'>
 			<div class='form table-head'>
-				<h2 class="table-title"><?php echo esc_html($this->tableSettings->title); ?></h2><br>
+				<h2 class="table-title"><?php echo esc_html($this->tableSettings->title ?? ''); ?></h2><br>
 				<?php
-					echo $buttons;
+					echo wp_kses_post($buttons);
 				?>
 			</div>
 			<?php
