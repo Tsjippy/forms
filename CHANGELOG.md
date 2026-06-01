@@ -4,13 +4,20 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.4.4] - 2026-06-01
+
+
+### Changed
 - merged hooks.md into readme.md
 
 ### Fixed
 - added domain to __ function
 - construction should have atts
-
-### Updated
 
 ## [11.4.3] - 2026-06-01
 
