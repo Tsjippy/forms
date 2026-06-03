@@ -3,6 +3,7 @@
 
 ### Added
 - escaping functions
+- echo escaping
 
 ### Changed
 
