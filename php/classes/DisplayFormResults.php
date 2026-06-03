@@ -1270,10 +1270,10 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	protected function columnSettingsForm($class, $viewRoles, $editRoles){
 		?>
-		<div class="tabcontent" id="column-settings-<?php echo $this->shortcodeId;?>">
+		<div class="tabcontent" id="column-settings-<?php echo esc_attr($this->shortcodeId);?>">
 			<form class="sortable-column-settings-rows">
-				<input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo $this->shortcodeId;?>'>
-				<input type='hidden' class='no-reset' name='form-id' value='<?php echo $this->formData->id;?>'>
+				<input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo esc_attr($this->shortcodeId);?>'>
+				<input type='hidden' class='no-reset' name='form-id' value='<?php echo esc_attr($this->formData->id);?>'>
 				
 				<table class='tsjippy table' style='display:table'>
 					<thead class="column-setting-wrapper">
@@ -1310,9 +1310,9 @@ class DisplayFormResults extends DisplayForm{
 							$icon			= "<img class='visibility-icon $visibility' src='".TSJIPPY\PICTURESURL."/$visibility.png' width='20px' loading='lazy' style='min-width:20px;'>";
 							
 							?>
-							<tr class="column-setting-wrapper" data-element-id="<?php esc_attr($elementIndex);?>">
-								<input type="hidden" class="no-reset" name="column-settings[<?php esc_attr($elementIndex);?>][column-id]"	value="<?php echo $columnSetting['id'] ?? -9;?>">
-								<input type="hidden" class="no-reset" name="column-settings[<?php esc_attr($elementIndex);?>][slug]"			value="<?php echo $columnSetting['slug'] ?? '';?>">
+							<tr class="column-setting-wrapper" data-element-id="<?php echo esc_attr($elementIndex);?>">
+								<input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($elementIndex);?>][column-id]"	value="<?php echo $columnSetting['id'] ?? -9;?>">
+								<input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($elementIndex);?>][slug]"			value="<?php echo $columnSetting['slug'] ?? '';?>">
 								<td>
 									<span class="movecontrol formfield-button" aria-hidden="true">:::</span>
 								</td>
@@ -1322,10 +1322,10 @@ class DisplayFormResults extends DisplayForm{
 									</span>
 								</td>
 								<td>
-									<input type="text" class="column-settings" name="column-settings[<?php esc_attr($elementIndex);?>][nice-name]" value="<?php echo $name;?>" style="margin-right:0px;">
+									<input type="text" class="column-settings" name="column-settings[<?php echo esc_attr($elementIndex);?>][nice-name]" value="<?php echo $name;?>" style="margin-right:0px;">
 								</td>
 								<td>
-									<input type="hidden" class="no-reset" name="column-settings[<?php esc_attr($elementIndex);?>][show]" value="<?php echo $columnSetting['show'];?>">
+									<input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($elementIndex);?>][show]" value="<?php echo $columnSetting['show'];?>">
 									<span class="visibility-icon">
 										<?php echo $icon;?>
 									</span>
@@ -1335,7 +1335,7 @@ class DisplayFormResults extends DisplayForm{
 								if(is_numeric($elementIndex)){
 									?>
 									<td style='max-width:200px;text-wrap: auto; text-align: left;'>
-										<select class='column-settings inline' name='column-settings[<?php esc_attr($elementIndex);?>][view-right-roles][]' multiple='multiple' style="margin-right:0px;">
+										<select class='column-settings inline' name='column-settings[<?php echo esc_attr($elementIndex);?>][view-right-roles][]' multiple='multiple' style="margin-right:0px;">
 											<?php
 											foreach($viewRoles as $key => $roleName){
 												if(isset($columnSetting['view_right_roles']) && in_array($key, (array)$columnSetting['view_right_roles'])){
@@ -1356,7 +1356,7 @@ class DisplayFormResults extends DisplayForm{
 								}
 								?>
 								<td style='max-width:200px;text-wrap: auto; text-align: left;'>
-									<select class='column-settings inline' name='column-settings[<?php esc_attr($elementIndex);?>][edit-right-roles][]' multiple='multiple' style="margin-right:0px;">
+									<select class='column-settings inline' name='column-settings[<?php echo esc_attr($elementIndex);?>][edit-right-roles][]' multiple='multiple' style="margin-right:0px;">
 										<?php
 										foreach($editRoles as $key=>$roleName){
 											if(isset($columnSetting['edit_right_roles']) && @in_array($key, (array)$columnSetting['edit_right_roles'])){
@@ -1370,10 +1370,10 @@ class DisplayFormResults extends DisplayForm{
 									</select>
 								</td>
 								<td>
-									<input type="number" class="column-settings" name="column-settings[<?php esc_attr($elementIndex);?>][width]" value="<?php esc_attr($width);?>" placeholder="200" min="100" style="max-width: 80px; margin-right:0px;">px
+									<input type="number" class="column-settings" name="column-settings[<?php echo esc_attr($elementIndex);?>][width]" value="<?php echo esc_attr($width);?>" placeholder="200" min="100" style="max-width: 80px; margin-right:0px;">px
 								</td>
 								<td>
-									<input type="checkbox" class="column-settings" name="column-settings[<?php esc_attr($elementIndex);?>][copy]" value="1" <?php if(isset($columnSetting['copy'])){echo 'checked';}?> style="max-width: 40px; margin-right:0px;">
+									<input type="checkbox" class="column-settings" name="column-settings[<?php echo esc_attr($elementIndex);?>][copy]" value="1" <?php if(isset($columnSetting['copy'])){echo 'checked';}?> style="max-width: 40px; margin-right:0px;">
 								</td>
 							</tr>
 							<?php
@@ -1400,7 +1400,7 @@ class DisplayFormResults extends DisplayForm{
 	 */
 	protected function tableSettingsForm($class, $viewRoles, $editRoles){
 		?>
-		<div class="tabcontent <?php esc_attr($class);?>" id="table-rights-<?php echo $this->shortcodeId;?>">
+		<div class="tabcontent <?php echo esc_attr($class);?>" id="table-rights-<?php echo esc_attr($this->shortcodeId);?>">
 			<form>
 				<input type='hidden' class='no-reset' class='shortcode-settings' name='shortcode-id'	value='<?php echo $this->shortcodeId;?>'>
 				<input type='hidden' class='no-reset' class='shortcode-settings' name='form-id'		value='<?php echo $this->formData->id;?>'>
@@ -2009,7 +2009,7 @@ class DisplayFormResults extends DisplayForm{
     			white-space: normal;
 			}
 		</style>
-		<table class='tsjippy table form-data' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>' data-type='<?php esc_attr($type);?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
+		<table class='tsjippy table form-data' data-form-id='<?php echo $this->formData->id;?>' data-shortcode-id='<?php echo $this->shortcodeId;?>' data-type='<?php echo esc_attr($type);?>' data-page='<?php echo $this->currentPage;?>' style='position: relative;z-index: 999;'>
 			<?php
 			$this->resultTableHead($type);
 			?>

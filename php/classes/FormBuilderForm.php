@@ -649,7 +649,7 @@ class FormBuilderForm extends DisplayForm{
 						}
 						?>
 						<label class='option-label'>
-							<input type='checkbox' class='formbuilder form-element-setting' name='actions[<?php esc_attr($action);?>]' value='<?php esc_attr($action);?>' <?php echo $checked;?>>
+							<input type='checkbox' class='formbuilder form-element-setting' name='actions[<?php echo esc_attr($action);?>]' value='<?php echo esc_attr($action);?>' <?php echo $checked;?>>
 							<?php echo ucfirst($action);?>
 						</label><br>
 						<?php
@@ -912,8 +912,8 @@ class FormBuilderForm extends DisplayForm{
 
 							?>
 							<label>
-								<input type='radio' name='period' id='period' value='<?php echo $period;?>' <?php echo $checked;?>>
-								<?php echo $period;?>
+								<input type='radio' name='period' id='period' value='<?php echo esc_attr($period);?>' <?php echo esc_attr($checked);?>>
+								<?php echo esc_html($period);?>
 							</label>
 							<?php
 						}
@@ -931,8 +931,8 @@ class FormBuilderForm extends DisplayForm{
 					<label>
 						<h4>Date Window</h4>
 						Allow Submissions Within This Date Window<br>
-						From <input type="date" name='window-start' value='<?php echo $this->formReminder->window_start;?>' <?php echo $min;?> >
-						To <input type="date" name='window-end' value='<?php echo $this->formReminder->window_end;?>' <?php echo $max;?> >
+						From <input type="date" name='window-start' value='<?php echo $this->formReminder->window_start;?>' <?php echo esc_attr($min);?> >
+						To <input type="date" name='window-end' value='<?php echo $this->formReminder->window_end;?>' <?php echo esc_attr($max);?> >
 					</label>				
 				</div>
 			<?php
@@ -954,7 +954,7 @@ class FormBuilderForm extends DisplayForm{
 
 					?>
 					<label>
-						<input type='radio' name='reminder-period' id='reminder-period' value='<?php echo $period;?>' <?php echo $checked;?>>
+						<input type='radio' name='reminder-period' id='reminder-period' value='<?php echo esc_attr($period);?>' <?php echo esc_attr($checked);?>>
 						<?php echo $period;?>
 					</label>
 					<?php
@@ -1039,7 +1039,7 @@ class FormBuilderForm extends DisplayForm{
 			?>
 		</datalist>
 		<label>Do not warn if user has role</label>
-		<select name='<?php echo $name;?>[roles][]' multiple>
+		<select name='<?php echo esc_attr($name);?>[roles][]' multiple>
 			<option value=''>---</option>
 			<?php
 			foreach($userRoles as $key=>$roleName){
@@ -1066,15 +1066,15 @@ class FormBuilderForm extends DisplayForm{
 					$arrayKeys	= maybe_unserialize($userMetaKeys[$condition['meta-key']][0]);
 				}
 				?>
-				<div class='warning-conditions element-conditions' data-index='<?php echo $conditionIndex;?>'>
-					<input type="hidden" class="no-reset warning-condition combinator" name="<?php echo $name;?>[<?php echo $conditionIndex;?>][combinator]" value="<?php echo $condition['combinator'];?>">
+				<div class='warning-conditions element-conditions' data-index='<?php echo esc_attr($conditionIndex);?>'>
+					<input type="hidden" class="no-reset warning-condition combinator" name="<?php echo esc_attr($name);?>[<?php echo esc_attr($conditionIndex);?>][combinator]" value="<?php echo $condition['combinator'];?>">
 
-					<input type="text" class="warning-condition meta-key" name="<?php echo $name;?>[<?php echo $conditionIndex;?>][meta-key]" value="<?php echo $condition['meta-key'];?>" list="meta-key" style="width: fit-content;">
+					<input type="text" class="warning-condition meta-key" name="<?php echo esc_attr($name);?>[<?php echo esc_attr($conditionIndex);?>][meta-key]" value="<?php echo $condition['meta-key'];?>" list="meta-key" style="width: fit-content;">
 
 					<span class="index-wrapper <?php if(empty($condition['meta-key-index'])){echo 'hidden';}?>">
 						<span>and index</span>
-						<input type="text" class="warning-condition meta-key-index" name='<?php echo $name;?>[<?php echo $conditionIndex;?>][meta-key-index]' value="<?php echo $condition['meta-key-index'];?>" list="meta-key-index[<?php echo $conditionIndex;?>]" style="width: fit-content;">
-						<datalist class="meta-key-index-list warning-condition" id="meta-key-index[<?php echo $conditionIndex;?>]">
+						<input type="text" class="warning-condition meta-key-index" name='<?php echo esc_attr($name);?>[<?php echo esc_attr($conditionIndex);?>][meta-key-index]' value="<?php echo $condition['meta-key-index'];?>" list="meta-key-index[<?php echo esc_attr($conditionIndex);?>]" style="width: fit-content;">
+						<datalist class="meta-key-index-list warning-condition" id="meta-key-index[<?php echo esc_attr($conditionIndex);?>]">
 							<?php
 							if(is_array($arrayKeys)){
 								foreach(array_keys($arrayKeys) as $key){
@@ -1085,7 +1085,7 @@ class FormBuilderForm extends DisplayForm{
 						</datalist>
 					</span>
 					
-					<select class="warning-condition inline" name='<?php echo $name;?>[<?php echo $conditionIndex;?>][equation]'>
+					<select class="warning-condition inline" name='<?php echo esc_attr($name);?>[<?php echo esc_attr($conditionIndex);?>][equation]'>
 						<?php
 						$optionArray	= [
 							''			=> '---',
@@ -1105,7 +1105,7 @@ class FormBuilderForm extends DisplayForm{
 						}
 						?>
 					</select>
-					<input  type='text'   class='warning-condition' name='<?php echo $name;?>[<?php echo $conditionIndex;?>][conditional-value]' value="<?php echo $condition['conditional-value'];?>" style="width: fit-content; <?php if($condition['equation'] == 'submitted'){echo 'visibility:hidden;';}?>">
+					<input  type='text'   class='warning-condition' name='<?php echo esc_attr($name);?>[<?php echo esc_attr($conditionIndex);?>][conditional-value]' value="<?php echo $condition['conditional-value'];?>" style="width: fit-content; <?php if($condition['equation'] == 'submitted'){echo 'visibility:hidden;';}?>">
 					
 					<button type='button' class='warn-cond button <?php if(!empty($condition['combinator']) && $condition['combinator'] == 'and'){echo 'active';}?>'	title='Add a new "AND" rule' value="and">AND</button>
 					<button type='button' class='warn-cond button  <?php if(!empty($condition['combinator']) && $condition['combinator'] == 'or'){echo 'active';}?>'	title='Add a new "OR"  rule' value="or">OR</button>
@@ -1198,42 +1198,42 @@ class FormBuilderForm extends DisplayForm{
 							$triggerValueElementId	= isset($email->submitted_trigger['value-element']) ? $email->submitted_trigger['value-element'] : '';
 
 							?>
-							<div class='clone-div tabcontent <?php echo $hidden;?>' id="email-<?php echo $key;?>" data-div-id='<?php echo $key;?>'>
+							<div class='clone-div tabcontent <?php echo esc_attr($hidden);?>' id="email-<?php echo esc_attr($key);?>" data-div-id='<?php echo esc_attr($key);?>'>
 								<h4 class="formfield" style="margin-top:50px; display:inline-block;">E-mail <?php echo $key+1;?></h4>
 								<button type='button' class='add button' style='flex: 1;'>+</button>
 								<button type='button' class='remove button' style='flex: 1;'>-</button>
 								<div style='width:100%;'>
-									<input type='hidden' class='no-reset' name='emails[<?php echo $key;?>][email-id]' value='<?php echo $email->id;?>'>
-									<input type='hidden' class='no-reset' name='emails[<?php echo $key;?>][form-id]' value='<?php echo $email->form_id;?>'>
+									<input type='hidden' class='no-reset' name='emails[<?php echo esc_attr($key);?>][email-id]' value='<?php echo $email->id;?>'>
+									<input type='hidden' class='no-reset' name='emails[<?php echo esc_attr($key);?>][form-id]' value='<?php echo $email->form_id;?>'>
 
 									<div class="formfield form-label" style="margin-top:10px;">
 										<h4>Trigger</h4>
 										Send e-mail when:<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='submitted' <?php if($email->email_trigger == 'submitted'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][email-trigger]' class='email-trigger' value='submitted' <?php if($email->email_trigger == 'submitted'){echo 'checked';}?>>
 											The form is submitted
 										</label><br>
 
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='shouldsubmit' <?php if($email->email_trigger == 'shouldsubmit'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][email-trigger]' class='email-trigger' value='shouldsubmit' <?php if($email->email_trigger == 'shouldsubmit'){echo 'checked';}?>>
 											The form is due for submission
 										</label><br>
 
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='submittedcond' <?php if($email->email_trigger == 'submittedcond'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][email-trigger]' class='email-trigger' value='submittedcond' <?php if($email->email_trigger == 'submittedcond'){echo 'checked';}?>>
 											The form is submitted and meets a condition
 										</label><br>
 
 										<div class='submitted-type <?php if($email->email_trigger != 'submittedcond'){echo 'hidden';}?>'>
 											<div class='submitted-trigger-type'>
 												Element 
-												<select class='' name='emails[<?php echo $key;?>][submitted-trigger][element]'>
+												<select class='' name='emails[<?php echo esc_attr($key);?>][submitted-trigger][element]'>
 													<?php
 													echo $this->inputDropdown($triggerElementId, "emails[$key][submitted-trigger']['element']");
 													?>
 												</select>
 
-												<select class='' name='emails[<?php echo $key;?>][submitted-trigger][equation]'>
+												<select class='' name='emails[<?php echo esc_attr($key);?>][submitted-trigger][equation]'>
 													<?php
 														$optionArray	= [
 															''			=> '---',
@@ -1261,10 +1261,10 @@ class FormBuilderForm extends DisplayForm{
 												</select>
 
 												<label class='staticvalue <?php if(empty($triggerEquation) || !in_array($triggerEquation, ['==', '!=', '>', '<'])){echo 'hidden';}?>'>
-													<input type='text' name='emails[<?php echo $key;?>][submitted-trigger][value]' value="<?php echo $triggerValue;?>" style='width: auto;'>
+													<input type='text' name='emails[<?php echo esc_attr($key);?>][submitted-trigger][value]' value="<?php echo esc_attr($triggerValue);?>" style='width: auto;'>
 												</label>
 
-												<select class='dynamicvalue <?php if(empty($triggerEquation) || in_array($triggerEquation, ['==', '!=', '>', '<', 'checked', '!checked'])){echo 'hidden';}?>' name='emails[<?php echo $key;?>][submitted-trigger][value-element]'>
+												<select class='dynamicvalue <?php if(empty($triggerEquation) || in_array($triggerEquation, ['==', '!=', '>', '<', 'checked', '!checked'])){echo 'hidden';}?>' name='emails[<?php echo esc_attr($key);?>][submitted-trigger][value-element]'>
 													<?php
 														echo $this->inputDropdown($triggerValueElementId, "emails[$key][submitted-trigger][value-element]");
 													?>
@@ -1273,12 +1273,12 @@ class FormBuilderForm extends DisplayForm{
 										</div>
 
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='fieldchanged' <?php if($email->email_trigger == 'fieldchanged'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][email-trigger]' class='email-trigger' value='fieldchanged' <?php if($email->email_trigger == 'fieldchanged'){echo 'checked';}?>>
 											A field has changed to a value
 										</label>
 										<div class='conditional-field-wrapper <?php if($email->email_trigger != 'fieldchanged'){echo 'hidden';}?>'>
 											<label class="formfield form-label">Field</label>
-											<select name='emails[<?php echo $key;?>][conditional-field]'>
+											<select name='emails[<?php echo esc_attr($key);?>][conditional-field]'>
 												<?php
 												echo $this->inputDropdown( $email->conditional_field );
 												?>
@@ -1286,18 +1286,18 @@ class FormBuilderForm extends DisplayForm{
 											
 											<label class="formfield form-label">
 												Value
-												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditional-value]' value="<?php echo $email->conditional_value; ?>" style='width:fit-content;'>
+												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][conditional-value]' value="<?php echo $email->conditional_value; ?>" style='width:fit-content;'>
 											</label>
 										</div>
 
 										<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='fieldschanged' <?php if($email->email_trigger == 'fieldschanged'){	echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][email-trigger]' class='email-trigger' value='fieldschanged' <?php if($email->email_trigger == 'fieldschanged'){	echo 'checked';}?>>
 											One or more fields have changed
 										</label>
 										<div class='conditional-fields-wrapper <?php if($email->email_trigger != 'fieldschanged'){echo 'hidden';}?>'>
 											<label class="formfield form-label">Field(s)</label>
-											<select name='emails[<?php echo $key;?>][conditional-fields][]' multiple='multiple'>
+											<select name='emails[<?php echo esc_attr($key);?>][conditional-fields][]' multiple='multiple'>
 												<?php
 												echo $this->inputDropdown( $email->conditional_fields );
 												?>
@@ -1306,13 +1306,13 @@ class FormBuilderForm extends DisplayForm{
 
 										<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='removed' <?php if($email->email_trigger == 'removed'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][email-trigger]' class='email-trigger' value='removed' <?php if($email->email_trigger == 'removed'){echo 'checked';}?>>
 											The submission is archived or deleted
 										</label>
 										<br>
 										<?php do_action('tsjippy-forms-after-email-triggers', $key, $email);?>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-trigger]' class='email-trigger' value='disabled' <?php if($email->email_trigger == 'disabled'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][email-trigger]' class='email-trigger' value='disabled' <?php if($email->email_trigger == 'disabled'){echo 'checked';}?>>
 											Do not send this e-mail
 										</label>
 										<br>
@@ -1323,11 +1323,11 @@ class FormBuilderForm extends DisplayForm{
 										<h4>Sender address</h4>
 										Sender e-mail should be:<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][from-email]' class='from-email' value='fixed' <?php if(empty($email->from_email) || $email->from_email == 'fixed'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][from-email]' class='from-email' value='fixed' <?php if(empty($email->from_email) || $email->from_email == 'fixed'){echo 'checked';}?>>
 											Fixed e-mail adress
 										</label><br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][from-email]' class='from-email' value='conditional' <?php if($email->from_email == 'conditional'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][from-email]' class='from-email' value='conditional' <?php if($email->from_email == 'conditional'){echo 'checked';}?>>
 											Conditional e-mail adress
 										</label><br>
 									</div>
@@ -1335,7 +1335,7 @@ class FormBuilderForm extends DisplayForm{
 									<div class='emailfromfixed <?php if(!empty($email->from_email) && $email->from_email != 'fixed'){echo 'hidden';}?>'>
 										<label class="formfield form-label">
 											From e-mail
-											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][from]' value="<?php if(empty($email->from)){echo $defaultFrom;} else{echo $email->from;} ?>">
+											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][from]' value="<?php if(empty($email->from)){esc_attr($defaultFrom);} else{echo $email->from;} ?>">
 										</label>
 									</div>
 									
@@ -1353,7 +1353,7 @@ class FormBuilderForm extends DisplayForm{
 											}
 											foreach(array_values($email->conditional_from_email) as $fromKey => $fromEmail){
 												?>
-												<div class='clone-div' data-div-id='<?php echo $fromKey;?>'>
+												<div class='clone-div' data-div-id='<?php echo esc_attr($fromKey);?>'>
 													<fieldset class='form-email-fieldset'>
 														<legend class="formfield button-wrapper">
 															<span class='text'>Condition <?php echo $fromKey+1;?></span>
@@ -1361,18 +1361,18 @@ class FormBuilderForm extends DisplayForm{
 															<button type='button' class='remove button' style='flex: 1;'>-</button>
 														</legend>
 														If
-														<select name='emails[<?php echo $key;?>][conditional-from-email][<?php echo $fromKey;?>][fieldid]'>
+														<select name='emails[<?php echo esc_attr($key);?>][conditional-from-email][<?php echo esc_attr($fromKey);?>][fieldid]'>
 															<?php
 															echo $this->inputDropdown($fromEmail['fieldid']);
 															?>
 														</select>
 														<label class="formfield form-label">
 															equals
-															<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditional-from-email][<?php echo $fromKey;?>][value]' value="<?php echo $fromEmail['value'];?>">
+															<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][conditional-from-email][<?php echo esc_attr($fromKey);?>][value]' value="<?php echo $fromEmail['value'];?>">
 														</label>
 														<label class="formfield form-label">
 															then from e-mail address should be:<br>
-															<input type='email' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditional-from-email][<?php echo $fromKey;?>][email]' value="<?php echo $fromEmail['email'];?>">
+															<input type='email' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][conditional-from-email][<?php echo esc_attr($fromKey);?>][email]' value="<?php echo $fromEmail['email'];?>">
 														</label>
 													</fieldset>
 												</div>
@@ -1382,7 +1382,7 @@ class FormBuilderForm extends DisplayForm{
 											<br>
 											<label class="formfield form-label">
 												Else the e-mail will be
-												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][else-from]' value="<?php echo $email->else_from; ?>">
+												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][else-from]' value="<?php echo $email->else_from; ?>">
 											</label>
 										</div>
 									</div>
@@ -1392,11 +1392,11 @@ class FormBuilderForm extends DisplayForm{
 									<div class="formfield tofieldlabel">
 										Recipient e-mail should be:<br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-to]' class='email-to' value='fixed' <?php if(empty($email->email_to) || $email->email_to == 'fixed'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][email-to]' class='email-to' value='fixed' <?php if(empty($email->email_to) || $email->email_to == 'fixed'){echo 'checked';}?>>
 											Fixed e-mail adress
 										</label><br>
 										<label>
-											<input type='radio' name='emails[<?php echo $key;?>][email-to]' class='email-to' value='conditional' <?php if($email->email_to == 'conditional'){echo 'checked';}?>>
+											<input type='radio' name='emails[<?php echo esc_attr($key);?>][email-to]' class='email-to' value='conditional' <?php if($email->email_to == 'conditional'){echo 'checked';}?>>
 											Conditional e-mail adress
 										</label><br>
 									</div>
@@ -1404,7 +1404,7 @@ class FormBuilderForm extends DisplayForm{
 									<div class='email-tofixed <?php if(!empty($email->email_to) && $email->email_to != 'fixed'){echo 'hidden';}?>'>
 										<label class="formfield form-label">
 											To e-mail
-											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][to]' value="<?php if(empty($email->to)){echo '%email%';}else{echo $email->to;} ?>">
+											<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][to]' value="<?php if(empty($email->to)){echo '%email%';}else{echo $email->to;} ?>">
 										</label>
 									</div>
 
@@ -1423,7 +1423,7 @@ class FormBuilderForm extends DisplayForm{
 											
 											foreach($email->conditional_email_to as $toKey => $toEmail){
 												?>
-												<div class='clone-div' data-div-id='<?php echo $toKey;?>'>
+												<div class='clone-div' data-div-id='<?php echo esc_attr($toKey);?>'>
 													<fieldset class='form-email-fieldset button-wrapper'>
 														<legend class="formfield">
 															<span class='text'>Condition <?php echo $toKey+1;?></span>
@@ -1431,18 +1431,18 @@ class FormBuilderForm extends DisplayForm{
 															<button type='button' class='remove button' style='flex: 1;'>-</button>
 														</legend>
 														If
-														<select name='emails[<?php echo $key;?>][conditional-email-to][<?php echo $toKey;?>][fieldid]'>
+														<select name='emails[<?php echo esc_attr($key);?>][conditional-email-to][<?php echo esc_attr($toKey);?>][fieldid]'>
 															<?php
 															echo $this->inputDropdown($toEmail['fieldid']);
 															?>
 														</select>
 														<label class="formfield form-label">
 															equals
-															<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditional-email-to][<?php echo $toKey;?>][value]' value="<?php echo $toEmail['value'];?>">
+															<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][conditional-email-to][<?php echo esc_attr($toKey);?>][value]' value="<?php echo $toEmail['value'];?>">
 														</label>
 														<label class="formfield form-label">
 															then from e-mail address should be:<br>
-															<input type='email' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][conditional-email-to][<?php echo $toKey;?>][email]' value="<?php echo $toEmail['email'];?>">
+															<input type='email' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][conditional-email-to][<?php echo esc_attr($toKey);?>][email]' value="<?php echo $toEmail['email'];?>">
 														</label>
 													</fieldset>
 												</div>
@@ -1452,7 +1452,7 @@ class FormBuilderForm extends DisplayForm{
 											<br>
 											<label class="formfield form-label">
 												Else the e-mail will be
-												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][else-to]' value="<?php echo $email->else_to; ?>">
+												<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][else-to]' value="<?php echo $email->else_to; ?>">
 											</label>
 										</div>
 									</div>
@@ -1460,7 +1460,7 @@ class FormBuilderForm extends DisplayForm{
 									<br>
 									<div class="formfield form-label">
 										<h4>Subject</h4>
-										<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][subject]' value="<?php echo $email->subject?>">
+										<input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][subject]' value="<?php echo $email->subject?>">
 									</div>
 									
 									<br>
@@ -1487,7 +1487,7 @@ class FormBuilderForm extends DisplayForm{
 									<br>
 									<div class="formfield form-label">
 										<h4>Additional headers like 'Reply-To'</h4>
-										<textarea class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][headers]'><?php
+										<textarea class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][headers]'><?php
 											echo $email->headers?>
 										</textarea>
 									</div>
@@ -1496,7 +1496,7 @@ class FormBuilderForm extends DisplayForm{
 									<div class="formfield form-label">
 										<h4>Attachments</h4>
 										Form values that should be attached to the e-mail
-										<textarea class='formbuilder form-element-setting' name='emails[<?php echo $key;?>][files]'><?php
+										<textarea class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key);?>][files]'><?php
 											echo $email->files?>
 										</textarea>
 									</div>
@@ -1751,7 +1751,7 @@ class FormBuilderForm extends DisplayForm{
 					$this->buildDefaultsArray();
 					foreach($this->defaultArrayValues as $key => $field){
 						?>
-						<option value='<?php echo $key;?>' <?php if(($element->default_array_value ?? '') == $key){ echo 'selected="selected"';}?>>
+						<option value='<?php echo esc_attr($key);?>' <?php if(($element->default_array_value ?? '') == $key){ echo 'selected="selected"';}?>>
 							<?php echo esc_attr(ucfirst(str_replace('_', ' ', $key)));?>
 						</option>
 						<?php
@@ -1771,7 +1771,7 @@ class FormBuilderForm extends DisplayForm{
 					<?php
 					foreach($this->defaultValues as $key => $field){
 						?>
-						<option value='<?php echo $key;?>'>
+						<option value='<?php echo esc_attr($key);?>'>
 							<?php echo esc_attr(ucfirst(str_replace('_', ' ', $key)));?>
 						</option>
 						<?php
@@ -1784,7 +1784,7 @@ class FormBuilderForm extends DisplayForm{
 			do_action('tsjippy-after-formbuilder-element-options', $element);
 			?>
 			<br>
-			<div name='element-options' class='element-option reverse not-php <?php echo $nonInputClasses;?> shouldhide'>
+			<div name='element-options' class='element-option reverse not-php <?php echo esc_attr($nonInputClasses);?> shouldhide'>
 				<label>
 					Specify any options like styling
 					<textarea class="formbuilder" name="formfield[options]"><?php echo esc_attr(trim($element->options?? ''));?></textarea>
@@ -1956,8 +1956,8 @@ class FormBuilderForm extends DisplayForm{
 			ob_start();
 			?>
 			<div>
-				This element has some conditions defined by <?php echo $counter;?>.<br>
-				Click on <?php echo $any;?> button below to view.
+				This element has some conditions defined by <?php echo esc_attr($counter);?>.<br>
+				Click on <?php echo esc_attr($any);?> button below to view.
 				<?php echo $jumbButtonHtml;?>
 			</div><br><br>
 			<?php
@@ -1968,7 +1968,7 @@ class FormBuilderForm extends DisplayForm{
 			<h3>Form element conditions</h3>
 			<input type='hidden' class='no-reset' class='element-condition' name='form-id' value='<?php echo $this->formData->id;?>'>
 			
-			<input type='hidden' class='no-reset' class='element-condition' name='elementid' value='<?php echo $elementId;?>'>
+			<input type='hidden' class='no-reset' class='element-condition' name='elementid' value='<?php echo esc_attr($elementId);?>'>
 
 			<?php
 			// get the last numeric array key
@@ -1980,23 +1980,23 @@ class FormBuilderForm extends DisplayForm{
 					continue;
 				}
 				?>
-				<div class='condition-row' data-condition-index='<?php echo $conditionIndex;?>'>
+				<div class='condition-row' data-condition-index='<?php echo esc_attr($conditionIndex);?>'>
 					<span style='font-weight: 600;'>If</span>
 					<br>
 					<?php
 					$lastRuleKey = array_key_last($condition['rules']);
 					foreach($condition['rules'] as $ruleIndex=>$rule){
 						?>
-						<div class='rule-row' data-rule-index='<?php echo $ruleIndex;?>'>
-							<input type='hidden' class='no-reset element-condition combinator' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][combinator]' value='<?php echo $rule['combinator']; ?>'>
+						<div class='rule-row' data-rule-index='<?php echo esc_attr($ruleIndex);?>'>
+							<input type='hidden' class='no-reset element-condition combinator' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][rules][<?php echo esc_attr($ruleIndex);?>][combinator]' value='<?php echo $rule['combinator']; ?>'>
 						
-							<select class='element-condition condition-select conditional-field' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional-field]' required>
+							<select class='element-condition condition-select conditional-field' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][rules][<?php echo esc_attr($ruleIndex);?>][conditional-field]' required>
 								<?php
 									echo $this->inputDropdown($rule['conditional-field'], $elementId);
 								?>
 							</select>
 
-							<select class='element-condition condition-select equation' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][equation]' required>
+							<select class='element-condition condition-select equation' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][rules][<?php echo esc_attr($ruleIndex);?>][equation]' required>
 								<?php
 									$optionArray	= [
 										''			=> '---',
@@ -2038,8 +2038,8 @@ class FormBuilderForm extends DisplayForm{
 							}
 							?>
 							
-							<span class='<?php echo $hidden;?> condition-form conditional-field-2'>
-								<select class='element-condition condition-select' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional-field-2]'>
+							<span class='<?php echo esc_attr($hidden);?> condition-form conditional-field-2'>
+								<select class='element-condition condition-select' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][rules][<?php echo esc_attr($ruleIndex);?>][conditional-field-2]'>
 								<?php
 									echo $this->inputDropdown($rule['conditional-field-2'], $elementId);
 								?>
@@ -2054,8 +2054,8 @@ class FormBuilderForm extends DisplayForm{
 							}
 							?>
 
-							<span class='<?php echo $hidden;?> condition-form equation-2'>
-								<select class='element-condition condition-select' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][equation-2]'>
+							<span class='<?php echo esc_attr($hidden);?> condition-form equation-2'>
+								<select class='element-condition condition-select' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][rules][<?php echo esc_attr($ruleIndex);?>][equation-2]'>
 									<?php
 										$optionArray	= [
 											''			=> '---',
@@ -2082,7 +2082,7 @@ class FormBuilderForm extends DisplayForm{
 								$hidden = '';
 							}
 							?>
-							<input  type='text'   class='<?php echo $hidden;?> element-condition condition-form' name='element-conditions[<?php echo $conditionIndex;?>][rules][<?php echo $ruleIndex;?>][conditional-value]' value="<?php echo $rule['conditional-value'];?>">
+							<input  type='text'   class='<?php echo esc_attr($hidden);?> element-condition condition-form' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][rules][<?php echo esc_attr($ruleIndex);?>][conditional-value]' value="<?php echo $rule['conditional-value'];?>">
 							
 							<button type='button' class='element-condition and-rule condition-form button <?php if(!empty($rule['combinator']) && $rule['combinator'] == 'AND'){echo 'active';}?>'	title='Add a new "AND" rule to this condition'>AND</button>
 							<button type='button' class='element-condition or-rule condition-form button  <?php if(!empty($rule['combinator']) && $rule['combinator'] == 'OR'){echo 'active';}?>'	title='Add a new "OR"  rule to this condition'>OR</button>
@@ -2105,30 +2105,30 @@ class FormBuilderForm extends DisplayForm{
 					<div class='action-row'>
 						<div class='radio-wrapper condition-form'>
 							<label>
-								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element-condition' value='show' <?php if($condition['action'] == 'show'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][action]' class='element-condition' value='show' <?php if($condition['action'] == 'show'){echo 'checked';}?> required>
 								Show this element
 							</label><br>
 							
 							<label>
-								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element-condition' value='hide' <?php if($condition['action'] == 'hide'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][action]' class='element-condition' value='hide' <?php if($condition['action'] == 'hide'){echo 'checked';}?> required>
 								Hide this element
 							</label><br>
 							
 							<label>
-								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element-condition' value='toggle' <?php if($condition['action'] == 'toggle'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][action]' class='element-condition' value='toggle' <?php if($condition['action'] == 'toggle'){echo 'checked';}?> required>
 								Toggle this element
 							</label><br>
 							
 							<label>
-								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element-condition' value='value' <?php if($condition['action'] == 'value'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][action]' class='element-condition' value='value' <?php if($condition['action'] == 'value'){echo 'checked';}?> required>
 								Set property
 							</label>
-							<input type="text" list="propertylist" name="element-conditions[<?php echo $conditionIndex;?>][property-name1]" class='element-condition' placeholder="property name" value="<?php echo $condition['property-name1'];?>">
+							<input type="text" list="propertylist" name="element-conditions[<?php echo esc_attr($conditionIndex);?>][property-name1]" class='element-condition' placeholder="property name" value="<?php echo $condition['property-name1'];?>">
 							<label> to:</label>
-							<textarea class='element-condition' name="element-conditions[<?php echo $conditionIndex;?>][action-value]" rows='1'><?php echo $condition['action-value'];?></textarea>
+							<textarea class='element-condition' name="element-conditions[<?php echo esc_attr($conditionIndex);?>][action-value]" rows='1'><?php echo $condition['action-value'];?></textarea>
 							<br>
 							<label>
-								<input type='radio' name='element-conditions[<?php echo $conditionIndex;?>][action]' class='element-condition' value='property' <?php if($condition['action'] == 'property'){echo 'checked';}?> required>
+								<input type='radio' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][action]' class='element-condition' value='property' <?php if($condition['action'] == 'property'){echo 'checked';}?> required>
 								Set the
 							</label>
 						
@@ -2138,11 +2138,11 @@ class FormBuilderForm extends DisplayForm{
 								<option value="max">
 							</datalist>
 							<label>
-								<input type="text" list="propertylist" name="element-conditions[<?php echo $conditionIndex;?>][property-name]" class='element-condition' placeholder="property name" value="<?php echo $condition['property-name'];?>">
+								<input type="text" list="propertylist" name="element-conditions[<?php echo esc_attr($conditionIndex);?>][property-name]" class='element-condition' placeholder="property name" value="<?php echo $condition['property-name'];?>">
 								property to the value of
 							</label>
 							
-							<select class='element-condition condition-select' name='element-conditions[<?php echo $conditionIndex;?>][property-value]'>
+							<select class='element-condition condition-select' name='element-conditions[<?php echo esc_attr($conditionIndex);?>][property-value]'>
 								<?php echo $this->inputDropdown($condition['property-value'], $elementId);?>
 							</select>
 
@@ -2162,8 +2162,8 @@ class FormBuilderForm extends DisplayForm{
 								}
 							}
 							?>
-							<label class='addition <?php echo $hidden;?>'>
-								+ <input type='number' name="element-conditions[<?php echo $conditionIndex;?>][addition]" class='element-condition' value="<?php echo $condition['addition'];?>" style='width: 60px;'>
+							<label class='addition <?php echo esc_attr($hidden);?>'>
+								+ <input type='number' name="element-conditions[<?php echo esc_attr($conditionIndex);?>][addition]" class='element-condition' value="<?php echo $condition['addition'];?>" style='width: 60px;'>
 								<span class='days <?php echo $hidden2;?>'> days</span>
 							</label>
 							<br>
