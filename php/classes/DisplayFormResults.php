@@ -1382,7 +1382,7 @@ class DisplayFormResults extends DisplayForm{
 					</tbody>
 				</table>
 				<?php
-				echo TSJIPPY\addSaveButton('submit_column_setting','Save table column settings');
+				TSJIPPY\addSaveButton('submit_column_setting','Save table column settings');
 				?>
 			</form>
 		</div>
@@ -1749,7 +1749,7 @@ class DisplayFormResults extends DisplayForm{
 					</div>
 				</div>
 			<?php
-			echo TSJIPPY\addSaveButton('submit_table_setting','Save table settings');
+			TSJIPPY\addSaveButton('submit_table_setting','Save table settings');
 			?>
 			</form>
 		</div>

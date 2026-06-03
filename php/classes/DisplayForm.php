@@ -401,7 +401,7 @@ class DisplayForm extends ElementHtmlBuilder{
 				$parent = $this->formStepControls($parent);
 			}
 			 
-			$this->addRawHtml(TSJIPPY\addSaveButton('submit-form', $buttonText, $hidden), $parent);
+			$this->addRawHtml(TSJIPPY\addSaveButton('submit-form', $buttonText, $hidden, false), $parent);
 		}
 
 		$html =  $this->dom->saveHTML();

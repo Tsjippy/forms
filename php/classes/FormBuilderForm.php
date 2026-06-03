@@ -832,7 +832,7 @@ class FormBuilderForm extends DisplayForm{
 					</div>
 				</div>
 				<?php
-				echo TSJIPPY\addSaveButton('submit-form-setting',  'Save form settings');
+				TSJIPPY\addSaveButton('submit-form-setting',  'Save form settings');
 				?>
 			</form>
 			<form method="POST" style='display: inline-block;'>
@@ -920,10 +920,10 @@ class FormBuilderForm extends DisplayForm{
 						
 						if(!empty($this->formReminder->frequency) && !empty($this->formReminder->period)){
 							// Selected data can not be in a previous window
-							$min = 'min="'.date("Y-m-d", strtotime("-{$this->formReminder->frequency} {$this->formReminder->period} + 1 day")).'"';
+							$min = 'min="'.gmdate("Y-m-d", strtotime("-{$this->formReminder->frequency} {$this->formReminder->period} + 1 day")).'"';
 							
 							// Selected date cannot be in the newxt window
-							$max = 'max="'.date("Y-m-d", strtotime("+{$this->formReminder->frequency} {$this->formReminder->period} - 1 day")).'"';
+							$max = 'max="'.gmdate("Y-m-d", strtotime("+{$this->formReminder->frequency} {$this->formReminder->period} - 1 day")).'"';
 						}
 					?>
 
@@ -973,7 +973,7 @@ class FormBuilderForm extends DisplayForm{
 			<?php echo $this->warningConditionsForm('conditions', maybe_unserialize($this->formReminder->conditions));?>
 
 			<?php
-			echo TSJIPPY\addSaveButton('submit-form-reminder',  'Save form reminder');
+			TSJIPPY\addSaveButton('submit-form-reminder',  'Save form reminder');
 			?>
 		</form>
 		<?php
@@ -1508,7 +1508,7 @@ class FormBuilderForm extends DisplayForm{
 					</div>
 				</div>
 				<?php
-				echo TSJIPPY\addSaveButton('submit-form-emails','Save form email configuration');
+				TSJIPPY\addSaveButton('submit-form-emails','Save form email configuration');
 				?>
 			</form>
 		</div>
@@ -1869,7 +1869,7 @@ class FormBuilderForm extends DisplayForm{
 
 			echo wp_kses_post($formContents);
 
-			echo wp_kses_post(TSJIPPY\addSaveButton('submit-form-element',"$text form element")); ?>
+			TSJIPPY\addSaveButton('submit-form-element',"$text form element"); ?>
 		</form>
 		<?php
 
@@ -2208,7 +2208,7 @@ class FormBuilderForm extends DisplayForm{
 				</div>
 			</div>
 			<?php
-			echo TSJIPPY\addSaveButton('submit-form-condition','Save conditions'); ?>
+			TSJIPPY\addSaveButton('submit-form-condition','Save conditions'); ?>
 		</form>
 		<?php
 		return ob_get_clean();

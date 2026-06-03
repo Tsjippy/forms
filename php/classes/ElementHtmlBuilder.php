@@ -483,7 +483,7 @@ class ElementHtmlBuilder extends SubmitForm{
 				}
 			}
 		//display dates in a nice way
-		}elseif(strtotime($string) && Date('Y', strtotime($string)) < 2200 && Date('Y', strtotime($string)) > 1900){
+		}elseif(strtotime($string) && gmdate('Y', strtotime($string)) < 2200 && gmdate('Y', strtotime($string)) > 1900){
 			$date		= date_parse($string);
 
 			//Only transform if everything is there
@@ -495,7 +495,7 @@ class ElementHtmlBuilder extends SubmitForm{
 					$format	.= ' '.get_option('time_format');
 				}
 
-				$output		= date($format, strtotime($string));
+				$output		= gmdate($format, strtotime($string));
 			}
 		}
 	
@@ -657,7 +657,7 @@ class ElementHtmlBuilder extends SubmitForm{
 					in_array($optionType, ['min', 'max', 'value']) && 
 					strtotime($optionValue)
 				){
-					$optionValue	= Date('Y-m-d', strtotime($optionValue));
+					$optionValue	= gmdate('Y-m-d', strtotime($optionValue));
 				}
 
 				// Store in the attributes array
@@ -1795,7 +1795,7 @@ class ElementHtmlBuilder extends SubmitForm{
 			//If the keyword is a valid date keyword
 			if(!empty(strtotime($keyword))){
 				//convert to date
-				$dateString = date("Y-m-d", strtotime($keyword));
+				$dateString = gmdate("Y-m-d", strtotime($keyword));
 				
 				//update form element
 				$this->html = str_replace($matches[0][$key], $dateString, $this->html);
