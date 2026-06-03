@@ -2,15 +2,22 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [11.4.5] - 2026-06-03
+
+
+### Added
 - escaping functions
 - echo escaping
 
 ### Changed
 - addSaveButton with echo param
-
-### Fixed
-
-### Updated
 
 ## [11.4.4] - 2026-06-01
 
