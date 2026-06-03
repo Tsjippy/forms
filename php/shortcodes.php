@@ -66,7 +66,7 @@ function showFormSelector($atts=[]){
                     <?php
                         foreach($forms as $form){
                             $name   = ucfirst(str_replace('_', ' ', $form->slug));
-                            if($_REQUEST['form'] == $form->slug || $_REQUEST['form'] == $form->id){
+                            if(($_REQUEST['form'] ?? '') == $form->slug || ($_REQUEST['form'] ?? '') == $form->id){
                                 $selected = 'selected=selected';
                             }else{
                                 $selected = '';

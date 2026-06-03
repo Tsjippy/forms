@@ -649,7 +649,7 @@ class FormBuilderForm extends DisplayForm{
 						}
 						?>
 						<label class='option-label'>
-							<input type='checkbox' class='formbuilder form-element-setting' name='actions[<?php echo $action;?>]' value='<?php echo $action;?>' <?php echo $checked;?>>
+							<input type='checkbox' class='formbuilder form-element-setting' name='actions[<?php esc_attr($action);?>]' value='<?php esc_attr($action);?>' <?php echo $checked;?>>
 							<?php echo ucfirst($action);?>
 						</label><br>
 						<?php

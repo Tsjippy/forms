@@ -166,11 +166,11 @@ trait CreateJs{
                         if(str_contains($rule['equation'], 'value')){
                             $compareValue2 = "value_$fieldNumber2";
                         //compare with a number
-                        }elseif(is_numeric($rule['conditional-value'])){
-                            $compareValue2 = trim($rule['conditional-value']);
+                        }elseif(is_numeric($rule['conditional-value'] ?? '')){
+                            $compareValue2 = trim($rule['conditional-value'] ?? '');
                         //compare with text
                         }else{
-                            $compareValue2 = "'".strtolower(trim($rule['conditional-value']))."'";
+                            $compareValue2 = "'".strtolower(trim($rule['conditional-value'] ?? ''))."'";
                         }
                         
                         /*

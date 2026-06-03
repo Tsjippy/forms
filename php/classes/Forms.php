@@ -484,7 +484,7 @@ class Forms{
 			return new WP_Error('forms', 'No form slug given');
 		}
 
-		$slug	= str_replace(' ', '-', strtolower($slug));
+		$slug	= str_replace([' ', '/'], '-', strtolower($slug));
 
 		// Check if name already exists
 		$newName	= $slug;

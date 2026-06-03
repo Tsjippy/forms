@@ -640,7 +640,7 @@ class FormReminders extends Forms{
 
         $formUrl    = $this->formData->url;
 
-        $formName   = str_replace(['-', '_'], ' ', $this->formData->slug);
+        $formName   = $this->formData->name;
 
         $text       = "Fill in the $formName form";
         if(!empty($childName)){
