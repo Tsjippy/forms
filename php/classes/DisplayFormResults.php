@@ -1228,15 +1228,27 @@ class DisplayFormResults extends DisplayForm{
 			}
 		}
 		
-		$query						= "SELECT * FROM {$this->shortcodeTable} WHERE id = '{$this->shortcodeId}'";
-		$this->tableSettings 		= $wpdb->get_results($query)[0];
+		$this->tableSettings 		= $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM %i WHERE id = %d",
+				$this->shortcodeTable,
+				$this->shortcodeId
+			)
+		)[0];
+
 		foreach($this->tableSettings as $key => &$value){
 			$value	= maybe_unserialize($value);
 		}
 
 		$this->columnSettings		= [];
-		$query						= "SELECT * FROM {$this->shortcodeColumnSettingsTable} WHERE shortcode_id = '{$this->shortcodeId}' ORDER BY `priority` ASC";
-		$results 					= $wpdb->get_results($query, ARRAY_A);
+		$results 					= $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM %i WHERE shortcode_id = %d ORDER BY `priority` ASC",
+				$this->shortcodeColumnSettingsTable,
+				$this->shortcodeId
+			),
+			ARRAY_A
+		);
 
 		foreach($results as $setting){
 			// do not add if the element does not exist anymore

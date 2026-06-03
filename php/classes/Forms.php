@@ -490,8 +490,13 @@ class Forms{
 		$newName	= $slug;
 		$i			= 1;
 		while(true){
-			$query	= "SELECT * FROM {$this->tableName} WHERE slug = '$newName'";
-			$result	= $wpdb->get_results($query);
+			$result	= $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i WHERE slug = %s",
+					$this->tableName,
+					$newName
+				)			
+			);
 
 			if(empty($result)){
 				break;
@@ -694,9 +699,12 @@ class Forms{
 	public function getForms(){
 		global $wpdb;
 		
-		$query							= "SELECT * FROM {$this->tableName}";
-		
-		$this->forms					= $wpdb->get_results($query);
+		$this->forms					= $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM %i",
+				$this->tableName
+			)
+		);
 	}
 
 	/**
@@ -740,18 +748,22 @@ class Forms{
 			)
 		){
 			// Get the form data
-			$query				= "SELECT * FROM {$this->tableName} WHERE ";
+			$query				= "SELECT * FROM %i WHERE ";
+			$values				= [$this->tableName];
 			if(is_numeric($formId)){
-				$query	.= "id= '$formId'";
+				$query	.= "id= %d";
+				$values[] = $formId;
 			}elseif(is_numeric($this->formData->id ?? '') && $this->formData->id > -1){
-				$query	.= "id= '{$this->formData->id}'";
+				$query	.= "id= %d";
+				$values[] = $this->formData->id;
 			}elseif(!empty($this->formData->slug)){
-				$query	.= "slug= '{$this->formData->slug}'";
+				$query	.= "slug= %s";
+				$values[] = $this->formData->slug;
 			}else{
 				return new \WP_Error('forms', 'No form name or id given');
 			}
 
-			$result				= $wpdb->get_results($query);
+			$result				= $wpdb->get_results($wpdb->prepare($query, $values));
 
 			// Form does not exist yet
 			if(empty($result)){
@@ -821,9 +833,13 @@ class Forms{
 		}
 		$this->formReminder	= new stdClass();
 		
-		$query = "select * from $this->formReminderTable where form_id={$formId}";
-		
-		$results	= $wpdb->get_results($query);
+		$results	= $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM %i WHERE form_id = %d",
+				$this->formReminderTable, 
+				$formId
+			)
+		);
 
 		if(empty($results)){
 			return;
@@ -1176,13 +1192,19 @@ class Forms{
 		}
 
 		// Get all form elements
-		$query						= "SELECT * FROM {$this->elTableName} WHERE form_id= '$formId'";
+		$query						= "SELECT * FROM %i WHERE form_id= %d";
+		$values						= [
+			$this->elTableName,
+			$formId
+		];
 
 		if(!empty($sortCol)){
-			$query .= " ORDER BY {$this->elTableName}.`$sortCol` ASC";
+			$query .= " ORDER BY %s ASC";
+			$values[]	= $sortCol;
 		}
 
-		$elements	= $wpdb->get_results($query);
+		$elements	= $wpdb->get_results($wpdb->prepare($query, $values));
+
 		foreach($elements as &$element){
 			if(!empty($element->conditions)){
 				while(is_serialized( $element->conditions )){
@@ -1307,17 +1329,21 @@ class Forms{
 
 		wp_enqueue_style('tsjippy_forms_style');
 
-		$query				= "SELECT * FROM {$this->elTableName} WHERE `form_id`=";
+		$query				= "SELECT * FROM %i WHERE `form_id`=";
+		$values				= [$this->elTableName];
 
 		if(is_numeric($this->formData->id) && $this->formData->id > -1){
-			$query	.= $this->formData->id;
+			$query	.= '%d';
+			$values[] = $this->formData->id;
 		}elseif(!empty($this->formData->slug)){
-			$query	.= "(SELECT `id` FROM {$this->tableName} WHERE slug='{$this->formData->slug}' LIMIT 1)";
+			$query	.= "(SELECT `id` FROM %i WHERE slug=%s LIMIT 1)";
+			$values[] = $this->tableName;
+			$values[] = $this->formData->slug;
 		}else{
 			return new WP_Error('forms', 'Which form do you have?');
 		}
 		
-		$formElements 		=  $wpdb->get_results($query);
+		$formElements 		=  $wpdb->get_results($wpdb->prepare($query, $values));
 
 		if(isset($_REQUEST['formbuilder']) && is_user_logged_in()){
 			$formBuilderForm	= new FormBuilderForm($atts);

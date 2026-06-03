@@ -95,8 +95,13 @@ function showFormSelector($atts=[]){
          * Loop over the forms to add both the form and the submission data 
          */
         foreach($forms as $form){
-		    $query			= "SELECT * FROM {$formTable->shortcodeTable} WHERE form_id= '{$form->id}'";
-		    $shortcodeData 	= $wpdb->get_results($query);
+		    $shortcodeData 	= $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM %i WHERE form_id= %d",
+                    $formTable->shortcodeTable,
+                    $form->id
+                )
+            );
 
             //Create shortcode data if not existing
             if(empty($shortcodeData)){

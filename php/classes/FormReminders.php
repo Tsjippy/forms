@@ -129,9 +129,13 @@ class FormReminders extends Forms{
         // Get the forms that have a stardate in the past
         $date				= gmdate('Y-m-d');
 
-        $query				= "SELECT * FROM {$this->formReminderTable} WHERE reminder_start_date <= '$date'";
-
-        $results			= $wpdb->get_results($query);
+        $results			= $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM %i WHERE reminder_start_date <= %s",
+                $this->formReminderTable,
+                $date
+            )
+        );
 
         foreach($results as $formReminder){
             $formReminder->conditions	= maybe_unserialize($formReminder->conditions);
@@ -203,7 +207,7 @@ class FormReminders extends Forms{
      * 
      * @return  string                  The minimum date for form submissions to be included in the reminders
      */
-    protected function getMinimumDate($formReminder){
+    protected function getMinimumDate($formReminder, &$query, &$values){
         $since	= '';
 
         // We have definded a submission
@@ -229,7 +233,8 @@ class FormReminders extends Forms{
                 $since = $date1->format('Y-m-d');
             }
 
-            $since = "AND time_created >= '$since'";
+            $query .= "AND time_created >= %s";
+            $values[] = $since;
         }
 
         return $since;
@@ -243,14 +248,23 @@ class FormReminders extends Forms{
      * @return  void
      */
     protected function processDefaultForm($formReminder){
-        global $wpdb;
-
-        $since  = $this->getMinimumDate($formReminder);
+        global $wpdb; 
 
         // Get all submissions created inside the current submission window
-        $query			= "SELECT * FROM {$this->submissionTableName} WHERE form_id=$formReminder->form_id $since";
+        $query			= "SELECT * FROM %i WHERE form_id=%d";
+        $values            = [
+            $this->submissionTableName,
+            $formReminder->form_id
+        ];
 
-        $submissions	= $wpdb->get_results($query);
+        $this->getMinimumDate($formReminder, $query, $values);
+
+        $submissions	= $wpdb->get_results(
+            $wpdb->prepare(
+                $query,
+                $values
+            )
+        );
 
         // get all the users who have submitted the form after the currentIntervalStart date
         $usersWithSubmission	= [];
@@ -275,9 +289,12 @@ class FormReminders extends Forms{
     protected function getMandatoryElements(){
         global $wpdb;
 
-        $query				        = "SELECT * FROM {$this->elTableName}";
-
-        $this->mandatoryElements	= $wpdb->get_results($query." WHERE mandatory=1 OR recommended=1");
+        $this->mandatoryElements	= $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM %i WHERE mandatory=1 OR recommended=1",
+                $this->elTableName
+            )
+        );
         $this->mandatoryElements	= apply_filters("tsjippy_elements_filter", $this->mandatoryElements	, $this);
     }
 
