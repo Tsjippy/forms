@@ -1,22 +1,26 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-trait ExportFormResults{
+trait ExportFormResults
+{
     /**
      * Clean excel Content from currenlty hidden columns
      */
-    function cleanExportContent() {
+    function cleanExportContent()
+    {
         $hiddenColumns        = [];
         if (!empty($this->user->ID)) {
-            $hiddenColumns        = get_user_meta($this->user->ID, 'hidden_columns_' .$this->formData->id, true);
+            $hiddenColumns        = get_user_meta($this->user->ID, 'hidden_columns_' . $this->formData->id, true);
         }
 
         $excludeIndexes        = [];
@@ -71,9 +75,10 @@ trait ExportFormResults{
      * @param    string    $fileName    the name of the downloaded file.     Default the form slug
      * @param    bool    $download    Whether to download the excel or print it to screen
      */
-    function exportExcel($fileName="", $download=true) {
+    function exportExcel($fileName = "", $download = true)
+    {
         if (empty($fileName)) {
-            $fileName = get_the_title($this->formData->slug). " .xlsx";
+            $fileName = get_the_title($this->formData->slug) . " .xlsx";
         }
 
         $spreadsheet = new Spreadsheet();
@@ -125,9 +130,9 @@ trait ExportFormResults{
             ob_end_flush();
             exit;
             die();
-        }else{
+        } else {
             //Store xlsx file on server and return the path
-            $file = get_temp_dir().$fileName;
+            $file = get_temp_dir() . $fileName;
             $writer->save($file);
             return $file;
         }
@@ -136,9 +141,10 @@ trait ExportFormResults{
     /**
      * Export the current table to PDF
      */
-    function exportPdf() {
+    function exportPdf()
+    {
         $pdf = new TSJIPPY\PDF\PdfHtml();
-        $pdf->SetFont('Arial','B',15);
+        $pdf->SetFont('Arial', 'B', 15);
 
         $this->cleanExportContent();
 
@@ -157,7 +163,7 @@ trait ExportFormResults{
         //loop over the data to check all cells for their length
         foreach ($this->excelContent as $rowData) {
             //loop over the columns to check how wide they need to be
-            for ($x = 0; $x <= $colCount-1; $x++) {
+            for ($x = 0; $x <= $colCount - 1; $x++) {
                 //Add the length to the array
                 if (is_array($rowData[$x])) {
                     $rowData[$x] = implode("\n", $rowData[$x]);
@@ -168,7 +174,7 @@ trait ExportFormResults{
         }
 
         //find the biggest cell per column
-        for ($x = 0; $x <= $colCount-1; $x++) {
+        for ($x = 0; $x <= $colCount - 1; $x++) {
             $colWidths[$x] = max($colWidths[$x]);
         }
 
@@ -178,10 +184,10 @@ trait ExportFormResults{
         //count the columns smaller than 10
         $smallCollCount = count(array_filter(
             $colWidths,
-            function ($value) use($smallCollWidth) {
+            function ($value) use ($smallCollWidth) {
                 return ($value <= $smallCollWidth);
             }
-       ));
+        ));
 
         //page with minus the total width of all small collums
         $remainingWidth    = $pdf->GetPageWidth() - $smallCollCount * $smallCollWidth;
@@ -189,72 +195,72 @@ trait ExportFormResults{
         //width needed by all non-small columns
         $requiredWidth = array_sum(array_filter(
             $colWidths,
-            function ($value) use($smallCollWidth) {
+            function ($value) use ($smallCollWidth) {
                 return ($value > $smallCollWidth);
             }
-       ));
+        ));
 
         //columns with a width smaller than 30
         $interColls    = array_filter(
             $colWidths,
-            function ($value) use($smallCollWidth, $mediumCollWidth) {
+            function ($value) use ($smallCollWidth, $mediumCollWidth) {
                 return ($value > $smallCollWidth && $value <= $mediumCollWidth);
             }
-       );
+        );
 
         //count the columns with a proportional medium width of 30 or smaller but an actual width bigger than 30
         $mediumCollCount = count(array_filter(
             $colWidths,
-            function ($value) use($remainingWidth, $requiredWidth, $mediumCollWidth) {
-                $propWidth    = $remainingWidth*($value/$requiredWidth);
+            function ($value) use ($remainingWidth, $requiredWidth, $mediumCollWidth) {
+                $propWidth    = $remainingWidth * ($value / $requiredWidth);
                 return ($value > $mediumCollWidth && $propWidth <= $mediumCollWidth);
             }
-       ));
+        ));
 
         $bigColls = array_filter(
             $colWidths,
-            function ($value) use($remainingWidth, $requiredWidth, $mediumCollWidth) {
-                $propWidth    = $remainingWidth*($value/$requiredWidth);
+            function ($value) use ($remainingWidth, $requiredWidth, $mediumCollWidth) {
+                $propWidth    = $remainingWidth * ($value / $requiredWidth);
                 return ($propWidth > $mediumCollWidth);
             }
-       );
+        );
 
         //Determine the page size
-        $minWidth    = $smallCollCount * $smallCollWidth + array_sum($interColls) + $mediumCollCount * $mediumCollWidth + array_sum($bigColls)/6;
+        $minWidth    = $smallCollCount * $smallCollWidth + array_sum($interColls) + $mediumCollCount * $mediumCollWidth + array_sum($bigColls) / 6;
 
         if ($minWidth > 180) {
             if ($minWidth < 297) {
                 //Landscape A4 pdf
                 $pdf = new TSJIPPY\PDF\PdfHtml('L');
-            }elseif ($minWidth < 420) {
+            } elseif ($minWidth < 420) {
                 //Landscape pdf A3 size
-                $pdf = new TSJIPPY\PDF\PdfHtml('L','mm','A3');
-            }elseif ($minWidth < 594) {
+                $pdf = new TSJIPPY\PDF\PdfHtml('L', 'mm', 'A3');
+            } elseif ($minWidth < 594) {
                 //Landscape pdf A2 size
-                $pdf = new TSJIPPY\PDF\PdfHtml('L','mm',array(594,420));
-            }elseif ($minWidth < 841) {
+                $pdf = new TSJIPPY\PDF\PdfHtml('L', 'mm', array(594, 420));
+            } elseif ($minWidth < 841) {
                 //Landscape pdf A1 size
-                $pdf = new TSJIPPY\PDF\PdfHtml('L','mm',array(841,594));
-            }else{
+                $pdf = new TSJIPPY\PDF\PdfHtml('L', 'mm', array(841, 594));
+            } else {
                 //Landscape pdf A0 size
-                $pdf = new TSJIPPY\PDF\PdfHtml('L','mm',array(1189,841));
+                $pdf = new TSJIPPY\PDF\PdfHtml('L', 'mm', array(1189, 841));
             }
 
             //Set font again
-            $pdf->SetFont('Arial','B',15);
+            $pdf->SetFont('Arial', 'B', 15);
         }
 
-        $availableWidthForBigColumns    = $pdf->GetPageWidth() -20 - $smallCollCount*$smallCollWidth - array_sum($interColls) - $mediumCollCount * $mediumCollWidth;
+        $availableWidthForBigColumns    = $pdf->GetPageWidth() - 20 - $smallCollCount * $smallCollWidth - array_sum($interColls) - $mediumCollCount * $mediumCollWidth;
         $bigCollWidth                    = $availableWidthForBigColumns / max(count($bigColls), 1);
 
         //now loop over all columns and set their maximum lengths
-        for ($x = 0; $x <= $colCount-1; $x++) {
+        for ($x = 0; $x <= $colCount - 1; $x++) {
             if ($colWidths[$x] < 10) {
                 $colWidths[$x]    = 10;
-            //min width for medium wide columns
-            }elseif ($colWidths[$x] > $mediumCollWidth && $remainingWidth*($colWidths[$x]/$requiredWidth) <= $mediumCollWidth) {
+                //min width for medium wide columns
+            } elseif ($colWidths[$x] > $mediumCollWidth && $remainingWidth * ($colWidths[$x] / $requiredWidth) <= $mediumCollWidth) {
                 $colWidths[$x]    = min($colWidths[$x], $mediumCollWidth);
-            }elseif ($colWidths[$x] > 30) {
+            } elseif ($colWidths[$x] > 30) {
                 //equal spread for big columns
                 $colWidths[$x]    = min($bigCollWidth, $colWidths[$x]);
             }
@@ -278,7 +284,7 @@ trait ExportFormResults{
         }
 
         // Closing line which is the sum off all the column widths
-        $pdf->Cell(array_sum($colWidths),0,'','T');
+        $pdf->Cell(array_sum($colWidths), 0, '', 'T');
 
         $pdf->printPdf();
 

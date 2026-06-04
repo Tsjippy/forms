@@ -1,13 +1,16 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
 add_shortcode('formselector', __NAMESPACE__ . '\showFormSelector');
-function showFormSelector($atts=[]) {
+function showFormSelector($atts = [])
+{
     global $wpdb;
 
     wp_enqueue_script('tsjippy_forms_script');
@@ -21,7 +24,7 @@ function showFormSelector($atts=[]) {
     $a = shortcode_atts(array(
         'exclude'   => [],
         'no_meta'   => true
-   ), $atts);
+    ), $atts);
 
     $formTable    = new DisplayFormResults($atts);
     $formTable->getForms();
@@ -32,11 +35,11 @@ function showFormSelector($atts=[]) {
     if (!empty($a['exclude']) || $a['no_meta']) {
         if (is_array($a['exclude'])) {
             $exclusions = $a['exclude'];
-        }else{
+        } else {
             $exclusions = explode(',', $a['exclude']);
         }
 
-        foreach ($forms as $key=>$form) {
+        foreach ($forms as $key => $form) {
             if (in_array($form->slug, $exclusions) || empty($form->slug)) {
                 unset($forms[$key]);
             }
@@ -53,30 +56,30 @@ function showFormSelector($atts=[]) {
         return strcasecmp($a->slug, $b->slug);
     });
 
-    ?>
+?>
     <div id="forms-wrapper">
         <?php
         //only show selector if not queried
         if (!isset($_REQUEST['form'])) {
-            ?>
+        ?>
             <div id="form-selector-wrapper">
                 <label>Select the form you want to submit or view the results of</label>
                 <br>
                 <select id="tsjippy-forms-selector">
                     <?php
-                        foreach ($forms as $form) {
-                            $name   = ucfirst(str_replace('_', ' ', $form->slug));
-                            if (($_REQUEST['form'] ?? '') == $form->slug || ($_REQUEST['form'] ?? '') == $form->id) {
-                                $selected = 'selected=selected';
-                            }else{
-                                $selected = '';
-                            }
-                            echo "<option value='$form->slug' $selected>$name</option>";
+                    foreach ($forms as $form) {
+                        $name   = ucfirst(str_replace('_', ' ', $form->slug));
+                        if (($_REQUEST['form'] ?? '') == $form->slug || ($_REQUEST['form'] ?? '') == $form->id) {
+                            $selected = 'selected=selected';
+                        } else {
+                            $selected = '';
                         }
+                        echo "<option value='$form->slug' $selected>$name</option>";
+                    }
                     ?>
                 </select>
             </div>
-            <?php
+        <?php
         }
 
         if (($_REQUEST['display'] ?? '') == 'results') {
@@ -84,7 +87,7 @@ function showFormSelector($atts=[]) {
             $resultVis     = '';
             $formActive    = ' active';
             $resultActive  = '';
-        }else{
+        } else {
             $formVis       = '';
             $resultVis     = ' hidden';
             $formActive    = ' active';
@@ -100,43 +103,43 @@ function showFormSelector($atts=[]) {
                     "SELECT * FROM %i WHERE form_id= %d",
                     $formTable->shortcodeTable,
                     $form->id
-               )
-           );
+                )
+            );
 
             //Create shortcode data if not existing
             if (empty($shortcodeData)) {
                 $shortcodeId   = $formTable->insertInDb($form->id);
-            }else{
+            } else {
                 $shortcodeId   = $shortcodeData[0]->id;
             }
 
             //Check if this form should be displayed
             if (isset($_REQUEST['form']) && ($_REQUEST['form'] == $form->slug || $_REQUEST['form'] == $form->id)) {
                 $hidden = '';
-            }else{
+            } else {
                 $hidden = ' hidden';
             }
 
             $id = strtolower(str_replace([' ', '_'], '-', $form->slug));
 
             echo "<div id='$id' class='main-form-wrapper$hidden'>";
-                //only show button if not queried
-                if (!isset($_REQUEST['display'])) {
-                    echo "<button class='button tablink$formActive' id='show-{$id}-form' data-target='{$id}-form'>Show form</button>";
-                    echo "<button class='button formresults tablink$resultActive' id='show-{$id}_results' data-target='{$id}-results'>Show form results</button>";
-                }
+            //only show button if not queried
+            if (!isset($_REQUEST['display'])) {
+                echo "<button class='button tablink$formActive' id='show-{$id}-form' data-target='{$id}-form'>Show form</button>";
+                echo "<button class='button formresults tablink$resultActive' id='show-{$id}_results' data-target='{$id}-results'>Show form results</button>";
+            }
 
-                echo "<div id='{$id}-form' class='form-wrapper $formVis form-load-trigger' data-form-id={$form->id}>";
-                echo "</div>";
+            echo "<div id='{$id}-form' class='form-wrapper $formVis form-load-trigger' data-form-id={$form->id}>";
+            echo "</div>";
 
 
-                echo "<div id='{$id}-results' class='form-results-wrapper $resultVis form-load-trigger' data-shortcode-id=$shortcodeId>";
-                echo "</div>";
+            echo "<div id='{$id}-results' class='form-results-wrapper $resultVis form-load-trigger' data-shortcode-id=$shortcodeId>";
+            echo "</div>";
             echo "</div>";
         }
         ?>
     </div>
-    <?php
+<?php
 
     return ob_get_clean();
 }
@@ -150,11 +153,12 @@ add_shortcode('formbuilder', __NAMESPACE__ . '\showForm');
  *
  * @return  string            The HTML for the form
  */
-function showForm($atts) {
+function showForm($atts)
+{
     $forms   = new Forms();
     $html       = $forms->determineForm($atts);
     if (is_wp_error($html)) {
-        return "<div class='error'>" .$html->get_error_message(). "</div>";
+        return "<div class='error'>" . $html->get_error_message() . "</div>";
     }
 
     return $html;
@@ -168,12 +172,13 @@ add_shortcode('formresults', __NAMESPACE__ . '\formResults');
  *
  * @return  string            The HTML for the form results
  */
-function formResults($atts) {
+function formResults($atts)
+{
     $displayFormResults = new DisplayFormResults($atts);
     $html   = $displayFormResults->showFormresultsTable();
 
     if (is_wp_error($html)) {
-        return "<div class='error'>" .$html->get_error_message(). "</div>";
+        return "<div class='error'>" . $html->get_error_message() . "</div>";
     }
 
     return $html;
@@ -189,10 +194,11 @@ add_shortcode("missing_form_fields", __NAMESPACE__ . '\missingFormFields');
  *
  * @return  string            The HTML for the recommended form fields
  */
-function missingFormFields($atts) {
+function missingFormFields($atts)
+{
     $a = shortcode_atts(array(
         'type'   => 'mandatory'
-   ), $atts);
+    ), $atts);
 
     $html    = '';
 
@@ -201,9 +207,9 @@ function missingFormFields($atts) {
 
     if (!empty($fieldHtml)) {
         $html .=  '<div id=recommendations style="margin-top:20px;">';
-            $html .=  '<h3 class="frontpage">Recommendations</h3>';
-            $html .=  '<p>It would be very helpfull if you could fill in the following:</p>';
-            $html .=  $fieldHtml;
+        $html .=  '<h3 class="frontpage">Recommendations</h3>';
+        $html .=  '<p>It would be very helpfull if you could fill in the following:</p>';
+        $html .=  $fieldHtml;
         $html .=  '</div>';
     }
 
@@ -219,7 +225,8 @@ add_filter('wp_insert_post_data', __NAMESPACE__ . '\insertPostData', 10, 2);
  *
  * @return  array   The modified post data to be inserted into the database
  */
-function insertPostData($data , $postarr) {
+function insertPostData($data, $postarr)
+{
     if (function_exists('wp_get_current_user')) {
         $formtable  = new DisplayFormResults([]);
         return $formtable->checkForFormShortcode($data);

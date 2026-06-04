@@ -1,18 +1,22 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use ParseSplittedFormResults;
 use TSJIPPY;
 use WP_Embed;
 use WP_Error;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-class SaveFormSettings extends Forms{
+class SaveFormSettings extends Forms
+{
     use CreateJs;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
@@ -24,7 +28,8 @@ class SaveFormSettings extends Forms{
      * @param object $oldElement The old form element
      * @return string The unique name
      */
-    public function getUniqueName($element, $update, $oldElement) {
+    public function getUniqueName($element, $update, $oldElement)
+    {
         global $wpdb;
 
         // Make sure we only are working on the name
@@ -56,8 +61,8 @@ class SaveFormSettings extends Forms{
                 $oldElement->slug == $element->slug &&     // Name didn't change
                 $elements &&
                 count($elements) == 1
-           )
-       ) {
+            )
+        ) {
 
             return $element->slug;
         }
@@ -67,7 +72,7 @@ class SaveFormSettings extends Forms{
         $i = '';
 
         // getElementBySlug returns false when no match found
-        while(true) {
+        while (true) {
             $existingElement    = $this->getElementBySlug($elementName);
 
             if (
@@ -76,8 +81,8 @@ class SaveFormSettings extends Forms{
                 (
                     $update &&                                     // Updating existing element
                     $existingElement->id == $element->id         // Same element
-               )
-           ) {
+                )
+            ) {
                 break;
             }
 
@@ -120,7 +125,8 @@ class SaveFormSettings extends Forms{
      *
      * @return    array                        The data ready for db injection
      */
-    public function insertOrUpdateData($table, &$data, $where=[], $whereFormat=['%d']) {
+    public function insertOrUpdateData($table, &$data, $where = [], $whereFormat = ['%d'])
+    {
         if (empty($table) || empty($data)) {
             return new WP_Error('forms', 'Please supply a table and data to insert/update');
         }
@@ -187,10 +193,10 @@ class SaveFormSettings extends Forms{
                 $table,
                 $data,
                 $formats
-           );
+            );
 
             $result    = $wpdb->insert_id;
-        }else{
+        } else {
             //Update element
             $wpdb->update(
                 $table,
@@ -198,14 +204,14 @@ class SaveFormSettings extends Forms{
                 $where,
                 $formats,
                 $whereFormat
-           );
+            );
 
             $result    = $wpdb->rows_affected;
 
             // Nothing got updated, maybe we should create instead of update
             if ($result == false) {
                 // check if this already exists
-                $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE " .implode('=%s AND ', array_keys($where)). "=%s", array_values($where)));
+                $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE " . implode('=%s AND ', array_keys($where)) . "=%s", array_values($where)));
 
                 if ($wpdb->num_rows === 0) {
                     // Insert instead
@@ -213,7 +219,7 @@ class SaveFormSettings extends Forms{
                         $table,
                         $data,
                         $formats
-                   );
+                    );
 
                     $result    = $wpdb->insert_id;
                 }
@@ -245,7 +251,8 @@ class SaveFormSettings extends Forms{
      *
      * @return    true|WP_Error                The result or error on failure
      */
-    public function updateFormElement($element) {
+    public function updateFormElement($element)
+    {
         global $wpdb;
 
         $elId        = $element->id;
@@ -272,7 +279,7 @@ class SaveFormSettings extends Forms{
             $this->tableName,
             ['version'    => $formVersion],
             ['id'        => $this->formData->id],
-       );
+        );
 
         if ($wpdb->last_error !== '') {
             return new WP_Error('forms', $wpdb->last_error);
@@ -290,7 +297,8 @@ class SaveFormSettings extends Forms{
      *
      * @return    int                            The new element id
      */
-    public function insertElement($element) {
+    public function insertElement($element)
+    {
         $id    = $this->insertOrUpdateData($this->elTableName, $element);
 
         return $id;
@@ -303,18 +311,20 @@ class SaveFormSettings extends Forms{
      *
      * @return    array|WP_Error                The result or error on failure
      */
-    public function updatePriority($element) {
+    public function updatePriority($element)
+    {
         global $wpdb;
 
         //Update the database
-        $result = $wpdb->update($this->elTableName,
+        $result = $wpdb->update(
+            $this->elTableName,
             array(
                 'priority'    => $element->priority
-           ),
+            ),
             array(
                 'id'        => $element->id
-           ),
-       );
+            ),
+        );
 
         if ($wpdb->last_error !== '') {
             return new WP_Error('forms', $wpdb->print_error());
@@ -329,7 +339,8 @@ class SaveFormSettings extends Forms{
      * @param    array            $newIndexes        The updated array of element id - priority pairs
      * @param    object            $element        The element to change the priority of
      */
-    public function reorderElements(array $newIndexes, $element) {
+    public function reorderElements(array $newIndexes, $element)
+    {
         if (!isset($this->formData->id) && !empty($element) && isset($element->form_id)) {
             $this->formData->id    = $element->form_id;
         }
@@ -354,11 +365,12 @@ class SaveFormSettings extends Forms{
      *
      * @return    true|WP_Error                The result or error on failure
      */
-    public function updateFormSettings($formId='', $settings='') {
+    public function updateFormSettings($formId = '', $settings = '')
+    {
         if (empty($formId)) {
             if (!empty($this->formData->id)) {
                 $formId    = $this->formData->id;
-            }else{
+            } else {
                 return new \WP_Error('Error', 'Please supply a form id');
             }
         }
@@ -385,11 +397,12 @@ class SaveFormSettings extends Forms{
      *
      * return    true|WP_Error                The result or error on failure
      */
-    public function updateFormReminder($formId, $settings) {
+    public function updateFormReminder($formId, $settings)
+    {
         if (empty($formId)) {
             if (!empty($this->formData->id)) {
                 $formId    = $this->formData->id;
-            }else{
+            } else {
                 return new \WP_Error('Error', 'Please supply a form id');
             }
         }
@@ -414,10 +427,11 @@ class SaveFormSettings extends Forms{
      * @param    int|string    $shortcodeId    The id of the shortcode these settings belong
      * @return    true|WP_Error                The result or error on failure
      */
-    public function saveColumnSettings($settings=[], $shortcodeId='') {
+    public function saveColumnSettings($settings = [], $shortcodeId = '')
+    {
         $priority    = 0;
 
-        if ( empty($shortcodeId) && isset($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])) {
+        if (empty($shortcodeId) && isset($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])) {
             $shortcodeId    = $_POST['shortcode-id'];
         }
 
@@ -470,7 +484,8 @@ class SaveFormSettings extends Forms{
      *
      * @return    true|WP_Error                    The result or error on failure
      */
-    public function saveFormEmails($formEmails, $formId) {
+    public function saveFormEmails($formEmails, $formId)
+    {
         global $wpdb;
 
         // Remove deleted emails
@@ -490,8 +505,8 @@ class SaveFormSettings extends Forms{
                     "DELETE FROM %i WHERE id IN ($placeholders)",
                     $this->formEmailTable,
                     ...$emailsToDelete
-               )
-           );
+                )
+            );
         }
 
         $result    = true;

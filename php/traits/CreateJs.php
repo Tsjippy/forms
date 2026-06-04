@@ -1,18 +1,22 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-trait CreateJs{
-        /**
+trait CreateJs
+{
+    /**
      * Checks if the current form is a multi step form
      *
      * @return    bool    True if multistep false otherwise
      */
-    function isMultiStep() {
+    function isMultiStep()
+    {
         if (empty($this->isMultiStepForm)) {
             foreach ($this->formElements as $el) {
                 if ($el->type == 'formstep') {
@@ -23,15 +27,16 @@ trait CreateJs{
 
             $this->isMultiStepForm    = false;
             return false;
-        }else{
+        } else {
             return $this->isMultiStepForm;
         }
     }
 
     /**
      * Builds the js files for the current form
-    */
-    function createJs() {
+     */
+    function createJs()
+    {
         $this->objectName   = strtolower(str_replace('-', '', $this->formData->slug));
 
         $checks = [];
@@ -67,7 +72,7 @@ trait CreateJs{
                         //Get field names of the fields who's value we are checking
                         if (is_numeric($rule['conditional-field'])) {
                             $conditionalElement        = $this->getElementById($rule['conditional-field']);
-                        }else{
+                        } else {
                             $conditionalElement     = false;
                         }
 
@@ -82,8 +87,8 @@ trait CreateJs{
 
                         if (str_contains($conditionalFieldName, '[]')) {
                             $propCompare            = 'el.id';
-                            $conditionalFieldName    = 'E' .$conditionalElement->id;
-                        }elseif (in_array($conditionalElement->type,['radio','checkbox']) && !str_contains($conditionalFieldName, '[]')) {
+                            $conditionalFieldName    = 'E' . $conditionalElement->id;
+                        } elseif (in_array($conditionalElement->type, ['radio', 'checkbox']) && !str_contains($conditionalFieldName, '[]')) {
                             $conditionalFieldName .= '[]';
                         }
 
@@ -100,8 +105,8 @@ trait CreateJs{
 
                             if (str_contains($conditionalField2Name, '[]')) {
                                 $propCompare            = 'el.id';
-                                $conditionalField2Name    = 'E' .$conditionalElement2->id;
-                            }elseif (in_array($conditionalElement2->type, ['radio','checkbox']) && !str_contains($conditionalField2Name, '[]')) {
+                                $conditionalField2Name    = 'E' . $conditionalElement2->id;
+                            } elseif (in_array($conditionalElement2->type, ['radio', 'checkbox']) && !str_contains($conditionalField2Name, '[]')) {
                                 $conditionalField2Name .= '[]';
                             }
                         }
@@ -109,7 +114,7 @@ trait CreateJs{
                         //Check if we are calculating a value based on two field values
                         if (($equation == '+' || $equation == '-') && is_numeric($rule['conditional-field-2'] ?? '') && !empty($rule['equation-2'])) {
                             $calc = true;
-                        }else{
+                        } else {
                             $calc = false;
                         }
 
@@ -126,7 +131,7 @@ trait CreateJs{
                         }
 
                         //Only allow or statements
-                        if (!$checkForChange || (isset($condition['rules'][$ruleIndex-1]) && $condition['rules'][$ruleIndex-1]['combinator'] == 'OR')) {
+                        if (!$checkForChange || (isset($condition['rules'][$ruleIndex - 1]) && $condition['rules'][$ruleIndex - 1]['combinator'] == 'OR')) {
                             // do not add the same element name twice
                             if (!str_contains($fieldCheckIf, "$propCompare == '$conditionalFieldName'")) {
                                 //Write the if statement to check if the current clicked field belongs to this condition
@@ -150,14 +155,14 @@ trait CreateJs{
                             if ($conditionalFieldType == 'date') {
                                 //Convert date strings to date values then miliseconds to days
                                 $conditionVariables[]  = "var calculated_value_$ruleIndex = (Date.parse(value_$fieldNumber1) $equation Date.parse(value_$fieldNumber2))/ (1000 * 60 * 60 * 24);";
-                            }else{
+                            } else {
                                 $conditionVariables[]  = "var calculated_value_$ruleIndex = value_$fieldNumber1 $equation value_$fieldNumber2;";
                             }
                             $equation = $rule['equation-2'];
 
                             //compare with calculated value
                             $compareValue1 = "calculated_value_$ruleIndex";
-                        }else{
+                        } else {
                             //compare with a field value
                             $compareValue1 = "value_$fieldNumber1";
                         }
@@ -165,12 +170,12 @@ trait CreateJs{
                         //compare with the value of another field
                         if (str_contains($rule['equation'], 'value')) {
                             $compareValue2 = "value_$fieldNumber2";
-                        //compare with a number
-                        }elseif (is_numeric($rule['conditional-value'] ?? '')) {
+                            //compare with a number
+                        } elseif (is_numeric($rule['conditional-value'] ?? '')) {
                             $compareValue2 = trim($rule['conditional-value'] ?? '');
-                        //compare with text
-                        }else{
-                            $compareValue2 = "'" .strtolower(trim($rule['conditional-value'] ?? '')). "'";
+                            //compare with text
+                        } else {
+                            $compareValue2 = "'" . strtolower(trim($rule['conditional-value'] ?? '')) . "'";
                         }
 
                         /*
@@ -187,25 +192,25 @@ trait CreateJs{
 
                         if (empty($equation)) {
                             return new \WP_Error('forms', "$element->slug has a rule without equation set. Please check");
-                        }elseif ($equation == 'checked') {
-                            if (count($condition['rules'])==1) {
+                        } elseif ($equation == 'checked') {
+                            if (count($condition['rules']) == 1) {
                                 $conditionIf .= "el.checked";
-                            }else{
+                            } else {
                                 $conditionIf .= "form.querySelector('[name=\"$conditionalFieldName\"]').checked";
                             }
-                        }elseif ($equation == '!checked') {
-                            if (count($condition['rules'])==1) {
+                        } elseif ($equation == '!checked') {
+                            if (count($condition['rules']) == 1) {
                                 $conditionIf .= "!el.checked";
-                            }else{
+                            } else {
                                 $conditionIf .= "!form.querySelector('[name=\"$conditionalFieldName\"]').checked";
                             }
-                        }elseif ($equation == 'visible') {
+                        } elseif ($equation == 'visible') {
                             $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest(' .hidden') == null";
-                        }elseif ($equation == 'invisible') {
+                        } elseif ($equation == 'invisible') {
                             $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest(' .hidden') != null";
-                        }elseif ($equation != 'changed' && $equation != 'clicked') {
+                        } elseif ($equation != 'changed' && $equation != 'clicked') {
                             $conditionIf .= "$compareValue1 $equation $compareValue2";
-                        }elseif ($equation == 'changed' || $equation == 'clicked') {
+                        } elseif ($equation == 'changed' || $equation == 'clicked') {
                             $conditionIf .= "$propCompare == '$conditionalFieldName'";
                         }
 
@@ -213,14 +218,14 @@ trait CreateJs{
                         if (
                             $lastRuleKey != $ruleIndex                                                      &&  // there is a next rule
                             !empty($conditionIf)                                                                 //there is already preceding code
-                       ) {
+                        ) {
                             if (empty($rule['combinator'])) {
                                 $rule['combinator'] = 'AND';
                                 TSJIPPY\printArray("Condition index $conditionIndex of $element->slug is missing a combinator. I have set it to 'AND' for now");
                             }
                             if ($rule['combinator'] == 'AND') {
                                 $conditionIf .= " && ";
-                            }else{
+                            } else {
                                 $conditionIf .= " || ";
                             }
                         }
@@ -233,18 +238,18 @@ trait CreateJs{
                     if (!isset($checks[$fieldCheckIf])) {
                         $checks[$fieldCheckIf]                                            = [];
                         $checks[$fieldCheckIf]['variables']                               = [];
-                        $checks[$fieldCheckIf]['actions']                                 = ['querystrings'=>[$action=>[]]];
+                        $checks[$fieldCheckIf]['actions']                                 = ['querystrings' => [$action => []]];
                         $checks[$fieldCheckIf]['condition_ifs']                           = [];
                     }
 
                     //no need for variable in case of a 'changed' condition
                     if (empty($conditionIf)) {
-                        $actionArray   =&  $checks[$fieldCheckIf]['actions'];
-                    }else{
+                        $actionArray   = &$checks[$fieldCheckIf]['actions'];
+                    } else {
                         $conditionIf       = "if ($conditionIf) {";
                         if (empty($checks[$fieldCheckIf]['condition_ifs'][$conditionIf])) {
                             $array              = [
-                                'actions'       => ['querystrings'=>[$action=>[]]],
+                                'actions'       => ['querystrings' => [$action => []]],
                                 'variables'     => [],
                             ];
                             $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]    = $array;
@@ -256,14 +261,14 @@ trait CreateJs{
                             }
                         }
 
-                        $actionArray   =&  $checks[$fieldCheckIf]['condition_ifs'][$conditionIf]['actions'];
+                        $actionArray   = &$checks[$fieldCheckIf]['condition_ifs'][$conditionIf]['actions'];
                     }
 
                     //show, toggle or hide action for this field
                     if ($action == 'show' || $action == 'hide' || $action == 'toggle') {
                         if ($action == 'show') {
                             $action = 'remove';
-                        }elseif ($action == 'hide') {
+                        } elseif ($action == 'hide') {
                             $action = 'add';
                         }
 
@@ -279,13 +284,13 @@ trait CreateJs{
                             if (!in_array($actionCode, $actionArray)) {
                                 $actionArray[] = $actionCode;
                             }
-                        }else{
+                        } else {
                             //only add if there is no wrapping element with the same condition.
                             $prevElement = $this->formElements[$elementIndex];
                             if (
                                 !$prevElement->wrap ||                                           // this element is not wrapped in the previous one
                                 !in_array($prevElement, $actionArray['querystrings'][$action])   // or the previous element is not in the action array
-                           ) {
+                            ) {
                                 $actionArray['querystrings'][$action][]    = $element;
                             }
                         }
@@ -308,12 +313,12 @@ trait CreateJs{
                                 if (!in_array($actionCode, $actionArray)) {
                                     $actionArray[] = $actionCode;
                                 }
-                            }else{
+                            } else {
                                 $actionArray['querystrings'][$action][]    = $copyToElement;
                             }
                         }
-                    //set property value
-                    }elseif ($action == 'property' || $action == 'value') {
+                        //set property value
+                    } elseif ($action == 'property' || $action == 'value') {
                         //set the attribute value of one field to the value of another field
                         $selector        = $this->getSelector($element);
 
@@ -322,10 +327,10 @@ trait CreateJs{
                         if ($action == 'value') {
                             $propertyName                            = $condition['property-name1'];
                             if (isset($condition['action-value'])) {
-                                $varName   = '"' .do_shortcode($condition['action-value']). '"';
+                                $varName   = '"' . do_shortcode($condition['action-value']) . '"';
                             }
-                        //retrieve value from another field
-                        }else{
+                            //retrieve value from another field
+                        } else {
                             $propertyName    = $condition['property-name'];
 
                             $copyfieldid    = $condition['property-value'];
@@ -340,8 +345,8 @@ trait CreateJs{
                             $copyFieldName    = $copyElement->slug;
                             if (str_contains($copyFieldName, '[]')) {
                                 $propCompare            = 'el.id';
-                                $copyFieldName    = 'E' .$copyElement->id;
-                            }elseif (in_array($copyElement->type,['radio','checkbox']) && !str_contains($copyFieldName, '[]')) {
+                                $copyFieldName    = 'E' . $copyElement->id;
+                            } elseif (in_array($copyElement->type, ['radio', 'checkbox']) && !str_contains($copyFieldName, '[]')) {
                                 $copyFieldName .= '[]';
                             }
 
@@ -363,13 +368,13 @@ trait CreateJs{
                             if (!in_array($actionCode, $actionArray)) {
                                 $actionArray[] = $actionCode;
                             }
-                        }else{
+                        } else {
                             $actionCode    = "this.change_field_property('$selector', '$propertyName', $varName, {$this->objectName}.processFields, form, $addition);";
                             if (!in_array($actionCode, $actionArray)) {
                                 $actionArray[] = $actionCode;
                             }
                         }
-                    }else{
+                    } else {
                         TSJIPPY\printArray("formbuilder.php writing js: missing action: '$action' for condition $conditionIndex of field {$element->slug}");
                     }
                 }
@@ -394,40 +399,40 @@ trait CreateJs{
 
         $newJs  .= "\n\tprevEl =               '';";
         $newJs  .= "\n\n\tlistener = (event) => {";
-            $newJs  .= "\n\t\tlet el            = event.target;";
-            $newJs  .= "\n\t\tlet form            = el.closest('form');";
-            $newJs  .= "\n\t\tlet elName        = el.getAttribute('name');";
-            $newJs  .= "\n\n\t\tif (elName == '' || elName == undefined) {";
-                $newJs  .= "\n\t\t\t//el is a nice select";
-                $newJs  .= "\n\t\t\tif (el.closest(' .nice-select-dropdown') != null && el.closest(' .input-wrapper') != null) {";
-                    $newJs  .= "\n\t\t\t\t//find the select element connected to the nice-select";
-                    $newJs  .= "\n\t\t\t\tel.closest(' .input-wrapper').querySelectorAll('select').foreach (select=>{";
-                        $newJs  .= "\n\t\t\t\t\tif (el.dataset.value == select.value) {";
-                            $newJs  .= "\n\t\t\t\t\t\tel    = select;";
-                            $newJs  .= "\n\t\t\t\t\t\telName = select.name;";
-                        $newJs  .= "\n\t\t\t\t\t}";
-                    $newJs  .= "\n\t\t\t\t});";
-                $newJs  .= "\n\t\t\t}else{";
-                    $newJs  .= "\n\t\t\t\treturn;";
-                $newJs  .= "\n\t\t\t}";
-            $newJs  .= "\n\t\t}";
+        $newJs  .= "\n\t\tlet el            = event.target;";
+        $newJs  .= "\n\t\tlet form            = el.closest('form');";
+        $newJs  .= "\n\t\tlet elName        = el.getAttribute('name');";
+        $newJs  .= "\n\n\t\tif (elName == '' || elName == undefined) {";
+        $newJs  .= "\n\t\t\t//el is a nice select";
+        $newJs  .= "\n\t\t\tif (el.closest(' .nice-select-dropdown') != null && el.closest(' .input-wrapper') != null) {";
+        $newJs  .= "\n\t\t\t\t//find the select element connected to the nice-select";
+        $newJs  .= "\n\t\t\t\tel.closest(' .input-wrapper').querySelectorAll('select').foreach (select=>{";
+        $newJs  .= "\n\t\t\t\t\tif (el.dataset.value == select.value) {";
+        $newJs  .= "\n\t\t\t\t\t\tel    = select;";
+        $newJs  .= "\n\t\t\t\t\t\telName = select.name;";
+        $newJs  .= "\n\t\t\t\t\t}";
+        $newJs  .= "\n\t\t\t\t});";
+        $newJs  .= "\n\t\t\t}else{";
+        $newJs  .= "\n\t\t\t\treturn;";
+        $newJs  .= "\n\t\t\t}";
+        $newJs  .= "\n\t\t}";
 
-            $newJs  .= "\n\n\t\t//prevent duplicate event handling";
-            $newJs  .= "\n\t\tif (el == this.prevEl) {";
-                $newJs  .= "\n\t\t\treturn;";
-            $newJs  .= "\n\t\t}";
+        $newJs  .= "\n\n\t\t//prevent duplicate event handling";
+        $newJs  .= "\n\t\tif (el == this.prevEl) {";
+        $newJs  .= "\n\t\t\treturn;";
+        $newJs  .= "\n\t\t}";
 
-            $newJs  .= "\n\t\tthis.prevEl = el;";
-            $newJs  .= "\n\n\t\t//clear event prevenion after 100 ms";
-            $newJs  .= "\n\t\tsetTimeout(() => { this.prevEl = ''; }, 50);";
+        $newJs  .= "\n\t\tthis.prevEl = el;";
+        $newJs  .= "\n\n\t\t//clear event prevenion after 100 ms";
+        $newJs  .= "\n\t\tsetTimeout(() => { this.prevEl = ''; }, 50);";
 
-            $newJs  .= "\n\n\t\tif (elName == 'next-button') {";
-                $newJs  .= "\n\t\t\tFormFunctions.nextPrev(1, form);";
-            $newJs  .= "\n\t\t}else if (elName == 'previous-button') {";
-                $newJs  .= "\n\t\t\tFormFunctions.nextPrev(-1, form);";
-            $newJs  .= "\n\t\t}";
+        $newJs  .= "\n\n\t\tif (elName == 'next-button') {";
+        $newJs  .= "\n\t\t\tFormFunctions.nextPrev(1, form);";
+        $newJs  .= "\n\t\t}else if (elName == 'previous-button') {";
+        $newJs  .= "\n\t\t\tFormFunctions.nextPrev(-1, form);";
+        $newJs  .= "\n\t\t}";
 
-            $newJs  .= "\n\n\t\tthis.processFields(el);";
+        $newJs  .= "\n\n\t\tthis.processFields(el);";
         $newJs  .= "\n\t};";
 
         $js         .= $newJs;
@@ -440,18 +445,18 @@ trait CreateJs{
 
         // Show the first tab
         if ($this->isMultiStep()) {
-            $tabJs.= "\n\t\t\t//show first tab";
-            $tabJs.= "\n\t\t\t// Display the current tab// Current tab is set to be the first tab (0)";
-            $tabJs.= "\n\t\t\tlet currentTab = 0; ";
-            $tabJs.= "\n\t\t\t// Display the current tab";
-            $tabJs.= "\n\t\t\tFormFunctions.showFormStep(currentTab, form); ";
+            $tabJs .= "\n\t\t\t//show first tab";
+            $tabJs .= "\n\t\t\t// Display the current tab// Current tab is set to be the first tab (0)";
+            $tabJs .= "\n\t\t\tlet currentTab = 0; ";
+            $tabJs .= "\n\t\t\t// Display the current tab";
+            $tabJs .= "\n\t\t\tFormFunctions.showFormStep(currentTab, form); ";
         }
 
         // Prefill form with meta data
         if (!empty($this->formData->save_in_meta)) {
-            $tabJs.= "\n\t\t\tform.querySelectorAll(`select, input, textarea`).foreach (";
-                $tabJs.= "\n\t\t\t\tel=>this.processFields(el)";
-            $tabJs.= "\n\t\t\t);";
+            $tabJs .= "\n\t\t\tform.querySelectorAll(`select, input, textarea`).foreach (";
+            $tabJs .= "\n\t\t\t\tel=>this.processFields(el)";
+            $tabJs .= "\n\t\t\t);";
         }
 
         if (!empty($tabJs)) {
@@ -501,17 +506,36 @@ trait CreateJs{
         */
         $newJs   = '';
         $newJs  .= "\n\n\tprocessFields = (el) => {";
-            $newJs  .= "\n\t\tvar elName = el.getAttribute('name');\n";
-            $newJs  .= "\n\t\tvar form    = el.closest('form');\n";
-            foreach ($checks as $if => $check) {
-                // empty if is not allowed
-                if (str_contains($if, 'if ()')) {
-                    continue;
-                }
+        $newJs  .= "\n\t\tvar elName = el.getAttribute('name');\n";
+        $newJs  .= "\n\t\tvar form    = el.closest('form');\n";
+        foreach ($checks as $if => $check) {
+            // empty if is not allowed
+            if (str_contains($if, 'if ()')) {
+                continue;
+            }
 
-                $prevVar   = [];
-                $newJs  .= "\t\t$if\n";
-                foreach ($check['variables'] as $variable) {
+            $prevVar   = [];
+            $newJs  .= "\t\t$if\n";
+            foreach ($check['variables'] as $variable) {
+                //Only write same var definition once
+                $varParts  = explode(' = ', $variable);
+                if (!isset($prevVar[$varParts[0]]) || $prevVar[$varParts[0]] != $varParts[1]) {
+                    $newJs  .= "\t\t\t$variable\n";
+                    $prevVar[$varParts[0]] = $varParts[1];
+                }
+            }
+
+            foreach ($check['actions'] as $index => $action) {
+                if ($index === 'querystrings') {
+                    $newJs  .= $this->buildQuerySelector($action, "\t\t\t");
+                } else {
+                    $newJs  .= "\t\t\t$action\n";
+                }
+            }
+
+            $prevVar   = [];
+            foreach ($check['condition_ifs'] as $i => $prop) {
+                foreach ($prop['variables'] as $variable) {
                     //Only write same var definition once
                     $varParts  = explode(' = ', $variable);
                     if (!isset($prevVar[$varParts[0]]) || $prevVar[$varParts[0]] != $varParts[1]) {
@@ -520,42 +544,23 @@ trait CreateJs{
                     }
                 }
 
-                foreach ($check['actions'] as $index => $action) {
-                    if ($index === 'querystrings') {
-                        $newJs  .= $this->buildQuerySelector($action, "\t\t\t");
-                    }else{
-                        $newJs  .= "\t\t\t$action\n";
-                    }
-                }
-
-                $prevVar   = [];
-                foreach ($check['condition_ifs'] as $i => $prop) {
-                    foreach ($prop['variables'] as $variable) {
-                        //Only write same var definition once
-                        $varParts  = explode(' = ', $variable);
-                        if (!isset($prevVar[$varParts[0]]) || $prevVar[$varParts[0]] != $varParts[1]) {
-                            $newJs  .= "\t\t\t$variable\n";
-                            $prevVar[$varParts[0]] = $varParts[1];
-                        }
-                    }
-
-                    if (!empty($prop['actions'])) {
-                        $newJs  .= "\n\t\t\t$i\n";
-                        foreach ($prop['actions'] as $index => $action) {
-                            if ($index === 'querystrings') {
-                                $newJs  .= $this->buildQuerySelector($action, "\t\t\t\t");
-                            }else{
-                                $newJs  .= "\t\t\t\t$action\n";
-                                if (str_contains((string) $action, 'formstep')) {
-                                    $newJs  .= "\t\t\t\tFormFunctions.updateMultiStepControls(form);\n";
-                                }
+                if (!empty($prop['actions'])) {
+                    $newJs  .= "\n\t\t\t$i\n";
+                    foreach ($prop['actions'] as $index => $action) {
+                        if ($index === 'querystrings') {
+                            $newJs  .= $this->buildQuerySelector($action, "\t\t\t\t");
+                        } else {
+                            $newJs  .= "\t\t\t\t$action\n";
+                            if (str_contains((string) $action, 'formstep')) {
+                                $newJs  .= "\t\t\t\tFormFunctions.updateMultiStepControls(form);\n";
                             }
                         }
-                        $newJs  .= "\t\t\t}\n";
                     }
+                    $newJs  .= "\t\t\t}\n";
                 }
-                $newJs  .= "\t\t}\n\n";
             }
+            $newJs  .= "\t\t}\n\n";
+        }
         $newJs  .= "\t};";
 
         $js         .= $newJs;
@@ -564,28 +569,28 @@ trait CreateJs{
         // Put is all in a namespace variable
         $className  = ucfirst($this->objectName);
 
-        $js         = "class $className {" .$js. "\n};\n\nlet $this->objectName = new $className();\n\n$this->objectName.init();\n";
-        $minifiedJs = "class $className {" .$minifiedJs. "\n};\n\nlet $this->objectName = new $className();\n\n$this->objectName.init();\n";
+        $js         = "class $className {" . $js . "\n};\n\nlet $this->objectName = new $className();\n\n$this->objectName.init();\n";
+        $minifiedJs = "class $className {" . $minifiedJs . "\n};\n\nlet $this->objectName = new $className();\n\n$this->objectName.init();\n";
 
         /**
-        * EXTERNAL JS Filter
-        * Allows to add extra js to the form, for example for custom conditions or actions that are not supported by the form builder yet. The js will be added to both the normal and minified version of the js file. The filter passes the current form object as a parameter, so you can check for the form slug or id to only add the js to specific forms.
-        * @param string $extraJs The extra js code to add to the form
-        * @param object $form The current form object
-        * @param bool   $minified Whether the js code will be added to the minified version of the js file or the normal version
-        **/
+         * EXTERNAL JS Filter
+         * Allows to add extra js to the form, for example for custom conditions or actions that are not supported by the form builder yet. The js will be added to both the normal and minified version of the js file. The filter passes the current form object as a parameter, so you can check for the form slug or id to only add the js to specific forms.
+         * @param string $extraJs The extra js code to add to the form
+         * @param object $form The current form object
+         * @param bool   $minified Whether the js code will be added to the minified version of the js file or the normal version
+         **/
         $extraJs   = apply_filters('tsjippy_form_extra_js', '', $this, false);
         if (!empty($extraJs)) {
             if (empty($checks)) {
                 $js = $extraJs;
-            }else{
-                $js.= "\n\n";
-                $js.= $extraJs;
+            } else {
+                $js .= "\n\n";
+                $js .= $extraJs;
             }
         }
 
         //Create js file
-        file_put_contents($this->jsFileName. ' .js', $js);
+        file_put_contents($this->jsFileName . ' .js', $js);
 
         //replace long strings for shorter ones
         $minifiedJs = str_replace(
@@ -614,7 +619,7 @@ trait CreateJs{
                 'i'
             ],
             $minifiedJs
-       );
+        );
 
         $extraJs   = apply_filters('tsjippy_form_extra_js', '', $this, true);
         if (!empty($extraJs)) {
@@ -623,7 +628,7 @@ trait CreateJs{
         }
 
         // Create minified version
-        file_put_contents($this->jsFileName. ' .min.js', $minifiedJs);
+        file_put_contents($this->jsFileName . ' .min.js', $minifiedJs);
 
         if (!empty($errors)) {
             TSJIPPY\printArray($errors);
@@ -637,7 +642,8 @@ trait CreateJs{
      * @param array $queryStrings The query strings for the show, hide and toggle actions
      * @param string $prefix The prefix to add to each line of the js code, for example to add extra tabs for nested if statements
      */
-    function buildQuerySelector($queryStrings, $prefix) {
+    function buildQuerySelector($queryStrings, $prefix)
+    {
         $actionCode    = '';
         foreach ($queryStrings as $action => $elements) {
             //multiple
@@ -652,20 +658,20 @@ trait CreateJs{
                     }
                 }
                 $actionCode    .= "`).foreach (el=>{\n";
-                    //$actionCode    .= "{$prefix}\ttry{\n";
-                        $actionCode    .= "{$prefix}\t\t//Make sure we only do each wrapper once by adding a temp class\n";
-                        $actionCode    .= "{$prefix}\t\tif (!el.closest(' .input-wrapper').matches(' .action-processed')) {\n";
-                            $actionCode    .= "{$prefix}\t\t\tel.closest(' .input-wrapper').classList.add('action-processed');\n";
-                            //$actionCode    .= "{$prefix}\t\t\tel.closest(' .input-wrapper').classList.$action('hidden');\n";
-                            $actionCode    .= "{$prefix}\t\t\tthis.change_visibility('$action', el, {$this->objectName}.processFields);\n";
-                        $actionCode    .= "{$prefix}\t\t}\n";
-                    //$actionCode    .= "{$prefix}\t}catch(e) {\n";
-                        //$actionCode    .= "{$prefix}\t\tel.classList.$action('hidden');\n";
-                    //$actionCode    .= "{$prefix}\t}\n";
+                //$actionCode    .= "{$prefix}\ttry{\n";
+                $actionCode    .= "{$prefix}\t\t//Make sure we only do each wrapper once by adding a temp class\n";
+                $actionCode    .= "{$prefix}\t\tif (!el.closest(' .input-wrapper').matches(' .action-processed')) {\n";
+                $actionCode    .= "{$prefix}\t\t\tel.closest(' .input-wrapper').classList.add('action-processed');\n";
+                //$actionCode    .= "{$prefix}\t\t\tel.closest(' .input-wrapper').classList.$action('hidden');\n";
+                $actionCode    .= "{$prefix}\t\t\tthis.change_visibility('$action', el, {$this->objectName}.processFields);\n";
+                $actionCode    .= "{$prefix}\t\t}\n";
+                //$actionCode    .= "{$prefix}\t}catch(e) {\n";
+                //$actionCode    .= "{$prefix}\t\tel.classList.$action('hidden');\n";
+                //$actionCode    .= "{$prefix}\t}\n";
                 $actionCode    .= "{$prefix}});\n";
                 $actionCode    .= "{$prefix}document.querySelectorAll(' .action-processed').foreach (el=>{el.classList.remove('action-processed')});\n";
-            //just one
-            }elseif (count($elements) == 1) {
+                //just one
+            } elseif (count($elements) == 1) {
                 $selector       = $this->getSelector($elements[0]);
                 //$actionCode    .= "{$prefix}form.querySelector('$selector').closest(' .input-wrapper').classList.$action('hidden');\n";
                 $actionCode    .= "{$prefix}this.change_visibility('$action', form.querySelector('$selector').closest(' .input-wrapper'), {$this->objectName}.processFields);\n";
@@ -683,13 +689,14 @@ trait CreateJs{
      *
      * @return string The css selector for the given element
      */
-    function getSelector($element) {
+    function getSelector($element)
+    {
         $queryById          = false;
         $name                = trim($element->slug);
 
         if (str_contains($name, '[]')) {
             $queryById          = true;
-        }elseif (in_array($element->type, ['radio', 'checkbox']) && !str_contains($name, '[]')) {
+        } elseif (in_array($element->type, ['radio', 'checkbox']) && !str_contains($name, '[]')) {
             $name .= '[]';
         }
 
@@ -699,9 +706,9 @@ trait CreateJs{
 
         if ($queryById) {
             return "[id^='E$element->id']";
-        }elseif (empty($element->multiple)) {
+        } elseif (empty($element->multiple)) {
             return "[name=\"$name\"]";
-        }else{
+        } else {
             // name is followed by an index [0]
             return "[name^=\"{$name}[\"]";
         }

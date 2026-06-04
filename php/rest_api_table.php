@@ -1,10 +1,12 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 use stdClass;
 use WP_Error;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
@@ -17,18 +19,20 @@ add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__ . '\addFormResultUrls'
  * @param array $urls The list of allowed REST API URLs
  * @return array The updated list of allowed REST API URLs
  */
-function addFormResultUrls($urls) {
-    $urls[] = RESTAPIPREFIX. '/forms/edit_value';
-    $urls[] = RESTAPIPREFIX. '/forms/get_input_html';
+function addFormResultUrls($urls)
+{
+    $urls[] = RESTAPIPREFIX . '/forms/edit_value';
+    $urls[] = RESTAPIPREFIX . '/forms/get_input_html';
 
     return $urls;
 }
 
 add_action('rest_api_init', __NAMESPACE__ . '\restApiInitTable');
-function restApiInitTable() {
+function restApiInitTable()
+{
     //save_table_prefs
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/save_table_prefs',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -42,15 +46,15 @@ function restApiInitTable() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
+                ),
                 'column-name'    => array('required'    => true),
-           )
-       )
-   );
+            )
+        )
+    );
 
     //delete_table_prefs
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/delete_table_prefs',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -64,14 +68,14 @@ function restApiInitTable() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
-           )
-       )
-   );
+                ),
+            )
+        )
+    );
 
     //save_column_settings
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/save_column_settings',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -86,17 +90,17 @@ function restApiInitTable() {
                     'validate_callback' => function ($shortcodeId) {
                         return is_numeric($shortcodeId);
                     }
-               ),
+                ),
                 'column-settings'        => array(
                     'required'    => true,
-               ),
-           )
-       )
-   );
+                ),
+            )
+        )
+    );
 
     // save_table_prefs
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/save_table_settings',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -111,17 +115,17 @@ function restApiInitTable() {
                     'validate_callback' => function ($shortcodeId) {
                         return is_numeric($shortcodeId);
                     }
-               ),
+                ),
                 'table-settings'        => array(
                     'required'    => true,
-               ),
-           )
-       )
-   );
+                ),
+            )
+        )
+    );
 
     //remove submission
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/remove_submission',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -136,14 +140,14 @@ function restApiInitTable() {
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     //archive submission
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/archive_submission',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -158,20 +162,20 @@ function restApiInitTable() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
+                ),
                 'submission-id'        => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // edit value
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/edit_value',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -183,23 +187,23 @@ function restApiInitTable() {
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
                     }
-               ),
+                ),
                 'element-id'        => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
                     }
-               ),
+                ),
                 'new-value'        => array(
                     'required'    => true,
-               ),
-           )
-       )
-   );
+                ),
+            )
+        )
+    );
 
     //get_input_html
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/get_input_html',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -208,20 +212,20 @@ function restApiInitTable() {
             'args'                    => array(
                 'element-id'        => array(
                     'required'    => true,
-               ),
+                ),
                 'submission-id'        => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
                     }
-               ),
-           )
-       )
-   );
+                ),
+            )
+        )
+    );
 
     // get next or prev page
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/get_page',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -233,13 +237,14 @@ function restApiInitTable() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 }
 
-function getPage() {
+function getPage()
+{
     $displayFormResults        = new DisplayFormResults($_POST);
 
     $displayFormResults->loadShortcodeData();
@@ -258,27 +263,30 @@ function getPage() {
     return $tables;
 }
 
-function saveTablePrefs(\WP_REST_Request $request) {
+function saveTablePrefs(\WP_REST_Request $request)
+{
     $columnName                    = $request['column-name'];
 
     $userId                        = get_current_user_id();
-    $hiddenColumns                = (array)get_user_meta($userId, 'hidden_columns_' .$request['form-id'], true);
+    $hiddenColumns                = (array)get_user_meta($userId, 'hidden_columns_' . $request['form-id'], true);
 
     $hiddenColumns[$columnName]    = 'hidden';
 
-    update_user_meta($userId, 'hidden_columns_' .$request['form-id'], $hiddenColumns);
+    update_user_meta($userId, 'hidden_columns_' . $request['form-id'], $hiddenColumns);
 
     return 'Succesfully updated column settings';
 }
 
-function deleteTablePrefs(\WP_REST_Request $request) {
+function deleteTablePrefs(\WP_REST_Request $request)
+{
     $userId        = get_current_user_id();
-    delete_user_meta($userId, 'hidden_columns_' .$request['form-id']);
+    delete_user_meta($userId, 'hidden_columns_' . $request['form-id']);
 
     return 'Succesfully reset column visibility';
 }
 
-function saveColumnSettings($settings=[], $shortcodeId='') {
+function saveColumnSettings($settings = [], $shortcodeId = '')
+{
     $forms    = new SaveFormSettings();
 
     if ($settings instanceof \WP_REST_Request) {
@@ -296,7 +304,8 @@ function saveColumnSettings($settings=[], $shortcodeId='') {
     return "Succesfully saved your column settings";
 }
 
-function saveTableSettings() {
+function saveTableSettings()
+{
     $tableSettings     = $_POST['table-settings'];
 
     // Check invalid filter names
@@ -333,7 +342,8 @@ function saveTableSettings() {
     return "Succesfully saved your table settings";
 }
 
-function removeSubmission() {
+function removeSubmission()
+{
     $formTable    = new EditFormResults($_POST);
 
     $result        = $formTable->deleteSubmission((int) $_POST['submission-id']);
@@ -350,14 +360,15 @@ function removeSubmission() {
 /**
  * Archive or unarchive a subsubmission
  */
-function archiveSubmission() {
+function archiveSubmission()
+{
     $formTable                    = new EditFormResults($_POST);
     $formTable->submissionId    = (int) $_POST['submission-id'];
     $action                        = $_POST['action'];
 
     if ($action    == 'archive') {
         $archive = true;
-    }else{
+    } else {
         $archive = false;
     }
 
@@ -374,7 +385,8 @@ function archiveSubmission() {
 /**
  * Retrieves the element html needed to be able to update a form result entry
  */
-function getInputHtml() {
+function getInputHtml()
+{
     $formTable        = new DisplayFormResults($_POST);
 
     $formTable->parseSubmissions('', $_POST['submission-id']);
@@ -423,7 +435,7 @@ function getInputHtml() {
             $datalist    = $formTable->getElementBySlug($optionValue);
 
             if ($datalist == $element) {
-                $datalist    = $formTable->getElementBySlug($optionValue. '-list');
+                $datalist    = $formTable->getElementBySlug($optionValue . '-list');
                 TSJIPPY\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
             }
 
@@ -437,15 +449,15 @@ function getInputHtml() {
     // prepend html with the html of previous element that wrap this elemnt
     $index            = $element->priority - 2;
     $prevElement     = $formTable->formElements[$index];
-    while($prevElement && $prevElement->wrap) {
+    while ($prevElement && $prevElement->wrap) {
         $index--;
-        $html             = $formTable->getElementHtml($prevElement, '').$html;
+        $html             = $formTable->getElementHtml($prevElement, '') . $html;
         $prevElement     = $formTable->formElements[$index];
     }
 
     // add next elements if they are wrapped in this one
     $index            = $element->priority;
-    while($element->wrap) {
+    while ($element->wrap) {
         $element = $formTable->formElements[$index];
         $html     .= $formTable->getElementHtml($element, '');
         $index++;
@@ -457,7 +469,8 @@ function getInputHtml() {
 /**
  * Updates a value in the submission results table with a new value
  */
-function editValue() {
+function editValue()
+{
     $formTable                    = new EditFormResults($_POST);
 
     $formTable->submissionId    = $_POST['submission-id'];

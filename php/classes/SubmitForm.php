@@ -1,15 +1,19 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 use WP_Embed;
 use WP_Error;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-class SubmitForm extends SaveFormSettings{
-    public function __construct($formData=null) {
+class SubmitForm extends SaveFormSettings
+{
+    public function __construct($formData = null)
+    {
         parent::__construct();
 
         if (!empty($formData)) {
@@ -24,7 +28,8 @@ class SubmitForm extends SaveFormSettings{
      *
      * @return    string|false            The e-mail adres or false if none found
      */
-    public function findConditionalEmail($conditions) {
+    public function findConditionalEmail($conditions)
+    {
         //loop over all conditions
         foreach ($conditions as $condition) {
 
@@ -49,7 +54,8 @@ class SubmitForm extends SaveFormSettings{
      *
      * @return    array                The filtered footer array
      */
-    public function emailFooter($footer) {
+    public function emailFooter($footer)
+    {
         $footer['url']        = $_POST['formurl'];
         $footer['text']        = $_POST['formurl'];
 
@@ -64,7 +70,8 @@ class SubmitForm extends SaveFormSettings{
      *
      * @return    bool                False if no match ture otherwise
      */
-    private function checkEmailConditions($email, $trigger) {
+    private function checkEmailConditions($email, $trigger)
+    {
         if (
             $email->email_trigger    != $trigger &&                     // trigger of the e-mail does not match the trigger exactly
             (
@@ -72,16 +79,16 @@ class SubmitForm extends SaveFormSettings{
                 (
                     $email->email_trigger    == 'submittedcond' &&    // trigger of the e-mail is submittedcond
                     $trigger                != 'submitted'            // the trigger is not submitted
-               )
-           )
-       ) {
+                )
+            )
+        ) {
             return false;
         }
 
         $changedElementId    = $_POST['element-id'] ?? '';
 
         // check if a certain element is changed to a certain value
-        if ( $trigger == 'fieldchanged') {
+        if ($trigger == 'fieldchanged') {
 
             // the changed element is not the conditional element)
             if ($changedElementId != $email->conditional_field) {
@@ -104,12 +111,12 @@ class SubmitForm extends SaveFormSettings{
             if ($formValue != $compareValue && $formValue != str_replace(' ', '_', $compareValue)) {
                 return false;
             }
-        }elseif (
+        } elseif (
             $trigger == 'fieldschanged'                                    &&        // an element has been changed
             !in_array($changedElementId, $email->conditional_fields)            // and the element is not in the conditional fields array
-       ) {
+        ) {
             return false;
-        }elseif ($trigger == 'submitted' && $email->email_trigger == 'submittedcond') {    // check if the submit condition is matched
+        } elseif ($trigger == 'submitted' && $email->email_trigger == 'submittedcond') {    // check if the submit condition is matched
             if (!is_array($email->submitted_trigger)) {
                 return false;
             }
@@ -118,7 +125,7 @@ class SubmitForm extends SaveFormSettings{
             $element    = $this->getElementById($email->submitted_trigger['element']);
             if (empty($this->submission->{$element->slug})) {
                 $elValue    = '';
-            }else{
+            } else {
                 $elValue    = $this->submission->{$element->slug};
             }
 
@@ -126,7 +133,7 @@ class SubmitForm extends SaveFormSettings{
             if (is_numeric($email->submitted_trigger['value-element'] ?? '')) {
                 $compareElement    = $this->getElementById($email->submitted_trigger['value-element']);
                 $compareElValue    = $this->submission->{$compareElement->slug};
-            }else{
+            } else {
                 $compareElValue    = $email->submitted_trigger['value'];
             }
 
@@ -152,7 +159,8 @@ class SubmitForm extends SaveFormSettings{
      *
      * @param    string    $trigger    One of 'submitted' or 'fieldchanged' . Default submitted
      */
-    public function sendEmail($trigger='submitted', $replaceValues=[]) {
+    public function sendEmail($trigger = 'submitted', $replaceValues = [])
+    {
         $this->getEmailSettings();
 
         foreach ($this->emailSettings as $key => $email) {
@@ -171,7 +179,7 @@ class SubmitForm extends SaveFormSettings{
                 if (!$from) {
                     $from    = $email->else_from;
                 }
-            }elseif ($email->from_email == 'fixed') {
+            } elseif ($email->from_email == 'fixed') {
                 $from    = $this->processPlaceholders($email->from, $replaceValues);
             }
 
@@ -186,7 +194,7 @@ class SubmitForm extends SaveFormSettings{
                 if (!$to) {
                     $to    = $email->else_to;
                 }
-            }elseif ($email->email_to == 'fixed') {
+            } elseif ($email->email_to == 'fixed') {
                 $to        = $this->processPlaceholders($email->to, $replaceValues);
 
                 // if no e-mail found, find any numbers and assume they are user ids
@@ -204,7 +212,7 @@ class SubmitForm extends SaveFormSettings{
                             return $match[0];
                         },
                         $to
-                   );
+                    );
                 }
             }
 
@@ -227,7 +235,7 @@ class SubmitForm extends SaveFormSettings{
             if (!is_array($headers)) {
                 if (!empty(trim($headers))) {
                     $headers    = explode("\n", trim($email->headers));
-                }else{
+                } else {
                     $headers    = [];
                 }
             }
@@ -251,7 +259,7 @@ class SubmitForm extends SaveFormSettings{
             add_filter('wp_mail', [$this, 'addFormData'], 1);
 
             //Send the mail
-            $result = wp_mail($to , $subject, $message, $headers, $files);
+            $result = wp_mail($to, $subject, $message, $headers, $files);
 
             remove_filter('wp_mail', [$this, 'addFormData'], 1);
 
@@ -277,25 +285,26 @@ class SubmitForm extends SaveFormSettings{
      * @param    array    $uploadedFiles        The array of filepaths
      * @param    string    $inputName            The name for the file
      */
-    public function processFiles($uploadedFiles, $inputName) {
+    public function processFiles($uploadedFiles, $inputName)
+    {
         //loop over all files uploaded in this fileinput
         foreach ($uploadedFiles as $key => $url) {
-            $urlParts     = explode('/',$url);
+            $urlParts     = explode('/', $url);
             $fileName    = end($urlParts);
             $path        = TSJIPPY\urlToPath($url);
-            $targetDir    = str_replace($fileName,'',$path);
+            $targetDir    = str_replace($fileName, '', $path);
 
             //add input name to filename
             $fileName    = "{$inputName}_$fileName";
 
             //also add submission id if not saving to meta
             if (empty($this->formData->save_in_meta)) {
-                $fileName    = $this->submission->id. "_$fileName";
+                $fileName    = $this->submission->id . "_$fileName";
             }
 
             //Create the filename
             $i = 0;
-            $targetFile = $targetDir.$fileName;
+            $targetFile = $targetDir . $fileName;
 
             //add a number if the file already exists
             while (file_exists($targetFile)) {
@@ -307,7 +316,7 @@ class SubmitForm extends SaveFormSettings{
             if (rename($path, $targetFile)) {
                 //update in formdata
                 $this->submission->{$inputName}[$key]    = str_replace(ABSPATH, '', $targetFile);
-            }else {
+            } else {
                 //update in formdata
                 $this->submission->{$inputName}[$key]    = str_replace(ABSPATH, '', $path);
             }
@@ -319,7 +328,8 @@ class SubmitForm extends SaveFormSettings{
      *
      * @param    array    $formresults    The form results array
      */
-    public function parseSplittedData(&$formresults) {
+    public function parseSplittedData(&$formresults)
+    {
         if (!isset($this->formData->split)) {
             return;
         }
@@ -336,7 +346,7 @@ class SubmitForm extends SaveFormSettings{
                 preg_match('/(.*?)\[[0-9]\](\[.*?\])/', $slug, $matches) &&
                 isset($matches[1]) &&
                 is_array($formresults[$matches[1]])
-           ) {
+            ) {
                 // remove empty entries
                 $results = TSJIPPY\cleanUpNestedArray($formresults[$matches[1]]);
 
@@ -348,7 +358,7 @@ class SubmitForm extends SaveFormSettings{
                         }
 
                         // Find the element id
-                        $elementId    = $this->getElementBySlug($matches[1]. "[$in][$subKey]", 'id');
+                        $elementId    = $this->getElementBySlug($matches[1] . "[$in][$subKey]", 'id');
 
                         // insert the value
                         $wpdb->insert(
@@ -365,7 +375,7 @@ class SubmitForm extends SaveFormSettings{
                                 '%d',
                                 '%s'
                             ]
-                       );
+                        );
                     }
                 }
 
@@ -374,14 +384,14 @@ class SubmitForm extends SaveFormSettings{
             }
 
             // single value for the split entry
-            else{
+            else {
                 // loop over all the sub entries of the split field to see if they are empty
                 foreach ($formresults[$slug] as $key => $subValue) {
                     if (empty($subValue)) {
                         continue;
                     }
 
-                    $elementId = $this->getElementBySlug($slug. '[' .$key. ']', 'id');
+                    $elementId = $this->getElementBySlug($slug . '[' . $key . ']', 'id');
 
                     $wpdb->insert(
                         $this->submissionValuesTableName,
@@ -397,7 +407,7 @@ class SubmitForm extends SaveFormSettings{
                             '%s',
                             '%s'
                         ]
-                   );
+                    );
                 }
 
                 unset($formresults[$slug]);
@@ -414,7 +424,8 @@ class SubmitForm extends SaveFormSettings{
      *
      * @return    WP_Error|true            The error if one exists or true
      */
-    public function saveToSubmissionTable($formresults, $formUrl, &$message) {
+    public function saveToSubmissionTable($formresults, $formUrl, &$message)
+    {
         global $wpdb;
 
         if (!empty($this->formData->save_in_meta)) {
@@ -443,11 +454,11 @@ class SubmitForm extends SaveFormSettings{
                     //rename the file
                     $this->processFiles($result, $key);
                     $result    = $this->submission->{$key};
-                }else{
+                } else {
                     //sort the array
                     ksort($result);
                 }
-            }elseif (str_contains($result,'wp-content/uploads/')) {
+            } elseif (str_contains($result, 'wp-content/uploads/')) {
                 //rename the file
                 $this->processFiles([$result], $key);
                 $result    = $this->submission->{$key}[0];
@@ -461,7 +472,7 @@ class SubmitForm extends SaveFormSettings{
 
             if ($key == 'viewhash') {
                 $elementId = -7;
-            }else{
+            } else {
                 $elementId    = $this->getElementBySlug($key, 'id');
                 if (!$elementId) {
                     continue;
@@ -478,7 +489,7 @@ class SubmitForm extends SaveFormSettings{
             $this->insertOrUpdateData(
                 $this->submissionValuesTableName,
                 $data
-           );
+            );
         }
 
         $placeholders                = $formresults;
@@ -493,7 +504,7 @@ class SubmitForm extends SaveFormSettings{
 
         if ($wpdb->last_error !== '') {
             $message    =  new \WP_Error('error', $wpdb->last_error);
-        }elseif (empty($this->formData->include_id) || $this->formData->include_id) {
+        } elseif (empty($this->formData->include_id) || $this->formData->include_id) {
             $message    .= "<br>Your id is {$this->submission->id}";
         }
 
@@ -504,7 +515,8 @@ class SubmitForm extends SaveFormSettings{
      * Saves a submission to the user meta table
      * @param    array    $formresults    The form results to be saved
      */
-    public function saveToUserMetaTable($formresults) {
+    public function saveToUserMetaTable($formresults)
+    {
         $updateuserData    = false;
 
         //get user data as array
@@ -517,7 +529,7 @@ class SubmitForm extends SaveFormSettings{
                 $result    = TSJIPPY\cleanUpNestedArray($result);
 
                 //check if we should only update one entry of the array
-                $el    = $this->getElementBySlug($key. '[' .array_keys($result)[0]. ']');
+                $el    = $this->getElementBySlug($key . '[' . array_keys($result)[0] . ']');
                 if (count(array_keys($result)) == 1 && $el) {
                     $subKey    = array_keys($result)[0];
                 }
@@ -528,12 +540,12 @@ class SubmitForm extends SaveFormSettings{
                 if ($subKey) {
                     $userData[$key][$subKey]        = $result;
                     $updateuserData                    = true;
-                }elseif ($userData[$key]    != $result) {
+                } elseif ($userData[$key]    != $result) {
                     $userData[$key]        = $result;
                     $updateuserData        = true;
                 }
-            //update user meta
-            }else{
+                //update user meta
+            } else {
                 // update an indexed value
                 if ($subKey) {
                     $curValue    = get_user_meta($this->userId, $key, true);
@@ -542,7 +554,7 @@ class SubmitForm extends SaveFormSettings{
                         if (isset($curValue[$subKey])) {
                             unset($curValue[$subKey]);
                         }
-                    }else{
+                    } else {
                         if (!is_array($curValue)) {
                             $curValue    = [];
                         }
@@ -552,10 +564,10 @@ class SubmitForm extends SaveFormSettings{
                     }
 
                     update_user_meta($this->userId, $key, $result);
-                }else{
+                } else {
                     if (empty($result)) {
                         delete_user_meta($this->userId, $key);
-                    }else{
+                    } else {
                         update_user_meta($this->userId, $key, $result);
                     }
                 }
@@ -572,7 +584,8 @@ class SubmitForm extends SaveFormSettings{
     /**
      * Save a form submission to the db
      */
-    public function formSubmit() {
+    public function formSubmit()
+    {
         $this->submission                    = new \stdClass();
 
         $this->submission->form_id            = (int) $_POST['form-id'];
@@ -596,9 +609,9 @@ class SubmitForm extends SaveFormSettings{
             if (
                 array_intersect($this->userRoles, $this->submitRoles) === false &&
                 $this->user->ID != $userId
-           ) {
+            ) {
                 return new \WP_Error('Error', "You do not have permission to save data for user with id $userId");
-            }else{
+            } else {
                 $this->userId = $userId;
             }
         }
@@ -658,8 +671,8 @@ class SubmitForm extends SaveFormSettings{
         //save to submission table
         if (empty($this->formData->save_in_meta)) {
             $result    = $this->saveToSubmissionTable($formresults, $formUrl, $message);
-        //save to user meta
-        }else{
+            //save to user meta
+        } else {
             $result    = $this->saveToUserMetaTable($formresults);
         }
 

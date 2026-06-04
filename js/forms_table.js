@@ -1,4 +1,4 @@
-import Sortable from 'sortablejs';
+import Sortable from "sortablejs";
 
 /**
  * We need to be carefull with this script as it has overlap with the main table.js
@@ -6,670 +6,740 @@ import Sortable from 'sortablejs';
 
 console.log("Formstable.js loaded");
 
-async function showHiddenColumns(target){
-	// store as preference
-	let formData	= new FormData();
-	formData.append('form-id', target.dataset.formId);
+async function showHiddenColumns(target) {
+  // store as preference
+  let formData = new FormData();
+  formData.append("form-id", target.dataset.formId);
 
-	let response	= await FormSubmit.fetchRestApi('forms/delete_table_prefs', formData);
+  let response = await FormSubmit.fetchRestApi(
+    "forms/delete_table_prefs",
+    formData,
+  );
 
-	if(response){
-		Main.displayMessage(response);
-		location.reload();
-	}
+  if (response) {
+    Main.displayMessage(response);
+    location.reload();
+  }
 }
 
-async function saveColumnSettings(target){
-	let response = await FormSubmit.submitForm(target, 'forms/save_column_settings');
+async function saveColumnSettings(target) {
+  let response = await FormSubmit.submitForm(
+    target,
+    "forms/save_column_settings",
+  );
 
-	if(response){
-		Main.displayMessage(response);
-		location.reload();
-	}
+  if (response) {
+    Main.displayMessage(response);
+    location.reload();
+  }
 }
 
-async function saveTableSettings(target){
-	let response = await FormSubmit.submitForm(target, 'forms/save_table_settings');
+async function saveTableSettings(target) {
+  let response = await FormSubmit.submitForm(
+    target,
+    "forms/save_table_settings",
+  );
 
-	if(response){
-		Main.displayMessage(response);
-	}
+  if (response) {
+    Main.displayMessage(response);
+  }
 }
 
-async function askConfirmation(text){
+async function askConfirmation(text) {
+  let options = {
+    title: `Are you sure?`,
+    ConfirmButtonText: `Yes, ${text} it!`,
+    CancelButtonText: "Cancel",
+  };
 
-	let options	= {
-		title: `Are you sure?`,
-		ConfirmButtonText: `Yes, ${text} it!`,
-		CancelButtonText: 'Cancel'
-	};
+  let alerter = new Main.Alert(
+    `Are you sure you want to ${text} this?`,
+    "question",
+    options,
+  );
+  let response = await alerter.promise;
 
-	let alerter 		= new Main.Alert(`Are you sure you want to ${text} this?`, 'question', options);
-	let response	= await alerter.promise;
-
-	return response == 'confirm';
+  return response == "confirm";
 }
 
-async function removeSubmission(target){
-	if(await askConfirmation('delete')){		
-		let submissionId	= target.closest('tr').dataset.submissionId;
-		let table			= target.closest('table');
+async function removeSubmission(target) {
+  if (await askConfirmation("delete")) {
+    let submissionId = target.closest("tr").dataset.submissionId;
+    let table = target.closest("table");
 
-		let formData = new FormData();
-		formData.append('form-id', table.dataset.formId);
-		formData.append('submission-id', submissionId);
-		
-		//display loading gif
-		Main.showLoader(target);
+    let formData = new FormData();
+    formData.append("form-id", table.dataset.formId);
+    formData.append("submission-id", submissionId);
 
-		let response	= await FormSubmit.fetchRestApi('forms/remove_submission', formData);
+    //display loading gif
+    Main.showLoader(target);
 
-		if(response){
-			table.querySelectorAll(`.table-row[data-submission-id="${submissionId}"]`).forEach(
-				row=>row.remove()
-			);
-		}
-	}
+    let response = await FormSubmit.fetchRestApi(
+      "forms/remove_submission",
+      formData,
+    );
+
+    if (response) {
+      table
+        .querySelectorAll(`.table-row[data-submission-id="${submissionId}"]`)
+        .forEach((row) => row.remove());
+    }
+  }
 }
 
-async function archiveSubmission(target){	
-	let table			= target.closest('table');
-	let tableRow		= target.closest('tr');
-	let submissionId	= tableRow.dataset.submissionId;
-	let action			= target.value;
-	let response;
+async function archiveSubmission(target) {
+  let table = target.closest("table");
+  let tableRow = target.closest("tr");
+  let submissionId = tableRow.dataset.submissionId;
+  let action = target.value;
+  let response;
 
-	let formData 		= new FormData();
-	formData.append('form-id', table.dataset.formId);
-	formData.append('submission-id', submissionId);
-	formData.append('action', action);
-	
-	// Ask whether to archive one piece or the whole
-	if(tableRow.dataset.subid != undefined){
+  let formData = new FormData();
+  formData.append("form-id", table.dataset.formId);
+  formData.append("submission-id", submissionId);
+  formData.append("action", action);
 
-		let options	= {
-			title: `What do you want to ${action}?`,
-			ConfirmButtonText: 'Just this one',
-			CancelButtonText: 'Cancel',
-			CancelButtonPosition:3,
-			CustomButtonText: 'The whole request',
-			CustomButtonPosition: 2
-		};
+  // Ask whether to archive one piece or the whole
+  if (tableRow.dataset.subid != undefined) {
+    let options = {
+      title: `What do you want to ${action}?`,
+      ConfirmButtonText: "Just this one",
+      CancelButtonText: "Cancel",
+      CancelButtonPosition: 3,
+      CustomButtonText: "The whole request",
+      CustomButtonPosition: 2,
+    };
 
-		let alerter = new Main.Alert(`Do you want to ${action} just this one or the whole request?`, 'question', options);
-		response	= await alerter.promise;
+    let alerter = new Main.Alert(
+      `Do you want to ${action} just this one or the whole request?`,
+      "question",
+      options,
+    );
+    response = await alerter.promise;
 
-		if (response == 'custom') {
-			formData.append('subid', tableRow.dataset.subid);
-		}else if(response == 'cancel'){
-			return;
-		}
-	}
-	
-	if(!await askConfirmation(action)){
-		return;
-	}
+    if (response == "custom") {
+      formData.append("subid", tableRow.dataset.subid);
+    } else if (response == "cancel") {
+      return;
+    }
+  }
 
-	//display loading gif
-	Main.showLoader(target);
-	
-	response	= await FormSubmit.fetchRestApi('forms/archive_submission', formData);
+  if (!(await askConfirmation(action))) {
+    return;
+  }
 
-	if(response){
-		let params = new Proxy(new URLSearchParams(window.location.search), {
-			get: (searchParams, prop) => searchParams.get(prop),
-		});
+  //display loading gif
+  Main.showLoader(target);
 
-		// Create a custom event so others can listen to it.
-		// Used by bookings uploads
-		const event = new Event('submissionArchived');
-		
-		// Delete all
-		if(formData.get('subid') == null){
-			table.querySelectorAll(`[data-submission-id="${submissionId}"]`).forEach(row=>{
-				row.dispatchEvent(event);
+  response = await FormSubmit.fetchRestApi(
+    "forms/archive_submission",
+    formData,
+  );
 
-				// just change the button name
-				if(params.archived){
-					let element;
-					if(action == 'archive'){
-						element = row.querySelector(`.loader-wrapper, .archive`);
-					}else{
-						element = row.querySelector(`.loader-wrapper, .unarchive`);
-					}
-					changeArchiveButton(element, action);
-				}else{
-					row.remove();
-				}
-			});
-		// Only delete subid
-		}else{
-			table.querySelectorAll(`.table-row[data-submission-id="${submissionId}"][data-subid="${tableRow.dataset.subid}"]`).forEach(row=>{
-				row.dispatchEvent(event);
-				
-				// just change the button name
-				if(params.archived){
-					let loader = row.querySelector('.loader-wrapper');
-					
-					changeArchiveButton(loader, action);
-				}else{
-					row.remove();
-				}
-			}
-			);
-		}
-	}
+  if (response) {
+    let params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    });
+
+    // Create a custom event so others can listen to it.
+    // Used by bookings uploads
+    const event = new Event("submissionArchived");
+
+    // Delete all
+    if (formData.get("subid") == null) {
+      table
+        .querySelectorAll(`[data-submission-id="${submissionId}"]`)
+        .forEach((row) => {
+          row.dispatchEvent(event);
+
+          // just change the button name
+          if (params.archived) {
+            let element;
+            if (action == "archive") {
+              element = row.querySelector(`.loader-wrapper, .archive`);
+            } else {
+              element = row.querySelector(`.loader-wrapper, .unarchive`);
+            }
+            changeArchiveButton(element, action);
+          } else {
+            row.remove();
+          }
+        });
+      // Only delete subid
+    } else {
+      table
+        .querySelectorAll(
+          `.table-row[data-submission-id="${submissionId}"][data-subid="${tableRow.dataset.subid}"]`,
+        )
+        .forEach((row) => {
+          row.dispatchEvent(event);
+
+          // just change the button name
+          if (params.archived) {
+            let loader = row.querySelector(".loader-wrapper");
+
+            changeArchiveButton(loader, action);
+          } else {
+            row.remove();
+          }
+        });
+    }
+  }
 }
 
-function changeArchiveButton(element, action){
-	let text;
+function changeArchiveButton(element, action) {
+  let text;
 
-	if(action == 'archive'){
-		action 	= 'unarchive';
-		text	= 'Unarchive';
-	}else{
-		action 	= 'archive';
-		text	= 'Archive';
-	}
-	element.outerHTML = `<button class="${action} button forms-table-action" name="${action}-action" value="${action}">${text}</button>`;
+  if (action == "archive") {
+    action = "unarchive";
+    text = "Unarchive";
+  } else {
+    action = "archive";
+    text = "Archive";
+  }
+  element.outerHTML = `<button class="${action} button forms-table-action" name="${action}-action" value="${action}">${text}</button>`;
 }
 
-function updatePageNav(navWrapper, pageNr){
+function updatePageNav(navWrapper, pageNr) {
+  navWrapper.querySelector(".current").classList.remove("current");
 
-	navWrapper.querySelector('.current').classList.remove('current');
+  navWrapper.querySelector(`[data-nr="${pageNr}"]`).classList.add("current");
 
-	navWrapper.querySelector(`[data-nr="${pageNr}"]`).classList.add('current');
+  // hide prev button
+  if (pageNr == 0) {
+    navWrapper.querySelector(".prev").classList.add("hidden");
+  } else {
+    navWrapper.querySelector(".prev").classList.remove("hidden");
+  }
 
-	// hide prev button
-	if(pageNr == 0){
-		navWrapper.querySelector('.prev').classList.add('hidden');
-	}else{
-		navWrapper.querySelector('.prev').classList.remove('hidden');
-	}
-
-	// hide next button
-	if(pageNr == navWrapper.querySelectorAll('.page-number').length -1){
-		navWrapper.querySelector('.next').classList.add('hidden');
-	}else{
-		navWrapper.querySelector('.next').classList.remove('hidden');
-	}
+  // hide next button
+  if (pageNr == navWrapper.querySelectorAll(".page-number").length - 1) {
+    navWrapper.querySelector(".next").classList.add("hidden");
+  } else {
+    navWrapper.querySelector(".next").classList.remove("hidden");
+  }
 }
 
 /**
- * 
+ *
  * @param {node} target  	The clicked node
- * @param {string} action	One of page, sort or filter 
- * @param {in} page			The page number to fetch 
- * @returns 
+ * @param {string} action	One of page, sort or filter
+ * @param {in} page			The page number to fetch
+ * @returns
  */
-async function getPage(target, action){
-	// we only have one wrapper
-	let wrapper			= target.closest('.form.table-wrapper');
+async function getPage(target, action) {
+  // we only have one wrapper
+  let wrapper = target.closest(".form.table-wrapper");
 
-	let orgContent		= wrapper.innerHTML;
+  let orgContent = wrapper.innerHTML;
 
-	let tableWrapper;
+  let tableWrapper;
 
-	// we are filtering, just take the first table wrapper
-	if(action == 'filter'){
-		tableWrapper	= wrapper.querySelector('.form-results-wrapper');
-	}else{
-		// Only get the table wrapper to the target
-		tableWrapper	= target.closest('.form-results-wrapper');
-	}
-	let table			= tableWrapper.querySelector('.form-data.table:not(.hidden)');
+  // we are filtering, just take the first table wrapper
+  if (action == "filter") {
+    tableWrapper = wrapper.querySelector(".form-results-wrapper");
+  } else {
+    // Only get the table wrapper to the target
+    tableWrapper = target.closest(".form-results-wrapper");
+  }
+  let table = tableWrapper.querySelector(".form-data.table:not(.hidden)");
 
-	// Get the details
-	let formId			= table.dataset.formId;
+  // Get the details
+  let formId = table.dataset.formId;
 
-	let shortcodeId		= table.dataset.shortcodeId;
+  let shortcodeId = table.dataset.shortcodeId;
 
-	let type			= table.dataset.type;
+  let type = table.dataset.type;
 
-	let pageSize		= tableWrapper.querySelector(`select.page-size`).value;
+  let pageSize = tableWrapper.querySelector(`select.page-size`).value;
 
-	/**
-	 * We reqested another page
-	 */
-	if(action == 'page'){
-		let navWrapper	= target.closest('.form-result-navigation');
+  /**
+   * We reqested another page
+   */
+  if (action == "page") {
+    let navWrapper = target.closest(".form-result-navigation");
 
-		// get the requested page number
-		let	curPage			= parseInt(navWrapper.querySelector(".page-number-wrapper .current").dataset.nr);
-		var page;
+    // get the requested page number
+    let curPage = parseInt(
+      navWrapper.querySelector(".page-number-wrapper .current").dataset.nr,
+    );
+    var page;
 
-		if(target.matches('.next')){
-			page	= curPage + 1;
-		}else if(target.matches('.prev')){
-			page	= curPage - 1;
-		}else{
-			page	= target.dataset.nr;
-		}
+    if (target.matches(".next")) {
+      page = curPage + 1;
+    } else if (target.matches(".prev")) {
+      page = curPage - 1;
+    } else {
+      page = target.dataset.nr;
+    }
 
-		updatePageNav(navWrapper, page);
+    updatePageNav(navWrapper, page);
 
-		let loadedPage	= tableWrapper.querySelector(`[data-page="${page}"]`);
-		
-		// check if the requested page is already loaded and show it
-		if(loadedPage != null){
-			loadedPage.classList.remove('hidden');
+    let loadedPage = tableWrapper.querySelector(`[data-page="${page}"]`);
 
-			return;
-		}
-		table.classList.add('hidden');
+    // check if the requested page is already loaded and show it
+    if (loadedPage != null) {
+      loadedPage.classList.remove("hidden");
 
-		Main.showLoader(table, false, 100, 'Loading data');
-	}
+      return;
+    }
+    table.classList.add("hidden");
 
-	/**
-	 * Sorting
-	 */
-	else if(action == 'sort' || action == 'size'){
-		tableWrapper.classList.add(table.dataset.type);
-		tableWrapper.innerHTML	= Main.showLoader('', true, 100, 'Loading data', true);
-	}
+    Main.showLoader(table, false, 100, "Loading data");
+  } else if (action == "sort" || action == "size") {
 
-	// If we sort or filter we want to do so on all tables
-	else{
-		type	= 'all';
+  /**
+   * Sorting
+   */
+    tableWrapper.classList.add(table.dataset.type);
+    tableWrapper.innerHTML = Main.showLoader(
+      "",
+      true,
+      100,
+      "Loading data",
+      true,
+    );
+  }
 
-		wrapper.querySelectorAll('.form-results-wrapper').forEach( el => {
-			el.classList.add(el.querySelector('table').dataset.type);
+  // If we sort or filter we want to do so on all tables
+  else {
+    type = "all";
 
-			el.innerHTML	= Main.showLoader(el, true, 100, 'Loading data', true);
-		});
-	}
+    wrapper.querySelectorAll(".form-results-wrapper").forEach((el) => {
+      el.classList.add(el.querySelector("table").dataset.type);
 
-	let formData;
-	if(wrapper.querySelector(".filter-options") == null){
-		formData		= new FormData();
-	}
-	
-	// Include the filter options if there is a filter
-	else{
-		formData		= new FormData(wrapper.querySelector("form.filter-options"));
-	}
+      el.innerHTML = Main.showLoader(el, true, 100, "Loading data", true);
+    });
+  }
 
-    formData.append('form-id', formId);
-    formData.append('page-number', page);
-	formData.append('shortcode-id', shortcodeId);
-    formData.append('type', type);
-	formData.append('pagesize', pageSize);
+  let formData;
+  if (wrapper.querySelector(".filter-options") == null) {
+    formData = new FormData();
+  }
 
-	let params = new Proxy(new URLSearchParams(window.location.search), {
-		get: (searchParams, prop) => searchParams.get(prop),
-	});
+  // Include the filter options if there is a filter
+  else {
+    formData = new FormData(wrapper.querySelector("form.filter-options"));
+  }
 
-	let archived;
-	if(params['archived'] == null){
-		archived	= 0;
-	}else{
-		archived	= 1;
-	}
+  formData.append("form-id", formId);
+  formData.append("page-number", page);
+  formData.append("shortcode-id", shortcodeId);
+  formData.append("type", type);
+  formData.append("pagesize", pageSize);
 
-	let onlyOwn;
-	if(params['onlyOwn'] == null){
-		onlyOwn	= 0;
-	}else{
-		onlyOwn	= 1;
-	}
-	formData.append('archived', archived);
-	formData.append('only-own', onlyOwn);
-	
-	if(tableWrapper.dataset.sortcol){
-		formData.append('sortcol', tableWrapper.dataset.sortcol);
-	}
+  let params = new Proxy(new URLSearchParams(window.location.search), {
+    get: (searchParams, prop) => searchParams.get(prop),
+  });
 
-	if(tableWrapper.dataset.sortdir){
-		formData.append('sortdir', tableWrapper.dataset.sortdir);
-	}
+  let archived;
+  if (params["archived"] == null) {
+    archived = 0;
+  } else {
+    archived = 1;
+  }
 
-	let response	= await FormSubmit.fetchRestApi('forms/get_page', formData);
+  let onlyOwn;
+  if (params["onlyOwn"] == null) {
+    onlyOwn = 0;
+  } else {
+    onlyOwn = 1;
+  }
+  formData.append("archived", archived);
+  formData.append("only-own", onlyOwn);
 
-	if(response){
-		for (let [tableType, tableHtml] of Object.entries(response)) {
-			if(action == 'page'){
-				const parser 	= new DOMParser();
-				const doc 		= parser.parseFromString(tableHtml, "text/html");
+  if (tableWrapper.dataset.sortcol) {
+    formData.append("sortcol", tableWrapper.dataset.sortcol);
+  }
 
-				// append the new page to the existing pages
-				tableHtml		= doc.querySelector("table.form-data.table").outerHTML; 
+  if (tableWrapper.dataset.sortdir) {
+    formData.append("sortdir", tableWrapper.dataset.sortdir);
+  }
 
-				tableWrapper.querySelector(`.loader-wrapper`).outerHTML = tableHtml;
-			}
-			
-			// Overwrite the table and navigation
-			else{
-				wrapper.querySelector(`.form-results-wrapper.${tableType}`).outerHTML	= tableHtml;
-			}
-		}
+  let response = await FormSubmit.fetchRestApi("forms/get_page", formData);
 
-		document.querySelectorAll('select:not(.nonice)').forEach(select => Main.attachNiceSelect(select));
-	}else{
-		// restore prev data
-		wrapper.innerHTML	= orgContent;
-	}
+  if (response) {
+    for (let [tableType, tableHtml] of Object.entries(response)) {
+      if (action == "page") {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(tableHtml, "text/html");
+
+        // append the new page to the existing pages
+        tableHtml = doc.querySelector("table.form-data.table").outerHTML;
+
+        tableWrapper.querySelector(`.loader-wrapper`).outerHTML = tableHtml;
+      }
+
+      // Overwrite the table and navigation
+      else {
+        wrapper.querySelector(`.form-results-wrapper.${tableType}`).outerHTML =
+          tableHtml;
+      }
+    }
+
+    document
+      .querySelectorAll("select:not(.nonice)")
+      .forEach((select) => Main.attachNiceSelect(select));
+  } else {
+    // restore prev data
+    wrapper.innerHTML = orgContent;
+  }
 }
 
-function prepareInputs(target){
-	// attach upload listenerss
-	target.querySelectorAll('.file-upload-wrap').forEach(el => el.addEventListener('uploadfinished', uploadFinished));
+function prepareInputs(target) {
+  // attach upload listenerss
+  target
+    .querySelectorAll(".file-upload-wrap")
+    .forEach((el) => el.addEventListener("uploadfinished", uploadFinished));
 
-	// Attache niceselects
-	target.querySelectorAll('select').forEach(el => {
-		if(el._niceSelect == undefined){
-			Main.attachNiceSelect(el);
-		}
-	});
+  // Attache niceselects
+  target.querySelectorAll("select").forEach((el) => {
+    if (el._niceSelect == undefined) {
+      Main.attachNiceSelect(el);
+    }
+  });
 
-	// focus on the first input
-	target.querySelector('input, select, textarea').focus();
+  // focus on the first input
+  target.querySelector("input, select, textarea").focus();
 
-	// Show the save button
-	target.querySelector(`button.save`).classList.remove('hidden');
+  // Show the save button
+  target.querySelector(`button.save`).classList.remove("hidden");
 }
 
-async function getInputHtml(target){
-	let data			= target.dataset;
-    let submissionId	= target.closest('tr').dataset.submissionId;
-	let shortcodeId		= target.closest('table').dataset.shortcodeId;
-    let loader			= Main.showLoader(target.querySelector('.override-wrapper'), true, 50, 'Loading...');
+async function getInputHtml(target) {
+  let data = target.dataset;
+  let submissionId = target.closest("tr").dataset.submissionId;
+  let shortcodeId = target.closest("table").dataset.shortcodeId;
+  let loader = Main.showLoader(
+    target.querySelector(".override-wrapper"),
+    true,
+    50,
+    "Loading...",
+  );
 
-	let formData 		= new FormData();
-	if(data.subid != undefined){
-    	formData.append('subid', data.subid);
-	}
-    formData.append('submission-id', submissionId);
-	formData.append('shortcode-id', shortcodeId);
-    formData.append('element-id', data.elementId);
+  let formData = new FormData();
+  if (data.subid != undefined) {
+    formData.append("subid", data.subid);
+  }
+  formData.append("submission-id", submissionId);
+  formData.append("shortcode-id", shortcodeId);
+  formData.append("element-id", data.elementId);
 
-	let response	= await FormSubmit.fetchRestApi('forms/get_input_html', formData);
+  let response = await FormSubmit.fetchRestApi(
+    "forms/get_input_html",
+    formData,
+  );
 
-	if(response){
-		loader.outerHTML	= `<div class='input-wrapper'>${response}</div>`;
+  if (response) {
+    loader.outerHTML = `<div class='input-wrapper'>${response}</div>`;
 
-		prepareInputs(target);
-	}else{
-		target.innerHTML	= target.dataset.oldHtml;
-		target.classList.remove('editing');
-	}
+    prepareInputs(target);
+  } else {
+    target.innerHTML = target.dataset.oldHtml;
+    target.classList.remove("editing");
+  }
 }
 
-function uploadFinished(event){
-	if(event.target.closest('td') != null){
-		//remove as soon as we come here
-		document.removeEventListener('uploadfinished', uploadFinished);
-		processFormsTableInput(document.querySelector('[data-oldText]'));
-	}
+function uploadFinished(event) {
+  if (event.target.closest("td") != null) {
+    //remove as soon as we come here
+    document.removeEventListener("uploadfinished", uploadFinished);
+    processFormsTableInput(document.querySelector("[data-oldText]"));
+  }
 }
 
 //function to get the temp input value and save it over AJAX
-async function processFormsTableInput(target){
-	// Do not proceed if this is a schedule table
-	if( target.closest('.schedule') != null ){
-		return;
-	}
+async function processFormsTableInput(target) {
+  // Do not proceed if this is a schedule table
+  if (target.closest(".schedule") != null) {
+    return;
+  }
 
-	let table			= target.closest('table');
-	let cell			= target.closest('td');
-    let data			= cell.dataset;
-	let submissionId	= target.closest('tr').dataset.submissionId;
-	let value			= FormFunctions.getFieldValue(target, cell, false);
-	let shortcodeId		= '';
+  let table = target.closest("table");
+  let cell = target.closest("td");
+  let data = cell.dataset;
+  let submissionId = target.closest("tr").dataset.submissionId;
+  let value = FormFunctions.getFieldValue(target, cell, false);
+  let shortcodeId = "";
 
-	if(target.closest('[data-shortcode-id]') != null){
-		shortcodeId	= target.closest('[data-shortcode-id]').dataset.shortcodeId;
-	}
+  if (target.closest("[data-shortcode-id]") != null) {
+    shortcodeId = target.closest("[data-shortcode-id]").dataset.shortcodeId;
+  }
 
-	//Only update when needed
-	if (value != data.oldText){
-		// hide the submit button
-		cell.querySelectorAll(`button.save`).forEach(el => el.classList.add('hidden'));
+  //Only update when needed
+  if (value != data.oldText) {
+    // hide the submit button
+    cell
+      .querySelectorAll(`button.save`)
+      .forEach((el) => el.classList.add("hidden"));
 
-		Main.showLoader(cell.querySelector('.input-wrapper'),true, 50, 'Saving...');
-		
-		// Submit new value and receive the filtered value back
-		let formData = new FormData();
-		formData.append('submission-id', submissionId);
-		formData.append('element-id', data.elementId);
-		formData.append('new-value', JSON.stringify(value));
-		if(data.subid != undefined){
-			formData.append('subid', data.subid);
-		}
+    Main.showLoader(
+      cell.querySelector(".input-wrapper"),
+      true,
+      50,
+      "Saving...",
+    );
 
-		if(shortcodeId != ''){
-			formData.append('shortcode-id', shortcodeId);
-		}
-		
-		let response	= await FormSubmit.fetchRestApi('forms/edit_value', formData);
+    // Submit new value and receive the filtered value back
+    let formData = new FormData();
+    formData.append("submission-id", submissionId);
+    formData.append("element-id", data.elementId);
+    formData.append("new-value", JSON.stringify(value));
+    if (data.subid != undefined) {
+      formData.append("subid", data.subid);
+    }
 
-		target.classList.remove('editing');
-	
-		if(response){
-			let newValue = response['new-value'];
-			
-			if(typeof(newValue) == 'string'){
-				newValue.replace('_', ' ');
-			}
+    if (shortcodeId != "") {
+      formData.append("shortcode-id", shortcodeId);
+    }
 
-			//Replace the input element with its value
-			if(newValue == ""){
-				newValue = "X";
-			}
-	
-			//Update all occurences of this field
-			if(data['subid'] != undefined){
-				let targets	= table.querySelectorAll(`tr[data-submission-id="${submissionId}"] td[data-element-id="${data.elementId}"]`);
-				targets.forEach(td=>{td.innerHTML = newValue;});
-			}else{
-				cell.innerHTML = newValue;
-			}
-	
-			Main.displayMessage(response.message.replace('_', ' '), 'success', 2000);
+    let response = await FormSubmit.fetchRestApi("forms/edit_value", formData);
 
-			return;
-		}
-	}
+    target.classList.remove("editing");
 
-	// Restore the old value
-	cell.innerHTML = cell.dataset.oldHtml;
+    if (response) {
+      let newValue = response["new-value"];
+
+      if (typeof newValue == "string") {
+        newValue.replace("_", " ");
+      }
+
+      //Replace the input element with its value
+      if (newValue == "") {
+        newValue = "X";
+      }
+
+      //Update all occurences of this field
+      if (data["subid"] != undefined) {
+        let targets = table.querySelectorAll(
+          `tr[data-submission-id="${submissionId}"] td[data-element-id="${data.elementId}"]`,
+        );
+        targets.forEach((td) => {
+          td.innerHTML = newValue;
+        });
+      } else {
+        cell.innerHTML = newValue;
+      }
+
+      Main.displayMessage(response.message.replace("_", " "), "success", 2000);
+
+      return;
+    }
+  }
+
+  // Restore the old value
+  cell.innerHTML = cell.dataset.oldHtml;
 }
 
 const copyContent = async (target) => {
-	let text	= target.closest('td').innerText;
-    try {
-		let options	= {
-			title: `Success`,
-			ConfirmButtonText: `Yes, delete it!`,
-			timer: 3000
-		};
+  let text = target.closest("td").innerText;
+  try {
+    let options = {
+      title: `Success`,
+      ConfirmButtonText: `Yes, delete it!`,
+      timer: 3000,
+    };
 
-		new Main.Alert(`Copied '${text}'`, 'success', options);
+    new Main.Alert(`Copied '${text}'`, "success", options);
 
-		navigator.clipboard.writeText(text);
-    } catch (err) {
-		Main.displayMessage('Failed to copy: '+err, 'error');
-    }
-}
+    navigator.clipboard.writeText(text);
+  } catch (err) {
+    Main.displayMessage("Failed to copy: " + err, "error");
+  }
+};
 
 const hideColumn = async (target) => {
-	// Table itself
-	if(target.parentNode.matches('th')){
-		let cell 	= target.parentNode;
+  // Table itself
+  if (target.parentNode.matches("th")) {
+    let cell = target.parentNode;
 
-		// Hide the column
-		var table		= cell.closest('table');
-		let tableRows	= table.rows;
-		for (const element of tableRows) {
-			element.cells[cell.cellIndex].classList.add('hidden')
-		}
+    // Hide the column
+    var table = cell.closest("table");
+    let tableRows = table.rows;
+    for (const element of tableRows) {
+      element.cells[cell.cellIndex].classList.add("hidden");
+    }
 
-		// store as preference
-		var formData	= new FormData();
-		formData.append('form-id', table.dataset.formId);
-		formData.append('column-name', cell.id);
-		
-		await FormSubmit.fetchRestApi('forms/save_table_prefs', formData);
-	// Table settings
-	}else{
-		if(target.classList.contains('visible')){
-			target.classList.replace('visible', 'invisible');
-			target.src	= target.src.replace('visible.png', 'invisible.png');
-			target.closest('td').querySelector('input').value = 0;
-		}else{
-			target.classList.replace('invisible','visible');
-			target.src	= target.src.replace('invisible.png','visible.png');
-			target.closest('td').querySelector('input').value = 1;
-		}
-	}
-}
+    // store as preference
+    var formData = new FormData();
+    formData.append("form-id", table.dataset.formId);
+    formData.append("column-name", cell.id);
 
-document.addEventListener("click", event=>{
-	let target 		= event.target;
+    await FormSubmit.fetchRestApi("forms/save_table_prefs", formData);
+    // Table settings
+  } else {
+    if (target.classList.contains("visible")) {
+      target.classList.replace("visible", "invisible");
+      target.src = target.src.replace("visible.png", "invisible.png");
+      target.closest("td").querySelector("input").value = 0;
+    } else {
+      target.classList.replace("invisible", "visible");
+      target.src = target.src.replace("invisible.png", "visible.png");
+      target.closest("td").querySelector("input").value = 1;
+    }
+  }
+};
 
-	if(target.name == 'submit_column_setting'){
-		saveColumnSettings(target);
-	}else if(target.name == 'submit_table_setting'){
-		saveTableSettings(target);
-	}else if(target.name == 'form-settings[autoarchive]'){
-		//show auto archive fields
-		let el = target.closest('.table-rights-wrapper').querySelector('.auto-archive-logic');
-		if(target.value == '1'){
-			el.classList.remove('hidden');
-		}else{
-			el.classList.add('hidden');
-		}
-	}else if(
-		target.closest('.form-result-navigation') != null && 
-		(
-			target.matches('.next') || 
-			target.matches('.prev') || 
-			target.matches('.page-number') 
-		)
-	){
-		getPage(target, 'page');
-	}
+document.addEventListener("click", (event) => {
+  let target = event.target;
 
-	// Filter data
-	else if(target.matches(`.button.filter-results`)){
-		getPage(target, 'filter');
-	}
+  if (target.name == "submit_column_setting") {
+    saveColumnSettings(target);
+  } else if (target.name == "submit_table_setting") {
+    saveTableSettings(target);
+  } else if (target.name == "form-settings[autoarchive]") {
+    //show auto archive fields
+    let el = target
+      .closest(".table-rights-wrapper")
+      .querySelector(".auto-archive-logic");
+    if (target.value == "1") {
+      el.classList.remove("hidden");
+    } else {
+      el.classList.add("hidden");
+    }
+  } else if (
+    target.closest(".form-result-navigation") != null &&
+    (target.matches(".next") ||
+      target.matches(".prev") ||
+      target.matches(".page-number"))
+  ) {
+    getPage(target, "page");
+  }
 
-	// copy cell contents
-	else if(target.matches('.copy')){
-		copyContent(target);
-	}
+  // Filter data
+  else if (target.matches(`.button.filter-results`)) {
+    getPage(target, "filter");
+  }
 
-	//Actions
-	else if(target.matches('.delete.forms-table-action')){
-		removeSubmission(target);
-	}
+  // copy cell contents
+  else if (target.matches(".copy")) {
+    copyContent(target);
+  }
 
-	else if(target.matches('.archive.forms-table-action, .unarchive.forms-table-action')){
-		archiveSubmission(target);
-	}
-	
-	//Open settings modal
-	else if(target.classList.contains('edit-formshortcode-settings')){
-		Main.showModal(document.querySelector('.modal.form-shortcode-settings'));
-	}
+  //Actions
+  else if (target.matches(".delete.forms-table-action")) {
+    removeSubmission(target);
+  } else if (
+    target.matches(".archive.forms-table-action, .unarchive.forms-table-action")
+  ) {
+    archiveSubmission(target);
+  }
 
-	else if(target.matches('form .table-permissions-rights-form')){
-		target.closest('div').querySelector('.permission-wrapper').classList.toggle('hidden');
-	}
+  //Open settings modal
+  else if (target.classList.contains("edit-formshortcode-settings")) {
+    Main.showModal(document.querySelector(".modal.form-shortcode-settings"));
+  } else if (target.matches("form .table-permissions-rights-form")) {
+    target
+      .closest("div")
+      .querySelector(".permission-wrapper")
+      .classList.toggle("hidden");
+  } else {
+    return;
+  }
 
-	else{
-		return;
-	}
-
-	event.stopImmediatePropagation();
+  event.stopImmediatePropagation();
 });
 
-document.addEventListener("DOMContentLoaded", function() {
-	//Make the sortable-column-settings-rows div sortable
-	let options = {
-		handle: '.movecontrol',
-		animation: 150,
-	};
+document.addEventListener("DOMContentLoaded", function () {
+  //Make the sortable-column-settings-rows div sortable
+  let options = {
+    handle: ".movecontrol",
+    animation: 150,
+  };
 
-	document.querySelectorAll('.sortable-column-settings-rows tbody').forEach(el=>{
-		Sortable.create(el, options);
-	});
+  document
+    .querySelectorAll(".sortable-column-settings-rows tbody")
+    .forEach((el) => {
+      Sortable.create(el, options);
+    });
 
-	document.querySelectorAll('.form-data.table th').forEach(cell=>{
-		cell.style.minWidth		= parseFloat(window.getComputedStyle(cell).width) + 20 + 'px';
-	});
+  document.querySelectorAll(".form-data.table th").forEach((cell) => {
+    cell.style.minWidth =
+      parseFloat(window.getComputedStyle(cell).width) + 20 + "px";
+  });
 });
 
-document.addEventListener('change', event=>{
-	let target = event.target;
+document.addEventListener("change", (event) => {
+  let target = event.target;
 
-	if(target.id == 'tsjippy-forms-selector'){
-		document.querySelectorAll('.main-form-wrapper').forEach(el=>{
-			el.classList.add('hidden');
-		});
+  if (target.id == "tsjippy-forms-selector") {
+    document.querySelectorAll(".main-form-wrapper").forEach((el) => {
+      el.classList.add("hidden");
+    });
 
-		document.getElementById(target.value).classList.remove('hidden');
+    document.getElementById(target.value).classList.remove("hidden");
 
-		// position table
-		TsjippyTableFunctions.positionTable();
-	}else if(target.matches(`.page-size`)){
-		getPage(target, 'size');
-	}else{
-		return;
-	}
+    // position table
+    TsjippyTableFunctions.positionTable();
+  } else if (target.matches(`.page-size`)) {
+    getPage(target, "size");
+  } else {
+    return;
+  }
 
-	event.stopImmediatePropagation();
+  event.stopImmediatePropagation();
 });
 
-document.addEventListener("table-content-update-inputs-loaded", async event => {
-	let target	= event.target;
+document.addEventListener(
+  "table-content-update-inputs-loaded",
+  async (event) => {
+    let target = event.target;
 
-	if( target.matches('.forms-table')){
-		event.preventDefault();
+    if (target.matches(".forms-table")) {
+      event.preventDefault();
 
-		await getInputHtml(target);
+      await getInputHtml(target);
 
-		prepareInputs(target);
-	}
+      prepareInputs(target);
+    }
+  },
+);
+
+document.addEventListener("table-content-before-update", async (event) => {
+  let target = event.target;
+
+  if (target.matches(".forms-table")) {
+    event.preventDefault();
+
+    processFormsTableInput(target);
+  }
 });
 
-document.addEventListener("table-content-before-update", async event => {
-	let target	= event.target;
+document.addEventListener("table-content-before-column-hide", async (event) => {
+  let target = event.target;
 
-	if( target.matches('.forms-table')){
-		event.preventDefault();
+  if (
+    target.closest(".column-setting-wrapper") != null ||
+    target.closest(".form-data.table") != null
+  ) {
+    event.preventDefault();
 
-		processFormsTableInput(target);
-	}
-});
-
-document.addEventListener("table-content-before-column-hide", async event => {
-	let target	= event.target;
-
-	if( target.closest('.column-setting-wrapper') != null || target.closest('.form-data.table' ) != null){
-		event.preventDefault();
-
-		hideColumn(target);
-	}
+    hideColumn(target);
+  }
 });
 
 // Listen to the sort table event from table.js
-document.addEventListener("table-sorted", async event => {
-	let target	= event.target;
+document.addEventListener("table-sorted", async (event) => {
+  let target = event.target;
 
-	// We only need to request a sorted table page if there are multiple pages, else the sorting is done by js
-	if(target.closest(".form-results-wrapper").querySelector('.form-result-navigation') != null){
-		// get a sorted table over AJAX
-		let sortCol			= target.id;
-		let sortDir			= target.classList.contains('desc') ? 'DESC' : 'ASC';
+  // We only need to request a sorted table page if there are multiple pages, else the sorting is done by js
+  if (
+    target
+      .closest(".form-results-wrapper")
+      .querySelector(".form-result-navigation") != null
+  ) {
+    // get a sorted table over AJAX
+    let sortCol = target.id;
+    let sortDir = target.classList.contains("desc") ? "DESC" : "ASC";
 
-		let tableWrapper	= target.closest('.form-results-wrapper');
-		tableWrapper.dataset.sortcol	= sortCol;
-		tableWrapper.dataset.sortdir	= sortDir;
+    let tableWrapper = target.closest(".form-results-wrapper");
+    tableWrapper.dataset.sortcol = sortCol;
+    tableWrapper.dataset.sortdir = sortDir;
 
-		getPage(target, 'sort');
-	}
+    getPage(target, "sort");
+  }
 });
 
-document.addEventListener("column-visibility-reset", event => showHiddenColumns(event.target));
+document.addEventListener("column-visibility-reset", (event) =>
+  showHiddenColumns(event.target),
+);

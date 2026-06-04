@@ -1,202 +1,200 @@
-@use '../../../plugins/tsjippy-shared-functionality/includes/css/scss/global' as *;
+@use "../../../plugins/tsjippy-shared-functionality/includes/css/scss/global"
+  as *;
 
-.tsjippy-form-wrapper{
-	input:disabled {
-		border: none;
-		padding: 0;
-		font-weight: bold;
-		font-size: inherit;
-	}
+.tsjippy-form-wrapper {
+  input:disabled {
+    border: none;
+    padding: 0;
+    font-weight: bold;
+    font-size: inherit;
+  }
 
-	.formfield-input:not(input[type='radio']){
-		float:left;
-	}
-	
-	.info-box{
-		position: relative;
-		z-index: 2;
-	}
+  .formfield-input:not(input[type="radio"]) {
+    float: left;
+  }
 
-	.info-icon{
-		flex:1;
-		margin-left: 10px !important;
-		width: 25px;
-		padding-top: 30px;
-	}
+  .info-box {
+    position: relative;
+    z-index: 2;
+  }
 
-	label .info-icon{
-		margin-top: -30px;
-		padding-top: 0px;
-	}
+  .info-icon {
+    flex: 1;
+    margin-left: 10px !important;
+    width: 25px;
+    padding-top: 30px;
+  }
 
-	/* Mark input boxes that gets an error on validation: */
-	input.invalid {
-	  background-color: #ffdddd;
-	}
+  label .info-icon {
+    margin-top: -30px;
+    padding-top: 0px;
+  }
 
-	.formsteploader{
-		margin-left: auto;
-		margin-right: auto;
-		display: block;
-	}
+  /* Mark input boxes that gets an error on validation: */
+  input.invalid {
+    background-color: #ffdddd;
+  }
 
-	/* Make circles that indicate the steps of the form: */
-	.step {
-		height: 15px;
-		width: 15px;
-		margin: 0 2px;
-		background-color: #bd2919;
-		border: none;
-		border-radius: 50%;
-		display: inline-block;
-		opacity: 0.5;
-		
-		/* Mark the active step: */
-		&.active {
-			opacity: 1;
-			height: 18px;
-			width: 18px;
-		}
+  .formsteploader {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
 
-		/* Mark the steps that are finished and valid: */
-		&.finish {
-			background-color: $secundaryColor;
-			opacity: 0.8;
-		}
-	}
+  /* Make circles that indicate the steps of the form: */
+  .step {
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bd2919;
+    border: none;
+    border-radius: 50%;
+    display: inline-block;
+    opacity: 0.5;
 
-	.next-button{
-		float: right;
-	}
+    /* Mark the active step: */
+    &.active {
+      opacity: 1;
+      height: 18px;
+      width: 18px;
+    }
 
-	@media (max-width: $mobilewidth){
-		.submit-wrapper{
-			margin-top: 0px;
-		}
-	}
+    /* Mark the steps that are finished and valid: */
+    &.finish {
+      background-color: $secundaryColor;
+      opacity: 0.8;
+    }
+  }
 
-	.submit-wrapper{
-		width: 100%;
-		
-		.button{
-			margin-right: 10px
-		}
-	}
+  .next-button {
+    float: right;
+  }
 
-	.multi-step-controls-wrapper{
-		display:flex; 
-		width:100%;
-		padding-top: 20px;
+  @media (max-width: $mobilewidth) {
+    .submit-wrapper {
+      margin-top: 0px;
+    }
+  }
 
-		.submit-wrapper{
-			justify-content: end;
-			margin: 0px;
-			
-			.button{
-				margin-top: 0px;
-			}
+  .submit-wrapper {
+    width: 100%;
 
-			.loadergif{
-				margin-top: 0px;
-			}
-		}
-	}
-	
+    .button {
+      margin-right: 10px;
+    }
+  }
 
-	.form-submit{
-		&:disabled{
-			background-color: grey;
-			
-			.online{
-				display: none;
-			}
-		}
-	}
+  .multi-step-controls-wrapper {
+    display: flex;
+    width: 100%;
+    padding-top: 20px;
 
-	.conditions-info{
-		margin-top: -20px;
-		margin-right: 30px;
-		float: right;
-		color: #bd2919;
-		font-size: xx-large;
-	}
+    .submit-wrapper {
+      justify-content: end;
+      margin: 0px;
 
-	.clone-div{
-		margin-top: 5px;
-		
-		.button{
-			max-width: 50px;
-			max-height: 40px;
-    		margin-top: auto;
-		}
-	}
+      .button {
+        margin-top: 0px;
+      }
 
-	.option-label{
-		margin-left: 5px;
-	}
-	
-	.label-text{
-		margin-bottom: 5px;
-	}
-	
-	.input-wrapper {
-		margin-top: 10px;
-		&:not(.info){
-			float: left;
-		}
-		
-		&.flex{
-			display: flex;
-			flex-wrap: wrap;
+      .loadergif {
+        margin-top: 0px;
+      }
+    }
+  }
 
-			@media (max-width: $mobilewidth){
-				input[type="date"],
-				input[type="text"],
-				input[type="email"],
-				input[type="tel"],
-				input[type="month"],
-				input[type="password"],
-				input[type="number"]
-				{
-					width: 100%;
-					margin-bottom: 10px;
-				}
-			}
-		} 
+  .form-submit {
+    &:disabled {
+      background-color: grey;
 
-		
-		input:not([type='checkbox'], [type='radio']){
-			margin-right: 10px;
-		}
-	}
-	
-	.clone-div{
-		.nice-select{
-			display: inline-block;
-		}
-	}
-	
-	.nice-select.relation{
-		min-width: 150px;
-	}
+      .online {
+        display: none;
+      }
+    }
+  }
 
-	.form-label{
-		width: 100%;
-	}
+  .conditions-info {
+    margin-top: -20px;
+    margin-right: 30px;
+    float: right;
+    color: #bd2919;
+    font-size: xx-large;
+  }
 
-	.highlight{
-		background-color: #f3f37d;
-		background: #f3f37d;
-	}
+  .clone-div {
+    margin-top: 5px;
+
+    .button {
+      max-width: 50px;
+      max-height: 40px;
+      margin-top: auto;
+    }
+  }
+
+  .option-label {
+    margin-left: 5px;
+  }
+
+  .label-text {
+    margin-bottom: 5px;
+  }
+
+  .input-wrapper {
+    margin-top: 10px;
+    &:not(.info) {
+      float: left;
+    }
+
+    &.flex {
+      display: flex;
+      flex-wrap: wrap;
+
+      @media (max-width: $mobilewidth) {
+        input[type="date"],
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="month"],
+        input[type="password"],
+        input[type="number"] {
+          width: 100%;
+          margin-bottom: 10px;
+        }
+      }
+    }
+
+    input:not([type="checkbox"], [type="radio"]) {
+      margin-right: 10px;
+    }
+  }
+
+  .clone-div {
+    .nice-select {
+      display: inline-block;
+    }
+  }
+
+  .nice-select.relation {
+    min-width: 150px;
+  }
+
+  .form-label {
+    width: 100%;
+  }
+
+  .highlight {
+    background-color: #f3f37d;
+    background: #f3f37d;
+  }
 }
 
-.export-button-wrapper{
-	margin:50px 0px 20px 0px;
-	display: flex;
-	
-	form{
-		min-width: fit-content;
-	}
+.export-button-wrapper {
+  margin: 50px 0px 20px 0px;
+  display: flex;
+
+  form {
+    min-width: fit-content;
+  }
 }
 
 .tsjippy-form-wrapper input[type="text"],
@@ -206,18 +204,17 @@
 .tsjippy-form-wrapper input[type="password"],
 .tsjippy-form-wrapper input[type="search"],
 .tsjippy-form-wrapper input[type="number"],
-.tsjippy-form-wrapper input[type="url"]
-{
-	&:not(.column-settings, .element-condition){
-		width: 100%;
-	}
+.tsjippy-form-wrapper input[type="url"] {
+  &:not(.column-settings, .element-condition) {
+    width: 100%;
+  }
 }
 
-.edit.forms-table{
-	text-decoration: underline;
-	text-decoration-color: $primaryColor;
+.edit.forms-table {
+  text-decoration: underline;
+  text-decoration-color: $primaryColor;
 }
 
-.checkbox-label{
-	margin-right: 10px;
+.checkbox-label {
+  margin-right: 10px;
 }

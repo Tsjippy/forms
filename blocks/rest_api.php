@@ -1,56 +1,59 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
 add_action('rest_api_init', __NAMESPACE__ . '\restApiInit');
-function restApiInit() {
+function restApiInit()
+{
     // add element to form
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/form-selector',
         array(
             'methods'                 => 'GET',
             'callback'                 =>     __NAMESPACE__ . '\showFormSelector',
             'permission_callback'     => '__return_true',                            // Allow public access
-       )
-   );
+        )
+    );
 
     // form builder
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/form_builder',
         array(
             'methods'                 => 'POST,GET',
             'callback'                 =>     __NAMESPACE__ . '\showFormBuilder',
             'permission_callback'     => '__return_true',                        // Allow public access to be able access public available forms
-       )
-   );
+        )
+    );
 
     // Get all forms
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/get_forms',
         array(
             'methods'                 => 'POST,GET',
             'callback'                 =>     __NAMESPACE__ . '\getAllForms',
             'permission_callback'     => '__return_true',                // Allow public access to be able access public available forms
-       )
-   );
+        )
+    );
 
-     // Show form results
+    // Show form results
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/show_form_results',
         array(
             'methods'                 => 'POST,GET',
             'callback'                 =>     __NAMESPACE__ . '\showFormResults',
             'permission_callback'     => '__return_true',            // Allow public access to be able access public available forms results, the function itself will check if the form is public or not and if the user has access to the results or not
-       )
-   );
+        )
+    );
 
     // Add new form table
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/missing_form_fields',
         array(
             'methods'                 => 'POST,GET',
@@ -67,8 +70,8 @@ function restApiInit() {
             'permission_callback'     => function ($rest) {
                 return current_user_can('read');        // Allow access to logged in users, the function itself will check if the user has access to the form and the fields or not
             },
-       )
-   );
+        )
+    );
 }
 
 /**
@@ -76,17 +79,18 @@ function restApiInit() {
  *
  * @param \WP_REST_Request|array $attributes    The parameters for the block, either as an array or as a WP_REST_Request object
  */
-function showFormBuilder($attributes) {
+function showFormBuilder($attributes)
+{
     $isRest    = false;
     if ($attributes instanceof \WP_REST_Request) {
         $isRest    = true;
         if (!empty($_REQUEST['formname'])) {
             $attributes = ['formname' => $_REQUEST['formname']];
-        }elseif (!empty($_REQUEST['slug'])) {
+        } elseif (!empty($_REQUEST['slug'])) {
             $attributes = ['slug' => $_REQUEST['slug']];
-        }elseif (!empty($_REQUEST['form-id'])) {
+        } elseif (!empty($_REQUEST['form-id'])) {
             $attributes = ['form-id' => $_REQUEST['form-id']];
-        }else{
+        } else {
             return false;
         }
     }
@@ -136,9 +140,10 @@ function showFormBuilder($attributes) {
  * Show form results
  * @param \WP_REST_Request|array $attributes    The parameters for the block, either as an array or as a WP_REST_Request object
  */
-function showFormResults($attributes) {
+function showFormResults($attributes)
+{
 
-     if ($attributes instanceof \WP_REST_Request) {
+    if ($attributes instanceof \WP_REST_Request) {
         if (!empty($_REQUEST['form-id'])) {
             $attributes = [
                 'form-id'         => $_REQUEST['form-id'],
@@ -156,10 +161,10 @@ function showFormResults($attributes) {
             if (isset($_REQUEST['all'])) {
                 $attributes['all']    = $_REQUEST['all'];
             }
-        }else{
+        } else {
             return false;
         }
-    }elseif (!isset($attributes['form-id'])) {
+    } elseif (!isset($attributes['form-id'])) {
         return false;
     }
 
@@ -182,7 +187,8 @@ function showFormResults($attributes) {
     return $html;
 }
 
-function getAllForms() {
+function getAllForms()
+{
     $forms    = new Forms();
     $forms->getForms();
 

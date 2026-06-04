@@ -1,125 +1,126 @@
-@use '../../../plugins/tsjippy-shared-functionality/includes/css/scss/global' as *;
+@use "../../../plugins/tsjippy-shared-functionality/includes/css/scss/global"
+  as *;
 
-.limit-length{
-    //min-width: 300px;
-    white-space: pre-wrap;
-    //word-wrap: break-word;
-    max-width: 200px;
+.limit-length {
+  //min-width: 300px;
+  white-space: pre-wrap;
+  //word-wrap: break-word;
+  max-width: 200px;
 }
 
-.auto-archive-logic{
+.auto-archive-logic {
+  display: flex;
+  width: 100%;
+
+  .info-box {
+    min-width: fit-content;
+  }
+
+  & > div {
+    float: right;
+
+    img {
+      max-width: 30px;
+    }
+  }
+}
+
+.filter-options {
+  margin-bottom: 10px;
+
+  .filter-wrapper {
     display: flex;
-    width: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+  }
 
-    .info-box{
-        min-width: fit-content;
+  .filter-option {
+    display: contents;
+
+    label {
+      margin-right: 10px;
     }
 
-    &>div{
-        float:right;
-
-        img{
-            max-width: 30px;
-        }
+    input {
+      margin-right: 10px;
     }
+  }
 }
 
-.filter-options{
-    margin-bottom:10px;
+.form-result-navigation {
+  width: 100%;
+  margin: 10px;
+  text-align: center;
 
-    .filter-wrapper{
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
+  .prev {
+    float: left;
+  }
+
+  .page-number-wrapper {
+    line-height: 25px;
+
+    .page-number {
+      color: $primaryColor;
+      cursor: pointer;
     }
 
-    .filter-option{
-        display: contents;
-
-        label{
-            margin-right: 10px;
-        }
-
-        input{
-            margin-right:10px;
-        }
+    .current {
+      font-weight: bold;
+      cursor: unset;
+      color: black;
     }
+  }
+
+  .next {
+    float: right;
+  }
 }
 
-.form-result-navigation{
-    width:100%;
-    margin:10px;
-    text-align:center;
+.table-wrapper {
+  .form.table-head {
+    background-color: white;
 
-    .prev{
-        float:left;
+    @media (prefers-color-scheme: dark) {
+      background-color: black;
     }
+  }
 
-    .page-number-wrapper{
-        line-height:25px;
-
-        .page-number{
-            color: $primaryColor;
-            cursor: pointer;
-        }
-
-        .current{
-            font-weight: bold;
-            cursor: unset;
-            color: black;
-        }
-    }
-
-    .next{
-        float:right;
-    }
+  th {
+    position: sticky;
+    top: 60px;
+  }
 }
 
-.table-wrapper{
-    .form.table-head{
-        background-color: white;
-
-        @media (prefers-color-scheme: dark) {
-            background-color: black;
-        }
-    }
-
-    th{
-        position: sticky;
-        top: 60px;
-    }
+.edit.forms-table {
+  text-decoration: underline;
+  text-decoration-color: $primaryColor;
 }
 
-.edit.forms-table{
-    text-decoration: underline;
-    text-decoration-color: $primaryColor;
+.visibility-icon {
+  margin-right: 5px;
 }
 
-.visibility-icon{
-    margin-right: 5px;
+td button {
+  margin-bottom: 3px;
 }
 
-td button{
-    margin-bottom: 3px;
-}
+input[type="number"].column-settings {
+  width: 70px;
+  -moz-appearance: textfield;
 
-input[type=number].column-settings {
-    width: 70px;
-    -moz-appearance: textfield;
-
-    &::-webkit-outer-spin-button,
-    &::-webkit-inner-spin-button {
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-    }
+  }
 }
 
-.copy-wrapper{
-    position:relative;
+.copy-wrapper {
+  position: relative;
 
-    .copy{
-        position:absolute; 
-        right:0px;
-        top: 0px;
-    }
+  .copy {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+  }
 }

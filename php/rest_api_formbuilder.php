@@ -1,32 +1,37 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 use stdClass;
 use WP_Error;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
 // Allow rest api urls for non-logged in users
 add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__ . '\addRestUrls');
-function addRestUrls($urls) {
-    $urls[] = RESTAPIPREFIX. '/forms/save_form_input';
+function addRestUrls($urls)
+{
+    $urls[] = RESTAPIPREFIX . '/forms/save_form_input';
 
     return $urls;
 }
 
-function checkPermissions() {
+function checkPermissions()
+{
     $forms    = new Forms();
 
     return $forms->editRights;
 }
 
 add_action('rest_api_init', __NAMESPACE__ . '\restApiInitForms');
-function restApiInitForms() {
+function restApiInitForms()
+{
     // load form
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/load_form',
         array(
             'methods'                 => 'POST',
@@ -38,14 +43,14 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // load form results table
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/load_form_results',
         array(
             'methods'                 => 'POST',
@@ -57,14 +62,14 @@ function restApiInitForms() {
                     'validate_callback' => function ($id) {
                         return is_numeric($id);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // copy element to form
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/copy_form_element',
         array(
             'methods'                 => 'POST',
@@ -76,23 +81,23 @@ function restApiInitForms() {
                     'validate_callback' => function ($elementIndex) {
                         return is_numeric($elementIndex);
                     }
-               ),
+                ),
                 'form-id'        => array(
                     'required'    => true,
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
+                ),
                 'order'        => array(
                     'required'    => true
-               ),
-           )
-       )
-   );
+                ),
+            )
+        )
+    );
 
     // add element to form
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/add_form_element',
         array(
             'methods'                 => 'POST',
@@ -101,17 +106,17 @@ function restApiInitForms() {
             'args'                    => array(
                 'formfield'        => array(
                     'required'    => true
-               ),
+                ),
                 'element-id'        => array(
                     'required'    => true
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // delete element
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/remove_element',
         array(
             'methods'                 => 'POST',
@@ -123,20 +128,20 @@ function restApiInitForms() {
                     'validate_callback' => function ($elementIndex) {
                         return is_numeric($elementIndex);
                     }
-               ),
+                ),
                 'form-id'        => array(
                     'required'    => true,
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // request form element
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/request_form_element',
         array(
             'methods'                 => 'POST',
@@ -148,20 +153,20 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
+                ),
                 'element-id'        => array(
                     'required'    => true,
                     'validate_callback' => function ($elementId) {
                         return is_numeric($elementId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // reorder form elements
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/reorder-form-elements',
         array(
             'methods'                 => 'POST',
@@ -173,23 +178,23 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
+                ),
                 'el-id'        => array(
                     'required'    => true,
                     'validate_callback' => function ($elementId) {
                         return is_numeric($elementId);
                     }
-               ),
+                ),
                 'indexes'        => array(
                     'required'    => true
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // edit formfield width
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/edit_formfield_width',
         array(
             'methods'                 => 'POST',
@@ -201,26 +206,26 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
+                ),
                 'elementid'        => array(
                     'required'    => true,
                     'validate_callback' => function ($elementId) {
                         return is_numeric($elementId);
                     }
-               ),
+                ),
                 'new-width'        => array(
                     'required'    => true,
                     'validate_callback' => function ($width) {
                         return is_numeric($width);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // form conditions html
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/request_form_conditions_html',
         array(
             'methods'                 => 'POST',
@@ -232,20 +237,20 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
+                ),
                 'elementid'        => array(
                     'required'    => true,
                     'validate_callback' => function ($elementId) {
                         return is_numeric($elementId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // save_element-conditions
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/save_element-conditions',
         array(
             'methods'                 => 'POST',
@@ -257,20 +262,20 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
+                ),
                 'elementid'        => array(
                     'required'    => true,
                     'validate_callback' => function ($elementId) {
                         return is_numeric($elementId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // save_form_settings
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/save_form_settings',
         array(
             'methods'                 => 'POST',
@@ -282,14 +287,14 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // save_form_reminder
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/save_form_reminder',
         array(
             'methods'                 => 'POST',
@@ -301,14 +306,14 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // save_form_input
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/save_form_input',
         array(
             'methods'                 => 'POST',
@@ -323,14 +328,14 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               )
-           )
-       )
-   );
+                )
+            )
+        )
+    );
 
     // save_form_emails
     register_rest_route(
-        RESTAPIPREFIX. '/forms',
+        RESTAPIPREFIX . '/forms',
         '/save_form_emails',
         array(
             'methods'                 => 'POST',
@@ -342,22 +347,23 @@ function restApiInitForms() {
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-               ),
+                ),
                 'emails'        => array(
                     'required'    => true
-               ),
+                ),
 
-           )
-       )
-   );
+            )
+        )
+    );
 }
 
-function prepareProperties($prop) {
+function prepareProperties($prop)
+{
     if (is_array($prop)) {
         foreach ($prop as &$p) {
             prepareProperties($p);
         }
-    }else{
+    } else {
         $prop     = wp_kses_post(wp_kses_stripslashes($prop));
         $prop    = str_replace('\\\\', '\\', $prop);
         $prop    = str_replace("\\'", "'", $prop);
@@ -366,12 +372,14 @@ function prepareProperties($prop) {
     return $prop;
 }
 
-function copyFormElement() {
+function copyFormElement()
+{
     return addFormElement(true);
 }
 
 // DONE
-function addFormElement($copy=false) {
+function addFormElement($copy = false)
+{
     global $wpdb;
 
     $forms    = new SaveFormSettings();
@@ -390,7 +398,7 @@ function addFormElement($copy=false) {
     }
 
     // Get element from $_POST
-    else{
+    else {
         $element            = $_POST["formfield"];
         $element            = (object)$element;
 
@@ -408,7 +416,7 @@ function addFormElement($copy=false) {
 
             if (is_array($val)) {
                 $val    = serialize($val);
-            }else{
+            } else {
                 $val    = TSJIPPY\deslash($val);
             }
         }
@@ -432,14 +440,14 @@ function addFormElement($copy=false) {
         $element->slug            = $element->function_name;
 
         //only continue if the function exists
-        if ( ! function_exists($element->function_name)) {
+        if (! function_exists($element->function_name)) {
             return new WP_Error('forms', "A function with name $element->function_name does not exist!");
         }
     }
 
     if (in_array($element->type, ['label', 'button', 'formstep'])) {
         $element->name    = $element->text;
-    }elseif (empty($element->name)) {
+    } elseif (empty($element->name)) {
         return new \WP_Error('Error', "Please enter a name");
     }
 
@@ -451,8 +459,8 @@ function addFormElement($copy=false) {
         in_array($element->type, $forms->nonInputs)         &&     // this is a non-input
         $element->type != 'datalist'                        &&     // but not a datalist
         !str_contains($element->slug, $element->type)            // and the type is not yet added to the name
-   ) {
-        $element->slug    .= '_' .$element->type;
+    ) {
+        $element->slug    .= '_' . $element->type;
     }
 
     //Get an unique name if needed
@@ -474,11 +482,11 @@ function addFormElement($copy=false) {
         if (is_wp_error($result)) {
             return $result;
         }
-    }else{
+    } else {
         $message                                = "Succesfully added '{$element->slug}' to this form";
         if (!is_numeric($_POST['insert-after'])) {
-            $element->priority    = $wpdb->get_var("SELECT COUNT(`id`) FROM `{$forms->elTableName}` WHERE `form_id`={$element->form_id}") +1;
-        }else{
+            $element->priority    = $wpdb->get_var("SELECT COUNT(`id`) FROM `{$forms->elTableName}` WHERE `form_id`={$element->form_id}") + 1;
+        } else {
             $element->priority    = $_POST['insert-after'] + 1;
         }
 
@@ -508,7 +516,8 @@ function addFormElement($copy=false) {
 }
 
 // DONE
-function removeElement() {
+function removeElement()
+{
     global $wpdb;
 
     $formBuilder    = new SaveFormSettings();
@@ -518,14 +527,14 @@ function removeElement() {
     $wpdb->delete(
         $formBuilder->elTableName,
         ['id' => $elementId],
-   );
+    );
 
     // Fix priorities
     // Get all elements of this form
     $formBuilder->getAllFormElements('priority', $_POST['form-id']);
 
     //Loop over all elements and give them the new priority
-    foreach ($formBuilder->formElements as $key=>$el) {
+    foreach ($formBuilder->formElements as $key => $el) {
         if ($el->priority != $key + 1) {
             $el->priority = $key + 1;
             //Update the database
@@ -538,7 +547,8 @@ function removeElement() {
 }
 
 // DONE
-function requestFormElement() {
+function requestFormElement()
+{
     $formBuilderForm                = new FormBuilderForm();
 
     $formId                 = $_POST['form-id'];
@@ -557,7 +567,8 @@ function requestFormElement() {
 }
 
 // DONE
-function reorderFormElements() {
+function reorderFormElements()
+{
     $formBuilder            = new SaveFormSettings();
 
     $formBuilder->formId    = $_POST['form-id'];
@@ -572,14 +583,15 @@ function reorderFormElements() {
 }
 
 // DONE
-function editFormfieldWidth() {
+function editFormfieldWidth()
+{
     $formBuilder    = new SaveFormSettings();
 
     $elementId         = $_POST['elementid'];
     $element        = $formBuilder->getElementById($elementId);
 
     $newwidth         = $_POST['new-width'];
-    $element->width = min($newwidth,100);
+    $element->width = min($newwidth, 100);
 
     $formBuilder->updateFormElement($element);
 
@@ -587,7 +599,8 @@ function editFormfieldWidth() {
 }
 
 // DONE
-function requestFormConditionsHtml() {
+function requestFormConditionsHtml()
+{
     $formBuilder    = new FormBuilderForm();
 
     $elementID = $_POST['elementid'];
@@ -598,7 +611,8 @@ function requestFormConditionsHtml() {
 }
 
 // DONE
-function saveElementConditions() {
+function saveElementConditions()
+{
     $formBuilder        = new SaveFormSettings();
 
     $elementId            = $_POST['elementid'];
@@ -616,7 +630,7 @@ function saveElementConditions() {
         $element->conditions    = '';
 
         $message = "Succesfully removed all conditions for {$element->slug}";
-    }else{
+    } else {
         $element->conditions     = $elementConditions;
 
         $message                 = "Succesfully updated conditions for {$element->slug}";
@@ -629,7 +643,7 @@ function saveElementConditions() {
 
     if (is_wp_error($errors)) {
         return $errors;
-    }elseif (!empty($errors)) {
+    } elseif (!empty($errors)) {
         $message    .= "\n\nThere were some errors:\n";
         $message    .= implode("\n", $errors);
     }
@@ -638,7 +652,8 @@ function saveElementConditions() {
 }
 
 // DONE
-function saveFormSettings() {
+function saveFormSettings()
+{
     $formBuilder            = new SaveFormSettings();
 
     $formSettings             = $_POST;
@@ -665,7 +680,8 @@ function saveFormSettings() {
     return "Succesfully saved your form settings";
 }
 
-function saveFormReminder() {
+function saveFormReminder()
+{
     $formBuilder            = new SaveFormSettings();
 
     $formReminder             = $_POST;
@@ -680,7 +696,8 @@ function saveFormReminder() {
 }
 
 // DONE
-function saveFormEmails() {
+function saveFormEmails()
+{
     $formBuilder    = new SaveFormSettings();
     $formBuilder->getForm($_POST['form-id']);
 
@@ -695,14 +712,16 @@ function saveFormEmails() {
     return "Succesfully saved your form e-mail configuration";
 }
 
-function loadForm() {
+function loadForm()
+{
     $displayForm    = new DisplayForm(['form-id' => $_POST['form-id']]);
 
     return $displayForm->showForm();
 }
 
-function loadFormResults() {
-    $displayFormResults = new DisplayFormResults(['shortcode-id'=> $_POST['shortcode-id']]);
+function loadFormResults()
+{
+    $displayFormResults = new DisplayFormResults(['shortcode-id' => $_POST['shortcode-id']]);
 
     return $displayFormResults->showFormresultsTable();
 }

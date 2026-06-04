@@ -1,4 +1,5 @@
 <?php
+
 namespace TSJIPPY\FORMS;
 
 use DOMElement;
@@ -6,11 +7,12 @@ use stdClass;
 use TSJIPPY;
 use WP_Error;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-class ElementHtmlBuilder extends SubmitForm{
+class ElementHtmlBuilder extends SubmitForm
+{
     public array $attributes;
     public object $currentElement;
     public array $defaultArrayValues;
@@ -37,7 +39,8 @@ class ElementHtmlBuilder extends SubmitForm{
     private mixed $selectedValue;
     private string $tagType;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $this->currentElement            = new stdClass();
@@ -64,7 +67,8 @@ class ElementHtmlBuilder extends SubmitForm{
         $this->reset();
     }
 
-    public function reset() {
+    public function reset()
+    {
         $this->elementValues            = [];
         $this->tagType                    = '';
         $this->selectedValue            = '';
@@ -75,7 +79,8 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Checks if this is a clonable formstep, meaning a multi_start - multi-end group wrapped inside a formstep
      */
-    protected function isClonableFormStep() {
+    protected function isClonableFormStep()
+    {
         $this->clonableFormStep    = false;
 
         if (
@@ -83,15 +88,15 @@ class ElementHtmlBuilder extends SubmitForm{
                 !empty($this->nextElement) &&
                 $this->nextElement->type == 'multi-start' &&
                 $this->currentElement->type == 'formstep'
-           ) ||
+            ) ||
             (
                 $this->currentElement->type == 'multi-start' &&
                 $this->prevElement->type == 'formstep'
-           )
-       ) {
+            )
+        ) {
             // loop until we find the multi-end
             $x    = $this->currentElement->priority; // this is the index of the next element, which is the multi-start
-            while(true) {
+            while (true) {
                 $x++;
                 // This is the multi end
                 if ($this->formElements[$x]->type == 'multi-end') {
@@ -99,7 +104,7 @@ class ElementHtmlBuilder extends SubmitForm{
                     if (
                         empty($this->formElements[$x + 1]) ||                // this is the last element of the form
                         $this->formElements[$x + 1]->type == 'formstep'        // the next element is a formstep
-                   ) {
+                    ) {
                         $this->clonableFormStep    = true;
                     }
                     break;
@@ -113,7 +118,8 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Builds the array with default values for the current user
      */
-    function buildDefaultsArray() {
+    function buildDefaultsArray()
+    {
         //Only create one time, and only for logged in users
         if (!empty($this->defaultValues) || $this->user->ID === 0) {
             return;
@@ -226,7 +232,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @param    array    $elementNames    The names of the element, split in case of arrays
      */
-    function getMetaElementValue($elementNames) {
+    function getMetaElementValue($elementNames)
+    {
         if (empty($this->formData->save_in_meta)) {
             return '';
         }
@@ -249,7 +256,7 @@ class ElementHtmlBuilder extends SubmitForm{
             if (isset($this->usermeta[$elementName])) {
                 $metaValue    = (array)maybe_unserialize($this->usermeta[$elementName]);
             }
-        }elseif (!empty($this->usermeta[$elementNames[0]])) {
+        } elseif (!empty($this->usermeta[$elementNames[0]])) {
             //an array of values, we only want a specific one
             $metaValue    = (array)maybe_unserialize($this->usermeta[$elementNames[0]]);
 
@@ -280,7 +287,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @return    array                    The array of values
      */
-    function getElementValues($element) {
+    function getElementValues($element)
+    {
         // Do not return default values when requesting the html over rest api
         if (defined('REST_REQUEST')) {
             //return $values;
@@ -314,7 +322,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
                 if (count($exploded) > 1) {
                     $values['defaults'][$exploded[0]]                = $exploded[1];
-                }else{
+                } else {
                     $values['defaults'][strtolower($elementValue)]    = $elementValue;
                 }
             }
@@ -330,7 +338,7 @@ class ElementHtmlBuilder extends SubmitForm{
             if (!empty($key)) {
                 if (isset($this->defaultValues[$key])) {
                     $values['defaults']        = array_merge($values['defaults'], (array)$this->defaultValues[$key]);
-                }elseif (!in_array($key, $values['defaults'])) {
+                } elseif (!in_array($key, $values['defaults'])) {
                     $values['defaults'][]    = $key;
                 }
             }
@@ -354,7 +362,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @return    string|DOMElement        The info box html or the created DOMElement
      */
-    public function infoBoxHtml($text, $parent=null) {
+    public function infoBoxHtml($text, $parent = null)
+    {
         $returnHtml         = false;
         $dom            = '';
 
@@ -380,12 +389,12 @@ class ElementHtmlBuilder extends SubmitForm{
                 'role'        => "img",
                 'class'        => "emoji",
                 'alt'        => "ℹ",
-                'src'        => TSJIPPY\PICTURESURL. '/info.png',
+                'src'        => TSJIPPY\PICTURESURL . '/info.png',
                 'loading'    => "lazy"
             ],
             '',
             $dom
-       );
+        );
 
         $this->addElement('span', $node, ['class' => "info-text"], $content, $dom);
 
@@ -405,7 +414,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @return    string                    The transformed string
      */
-    public function transformInputData($string, $elementSlug, $submission) {
+    public function transformInputData($string, $elementSlug, $submission)
+    {
         if (empty($string)) {
             return $string;
         }
@@ -429,27 +439,27 @@ class ElementHtmlBuilder extends SubmitForm{
             $name        = '';
             if (isset($submission->slug)) {
                 $name    = "Hi $submission->name,";
-            }elseif (isset($submission->your_name)) {
+            } elseif (isset($submission->your_name)) {
                 $name    = "Hi $submission->your_name,";
-            }elseif (isset($submission->first_name)) {
+            } elseif (isset($submission->first_name)) {
                 $name    = "Hi $submission->first_name,";
             }
             $output     = "<a href='mailto:$string?subject=Regarding your {$this->formData->slug} with id $submission->id&body={$name}'>$string</a>";
-        //Convert link to clickable link if not already
-        }elseif (
+            //Convert link to clickable link if not already
+        } elseif (
             (
                 str_contains($string, 'https://')    ||
                 str_contains($string, 'http://')    ||
                 str_contains($string, '/form_uploads/')
-           ) &&
+            ) &&
             !str_contains($string, 'href') &&
             !str_contains($string, '<img')
-       ) {
+        ) {
             $url    = str_replace(['https://', 'http://'], '', SITEURL);
             $string    = str_replace(str_replace('\\', '/', ABSPATH), '', $string);
 
             if (!str_contains($string, $url)) {
-                $string        = SITEURL. "/$string";
+                $string        = SITEURL . "/$string";
             }
 
             $text    = "Link";
@@ -458,8 +468,8 @@ class ElementHtmlBuilder extends SubmitForm{
                 $text    = "<img src='$string' alt='form_upload' style='width:150px;' loading='lazy'>";
             }
             $output        = "<a href='$string'>$text</a>";
-        // Convert phonenumber to signal link
-        }elseif (gettype($string) == 'string' && $string[0] == '+') {
+            // Convert phonenumber to signal link
+        } elseif (gettype($string) == 'string' && $string[0] == '+') {
             $numbers        = explode(" ", $string);
             $output            = '';
             $signalNumber    = '';
@@ -467,7 +477,7 @@ class ElementHtmlBuilder extends SubmitForm{
             $userIdKey    = false;
             if (isset($submission->user_id)) {
                 $userIdKey    = 'user_id';
-            }elseif (isset($submission->user_id)) {
+            } elseif (isset($submission->user_id)) {
                 $userIdKey    = 'user_id';
             }
 
@@ -478,12 +488,12 @@ class ElementHtmlBuilder extends SubmitForm{
             foreach ($numbers as $number) {
                 if ($userIdKey && $number == $signalNumber) {
                     $output    .= "<a href='https://signal.me/#p/$number'>$number</a><br>";
-                }else{
+                } else {
                     $output    .= "<a href='https://api.whatsapp.com/send?phone=$number&text=Regarding%20your%20submission%20of%20{$this->formData->name}%20with%20id%20$submission->id'>$number</a><br>";
                 }
             }
-        //display dates in a nice way
-        }elseif (strtotime($string) && gmdate('Y', strtotime($string)) < 2200 && gmdate('Y', strtotime($string)) > 1900) {
+            //display dates in a nice way
+        } elseif (strtotime($string) && gmdate('Y', strtotime($string)) < 2200 && gmdate('Y', strtotime($string)) > 1900) {
             $date        = date_parse($string);
 
             //Only transform if everything is there
@@ -492,7 +502,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
                 //include time if needed
                 if ($date['hour'] && $date['minute']) {
-                    $format    .= ' ' .get_option('time_format');
+                    $format    .= ' ' . get_option('time_format');
                 }
 
                 $output        = gmdate($format, strtotime($string));
@@ -514,7 +524,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @return    object                    The created node
      */
-    public function addElement($type, $parent, $attributes=[], $textContent='', $dom='') {
+    public function addElement($type, $parent, $attributes = [], $textContent = '', $dom = '')
+    {
         if (empty($parent)) {
             return;
         }
@@ -550,7 +561,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 continue;
             }
 
-            try{
+            try {
                 $node->setAttribute($attribute, $value);
             } catch (\DOMException $e) {
                 // Catch the specific DOMException
@@ -561,7 +572,7 @@ class ElementHtmlBuilder extends SubmitForm{
             }
         }
 
-        try{
+        try {
             $parent->appendChild($node);
         } catch (\DOMException $e) {
             // Catch the specific DOMException
@@ -582,7 +593,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @return    object                The created node
      */
-    public function addRawHtml($html, $parent) {
+    public function addRawHtml($html, $parent)
+    {
         if (empty($html)) {
             return false;
         }
@@ -611,12 +623,13 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Gets the elment attributes
      */
-    protected function getAttributes() {
+    protected function getAttributes()
+    {
         /*
             BUTTON TYPE
         */
         if ($this->element->type == 'button') {
-            $this->attributes["type"]    ='button';
+            $this->attributes["type"]    = 'button';
         }
 
         if (empty($this->element->options)) {
@@ -647,7 +660,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
             if ($optionType == 'class') {
                 $this->attributes['class']    .= $optionValue;
-            }else{
+            } else {
                 //remove any leading "
                 $optionValue    = trim($optionValue, '\'"');
 
@@ -656,7 +669,7 @@ class ElementHtmlBuilder extends SubmitForm{
                     $this->element->type == 'date' &&
                     in_array($optionType, ['min', 'max', 'value']) &&
                     strtotime($optionValue)
-               ) {
+                ) {
                     $optionValue    = gmdate('Y-m-d', strtotime($optionValue));
                 }
 
@@ -671,7 +684,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @param    DOMElement    $parent    The parent node to add the buttons to
      */
-    protected function renderButtons($parent) {
+    protected function renderButtons($parent)
+    {
         ob_start();
 
         $addText    = '+';
@@ -691,7 +705,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 'class'    => 'button-wrapper',
                 'style'    => 'margin: auto; display:flex;'
             ]
-       );
+        );
 
         $this->addElement(
             'button',
@@ -702,7 +716,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 'style'    => 'flex: 1;max-width: max-content;'
             ],
             $addText
-       );
+        );
 
         $this->addElement(
             'button',
@@ -713,7 +727,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 'style'    => 'flex: 1;max-width: max-content;'
             ],
             $removeText
-       );
+        );
 
         return $wrapper;
     }
@@ -725,11 +739,12 @@ class ElementHtmlBuilder extends SubmitForm{
      * @param    string|array    $value            The value to add
      * @param    object            $node            The node to edit
      */
-    function changeNodeAttributes($index, $value, $node) {
+    function changeNodeAttributes($index, $value, $node)
+    {
         // the node is already an input
         if (in_array($node->tagName, ['input', 'textarea', 'select'])) {
             $nodes    = [$node];
-        }else{
+        } else {
             $nodes    = $node->getElementsByTagName('*');
         }
 
@@ -753,14 +768,14 @@ class ElementHtmlBuilder extends SubmitForm{
             }
 
             // Add the index to the name
-            $curNode->setAttribute('name', $name.$indexString);
+            $curNode->setAttribute('name', $name . $indexString);
 
             /**
              * Change the id
              */
             if (!empty($curNode->attributes['id']->value)) {
                 // Add the index to the id
-                $curNode->setAttribute('id', $name. "[$index]");
+                $curNode->setAttribute('id', $name . "[$index]");
             }
 
             /**
@@ -772,9 +787,9 @@ class ElementHtmlBuilder extends SubmitForm{
                 foreach ($options as $option) {
                     if ($option->attributes['value'] == $value) {
                         $option->setAttribute('selected', 'selected');
-                    }else
+                    } else
                         $option->removeAttribute('selected');
-                    }
+                }
             }
 
             /**
@@ -786,9 +801,9 @@ class ElementHtmlBuilder extends SubmitForm{
                 foreach ($nodes as $nd) {
                     if ($nd->attributes['value'] == $value) {
                         $nd->setAttribute('checked', 'checked');
-                    }else
+                    } else
                         $nd->removeAttribute('checked');
-                    }
+                }
             }
 
             /**
@@ -796,10 +811,9 @@ class ElementHtmlBuilder extends SubmitForm{
              */
             elseif ($this->element->type == 'textarea') {
                 $curNode->nodeValue = $value;
-            }
-            elseif (is_array($value)) {
+            } elseif (is_array($value)) {
                 $curNode->setAttribute('value', $value[$index]);
-            }elseif (!empty($value)) {
+            } elseif (!empty($value)) {
                 $curNode->setAttribute('value', $value);
             }
 
@@ -807,7 +821,7 @@ class ElementHtmlBuilder extends SubmitForm{
             if (
                 $this->element->type == 'label' &&
                 $this->multiWrapElementCount < $this->minElForTabs
-           ) {
+            ) {
                 $nr                     = $index + 1;
                 $curNode->nodeValue    .= " $nr";
             }
@@ -817,7 +831,8 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Get the previous values of a element
      */
-    function getPrevValues($returnArray=false) {
+    function getPrevValues($returnArray = false)
+    {
         if (empty($this->submissions)) {
             return;
         }
@@ -857,13 +872,13 @@ class ElementHtmlBuilder extends SubmitForm{
                     foreach ($this->submissions as $submission) {
                         $prevValues[]    = $submission->{$index};
                     }
-                }else{
+                } else {
                     $prevValues    = $this->submissions[0]->{$index};
                 }
             }
 
             // return the sub value
-            else{
+            else {
                 if ($i == 1 && is_numeric($_POST['subid'])) {
                     $index    = $_POST['subid'];
                 }
@@ -892,7 +907,8 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Gets the html for a file or image element
      */
-    protected function uploaderHtml() {
+    protected function uploaderHtml()
+    {
         $name        = $this->element->slug;
 
         $options    = $this->attributes;
@@ -908,8 +924,8 @@ class ElementHtmlBuilder extends SubmitForm{
         if (!empty($this->element->folder_name)) {
             if (str_contains($this->element->folder_name, "private/")) {
                 $targetDir    = $this->element->folder_name;
-            }else{
-                $targetDir    = "private/" .$this->element->folder_name;
+            } else {
+                $targetDir    = "private/" . $this->element->folder_name;
             }
         }
 
@@ -920,14 +936,14 @@ class ElementHtmlBuilder extends SubmitForm{
 
         // Default setting
         if (empty($targetDir)) {
-            $targetDir = 'form_uploads/' .$this->formData->slug;
+            $targetDir = 'form_uploads/' . $this->formData->slug;
         }
 
         if (empty($this->formData->save_in_meta)) {
             $library    = false;
             $metakey    = '';
             $userId        = '';
-        }else{
+        } else {
             $library    = $this->element->library;
             $metakey    = $name;
             $userId        = $this->userId;
@@ -941,12 +957,13 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Determines the tag type of an element
      */
-    protected function getTagType() {
+    protected function getTagType()
+    {
         if (in_array($this->element->type, ['formstep', 'info', 'div-start'])) {
             $this->tagType        = "div";
-        }elseif (in_array($this->element->type, array_merge($this->nonInputs, ['select', 'textarea']))) {
+        } elseif (in_array($this->element->type, array_merge($this->nonInputs, ['select', 'textarea']))) {
             $this->tagType        = $this->element->type;
-        }else{
+        } else {
             $this->attributes['type'] = $this->element->type;
 
             $this->tagType        = "input";
@@ -956,11 +973,12 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Determines the element name
      */
-    protected function getNameAttribute() {
+    protected function getNameAttribute()
+    {
         $this->element->slug    = trim($this->element->slug, " \n\r\t\v\0_");
 
         // [] not yet added to name
-        if (in_array($this->element->type, ['radio','checkbox']) && !str_contains($this->element->slug, '[]')) {
+        if (in_array($this->element->type, ['radio', 'checkbox']) && !str_contains($this->element->slug, '[]')) {
             $this->element->slug .= '[]';
         }
 
@@ -970,7 +988,8 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Get element Id
      */
-    protected function getElementId() {
+    protected function getElementId()
+    {
         //datalist needs an id to work as well as mandatory elements for use in anchor links
         if ($this->element->type == 'datalist' || $this->element->mandatory || $this->element->recommended) {
             $this->attributes["id"] = $this->element->slug;
@@ -984,10 +1003,11 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Gets the class string for an element
      */
-    protected function getClasses() {
+    protected function getClasses()
+    {
         $this->attributes['class']    .= "formfield";
 
-        switch($this->element->type) {
+        switch ($this->element->type) {
             case 'label':
                 $this->attributes['class']    .= " form-label";
                 break;
@@ -1005,7 +1025,8 @@ class ElementHtmlBuilder extends SubmitForm{
     /**
      * Gets the element value
      */
-    protected function getValue() {
+    protected function getValue()
+    {
         if (in_array($this->element->type, $this->nonInputs) || $this->requestedValue === false) {
             return '';
         }
@@ -1021,8 +1042,8 @@ class ElementHtmlBuilder extends SubmitForm{
             !empty($this->element->multiple) ||
             (
                 empty($this->elementValues) && empty($this->requestedValue)
-           )
-       ) {
+            )
+        ) {
             return;
         }
 
@@ -1035,16 +1056,16 @@ class ElementHtmlBuilder extends SubmitForm{
                 (
                     empty($this->formData->save_in_meta) ||     // we are not saving to the user meta table
                     empty($this->elementValues['metavalue'])    // or the metavalue is empty
-               )
-           ) {
+                )
+            ) {
                 $this->selectedValue        = $this->elementValues['defaults'];
-            }elseif (!empty($this->elementValues['metavalue'])) {
+            } elseif (!empty($this->elementValues['metavalue'])) {
                 $elIndex    = 0;
                 if (str_contains($this->element->slug, '[]')) {
                     // Check if there are multiple elements with the same name
                     $elements    = $this->getElementBySlug($this->element->slug, '', false);
 
-                    foreach ($elements as $elIndex=>$el) {
+                    foreach ($elements as $elIndex => $el) {
                         if ($el->id == $this->element->id) {
                             break;
                         }
@@ -1058,7 +1079,7 @@ class ElementHtmlBuilder extends SubmitForm{
         if (
             !empty($this->selectedValue) &&
             !in_array($this->element->type, ['radio', 'checkbox'])
-       ) {
+        ) {
             if (is_array($this->selectedValue)) {
                 $this->selectedValue    = array_values($this->selectedValue)[0];
             }
@@ -1086,8 +1107,9 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @param    DOMElement    $node    The node to add the content to
      */
-    protected function getTagContent($node) {
-        switch($this->element->type) {
+    protected function getTagContent($node)
+    {
+        switch ($this->element->type) {
             case 'textarea':
                 $value    = $this->requestedValue;
                 if (empty($value)) {
@@ -1127,7 +1149,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @param    DOMElement    $parent    The parent node to add the content to
      */
-    protected function getMultiTextInputHtml($parent) {
+    protected function getMultiTextInputHtml($parent)
+    {
         if (empty($this->requestedValue) && !empty($this->defaultArrayValues[$this->element->default_value])) {
             $this->requestedValue    = $this->defaultArrayValues[$this->element->default_value];
 
@@ -1154,7 +1177,7 @@ class ElementHtmlBuilder extends SubmitForm{
             foreach ($this->requestedValue as $v) {
                 if (method_exists($this, 'transformInputData') && !empty($this->submissions)) {
                     $transValue        = $this->transformInputData($v, $this->element->slug, $this->submissions[0]);
-                }else{
+                } else {
                     $transValue        = $v;
                 }
 
@@ -1167,7 +1190,7 @@ class ElementHtmlBuilder extends SubmitForm{
                         'type'    => 'button',
                         'class'    => 'small remove-list-selection'
                     ]
-               );
+                );
 
                 $this->addElement('span', $button, ['class' => 'remove-list-selection'], '×');
 
@@ -1180,7 +1203,7 @@ class ElementHtmlBuilder extends SubmitForm{
                         'name'    => $elName,
                         'value'    => $v
                     ]
-               );
+                );
 
                 $this->addElement('span', $listItem, ['class' => 'selected-name'], $transValue);
             }
@@ -1195,7 +1218,7 @@ class ElementHtmlBuilder extends SubmitForm{
             [
                 'class' => 'multi-text-input-wrapper'
             ]
-       );
+        );
 
         $attributes                = $this->attributes;
         $attributes['type']        = 'text';
@@ -1214,12 +1237,13 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @param    DOMElement    $node    The node to add the multiple elements to
      */
-    protected function getMultiElementHtml($node) {
+    protected function getMultiElementHtml($node)
+    {
         if (
             empty($this->element->multiple) ||
             in_array($this->element->type, ['file', 'image', 'text']) ||
             get_class($this) === "TSJIPPY\FORMS\FormBuilderForm"
-       ) {
+        ) {
             return false;
         }
 
@@ -1235,9 +1259,9 @@ class ElementHtmlBuilder extends SubmitForm{
         if (
             empty($this->formData->save_in_meta) &&
             !empty($this->elementValues['defaults'])
-       ) {
+        ) {
             $values        = array_values($this->elementValues['defaults']);
-        }elseif (!empty($this->elementValues['metavalue'])) {
+        } elseif (!empty($this->elementValues['metavalue'])) {
             $values        = array_values($this->elementValues['metavalue']);
         }
 
@@ -1249,7 +1273,7 @@ class ElementHtmlBuilder extends SubmitForm{
             !empty($this->prevElement)    &&
             !empty($this->prevElement->wrap) &&
             $this->prevElement != $this->element
-       ) {
+        ) {
             // we should clone the wrapping node
             $node         = $node->parentNode;
 
@@ -1257,7 +1281,7 @@ class ElementHtmlBuilder extends SubmitForm{
             $parent        = $node->parentNode;
         }
 
-          $multiWrapper     = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
+        $multiWrapper     = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
 
         //create as many inputs as the maximum value found
         for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
@@ -1278,7 +1302,7 @@ class ElementHtmlBuilder extends SubmitForm{
             // Clone the original input but not for index 0, then we use the original
             if ($index === 0) {
                 $copy     = $node;
-            }else{
+            } else {
                 $copy    = $node->cloneNode(true);
             }
 
@@ -1296,7 +1320,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @param    DOMElement    $node    The node to add the options to
      */
-    public function addSelectOptions($node) {
+    public function addSelectOptions($node)
+    {
         // Empty option on the top
         $this->addElement("option", $node, ['value' => ''], '---');
 
@@ -1310,7 +1335,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 foreach ($this->requestedValue as $v) {
                     $selValues[] = strtolower($v);
                 }
-            }else{
+            } else {
                 $selValues[] = strtolower($this->requestedValue);
             }
         }
@@ -1324,8 +1349,8 @@ class ElementHtmlBuilder extends SubmitForm{
                 in_array(strtolower($option), $selValues) ||
                 in_array(strtolower($key), $selValues) ||
                 in_array($this->element->default_value, [$key, $option])
-           ) {
-                $attributes['selected'] ="selected";
+            ) {
+                $attributes['selected'] = "selected";
             }
             $this->addElement("option", $node, $attributes, $option);
         }
@@ -1336,11 +1361,12 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @param    DOMElement    $node    The node to add the options to
      */
-    public function addDatalistOptions($node) {
+    public function addDatalistOptions($node)
+    {
         foreach ($this->elementValues['defaults'] as $key => $option) {
             if (is_array($option)) {
                 $value    = $option['value'];
-            }else{
+            } else {
                 $value    = $option;
             }
 
@@ -1357,7 +1383,7 @@ class ElementHtmlBuilder extends SubmitForm{
                     'value'         => $value
                 ],
                 $elContent
-           );
+            );
         }
     }
 
@@ -1367,7 +1393,8 @@ class ElementHtmlBuilder extends SubmitForm{
      * @param    DOMElement    $parent    The node to add the checkboxes or radios to
      *
      */
-    public function addCheckboxes($parent) {
+    public function addCheckboxes($parent)
+    {
         /**
          * Get all the checked options and make them lowercase
          */
@@ -1386,11 +1413,11 @@ class ElementHtmlBuilder extends SubmitForm{
                             foreach ($v as $v2) {
                                 $selected[] = strtolower($v2);
                             }
-                        }else{
+                        } else {
                             $selected[] = strtolower($v);
                         }
                     }
-                }else{
+                } else {
                     $selected[] = strtolower($val);
                 }
             }
@@ -1405,15 +1432,15 @@ class ElementHtmlBuilder extends SubmitForm{
                                 foreach ($av as $aav) {
                                     $selected[] = strtolower($aav);
                                 }
-                            }else{
+                            } else {
                                 $selected[] = strtolower($av);
                             }
                         }
-                    }else{
+                    } else {
                         $selected[] = strtolower($v);
                     }
                 }
-            }else{
+            } else {
                 $selected[] = strtolower($this->requestedValue);
             }
         }
@@ -1451,7 +1478,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 in_array(strtolower($option), $selected) ||
                 in_array(strtolower($key), $selected) ||
                 in_array($this->element->default_value, [$key, $option])
-           ) {
+            ) {
                 $attributes['checked']    = 'checked';
             }
 
@@ -1470,7 +1497,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 "input",
                 $label,
                 $attributes
-           );
+            );
 
             // Text for the checkbox or radio
             $this->addElement(
@@ -1478,7 +1505,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 $label,
                 ['class' => 'optionlabel'],
                 $option
-           );
+            );
 
             // one of the options is longer than 8 or the total is more than 30, add each checkbox on a seperate line
             if ($maxLength > 8 || $totalLength > 30) {
@@ -1495,7 +1522,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      *     @param    DOMElement    $parent    The parent node to add the clone wrappers to
      */
-    public function multiwrapStart($parent) {
+    public function multiwrapStart($parent)
+    {
         /**
          * find the max number of values
          */
@@ -1504,7 +1532,7 @@ class ElementHtmlBuilder extends SubmitForm{
         $this->multiWrapElementCount    = 0;
 
         // Loop till we reach a multi-end element or the end of the form and count the values of each input
-        while(!empty($this->formElements[$i]) && $this->formElements[$i]->type != 'multi-end') {
+        while (!empty($this->formElements[$i]) && $this->formElements[$i]->type != 'multi-end') {
             $i++;
 
             $type    = $this->formElements[$i]->type;
@@ -1520,7 +1548,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
             if (empty($values) || !is_array(array_values($values)[0])) {
                 $valueCount    = 0;
-            }else{
+            } else {
                 $valueCount    = count(array_values($values)[0]);
 
                 // Do not count the value_list values
@@ -1561,7 +1589,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 $attributes['class']    .= ' formstep step-hidden';
             }
 
-             /**
+            /**
              * Instead of showing the whole in a single view,
              * we show each group of inputs in a seperate tab
              * if the number of inputs in each group is bigger than
@@ -1587,7 +1615,7 @@ class ElementHtmlBuilder extends SubmitForm{
                         'style'         => 'margin-right:4px;'
                     ],
                     "{$this->element->name} $index"
-               );
+                );
 
                 // Extra class for each clone-div
                 $attributes['class']    .= ' tabcontent';
@@ -1599,7 +1627,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 'div',
                 $multiWrapper,
                 $attributes
-           );
+            );
 
             if (empty($this->multiwrapperFirstClone)) {
                 $this->multiwrapperFirstClone    = $cloneDiv;
@@ -1621,7 +1649,8 @@ class ElementHtmlBuilder extends SubmitForm{
      *
      * @return    object|string|WP_Error            A DomDocumentNode or the raw html
      */
-    public function getElementHtml($element, $parent='', $requestedValue ='') {
+    public function getElementHtml($element, $parent = '', $requestedValue = '')
+    {
         $this->reset();
 
         $this->element                = $element;
@@ -1634,7 +1663,7 @@ class ElementHtmlBuilder extends SubmitForm{
 
             $parent     = $this->dom;
 
-               $returnHtml = true;
+            $returnHtml = true;
         }
 
         /**
@@ -1661,12 +1690,12 @@ class ElementHtmlBuilder extends SubmitForm{
 
         $this->getValue();
 
-        switch($this->element->type) {
+        switch ($this->element->type) {
             case 'p':
                 $content     = wp_kses_post($this->element->text);
                 $content    = TSJIPPY\deslash($content);
 
-                $node        = $this->addElement('div', $parent, ['name'=>$this->element->slug]);
+                $node        = $this->addElement('div', $parent, ['name' => $this->element->slug]);
 
                 $this->addRawHtml($content, $node);
                 break;
@@ -1677,13 +1706,13 @@ class ElementHtmlBuilder extends SubmitForm{
                 //only continue if the function exists
                 if (function_exists($functionName)) {
                     $node        = $this->addRawHtml($functionName($this->userId), $parent);
-                }else{
+                } else {
                     $node        = $this->addElement('text', $parent, [], "php function '$functionName' not found");
                 }
 
                 break;
             case 'div-start':
-                $attributes    = ['name'=> $this->element->slug];
+                $attributes    = ['name' => $this->element->slug];
                 if ($this->element->hidden) {
                     $attributes["class"] = 'hidden';
                 }
@@ -1720,7 +1749,7 @@ class ElementHtmlBuilder extends SubmitForm{
             default:
                 if ($this->element->type == 'text' && $this->element->multiple) {
                     $node    = $this->getMultiTextInputHtml($parent);
-                }else{
+                } else {
 
                     $this->getTagType();
 
@@ -1742,7 +1771,7 @@ class ElementHtmlBuilder extends SubmitForm{
             get_class($this) != "TSJIPPY\FORMS\FormBuilderForm" &&         // Do not clone on formbuilder pages
             $element->type != 'multi-start' &&                        // skip this one
             !$element->wrap                                            // only clone when the wrapping is finished
-       ) {
+        ) {
             $cloneDivs    = $this->multiwrapperFirstClone->parentNode->childNodes;
 
             // loop over all clone-divs
@@ -1773,7 +1802,7 @@ class ElementHtmlBuilder extends SubmitForm{
                 if (str_contains($cloneDiv->attributes['class']->value, 'clone-div')) {
                     // Check which node to clone should be a direct child of the clone-div
                     $base    = $node;
-                    while(!str_contains($base->parentNode->attributes['class']->value, 'clone-div')) {
+                    while (!str_contains($base->parentNode->attributes['class']->value, 'clone-div')) {
                         $base    = $base->parentNode;
                     }
                     // Clone the just created node

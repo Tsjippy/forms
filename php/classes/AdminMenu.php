@@ -1,16 +1,19 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 use TSJIPPY\ADMIN;
 
 use function TSJIPPY\addElement;
 use function TSJIPPY\addRawHtml;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-class AdminMenu extends ADMIN\SubAdminMenu{
+class AdminMenu extends ADMIN\SubAdminMenu
+{
 
     /**
      * AdminMenu constructor.
@@ -18,19 +21,23 @@ class AdminMenu extends ADMIN\SubAdminMenu{
      * @param array $settings The settings for the plugin
      * @param string $name The name of the plugin
      */
-    public function __construct($settings, $name) {
+    public function __construct($settings, $name)
+    {
         parent::__construct($settings, $name);
     }
 
-    public function settings($parent) {
+    public function settings($parent)
+    {
         return false;
     }
 
-    public function emails($parent) {
+    public function emails($parent)
+    {
         return false;
     }
 
-    public function data($parent='') {
+    public function data($parent = '')
+    {
         $forms    = new SaveFormSettings();
         $forms->getForms();
 
@@ -54,7 +61,7 @@ class AdminMenu extends ADMIN\SubAdminMenu{
             $formUrl    = $form->url;
             if (empty($formUrl)) {
                 $formUrl    .= "Not set";
-            }else{
+            } else {
                 $formUrl    .= "<a href='$formUrl' target='_blank'>Link</a>";
             }
 
@@ -70,15 +77,15 @@ class AdminMenu extends ADMIN\SubAdminMenu{
 
             $formEl   = addElement('form', $td, ['method' => 'post', 'style' => 'display: inline-block;']);
             addElement('button', $formEl, ['class' => 'small', 'name' => 'delete', 'value' => $form->id], 'Delete');
-
         }
 
         return true;
     }
 
-    public function functions($parent) {
+    public function functions($parent)
+    {
         ob_start();
-        ?>
+?>
         <h4>Form import</h4>
         <p>
             It is possible to import forms exported from this plugin previously.<br>
@@ -93,14 +100,15 @@ class AdminMenu extends ADMIN\SubAdminMenu{
             <button type='submit' name='import-form'>Import the form</button>
         </form>
 
-        <?php
+<?php
 
         addRawHtml(ob_get_clean(), $parent);
 
         return true;
     }
 
-    public function postActions() {
+    public function postActions()
+    {
         if (isset($_POST['import-form'])) {
             $formBuilder    = new FormExport();
             return $formBuilder->importForm($_FILES['formfile']['tmp_name']);
@@ -128,8 +136,8 @@ class AdminMenu extends ADMIN\SubAdminMenu{
                 $wpdb->prepare(
                     "SELECT * FROM %i WHERE `version` = 1 and `button_text` IS NULL",
                     "{$wpdb->prefix}tsjippy_forms"
-               )
-           );
+                )
+            );
 
             foreach ($emptyForms as $form) {
                 $forms->deleteForm($form->id);
@@ -146,8 +154,9 @@ class AdminMenu extends ADMIN\SubAdminMenu{
     /**
      * Schedules the tasks for this plugin
      *
-    */
-    public function postSettingsSave() {
+     */
+    public function postSettingsSave()
+    {
         TSJIPPY\scheduleTask('anniversary_check_action', 'daily');
         TSJIPPY\scheduleTask('remove_old_schedules_action', 'daily');
         TSJIPPY\scheduleTask('add_repeated_events_action', 'yearly');

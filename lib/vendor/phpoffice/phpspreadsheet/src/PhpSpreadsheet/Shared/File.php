@@ -130,12 +130,7 @@ class File
 
     public static function temporaryFilename(): string
     {
-        $filename = tempnam(self::sysGetTempDir(), 'phpspreadsheet');
-        if ($filename === false) {
-            throw new Exception('Could not create temporary file');
-        }
-
-        return $filename;
+        return tempnam(self::sysGetTempDir(), 'phpspreadsheet') ?: throw new Exception('Could not create temporary file');
     }
 
     /**
@@ -144,7 +139,7 @@ class File
      * return false for is_file.
      * A whitelist of protocols may be added if needed in future.
      */
-    public static function prohibitwrappers(string $filename): void
+    public static function prohibitWrappers(string $filename): void
     {
         $scheme = parse_url($filename, PHP_URL_SCHEME);
         // strlen check > 1 to avoid issues with Windows absolute paths (e.g. C:\...), Windows quirks :)
@@ -161,13 +156,9 @@ class File
      */
     public static function assertFile(string $filename, string $zipMember = ''): void
     {
-        self::prohibitwrappers($filename);
-        if (!is_file($filename)) {
-            throw new ReaderException('File "' . $filename . '" does not exist.');
-        }
-
-        if (!is_readable($filename)) {
-            throw new ReaderException('Could not open "' . $filename . '" for reading.');
+        self::prohibitWrappers($filename);
+        if (!is_file($filename) || !is_readable($filename)) {
+            throw new ReaderException('File "' . $filename . '" does not exist or is not readable.');
         }
 
         if ($zipMember !== '') {
@@ -188,11 +179,8 @@ class File
      */
     public static function testFileNoThrow(string $filename, ?string $zipMember = null): bool
     {
-        self::prohibitwrappers($filename);
-        if (!is_file($filename)) {
-            return false;
-        }
-        if (!is_readable($filename)) {
+        self::prohibitWrappers($filename);
+        if (!is_file($filename) || !is_readable($filename)) {
             return false;
         }
         if ($zipMember === null) {

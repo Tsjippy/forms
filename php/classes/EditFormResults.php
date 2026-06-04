@@ -1,15 +1,19 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-class EditFormResults extends DisplayFormResults{
+class EditFormResults extends DisplayFormResults
+{
     public int|false $submissionId;
 
-    public function __construct($atts=[]) {
+    public function __construct($atts = [])
+    {
         parent::__construct($atts);
 
         $this->submissionId    = false;
@@ -24,18 +28,19 @@ class EditFormResults extends DisplayFormResults{
      *
      * @return    true|\WP_Error        The result or error on failure
      */
-    public function updateSubmission($elementId, $value, $subId = null) {
+    public function updateSubmission($elementId, $value, $subId = null)
+    {
         global $wpdb;
 
         $value    = TSJIPPY\cleanUpNestedArray($value);
 
         if (is_numeric($this->submissionId)) {
             $submissionId    = $this->submissionId;
-        }elseif (!empty($this->submission->id) && is_numeric($this->submission->id)) {
+        } elseif (!empty($this->submission->id) && is_numeric($this->submission->id)) {
             $submissionId    = $this->submission->id;
-        }elseif (is_numeric($_POST['submission-id'])) {
+        } elseif (is_numeric($_POST['submission-id'])) {
             $submissionId    = $_POST['submission-id'];
-        }else{
+        } else {
             TSJIPPY\printArray('No submission id found');
             return false;
         }
@@ -75,7 +80,7 @@ class EditFormResults extends DisplayFormResults{
         if ($elementId == 'user_id') {
             $data['user_id']            = $value;
             $formats[]                = '%d';
-        }elseif ($elementId == 'submitter_id') {
+        } elseif ($elementId == 'submitter_id') {
             $data['submitter_id']    = $value;
             $formats[]                = '%d';
         }
@@ -86,18 +91,18 @@ class EditFormResults extends DisplayFormResults{
             $data,
             array(
                 'id'                => $submissionId,
-           ),
+            ),
             $formats
-       );
+        );
 
         if ($wpdb->last_error !== '') {
             $message    = $wpdb->print_error();
             if (defined('REST_REQUEST')) {
                 return new \WP_Error('form error', $message);
-            }else{
+            } else {
                 TSJIPPY\printArray($message);
             }
-        }elseif (!$result) {
+        } elseif (!$result) {
             $column        = array_keys($data)[0];
 
             $curValue    = $wpdb->get_var(
@@ -105,8 +110,8 @@ class EditFormResults extends DisplayFormResults{
                     "select $column from %i where id = %d",
                     $this->submissionTableName,
                     $submissionId
-               )
-           );
+                )
+            );
 
             if ($curValue != $data[$column]) {
                 $message    = "No row with id $submissionId found\nQuery used is '$wpdb->last_query'";
@@ -125,12 +130,12 @@ class EditFormResults extends DisplayFormResults{
             $where    = array(
                 'submission_id'    => $submissionId,
                 'element_id'    => $elementId,
-           );
+            );
 
             $formats    = array(
                 '%d',
                 '%s'
-           );
+            );
 
             if (is_numeric($subId)) {
                 $where['sub_id']    = $subId;
@@ -150,7 +155,7 @@ class EditFormResults extends DisplayFormResults{
                 $data,
                 $where,
                 $formats
-           );
+            );
 
             if (is_wp_error($result)) {
                 return $result;
@@ -172,7 +177,8 @@ class EditFormResults extends DisplayFormResults{
      *
      * @return    true|WP_Error        The result or error on failure
      */
-    public function archiveSubSubmission($archive, $subId, $submissionId) {
+    public function archiveSubSubmission($archive, $subId, $submissionId)
+    {
         //we are archiving a sub-entry
         if (!is_numeric($subId)) {
             return false;
@@ -189,40 +195,40 @@ class EditFormResults extends DisplayFormResults{
                     'sub_id'        => $subId,
                     'element_id'    => -6,
                     'value'            => 1
-               ),
+                ),
                 array(
                     '%d',
                     '%d',
                     '%d',
                     '%d'
-               )
-           );
+                )
+            );
         }
 
         // Remove the index from the archived indexes
-        else{
+        else {
             $result = $wpdb->delete(
                 $this->submissionValuesTableName,
                 array(
                     'submission_id'    => $submissionId,
                     'element_id'    => -6,
                     'sub_id'        => $subId
-               )
-           );
+                )
+            );
         }
 
         if ($wpdb->last_error !== '') {
             $message    = $wpdb->print_error();
             if (defined('REST_REQUEST')) {
                 return new \WP_Error('form error', $message);
-            }else{
+            } else {
                 TSJIPPY\printArray($message);
             }
-        }elseif (!$result) {
+        } elseif (!$result) {
             $message    = "No row with id $submissionId found";
             if (defined('REST_REQUEST')) {
                 return new \WP_Error('form error', $message);
-            }else{
+            } else {
                 TSJIPPY\printArray($message);
                 TSJIPPY\printArray($this->submission);
             }
@@ -244,16 +250,17 @@ class EditFormResults extends DisplayFormResults{
      *
      * @return    true|WP_Error        The result or error on failure
      */
-    public function archiveSubmission($archive, $subId = null) {
+    public function archiveSubmission($archive, $subId = null)
+    {
         global $wpdb;
 
         if (is_numeric($this->submissionId)) {
             $submissionId    = $this->submissionId;
-        }elseif (is_numeric($_POST['submission-id'])) {
+        } elseif (is_numeric($_POST['submission-id'])) {
             $submissionId    = $_POST['submission-id'];
-        }elseif (!empty($this->submission->id)) {
+        } elseif (!empty($this->submission->id)) {
             $submissionId    = $this->submission->id;
-        }else{
+        } else {
             TSJIPPY\printArray('No submission id found');
             return false;
         }
@@ -271,32 +278,32 @@ class EditFormResults extends DisplayFormResults{
             array(
                 'time_last_edited'    => gmdate("Y-m-d H:i:s"),
                 'archived'            => $archive
-           ),
+            ),
             array(
                 'id'                => $submissionId,
-           ),
+            ),
             array(
                 '%s',
                 '%d'
-           )
-       );
+            )
+        );
 
         if ($wpdb->last_error !== '') {
             $message    = $wpdb->print_error();
             if (defined('REST_REQUEST')) {
                 return new \WP_Error('form error', $message);
-            }else{
+            } else {
                 TSJIPPY\printArray($message);
             }
-        }elseif (!$result) {
+        } elseif (!$result) {
             $message    = "No row with id $submissionId found";
             if (defined('REST_REQUEST')) {
                 return new \WP_Error('form error', $message);
-            }else{
+            } else {
                 TSJIPPY\printArray($message);
                 TSJIPPY\printArray($this->submission);
             }
-        }else{
+        } else {
             $message    = "Entry with id {$this->submissionId} succesfully " . ($archive ? 'archived' : 'unarchived');
         }
 
@@ -312,7 +319,8 @@ class EditFormResults extends DisplayFormResults{
     /**
      * Auto archive form submission based on the form settings
      */
-    public function autoArchive() {
+    public function autoArchive()
+    {
         //get all the forms
         $this->getForms();
 
@@ -343,7 +351,7 @@ class EditFormResults extends DisplayFormResults{
             preg_match_all($pattern, $triggerValue, $matches);
             if (!is_array($matches[1])) {
                 TSJIPPY\printArray($matches[1]);
-            }else{
+            } else {
                 // Loop over all the replacements
                 foreach ((array)$matches[1] as $keyword) {
                     //If the keyword is a valid date keyword
@@ -385,7 +393,7 @@ class EditFormResults extends DisplayFormResults{
                 [
                     $triggerValue
                 ]
-           );
+            );
 
             foreach ($submissions as $submission) {
                 $this->submissionId    = $submission->id;
@@ -395,10 +403,11 @@ class EditFormResults extends DisplayFormResults{
         }
     }
 
-     /**
+    /**
      * Checks if all sub entries are archived, if so archives the whole
      */
-    public function checkIfAllArchived() {
+    public function checkIfAllArchived()
+    {
         //check if all subfields are archived or empty
         $allArchived = true;
 
@@ -426,7 +435,7 @@ class EditFormResults extends DisplayFormResults{
             if (
                 isset($this->submission->{$elementName}) &&
                 count($this->submission->{$elementName}) > $archivedCount
-           ) {
+            ) {
                 $allArchived = false;
             }
         }
@@ -441,15 +450,16 @@ class EditFormResults extends DisplayFormResults{
      *
      * @return    int|WP_Error            The number of rows updated, or an WP_Error on error.
      */
-    public function deleteSubmission($submissionId) {
+    public function deleteSubmission($submissionId)
+    {
         global $wpdb;
 
         $result = $wpdb->delete(
             $this->submissionTableName,
             array(
                 'id'        => $submissionId
-           )
-       );
+            )
+        );
 
         if ($result === false) {
             return new \WP_Error('tsjippy forms', "Submission removal failed");

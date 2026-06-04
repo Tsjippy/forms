@@ -1,14 +1,17 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 use stdClass;
 use WP_Error;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-class Forms{
+class Forms
+{
 
     public bool         $all;            // do not page submissions
     protected bool         $clonableFormStep;
@@ -50,7 +53,8 @@ class Forms{
     protected string    $userIdElementName;
     public array         $userRoles;
 
-    public function __construct() {
+    public function __construct()
+    {
         global $wpdb;
 
         $this->all                            = false;
@@ -93,9 +97,9 @@ class Forms{
 
         if (isset($_REQUEST['all'])) {
             $this->pageSize                    = 99999;
-        }elseif (isset($_REQUEST['pagesize']) && is_numeric($_REQUEST['pagesize'])) {
+        } elseif (isset($_REQUEST['pagesize']) && is_numeric($_REQUEST['pagesize'])) {
             $this->pageSize                    = $_REQUEST['pagesize'];
-        }else{
+        } else {
             $this->pageSize                    = 50;
         }
 
@@ -104,24 +108,24 @@ class Forms{
         $postAuthor    = 0;
         if (!empty($object->post_author)) {
             $postAuthor    = $object->post_author;
-        }elseif (!empty($_REQUEST['post'])) {
+        } elseif (!empty($_REQUEST['post'])) {
             $post        = get_post($_REQUEST['post']);
             if (!empty($post)) {
                 $postAuthor    = $post->post_author;
             }
-        }elseif (!empty($_POST['form-url'])) {
+        } elseif (!empty($_POST['form-url'])) {
             $postId        = url_to_postid($_POST['form-url']);
 
             if ($postId) {
                 $postAuthor    = get_post($postId)->post_author;
             }
-        }else{
+        } else {
             echo '';
         }
 
-        if (array_intersect(['administrator','editor'], $this->userRoles) || $postAuthor == $this->user->ID) {
+        if (array_intersect(['administrator', 'editor'], $this->userRoles) || $postAuthor == $this->user->ID) {
             $this->editRights        = true;
-        }else{
+        } else {
             $this->editRights        = false;
         }
 
@@ -131,8 +135,9 @@ class Forms{
     /**
      * Creates the tables for this plugin
      */
-    public function createDbTables() {
-        if ( !function_exists('maybe_create_table')) {
+    public function createDbTables()
+    {
+        if (!function_exists('maybe_create_table')) {
             require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         }
 
@@ -310,7 +315,8 @@ class Forms{
     /**
      * Defines the formats of each column in each table for use in $wpdb->insert and $wpdb->update
      */
-    private function tableFormats() {
+    private function tableFormats()
+    {
         // Form Settings
         $formats            = [
             'slug'                    => '%s',
@@ -372,7 +378,7 @@ class Forms{
             'multiple'                => '%d',
             'library'                => '%d',
             'edit_image'            => '%d',
-              'conditions'            => '%s',
+            'conditions'            => '%s',
             'remove'                => '%s',
             'add'                    => '%s',
         ];
@@ -389,7 +395,7 @@ class Forms{
             'conditional_value'        => '%s',
             'from_email'            => '%s',
             'from'                    => '%s',
-            'conditional_from_email'=> '%s',
+            'conditional_from_email' => '%s',
             'else_from'                => '%s',
             'email_to'                => '%s',
             'to'                    => '%s',
@@ -471,7 +477,8 @@ class Forms{
      *
      * @return    int|WP_Error    The form id or error ion failure
      */
-    public function insertForm($slug='') {
+    public function insertForm($slug = '')
+    {
         global $wpdb;
 
         if (empty($this->formData)) {
@@ -480,7 +487,7 @@ class Forms{
 
         if (empty($slug) && !empty($this->formData->slug)) {
             $slug = $this->formData->slug;
-        }else{
+        } else {
             return new WP_Error('forms', 'No form slug given');
         }
 
@@ -489,14 +496,14 @@ class Forms{
         // Check if name already exists
         $newName    = $slug;
         $i            = 1;
-        while(true) {
+        while (true) {
             $result    = $wpdb->get_results(
                 $wpdb->prepare(
                     "SELECT * FROM %i WHERE slug = %s",
                     $this->tableName,
                     $newName
-               )
-           );
+                )
+            );
 
             if (empty($result)) {
                 break;
@@ -513,8 +520,8 @@ class Forms{
             array(
                 'slug'            => $this->formData->slug,
                 'version'         => 1
-           )
-       );
+            )
+        );
 
         if (!empty($wpdb->last_error)) {
             return new \WP_Error('error', $wpdb->print_error());
@@ -536,8 +543,8 @@ class Forms{
                 'options'         => 'list=users',
                 'default_value' => 'display_name',
                 'priority'        => 3
-           )
-       );
+            )
+        );
 
         $elementId    = $wpdb->insert_id;
 
@@ -545,7 +552,7 @@ class Forms{
             array(
                 'type'                     => 'number',
                 'slug'                    => 'user_id',
-                 'default_value'         => 'user_id',
+                'default_value'         => 'user_id',
                 'hidden'                => true,
                 'conditions'            => serialize([
                     [
@@ -561,20 +568,20 @@ class Forms{
                     ]
                 ]),
                 'priority'                => 1
-           ),
+            ),
             array(
                 'type'                     => 'label',
                 'slug'                    => 'name-label',
                 'text'                     => 'Your Name',
                 'wrap'                    => true,
                 'priority'                => 2
-           ),
+            ),
             array(
                 'type'                     => 'datalist',
                 'slug'                    => 'users',
                 'default_array_value'     => 'all_users',
                 'priority'                => 4
-           )
+            )
         ];
 
         foreach ($elements as $element) {
@@ -583,14 +590,15 @@ class Forms{
             $wpdb->insert(
                 $this->elTableName,
                 $element
-           );
+            );
         }
     }
 
     /**
      * Checks if the current form exists in the db. If not, inserts it
      */
-    public function maybeInsertForm($formId='') {
+    public function maybeInsertForm($formId = '')
+    {
         global $wpdb;
 
         if (!isset($this->formData->slug)) {
@@ -615,8 +623,9 @@ class Forms{
      * @param    int        $formId    The id of the form to be deleted
      *
      * @return    string            The deletion result
-    */
-    public  function deleteForm($formId) {
+     */
+    public  function deleteForm($formId)
+    {
         global $wpdb;
 
         // Remove the form
@@ -624,42 +633,42 @@ class Forms{
             $this->tableName,
             ['id' => $formId],
             ['%d']
-       );
+        );
 
         // remove the form elements
         $wpdb->delete(
             $this->elTableName,
             ['form_id' => $formId],
             ['%d']
-       );
+        );
 
         // emails
         $wpdb->delete(
             $this->formEmailTable,
             ['form_id' => $formId],
             ['%d']
-       );
+        );
 
         // reminders
         $wpdb->delete(
             $this->formReminderTable,
             ['form_id' => $formId],
             ['%d']
-       );
+        );
 
         //sortcodes
         $wpdb->delete(
             $this->shortcodeTable,
             ['form_id' => $formId],
             ['%d']
-       );
+        );
 
         // shortcode setttings
         $wpdb->delete(
             $this->shortcodeColumnSettingsTable,
             ['form_id' => $formId],
             ['%d']
-       );
+        );
 
         // submission values
         $wpdb->query(
@@ -670,24 +679,24 @@ class Forms{
                 $this->submissionValuesTableName,
                 $this->submissionTableName,
                 $formId
-           )
-       );
+            )
+        );
 
         // remove the form submissions
         $wpdb->delete(
             $this->submissionTableName,
             ['form_id' => $formId],
             ['%d']
-       );
+        );
 
         // update or delete posts with this form
         $results    = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT ID FROM %i WHERE post_content LIKE %s",
                 $wpdb->posts,
-                "%" .$wpdb->esc_like("[formbuilder slug={$this->formData->slug}]"). "%"
-           )
-       );
+                "%" . $wpdb->esc_like("[formbuilder slug={$this->formData->slug}]") . "%"
+            )
+        );
 
         // remove the shortcode from the page
         foreach ($results as $postId) {
@@ -698,7 +707,7 @@ class Forms{
             // delete post
             if (empty($post->post_content)) {
                 wp_delete_post($post->ID);
-            }else{
+            } else {
                 wp_update_post($post);
             }
         }
@@ -709,15 +718,16 @@ class Forms{
     /**
      * Gets all forms from the db
      */
-    public function getForms() {
+    public function getForms()
+    {
         global $wpdb;
 
         $this->forms                    = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM %i",
                 $this->tableName
-           )
-       );
+            )
+        );
     }
 
     /**
@@ -725,7 +735,8 @@ class Forms{
      * @param    int            $submisisonId    The id of the submission for which to retrieve the form
      * @return    object                        The form data object or WP_Error on failure
      */
-    public function getFormBySubmissionId($submisisonId) {
+    public function getFormBySubmissionId($submisisonId)
+    {
         global $wpdb;
 
         $formId        = $wpdb->get_var(
@@ -733,8 +744,8 @@ class Forms{
                 "SELECT form_id FROM %i WHERE id = %d",
                 $this->submissionTableName,
                 $submisisonId
-           )
-       );
+            )
+        );
 
         if (empty($formId)) {
             return new WP_Error('forms', "No form found for submission id $submisisonId");
@@ -748,7 +759,8 @@ class Forms{
      *
      * @param    int        $formId    the form id to load. Default empty
      */
-    public function getForm($formId='') {
+    public function getForm($formId = '')
+    {
         global $wpdb;
 
         // first check if needed
@@ -758,21 +770,21 @@ class Forms{
                 !empty($this->formData->id)        &&
                 !empty($formId) &&
                 $this->formData->id != $formId
-           )
-       ) {
+            )
+        ) {
             // Get the form data
             $query                = "SELECT * FROM %i WHERE ";
             $values                = [$this->tableName];
             if (is_numeric($formId)) {
                 $query    .= "id= %d";
                 $values[] = $formId;
-            }elseif (is_numeric($this->formData->id ?? '') && $this->formData->id > -1) {
+            } elseif (is_numeric($this->formData->id ?? '') && $this->formData->id > -1) {
                 $query    .= "id= %d";
                 $values[] = $this->formData->id;
-            }elseif (!empty($this->formData->slug)) {
+            } elseif (!empty($this->formData->slug)) {
                 $query    .= "slug= %s";
                 $values[] = $this->formData->slug;
-            }else{
+            } else {
                 return new \WP_Error('forms', 'No form name or id given');
             }
 
@@ -786,7 +798,7 @@ class Forms{
 
                 TSJIPPY\printArray("Form requested on {$post->post_type} on $url does not exist. Query used is '$query'");
                 $this->insertForm();
-            }else{
+            } else {
                 $this->formData                     = (object)$result[0];
                 $this->formData->actions            = maybe_unserialize($this->formData->actions);
                 $this->formData->split                = maybe_unserialize($this->formData->split);
@@ -816,7 +828,7 @@ class Forms{
 
             if (array_intersect($editRoles, (array)$this->userRoles) || (!empty($object) && $object->post_author == $this->user->ID)) {
                 $this->editRights        = true;
-            }else{
+            } else {
                 $this->editRights        = false;
             }
         }
@@ -829,7 +841,7 @@ class Forms{
             TSJIPPY\printArray($wpdb->print_error());
         }
 
-        $this->jsFileName    = plugin_dir_path(__DIR__). " ../js/dynamic/{$this->formData->slug}forms";
+        $this->jsFileName    = plugin_dir_path(__DIR__) . " ../js/dynamic/{$this->formData->slug}forms";
 
         return true;
     }
@@ -838,7 +850,8 @@ class Forms{
      * Gets the form reminders from the db
      * @param    int    $formId        the form id for which to get the reminders
      */
-    public function getFormReminder($formId='') {
+    public function getFormReminder($formId = '')
+    {
         global $wpdb;
 
         if (empty($formId)) {
@@ -851,8 +864,8 @@ class Forms{
                 "SELECT * FROM %i WHERE form_id = %d",
                 $this->formReminderTable,
                 $formId
-           )
-       );
+            )
+        );
 
         if (empty($results)) {
             return;
@@ -865,10 +878,11 @@ class Forms{
         }
     }
 
-     /**
-    * Retrieves e-mail settings from the database
-    */
-    public function getEmailSettings() {
+    /**
+     * Retrieves e-mail settings from the database
+     */
+    public function getEmailSettings()
+    {
         global $wpdb;
 
         if (empty($this->formData)) {
@@ -877,7 +891,7 @@ class Forms{
 
         $this->emailSettings                = $wpdb->get_results(
             $wpdb->prepare("select * from %i where form_id=%d", $this->formEmailTable, $this->formData->id)
-       );
+        );
 
         foreach ($this->emailSettings as &$emailSetting) {
             foreach ($emailSetting as &$setting) {
@@ -903,15 +917,16 @@ class Forms{
      *
      * @param    bool    $force        Whether to requery, default false
      */
-    public function elementMapper($force = false) {
+    public function elementMapper($force = false)
+    {
         if (
             empty($this->formData) ||
             (
                 isset($this->elementMapping) &&
                 !empty($this->elementMapping['type']) &&
                 !$force
-           )
-       ) {
+            )
+        ) {
             return;
         }
 
@@ -934,7 +949,8 @@ class Forms{
      *
      * @return    string    the select html
      */
-    public function formSelect() {
+    public function formSelect()
+    {
         $this->getForms();
 
         foreach ($this->forms as $form) {
@@ -942,10 +958,10 @@ class Forms{
         }
 
         $html = "<select name='form-selector'>";
-            $html .= "<option value=''>---</option>";
-            foreach ($this->slugs as $name) {
-                $html .= "<option value='$name'>$name</option>";
-            }
+        $html .= "<option value=''>---</option>";
+        foreach ($this->slugs as $name) {
+            $html .= "<option value='$name'>$name</option>";
+        }
         $html .= "</select>";
 
         return $html;
@@ -959,7 +975,8 @@ class Forms{
      *
      * @return    object|array|string|false            The element or element property
      */
-    public function getElementById($id, $key='') {
+    public function getElementById($id, $key = '')
+    {
         global $post;
 
         if (empty($id)) {
@@ -980,7 +997,7 @@ class Forms{
 
             if (empty($post)) {
                 $url    = $_SERVER['REQUEST_URI'];
-            }else{
+            } else {
                 $url    = get_page_link($post);
             }
 
@@ -998,7 +1015,7 @@ class Forms{
 
         if (empty($key)) {
             return $element;
-        }else{
+        } else {
             return $element->$key;
         }
     }
@@ -1012,7 +1029,8 @@ class Forms{
      *
      * @return    object|array|string|false    The element or an array of elements or an element property of false if not found
      */
-    public function getElementBySlug($slug, $key='', $single=true) {
+    public function getElementBySlug($slug, $key = '', $single = true)
+    {
         if (empty($slug)) {
             return false;
         }
@@ -1033,26 +1051,26 @@ class Forms{
             if (isset($this->elementMapping['slug'][$slugNew])) {
                 // remove '[]'
                 $slug    .= $slugNew;
-            }elseif (isset($this->elementMapping['slug'][$slug. '[]'])) {
+            } elseif (isset($this->elementMapping['slug'][$slug . '[]'])) {
                 // add []
                 $slug    .= '[]';
-            }elseif (!empty($this->formData->split)) {
+            } elseif (!empty($this->formData->split)) {
                 // only the last part of a splitted name is given
                 $mainName    = explode('[', $this->getElementById($this->formData->split[0], 'name'))[0];
 
                 // we already tried adding splits, did not work
-                if (str_contains($slug, $mainName. '[1][')) {
+                if (str_contains($slug, $mainName . '[1][')) {
                     return false;
-                }elseif ($mainName == $slugNew) {
+                } elseif ($mainName == $slugNew) {
                     $exploded    = explode('[', $slug);
                     $orgName    = trim(end($exploded), ']');
-                    $slug        = $mainName. "[1][$orgName]";
-                }else{
-                    $slug        = $mainName. "[0][$slug]";
+                    $slug        = $mainName . "[1][$orgName]";
+                } else {
+                    $slug        = $mainName . "[0][$slug]";
                 }
 
                 return $this->getElementBySlug($slug, $key, $single);
-            }else{
+            } else {
                 //TSJIPPY\printArray("Element with slug $slug not found on form {$this->formData->slug} with id {$this->formData->id}");
                 return false;
             }
@@ -1075,7 +1093,7 @@ class Forms{
 
         if (empty($key)) {
             return $element;
-        }else{
+        } else {
             return $element->$key;
         }
     }
@@ -1088,7 +1106,8 @@ class Forms{
      *
      * @return    object|array|string|false            An array of elements
      */
-    public function getElementByType($type, $load=true) {
+    public function getElementByType($type, $load = true)
+    {
         if (empty($type)) {
             return false;
         }
@@ -1125,17 +1144,18 @@ class Forms{
      *
      * @return    string    the element name or false if no name element is found
      */
-    public function findUserNameElementName() {
+    public function findUserNameElementName()
+    {
         // find the user id element
         $userNameKey    = false;
 
         if ($this->getElementBySlug('name')) {
             $userNameKey    = 'name';
-        }elseif ($this->getElementBySlug('fullname')) {
+        } elseif ($this->getElementBySlug('fullname')) {
             $userNameKey    = 'fullname';
-        }elseif ($this->getElementBySlug('firstname')) {
+        } elseif ($this->getElementBySlug('firstname')) {
             $userNameKey    = 'firstname';
-        }elseif ($this->getElementBySlug('lasttname')) {
+        } elseif ($this->getElementBySlug('lasttname')) {
             $userNameKey    = 'lasttname';
         }
 
@@ -1147,13 +1167,14 @@ class Forms{
      *
      * @return    string    the element name or false if no phonenumber element is found
      */
-    public function findPhoneNumberElementName() {
+    public function findPhoneNumberElementName()
+    {
         // find the user id element
         $phonenumberKey    = false;
 
         if ($this->getElementBySlug('phone')) {
             $phonenumberKey    = 'phone';
-        }elseif ($this->getElementBySlug('phonenumber')) {
+        } elseif ($this->getElementBySlug('phonenumber')) {
             $phonenumberKey    = 'phonenumber';
         }
 
@@ -1165,13 +1186,14 @@ class Forms{
      *
      * @return    string    the element name or false if no e-mail element is found
      */
-    public function findEmailElementName() {
+    public function findEmailElementName()
+    {
         // find the user id element
         $emailKey    = false;
 
         if ($this->getElementBySlug('email')) {
             $emailKey    = 'email';
-        }elseif ($this->getElementBySlug('e-mail')) {
+        } elseif ($this->getElementBySlug('e-mail')) {
             $emailKey    = 'e-mail';
         }
 
@@ -1185,7 +1207,8 @@ class Forms{
      * @param    int        $formId        The id of the form to get elements for, default empty
      * @param    bool    $force        Whether to requery, default false
      */
-    public function getAllFormElements($sortCol = '', $formId='', $force=false) {
+    public function getAllFormElements($sortCol = '', $formId = '', $force = false)
+    {
         if (isset($this->formElements) && !$force) {
             return '';
         }
@@ -1220,7 +1243,7 @@ class Forms{
 
         foreach ($elements as &$element) {
             if (!empty($element->conditions)) {
-                while(is_serialized($element->conditions)) {
+                while (is_serialized($element->conditions)) {
                     $element->conditions    = maybe_unserialize($element->conditions);
                 }
             }
@@ -1240,7 +1263,8 @@ class Forms{
      *
      * @param    array    $atts    The shortcode attributes
      */
-    public function processAtts($atts) {
+    public function processAtts($atts)
+    {
         if (empty($this->formData)) {
             $this->formData    = new stdClass();
         }
@@ -1264,16 +1288,16 @@ class Forms{
                     'onlyown'        => false,
                     'archived'        => false,
                     'all'            => false,
-               ),
+                ),
                 $atts
-           );
+            );
 
             if (empty($atts['form-name'])) {
                 if (!empty($atts['formname'])) {
                     $atts['form-name']    = $atts['formname'];
-                }elseif (!empty($atts['name'])) {
+                } elseif (!empty($atts['name'])) {
                     $atts['form-name']    = $atts['name'];
-                }elseif (!empty($atts['slug'])) {
+                } elseif (!empty($atts['slug'])) {
                     $atts['form-name']    = ucfirst(str_replace('-', ' ', $atts['slug']));
                 }
             }
@@ -1335,7 +1359,8 @@ class Forms{
      *
      * @param    array    $atts    The shortcode attributes
      */
-    public function determineForm($atts) {
+    public function determineForm($atts)
+    {
         global $wpdb;
 
         $this->processAtts($atts);
@@ -1348,11 +1373,11 @@ class Forms{
         if (is_numeric($this->formData->id) && $this->formData->id > -1) {
             $query    .= '%d';
             $values[] = $this->formData->id;
-        }elseif (!empty($this->formData->slug)) {
+        } elseif (!empty($this->formData->slug)) {
             $query    .= "(SELECT `id` FROM %i WHERE slug=%s LIMIT 1)";
             $values[] = $this->tableName;
             $values[] = $this->formData->slug;
-        }else{
+        } else {
             return new WP_Error('forms', 'Which form do you have?');
         }
 
@@ -1362,16 +1387,16 @@ class Forms{
             $formBuilderForm    = new FormBuilderForm($atts);
 
             return $formBuilderForm->showForm();
-        }elseif (empty($formElements)) {
+        } elseif (empty($formElements)) {
             $html    = "<div class='warning'>This form has no elements yet.<br>";
-                if ($this->editRights) {
-                    $url     = add_query_arg('formbuilder', 1, TSJIPPY\getCurrentUrl());
-                    $html    .= "<br><a href='$url' class='button small tsjippy'>Start Building the form</a>";
-                }else{
-                    $html    .= "Ask an user with the editor role to start working on it";
-                }
-            return $html. "</div>";
-        }else{
+            if ($this->editRights) {
+                $url     = add_query_arg('formbuilder', 1, TSJIPPY\getCurrentUrl());
+                $html    .= "<br><a href='$url' class='button small tsjippy'>Start Building the form</a>";
+            } else {
+                $html    .= "Ask an user with the editor role to start working on it";
+            }
+            return $html . "</div>";
+        } else {
             $displayForm    = new DisplayForm($atts);
             return $displayForm->showForm();
         }
@@ -1385,7 +1410,8 @@ class Forms{
      * @param    int        $subId            The sub id in case of multiple values for the same key
      * @param    bool    $returnArray    Wheter to return an array of values, default false
      */
-    public function getSubmissionValue($submissionId, $elementId, $subId='', $returnArray=false) {
+    public function getSubmissionValue($submissionId, $elementId, $subId = '', $returnArray = false)
+    {
         global $wpdb;
 
         /**
@@ -1393,13 +1419,13 @@ class Forms{
          */
         if (!empty($this->submissions)) {
             foreach ($this->submissions as $submission) {
-                if ( $submission->id == $submissionId && isset($submission->{$elementId})) {
+                if ($submission->id == $submissionId && isset($submission->{$elementId})) {
                     return $submission->{$elementId};
                 }
             }
         }
 
-         $baseQuery    = "SELECT `value` FROM %i WHERE ";
+        $baseQuery    = "SELECT `value` FROM %i WHERE ";
         $where        = [
             'submission_id = %d',
             'element_id = %s'
@@ -1428,15 +1454,15 @@ class Forms{
             ],
             $this->userId,
             $this
-       );
+        );
 
         extract($filtered);
 
-        $query    = $baseQuery.implode(' AND ', $where);
+        $query    = $baseQuery . implode(' AND ', $where);
 
         $results    = $wpdb->get_col(
             $wpdb->prepare($query, ...$values)
-       );
+        );
 
         $results = array_map(function ($value) {
             return maybe_unserialize($value);
@@ -1461,7 +1487,8 @@ class Forms{
      *
      * @param    array    $args    The wp_mail args
      */
-    public function addFormData($args) {
+    public function addFormData($args)
+    {
         $args['submission'] = $this->submission;
 
         return $args;
@@ -1475,7 +1502,8 @@ class Forms{
      *
      * @return    string                    The filtered string
      */
-    public function processPlaceholders($string, $replaceValues='') {
+    public function processPlaceholders($string, $replaceValues = '')
+    {
         if (empty($string)) {
             return $string;
         }
@@ -1533,22 +1561,20 @@ class Forms{
             // Valid file(s)
             elseif (
                 is_array($replaceValue)                                    &&    // the form results are an array
-                file_exists(ABSPATH.array_values($replaceValue)[0])        // and the first entry is a valid file
-           ) {
+                file_exists(ABSPATH . array_values($replaceValue)[0])        // and the first entry is a valid file
+            ) {
                 // add the ABSPATH to the file paths
                 $string = array_map(function ($value) {
-                    return ABSPATH.$value;
+                    return ABSPATH . $value;
                 }, $replaceValue);
-            }
-
-            else{
+            } else {
                 if (is_array($replaceValue) && count($replaceValue) == 1) {
                     $replaceValue    = array_values($replaceValue)[0];
                 }
 
                 if (is_array($replaceValue)) {
                     $replaceValue    = apply_filters('tsjippy-forms-transform-array', implode(',', $replaceValue), $replaceValue, $this, $match);
-                }elseif (preg_match('/^(\d{4}-\d{2}-\d{2})$/', $replaceValue, $matches)) {
+                } elseif (preg_match('/^(\d{4}-\d{2}-\d{2})$/', $replaceValue, $matches)) {
                     $replaceValue    = gmdate(get_option('date_format'), strtotime((string)$matches[1]));
                 }
 

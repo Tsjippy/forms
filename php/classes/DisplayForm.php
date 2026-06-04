@@ -1,15 +1,19 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-class DisplayForm extends ElementHtmlBuilder{
+class DisplayForm extends ElementHtmlBuilder
+{
     use CreateJs;
 
-    public function __construct($atts=[]) {
+    public function __construct($atts = [])
+    {
         parent::__construct();
 
         $this->isFormStep                = false;
@@ -37,13 +41,14 @@ class DisplayForm extends ElementHtmlBuilder{
      * Check if we are editing on behalf of someone else, and we have permission for that
      *
      */
-    protected function getUserId($atts=[]) {
+    protected function getUserId($atts = [])
+    {
         if (
             array_intersect($this->userRoles, $this->submitRoles)     &&    // we have the permission to submit on behalf on someone else
             !empty(($_GET['user-id']))                                &&
             is_numeric($_GET['user-id'])                            &&     // and the user-id parameter is set in the url
             empty($atts['user-id'])                                        // and the user id is not given in the shortcode
-       ) {
+        ) {
             $this->userId    = $_GET['user-id'];
         }
     }
@@ -56,7 +61,8 @@ class DisplayForm extends ElementHtmlBuilder{
      *
      * @return    string                    The html
      */
-    public function buildHtml($element, $parent) {
+    public function buildHtml($element, $parent)
+    {
 
         $elementIndex    = $element->priority - 1;
 
@@ -72,8 +78,8 @@ class DisplayForm extends ElementHtmlBuilder{
                     'name'    => $element->slug,
                     'class'    => $class
                 ]
-           );
-        }elseif (in_array($element->type, ['div-end'])) {
+            );
+        } elseif (in_array($element->type, ['div-end'])) {
             return;
         }
 
@@ -86,18 +92,18 @@ class DisplayForm extends ElementHtmlBuilder{
             (
                 empty($this->prevElement) ||    // this is a clonable formstep and a multi-start element
                 !$this->prevElement->wrap
-           ) &&        // this element is not wrapped in a previous element
+            ) &&        // this element is not wrapped in a previous element
             $element->type != 'formstep'        // this is not a formstep
-       ) {
+        ) {
             //Set the element width to 85 percent so that the info icon floats next to it
             if ($elementIndex != 0  && !empty($this->prevElement) && $this->prevElement->type == 'info') {
                 $width = 85;
-            //We are dealing with a label which is wrapped around the next element
-            }elseif ($element->type == 'label' && !isset($element->wrap) && is_numeric($this->nextElement->width)) {
+                //We are dealing with a label which is wrapped around the next element
+            } elseif ($element->type == 'label' && !isset($element->wrap) && is_numeric($this->nextElement->width)) {
                 $width = $this->nextElement->width;
-            }elseif (is_numeric($element->width)) {
+            } elseif (is_numeric($element->width)) {
                 $width = $element->width;
-            }else{
+            } else {
                 $width = 100;
             }
 
@@ -118,16 +124,16 @@ class DisplayForm extends ElementHtmlBuilder{
                     (
                         $this->nextElement->required    ||
                         $this->nextElement->mandatory
-                   )
-               )
-           ) {
+                    )
+                )
+            ) {
                 $class .= ' required';
             }
 
             if ($element->type == 'info') {
                 $class .= ' info';
                 $style = '';
-            }else{
+            } else {
                 if (!empty($element->wrap)) {
                     $class    .= ' flex';
                 }
@@ -142,7 +148,7 @@ class DisplayForm extends ElementHtmlBuilder{
         if (
             !$this->clonableFormStep ||            // this is not a clonable formstep
             $element->type == 'multi-start'        // or it is but this is the multi-start element
-       ) {
+        ) {
             $node     = $this->getElementHtml($element, $parent);
 
             if (is_wp_error($node)) {
@@ -172,7 +178,8 @@ class DisplayForm extends ElementHtmlBuilder{
      *
      * @return    \DOMELEMENT                The next button node, needed for formstep logic in the js
      */
-    public function formStepControls($parent) {
+    public function formStepControls($parent)
+    {
         // formstep buttons
         if (!$this->isFormStep) {
             return $parent;
@@ -190,16 +197,16 @@ class DisplayForm extends ElementHtmlBuilder{
             $prevWrapper,
             [
                 'type' => 'button',
-                'class' =>'button',
+                'class' => 'button',
                 'name' => 'previous-button'
             ],
             'Previous'
-       );
+        );
 
         //Circles which indicates the steps of the form:
         $indicatorWrapper = $this->addElement('div', $wrapper,    ['class' => 'step-wrapper', 'style' => 'flex:1;text-align:center;margin:auto;']);
         for ($x = 1; $x <= $this->formStepCounter; $x++) {
-            $this->addElement('span', $indicatorWrapper, [ 'class' => 'step']);
+            $this->addElement('span', $indicatorWrapper, ['class' => 'step']);
         }
 
         /**
@@ -215,26 +222,27 @@ class DisplayForm extends ElementHtmlBuilder{
                 'name'    => 'next-button'
             ],
             'Next'
-       );
+        );
 
         return $nextWrapper;
-}
+    }
 
     /**
      * Show the form
      */
-    public function showForm() {
+    public function showForm()
+    {
         //Load conditional js if available and needed
         if (wp_get_environment_type() === 'local') {
-            $jsPath        = $this->jsFileName. ' .js';
-        }else{
-            $jsPath        = $this->jsFileName. ' .min.js';
+            $jsPath        = $this->jsFileName . ' .js';
+        } else {
+            $jsPath        = $this->jsFileName . ' .min.js';
         }
 
         if (!file_exists($jsPath)) {
             //TSJIPPY\printArray("$jsPath does not exist!\nBuilding it now");
 
-            $path    = PLUGINPATH. "js/dynamic";
+            $path    = PLUGINPATH . "js/dynamic";
             if (!is_dir($path)) {
                 wp_mkdir_p($path);
             }
@@ -287,13 +295,13 @@ class DisplayForm extends ElementHtmlBuilder{
         // Reset a form when not saving to meta
         if (empty($this->formData->save_in_meta)) {
             $attributes["data-reset"]        = 1;
-        }else{
+        } else {
             // make sure empty checkboxes show up in form results
             $attributes["data-add-empty"]    = 1;
         }
         $form = $this->addElement("form", $this->formWrapper, $attributes);
 
-        $this->addElement('div', $form, ['class'=>'form-elements']);
+        $this->addElement('div', $form, ['class' => 'form-elements']);
 
         /**
          * Hidden input for form id
@@ -328,7 +336,7 @@ class DisplayForm extends ElementHtmlBuilder{
              */
             if (isset($this->formElements[$index + 1])) {
                 $this->nextElement        = $this->formElements[$index + 1];
-            }else{
+            } else {
                 $this->nextElement        = null;
             }
 
@@ -353,16 +361,16 @@ class DisplayForm extends ElementHtmlBuilder{
                         (
                             empty($this->formElements[$index - 1]) ||
                             !$this->formElements[$index - 1]->wrap
-                       )
-                   ) ||
+                        )
+                    ) ||
                     in_array($element->type, ['formstep', 'div-start', 'multi-start']) ||    // this is a wrapping element type
                     $this->clonableFormStep                                                    // this is a clonable forstep multi-start
-               )
-           ) {
+                )
+            ) {
                 // Make the first child-div the parent of the concuring elements
                 if ($element->type == 'multi-start') {
                     $parents[$element->type] = $this->multiwrapperFirstClone;
-                }else{
+                } else {
                     $parents[$element->type] = $node;
                 }
             }
@@ -372,9 +380,9 @@ class DisplayForm extends ElementHtmlBuilder{
                     !$element->wrap &&
                     !empty($this->formElements[$index - 1]) &&
                     $this->formElements[$index - 1]->wrap
-               ) ||
+                ) ||
                 in_array($element->type, ['div-end', 'multi-end'])
-           ) {
+            ) {
                 array_pop($parents);
             }
 
@@ -415,7 +423,8 @@ class DisplayForm extends ElementHtmlBuilder{
      *    1 - case of a BASENAME[index]SUBNAME name
      *    2 - case of a BASENAME[index] name
      */
-    public function findSplitElementIds() {
+    public function findSplitElementIds()
+    {
         $baseNames    = $elementIds = [];
 
         // Check if this is an splitted element
@@ -434,9 +443,9 @@ class DisplayForm extends ElementHtmlBuilder{
             $pattern    = "/(.*?)\[[0-9]+\]\[([^\]]+)\]/i";
 
             // This slug matches the pattern
-            if ( preg_match($pattern, $slug, $matches)) {
+            if (preg_match($pattern, $slug, $matches)) {
                 $baseNames[]    = $matches[1];
-            }else{
+            } else {
                 // Splitted element with just normal multiple values slug[index]
                 $elementIds[]    = $splitElementId;
             }
@@ -455,7 +464,7 @@ class DisplayForm extends ElementHtmlBuilder{
                     // Check if this name belongs to this splitted element
                     $pattern        = "/$baseName\[[0-9]+\]\[([^\]]+)\]/i";
 
-                    if ( preg_match($pattern, $element->slug, $matches)) {
+                    if (preg_match($pattern, $element->slug, $matches)) {
                         $name            = $matches[1];
 
                         // store found element ids by basename

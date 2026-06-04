@@ -1,21 +1,26 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 use stdClass;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
-class FormExport extends FormBuilderForm{
-    public function __construct() {
+class FormExport extends FormBuilderForm
+{
+    public function __construct()
+    {
         parent::__construct();
     }
 
     /**
      * Writes the form export to the output buffer for download
      */
-    public function exportForm($formId) {
+    public function exportForm($formId)
+    {
         global $wpdb;
 
         $this->getForm($formId);
@@ -31,7 +36,7 @@ class FormExport extends FormBuilderForm{
         // Set form version to 1
         $this->formData->version     = 1;
 
-        $content    = "form: " .json_encode(serialize($this->formData)). "\n";
+        $content    = "form: " . json_encode(serialize($this->formData)) . "\n";
 
         /**
          * Form Elements
@@ -40,21 +45,21 @@ class FormExport extends FormBuilderForm{
             unset($element->form_id);
         }
 
-        $content    .= "elements: " .json_encode(serialize($this->formElements)). "\n";
+        $content    .= "elements: " . json_encode(serialize($this->formElements)) . "\n";
 
         /**
          * Form E-mails
          */
         $emailSettings    = $wpdb->get_results(
             $wpdb->prepare("select * from %i where form_id=%d", $this->formEmailTable, $this->formData->id)
-       );
+        );
 
         foreach ($emailSettings as &$emailSetting) {
             unset($emailSetting->form_id);
         }
 
         if (!empty($emailSettings)) {
-            $content    .= "emails: " .json_encode(serialize($emailSettings)). "\n";
+            $content    .= "emails: " . json_encode(serialize($emailSettings)) . "\n";
         }
 
         /**
@@ -62,14 +67,14 @@ class FormExport extends FormBuilderForm{
          */
         $reminders            = $wpdb->get_results(
             $wpdb->prepare("SELECT * FROM %i WHERE form_id = %d", $this->formReminderTable, $formId)
-       );
+        );
 
         if (!empty($reminders)) {
             unset($reminders->id);
-            $content    .= "reminders: " .json_encode(serialize($reminders)). "\n";
+            $content    .= "reminders: " . json_encode(serialize($reminders)) . "\n";
         }
 
-        $backupName = $this->formData->slug. " .sform";
+        $backupName = $this->formData->slug . " .sform";
         TSJIPPY\clearOutput();
 
         header('Content-Type: application/octet-stream');
@@ -88,7 +93,8 @@ class FormExport extends FormBuilderForm{
      *
      * @return array|WP_Error            Array of old element ids to new element ids or WP_Error on failure
      */
-    protected function insertFormElements($formElements, $elementIdMapping = []) {
+    protected function insertFormElements($formElements, $elementIdMapping = [])
+    {
         $procesLater        = [];
 
         // Form elements
@@ -177,7 +183,8 @@ class FormExport extends FormBuilderForm{
      *
      * @return array|WP_Error            Array of old element ids to new element ids or WP_Error on failure
      */
-    protected function insertFormEmails($formEmails, $elementIdMapping) {
+    protected function insertFormEmails($formEmails, $elementIdMapping)
+    {
         // Form elements
         foreach ($formEmails as $email) {
 
@@ -194,7 +201,7 @@ class FormExport extends FormBuilderForm{
                     if (is_numeric($triggers['valueelement'])) {
                         $triggers['valueelement']    = $elementIdMapping[$trigger['valueelement']];
                     }
-                }else{
+                } else {
                     foreach ($triggers as &$trigger) {
                         if (is_numeric($trigger['element'])) {
                             $trigger['element']    = $elementIdMapping[$trigger['element']];
@@ -218,7 +225,6 @@ class FormExport extends FormBuilderForm{
 
                 foreach ($conditionalFields as &$conditionalFieldId) {
                     $conditionalFieldId    = $elementIdMapping[$conditionalFieldId];
-
                 }
 
                 $email->conditional_fields    = serialize($conditionalFields);
@@ -229,7 +235,6 @@ class FormExport extends FormBuilderForm{
 
                 foreach ($conditionalFromEmails as &$conditionalFromEmail) {
                     $conditionalFromEmail['fieldid']    = $elementIdMapping[$conditionalFromEmail['fieldid']];
-
                 }
 
                 $email->conditional_from_email    = serialize($conditionalFromEmails);
@@ -240,7 +245,6 @@ class FormExport extends FormBuilderForm{
 
                 foreach ($conditionalEmailTo as &$conditionalEmailToField) {
                     $conditionalEmailToField['fieldid']    = $elementIdMapping[$conditionalEmailToField['fieldid']];
-
                 }
 
                 $email->conditional_email_to    = serialize($conditionalEmailTo);
@@ -256,7 +260,8 @@ class FormExport extends FormBuilderForm{
         return true;
     }
 
-    public function importForm($path) {
+    public function importForm($path)
+    {
         if (!file_exists($path)) {
             return new \WP_Error('forms', "$path does not exist");
         }
@@ -274,7 +279,7 @@ class FormExport extends FormBuilderForm{
 
         $autoArchiveEl    = null;
 
-        foreach ( $lines as $line) {
+        foreach ($lines as $line) {
             if (empty($line)) {
                 continue;
             }
@@ -299,7 +304,7 @@ class FormExport extends FormBuilderForm{
                     'post_content'  => "[formbuilder slug={$object->slug}]",
                     'post_status'   => "publish",
                     'post_author'   => '1'
-               );
+                );
                 $url    = get_permalink(wp_insert_post($post, true, false));
 
                 // Form data
@@ -314,17 +319,16 @@ class FormExport extends FormBuilderForm{
                 if (is_wp_error($this->formData->id)) {
                     return $this->formData->id;
                 }
-
-            }elseif ($type    == 'elements') {
+            } elseif ($type    == 'elements') {
                 $elementIdMapping    = $this->insertFormElements($object);
 
                 if (is_wp_error($elementIdMapping)) {
                     return $elementIdMapping;
                 }
-            }elseif ($type    == 'emails') {
+            } elseif ($type    == 'emails') {
                 // Form e-mails
                 $this->insertFormEmails($object, $elementIdMapping);
-            }elseif ($type    == 'reminders') {
+            } elseif ($type    == 'reminders') {
                 // Form reminders
                 foreach ($object as $reminder) {
                     if (empty($reminder->frequency) || empty($reminder->period)) {
@@ -335,7 +339,7 @@ class FormExport extends FormBuilderForm{
 
                     $this->insertOrUpdateData($this->formReminderTable, $reminder);
                 }
-            }else{
+            } else {
                 TSJIPPY\printArray("Unknown import type: $type");
                 continue;
             }
@@ -347,11 +351,11 @@ class FormExport extends FormBuilderForm{
                 $this->tableName,
                 array(
                     'autoarchive_el'     => $elementIdMapping[$autoArchiveEl]
-               ),
+                ),
                 array(
                     'id'        => $formId,
-               ),
-           );
+                ),
+            );
         }
 
         return "<div class='success'>Import of the form '{$object->formData->slug}' finished successfully.<br>Visit the created form <a href='$url' target='_blank'>here</a></div>";

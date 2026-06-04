@@ -1,5 +1,7 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
 /**
@@ -20,7 +22,7 @@ use TSJIPPY;
  *
  * @author Ewald Harmsen
  */
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
@@ -35,7 +37,7 @@ define(__NAMESPACE__ . '\SETTINGS', get_option('tsjippy_forms_settings', []));
 
 // run right before activation
 register_activation_hook(__FILE__, function () {
-    require_once(PLUGINPATH. 'php/classes/Forms.php');
+    require_once(PLUGINPATH . 'php/classes/Forms.php');
 
     $forms = new Forms();
     $forms->createDbTables();
@@ -60,4 +62,3 @@ register_deactivation_hook(__FILE__, function () {
     wp_clear_scheduled_hook('auto_archive_action');
     wp_clear_scheduled_hook('mandatory_fields_reminder_action');
 });
-

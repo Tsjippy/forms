@@ -1,13 +1,16 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
 add_filter('login_redirect', __NAMESPACE__ . '\loginRedirect', 10, 3);
-function loginRedirect($redirect, $requestedRedirect, $user) {
+function loginRedirect($redirect, $requestedRedirect, $user)
+{
 
     if (rtrim($redirect, '/') != SITEURL) {
         return $redirect;
@@ -18,7 +21,7 @@ function loginRedirect($redirect, $requestedRedirect, $user) {
         $url            = get_permalink(TSJIPPY\USERMANAGEMENT\SETTINGS['account_page']);
     }
 
-    if ( !$url) {
+    if (!$url) {
         return $redirect;
     }
 

@@ -1,15 +1,18 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
 add_action('init', __NAMESPACE__ . '\initBlocks');
-function initBlocks() {
+function initBlocks()
+{
     register_block_type(
         __DIR__ . '/formselector/build',
         array(
             'render_callback' => __NAMESPACE__ . '\showFormSelector',
-       )
-   );
+        )
+    );
 
     register_block_type(
         __DIR__ . '/formbuilder/build',
@@ -17,8 +20,8 @@ function initBlocks() {
             'render_callback' => function ($request) {
                 return showFormBuilder($request)['html'];
             },
-       )
-   );
+        )
+    );
 
     register_block_type(
         __DIR__ . '/formresults/build',
@@ -40,8 +43,8 @@ function initBlocks() {
                     'type'  => 'integer'
                 ],
             ]
-       )
-   );
+        )
+    );
 
     register_block_type(
         __DIR__ . '/missing_form_fields/build',
@@ -53,12 +56,13 @@ function initBlocks() {
                     'default'     => 'mandatory',
                 ]
             ]
-       )
-   );
+        )
+    );
 }
 
 add_action('enqueue_block_assets', __NAMESPACE__ . '\loadAssets');
-function loadAssets() {
+function loadAssets()
+{
     if (is_admin()) {
         TSJIPPY\enqueueScripts();
 

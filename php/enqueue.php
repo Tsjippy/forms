@@ -1,8 +1,10 @@
 <?php
+
 namespace TSJIPPY\FORMS;
+
 use TSJIPPY;
 
-if ( ! defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit;
 }
 
@@ -10,7 +12,8 @@ if ( ! defined('ABSPATH')) {
  * Checks if a form exists
  * @param   string  $slug   The form slug or form name
  */
-function checkFormExistence($slug) {
+function checkFormExistence($slug)
+{
     $slug   = strtolower(str_replace(' ', '-', $slug));
     $forms  = new Forms();
     $forms->getForms();
@@ -35,7 +38,8 @@ function checkFormExistence($slug) {
 }
 
 add_action('wp_after_insert_post', __NAMESPACE__ . '\afterInsertPost', 10, 2);
-function afterInsertPost($postId, $post) {
+function afterInsertPost($postId, $post)
+{
     if (has_block('tsjippy/formbuilder', $post)) {
         $hasFormbuilderShortcode    = true;
 
@@ -46,8 +50,8 @@ function afterInsertPost($postId, $post) {
                 checkFormExistence($block['attrs']['formname']);
             }
         }
-    }else{
-        $hasFormbuilderShortcode    = has_shortcode($post->post_content, 'formbuilder') ;
+    } else {
+        $hasFormbuilderShortcode    = has_shortcode($post->post_content, 'formbuilder');
 
         // Add the form if it does not exist yet
         if ($hasFormbuilderShortcode) {
@@ -56,7 +60,7 @@ function afterInsertPost($postId, $post) {
                 $post->post_content,
                 $shortcodes,
                 PREG_SET_ORDER
-           );
+            );
 
             // loop over all the found shortcodes
             foreach ($shortcodes as $shortcode) {
@@ -66,11 +70,11 @@ function afterInsertPost($postId, $post) {
                     // Get the formbuilder name from the shortcode
                     if (!empty($atts['formname'])) {
                         $formName       = $atts['formname'];
-                    }elseif (!empty($atts['name'])) {
+                    } elseif (!empty($atts['name'])) {
                         $formName       = $atts['name'];
-                    }elseif (!empty($atts['slug'])) {
+                    } elseif (!empty($atts['slug'])) {
                         $formName       = $atts['slug'];
-                    }elseif (!empty($atts['id'])) {
+                    } elseif (!empty($atts['id'])) {
                         $formName       = $atts['id'];
                     }
 
@@ -85,10 +89,10 @@ function afterInsertPost($postId, $post) {
                             array(
                                 'ID'           => $postId,
                                 'post_content' => $content,
-                           ),
+                            ),
                             false,
                             false
-                       );
+                        );
                     }
                 }
             }
@@ -121,15 +125,16 @@ function afterInsertPost($postId, $post) {
 add_action('wp_enqueue_scripts', __NAMESPACE__ . '\registerScripts');
 add_action('admin_enqueue_scripts', __NAMESPACE__ . '\registerScripts');
 
-function registerScripts() {
-    wp_register_style('tsjippy_forms_style', TSJIPPY\pathToUrl(PLUGINPATH. 'css/forms.min.css'), array(), PLUGINVERSION);
-    wp_register_style('tsjippy_formtable_style', TSJIPPY\pathToUrl(PLUGINPATH. 'css/formtable.min.css'), array(), PLUGINVERSION);
+function registerScripts()
+{
+    wp_register_style('tsjippy_forms_style', TSJIPPY\pathToUrl(PLUGINPATH . 'css/forms.min.css'), array(), PLUGINVERSION);
+    wp_register_style('tsjippy_formtable_style', TSJIPPY\pathToUrl(PLUGINPATH . 'css/formtable.min.css'), array(), PLUGINVERSION);
 
-    wp_register_script('tsjippy_forms_script', TSJIPPY\pathToUrl(PLUGINPATH. 'js/forms.min.js'), array('tsjippy_formsubmit_script', 'tsjippy_fileupload_script'), PLUGINVERSION, true);
+    wp_register_script('tsjippy_forms_script', TSJIPPY\pathToUrl(PLUGINPATH . 'js/forms.min.js'), array('tsjippy_formsubmit_script', 'tsjippy_fileupload_script'), PLUGINVERSION, true);
 
-    wp_register_script('tsjippy_formbuilderjs', TSJIPPY\pathToUrl(PLUGINPATH. 'js/formbuilder.min.js'), array('tsjippy_forms_script'), PLUGINVERSION, true);
+    wp_register_script('tsjippy_formbuilderjs', TSJIPPY\pathToUrl(PLUGINPATH . 'js/formbuilder.min.js'), array('tsjippy_forms_script'), PLUGINVERSION, true);
 
-    wp_register_script('tsjippy_forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH. 'js/forms_table.min.js'), array('tsjippy_forms_script', 'tsjippy_table_script'), PLUGINVERSION, true);
+    wp_register_script('tsjippy_forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH . 'js/forms_table.min.js'), array('tsjippy_forms_script', 'tsjippy_table_script'), PLUGINVERSION, true);
 
     if (is_numeric(get_the_ID())) {
         $pages  = SETTINGS['formbuilder-pages'] ?? [];
