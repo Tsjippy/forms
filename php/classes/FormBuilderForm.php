@@ -1696,17 +1696,17 @@ class FormBuilderForm extends DisplayForm
                     <?php
                     $options    = [
                         "hcaptcha"        => "hCaptcha",
-                        "recaptcha"        => "reCaptcha",
-                        "turnstile"        => "Cloudflare Turnstile",
+                        "recaptcha"       => "reCaptcha",
+                        "turnstile"       => "Cloudflare Turnstile",
                         "datalist"        => "Datalist",
-                        "div-start"        => "Div Container - start",
-                        "div-end"        => "Div Container - end",
+                        "div-start"       => "Div Container - start",
+                        "div-end"         => "Div Container - end",
                         "formstep"        => "Multistep",
                         "info"            => "Infobox",
-                        "multi-start"    => "Multi-answer - start",
-                        "multi-end"        => "Multi-answer - end",
-                        "p"                => "Paragraph",
-                        "php"            => "Custom code"
+                        "multi-start"     => "Multi-answer - start",
+                        "multi-end"       => "Multi-answer - end",
+                        "p"               => "Paragraph",
+                        "php"             => "Custom code"
                     ];
 
                     $options    = apply_filters('tsjippy-special-form-elements', $options);

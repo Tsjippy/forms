@@ -841,7 +841,7 @@ class Forms
             TSJIPPY\printArray($wpdb->print_error());
         }
 
-        $this->jsFileName    = plugin_dir_path(__DIR__) . " ../js/dynamic/{$this->formData->slug}forms";
+        $this->jsFileName    = plugin_dir_path(__DIR__) . "../js/dynamic/{$this->formData->slug}forms";
 
         return true;
     }
@@ -996,7 +996,7 @@ class Forms
             $this->elementMapper(true);
 
             if (empty($post)) {
-                $url    = $_SERVER['REQUEST_URI'];
+                $url    = $_SERVER['REQUEST_URI'] ?? '';
             } else {
                 $url    = get_page_link($post);
             }

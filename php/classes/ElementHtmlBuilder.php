@@ -915,11 +915,6 @@ class ElementHtmlBuilder extends SubmitForm
         unset($options['name']);
         unset($options['class']);
 
-        $optionHtml    = '';
-        foreach ($options as $attribute => $value) {
-            $optionHtml .= " $attribute=$value";
-        }
-
         // Element setting
         if (!empty($this->element->folder_name)) {
             if (str_contains($this->element->folder_name, "private/")) {
@@ -949,9 +944,9 @@ class ElementHtmlBuilder extends SubmitForm
             $userId        = $this->userId;
         }
         //Load js
-        $uploader         = new TSJIPPY\FILEUPLOAD\FileUpload($userId, $metakey, $library, '', false, $this->usermeta[$metakey] ?? '');
+        $uploader         = new TSJIPPY\FILEUPLOAD\FileUploadHtml($userId, $metakey, $library, '', false, $this->usermeta[$metakey] ?? '');
 
-        return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $optionHtml, $this->element->edit_image);
+        return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $options, $this->element->edit_image);
     }
 
     /**
