@@ -2,14 +2,14 @@
 namespace TSJIPPY\FORMS;
 use TSJIPPY;
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined('ABSPATH')) exit;
 
 class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
 
-    public function afterPluginUpdate($oldVersion){
+    public function afterPluginUpdate($oldVersion) {
         global $wpdb;
 
-        if(version_compare('11.0.6', $oldVersion) === 1){
+        if (version_compare('11.0.6', $oldVersion) === 1) {
             /**
              * Rename tables to tsjippy_
              */
@@ -17,7 +17,7 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
                 "ALTER TABLE `{$wpdb->prefix}tsjippy_forms`
                 RENAME COLUMN `name` to `slug`,
                 RENAME COLUMN `formname` to `name`;"
-            );
+           );
 
             $wpdb->query(
                 "ALTER TABLE `{$wpdb->prefix}tsjippy_form_elements`
@@ -27,28 +27,28 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
                 RENAME COLUMN `nicename` to `name`,
                 RENAME COLUMN `editimage` to `edit_image`,
                 RENAME COLUMN `valuelist` to `value_list`;"
-            );
+           );
 
             $wpdb->query(
                 "ALTER TABLE `{$wpdb->prefix}tsjippy_form_reminders`
                 RENAME COLUMN `reminder_startdate` to `reminder_start_date`;"
-            );
+           );
 
             $wpdb->query(
                 "ALTER TABLE `{$wpdb->prefix}tsjippy_form_shortcode_column_settings`
                 RENAME COLUMN `name` to `slug`,
                 RENAME COLUMN `nice_name` to `name`;"
-            );
+           );
 
             $wpdb->query(
                 "ALTER TABLE `{$wpdb->prefix}tsjippy_form_shortcode_column_settings`
                 RENAME COLUMN `timecreated` to `time_created`,
                 RENAME COLUMN `timelastedited` to `time_last_edited`,
                 RENAME COLUMN `userid` to `user_id`;"
-            );
+           );
         }
 
-        if(version_compare('11.3.4', $oldVersion) === 1){
+        if (version_compare('11.3.4', $oldVersion) === 1) {
             global $wpdb;
 
             $forms      = new Forms();
@@ -59,9 +59,9 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
                     'slug'  => 'time_created'
                 ],
                 array(
-                    'slug'	=> 'timecreated'
-                ),
-            );
+                    'slug'    => 'timecreated'
+               ),
+           );
 
             $wpdb->update(
                 $forms->shortcodeColumnSettingsTable,
@@ -69,9 +69,9 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
                     'slug'  => 'time_last_edited'
                 ],
                 array(
-                    'slug'	=> 'timelastedited'
-                ),
-            );
+                    'slug'    => 'timelastedited'
+               ),
+           );
 
             $wpdb->update(
                 $forms->shortcodeColumnSettingsTable,
@@ -79,15 +79,15 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
                     'slug'  => 'userid'
                 ],
                 array(
-                    'slug'	=> 'user_id'
-                ),
-            );
+                    'slug'    => 'user_id'
+               ),
+           );
 
             $wpdb->query(
                 "UPDATE $forms->elTableName
                 SET slug = LOWER(name)
                 WHERE slug IS NULL"
-            );
+           );
 
             $wpdb->delete(
                 $forms->elTableName,
@@ -95,7 +95,7 @@ class AfterUpdate extends TSJIPPY\AfterPluginUpdate {
                     'slug' => null,
                     'name' => null
                 ]
-            );
+           );
         }
     }
 }

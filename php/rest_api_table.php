@@ -4,12 +4,12 @@ use TSJIPPY;
 use stdClass;
 use WP_Error;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if ( ! defined('ABSPATH')) {
+    exit;
 }
 
 // Allow rest api urls for non-logged in users
-add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__.'\addFormResultUrls');
+add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__ . '\addFormResultUrls');
 
 /**
  * Add form result URLs to the list of allowed REST API URLs
@@ -17,483 +17,483 @@ add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__.'\addFormResultUrls');
  * @param array $urls The list of allowed REST API URLs
  * @return array The updated list of allowed REST API URLs
  */
-function addFormResultUrls($urls){
-    $urls[] = RESTAPIPREFIX.'/forms/edit_value';
-	$urls[] = RESTAPIPREFIX.'/forms/get_input_html';
+function addFormResultUrls($urls) {
+    $urls[] = RESTAPIPREFIX. '/forms/edit_value';
+    $urls[] = RESTAPIPREFIX. '/forms/get_input_html';
 
     return $urls;
 }
 
-add_action( 'rest_api_init', __NAMESPACE__.'\restApiInitTable' );
+add_action('rest_api_init', __NAMESPACE__ . '\restApiInitTable');
 function restApiInitTable() {
-	//save_table_prefs
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/save_table_prefs',
-		array(
-			'methods' 				=> \WP_REST_Server::CREATABLE,
-			'callback' 				=> __NAMESPACE__.'\saveTablePrefs',
-			'permission_callback' 	=> function($request){
-				return current_user_can('read');		// Allow access to logged in users, tto be able to save theire column visibility preferences
-			},
-			'args'					=> array(
-				'form-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($formId){
-						return is_numeric($formId);
-					}
-				),
-				'column-name'	=> array('required'	=> true),
-			)
-		)
-	);
+    //save_table_prefs
+    register_rest_route(
+        RESTAPIPREFIX. '/forms',
+        '/save_table_prefs',
+        array(
+            'methods'                 => \WP_REST_Server::CREATABLE,
+            'callback'                 => __NAMESPACE__ . '\saveTablePrefs',
+            'permission_callback'     => function ($request) {
+                return current_user_can('read');        // Allow access to logged in users, tto be able to save theire column visibility preferences
+            },
+            'args'                    => array(
+                'form-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($formId) {
+                        return is_numeric($formId);
+                    }
+               ),
+                'column-name'    => array('required'    => true),
+           )
+       )
+   );
 
-	//delete_table_prefs
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/delete_table_prefs',
-		array(
-			'methods' 				=> \WP_REST_Server::CREATABLE,
-			'callback' 				=> __NAMESPACE__.'\deleteTablePrefs',
-			'permission_callback' 	=> function($request){
-				return current_user_can('read');		// Allow access to logged in users, to be able to reset theire column visibility preferences
-			},
-			'args'					=> array(
-				'form-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($formId){
-						return is_numeric($formId);
-					}
-				),
-			)
-		)
-	);
+    //delete_table_prefs
+    register_rest_route(
+        RESTAPIPREFIX. '/forms',
+        '/delete_table_prefs',
+        array(
+            'methods'                 => \WP_REST_Server::CREATABLE,
+            'callback'                 => __NAMESPACE__ . '\deleteTablePrefs',
+            'permission_callback'     => function ($request) {
+                return current_user_can('read');        // Allow access to logged in users, to be able to reset theire column visibility preferences
+            },
+            'args'                    => array(
+                'form-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($formId) {
+                        return is_numeric($formId);
+                    }
+               ),
+           )
+       )
+   );
 
-	//save_column_settings
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/save_column_settings',
-		array(
-			'methods' 				=> \WP_REST_Server::CREATABLE,
-			'callback' 				=> __NAMESPACE__.'\saveColumnSettings',
-			'permission_callback' 	=> function(){
-				$formsTable		= new DisplayFormResults($_POST);
-				return $formsTable->tableEditPermissions;
-			},
-			'args'					=> array(
-				'shortcode-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($shortcodeId){
-						return is_numeric($shortcodeId);
-					}
-				),
-				'column-settings'		=> array(
-					'required'	=> true,
-				),
-			)
-		)
-	);
+    //save_column_settings
+    register_rest_route(
+        RESTAPIPREFIX. '/forms',
+        '/save_column_settings',
+        array(
+            'methods'                 => \WP_REST_Server::CREATABLE,
+            'callback'                 => __NAMESPACE__ . '\saveColumnSettings',
+            'permission_callback'     => function () {
+                $formsTable        = new DisplayFormResults($_POST);
+                return $formsTable->tableEditPermissions;
+            },
+            'args'                    => array(
+                'shortcode-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($shortcodeId) {
+                        return is_numeric($shortcodeId);
+                    }
+               ),
+                'column-settings'        => array(
+                    'required'    => true,
+               ),
+           )
+       )
+   );
 
-	// save_table_prefs
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/save_table_settings',
-		array(
-			'methods' 				=> \WP_REST_Server::CREATABLE,
-			'callback' 				=> __NAMESPACE__.'\saveTableSettings',
-			'permission_callback' 	=> function(){
-				$formsTable		= new DisplayFormResults($_POST);
-				return $formsTable->tableEditPermissions;
-			},
-			'args'					=> array(
-				'shortcode-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($shortcodeId){
-						return is_numeric($shortcodeId);
-					}
-				),
-				'table-settings'		=> array(
-					'required'	=> true,
-				),
-			)
-		)
-	);
+    // save_table_prefs
+    register_rest_route(
+        RESTAPIPREFIX. '/forms',
+        '/save_table_settings',
+        array(
+            'methods'                 => \WP_REST_Server::CREATABLE,
+            'callback'                 => __NAMESPACE__ . '\saveTableSettings',
+            'permission_callback'     => function () {
+                $formsTable        = new DisplayFormResults($_POST);
+                return $formsTable->tableEditPermissions;
+            },
+            'args'                    => array(
+                'shortcode-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($shortcodeId) {
+                        return is_numeric($shortcodeId);
+                    }
+               ),
+                'table-settings'        => array(
+                    'required'    => true,
+               ),
+           )
+       )
+   );
 
-	//remove submission
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/remove_submission',
-		array(
-			'methods' 				=> \WP_REST_Server::CREATABLE,
-			'callback' 				=> __NAMESPACE__.'\removeSubmission',
-			'permission_callback' 	=> function(){
-				$formsTable		= new DisplayFormResults($_POST);
-				return $formsTable->tableEditPermissions;
-			},
-			'args'					=> array(
-				'submission-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($submissionId){
-						return is_numeric($submissionId);
-					}
-				)
-			)
-		)
-	);
+    //remove submission
+    register_rest_route(
+        RESTAPIPREFIX. '/forms',
+        '/remove_submission',
+        array(
+            'methods'                 => \WP_REST_Server::CREATABLE,
+            'callback'                 => __NAMESPACE__ . '\removeSubmission',
+            'permission_callback'     => function () {
+                $formsTable        = new DisplayFormResults($_POST);
+                return $formsTable->tableEditPermissions;
+            },
+            'args'                    => array(
+                'submission-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($submissionId) {
+                        return is_numeric($submissionId);
+                    }
+               )
+           )
+       )
+   );
 
-	//archive submission
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/archive_submission',
-		array(
-			'methods' 				=> \WP_REST_Server::CREATABLE,
-			'callback' 				=> __NAMESPACE__.'\archiveSubmission',
-			'permission_callback' 	=> function(){
-				$formsTable		= new DisplayFormResults($_POST);
-				return $formsTable->tableEditPermissions;
-			},
-			'args'					=> array(
-				'form-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($formId){
-						return is_numeric($formId);
-					}
-				),
-				'submission-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($submissionId){
-						return is_numeric($submissionId);
-					}
-				)
-			)
-		)
-	);
+    //archive submission
+    register_rest_route(
+        RESTAPIPREFIX. '/forms',
+        '/archive_submission',
+        array(
+            'methods'                 => \WP_REST_Server::CREATABLE,
+            'callback'                 => __NAMESPACE__ . '\archiveSubmission',
+            'permission_callback'     => function () {
+                $formsTable        = new DisplayFormResults($_POST);
+                return $formsTable->tableEditPermissions;
+            },
+            'args'                    => array(
+                'form-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($formId) {
+                        return is_numeric($formId);
+                    }
+               ),
+                'submission-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($submissionId) {
+                        return is_numeric($submissionId);
+                    }
+               )
+           )
+       )
+   );
 
-	// edit value
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/edit_value',
-		array(
-			'methods' 				=> \WP_REST_Server::CREATABLE,
-			'callback' 				=> __NAMESPACE__.'\editValue',
-			'permission_callback' 	=> '__return_true', 	// Allow public access, the function itself will check if the user has permissions to edit the value or not
-			'args'					=> array(
-				'submission-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($submissionId){
-						return is_numeric($submissionId);
-					}
-				),
-				'element-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($submissionId){
-						return is_numeric($submissionId);
-					}
-				),
-				'new-value'		=> array(
-					'required'	=> true,
-				),
-			)
-		)
-	);
+    // edit value
+    register_rest_route(
+        RESTAPIPREFIX. '/forms',
+        '/edit_value',
+        array(
+            'methods'                 => \WP_REST_Server::CREATABLE,
+            'callback'                 => __NAMESPACE__ . '\editValue',
+            'permission_callback'     => '__return_true',     // Allow public access, the function itself will check if the user has permissions to edit the value or not
+            'args'                    => array(
+                'submission-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($submissionId) {
+                        return is_numeric($submissionId);
+                    }
+               ),
+                'element-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($submissionId) {
+                        return is_numeric($submissionId);
+                    }
+               ),
+                'new-value'        => array(
+                    'required'    => true,
+               ),
+           )
+       )
+   );
 
-	//get_input_html
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/get_input_html',
-		array(
-			'methods' 				=> \WP_REST_Server::CREATABLE,
-			'callback' 				=> __NAMESPACE__.'\getInputHtml',
-			'permission_callback' 	=> '__return_true',						// Allow public access, the function itself will check if the user has permissions to view the input or not
-			'args'					=> array(
-				'element-id'		=> array(
-					'required'	=> true,
-				),
-				'submission-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($submissionId){
-						return is_numeric($submissionId);
-					}
-				),
-			)
-		)
-	);
+    //get_input_html
+    register_rest_route(
+        RESTAPIPREFIX. '/forms',
+        '/get_input_html',
+        array(
+            'methods'                 => \WP_REST_Server::CREATABLE,
+            'callback'                 => __NAMESPACE__ . '\getInputHtml',
+            'permission_callback'     => '__return_true',                        // Allow public access, the function itself will check if the user has permissions to view the input or not
+            'args'                    => array(
+                'element-id'        => array(
+                    'required'    => true,
+               ),
+                'submission-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($submissionId) {
+                        return is_numeric($submissionId);
+                    }
+               ),
+           )
+       )
+   );
 
-	// get next or prev page
-	register_rest_route(
-		RESTAPIPREFIX.'/forms',
-		'/get_page',
-		array(
-			'methods' 				=> \WP_REST_Server::CREATABLE,
-			'callback' 				=> __NAMESPACE__.'\getPage',
-			'permission_callback' 	=> '__return_true',						// Allow public access
-			'args'					=> array(	
-				'form-id'		=> array(
-					'required'	=> true,
-					'validate_callback' => function($formId){
-						return is_numeric($formId);
-					}
-				)
-			)
-		)
-	);
+    // get next or prev page
+    register_rest_route(
+        RESTAPIPREFIX. '/forms',
+        '/get_page',
+        array(
+            'methods'                 => \WP_REST_Server::CREATABLE,
+            'callback'                 => __NAMESPACE__ . '\getPage',
+            'permission_callback'     => '__return_true',                        // Allow public access
+            'args'                    => array(
+                'form-id'        => array(
+                    'required'    => true,
+                    'validate_callback' => function ($formId) {
+                        return is_numeric($formId);
+                    }
+               )
+           )
+       )
+   );
 }
 
-function getPage(){
-	$displayFormResults		= new DisplayFormResults($_POST);
+function getPage() {
+    $displayFormResults        = new DisplayFormResults($_POST);
 
-	$displayFormResults->loadShortcodeData();
+    $displayFormResults->loadShortcodeData();
 
-	$tables	= [];
+    $tables    = [];
 
-	$types	= [$_POST['type']];
-	if($_POST['type'] == 'all' && $displayFormResults->tableSettings->split_table){
-		$types	= ['own', 'others'];
-	}
+    $types    = [$_POST['type']];
+    if ($_POST['type'] == 'all' && $displayFormResults->tableSettings->split_table) {
+        $types    = ['own', 'others'];
+    }
 
-	foreach($types as $type){
-		$tables[$type]				= $displayFormResults->renderTable($type);
-	}
+    foreach ($types as $type) {
+        $tables[$type]                = $displayFormResults->renderTable($type);
+    }
 
-	return $tables;
+    return $tables;
 }
 
-function saveTablePrefs( \WP_REST_Request $request ) {
-	$columnName					= $request['column-name'];
+function saveTablePrefs(\WP_REST_Request $request) {
+    $columnName                    = $request['column-name'];
 
-	$userId						= get_current_user_id();
-	$hiddenColumns				= (array)get_user_meta($userId, 'hidden_columns_'.$request['form-id'], true);
+    $userId                        = get_current_user_id();
+    $hiddenColumns                = (array)get_user_meta($userId, 'hidden_columns_' .$request['form-id'], true);
 
-	$hiddenColumns[$columnName]	= 'hidden';
+    $hiddenColumns[$columnName]    = 'hidden';
 
-	update_user_meta($userId, 'hidden_columns_'.$request['form-id'], $hiddenColumns);
+    update_user_meta($userId, 'hidden_columns_' .$request['form-id'], $hiddenColumns);
 
-	return 'Succesfully updated column settings';
+    return 'Succesfully updated column settings';
 }
 
-function deleteTablePrefs( \WP_REST_Request $request ) {
-	$userId		= get_current_user_id();
-	delete_user_meta($userId, 'hidden_columns_'.$request['form-id']);
+function deleteTablePrefs(\WP_REST_Request $request) {
+    $userId        = get_current_user_id();
+    delete_user_meta($userId, 'hidden_columns_' .$request['form-id']);
 
-	return 'Succesfully reset column visibility';
+    return 'Succesfully reset column visibility';
 }
 
-function saveColumnSettings($settings=[], $shortcodeId=''){
-	$forms	= new SaveFormSettings();
-	
-	if($settings instanceof \WP_REST_Request){
-		$params			= $settings->get_params();
+function saveColumnSettings($settings=[], $shortcodeId='') {
+    $forms    = new SaveFormSettings();
 
-		$settings 		= $params['column-settings'];
-	}
+    if ($settings instanceof \WP_REST_Request) {
+        $params            = $settings->get_params();
 
-	$result = $forms->saveColumnSettings($settings, $shortcodeId);
+        $settings         = $params['column-settings'];
+    }
 
-	if(is_wp_error($result)){
-		return $result;
-	}
-	
-	return "Succesfully saved your column settings";
+    $result = $forms->saveColumnSettings($settings, $shortcodeId);
+
+    if (is_wp_error($result)) {
+        return $result;
+    }
+
+    return "Succesfully saved your column settings";
 }
 
-function saveTableSettings(){	
-	$tableSettings 	= $_POST['table-settings'];
+function saveTableSettings() {
+    $tableSettings     = $_POST['table-settings'];
 
-	// Check invalid filter names
-	if(isset($tableSettings->filter)){
-		foreach($tableSettings->filter as $filter){
-			if(in_array($filter['name'], ['accept-charset', 'action', 'autocomplete', 'enctype', 'method', 'name', 'novalidate', 'rel', 'target'])){
-				return new WP_Error('forms', "Invalid filter name '{$filter['name']}', use a different one");
-			}
-		}
-	}
+    // Check invalid filter names
+    if (isset($tableSettings->filter)) {
+        foreach ($tableSettings->filter as $filter) {
+            if (in_array($filter['name'], ['accept-charset', 'action', 'autocomplete', 'enctype', 'method', 'name', 'novalidate', 'rel', 'target'])) {
+                return new WP_Error('forms', "Invalid filter name '{$filter['name']}', use a different one");
+            }
+        }
+    }
 
-	//update table settings
-	$forms	= new SaveFormSettings();
-	
-	$result = $forms->insertOrUpdateData($forms->shortcodeTable, $tableSettings, ['id' => $_POST['shortcode-id']]);
+    //update table settings
+    $forms    = new SaveFormSettings();
 
-	if(is_wp_error($result)){
-		return $result;
-	}
-	
-	//also update form setings if needed
-	$formSettings = $_POST['form-settings'];
-	if(is_array($formSettings) && is_numeric($_POST['form-id'])){
-		$forms->getForm($_POST['form-id']);
-		
-		//update existing
-		$result = $forms->insertOrUpdateData($forms->tableName, $formSettings, ['id' => $forms->formData->id]);
+    $result = $forms->insertOrUpdateData($forms->shortcodeTable, $tableSettings, ['id' => $_POST['shortcode-id']]);
 
-		if(is_wp_error($result)){
-			return $result;
-		}
-	}
-	
-	return "Succesfully saved your table settings";
+    if (is_wp_error($result)) {
+        return $result;
+    }
+
+    //also update form setings if needed
+    $formSettings = $_POST['form-settings'];
+    if (is_array($formSettings) && is_numeric($_POST['form-id'])) {
+        $forms->getForm($_POST['form-id']);
+
+        //update existing
+        $result = $forms->insertOrUpdateData($forms->tableName, $formSettings, ['id' => $forms->formData->id]);
+
+        if (is_wp_error($result)) {
+            return $result;
+        }
+    }
+
+    return "Succesfully saved your table settings";
 }
 
-function removeSubmission(){
-	$formTable	= new EditFormResults($_POST);
+function removeSubmission() {
+    $formTable    = new EditFormResults($_POST);
 
-	$result		= $formTable->deleteSubmission((int) $_POST['submission-id']);
-	
-	if(is_wp_error($result)){
-		return $result;
-	}
+    $result        = $formTable->deleteSubmission((int) $_POST['submission-id']);
 
-	do_action('tsjippy-forms-entry-removed', $formTable, (int) $_POST['submission-id']);
+    if (is_wp_error($result)) {
+        return $result;
+    }
 
-	return "Entry with id {$_POST['submission-id']} succesfully removed";
+    do_action('tsjippy-forms-entry-removed', $formTable, (int) $_POST['submission-id']);
+
+    return "Entry with id {$_POST['submission-id']} succesfully removed";
 }
 
 /**
  * Archive or unarchive a subsubmission
  */
-function archiveSubmission(){
-	$formTable					= new EditFormResults($_POST);
-	$formTable->submissionId	= (int) $_POST['submission-id'];
-	$action						= $_POST['action'];
+function archiveSubmission() {
+    $formTable                    = new EditFormResults($_POST);
+    $formTable->submissionId    = (int) $_POST['submission-id'];
+    $action                        = $_POST['action'];
 
-	if($action	== 'archive'){
-		$archive = true;
-	}else{
-		$archive = false;
-	}
+    if ($action    == 'archive') {
+        $archive = true;
+    }else{
+        $archive = false;
+    }
 
-	$subId		= null;
-	if(isset($_POST['subid']) && is_numeric($_POST['subid'])){
-		$subId		= $_POST['subid'];
-	}
-	
-	$message	= $formTable->archiveSubmission($archive, $subId);
-	
-	return $message;
+    $subId        = null;
+    if (isset($_POST['subid']) && is_numeric($_POST['subid'])) {
+        $subId        = $_POST['subid'];
+    }
+
+    $message    = $formTable->archiveSubmission($archive, $subId);
+
+    return $message;
 }
 
 /**
  * Retrieves the element html needed to be able to update a form result entry
  */
-function getInputHtml(){
-	$formTable		= new DisplayFormResults($_POST);
+function getInputHtml() {
+    $formTable        = new DisplayFormResults($_POST);
 
-	$formTable->parseSubmissions('', $_POST['submission-id']);
+    $formTable->parseSubmissions('', $_POST['submission-id']);
 
-	// Get the form id from the submission and load the form
-	$formTable->getForm($formTable->submission->form_id);
+    // Get the form id from the submission and load the form
+    $formTable->getForm($formTable->submission->form_id);
 
-	$userId											= $formTable->submission->user_id;
+    $userId                                            = $formTable->submission->user_id;
 
-	$formTable->userId								= $userId;
+    $formTable->userId                                = $userId;
 
-	$elementId										= sanitize_text_field( wp_unslash( $_POST['element-id']));
+    $elementId                                        = sanitize_text_field(wp_unslash($_POST['element-id']));
 
-	$element										= $formTable->getElementById($elementId);
+    $element                                        = $formTable->getElementById($elementId);
 
-	if(!$element){
-		return new \WP_Error('No element found', "No element found with id '$elementId'");
-	}
+    if (!$element) {
+        return new \WP_Error('No element found', "No element found with id '$elementId'");
+    }
 
-	$value		= $formTable->getSubmissionValue($_POST['submission-id'], $elementId, isset($_POST['subid']) ? $_POST['subid'] : null);
+    $value        = $formTable->getSubmissionValue($_POST['submission-id'], $elementId, isset($_POST['subid']) ? $_POST['subid'] : null);
 
-	// Get element html
-	$html 		= $formTable->getElementHtml($element, '', $value);
-	
-	/**
-	 * Check if this element needs a datalist
-	 */
-	// Get all options
-	$options	= explode("\n", trim($element->options));
-		
-	//Loop over the options array
-	foreach($options as $option){
-		//Remove starting or ending spaces and make it lowercase
-		$option 		= explode('=', trim($option));
+    // Get element html
+    $html         = $formTable->getElementHtml($element, '', $value);
 
-		$optionType		= $option[0];
+    /**
+     * Check if this element needs a datalist
+     */
+    // Get all options
+    $options    = explode("\n", trim($element->options));
 
-		if(empty($option[1])){
-			TSJIPPY\printArray(["Option '$optionType' has no value, skipping", $option]);
-			continue;
-		}
-		$optionValue	= str_replace('\\\\', '\\', $option[1]);
+    //Loop over the options array
+    foreach ($options as $option) {
+        //Remove starting or ending spaces and make it lowercase
+        $option         = explode('=', trim($option));
 
-		// This option is a list option
-		if($optionType == 'list'){
-			$datalist	= $formTable->getElementBySlug($optionValue);
+        $optionType        = $option[0];
 
-			if($datalist == $element){
-				$datalist	= $formTable->getElementBySlug($optionValue.'-list');
-				TSJIPPY\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
-			}
+        if (empty($option[1])) {
+            TSJIPPY\printArray(["Option '$optionType' has no value, skipping", $option]);
+            continue;
+        }
+        $optionValue    = str_replace('\\\\', '\\', $option[1]);
 
-			// Get the html of the datalist element
-			if($datalist){
-				$html .= $formTable->getElementHtml($datalist, '');
-			}
-		}
-	}
-		
-	// prepend html with the html of previous element that wrap this elemnt
-	$index			= $element->priority - 2;
-	$prevElement 	= $formTable->formElements[$index];
-	while($prevElement && $prevElement->wrap){
-		$index--;
-		$html 			= $formTable->getElementHtml($prevElement, '').$html;
-		$prevElement 	= $formTable->formElements[$index];
-	}
-		
-	// add next elements if they are wrapped in this one
-	$index			= $element->priority;
-	while($element->wrap){
-		$element = $formTable->formElements[$index];
-		$html 	.= $formTable->getElementHtml($element, '');
-		$index++;
-	}
+        // This option is a list option
+        if ($optionType == 'list') {
+            $datalist    = $formTable->getElementBySlug($optionValue);
 
-	return $html;
+            if ($datalist == $element) {
+                $datalist    = $formTable->getElementBySlug($optionValue. '-list');
+                TSJIPPY\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
+            }
+
+            // Get the html of the datalist element
+            if ($datalist) {
+                $html .= $formTable->getElementHtml($datalist, '');
+            }
+        }
+    }
+
+    // prepend html with the html of previous element that wrap this elemnt
+    $index            = $element->priority - 2;
+    $prevElement     = $formTable->formElements[$index];
+    while($prevElement && $prevElement->wrap) {
+        $index--;
+        $html             = $formTable->getElementHtml($prevElement, '').$html;
+        $prevElement     = $formTable->formElements[$index];
+    }
+
+    // add next elements if they are wrapped in this one
+    $index            = $element->priority;
+    while($element->wrap) {
+        $element = $formTable->formElements[$index];
+        $html     .= $formTable->getElementHtml($element, '');
+        $index++;
+    }
+
+    return $html;
 }
 
 /**
  * Updates a value in the submission results table with a new value
  */
-function editValue(){
-	$formTable					= new EditFormResults($_POST);
-		
-	$formTable->submissionId	= $_POST['submission-id'];
+function editValue() {
+    $formTable                    = new EditFormResults($_POST);
 
-	$elementId					= sanitize_text_field( wp_unslash( $_POST['element-id']));
+    $formTable->submissionId    = $_POST['submission-id'];
 
-	$subId						= sanitize_text_field( wp_unslash( $_POST['subid']));
-	if($subId == ''){
-		$subId	= null;
-	}
+    $elementId                    = sanitize_text_field(wp_unslash($_POST['element-id']));
 
-	$newValue 					= json_decode(sanitize_textarea_field(stripslashes($_POST['new-value'])));
+    $subId                        = sanitize_text_field(wp_unslash($_POST['subid']));
+    if ($subId == '') {
+        $subId    = null;
+    }
 
-	$oldValue					= $formTable->getSubmissionValue($formTable->submissionId, $elementId, $subId);
+    $newValue                     = json_decode(sanitize_textarea_field(stripslashes($_POST['new-value'])));
 
-	if($oldValue == $newValue){
-		if(is_array($oldValue)){
-			$oldValue	= implode(' ', $oldValue);
-		}
-		return new WP_Error('tsjippy-forms', "Old value '$oldValue' is the same as the new value!");
-	}
+    $oldValue                    = $formTable->getSubmissionValue($formTable->submissionId, $elementId, $subId);
 
-	// update the submissiom
-	$result		= $formTable->updateSubmission($elementId, $newValue, $subId);
-	if(is_wp_error($result)){
-		return $result;
-	}
+    if ($oldValue == $newValue) {
+        if (is_array($oldValue)) {
+            $oldValue    = implode(' ', $oldValue);
+        }
+        return new WP_Error('tsjippy-forms', "Old value '$oldValue' is the same as the new value!");
+    }
 
-	//get transformed value
-	$elementSlug	= $formTable->getElementById($elementId, 'slug' );
-	$submissions	= $formTable->getSubmissions('', $formTable->submissionId);
-	$transValue		= $formTable->transformInputData($newValue, $elementSlug, $submissions[0]);
+    // update the submissiom
+    $result        = $formTable->updateSubmission($elementId, $newValue, $subId);
+    if (is_wp_error($result)) {
+        return $result;
+    }
 
-	//send message back to js
-	return [
-		'message'			=> "Succesfully updated the value to $transValue",
-		'new-value'			=> $transValue,
-	];
+    //get transformed value
+    $elementSlug    = $formTable->getElementById($elementId, 'slug');
+    $submissions    = $formTable->getSubmissions('', $formTable->submissionId);
+    $transValue        = $formTable->transformInputData($newValue, $elementSlug, $submissions[0]);
+
+    //send message back to js
+    return [
+        'message'            => "Succesfully updated the value to $transValue",
+        'new-value'            => $transValue,
+    ];
 }

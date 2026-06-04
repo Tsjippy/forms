@@ -2,72 +2,72 @@
 namespace TSJIPPY\FORMS;
 use TSJIPPY;
 
-add_action('init', __NAMESPACE__.'\initBlocks');
+add_action('init', __NAMESPACE__ . '\initBlocks');
 function initBlocks() {
-	register_block_type(
-		__DIR__ . '/formselector/build',
-		array(
-			'render_callback' => __NAMESPACE__.'\showFormSelector',
-		)
-	);
+    register_block_type(
+        __DIR__ . '/formselector/build',
+        array(
+            'render_callback' => __NAMESPACE__ . '\showFormSelector',
+       )
+   );
 
-	register_block_type(
-		__DIR__ . '/formbuilder/build',
-		array(
-			'render_callback' => function($request){
-				return showFormBuilder($request)['html'];
-			},
-		)
-	);
+    register_block_type(
+        __DIR__ . '/formbuilder/build',
+        array(
+            'render_callback' => function ($request) {
+                return showFormBuilder($request)['html'];
+            },
+       )
+   );
 
-	register_block_type(
-		__DIR__ . '/formresults/build',
-		array(
-			'render_callback' => __NAMESPACE__.'\showFormResults',
-			'attributes'      => [
-				'formid' => [
-					'type' => 'string'
-				],
-				'onlyOwn'  => [
-					'type'  => 'boolean',
-					'default' => false,
-				],
-				'archived'  => [
-					'type'  => 'boolean',
-					'default' => false,
-				],
-				'tableid'  => [
-					'type'  => 'integer'
-				],
-			]
-		)
-	);
+    register_block_type(
+        __DIR__ . '/formresults/build',
+        array(
+            'render_callback' => __NAMESPACE__ . '\showFormResults',
+            'attributes'      => [
+                'formid' => [
+                    'type' => 'string'
+                ],
+                'onlyOwn'  => [
+                    'type'  => 'boolean',
+                    'default' => false,
+                ],
+                'archived'  => [
+                    'type'  => 'boolean',
+                    'default' => false,
+                ],
+                'tableid'  => [
+                    'type'  => 'integer'
+                ],
+            ]
+       )
+   );
 
-	register_block_type(
-		__DIR__ . '/missing_form_fields/build',
-		array(
-			'render_callback' => __NAMESPACE__.'\missingFormFields',
-			'attributes'      => [
-				'type'  => [
-					'type'  	=> 'string',
-					'default' 	=> 'mandatory',
-				]
-			]
-		)
-	);
+    register_block_type(
+        __DIR__ . '/missing_form_fields/build',
+        array(
+            'render_callback' => __NAMESPACE__ . '\missingFormFields',
+            'attributes'      => [
+                'type'  => [
+                    'type'      => 'string',
+                    'default'     => 'mandatory',
+                ]
+            ]
+       )
+   );
 }
 
-add_action( 'enqueue_block_assets', __NAMESPACE__.'\loadAssets');
-function loadAssets(){
-	if(is_admin()){
-		TSJIPPY\enqueueScripts();
+add_action('enqueue_block_assets', __NAMESPACE__ . '\loadAssets');
+function loadAssets() {
+    if (is_admin()) {
+        TSJIPPY\enqueueScripts();
 
-		TSJIPPY\FILEUPLOAD\registerUploadScripts();
+        TSJIPPY\FILEUPLOAD\registerUploadScripts();
 
-		registerScripts();
-		
-		wp_enqueue_script( 'tsjippy_formbuilderjs');
+        registerScripts();
 
-		wp_enqueue_script('tsjippy_forms_table_script');
-	}
+        wp_enqueue_script('tsjippy_formbuilderjs');
+
+        wp_enqueue_script('tsjippy_forms_table_script');
+    }
 }

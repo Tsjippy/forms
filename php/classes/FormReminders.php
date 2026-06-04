@@ -2,8 +2,8 @@
 namespace TSJIPPY\FORMS;
 use TSJIPPY;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if ( ! defined('ABSPATH')) {
+    exit;
 }
 
 class FormReminders extends Forms{
@@ -15,7 +15,7 @@ class FormReminders extends Forms{
     public array        $mandatoryElements;
     public array        $userReminders;
 
-    public function __construct(){
+    public function __construct() {
         parent::__construct();
 
         $this->metaForms         = [];
@@ -34,10 +34,10 @@ class FormReminders extends Forms{
     /**
      * Gets the cached results from the database
      */
-    protected function getCache(){
+    protected function getCache() {
         $this->reminders  = get_transient('form_reminders');
 
-        if(empty($this->reminders)){
+        if (empty($this->reminders)) {
             $this->updateCache();
         }
     }
@@ -45,31 +45,31 @@ class FormReminders extends Forms{
     /**
      * Store the result in the cache
      */
-    public function updateCache(){
+    public function updateCache() {
         delete_transient('form_reminders');
 
         $this->reminders            = [
             'metaforms'    => [],
-            'defaultforms' => []  
+            'defaultforms' => []
         ];
-        
+
         //Retrieve all users
-        $this->userIds          			= TSJIPPY\getUserAccounts(false, false, 'ID');
-        
+        $this->userIds                      = TSJIPPY\getUserAccounts(false, false, 'ID');
+
         $this->getMandatoryElements();
 
         $this->checkElementNeedsInput();
 
-        foreach($this->defaultForms as $day => $submissionForm){
-            if(empty($submissionForm)){
+        foreach ($this->defaultForms as $day => $submissionForm) {
+            if (empty($submissionForm)) {
                 continue;
             }
 
-            foreach($submissionForm as $formDetails){
+            foreach ($submissionForm as $formDetails) {
                 $formReminder   = $formDetails['reminder'];
 
                 // do not process if not needed
-                if($this->passedReminderCount($formReminder)){
+                if ($this->passedReminderCount($formReminder)) {
                     continue;
                 }
 
@@ -86,25 +86,25 @@ class FormReminders extends Forms{
 
     /**
      * Updates the cache for a specific form
-     * 
+     *
      * @param   int     $formId    The form id to update the cache for
      * @param   int     $userId    The user id to update the cache for
-     * 
+     *
      * @return  void
      */
-    public function updateFormCache($formId, $userId=''){
+    public function updateFormCache($formId, $userId='') {
         $this->getForm($formId);
     }
 
     /**
      * Gets the reminders for a given user id
-     * 
+     *
      * @param   int $userId    The user id to get the reminders for
-     * 
+     *
      * @return  array           The reminders for the given user id
      */
-    public function getUserFormReminders($userId){
-        if(empty($this->userReminders[$userId])){
+    public function getUserFormReminders($userId) {
+        if (empty($this->userReminders[$userId])) {
             return '';
         }
 
@@ -114,7 +114,7 @@ class FormReminders extends Forms{
     /**
      * Gets all forms with reminder settings from the db
      */
-    protected function getFormsWithReminders(){
+    protected function getFormsWithReminders() {
         global $wpdb;
 
         // Prepare the weekdays
@@ -122,33 +122,33 @@ class FormReminders extends Forms{
 
         for ($i = 0; $i < 7; $i++) {
             $this->metaForms[$date->format('D')]        = []; // 'D' for short day name
-            $this->defaultForms[$date->format('D')]     = []; 
+            $this->defaultForms[$date->format('D')]     = [];
             $date->modify('+1 day');
         }
 
         // Get the forms that have a stardate in the past
-        $date				= gmdate('Y-m-d');
+        $date                = gmdate('Y-m-d');
 
-        $results			= $wpdb->get_results(
+        $results            = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM %i WHERE reminder_start_date <= %s",
                 $this->formReminderTable,
                 $date
-            )
-        );
+           )
+       );
 
-        foreach($results as $formReminder){
-            $formReminder->conditions	= maybe_unserialize($formReminder->conditions);
+        foreach ($results as $formReminder) {
+            $formReminder->conditions    = maybe_unserialize($formReminder->conditions);
 
-            $form	= $this->getForm($formReminder->form_id);
+            $form    = $this->getForm($formReminder->form_id);
 
-            $form	= $this->formData;
+            $form    = $this->formData;
 
             // get the start day of the week
             $day = gmdate('D', strtotime($formReminder->reminder_start_date));
 
             // This is a form that saves its data in the user meta, so we use different logic for that
-            if($this->formData->save_in_meta){
+            if ($this->formData->save_in_meta) {
                 $varName   = 'metaForms';
             }else{
                 $varName   = 'defaultForms';
@@ -163,26 +163,26 @@ class FormReminders extends Forms{
 
     /**
      * Checks if the maximimum form amount of form reminders has been sent
-     * 
+     *
      * @param   object  $formReminder   The form reminder obejct
-     * 
-     * @return  bool                    true if past, false otherwise 
+     *
+     * @return  bool                    true if past, false otherwise
      */
-    protected function passedReminderCount($formReminder){
+    protected function passedReminderCount($formReminder) {
         // Recurring submissions
-        if(!empty($formReminder->frequency ) && !empty($formReminder->period)){
+        if (!empty($formReminder->frequency) && !empty($formReminder->period)) {
             // Get the re-submission intervals since the start
-            $interval 		= \DateInterval::createFromDateString("$formReminder->frequency $formReminder->period"); 	// the interval between submissions
-            $daterange 		= new \DatePeriod(																			// the date range between start_date and today with the specified interval 
-                date_create($formReminder->reminder_start_date), 
-                $interval , 
+            $interval         = \DateInterval::createFromDateString("$formReminder->frequency $formReminder->period");     // the interval between submissions
+            $daterange         = new \DatePeriod(                                                                           // the date range between start_date and today with the specified interval
+                date_create($formReminder->reminder_start_date),
+                $interval ,
                 new \DateTime('now'),
                 false
-            );
+           );
 
             // Get the current interval
-            $currentReminderStart		= $daterange->getEndDate()->format('Y-m-d');
-            foreach($daterange as $date1){
+            $currentReminderStart        = $daterange->getEndDate()->format('Y-m-d');
+            foreach ($daterange as $date1) {
                 $currentReminderStart = $date1->format('Y-m-d');
             }
         }else{
@@ -190,10 +190,10 @@ class FormReminders extends Forms{
         }
 
         // Do not continue if we already have notified the maximum amount
-        if(
-            !empty($formReminder->reminder_amount) &&																				// There is an max amount set in weeks
-            strtotime("+ $formReminder->reminder_amount $formReminder->reminder_period", strtotime($currentReminderStart)) < time()	// we are passed the amount
-        ){
+        if (
+            !empty($formReminder->reminder_amount) &&                                                                                // There is an max amount set in weeks
+            strtotime("+ $formReminder->reminder_amount $formReminder->reminder_period", strtotime($currentReminderStart)) < time()    // we are passed the amount
+       ) {
             return true;
         }
 
@@ -202,34 +202,34 @@ class FormReminders extends Forms{
 
     /**
      * Get the minimum form submission date
-     * 
+     *
      * @param   object  $formReminder   The form reminder obejct
-     * 
+     *
      * @return  string                  The minimum date for form submissions to be included in the reminders
      */
-    protected function getMinimumDate($formReminder, &$query, &$values){
-        $since	= '';
+    protected function getMinimumDate($formReminder, &$query, &$values) {
+        $since    = '';
 
         // We have definded a submission
-        if(
-            !empty($formReminder->frequency) && 
-            !empty($formReminder->period) && 
-            !empty($formReminder->window_start) && 
+        if (
+            !empty($formReminder->frequency) &&
+            !empty($formReminder->period) &&
+            !empty($formReminder->window_start) &&
             $formReminder->window_start != '0000-00-00'
-        ){
-            $interval 		= \DateInterval::createFromDateString("$formReminder->frequency $formReminder->period");
+       ) {
+            $interval         = \DateInterval::createFromDateString("$formReminder->frequency $formReminder->period");
 
             // calculate the start of the current window
-            $daterange 		= new \DatePeriod(																			// the date range between start_date and today with the specified interval 
-                date_create($formReminder->window_start), 
-                $interval , 
+            $daterange         = new \DatePeriod(                                                                           // the date range between start_date and today with the specified interval
+                date_create($formReminder->window_start),
+                $interval ,
                 new \DateTime('now'),
                 false
-            );
+           );
 
             // Get the current interval
-            $since		= $daterange->getEndDate()->format('Y-m-d');
-            foreach($daterange as $date1){
+            $since        = $daterange->getEndDate()->format('Y-m-d');
+            foreach ($daterange as $date1) {
                 $since = $date1->format('Y-m-d');
             }
 
@@ -242,16 +242,16 @@ class FormReminders extends Forms{
 
     /**
      * Checks a given form for pending reminders
-     * 
+     *
      * @param   object  $formReminder   The form reminder object
-     * 
+     *
      * @return  void
      */
-    protected function processDefaultForm($formReminder){
-        global $wpdb; 
+    protected function processDefaultForm($formReminder) {
+        global $wpdb;
 
         // Get all submissions created inside the current submission window
-        $query			= "SELECT * FROM %i WHERE form_id=%d";
+        $query            = "SELECT * FROM %i WHERE form_id=%d";
         $values            = [
             $this->submissionTableName,
             $formReminder->form_id
@@ -259,69 +259,70 @@ class FormReminders extends Forms{
 
         $this->getMinimumDate($formReminder, $query, $values);
 
-        $submissions	= $wpdb->get_results(
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $submissions    = $wpdb->get_results(
             $wpdb->prepare(
                 $query,
                 $values
-            )
-        );
+           )
+       );
 
         // get all the users who have submitted the form after the currentIntervalStart date
-        $usersWithSubmission	= [];
-        foreach($submissions as $submission){
-            $usersWithSubmission[]	= $submission->user_id;
+        $usersWithSubmission    = [];
+        foreach ($submissions as $submission) {
+            $usersWithSubmission[]    = $submission->user_id;
         }
 
-        $usersWithoutSubmission	= array_diff($this->userIds, $usersWithSubmission);		
+        $usersWithoutSubmission    = array_diff($this->userIds, $usersWithSubmission);
 
-        foreach($usersWithoutSubmission as $index => $userWithoutSubmission){
-            if($this->checkIfConditionsAppliesToUser($formReminder->conditions, $userWithoutSubmission, $submissions)){
+        foreach ($usersWithoutSubmission as $index => $userWithoutSubmission) {
+            if ($this->checkIfConditionsAppliesToUser($formReminder->conditions, $userWithoutSubmission, $submissions)) {
                 unset($usersWithoutSubmission[$index]);
             }
         }
 
-        $this->reminders['defaultforms'][$formReminder->form_id]	= array_values($usersWithoutSubmission);
+        $this->reminders['defaultforms'][$formReminder->form_id]    = array_values($usersWithoutSubmission);
     }
 
     /**
      * Get mandatory and recommended elements from the db
      */
-    protected function getMandatoryElements(){
+    protected function getMandatoryElements() {
         global $wpdb;
 
-        $this->mandatoryElements	= $wpdb->get_results(
+        $this->mandatoryElements    = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM %i WHERE mandatory=1 OR recommended=1",
                 $this->elTableName
-            )
-        );
-        $this->mandatoryElements	= apply_filters("tsjippy_elements_filter", $this->mandatoryElements	, $this);
+           )
+       );
+        $this->mandatoryElements    = apply_filters("tsjippy_elements_filter", $this->mandatoryElements    , $this);
     }
 
     /**
      * Checks if a given set of conditions applies to the current user. Returns true if there is a match
      *
-     * @param	object	$conditions		The element conditions
-     * @param	int		$userId			The user id
-     * @param	array	$submissions	The submissions to check
+     * @param    object    $conditions        The element conditions
+     * @param    int        $userId            The user id
+     * @param    array    $submissions    The submissions to check
      *
-     * @return	bool					true if no conditions or the condition apply, false if it does not apply
+     * @return    bool                    true if no conditions or the condition apply, false if it does not apply
      */
-    public function checkIfConditionsAppliesToUser($conditions, $userId, $submissions=''){
-        if(!is_array($conditions)){
+    public function checkIfConditionsAppliesToUser($conditions, $userId, $submissions='') {
+        if (!is_array($conditions)) {
             return true;
         }
 
-        $conditions	= TSJIPPY\cleanUpNestedArray($conditions);
+        $conditions    = TSJIPPY\cleanUpNestedArray($conditions);
 
         // Check if the the roles overlap
-        if(isset($conditions['roles'])){
+        if (isset($conditions['roles'])) {
             // Check if user has one of the roles
-            $user	= get_userdata($userId);
-            if($user){
-                $userRoles	= $user->roles;
-                $intersect	= array_intersect($conditions['roles'], $userRoles);
-                if(!empty($intersect)){
+            $user    = get_userdata($userId);
+            if ($user) {
+                $userRoles    = $user->roles;
+                $intersect    = array_intersect($conditions['roles'], $userRoles);
+                if (!empty($intersect)) {
                     // There is at least one overlapping role
                     return true;
                 }
@@ -331,68 +332,68 @@ class FormReminders extends Forms{
 
         $applies = false;
 
-        foreach($conditions as $check){
+        foreach ($conditions as $check) {
             // get the user value
-            $value		= get_user_meta($userId, $check['meta-key'], true);
+            $value        = get_user_meta($userId, $check['meta-key'], true);
 
             $metaIndex  = trim($check['meta-key-index']);
-            if(!empty($metaIndex)){
-                if(!empty($value[$metaIndex])){
-                    $value		= $value[$metaIndex];
+            if (!empty($metaIndex)) {
+                if (!empty($value[$metaIndex])) {
+                    $value        = $value[$metaIndex];
                 }else{
-                    $value		= '';
+                    $value        = '';
                 }
             }
 
-            if(is_array($value)){
-                $value	= array_filter($value);
+            if (is_array($value)) {
+                $value    = array_filter($value);
 
-                if(empty($value)){
-                    $value	= '';
+                if (empty($value)) {
+                    $value    = '';
                 }
             }
 
-            if(is_array($value) && $check['equation'] != 'submitted' && isset($value[0])){
-                $value	= $value[0];
+            if (is_array($value) && $check['equation'] != 'submitted' && isset($value[0])) {
+                $value    = $value[0];
             }
 
             // Get the compare value
-            $checkValue	= '';
-            if(isset($check['conditional-value'])){
-                $checkValue			= $check['conditional-value'];
-                $conditionalValue	= strtotime($check['conditional-value']);
-                if($conditionalValue && gmdate('Y', $conditionalValue) < 2200){
-                    $checkValue	= gmdate('Y-m-d', $conditionalValue);
+            $checkValue    = '';
+            if (isset($check['conditional-value'])) {
+                $checkValue            = $check['conditional-value'];
+                $conditionalValue    = strtotime($check['conditional-value']);
+                if ($conditionalValue && gmdate('Y', $conditionalValue) < 2200) {
+                    $checkValue    = gmdate('Y-m-d', $conditionalValue);
                 }
             }
 
             // compare the values
-            switch($check['equation']){
+            switch($check['equation']) {
                 case '==':
-                    $result	= $value == $checkValue;
+                    $result    = $value == $checkValue;
                     break;
                 case '!=':
-                    $result	= $value != $checkValue;
+                    $result    = $value != $checkValue;
                     break;
                 case '>':
-                    $result	= $value > $checkValue;
+                    $result    = $value > $checkValue;
                     break;
                 case '<':
-                    $result	= $value < $checkValue;
+                    $result    = $value < $checkValue;
                     break;
                 case 'submitted':
-                    $result	= false;
+                    $result    = false;
 
-                    // check if the given user_id has submitted the form already 
-                    foreach($submissions as $submission){
-                        if(is_array($value)){
-                            if(in_array($submission->user_id, $value)){
-                                $result	= true;
+                    // check if the given user_id has submitted the form already
+                    foreach ($submissions as $submission) {
+                        if (is_array($value)) {
+                            if (in_array($submission->user_id, $value)) {
+                                $result    = true;
                                 break;
                             }
                         }else{
-                            if($submission->user_id == $value){
-                                $result	= true;
+                            if ($submission->user_id == $value) {
+                                $result    = true;
                                 break;
                             }
                         }
@@ -403,65 +404,65 @@ class FormReminders extends Forms{
             }
 
             // Check the result
-            if($result){
+            if ($result) {
                 $applies = true;
 
                 //break this loop when we already know we should skip this field
-                if(!empty($check['combinator']) && $check['combinator'] == 'or'){
+                if (!empty($check['combinator']) && $check['combinator'] == 'or') {
                     break;
                 }
             }
         }
-        
+
         return $applies;
     }
 
     /**
      * Checks if a given elements needs some input of a given user and returns html links for each element that needs input
      *
-     * @return	string				The html
+     * @return    string                The html
      */
-    public function checkElementNeedsInput(){
+    public function checkElementNeedsInput() {
         // Sort on form
-        usort($this->mandatoryElements, function($a, $b) {
+        usort($this->mandatoryElements, function ($a, $b) {
             return $a->form_id <=> $b->form_id; // The spaceship operator (<=>) simplifies comparisons in PHP 7+
         });
 
         // Loop over all mandatory and required elements
-        foreach($this->mandatoryElements as $element){
+        foreach ($this->mandatoryElements as $element) {
             // Load the form data for this element to save db queries in the getElementById function
             $this->getForm($element->form_id);
 
             // Unserialize the warning conditions
-            $warningCondition	= maybe_unserialize($element->warning_conditions);
+            $warningCondition    = maybe_unserialize($element->warning_conditions);
 
-            $metakey 	= explode('[', $element->slug)[0];
+            $metakey     = explode('[', $element->slug)[0];
 
             // Loop over the users
-            foreach($this->userIds as $userId){
+            foreach ($this->userIds as $userId) {
                 //check if this element applies to this user
-                if($this->checkIfConditionsAppliesToUser($warningCondition, $userId)){
+                if ($this->checkIfConditionsAppliesToUser($warningCondition, $userId)) {
                     continue;
                 }
 
-                $name		= $element->slug;
-                if (str_contains($name, '[')){
+                $name        = $element->slug;
+                if (str_contains($name, '[')) {
                     $value  = TSJIPPY\getMetaArrayValue($userId, $name, $value);
                 }else{
                     $value  = get_user_meta($userId, $metakey, true);
                 }
 
                 // Element has a value
-                if(!empty($value)){
+                if (!empty($value)) {
                     continue;
                 }
 
                 // Store the in the reminders array
-                if(!isset($this->reminders['metaforms'][$this->formData->id])){
+                if (!isset($this->reminders['metaforms'][$this->formData->id])) {
                     $this->reminders['metaforms'][$this->formData->id]   = [];
                 }
 
-                if(!isset($this->reminders['metaforms'][$this->formData->id][$element->id])){
+                if (!isset($this->reminders['metaforms'][$this->formData->id][$element->id])) {
                     $this->reminders['metaforms'][$this->formData->id][$element->id]   = [];
                 }
 
@@ -474,42 +475,42 @@ class FormReminders extends Forms{
      * Gets all mandatory forms for today as html links
      *
      * @param   bool    $includeMandatoryForms    Whether to include mandatory forms without element reminders as well
-     * 
-     * @return string|array 			Returns html links to forms who are due for submission if a user_id is given, an array of form => [user_ids] otherwise
+     *
+     * @return string|array             Returns html links to forms who are due for submission if a user_id is given, an array of form => [user_ids] otherwise
      */
-    public function getAllFormRemindersForToday($includeMandatoryForms=true){
+    public function getAllFormRemindersForToday($includeMandatoryForms=true) {
         $today      = gmdate('D');
-	    $family	    = new TSJIPPY\FAMILY\Family();
+        $family        = new TSJIPPY\FAMILY\Family();
         $reminders  = [];
 
         // Form element reminders
-        foreach($this->metaForms[$today] as $formDetails){
+        foreach ($this->metaForms[$today] as $formDetails) {
             $formId     = $formDetails['form']->id;
 
             // Do nothing if there are no reminders for this form
-            if(!isset($this->reminders['metaforms'][$formId])){
+            if (!isset($this->reminders['metaforms'][$formId])) {
                 continue;
             }
 
-            foreach($this->reminders['metaforms'][$formId] as $elementId => $userIds){
+            foreach ($this->reminders['metaforms'][$formId] as $elementId => $userIds) {
 
                 $this->getForm($formId);
 
-                foreach($userIds as $userId){
-                    $child				= $family->isChild($userId);
+                foreach ($userIds as $userId) {
+                    $child                = $family->isChild($userId);
                     $childName          = '';
-                    if($child){
-                        $childName		= get_userdata($userId)->first_name;
+                    if ($child) {
+                        $childName        = get_userdata($userId)->first_name;
                     }
 
                     $result             = $this->getElementReminderHtml($elementId, 'mandatory', $childName);
 
-                    if(!empty($result)){   
-                        if(!isset($reminders[$userId])){
+                    if (!empty($result)) {
+                        if (!isset($reminders[$userId])) {
                             $reminders[$userId] = [];
                         }
 
-                        if(!isset($reminders[$userId][$formId])){
+                        if (!isset($reminders[$userId][$formId])) {
                             $reminders[$userId][$formId] = '<ul>';
                         }
 
@@ -520,24 +521,24 @@ class FormReminders extends Forms{
         }
 
         // Form reminders
-        if($includeMandatoryForms){
-            foreach($this->defaultForms[$today] as $formDetails){
+        if ($includeMandatoryForms) {
+            foreach ($this->defaultForms[$today] as $formDetails) {
                 $formId     = $formDetails['form']->id;
 
                 // Do nothing if there are no reminders for this form
-                if(!isset($this->reminders['defaultforms'][$formId])){
+                if (!isset($this->reminders['defaultforms'][$formId])) {
                     continue;
                 }
 
-                foreach($this->reminders['defaultforms'] as $formId => $userIds){
-                    foreach($userIds as $userId){
-                        $child				= $family->isChild($userId);
+                foreach ($this->reminders['defaultforms'] as $formId => $userIds) {
+                    foreach ($userIds as $userId) {
+                        $child                = $family->isChild($userId);
                         $childName          = '';
-                        if($child){
-                            $childName		= get_userdata($userId)->first_name;
+                        if ($child) {
+                            $childName        = get_userdata($userId)->first_name;
                         }
 
-                        if(!isset($reminders[$userId])){
+                        if (!isset($reminders[$userId])) {
                             $reminders[$userId] = '<ul>';
                         }
 
@@ -547,8 +548,8 @@ class FormReminders extends Forms{
             }
         }
 
-        foreach($reminders as $userId => &$forms){
-            foreach($forms as $formId => &$reminder){
+        foreach ($reminders as $userId => &$forms) {
+            foreach ($forms as $formId => &$reminder) {
                 $reminder .= '</ul>';
             }
         }
@@ -559,31 +560,31 @@ class FormReminders extends Forms{
     /**
      * Maps all reminders by user id
      */
-    protected function mapToUserId(){
-        foreach($this->reminders['metaforms'] as $formId => $elements){
-            foreach($elements as $elementId => $userIds){
-                foreach($userIds as $userId){
-                    if(!isset($this->userReminders[$userId])){
+    protected function mapToUserId() {
+        foreach ($this->reminders['metaforms'] as $formId => $elements) {
+            foreach ($elements as $elementId => $userIds) {
+                foreach ($userIds as $userId) {
+                    if (!isset($this->userReminders[$userId])) {
                         $this->userReminders[$userId]   = [];
                     }
 
-                    if(!isset($this->userReminders[$userId]['metaforms'])){
+                    if (!isset($this->userReminders[$userId]['metaforms'])) {
                         $this->userReminders[$userId]['metaforms']   = [];
                     }
 
-                    if(!isset($this->userReminders[$userId]['metaforms'][$formId])){
+                    if (!isset($this->userReminders[$userId]['metaforms'][$formId])) {
                         $this->userReminders[$userId]['metaforms'][$formId]   = [];
                     }
 
-                    if(!in_array($elementId, $this->userReminders[$userId]['metaforms'][$formId])){
-                        $this->userReminders[$userId]['metaforms'][$formId][]    = $elementId; 
+                    if (!in_array($elementId, $this->userReminders[$userId]['metaforms'][$formId])) {
+                        $this->userReminders[$userId]['metaforms'][$formId][]    = $elementId;
                     }
                 }
             }
         }
 
-        foreach($this->reminders['defaultforms'] as $formId => $userIds){
-            foreach($userIds as $userId){
+        foreach ($this->reminders['defaultforms'] as $formId => $userIds) {
+            foreach ($userIds as $userId) {
                 $this->userReminders[$userId]['defaultforms'][]     = $formId;
             }
         }
@@ -591,20 +592,20 @@ class FormReminders extends Forms{
 
     /**
      * Get the html for a specific element
-     * 
+     *
      * @param   int     $elementId     The element id to get the html for
      * @param   string  $type          The type of reminder to get the html for
      * @param   string  $childName     The name of the child to include in the reminder text if applicable
      * @return  string                  The html for the element reminder
-     * 
+     *
      */
-    protected function getElementReminderHtml($elementId, $type='all', $childName=''){
+    protected function getElementReminderHtml($elementId, $type='all', $childName='') {
         $element    = $this->getElementById($elementId);
-        if(!$element){
+        if (!$element) {
             return '';
         }
 
-        if($type != 'all' && !$element->$type){
+        if ($type != 'all' && !$element->$type) {
             return '';
         }
 
@@ -613,34 +614,34 @@ class FormReminders extends Forms{
         parse_str(parse_url($formUrl, PHP_URL_QUERY), $params);
 
         //Show a nice name
-        $name	= str_replace(['[]', '_'], ['', ' '], $element->name);
-        $name	= ucfirst(str_replace(['[', ']'], [': ',''], $name));
+        $name    = str_replace(['[]', '_'], ['', ' '], $element->name);
+        $name    = ucfirst(str_replace(['[', ']'], [': ',''], $name));
 
-        $baseUrl	= explode('main-tab=', $_SERVER['REQUEST_URI'])[0];
-        $mainTab	= $params['main-tab'] ?? '';
-        if(!empty($childName)){
-            $name 		.= " for $childName";
-            $mainTab	 = strtolower($childName);
-            $formUrl	 = str_replace($params['main-tab'], $mainTab, $formUrl);
+        $baseUrl    = explode('main-tab=', $_SERVER['REQUEST_URI'])[0];
+        $mainTab    = $params['main-tab'] ?? '';
+        if (!empty($childName)) {
+            $name         .= " for $childName";
+            $mainTab     = strtolower($childName);
+            $formUrl     = str_replace($params['main-tab'], $mainTab, $formUrl);
         }
-        
+
         // If the url has no hash or we are not on the same url
-        if(
-            !isset($_GET['user_id']) && 
+        if (
+            !isset($_GET['user_id']) &&
             !str_contains($baseUrl, 'wp-json') &&
             (
-                empty($params['main-tab']) || 
+                empty($params['main-tab']) ||
                 !str_contains($formUrl, $baseUrl)
-            )
-        ){
+           )
+       ) {
             return "<li><a href='$formUrl#{$element->slug}'>$name</a></li>";
         }
 
         //We are on the same page, just change the hash
-        $secondTab	= '';
-        $names		= explode('[', $element->slug);
-        if(count($names) > 1){
-            $secondTab	= $names[0];
+        $secondTab    = '';
+        $names        = explode('[', $element->slug);
+        if (count($names) > 1) {
+            $secondTab    = $names[0];
         }
 
         return "<li><a onclick='Main.changeUrl(this, `$secondTab`)' data-target='$mainTab' data-hash={$element->slug} style='cursor:pointer'>$name</a></li>";
@@ -652,7 +653,7 @@ class FormReminders extends Forms{
      * @param   string  $childName     The name of the child to include in the reminder text if applicable
      * @return  string                  The html for the form reminder
      */
-    protected function getFormReminderHtml($formId, $childName){
+    protected function getFormReminderHtml($formId, $childName) {
         $this->getForm($formId);
 
         $formUrl    = $this->formData->url;
@@ -660,7 +661,7 @@ class FormReminders extends Forms{
         $formName   = $this->formData->name;
 
         $text       = "Fill in the $formName form";
-        if(!empty($childName)){
+        if (!empty($childName)) {
             $text   .= " for $childName";
         }
 
@@ -669,37 +670,37 @@ class FormReminders extends Forms{
 
     /**
      * Gets the reminder html for a given user id
-     * 
+     *
      * @param   int $userId     The user id to get the reminder html for
      * @param   string $type    The type of reminders to include in the html, either 'mandatory', 'recommended' or 'all'
-      * 
+      *
       * @return  string          The reminder html for the given user id
      */
-    public function getReminderHtml($userId, $type){
+    public function getReminderHtml($userId, $type) {
         // Nothing to do
-        if(empty($this->userReminders[$userId])){
+        if (empty($this->userReminders[$userId])) {
             return '';
         }
-        
-	    $family	            = new TSJIPPY\FAMILY\Family();
-        $child				= $family->isChild($userId);
+
+        $family                = new TSJIPPY\FAMILY\Family();
+        $child                = $family->isChild($userId);
         $childName          = '';
-        if($child){
-            $childName		= get_userdata($userId)->first_name;
+        if ($child) {
+            $childName        = get_userdata($userId)->first_name;
         }
-        
-        $html				= '';
+
+        $html                = '';
 
         // HTML for individual elements on a meta form
-        if(!empty($this->userReminders[$userId]['metaforms'])){
-            foreach($this->userReminders[$userId]['metaforms'] as $formId => $elements){
+        if (!empty($this->userReminders[$userId]['metaforms'])) {
+            foreach ($this->userReminders[$userId]['metaforms'] as $formId => $elements) {
                 // Load the form data
                 $this->getForm($formId);
 
-                foreach($elements as $elementId){
+                foreach ($elements as $elementId) {
                     $result = $this->getElementReminderHtml($elementId, $type, $childName);
 
-                    if(!empty($result)){
+                    if (!empty($result)) {
                         $html   .= $result;
                     }
                 }
@@ -707,17 +708,17 @@ class FormReminders extends Forms{
         }
 
         // Forms to be submitted
-        if(!empty($this->userReminders[$userId]['defaultforms'])){
-            foreach($this->userReminders[$userId]['defaultforms'] as $formId){
+        if (!empty($this->userReminders[$userId]['defaultforms'])) {
+            foreach ($this->userReminders[$userId]['defaultforms'] as $formId) {
                 $html .= $this->getFormReminderHtml($formId, $childName);
             }
         }
 
-        if(!empty($html)){
-            $html	= "<ul>$html</ul>";
+        if (!empty($html)) {
+            $html    = "<ul>$html</ul>";
         }
 
-        $html	= apply_filters("tsjippy_manadatory_html_filter", $html, $userId, $this);
+        $html    = apply_filters("tsjippy_manadatory_html_filter", $html, $userId, $this);
 
         return $html;
     }
@@ -725,33 +726,33 @@ class FormReminders extends Forms{
     /**
      * Sends reminders by e-mail to submit or update a form
      */
-    public function sendFormReminders(){
+    public function sendFormReminders() {
         $today  = gmdate('D');
 
         // Send e-mails for forms to be submitted
-        foreach($this->defaultForms[$today] as $formDetails){
+        foreach ($this->defaultForms[$today] as $formDetails) {
             $this->formData = $formDetails['form'];
 
             $formId = $this->formData->id;
 
             // Do nothing if there are no reminders for this form
-            if(!isset($this->reminders['defaultforms'][$formId])){
+            if (!isset($this->reminders['defaultforms'][$formId])) {
                 continue;
             }
 
             // Load the e-mail settings
             $this->getEmailSettings();
 
-            foreach($this->reminders['defaultforms'][$formId] as $userId){
+            foreach ($this->reminders['defaultforms'][$formId] as $userId) {
                 $this->sendEmail($userId);
             }
         }
 
-        foreach($this->getAllFormRemindersForToday(false) as $userId => $forms){
-            foreach($forms as $formId => $html){
+        foreach ($this->getAllFormRemindersForToday(false) as $userId => $forms) {
+            foreach ($forms as $formId => $html) {
                 // Load the form data for this form
-                foreach($this->metaForms[$today] as $formDetails){
-                    if($formDetails['form']->id == $formId){
+                foreach ($this->metaForms[$today] as $formDetails) {
+                    if ($formDetails['form']->id == $formId) {
                         $this->formData = $formDetails['form'];
                         break;
                     }
@@ -767,22 +768,22 @@ class FormReminders extends Forms{
 
     /**
      * Sends an e-mail reminder to a user
-     * 
+     *
      * @param   int     $userId        The user id to send the e-mail to
      * @param   string  $html          The html content for the e-mail
      */
-    protected function sendEmail($userId, $html=''){   
+    protected function sendEmail($userId, $html='') {
         $user   = get_userdata($userId);
-        
+
         // Invalid user id given
-        if(!$user){
+        if (!$user) {
             return;
         }
 
-        foreach($this->emailSettings as $mail){
+        foreach ($this->emailSettings as $mail) {
             $mail   = (object)$mail;
 
-            if($mail->email_trigger != 'shouldsubmit'){
+            if ($mail->email_trigger != 'shouldsubmit') {
                 continue;
             }
 
@@ -794,27 +795,27 @@ class FormReminders extends Forms{
 
             $message    = $mail->message;
 
-            $headers	= [];
+            $headers    = [];
 
-            if(!empty(trim($mail->headers))){
-                $headers	= explode("\n", trim($mail->headers));
+            if (!empty(trim($mail->headers))) {
+                $headers    = explode("\n", trim($mail->headers));
             }
 
-            if(!empty($from) && !str_contains($mail->headers, 'Reply-To:')){
-                if(str_contains($from, '%')){
-                    $headers[]	= "Reply-To: ". $user->user_email;
+            if (!empty($from) && !str_contains($mail->headers, 'Reply-To:')) {
+                if (str_contains($from, '%')) {
+                    $headers[]    = "Reply-To: " . $user->user_email;
                 }else{
-                    $headers[]	= "Reply-To: $from";
+                    $headers[]    = "Reply-To: $from";
                 }
             }
 
-            if(str_contains($to, '%')){
-                $recipient  = $user->user_email; 
+            if (str_contains($to, '%')) {
+                $recipient  = $user->user_email;
             }else{
                 $recipient  = $to;
             }
 
-            if(!empty($html) && !str_contains($message, '%reminders%')){
+            if (!empty($html) && !str_contains($message, '%reminders%')) {
                 $message .= '%reminders%';
             }
 
@@ -826,7 +827,7 @@ class FormReminders extends Forms{
                     'email'     => $user->user_email,
                     'reminders' => $html
                 ]
-            );
+           );
 
             wp_mail($recipient , $subject, $msg, $headers);
         }

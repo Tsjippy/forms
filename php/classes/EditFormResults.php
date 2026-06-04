@@ -2,461 +2,461 @@
 namespace TSJIPPY\FORMS;
 use TSJIPPY;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if ( ! defined('ABSPATH')) {
+    exit;
 }
 
 class EditFormResults extends DisplayFormResults{
-	public int|false $submissionId;
+    public int|false $submissionId;
 
-	public function __construct($atts=[]){
-		parent::__construct($atts);
+    public function __construct($atts=[]) {
+        parent::__construct($atts);
 
-		$this->submissionId	= false;
-	}
-	
-	/**
-	 * Update an existing form submission
-	 *
-	 * @param	int		$elementId	The element id of the value
-	 * @param	mixed	$value		The value to set
-	 * @param	int		$subId		The sub id in case of multiple values for the same key, default null
-	 *
-	 * @return	true|\WP_Error		The result or error on failure
-	 */
-	public function updateSubmission($elementId, $value, $subId = null){
-		global $wpdb;
+        $this->submissionId    = false;
+    }
 
-		$value	= TSJIPPY\cleanUpNestedArray($value);
+    /**
+     * Update an existing form submission
+     *
+     * @param    int        $elementId    The element id of the value
+     * @param    mixed    $value        The value to set
+     * @param    int        $subId        The sub id in case of multiple values for the same key, default null
+     *
+     * @return    true|\WP_Error        The result or error on failure
+     */
+    public function updateSubmission($elementId, $value, $subId = null) {
+        global $wpdb;
 
-		if(is_numeric($this->submissionId)){
-			$submissionId	= $this->submissionId;
-		}elseif(!empty($this->submission->id) && is_numeric($this->submission->id)){
-			$submissionId	= $this->submission->id;
-		}elseif(is_numeric($_POST['submission-id'])){
-			$submissionId	= $_POST['submission-id'];
-		}else{
-			TSJIPPY\printArray('No submission id found');
-			return false;
-		}
+        $value    = TSJIPPY\cleanUpNestedArray($value);
 
-		if(empty($this->submission) || $this->submission->id != $submissionId){
-			$this->parseSubmissions(null, $submissionId);
-		}
+        if (is_numeric($this->submissionId)) {
+            $submissionId    = $this->submissionId;
+        }elseif (!empty($this->submission->id) && is_numeric($this->submission->id)) {
+            $submissionId    = $this->submission->id;
+        }elseif (is_numeric($_POST['submission-id'])) {
+            $submissionId    = $_POST['submission-id'];
+        }else{
+            TSJIPPY\printArray('No submission id found');
+            return false;
+        }
 
-		/**
-		 * Filters the form results
-		 * 
-		 * @param mixed			$value			The value to set
-		 * @param int			$elementId		The element id of the value
-		 * @param int			$subId			The sub id of the value
-		 * @param object		$object			The EditFormResults Instance
-		 */
-		$value 				= apply_filters('tsjippy_before_updating_formdata', $value, $elementId, $subId, $this);
+        if (empty($this->submission) || $this->submission->id != $submissionId) {
+            $this->parseSubmissions(null, $submissionId);
+        }
 
-		if($value === null || is_wp_error($value)){
-			return $value;
-		}
+        /**
+         * Filters the form results
+         *
+         * @param mixed            $value            The value to set
+         * @param int            $elementId        The element id of the value
+         * @param int            $subId            The sub id of the value
+         * @param object        $object            The EditFormResults Instance
+         */
+        $value                 = apply_filters('tsjippy_before_updating_formdata', $value, $elementId, $subId, $this);
 
-		/**
-		 * Update the main submission data if we are updating the user_id or submitter_id, or if we are updating a field that is used in the auto archive settings
-		 * We also always update the time_last_edited field to be able to track when the submission was last edited, and to trigger the auto archive if needed
-		 */
+        if ($value === null || is_wp_error($value)) {
+            return $value;
+        }
 
-		// Always update the time_last_edited
-		$data = [
-			'time_last_edited'	=> gmdate("Y-m-d H:i:s")
-		];
+        /**
+         * Update the main submission data if we are updating the user_id or submitter_id, or if we are updating a field that is used in the auto archive settings
+         * We also always update the time_last_edited field to be able to track when the submission was last edited, and to trigger the auto archive if needed
+         */
 
-		$formats = [
-			'%s'
-		];
+        // Always update the time_last_edited
+        $data = [
+            'time_last_edited'    => gmdate("Y-m-d H:i:s")
+        ];
 
-		if($elementId == 'user_id'){
-			$data['user_id']			= $value;
-			$formats[]				= '%d';
-		}elseif($elementId == 'submitter_id'){
-			$data['submitter_id']	= $value;
-			$formats[]				= '%d';
-		}
+        $formats = [
+            '%s'
+        ];
 
-		// Update the main submission data
-		$result = $wpdb->update(
-			$this->submissionTableName,
-			$data,
-			array(
-				'id'				=> $submissionId,
-			),
-			$formats
-		);
-		
-		if($wpdb->last_error !== ''){
-			$message	= $wpdb->print_error();
-			if(defined('REST_REQUEST')){
-				return new \WP_Error('form error', $message);
-			}else{
-				TSJIPPY\printArray($message);
-			}
-		}elseif(!$result){
-			$column		= array_keys($data)[0];
+        if ($elementId == 'user_id') {
+            $data['user_id']            = $value;
+            $formats[]                = '%d';
+        }elseif ($elementId == 'submitter_id') {
+            $data['submitter_id']    = $value;
+            $formats[]                = '%d';
+        }
 
-			$curValue	= $wpdb->get_var(
-				$wpdb->prepare(
-					"select $column from %i where id = %d",
-					$this->submissionTableName,
-					$submissionId
-				)
-			);
+        // Update the main submission data
+        $result = $wpdb->update(
+            $this->submissionTableName,
+            $data,
+            array(
+                'id'                => $submissionId,
+           ),
+            $formats
+       );
 
-			if($curValue != $data[$column]){
-				$message	= "No row with id $submissionId found\nQuery used is '$wpdb->last_query'";
-				TSJIPPY\printArray($message);
-				TSJIPPY\printArray($this->submission);
-			}
-		}
+        if ($wpdb->last_error !== '') {
+            $message    = $wpdb->print_error();
+            if (defined('REST_REQUEST')) {
+                return new \WP_Error('form error', $message);
+            }else{
+                TSJIPPY\printArray($message);
+            }
+        }elseif (!$result) {
+            $column        = array_keys($data)[0];
 
-		/**
-		 * Update submission values
-		 */
-		// Filters if we should do the update, return false for no update
-		$continue	= apply_filters('tsjippy-forms-should-update-form-data', true, $elementId, $submissionId, $subId, $value, $this);
-		if($elementId != 'user_id' && $elementId != 'submitter_id' && $continue){
-			//Update the submission data	
-			$where	= array(
-				'submission_id'	=> $submissionId,
-				'element_id'	=> $elementId,
-			);
+            $curValue    = $wpdb->get_var(
+                $wpdb->prepare(
+                    "select $column from %i where id = %d",
+                    $this->submissionTableName,
+                    $submissionId
+               )
+           );
 
-			$formats	= array(
-				'%d',
-				'%s'
-			);
+            if ($curValue != $data[$column]) {
+                $message    = "No row with id $submissionId found\nQuery used is '$wpdb->last_query'";
+                TSJIPPY\printArray($message);
+                TSJIPPY\printArray($this->submission);
+            }
+        }
 
-			if(is_numeric($subId)){
-				$where['sub_id']	= $subId;
-				$formats[]			= '%d';
-			}
+        /**
+         * Update submission values
+         */
+        // Filters if we should do the update, return false for no update
+        $continue    = apply_filters('tsjippy-forms-should-update-form-data', true, $elementId, $submissionId, $subId, $value, $this);
+        if ($elementId != 'user_id' && $elementId != 'submitter_id' && $continue) {
+            //Update the submission data
+            $where    = array(
+                'submission_id'    => $submissionId,
+                'element_id'    => $elementId,
+           );
 
-			$data	= [
-				'submission_id'	=> $submissionId,	// include in case we need to create instead of update
-				'sub_id'		=> $subId,			// include in case we need to create instead of update
-				'element_id'	=> $elementId,		// include in case we need to create instead of update
-				'value' 		=> $value
-			];
+            $formats    = array(
+                '%d',
+                '%s'
+           );
 
-			//Update the submission data
-			$result	= $this->insertOrUpdateData(
-				$this->submissionValuesTableName,
-				$data,
-				$where,
-				$formats
-			);
+            if (is_numeric($subId)) {
+                $where['sub_id']    = $subId;
+                $formats[]            = '%d';
+            }
 
-			if(is_wp_error($result)){
-				return $result;
-			}
-		}
+            $data    = [
+                'submission_id'    => $submissionId,    // include in case we need to create instead of update
+                'sub_id'        => $subId,            // include in case we need to create instead of update
+                'element_id'    => $elementId,        // include in case we need to create instead of update
+                'value'         => $value
+            ];
 
-		do_action('tsjippy_after_updating_formdata', $value, $elementId, $subId, $this);
+            //Update the submission data
+            $result    = $this->insertOrUpdateData(
+                $this->submissionValuesTableName,
+                $data,
+                $where,
+                $formats
+           );
 
-		$this->sendEmail('fieldchanged');
-		$this->sendEmail('fieldschanged');
-		
-		return $result;
-	}
+            if (is_wp_error($result)) {
+                return $result;
+            }
+        }
 
-	/**
-	 * (un)Archive an existing form submission
-	 *
-	 * @param	bool	$archive	Whether we should archive or unarchive the submission. Default false
-	 *
-	 * @return	true|WP_Error		The result or error on failure
-	 */
-	public function archiveSubSubmission($archive, $subId, $submissionId){
-		//we are archiving a sub-entry
-		if(!is_numeric($subId)){
-			return false;
-		}
+        do_action('tsjippy_after_updating_formdata', $value, $elementId, $subId, $this);
 
-		global $wpdb;
+        $this->sendEmail('fieldchanged');
+        $this->sendEmail('fieldschanged');
 
-		// Add the index to the archived indexes
-		if($archive){
-			$result = $wpdb->insert(
-				$this->submissionValuesTableName,
-				array(
-					'submission_id'	=> $submissionId,
-					'sub_id'		=> $subId,
-					'element_id'	=> -6,
-					'value'			=> 1
-				),
-				array(
-					'%d',
-					'%d',
-					'%d',
-					'%d'
-				)
-			);
-		}
-		
-		// Remove the index from the archived indexes
-		else{
-			$result = $wpdb->delete(
-				$this->submissionValuesTableName,
-				array(
-					'submission_id'	=> $submissionId,
-					'element_id'	=> -6,
-					'sub_id'		=> $subId
-				)
-			);
-		}
+        return $result;
+    }
 
-		if($wpdb->last_error !== ''){
-			$message	= $wpdb->print_error();
-			if(defined('REST_REQUEST')){
-				return new \WP_Error('form error', $message);
-			}else{
-				TSJIPPY\printArray($message);
-			}
-		}elseif(!$result){
-			$message	= "No row with id $submissionId found";
-			if(defined('REST_REQUEST')){
-				return new \WP_Error('form error', $message);
-			}else{
-				TSJIPPY\printArray($message);
-				TSJIPPY\printArray($this->submission);
-			}
-		}	
-		
-		// We did not archive the whole submission, so stop here
-		if(!$this->checkIfAllArchived()){
-			//not all subentries are archived, no need to archive the whole submission
-			return "Entry with id {$this->submissionId} and sub-id $subId succesfully " . ($archive ? 'archived' : 'unarchived');
-		}
+    /**
+     * (un)Archive an existing form submission
+     *
+     * @param    bool    $archive    Whether we should archive or unarchive the submission. Default false
+     *
+     * @return    true|WP_Error        The result or error on failure
+     */
+    public function archiveSubSubmission($archive, $subId, $submissionId) {
+        //we are archiving a sub-entry
+        if (!is_numeric($subId)) {
+            return false;
+        }
 
-		return true;
-	}
+        global $wpdb;
 
-	/**
-	 * (un)Archive an existing form submission
-	 *
-	 * @param	bool	$archive	Whether we should archive or unarchive the submission. Default false
-	 *
-	 * @return	true|WP_Error		The result or error on failure
-	 */
-	public function archiveSubmission($archive, $subId = null){
-		global $wpdb;
+        // Add the index to the archived indexes
+        if ($archive) {
+            $result = $wpdb->insert(
+                $this->submissionValuesTableName,
+                array(
+                    'submission_id'    => $submissionId,
+                    'sub_id'        => $subId,
+                    'element_id'    => -6,
+                    'value'            => 1
+               ),
+                array(
+                    '%d',
+                    '%d',
+                    '%d',
+                    '%d'
+               )
+           );
+        }
 
-		if(is_numeric($this->submissionId)){
-			$submissionId	= $this->submissionId;
-		}elseif(is_numeric($_POST['submission-id'])){
-			$submissionId	= $_POST['submission-id'];
-		}elseif(!empty($this->submission->id)){
-			$submissionId	= $this->submission->id;
-		}else{
-			TSJIPPY\printArray('No submission id found');
-			return false;
-		}
-	
-		// If we are archiving a sub entry, we need to check if all other sub entries are also archived, if so we archive the whole submission
-		$result	= $this->archiveSubSubmission($archive, $subId, $submissionId);	
+        // Remove the index from the archived indexes
+        else{
+            $result = $wpdb->delete(
+                $this->submissionValuesTableName,
+                array(
+                    'submission_id'    => $submissionId,
+                    'element_id'    => -6,
+                    'sub_id'        => $subId
+               )
+           );
+        }
 
-		if($result){
-			return $result;
-		}
+        if ($wpdb->last_error !== '') {
+            $message    = $wpdb->print_error();
+            if (defined('REST_REQUEST')) {
+                return new \WP_Error('form error', $message);
+            }else{
+                TSJIPPY\printArray($message);
+            }
+        }elseif (!$result) {
+            $message    = "No row with id $submissionId found";
+            if (defined('REST_REQUEST')) {
+                return new \WP_Error('form error', $message);
+            }else{
+                TSJIPPY\printArray($message);
+                TSJIPPY\printArray($this->submission);
+            }
+        }
 
-		// Mark as (un)archived
-		$result = $wpdb->update(
-			$this->submissionTableName,
-			array(
-				'time_last_edited'	=> gmdate("Y-m-d H:i:s"),
-				'archived'			=> $archive
-			),
-			array(
-				'id'				=> $submissionId,
-			),
-			array(
-				'%s',
-				'%d'
-			)
-		);
-		
-		if($wpdb->last_error !== ''){
-			$message	= $wpdb->print_error();
-			if(defined('REST_REQUEST')){
-				return new \WP_Error('form error', $message);
-			}else{
-				TSJIPPY\printArray($message);
-			}
-		}elseif(!$result){
-			$message	= "No row with id $submissionId found";
-			if(defined('REST_REQUEST')){
-				return new \WP_Error('form error', $message);
-			}else{
-				TSJIPPY\printArray($message);
-				TSJIPPY\printArray($this->submission);
-			}
-		}else{
-			$message	= "Entry with id {$this->submissionId} succesfully " . ($archive ? 'archived' : 'unarchived');
-		}
+        // We did not archive the whole submission, so stop here
+        if (!$this->checkIfAllArchived()) {
+            //not all subentries are archived, no need to archive the whole submission
+            return "Entry with id {$this->submissionId} and sub-id $subId succesfully " . ($archive ? 'archived' : 'unarchived');
+        }
 
-		if($archive){
-			$this->sendEmail('removed');
+        return true;
+    }
 
-			do_action('tsjippy-forms-entry-archived', $this, $submissionId);
-		}
-		
-		return $message;
-	}
-	
-	/**
-	 * Auto archive form submission based on the form settings
-	 */
-	public function autoArchive(){
-		//get all the forms
-		$this->getForms();
-		
-		//loop over all the forms
-		foreach($this->forms as $form){
-			//check if auto archive is turned on for this form
-			if(!isset($form->autoarchive) || !$form->autoarchive || empty($form->autoarchive_el)){
-				continue;
-			}
+    /**
+     * (un)Archive an existing form submission
+     *
+     * @param    bool    $archive    Whether we should archive or unarchive the submission. Default false
+     *
+     * @return    true|WP_Error        The result or error on failure
+     */
+    public function archiveSubmission($archive, $subId = null) {
+        global $wpdb;
 
-			$this->getForm($form->id);
-			
-			$triggerId		= $form->autoarchive_el;
-			$triggerValue	= $form->autoarchive_value;
+        if (is_numeric($this->submissionId)) {
+            $submissionId    = $this->submissionId;
+        }elseif (is_numeric($_POST['submission-id'])) {
+            $submissionId    = $_POST['submission-id'];
+        }elseif (!empty($this->submission->id)) {
+            $submissionId    = $this->submission->id;
+        }else{
+            TSJIPPY\printArray('No submission id found');
+            return false;
+        }
 
-			if(empty($triggerId) || empty($triggerValue)){
-				continue;
-			}
+        // If we are archiving a sub entry, we need to check if all other sub entries are also archived, if so we archive the whole submission
+        $result    = $this->archiveSubSubmission($archive, $subId, $submissionId);
 
-			/**
-			 * Process placeholder in the triggervalue
-			 */
+        if ($result) {
+            return $result;
+        }
 
-			// Regex pattern to search for %words%
-			$pattern = '/%([^%;]*)%/i';
+        // Mark as (un)archived
+        $result = $wpdb->update(
+            $this->submissionTableName,
+            array(
+                'time_last_edited'    => gmdate("Y-m-d H:i:s"),
+                'archived'            => $archive
+           ),
+            array(
+                'id'                => $submissionId,
+           ),
+            array(
+                '%s',
+                '%d'
+           )
+       );
 
-			// Get all the replace patterns
-			preg_match_all($pattern, $triggerValue, $matches);
-			if(!is_array($matches[1])){
-				TSJIPPY\printArray($matches[1]);
-			}else{
-				// Loop over all the replacements
-				foreach((array)$matches[1] as $keyword){
-					//If the keyword is a valid date keyword
-					if(strtotime($keyword)){
-						//convert to date
-						$triggerValue = gmdate("Y-m-d", strtotime(str_replace('%', '', $triggerValue)));
-					}
-				}
-			}
+        if ($wpdb->last_error !== '') {
+            $message    = $wpdb->print_error();
+            if (defined('REST_REQUEST')) {
+                return new \WP_Error('form error', $message);
+            }else{
+                TSJIPPY\printArray($message);
+            }
+        }elseif (!$result) {
+            $message    = "No row with id $submissionId found";
+            if (defined('REST_REQUEST')) {
+                return new \WP_Error('form error', $message);
+            }else{
+                TSJIPPY\printArray($message);
+                TSJIPPY\printArray($this->submission);
+            }
+        }else{
+            $message    = "Entry with id {$this->submissionId} succesfully " . ($archive ? 'archived' : 'unarchived');
+        }
 
-			$compare	= '=';
+        if ($archive) {
+            $this->sendEmail('removed');
 
-			// If this looks like a date, we want to compare if the date is in the past, so we change the compare operator to <
-			if(preg_match('/\d{4}-\d{2}-\d{2}/', $triggerValue)){
-				$compare	= '<';
-			}
+            do_action('tsjippy-forms-entry-archived', $this, $submissionId);
+        }
 
-			// Get potential split
-			$splittedElements	= $this->findSplitElementIds();
+        return $message;
+    }
 
-			// Find the name of the trigger element
-			foreach($splittedElements as $baseName){
-				foreach($baseName as $name => $splitElementIds){
-					if(in_array($triggerId, $splitElementIds)){
-						$triggerId	= $name;
+    /**
+     * Auto archive form submission based on the form settings
+     */
+    public function autoArchive() {
+        //get all the forms
+        $this->getForms();
 
-						break 2;
-					}
-				}
-			}
+        //loop over all the forms
+        foreach ($this->forms as $form) {
+            //check if auto archive is turned on for this form
+            if (!isset($form->autoarchive) || !$form->autoarchive || empty($form->autoarchive_el)) {
+                continue;
+            }
 
-			$submissions		= $this->getSubmissions(
-				null, 
-				null, 
-				true,
-				[
-					"$triggerId $compare %s"
-				],
-				[
-					$triggerValue
-				]
-			);
+            $this->getForm($form->id);
 
-			foreach($submissions as $submission){
-				$this->submissionId	= $submission->id;
+            $triggerId        = $form->autoarchive_el;
+            $triggerValue    = $form->autoarchive_value;
 
-				$this->archiveSubmission(true, $submission->sub_id);
-			}
-		}
-	}
+            if (empty($triggerId) || empty($triggerValue)) {
+                continue;
+            }
 
-	 /**
-	 * Checks if all sub entries are archived, if so archives the whole
-	 */
-	public function checkIfAllArchived(){
-		//check if all subfields are archived or empty
-		$allArchived = true;
+            /**
+             * Process placeholder in the triggervalue
+             */
 
-		$splitIds	= $this->formData->split;
+            // Regex pattern to search for %words%
+            $pattern = '/%([^%;]*)%/i';
 
-		foreach($splitIds as $id){
-			if(!$id){
-				continue;
-			}
+            // Get all the replace patterns
+            preg_match_all($pattern, $triggerValue, $matches);
+            if (!is_array($matches[1])) {
+                TSJIPPY\printArray($matches[1]);
+            }else{
+                // Loop over all the replacements
+                foreach ((array)$matches[1] as $keyword) {
+                    //If the keyword is a valid date keyword
+                    if (strtotime($keyword)) {
+                        //convert to date
+                        $triggerValue = gmdate("Y-m-d", strtotime(str_replace('%', '', $triggerValue)));
+                    }
+                }
+            }
 
-			$elementName			= $this->getElementById($id, 'name');
-			if(!$elementName){
-				continue;
-			}
+            $compare    = '=';
 
-			preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $elementName, $matches);
+            // If this looks like a date, we want to compare if the date is in the past, so we change the compare operator to <
+            if (preg_match('/\d{4}-\d{2}-\d{2}/', $triggerValue)) {
+                $compare    = '<';
+            }
 
-			if(isset($matches[1])){
-				$elementName	= $matches[1];
-			}
+            // Get potential split
+            $splittedElements    = $this->findSplitElementIds();
 
-			$archivedCount	= count($this->getSubmissionValue($this->submission->id, -6, '', true));
+            // Find the name of the trigger element
+            foreach ($splittedElements as $baseName) {
+                foreach ($baseName as $name => $splitElementIds) {
+                    if (in_array($triggerId, $splitElementIds)) {
+                        $triggerId    = $name;
 
-			// Check id there are still non archived entries
-			if(
-				isset($this->submission->{$elementName}) && 
-				count($this->submission->{$elementName}) > $archivedCount
-			){
-				$allArchived = false;
-			}
-		}
+                        break 2;
+                    }
+                }
+            }
 
-		return $allArchived;
-	}
+            $submissions        = $this->getSubmissions(
+                null,
+                null,
+                true,
+                [
+                    "$triggerId $compare %s"
+                ],
+                [
+                    $triggerValue
+                ]
+           );
 
-	/**
-	 * Removes an existing submission from the database
-	 *
-	 * @param	int	$submissionId		The id of the submission to delete
-	 *
-	 * @return	int|WP_Error			The number of rows updated, or an WP_Error on error.
-	 */
-	public function deleteSubmission($submissionId){
-		global $wpdb;
+            foreach ($submissions as $submission) {
+                $this->submissionId    = $submission->id;
 
-		$result = $wpdb->delete(
-			$this->submissionTableName,
-			array(
-				'id'		=> $submissionId
-			)
-		);
-		
-		if($result === false){
-			return new \WP_Error('tsjippy forms', "Submission removal failed");
-		}
+                $this->archiveSubmission(true, $submission->sub_id);
+            }
+        }
+    }
 
-		$this->sendEmail('removed');
+     /**
+     * Checks if all sub entries are archived, if so archives the whole
+     */
+    public function checkIfAllArchived() {
+        //check if all subfields are archived or empty
+        $allArchived = true;
 
-		return $result;
-	}
+        $splitIds    = $this->formData->split;
+
+        foreach ($splitIds as $id) {
+            if (!$id) {
+                continue;
+            }
+
+            $elementName            = $this->getElementById($id, 'name');
+            if (!$elementName) {
+                continue;
+            }
+
+            preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $elementName, $matches);
+
+            if (isset($matches[1])) {
+                $elementName    = $matches[1];
+            }
+
+            $archivedCount    = count($this->getSubmissionValue($this->submission->id, -6, '', true));
+
+            // Check id there are still non archived entries
+            if (
+                isset($this->submission->{$elementName}) &&
+                count($this->submission->{$elementName}) > $archivedCount
+           ) {
+                $allArchived = false;
+            }
+        }
+
+        return $allArchived;
+    }
+
+    /**
+     * Removes an existing submission from the database
+     *
+     * @param    int    $submissionId        The id of the submission to delete
+     *
+     * @return    int|WP_Error            The number of rows updated, or an WP_Error on error.
+     */
+    public function deleteSubmission($submissionId) {
+        global $wpdb;
+
+        $result = $wpdb->delete(
+            $this->submissionTableName,
+            array(
+                'id'        => $submissionId
+           )
+       );
+
+        if ($result === false) {
+            return new \WP_Error('tsjippy forms', "Submission removal failed");
+        }
+
+        $this->sendEmail('removed');
+
+        return $result;
+    }
 }

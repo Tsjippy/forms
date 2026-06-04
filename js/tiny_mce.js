@@ -31,8 +31,8 @@ var insertFormShortcodeDialog = {
     buttons: [{
         text: 'Insert shortcode',
         onclick: function(){
-            var formName		= document.querySelector("#form-name").value;
-            var formSelector	= document.querySelector("[name='form-selector']").value;
+            var formName        = document.querySelector("#form-name").value;
+            var formSelector    = document.querySelector("[name='form-selector']").value;
             if(formName != ''){
                 tinymce.activeEditor.insertContent(`[formbuilder formname=${formName}]`);
                 Main.displayMessage("Form succesfully inserted.\n\n Please publish the page, then visit the new page to start building your form");
