@@ -406,7 +406,7 @@ trait CreateJs
         $newJs  .= "\n\t\t\t//el is a nice select";
         $newJs  .= "\n\t\t\tif (el.closest(' .nice-select-dropdown') != null && el.closest(' .input-wrapper') != null) {";
         $newJs  .= "\n\t\t\t\t//find the select element connected to the nice-select";
-        $newJs  .= "\n\t\t\t\tel.closest(' .input-wrapper').querySelectorAll('select').foreach (select=>{";
+        $newJs  .= "\n\t\t\t\tel.closest(' .input-wrapper').querySelectorAll('select').forEach (select=>{";
         $newJs  .= "\n\t\t\t\t\tif (el.dataset.value == select.value) {";
         $newJs  .= "\n\t\t\t\t\t\tel    = select;";
         $newJs  .= "\n\t\t\t\t\t\telName = select.name;";
@@ -454,13 +454,13 @@ trait CreateJs
 
         // Prefill form with meta data
         if (!empty($this->formData->save_in_meta)) {
-            $tabJs .= "\n\t\t\tform.querySelectorAll(`select, input, textarea`).foreach (";
+            $tabJs .= "\n\t\t\tform.querySelectorAll(`select, input, textarea`).forEach (";
             $tabJs .= "\n\t\t\t\tel=>this.processFields(el)";
             $tabJs .= "\n\t\t\t);";
         }
 
         if (!empty($tabJs)) {
-            $tabJs  = "\n\n\t\tthis.forms.foreach (form => {\n\t\t\t$tabJs\n\t\t});";
+            $tabJs  = "\n\n\t\tthis.forms.forEach (form => {\n\t\t\t$tabJs\n\t\t});";
         }
 
         // Process get variables in the url
@@ -477,12 +477,12 @@ trait CreateJs
         if (typeof(urlSearchParams) == 'undefined') {
             window.urlSearchParams = new URLSearchParams(window.location.search.replaceAll('&amp;', '&'));
         }
-        Array.from(urlSearchParams).foreach (array => {
-            document.querySelectorAll(`[name^='\${array[0]}' i]`).foreach (el => this.change_field_value(el, array[1], $this->objectName.processFields, el.closest('form')));
+        Array.from(urlSearchParams).forEach (array => {
+            document.querySelectorAll(`[name^='\${array[0]}' i]`).forEach (el => this.change_field_value(el, array[1], $this->objectName.processFields, el.closest('form')));
         });
 
         // Loop over the elements who have a default value and apply the logic;
-        this.forms.foreach (form => {Array.from(form.elements).filter(element => {
+        this.forms.forEach (form => {Array.from(form.elements).filter(element => {
             // Exclude elements without a name, as they are typically not submitted
             if (!element.name) {
                 return false;
@@ -495,7 +495,7 @@ trait CreateJs
 
             // For other input types, check if the value is not empty
             return element.value !== '';
-        }).foreach (el => this.processFields(el))});
+        }).forEach (el => this.processFields(el))});
     };";
 
         $js         .= $newJs;
@@ -590,7 +590,7 @@ trait CreateJs
         }
 
         //Create js file
-        file_put_contents($this->jsFileName . ' .js', $js);
+        file_put_contents($this->jsFileName . '.js', $js);
 
         //replace long strings for shorter ones
         $minifiedJs = str_replace(
@@ -628,7 +628,7 @@ trait CreateJs
         }
 
         // Create minified version
-        file_put_contents($this->jsFileName . ' .min.js', $minifiedJs);
+        file_put_contents($this->jsFileName . '.min.js', $minifiedJs);
 
         if (!empty($errors)) {
             TSJIPPY\printArray($errors);
@@ -657,7 +657,7 @@ trait CreateJs
                         $actionCode    .= ', ';
                     }
                 }
-                $actionCode    .= "`).foreach (el=>{\n";
+                $actionCode    .= "`).forEach (el=>{\n";
                 //$actionCode    .= "{$prefix}\ttry{\n";
                 $actionCode    .= "{$prefix}\t\t//Make sure we only do each wrapper once by adding a temp class\n";
                 $actionCode    .= "{$prefix}\t\tif (!el.closest(' .input-wrapper').matches(' .action-processed')) {\n";
@@ -669,7 +669,7 @@ trait CreateJs
                 //$actionCode    .= "{$prefix}\t\tel.classList.$action('hidden');\n";
                 //$actionCode    .= "{$prefix}\t}\n";
                 $actionCode    .= "{$prefix}});\n";
-                $actionCode    .= "{$prefix}document.querySelectorAll(' .action-processed').foreach (el=>{el.classList.remove('action-processed')});\n";
+                $actionCode    .= "{$prefix}document.querySelectorAll(' .action-processed').forEach (el=>{el.classList.remove('action-processed')});\n";
                 //just one
             } elseif (count($elements) == 1) {
                 $selector       = $this->getSelector($elements[0]);
