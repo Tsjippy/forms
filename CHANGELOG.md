@@ -11,6 +11,7 @@
 ### Fixed
 - spacing problem
 - foreach bug
+- space before dot bug
 
 ### Updated
 
