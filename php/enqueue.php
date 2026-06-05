@@ -82,7 +82,7 @@ function afterInsertPost($postId, $post)
 
                     // Check if we should adjust the name
                     if ($formName != $newFormName) {
-                        $newShortcode  = str_replace($formName, $newFormName, $shortcode[0]);
+                        $newShortcode   = str_replace($formName, $newFormName, $shortcode[0]);
 
                         $content        = str_replace($shortcode[0], $newShortcode, $post->post_content);
                         wp_update_post(

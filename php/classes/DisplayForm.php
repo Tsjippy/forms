@@ -234,9 +234,9 @@ class DisplayForm extends ElementHtmlBuilder
     {
         //Load conditional js if available and needed
         if (wp_get_environment_type() === 'local') {
-            $jsPath        = $this->jsFileName . ' .js';
+            $jsPath        = $this->jsFileName . '.js';
         } else {
-            $jsPath        = $this->jsFileName . ' .min.js';
+            $jsPath        = $this->jsFileName . '.min.js';
         }
 
         if (!file_exists($jsPath)) {

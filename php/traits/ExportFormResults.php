@@ -78,7 +78,7 @@ trait ExportFormResults
     function exportExcel($fileName = "", $download = true)
     {
         if (empty($fileName)) {
-            $fileName = get_the_title($this->formData->slug) . " .xlsx";
+            $fileName = get_the_title($this->formData->slug) . ".xlsx";
         }
 
         $spreadsheet = new Spreadsheet();

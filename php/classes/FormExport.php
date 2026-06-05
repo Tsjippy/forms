@@ -74,7 +74,7 @@ class FormExport extends FormBuilderForm
             $content    .= "reminders: " . json_encode(serialize($reminders)) . "\n";
         }
 
-        $backupName = $this->formData->slug . " .sform";
+        $backupName = $this->formData->slug . ".sform";
         TSJIPPY\clearOutput();
 
         header('Content-Type: application/octet-stream');

@@ -205,9 +205,9 @@ trait CreateJs
                                 $conditionIf .= "!form.querySelector('[name=\"$conditionalFieldName\"]').checked";
                             }
                         } elseif ($equation == 'visible') {
-                            $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest(' .hidden') == null";
+                            $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest('.hidden') == null";
                         } elseif ($equation == 'invisible') {
-                            $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest(' .hidden') != null";
+                            $conditionIf .= "form.querySelector(\"[name='$conditionalFieldName']\").closest('.hidden') != null";
                         } elseif ($equation != 'changed' && $equation != 'clicked') {
                             $conditionIf .= "$compareValue1 $equation $compareValue2";
                         } elseif ($equation == 'changed' || $equation == 'clicked') {
@@ -404,9 +404,9 @@ trait CreateJs
         $newJs  .= "\n\t\tlet elName        = el.getAttribute('name');";
         $newJs  .= "\n\n\t\tif (elName == '' || elName == undefined) {";
         $newJs  .= "\n\t\t\t//el is a nice select";
-        $newJs  .= "\n\t\t\tif (el.closest(' .nice-select-dropdown') != null && el.closest(' .input-wrapper') != null) {";
+        $newJs  .= "\n\t\t\tif (el.closest('.nice-select-dropdown') != null && el.closest('.input-wrapper') != null) {";
         $newJs  .= "\n\t\t\t\t//find the select element connected to the nice-select";
-        $newJs  .= "\n\t\t\t\tel.closest(' .input-wrapper').querySelectorAll('select').forEach (select=>{";
+        $newJs  .= "\n\t\t\t\tel.closest('.input-wrapper').querySelectorAll('select').forEach (select=>{";
         $newJs  .= "\n\t\t\t\t\tif (el.dataset.value == select.value) {";
         $newJs  .= "\n\t\t\t\t\t\tel    = select;";
         $newJs  .= "\n\t\t\t\t\t\telName = select.name;";
@@ -660,21 +660,21 @@ trait CreateJs
                 $actionCode    .= "`).forEach (el=>{\n";
                 //$actionCode    .= "{$prefix}\ttry{\n";
                 $actionCode    .= "{$prefix}\t\t//Make sure we only do each wrapper once by adding a temp class\n";
-                $actionCode    .= "{$prefix}\t\tif (!el.closest(' .input-wrapper').matches(' .action-processed')) {\n";
-                $actionCode    .= "{$prefix}\t\t\tel.closest(' .input-wrapper').classList.add('action-processed');\n";
-                //$actionCode    .= "{$prefix}\t\t\tel.closest(' .input-wrapper').classList.$action('hidden');\n";
+                $actionCode    .= "{$prefix}\t\tif (!el.closest('.input-wrapper').matches('.action-processed')) {\n";
+                $actionCode    .= "{$prefix}\t\t\tel.closest('.input-wrapper').classList.add('action-processed');\n";
+                //$actionCode    .= "{$prefix}\t\t\tel.closest('.input-wrapper').classList.$action('hidden');\n";
                 $actionCode    .= "{$prefix}\t\t\tthis.change_visibility('$action', el, {$this->objectName}.processFields);\n";
                 $actionCode    .= "{$prefix}\t\t}\n";
                 //$actionCode    .= "{$prefix}\t}catch(e) {\n";
                 //$actionCode    .= "{$prefix}\t\tel.classList.$action('hidden');\n";
                 //$actionCode    .= "{$prefix}\t}\n";
                 $actionCode    .= "{$prefix}});\n";
-                $actionCode    .= "{$prefix}document.querySelectorAll(' .action-processed').forEach (el=>{el.classList.remove('action-processed')});\n";
+                $actionCode    .= "{$prefix}document.querySelectorAll('.action-processed').forEach (el=>{el.classList.remove('action-processed')});\n";
                 //just one
             } elseif (count($elements) == 1) {
                 $selector       = $this->getSelector($elements[0]);
-                //$actionCode    .= "{$prefix}form.querySelector('$selector').closest(' .input-wrapper').classList.$action('hidden');\n";
-                $actionCode    .= "{$prefix}this.change_visibility('$action', form.querySelector('$selector').closest(' .input-wrapper'), {$this->objectName}.processFields);\n";
+                //$actionCode    .= "{$prefix}form.querySelector('$selector').closest('.input-wrapper').classList.$action('hidden');\n";
+                $actionCode    .= "{$prefix}this.change_visibility('$action', form.querySelector('$selector').closest('.input-wrapper'), {$this->objectName}.processFields);\n";
             }
         }
 

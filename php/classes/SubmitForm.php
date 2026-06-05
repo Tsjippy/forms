@@ -629,7 +629,7 @@ class SubmitForm extends SaveFormSettings
         // check for required empty elements
         foreach ($this->formElements as $element) {
             // element is required but has no value
-            if ($element->required && ($formresults[$element->slug] ?? '') === '') {
+            if ($element->required && ($formresults[str_replace('[]', '', $element->slug)] ?? '') === '') {
                 return new \WP_Error('Error', "$element->name is required!");
             }
         }
