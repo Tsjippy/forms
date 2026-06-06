@@ -21,8 +21,8 @@ add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__ . '\addFormResultUrls'
  */
 function addFormResultUrls($urls)
 {
-    $urls[] = RESTAPIPREFIX . '/forms/edit_value';
-    $urls[] = RESTAPIPREFIX . '/forms/get_input_html';
+    $urls[] = TSJIPPY\RESTAPIPREFIX . '/forms/edit_value';
+    $urls[] = TSJIPPY\RESTAPIPREFIX . '/forms/get_input_html';
 
     return $urls;
 }
@@ -32,7 +32,7 @@ function restApiInitTable()
 {
     //save_table_prefs
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_table_prefs',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -54,7 +54,7 @@ function restApiInitTable()
 
     //delete_table_prefs
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/delete_table_prefs',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -75,7 +75,7 @@ function restApiInitTable()
 
     //save_column_settings
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_column_settings',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -100,7 +100,7 @@ function restApiInitTable()
 
     // save_table_prefs
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_table_settings',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -125,7 +125,7 @@ function restApiInitTable()
 
     //remove submission
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/remove_submission',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -147,7 +147,7 @@ function restApiInitTable()
 
     //archive submission
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/archive_submission',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -175,7 +175,7 @@ function restApiInitTable()
 
     // edit value
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/edit_value',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -203,7 +203,7 @@ function restApiInitTable()
 
     //get_input_html
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/get_input_html',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,
@@ -225,7 +225,7 @@ function restApiInitTable()
 
     // get next or prev page
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/get_page',
         array(
             'methods'                 => \WP_REST_Server::CREATABLE,

@@ -455,11 +455,11 @@ class ElementHtmlBuilder extends SubmitForm
             !str_contains($string, 'href') &&
             !str_contains($string, '<img')
         ) {
-            $url    = str_replace(['https://', 'http://'], '', SITEURL);
+            $url    = str_replace(['https://', 'http://'], '', TSJIPPY\SITEURL);
             $string    = str_replace(str_replace('\\', '/', ABSPATH), '', $string);
 
             if (!str_contains($string, $url)) {
-                $string        = SITEURL . "/$string";
+                $string        = TSJIPPY\SITEURL . "/$string";
             }
 
             $text    = "Link";

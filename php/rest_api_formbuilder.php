@@ -14,7 +14,7 @@ if (! defined('ABSPATH')) {
 add_filter('tsjippy_allowed_rest_api_urls', __NAMESPACE__ . '\addRestUrls');
 function addRestUrls($urls)
 {
-    $urls[] = RESTAPIPREFIX . '/forms/save_form_input';
+    $urls[] = TSJIPPY\RESTAPIPREFIX . '/forms/save_form_input';
 
     return $urls;
 }
@@ -31,7 +31,7 @@ function restApiInitForms()
 {
     // load form
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/load_form',
         array(
             'methods'                 => 'POST',
@@ -50,7 +50,7 @@ function restApiInitForms()
 
     // load form results table
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/load_form_results',
         array(
             'methods'                 => 'POST',
@@ -69,7 +69,7 @@ function restApiInitForms()
 
     // copy element to form
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/copy_form_element',
         array(
             'methods'                 => 'POST',
@@ -97,7 +97,7 @@ function restApiInitForms()
 
     // add element to form
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/add_form_element',
         array(
             'methods'                 => 'POST',
@@ -116,7 +116,7 @@ function restApiInitForms()
 
     // delete element
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/remove_element',
         array(
             'methods'                 => 'POST',
@@ -141,7 +141,7 @@ function restApiInitForms()
 
     // request form element
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/request_form_element',
         array(
             'methods'                 => 'POST',
@@ -166,7 +166,7 @@ function restApiInitForms()
 
     // reorder form elements
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/reorder-form-elements',
         array(
             'methods'                 => 'POST',
@@ -194,7 +194,7 @@ function restApiInitForms()
 
     // edit formfield width
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/edit_formfield_width',
         array(
             'methods'                 => 'POST',
@@ -225,7 +225,7 @@ function restApiInitForms()
 
     // form conditions html
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/request_form_conditions_html',
         array(
             'methods'                 => 'POST',
@@ -250,7 +250,7 @@ function restApiInitForms()
 
     // save_element-conditions
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_element-conditions',
         array(
             'methods'                 => 'POST',
@@ -275,7 +275,7 @@ function restApiInitForms()
 
     // save_form_settings
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_form_settings',
         array(
             'methods'                 => 'POST',
@@ -294,7 +294,7 @@ function restApiInitForms()
 
     // save_form_reminder
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_form_reminder',
         array(
             'methods'                 => 'POST',
@@ -313,7 +313,7 @@ function restApiInitForms()
 
     // save_form_input
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_form_input',
         array(
             'methods'                 => 'POST',
@@ -335,7 +335,7 @@ function restApiInitForms()
 
     // save_form_emails
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_form_emails',
         array(
             'methods'                 => 'POST',

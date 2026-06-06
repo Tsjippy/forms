@@ -9,7 +9,7 @@ function restApiInit()
 {
     // add element to form
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/form-selector',
         array(
             'methods'                 => 'GET',
@@ -20,7 +20,7 @@ function restApiInit()
 
     // form builder
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/form_builder',
         array(
             'methods'                 => 'POST,GET',
@@ -31,7 +31,7 @@ function restApiInit()
 
     // Get all forms
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/get_forms',
         array(
             'methods'                 => 'POST,GET',
@@ -42,7 +42,7 @@ function restApiInit()
 
     // Show form results
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/show_form_results',
         array(
             'methods'                 => 'POST,GET',
@@ -53,7 +53,7 @@ function restApiInit()
 
     // Add new form table
     register_rest_route(
-        RESTAPIPREFIX . '/forms',
+        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/missing_form_fields',
         array(
             'methods'                 => 'POST,GET',

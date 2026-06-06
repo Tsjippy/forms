@@ -12,7 +12,7 @@ add_filter('login_redirect', __NAMESPACE__ . '\loginRedirect', 10, 3);
 function loginRedirect($redirect, $requestedRedirect, $user)
 {
 
-    if (rtrim($redirect, '/') != SITEURL) {
+    if (rtrim($redirect, '/') != TSJIPPY\SITEURL) {
         return $redirect;
     }
 
