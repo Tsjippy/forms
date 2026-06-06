@@ -1540,7 +1540,7 @@ class Forms
 
         //loop over the results
         foreach ($matches[1] as $match) {
-            $replaceValue    = $replaceValues[$match];
+            $replaceValue    = $replaceValues[$match] ?? '';
 
             // Empty
             if (empty($replaceValue)) {
