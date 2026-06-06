@@ -9,6 +9,7 @@
 ### Changed
 - comply to coding standards
 - code layout
+- namespaced all constants
 
 ### Fixed
 - spacing problem
