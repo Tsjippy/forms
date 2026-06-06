@@ -4,6 +4,7 @@
 ### Added
 - usage of wpdb->prepare for all queries
 - shared functionality loader
+- default value
 
 ### Changed
 - comply to coding standards
