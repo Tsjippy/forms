@@ -49,7 +49,7 @@ class DisplayForm extends ElementHtmlBuilder
             is_numeric($_GET['user-id'])                            &&     // and the user-id parameter is set in the url
             empty($atts['user-id'])                                        // and the user id is not given in the shortcode
         ) {
-            $this->userId    = $_GET['user-id'];
+            $this->userId    = (int) $_GET['user-id'];
         }
     }
 

@@ -114,7 +114,7 @@ class Forms
                 $postAuthor    = $post->post_author;
             }
         } elseif (!empty($_POST['form-url'])) {
-            $postId        = url_to_postid($_POST['form-url']);
+            $postId        = url_to_postid(TSJIPPY\sanitize($_POST['form-url'], 'url'));
 
             if ($postId) {
                 $postAuthor    = get_post($postId)->post_author;
@@ -1329,26 +1329,26 @@ class Forms
 
             $this->onlyOwn        = $atts['only-own'];
             if (isset($_GET['only-own'])) {
-                $this->onlyOwn    = $_GET['only-own'];
+                $this->onlyOwn    = (int) $_GET['only-own'];
             }
 
             $this->all            = $atts['all'];
             $this->showArchived    = $atts['archived'];
             if (isset($_GET['archived'])) {
-                $this->showArchived    = $_GET['archived'];
+                $this->showArchived    = TSJIPPY\sanitize($_GET['archived']);
             }
 
             if (isset($_GET['all'])) {
-                $this->all    = $_GET['all'];
+                $this->all    = TSJIPPY\sanitize($_GET['all']);
             }
 
             if (!empty($atts['user-id']) && is_numeric($atts['user-id'])) {
                 $this->userId    = $atts['user-id'];
             }
 
-            $this->formData->name     = sanitize_text_field(wp_unslash($atts['form-name']));
-            $this->formData->slug     = sanitize_text_field(wp_unslash($atts['slug']));
-            $this->formData->id        = sanitize_text_field(wp_unslash($atts['form-id']));
+            $this->formData->name     = TSJIPPY\sanitize($atts['form-name']);
+            $this->formData->slug     = TSJIPPY\sanitize($atts['slug']);
+            $this->formData->id        = TSJIPPY\sanitize($atts['form-id']);
 
             $this->getForm();
         }

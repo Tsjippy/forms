@@ -81,7 +81,7 @@ function restApiInitTable()
             'methods'                 => \WP_REST_Server::CREATABLE,
             'callback'                 => __NAMESPACE__ . '\saveColumnSettings',
             'permission_callback'     => function () {
-                $formsTable        = new DisplayFormResults($_POST);
+                $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
                 return $formsTable->tableEditPermissions;
             },
             'args'                    => array(
@@ -106,7 +106,7 @@ function restApiInitTable()
             'methods'                 => \WP_REST_Server::CREATABLE,
             'callback'                 => __NAMESPACE__ . '\saveTableSettings',
             'permission_callback'     => function () {
-                $formsTable        = new DisplayFormResults($_POST);
+                $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
                 return $formsTable->tableEditPermissions;
             },
             'args'                    => array(
@@ -131,7 +131,7 @@ function restApiInitTable()
             'methods'                 => \WP_REST_Server::CREATABLE,
             'callback'                 => __NAMESPACE__ . '\removeSubmission',
             'permission_callback'     => function () {
-                $formsTable        = new DisplayFormResults($_POST);
+                $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
                 return $formsTable->tableEditPermissions;
             },
             'args'                    => array(
@@ -153,7 +153,7 @@ function restApiInitTable()
             'methods'                 => \WP_REST_Server::CREATABLE,
             'callback'                 => __NAMESPACE__ . '\archiveSubmission',
             'permission_callback'     => function () {
-                $formsTable        = new DisplayFormResults($_POST);
+                $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
                 return $formsTable->tableEditPermissions;
             },
             'args'                    => array(
@@ -245,14 +245,14 @@ function restApiInitTable()
 
 function getPage()
 {
-    $displayFormResults        = new DisplayFormResults($_POST);
+    $displayFormResults        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
 
     $displayFormResults->loadShortcodeData();
 
     $tables    = [];
 
-    $types    = [$_POST['type']];
-    if ($_POST['type'] == 'all' && $displayFormResults->tableSettings->split_table) {
+    $types    = [TSJIPPY\sanitize($_POST['type'])];
+    if (TSJIPPY\sanitize($_POST['type']) == 'all' && $displayFormResults->tableSettings->split_table) {
         $types    = ['own', 'others'];
     }
 
@@ -306,7 +306,7 @@ function saveColumnSettings($settings = [], $shortcodeId = '')
 
 function saveTableSettings()
 {
-    $tableSettings     = $_POST['table-settings'];
+    $tableSettings     = TSJIPPY\sanitize($_POST['table-settings']);
 
     // Check invalid filter names
     if (isset($tableSettings->filter)) {
@@ -320,14 +320,14 @@ function saveTableSettings()
     //update table settings
     $forms    = new SaveFormSettings();
 
-    $result = $forms->insertOrUpdateData($forms->shortcodeTable, $tableSettings, ['id' => $_POST['shortcode-id']]);
+    $result = $forms->insertOrUpdateData($forms->shortcodeTable, $tableSettings, ['id' => (int) $_POST['shortcode-id']]);
 
     if (is_wp_error($result)) {
         return $result;
     }
 
     //also update form setings if needed
-    $formSettings = $_POST['form-settings'];
+    $formSettings = TSJIPPY\sanitize($_POST['form-settings']);
     if (is_array($formSettings) && is_numeric($_POST['form-id'])) {
         $forms->getForm($_POST['form-id']);
 
@@ -344,7 +344,7 @@ function saveTableSettings()
 
 function removeSubmission()
 {
-    $formTable    = new EditFormResults($_POST);
+    $formTable    = new EditFormResults(TSJIPPY\sanitize($_POST));
 
     $result        = $formTable->deleteSubmission((int) $_POST['submission-id']);
 
@@ -362,9 +362,9 @@ function removeSubmission()
  */
 function archiveSubmission()
 {
-    $formTable                    = new EditFormResults($_POST);
+    $formTable                  = new EditFormResults(TSJIPPY\sanitize($_POST));
     $formTable->submissionId    = (int) $_POST['submission-id'];
-    $action                        = $_POST['action'];
+    $action                     = TSJIPPY\sanitize($_POST['action']);
 
     if ($action    == 'archive') {
         $archive = true;
@@ -373,7 +373,7 @@ function archiveSubmission()
     }
 
     $subId        = null;
-    if (isset($_POST['subid']) && is_numeric($_POST['subid'])) {
+    if (is_numeric($_POST['subid'] ?? '')) {
         $subId        = $_POST['subid'];
     }
 
@@ -387,26 +387,26 @@ function archiveSubmission()
  */
 function getInputHtml()
 {
-    $formTable        = new DisplayFormResults($_POST);
+    $formTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
 
-    $formTable->parseSubmissions('', $_POST['submission-id']);
+    $formTable->parseSubmissions('', (int) $_POST['submission-id']);
 
     // Get the form id from the submission and load the form
     $formTable->getForm($formTable->submission->form_id);
 
-    $userId                                            = $formTable->submission->user_id;
+    $userId             = $formTable->submission->user_id;
 
-    $formTable->userId                                = $userId;
+    $formTable->userId  = $userId;
 
-    $elementId                                        = sanitize_text_field(wp_unslash($_POST['element-id']));
+    $elementId          = (int) $_POST['element-id'];
 
-    $element                                        = $formTable->getElementById($elementId);
+    $element            = $formTable->getElementById($elementId);
 
     if (!$element) {
         return new \WP_Error('No element found', "No element found with id '$elementId'");
     }
 
-    $value        = $formTable->getSubmissionValue($_POST['submission-id'], $elementId, isset($_POST['subid']) ? $_POST['subid'] : null);
+    $value        = $formTable->getSubmissionValue((int) $_POST['submission-id'], $elementId, isset($_POST['subid']) ? (int) $_POST['subid'] : null);
 
     // Get element html
     $html         = $formTable->getElementHtml($element, '', $value);
@@ -471,20 +471,20 @@ function getInputHtml()
  */
 function editValue()
 {
-    $formTable                    = new EditFormResults($_POST);
+    $formTable               = new EditFormResults(TSJIPPY\sanitize($_POST));
 
-    $formTable->submissionId    = $_POST['submission-id'];
+    $formTable->submissionId = (int) $_POST['submission-id'];
 
-    $elementId                    = sanitize_text_field(wp_unslash($_POST['element-id']));
+    $elementId               = (int) $_POST['element-id'];
 
-    $subId                        = sanitize_text_field(wp_unslash($_POST['subid']));
+    $subId                   = (int) $_POST['subid'];
     if ($subId == '') {
         $subId    = null;
     }
 
-    $newValue                     = json_decode(sanitize_textarea_field(stripslashes($_POST['new-value'])));
+    $newValue                = json_decode(TSJIPPY\sanitize($_POST['new-value'], 'textarea_field'));
 
-    $oldValue                    = $formTable->getSubmissionValue($formTable->submissionId, $elementId, $subId);
+    $oldValue                = $formTable->getSubmissionValue($formTable->submissionId, $elementId, $subId);
 
     if ($oldValue == $newValue) {
         if (is_array($oldValue)) {

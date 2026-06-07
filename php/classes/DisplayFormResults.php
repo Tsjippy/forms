@@ -334,9 +334,9 @@ class DisplayFormResults extends DisplayForm
             }
 
             // Get the data for the current filter
-            $filterValue    = sanitize_text_field(wp_unslash($_POST[$filterKey]));
+            $filterValue    = TSJIPPY\sanitize($_POST[$filterKey]);
 
-            $filterElement    = $this->getElementById($filter['element']);
+            $filterElement  = $this->getElementById($filter['element']);
 
             // Invalid filter element id
             if (!$filterElement) {
@@ -1245,7 +1245,7 @@ class DisplayFormResults extends DisplayForm
             !is_numeric($this->shortcodeId) ||
             $this->shortcodeId == -1
         ) {
-            if (!empty($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])) {
+            if (is_numeric($_POST['shortcode-id'] ?? '')) {
                 $this->shortcodeId    = $_POST['shortcode-id'];
             } else {
                 return new WP_Error('forms', 'no shortcoode id');
@@ -1961,7 +1961,7 @@ class DisplayFormResults extends DisplayForm
             }
 
             if (!empty($_POST[$filterKey])) {
-                $filterValue    = $_POST[$filterKey];
+                $filterValue    = TSJIPPY\sanitize($_POST[$filterKey]);
             }
 
             $elementHtml    = $this->getElementHtml($filterElement, $parent, $filterValue);

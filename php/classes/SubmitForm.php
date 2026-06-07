@@ -56,8 +56,8 @@ class SubmitForm extends SaveFormSettings
      */
     public function emailFooter($footer)
     {
-        $footer['url']        = $_POST['formurl'];
-        $footer['text']        = $_POST['formurl'];
+        $footer['url']  = TSJIPPY\sanitize($_POST['formurl'], 'url');
+        $footer['text'] = TSJIPPY\sanitize($_POST['formurl'], 'url');
 
         return $footer;
     }
@@ -85,7 +85,7 @@ class SubmitForm extends SaveFormSettings
             return false;
         }
 
-        $changedElementId    = $_POST['element-id'] ?? '';
+        $changedElementId    = (int) $_POST['element-id'] ?? '';
 
         // check if a certain element is changed to a certain value
         if ($trigger == 'fieldchanged') {
@@ -616,15 +616,15 @@ class SubmitForm extends SaveFormSettings
             }
         }
 
-        $formresults                         = $_POST;
+        $formresults                         = TSJIPPY\sanitize($_POST);
 
-        $this->submission->time_created        = gmdate("Y-m-d H:i:s");
+        $this->submission->time_created      = gmdate("Y-m-d H:i:s");
 
-        $this->submission->time_last_edited    = gmdate("Y-m-d H:i:s");
+        $this->submission->time_last_edited  = gmdate("Y-m-d H:i:s");
 
-        $this->submission->user_id            = $userId;
+        $this->submission->user_id           = $userId;
 
-        $this->submission->submitter_id        = $this->userId;
+        $this->submission->submitter_id      = $this->userId;
 
         // check for required empty elements
         foreach ($this->formElements as $element) {
@@ -680,7 +680,7 @@ class SubmitForm extends SaveFormSettings
             return $result;
         }
 
-        $message    = apply_filters('tsjippy_after_form_submission', $message, $_POST, $this);
+        $message    = apply_filters('tsjippy_after_form_submission', $message, TSJIPPY\sanitize($_POST), $this);
 
         do_action('tsjippy-after-form-submit', $this);
 

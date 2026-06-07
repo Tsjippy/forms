@@ -383,14 +383,14 @@ function addFormElement($copy = false)
     global $wpdb;
 
     $forms    = new SaveFormSettings();
-    $forms->getForm($_POST['form-id']);
+    $forms->getForm((int) $_POST['form-id']);
 
     $index        = 0;
     $oldElement    = new stdClass();
 
     //copy an existing element
     if ($copy === true) {
-        $element            = $forms->getElementById($_POST['element-id']);
+        $element            = $forms->getElementById((int) $_POST['element-id']);
 
         $element->slug        = $element->name;
 
@@ -399,7 +399,7 @@ function addFormElement($copy = false)
 
     // Get element from $_POST
     else {
-        $element            = $_POST["formfield"];
+        $element            = TSJIPPY\sanitize($_POST["formfield"]);
         $element            = (object)$element;
 
         // make sure all data is clean
@@ -430,9 +430,9 @@ function addFormElement($copy = false)
 
         $element->id    = $_POST['element-id'];
 
-        $oldElement        = $forms->getElementById($element->id);
+        $oldElement     = $forms->getElementById($element->id);
 
-        //$index            = $oldElement->index;
+        //$index        = $oldElement->index;
     }
 
     if ($element->type == 'php') {
@@ -485,16 +485,22 @@ function addFormElement($copy = false)
     } else {
         $message                                = "Succesfully added '{$element->slug}' to this form";
         if (!is_numeric($_POST['insert-after'])) {
-            $element->priority    = $wpdb->get_var("SELECT COUNT(`id`) FROM `{$forms->elTableName}` WHERE `form_id`={$element->form_id}") + 1;
+            $element->priority    = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(`id`) FROM %i WHERE `form_id`=%d",
+                    $forms->elTableName,
+                    $element->form_id
+                )
+            ) + 1;
         } else {
-            $element->priority    = $_POST['insert-after'] + 1;
+            $element->priority    = (int) $_POST['insert-after'] + 1;
         }
 
         $element->id    = $forms->insertElement($element);
 
         if (!empty($_POST['extra'])) {
             // The current indexes without the new element
-            $newIndexes     = (array)json_decode(sanitize_text_field(stripslashes($_POST['extra'])));
+            $newIndexes     = (array)json_decode(TSJIPPY\sanitize($_POST['extra']));
 
             // The new element has an unknow id of -1, replace it with the real id.
             $newIndexes[$element->id]    = $newIndexes[-1];
@@ -505,7 +511,7 @@ function addFormElement($copy = false)
     }
 
     $formBuilderForm    = new FormBuilderForm();
-    $formBuilderForm->getForm($_POST['form-id']);
+    $formBuilderForm->getForm((int) $_POST['form-id']);
 
     $html                 = $formBuilderForm->buildHtml($element, '', $index);
 
@@ -522,7 +528,7 @@ function removeElement()
 
     $formBuilder    = new SaveFormSettings();
 
-    $elementId        = $_POST['elementindex'];
+    $elementId        = (int) $_POST['elementindex'];
 
     $wpdb->delete(
         $formBuilder->elTableName,
@@ -531,7 +537,7 @@ function removeElement()
 
     // Fix priorities
     // Get all elements of this form
-    $formBuilder->getAllFormElements('priority', $_POST['form-id']);
+    $formBuilder->getAllFormElements('priority', (int) $_POST['form-id']);
 
     //Loop over all elements and give them the new priority
     foreach ($formBuilder->formElements as $key => $el) {
@@ -549,19 +555,19 @@ function removeElement()
 // DONE
 function requestFormElement()
 {
-    $formBuilderForm                = new FormBuilderForm();
+    $formBuilderForm        = new FormBuilderForm();
 
-    $formId                 = $_POST['form-id'];
-    $elementId                 = $_POST['element-id'];
+    $formId                 = (int) $_POST['form-id'];
+    $elementId              = (int) $_POST['element-id'];
 
     $formBuilderForm->getForm($formId);
 
-    $conditionForm            = $formBuilderForm->elementConditionsForm($elementId);
+    $conditionForm          = $formBuilderForm->elementConditionsForm($elementId);
 
     $elementForm            = $formBuilderForm->elementBuilderForm($elementId);
 
     return [
-        'elementForm'        => $elementForm,
+        'elementForm'       => $elementForm,
         'conditionsHtml'    => $conditionForm
     ];
 }
@@ -571,11 +577,11 @@ function reorderFormElements()
 {
     $formBuilder            = new SaveFormSettings();
 
-    $formBuilder->formId    = $_POST['form-id'];
+    $formBuilder->formId    = (int) $_POST['form-id'];
 
-    $newIndexes             = (array)json_decode(sanitize_text_field(stripslashes($_POST['indexes'])));
+    $newIndexes             = (array)json_decode(TSJIPPY\sanitize($_POST['indexes']));
 
-    $element                = $formBuilder->getElementById($_POST['el-id']);
+    $element                = $formBuilder->getElementById((int) $_POST['el-id']);
 
     $formBuilder->reorderElements($newIndexes, $element);
 
@@ -587,10 +593,10 @@ function editFormfieldWidth()
 {
     $formBuilder    = new SaveFormSettings();
 
-    $elementId         = $_POST['elementid'];
+    $elementId         = (int) $_POST['elementid'];
     $element        = $formBuilder->getElementById($elementId);
 
-    $newwidth         = $_POST['new-width'];
+    $newwidth         = (int) $_POST['new-width'];
     $element->width = min($newwidth, 100);
 
     $formBuilder->updateFormElement($element);
@@ -601,11 +607,11 @@ function editFormfieldWidth()
 // DONE
 function requestFormConditionsHtml()
 {
-    $formBuilder    = new FormBuilderForm();
+    $formBuilder = new FormBuilderForm();
 
-    $elementID = $_POST['elementid'];
+    $elementID   = (int) $_POST['elementid'];
 
-    $formBuilder->getForm($_POST['form-id']);
+    $formBuilder->getForm((int) $_POST['form-id']);
 
     return $formBuilder->elementConditionsForm($elementID);
 }
@@ -613,19 +619,19 @@ function requestFormConditionsHtml()
 // DONE
 function saveElementConditions()
 {
-    $formBuilder        = new SaveFormSettings();
+    $formBuilder          = new SaveFormSettings();
 
-    $elementId            = $_POST['elementid'];
+    $elementId            = (int) $_POST['elementid'];
     if (!$elementId) {
         return new \WP_Error('forms', "First save the element before adding conditions to it");
     }
-    $formId                = $_POST['form-id'];
+    $formId                = (int) $_POST['form-id'];
 
     $formBuilder->getForm($formId);
 
-    $element             = $formBuilder->getElementById($elementId);
+    $element              = $formBuilder->getElementById($elementId);
 
-    $elementConditions    = $_POST['element-conditions'];
+    $elementConditions    = TSJIPPY\sanitize($_POST['element-conditions'] ?? '');
     if (empty($elementConditions)) {
         $element->conditions    = '';
 
@@ -654,9 +660,9 @@ function saveElementConditions()
 // DONE
 function saveFormSettings()
 {
-    $formBuilder            = new SaveFormSettings();
+    $formBuilder   = new SaveFormSettings();
 
-    $formSettings             = $_POST;
+    $formSettings  = TSJIPPY\sanitize($_POST);
     unset($formSettings['_wpnonce']);
     unset($formSettings['form-id']);
 
@@ -664,7 +670,7 @@ function saveFormSettings()
         $formBuilder->formData    = new stdClass();
     }
 
-    $formBuilder->formData->name    = sanitize_text_field(wp_unslash($formSettings['form-name']));
+    $formBuilder->formData->name    = TSJIPPY\sanitize($formSettings['form-name']);
     $formBuilder->formData->slug    = str_replace(' ', '-', strtolower($formBuilder->formData->name));
 
     //remove double slashes
@@ -682,12 +688,12 @@ function saveFormSettings()
 
 function saveFormReminder()
 {
-    $formBuilder            = new SaveFormSettings();
+    $formBuilder   = new SaveFormSettings();
 
-    $formReminder             = $_POST;
+    $formReminder  = TSJIPPY\sanitize($_POST);
     unset($formReminder['_wpnonce']);
 
-    $result    = $formBuilder->updateFormReminder($_POST['form-id'], $formReminder);
+    $result    = $formBuilder->updateFormReminder((int) $_POST['form-id'], $formReminder);
 
     if (is_wp_error($result)) {
         return $result;
@@ -699,11 +705,11 @@ function saveFormReminder()
 function saveFormEmails()
 {
     $formBuilder    = new SaveFormSettings();
-    $formBuilder->getForm($_POST['form-id']);
+    $formBuilder->getForm((int) $_POST['form-id']);
 
-    $formEmails     = $_POST['emails'];
+    $formEmails     = TSJIPPY\sanitize($_POST['emails']);
 
-    $result            = $formBuilder->saveFormEmails($formEmails, $_POST['form-id']);
+    $result         = $formBuilder->saveFormEmails($formEmails, (int) $_POST['form-id']);
 
     if (is_wp_error($result)) {
         return $result;
@@ -714,14 +720,14 @@ function saveFormEmails()
 
 function loadForm()
 {
-    $displayForm    = new DisplayForm(['form-id' => $_POST['form-id']]);
+    $displayForm    = new DisplayForm(['form-id' => (int) $_POST['form-id']]);
 
     return $displayForm->showForm();
 }
 
 function loadFormResults()
 {
-    $displayFormResults = new DisplayFormResults(['shortcode-id' => $_POST['shortcode-id']]);
+    $displayFormResults = new DisplayFormResults(['shortcode-id' => (int) $_POST['shortcode-id']]);
 
     return $displayFormResults->showFormresultsTable();
 }

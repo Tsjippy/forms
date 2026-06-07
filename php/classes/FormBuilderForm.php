@@ -408,12 +408,12 @@ class FormBuilderForm extends DisplayForm
         // Load js
         wp_enqueue_script('tsjippy_forms_script');
 
-        if (isset($_POST['export-form']) && is_numeric($_POST['export-form'])) {
+        if (is_numeric($_POST['export-form'] ?? '')) {
             $formExport    = new FormExport();
             $formExport->exportForm($_POST['export-form']);
         }
 
-        if (isset($_POST['delete-form']) && is_numeric($_POST['delete-form'])) {
+        if (is_numeric($_POST['delete-form'] ?? '')) {
             $saveFormSettings    = new SaveFormSettings();
             $saveFormSettings->deleteForm($_POST['delete-form']);
 
@@ -1057,7 +1057,13 @@ class FormBuilderForm extends DisplayForm
                 if (isset($userMetas[$key])) {
                     $value    = $userMetas[$key][0];
                 } else {
-                    $value    = $wpdb->get_var("SELECT `meta_value` FROM `{$wpdb->usermeta}` WHERE meta_key = '$key'");
+                    $value    = $wpdb->get_var(
+                        $wpdb->prepare(
+                            "SELECT `meta_value` FROM %i WHERE meta_key = %s",
+                            $wpdb->usermeta,
+                            $key
+                        )
+                    );
                 }
 
                 // Check if array, store array keys

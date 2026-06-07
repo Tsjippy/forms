@@ -879,7 +879,7 @@ class ElementHtmlBuilder extends SubmitForm
 
             // return the sub value
             else {
-                if ($i == 1 && is_numeric($_POST['subid'])) {
+                if ($i == 1 && is_numeric($_POST['subid'] ?? '')) {
                     $index    = $_POST['subid'];
                 }
 

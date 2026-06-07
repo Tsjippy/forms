@@ -266,7 +266,7 @@ class SaveFormSettings extends Forms
         $this->formElements[$oldElement->index]    = (object)$element;
 
         if ($this->formData == null) {
-            $this->getForm($_POST['form-id']);
+            $this->getForm((int) $_POST['form-id']);
         }
 
         $formVersion    = 1;
@@ -431,7 +431,7 @@ class SaveFormSettings extends Forms
     {
         $priority    = 0;
 
-        if (empty($shortcodeId) && isset($_POST['shortcode-id']) && is_numeric($_POST['shortcode-id'])) {
+        if (empty($shortcodeId) && is_numeric($_POST['shortcode-id'] ?? '')) {
             $shortcodeId    = $_POST['shortcode-id'];
         }
 

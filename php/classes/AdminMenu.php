@@ -111,17 +111,17 @@ class AdminMenu extends ADMIN\SubAdminMenu
     {
         if (isset($_POST['import-form'])) {
             $formBuilder    = new FormExport();
-            return $formBuilder->importForm($_FILES['formfile']['tmp_name']);
+            return $formBuilder->importForm(TSJIPPY\sanitize($_FILES['formfile']['tmp_name']));
         }
 
-        if (isset($_POST['export']) && is_numeric($_POST['export'])) {
+        if (is_numeric($_POST['export'] ?? '')) {
             $forms    = new FormExport();
             $forms->exportForm($_POST['export']);
 
             return;
         }
 
-        if (isset($_POST['delete']) && is_numeric($_POST['delete'])) {
+        if (is_numeric($_POST['delete'] ?? '')) {
             $forms    = new SaveFormSettings();
 
             return $forms->deleteForm($_POST['delete']);
