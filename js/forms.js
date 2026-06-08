@@ -1,4 +1,4 @@
-import { addStyles } from "../../../plugins/tsjippy-shared-functionality/includes/js/partials/load_assets.js";
+import { addStyles } from "../../tsjippy-shared-functionality/js/partials/load_assets.js";
 import {
   removeDefaultSelect,
   cloneNode,
@@ -13,7 +13,7 @@ import {
   changeVisibility,
   changeFieldProperty,
 } from "./form_exports.js";
-import { getFieldValue } from "../../../plugins/tsjippy-shared-functionality/includes/js/partials/field_value.js";
+import { getFieldValue } from "../../tsjippy-shared-functionality/js/partials/field_value.js";
 export {
   getFieldValue,
   removeDefaultSelect,

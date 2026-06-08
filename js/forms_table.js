@@ -65,7 +65,7 @@ async function askConfirmation(text) {
 async function removeSubmission(target) {
   if (await askConfirmation("delete")) {
     let submissionId = target.closest("tr").dataset.submissionId;
-    let table = target.closest("table");
+    let table        = target.closest("table");
 
     let formData = new FormData();
     formData.append("form-id", table.dataset.formId);
@@ -88,14 +88,15 @@ async function removeSubmission(target) {
 }
 
 async function archiveSubmission(target) {
-  let table = target.closest("table");
-  let tableRow = target.closest("tr");
+  let table        = target.closest("table");
+  let tableRow     = target.closest("tr");
   let submissionId = tableRow.dataset.submissionId;
-  let action = target.value;
+  let action       = target.value;
   let response;
 
   let formData = new FormData();
   formData.append("form-id", table.dataset.formId);
+  formData.append("shortcode-id", table.dataset.shortcodeId);
   formData.append("submission-id", submissionId);
   formData.append("action", action);
 

@@ -801,9 +801,9 @@ class Forms
             } else {
                 $this->formData                     = (object)$result[0];
                 $this->formData->actions            = maybe_unserialize($this->formData->actions);
-                $this->formData->split                = maybe_unserialize($this->formData->split);
-                $this->formData->full_right_roles    = maybe_unserialize($this->formData->full_right_roles);
-                $this->formData->submit_others_form    = maybe_unserialize($this->formData->submit_others_form);
+                $this->formData->split              = maybe_unserialize($this->formData->split);
+                $this->formData->full_right_roles   = maybe_unserialize($this->formData->full_right_roles);
+                $this->formData->submit_others_form = maybe_unserialize($this->formData->submit_others_form);
 
                 /**
                  * Filters the elements the submission data should be splitted on
@@ -811,7 +811,7 @@ class Forms
                  * @param    array    $splitElements    The current element id's
                  * @param    object    $object            Form instance
                  */
-                $this->formData->split                = apply_filters('tsjippy-forms-split-elements', $this->formData->split, $this);
+                $this->formData->split              = apply_filters('tsjippy-forms-split-elements', $this->formData->split, $this);
             }
         }
 
@@ -1348,7 +1348,7 @@ class Forms
 
             $this->formData->name     = TSJIPPY\sanitize($atts['form-name']);
             $this->formData->slug     = TSJIPPY\sanitize($atts['slug']);
-            $this->formData->id        = TSJIPPY\sanitize($atts['form-id']);
+            $this->formData->id       = TSJIPPY\sanitize($atts['form-id']);
 
             $this->getForm();
         }

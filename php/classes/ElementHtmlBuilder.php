@@ -43,37 +43,37 @@ class ElementHtmlBuilder extends SubmitForm
     {
         parent::__construct();
 
-        $this->currentElement            = new stdClass();
-        $this->defaultArrayValues        = [];
-        $this->defaultValues            = [];
-        $this->dom                        = null;
-        $this->element                    = new stdClass();
-        $this->elementHtmlBuilder        = new stdClass();
-        $this->formData                    = new stdClass();
-        $this->formElements                = [];
-        $this->formWrapper                = null;
-        $this->html                        = '';
-        $this->minElForTabs                = -1;
-        $this->multiWrapElementCount    = -1;
-        $this->multiwrapperFirstClone    = null;
-        $this->multiWrapValueCount        = -1;
-        $this->nextElement                = null;
-        $this->nonWrappable                = [];
-        $this->prevElement                = null;
-        $this->submissions                = [];
-        $this->wrap                        = false;
-        $this->requestedValue            = null;
+        $this->currentElement         = new stdClass();
+        $this->defaultArrayValues     = [];
+        $this->defaultValues          = [];
+        $this->dom                    = null;
+        $this->element                = new stdClass();
+        $this->elementHtmlBuilder     = new stdClass();
+        $this->formData               = new stdClass();
+        $this->formElements           = [];
+        $this->formWrapper            = null;
+        $this->html                   = '';
+        $this->minElForTabs           = -1;
+        $this->multiWrapElementCount  = -1;
+        $this->multiwrapperFirstClone = null;
+        $this->multiWrapValueCount    = -1;
+        $this->nextElement            = null;
+        $this->nonWrappable           = [];
+        $this->prevElement            = null;
+        $this->submissions            = [];
+        $this->wrap                   = false;
+        $this->requestedValue         = null;
 
         $this->reset();
     }
 
     public function reset()
     {
-        $this->elementValues            = [];
-        $this->tagType                    = '';
-        $this->selectedValue            = '';
-        $this->attributes                = ['class' => ''];
-        $this->usermeta                    = [];
+        $this->elementValues          = [];
+        $this->tagType                = '';
+        $this->selectedValue          = '';
+        $this->attributes             = ['class' => ''];
+        $this->usermeta               = [];
     }
 
     /**

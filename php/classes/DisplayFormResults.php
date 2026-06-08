@@ -15,24 +15,24 @@ class DisplayFormResults extends DisplayForm
 {
     use ExportFormResults;
 
-    public array     $columnSettings;
-    public int         $currentPage;
+    public array    $columnSettings;
+    public int      $currentPage;
     public bool     $enriched;
-    public array     $excelContent;
-    public array     $extraElements;
+    public array    $excelContent;
+    public array    $extraElements;
     public bool     $formEditPermissions;
-    public array     $hiddenColumns;
+    public array    $hiddenColumns;
     public bool     $ownData;
-    public string     $shortcodeTable;
-    public string     $sortColumn;
-    public string     $sortDirection;
-    public array     $sortElementIds;
+    public string   $shortcodeTable;
+    public string   $sortColumn;
+    public string   $sortDirection;
+    public array    $sortElementIds;
     public bool     $spliced;
-    public array     $subElements;
+    public array    $subElements;
     public bool     $tableEditPermissions;
-    public object     $tableSettings;
+    public object   $tableSettings;
     public bool     $tableViewPermissions;
-    public int|null    $total;
+    public int|null $total;
 
     /**
      * Constructor for the DisplayFormResults class
@@ -46,23 +46,23 @@ class DisplayFormResults extends DisplayForm
 
         global $wpdb;
 
-        $this->columnSettings            = [];
-        $this->currentPage                = 0;
-        $this->enriched                    = false;
-        $this->excelContent                = [];
-        $this->extraElements            = [];
-        $this->formEditPermissions        = false;
-        $this->ownData                    = false;
-        $this->shortcodeTable            = $wpdb->prefix . 'tsjippy_form_shortcodes';
-        $this->sortColumn                = '';
-        $this->sortDirection            = 'ASC';
-        $this->sortElementIds            = [];
-        $this->spliced                    = false;
-        $this->subElements                = [];
-        $this->tableEditPermissions        = false;
-        $this->tableSettings            = new stdClass();
-        $this->tableViewPermissions        = false;
-        $this->total                    = 0;
+        $this->columnSettings       = [];
+        $this->currentPage          = 0;
+        $this->enriched             = false;
+        $this->excelContent         = [];
+        $this->extraElements        = [];
+        $this->formEditPermissions  = false;
+        $this->ownData              = false;
+        $this->shortcodeTable       = $wpdb->prefix . 'tsjippy_form_shortcodes';
+        $this->sortColumn           = '';
+        $this->sortDirection        = 'ASC';
+        $this->sortElementIds       = [];
+        $this->spliced              = false;
+        $this->subElements          = [];
+        $this->tableEditPermissions = false;
+        $this->tableSettings        = new stdClass();
+        $this->tableViewPermissions = false;
+        $this->total                = 0;
 
         //Get personal visibility
         if (empty($this->formData)) {
@@ -81,11 +81,11 @@ class DisplayFormResults extends DisplayForm
 
         wp_enqueue_style('tsjippy_formtable_style');
 
-        $family                            = new TSJIPPY\FAMILY\Family();
-        $this->user->partnerId            = $family->getPartner($this->user->ID);
+        $family                     = new TSJIPPY\FAMILY\Family();
+        $this->user->partnerId      = $family->getPartner($this->user->ID);
 
         if (function_exists('is_user_logged_in') && is_user_logged_in()) {
-            $this->userRoles[]    = 'everyone'; //used to indicate view rights on permissions
+            $this->userRoles[]      = 'everyone'; //used to indicate view rights on permissions
         }
 
         $result    = $this->enrichColumnSettings();
@@ -864,13 +864,7 @@ class DisplayFormResults extends DisplayForm
                         $this->addColumnSetting($element, $relatedIds[$id]);
                     }
 
-                   /*  // Loop over the column settings to add the element ids
-                    foreach ($this->columnSettings as &$setting) {
-                        // its already in settings, just add the extra element id
-                        if ($setting['name'] == $name) {
-                            $setting['elementIds']    = $elIds;
-                        }
-                    } */
+                    $this->columnSettings[$id]['elementIds']    = $elIds;
                 }
             }
         }
@@ -1039,13 +1033,13 @@ class DisplayFormResults extends DisplayForm
             if ($value != 'X') {
                 $rowHasContents    = true;
 
-                //Get the element value from the array
-                if (
-                    isset($this->submission->sub_id) &&                   // sub id set
-                    !empty($columnSetting['elementIds']) &&               // this has an element ids array
-                    in_array($elementId, $columnSetting['elementIds'])    // this element belongs to this setting
-                ) {
-                    $attributes["data-subid"] = $this->submission->sub_id;
+                /**
+                 * Find splitted element values
+                 */
+                if (in_array($elementId, $columnSetting['elementIds'] ?? []) ) {
+                    if(!empty($this->submission->sub_id)){
+                        $attributes["data-subid"] = $this->submission->sub_id;
+                    }
 
                     // Find the splitted value
                     foreach ($columnSetting['elementIds'] as $id) {
@@ -1056,13 +1050,16 @@ class DisplayFormResults extends DisplayForm
                     }
                 }
 
+                /**
+                 * Find regular values
+                 */
                 if (isset($this->submission->{$elementId})) {
                     $value    = $this->submission->{$elementId};
                 } elseif (isset($this->submission->{$elementName})) {
                     $value    = $this->submission->{$elementName};
                 } elseif (isset($this->submission->{$class})) {
                     $value    = $this->submission->{$class};
-                } else {
+                } elseif(empty($value)) {
                     $value    = 'X';
                 }
 
@@ -2422,7 +2419,7 @@ class DisplayFormResults extends DisplayForm
         //Load js
         wp_enqueue_script('tsjippy_forms_table_script');
 
-    ?>
+        ?>
         <div class='form table-wrapper'>
             <div class='form table-head'>
                 <h2 class="table-title"><?php echo esc_html($this->tableSettings->title ?? ''); ?></h2><br>
@@ -2434,7 +2431,7 @@ class DisplayFormResults extends DisplayForm
             echo $tableHtml;
             ?>
         </div>
-<?php
+        <?php
 
         //now we have rendered all the content we can export the excel if requested
         if (isset($_POST['export-xls'])) {
