@@ -1,5 +1,9 @@
-@use "../../../plugins/tsjippy-shared-functionality/includes/css/scss/global"
-  as *;
+@use "../../tsjippy-shared-functionality/css/scss/global" as *;
+
+.name {
+  max-width: 50px;
+  white-space: normal;
+}
 
 .limit-length {
   //min-width: 300px;

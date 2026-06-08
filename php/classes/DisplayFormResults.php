@@ -2,10 +2,10 @@
 
 namespace TSJIPPY\FORMS;
 
-use ParagonIE\Sodium\Core\Curve25519\Ge\P2;
 use TSJIPPY;
 use stdClass;
 use WP_Error;
+use function TSJIPPY\addElement as addElement;
 
 if (! defined('ABSPATH')) {
     exit;
@@ -475,11 +475,11 @@ class DisplayFormResults extends DisplayForm
 
         // Check which where statements should apply to the splitted values and add those to the inner join string
         $rawWhere            = [];
-        $rawValues            = [];
-        $finalWhere            = [];
-        $valueIndex            = 0;
-        foreach ($where as $index => $whereStatement) {
-            if (str_contains($whereStatement, 'S. ')) {
+        $rawValues           = [];
+        $finalWhere          = [];
+        $valueIndex          = 0;
+        foreach ($where as $whereStatement) {
+            if (str_contains($whereStatement, 'S.')) {
                 $rawWhere[]        = $whereStatement;
 
                 if (str_contains($whereStatement, '%')) {
@@ -666,7 +666,7 @@ class DisplayFormResults extends DisplayForm
         $ecd            = $this->columnsQuery($where, $query, $values);
 
         // Get the total
-        $countQuery        = "$ecd\n\nSELECT COUNT(*) AS total FROM (\n\t$query\n) AS AllData;";
+        $countQuery     = "$ecd\n\nSELECT COUNT(*) AS total FROM (\n\t$query\n) AS AllData;";
         $this->total    = $wpdb->get_var($wpdb->prepare($countQuery, ...$values));
 
         if (empty($this->total)) {
@@ -935,60 +935,52 @@ class DisplayFormResults extends DisplayForm
         }
     }
 
-    protected function getRowContents()
+    protected function getRowContents($tr)
     {
-        $rowContents    = '';
-        $excelRow        = [];
+        $excelRow    = [];
 
-        if ($this->submission->user_id == $this->user->ID || $this->submission->user_id == $this->user->partnerId) {
+        if (
+            $this->submission->user_id == $this->user->ID ||
+            $this->submission->user_id == $this->user->partnerId
+        ) {
             $ownEntry    = true;
         } else {
             $ownEntry    = false;
         }
 
-        $rowHasContents    = false;
+        $rowHasContents  = false;
         $iconUrl         = TSJIPPY\pathToUrl(PLUGINPATH . 'pictures/copy.png');
 
         foreach ($this->columnSettings as $elementId => $columnSetting) {
 
-            if (!is_array($columnSetting)) {
+            if (
+                !is_array($columnSetting) ||
+                !$columnSetting['show'] ||
+                !is_numeric($elementId)
+            ) {
                 continue;
             }
 
-            $value            = '';
-            $subIdString    = '';
-            $orgFieldValue    = $value;
-
-            //If the column is hidden, do not show this cell
-            if (!$columnSetting['show'] || !is_numeric($elementId)) {
-                continue;
-            }
-
-            if (!isset($columnSetting['view_right_roles'])) {
-                $columnSetting['view_right_roles']    = [];
-            }
-
-            if (!isset($columnSetting['edit_right_roles'])) {
-                $columnSetting['edit_right_roles']    = [];
-            }
+            $value         = '';
+            $orgFieldValue = $value;
 
             //if we lack view permission, do not show this cell
             if (
                 (
                     !$ownEntry ||
-                    (                                                                            //not our own entry
+                    (                                                                           //not our own entry
                         $ownEntry &&                                                            //or it is our own
-                        !in_array('own', (array)$columnSetting['view_right_roles'])                //but we are not allowed to see it
+                        !in_array('own', (array)$columnSetting['view_right_roles'] ?? [])       //but we are not allowed to see it
                     )
                 )    &&
-                !$this->tableEditPermissions &&                                                    //no permission to edit the table and
-                !empty($columnSetting['view_right_roles']) &&                                     // there are view right permissions defined
-                !array_intersect($this->userRoles, $columnSetting['view_right_roles'])            // and we do not have the view right role
+                !$this->tableEditPermissions &&                                                 //no permission to edit the table and
+                !empty($columnSetting['view_right_roles'] ?? []) &&                                   // there are view right permissions defined
+                !array_intersect($this->userRoles, $columnSetting['view_right_roles'] ?? [])          // and we do not have the view right role
             ) {
                 //later on there will be a row with data in this column
                 if (
-                    $this->ownData &&                                                             // we are only showing own data
-                    in_array('own', $columnSetting['view_right_roles'])                            // and this column can be viewed by owner
+                    $this->ownData &&                                                           // we are only showing own data
+                    in_array('own', $columnSetting['view_right_roles'] ?? [])                         // and this column can be viewed by owner
                 ) {
                     $value = 'X'; // we cannot see this value, but we can see other values in this column
                 } else {
@@ -998,24 +990,24 @@ class DisplayFormResults extends DisplayForm
 
             //if this row has no value in this column remove the row
             if (
-                !empty($this->tableSettings->hide_row) &&                                                // There is a column defined
-                $columnSetting['name'] == $this->tableSettings->hide_row &&                             // We are currently checking a cell in that column
+                !empty($this->tableSettings->hide_row) &&                                        // There is a column defined
+                $columnSetting['name'] == $this->tableSettings->hide_row &&                      // We are currently checking a cell in that column
                 (
                     (
-                        empty($values[$this->tableSettings->hide_row]) &&                                 // The cell has no value
-                        empty($values[trim($this->tableSettings->hide_row, '[]')])                        // also check the name without []
+                        empty($values[$this->tableSettings->hide_row]) &&                        // The cell has no value
+                        empty($values[trim($this->tableSettings->hide_row, '[]')])               // also check the name without []
                     )
                 ) &&
-                !array_intersect($this->userRoles, (array)$columnSetting['edit_right_roles'])    &&        // And we have no right to edit this specific column
+                !array_intersect($this->userRoles, (array)$columnSetting['edit_right_roles'] ?? [])    &&        // And we have no right to edit this specific column
                 !$this->tableEditPermissions                                                            // and we have no right to edit all table data
             ) {
-                return '';
+                return;
             }
 
             if (
-                in_array('own', $columnSetting['edit_right_roles']) &&
+                in_array('own', $columnSetting['edit_right_roles'] ?? []) &&
                 $ownEntry ||
-                array_intersect($this->userRoles, $columnSetting['edit_right_roles']) ||
+                array_intersect($this->userRoles, $columnSetting['edit_right_roles'] ?? []) ||
                 $this->tableEditPermissions
             ) {
                 $elementEditRights = true;
@@ -1023,10 +1015,12 @@ class DisplayFormResults extends DisplayForm
                 $elementEditRights = false;
             }
 
+            $attributes = [];
+
             /*
                 Write the content to the cell, convert to something if needed
             */
-            $class             = $columnSetting['slug'];
+            $class          = $columnSetting['slug'];
 
             $elementName    = $columnSetting['name'];
 
@@ -1036,11 +1030,11 @@ class DisplayFormResults extends DisplayForm
 
                 //Get the element value from the array
                 if (
-                    isset($this->submission->sub_id) &&                     // sub id set
-                    !empty($columnSetting['elementIds']) &&                // this has an element ids array
+                    isset($this->submission->sub_id) &&                   // sub id set
+                    !empty($columnSetting['elementIds']) &&               // this has an element ids array
                     in_array($elementId, $columnSetting['elementIds'])    // this element belongs to this setting
                 ) {
-                    $subIdString = "data-subid='{$this->submission->sub_id}'";
+                    $attributes["data-subid"] = $this->submission->sub_id;
 
                     // Find the splitted value
                     foreach ($columnSetting['elementIds'] as $id) {
@@ -1068,8 +1062,8 @@ class DisplayFormResults extends DisplayForm
                 //transform if needed
                 $orgFieldValue    = $value;
 
-                $value             = apply_filters('tsjippy-form-result-table-value', $value, $columnSetting, $this->submission, $this);
-                $value             = $this->transformInputData($value, $class, $this->submission);
+                $value            = apply_filters('tsjippy-form-result-table-value', $value, $columnSetting, $this->submission, $this);
+                $value            = $this->transformInputData($value, $class, $this->submission);
 
                 //show original email in excel
                 if (gettype($value) == 'string' && str_contains($value, '@')) {
@@ -1079,9 +1073,9 @@ class DisplayFormResults extends DisplayForm
                     preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $value, $match);
 
                     if (!empty($match[0][0])) {
-                        $excelRow[]        = $match[0][0];
+                        $excelRow[]    = $match[0][0];
                     } else {
-                        $excelRow[]        = $orgFieldValue;
+                        $excelRow[]    = $orgFieldValue;
                     }
                 } else {
                     $excelRow[]        = wp_strip_all_tags($value);
@@ -1116,121 +1110,156 @@ class DisplayFormResults extends DisplayForm
                 $class    .= ' edit forms-table';
             }
 
-            if (!empty($class)) {
-                $class    = trim($class);
-                $class     = " class='$class'";
-            }
+            $attributes['class'] = trim($class);
 
             //Convert underscores to spaces, but not in urls
             if (!str_contains($value, 'href=')) {
                 $value    = str_replace('_', ' ', $value);
             }
 
-            $style            = '';
             if (!empty($columnSetting['width'])) {
-                $style    = "style='max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;'";
+                $attributes['style']    = "max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;";
             }
 
             // for action buttons there is no element id
-            if (!$elementId) {
-                $cellOpeningTag    = "<td $class";
-            } else {
-                $cellOpeningTag    = "<td $class data-element-id='$elementId'";
+            if ($elementId) {
+                $attributes['data-element-id'] = $elementId;
             }
 
-            $cellOpeningTag    = apply_filters('tsjippy-formresult-cell-opening-tag', $cellOpeningTag . ' ' . $subIdString, $this, $columnSetting, $this->submission);
+            /**
+             * Filters the cell attributes
+             * 
+             * @param   array   $attributes             The td attributes
+             * @param   object  $displayFormResults     The current instance
+             * @param   array   $columnSetting          The current column settings array
+             * @param   array   $submission             The current submission
+             */
+            $attributes    = apply_filters('tsjippy-formresult-cell-attributes', $attributes, $this, $columnSetting, $this->submission);
+
+            $td = addElement('td', $tr, $attributes);
+
+            TSJIPPY\addRawHtml($value, $td);
 
             // Add a copy option to the value
-            $copy    = "";
             if (isset($columnSetting['copy'])) {
-                $copy    = "<img class='copy' src='$iconUrl' width='20' height='20' loading='lazy' title='Click to copy cell contents'>";
+                addElement(
+                    'img',
+                    $td,
+                    [
+                        'class'   => 'copy',
+                        'src'     => $iconUrl,
+                        'width'   => '20',
+                        'height'  => '20',
+                        'loading' => 'lazy',
+                        'title'   => 'Click to copy cell contents'
+                    ],
+                    '',
+                    'afterBegin'
+                );
             }
-
-            $rowContents .= "$cellOpeningTag $style>$copy$value</td>";
         }
 
         $this->excelContent[] = $excelRow;
 
         // none of the cells in this row has a value, only X
         if (!$rowHasContents) {
-            return '';
+            return false;
         }
 
-        // we now have a an array of rows containing arrays of cells
-        return $rowContents;
+        return true;
+    }
+
+    /**
+     * Action Buttons
+     */
+    protected function actionButtons($row)
+    {
+        if (empty($this->formData->actions)) {
+            return;
+        }
+
+        $attributes = [];
+
+        //loop over all the actions
+        foreach ($this->formData->actions as $action) {
+            if (
+                !$this->tableEditPermissions                  &&      // if we are notallowed to do all actions
+                $this->submission->user_id != $this->user->ID &&      //  this is not our own entry
+                !array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'] ?? [])
+            ) {
+                continue;
+            }
+
+            /**
+             * check if this submission is already archived, in that case make it an unarchive button
+             */
+            if (
+                $action == 'archive' &&
+                $this->showArchived &&
+                (
+                    $this->submission->archived ||
+                    !empty($this->submission->archived)
+                )
+            ) {
+                $action = 'unarchive';
+            }
+
+            $attributes[$action]    = [
+                "class" => "$action button forms-table-action",
+                "name"  => "{$action}-action",
+                "value" => $action,
+                "text"  => ucfirst($action)
+            ];
+        }
+
+        /**
+         * Filters the avaiable buttons and their attributes
+         * 
+         * @param   array   $attributes Array of arrays with attributes
+         * @param   object  $submission The current submission
+         * @param   object  $object     The current DisplayFormResults object
+         */
+        $attributes = apply_filters('tsjippy-formresults-row-actions', $attributes, $this->submission, $this);
+
+        $cell       = addElement('td', $row);
+        //we have the attributes now, check for which one we have permission
+        foreach ($attributes as $action => $buttonAttributes) {
+            $text   = $buttonAttributes['text'];
+            unset($buttonAttributes['text']);
+            addElement('button', $cell, $buttonAttributes, $text);
+        }
     }
 
     /**
      * Writes a row of the table to the screen
      *
      */
-    protected function writeTableRow()
+    protected function writeTableRow($body)
     {
+        $attributes = [
+            'class'              => 'table-row',
+            'data-submission-id' => $this->submission->id
+        ];
 
-        $rowContents    = $this->getRowContents();
-
-        $buttons = '';
-
-        //if there are actions
-        if (!empty($this->formData->actions)) {
-            //loop over all the actions
-            $buttonsHtml    = [];
-
-            foreach ($this->formData->actions as $action) {
-                /**
-                 * check if this submission is already archived, in that case make it an unarchive button
-                 */
-                if (
-                    $action == 'archive' &&
-                    $this->showArchived &&
-                    (
-                        $this->submission->archived ||
-                        !empty($this->submission->archived)
-                    )
-                ) {
-                    $action = 'unarchive';
-                }
-                $buttonsHtml[$action]    = "<button class='$action button forms-table-action' name='{$action}-action' value='$action'/>" . ucfirst($action) . "</button>";
-            }
-            $buttonsHtml = apply_filters('tsjippy_form_actions_html', $buttonsHtml, $this->submission, $this->submission->sub_id ?? null, $this);
-
-            //we have te html now, check for which one we have permission
-            foreach ($buttonsHtml as $action => $button) {
-                if (
-                    $this->tableEditPermissions ||             // if we are allowed to do all actions
-                    $this->submission->user_id == $this->user->ID || // or this is our own entry
-                    (
-                        isset($this->columnSettings[$action]['edit_right_roles']) &&
-                        array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])
-                    )        //or we have permission for this specific button
-                ) {
-                    $buttons .= $button;
-                }
-            }
+        if (isset($this->submission->sub_id)) {
+            $attributes['data-subid'] = $this->submission->sub_id;
         }
 
-        if (!empty($rowContents)) {
-?>
-            <tr class='table-row' data-submission-id='<?php echo esc_attr($this->submission->id); ?>' <?php if (isset($this->submission->sub_id)) {
-                                                                                                            echo esc_attr("data-subid={$this->submission->sub_id}");
-                                                                                                        } ?>>
-                <?php
-                echo $rowContents;
-                if (!empty($buttons)) {
-                ?>
-                    <td>
-                        <?php echo $buttons; ?>
-                    </td>
-                <?php
-                }
-                ?>
-            </tr>
-        <?php
+        $tr = addElement(
+            'tr',
+            $body,
+            $attributes
+        );
 
-            return true;
+
+        if (!$this->getRowContents($tr)) {
+            $tr->remove();
+            return false;
         }
 
-        return false;
+        $this->actionButtons($tr);
+
+        return true;
     }
 
     /**
@@ -1306,7 +1335,7 @@ class DisplayFormResults extends DisplayForm
      */
     protected function columnSettingsForm($class, $viewRoles, $editRoles)
     {
-        ?>
+?>
         <div class="tabcontent" id="column-settings-<?php echo esc_attr($this->shortcodeId); ?>">
             <form class="sortable-column-settings-rows">
                 <input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo esc_attr($this->shortcodeId); ?>'>
@@ -1454,26 +1483,26 @@ class DisplayFormResults extends DisplayForm
                         <?php
                         if ($this->tableSettings->default_sort == '') {
                         ?><option value='' selected>---</option><?php
-                                                                } else {
-                                                                    ?><option value=''>---</option><?php
-                                                                }
+                                                            } else {
+                                                                ?><option value=''>---</option><?php
+                                                                                            }
 
-                                                                foreach ($this->columnSettings as $key => $columnSetting) {
-                                                                    if (!is_array($columnSetting)) {
-                                                                        continue;
-                                                                    }
+                                                                                            foreach ($this->columnSettings as $key => $columnSetting) {
+                                                                                                if (!is_array($columnSetting)) {
+                                                                                                    continue;
+                                                                                                }
 
-                                                                    $name = $columnSetting['name'];
+                                                                                                $name = $columnSetting['name'];
 
-                                                                    //Check which option is the selected one
-                                                                    if ($this->tableSettings->default_sort != '' && $this->tableSettings->default_sort == $key) {
-                                                                        $selected = 'selected="selected"';
-                                                                    } else {
-                                                                        $selected = '';
-                                                                    }
-                                                                    echo "<option value='$key' $selected>$name</option>";
-                                                                }
-                                                            ?>
+                                                                                                //Check which option is the selected one
+                                                                                                if ($this->tableSettings->default_sort != '' && $this->tableSettings->default_sort == $key) {
+                                                                                                    $selected = 'selected="selected"';
+                                                                                                } else {
+                                                                                                    $selected = '';
+                                                                                                }
+                                                                                                echo "<option value='$key' $selected>$name</option>";
+                                                                                            }
+                                                                                                ?>
                     </select>
 
                     <h4>Select the sort direction</h4>
@@ -1591,24 +1620,24 @@ class DisplayFormResults extends DisplayForm
                         ?><option value='' selected>---</option><?php
                                                             } else {
                                                                 ?><option value=''>---</option><?php
-                                                            }
+                                                                                            }
 
-                                                            foreach ($this->columnSettings as $key => $columnSetting) {
-                                                                if (!is_array($columnSetting)) {
-                                                                    continue;
-                                                                }
+                                                                                            foreach ($this->columnSettings as $key => $columnSetting) {
+                                                                                                if (!is_array($columnSetting)) {
+                                                                                                    continue;
+                                                                                                }
 
-                                                                $name = $columnSetting['name'];
+                                                                                                $name = $columnSetting['name'];
 
-                                                                //Check which option is the selected one
-                                                                if (($this->tableSettings->hide_row ?? '') == $columnSetting['name']) {
-                                                                    $selected = 'selected="selected"';
-                                                                } else {
-                                                                    $selected = '';
-                                                                }
-                                                                echo "<option value='{$columnSetting['name']}' $selected>$name</option>";
-                                                            }
-                                                        ?>
+                                                                                                //Check which option is the selected one
+                                                                                                if (($this->tableSettings->hide_row ?? '') == $columnSetting['name']) {
+                                                                                                    $selected = 'selected="selected"';
+                                                                                                } else {
+                                                                                                    $selected = '';
+                                                                                                }
+                                                                                                echo "<option value='{$columnSetting['name']}' $selected>$name</option>";
+                                                                                            }
+                                                                                                ?>
                     </select>
                 </div>
 
@@ -1683,26 +1712,26 @@ class DisplayFormResults extends DisplayForm
                             <?php
                             if (empty($this->formData->autoarchive_el)) {
                             ?><option value='' selected>---</option><?php
-                                                                    } else {
-                                                                        ?><option value=''>---</option><?php
-                                                                    }
+                                                                } else {
+                                                                    ?><option value=''>---</option><?php
+                                                                                                }
 
-                                                                    foreach ($this->columnSettings as $key => $columnSetting) {
-                                                                        if (!is_array($columnSetting)) {
-                                                                            continue;
-                                                                        }
+                                                                                                foreach ($this->columnSettings as $key => $columnSetting) {
+                                                                                                    if (!is_array($columnSetting)) {
+                                                                                                        continue;
+                                                                                                    }
 
-                                                                        $name = $columnSetting['name'];
+                                                                                                    $name = $columnSetting['name'];
 
-                                                                        //Check which option is the selected one
-                                                                        if ($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key) {
-                                                                            $selected = 'selected="selected"';
-                                                                        } else {
-                                                                            $selected = '';
-                                                                        }
-                                                                        echo "<option value='$key' $selected>$name</option>";
-                                                                    }
-                                                                ?>
+                                                                                                    //Check which option is the selected one
+                                                                                                    if ($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key) {
+                                                                                                        $selected = 'selected="selected"';
+                                                                                                    } else {
+                                                                                                        $selected = '';
+                                                                                                    }
+                                                                                                    echo "<option value='$key' $selected>$name</option>";
+                                                                                                }
+                                                                                                    ?>
                         </select>
                         <label style="margin:0 10px;">equals</label>
                         <input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo $this->formData->autoarchive_value ?? ''; ?>" style='max-width:200px;'>
@@ -2043,17 +2072,23 @@ class DisplayFormResults extends DisplayForm
     /**
      * Gets an empty table
      */
-    public function emptyTable()
+    public function emptyTable($parent = '')
     {
-        ob_start();
+        $table  = addElement(
+            'table',
+            $parent,
+            [
+                'class'             => 'tsjippy table form-data-',
+                'data-form-id'      => $this->formData->id,
+                'data-shortcode-id' => $this->shortcodeId
+            ]
+        );
 
-    ?>
-        <table class='tsjippy table form-data-' data-form-id='<?php echo $this->formData->id; ?>' data-shortcode-id='<?php echo $this->shortcodeId; ?>'>
-            <td>No records found</td>
-        </table>
+        addElement('td', $table, [], 'No records found');
 
-    <?php
-        return ob_get_clean();
+        if (empty($parent)) {
+            return $table->ownerDocument->saveHTML();
+        }
     }
 
     /**
@@ -2064,74 +2099,82 @@ class DisplayFormResults extends DisplayForm
      *
      * @return    bool                        If there are submissions or not
      */
-    public function theTable($type, $submissions)
+    public function theTable($type, $submissions, $parent)
     {
-    ?>
-        <style>
-            .name {
-                max-width: 50px;
-                white-space: normal;
+        $table  = addElement(
+            'table',
+            $parent,
+            [
+                'class'             => 'tsjippy table form-data',
+                'data-form-id'      => $this->formData->id,
+                'data-shortcode-id' => $this->shortcodeId,
+                'data-type'         => esc_attr($type),
+                'data-page'         => $this->currentPage,
+                'style'             => 'position: relative;z-index: 999;',
+            ]
+        );
+
+        $this->resultTableHead($type, $table);
+
+        $body   = addElement('tbody', $table, ['class' => "table-body"]);
+
+        $allRowsEmpty    = true;
+        foreach ($submissions as $this->submission) {
+            // Skip if needed
+            if ($type == 'others' && $this->submission->user_id == $this->user->ID) {
+                continue;
             }
-        </style>
-        <table class='tsjippy table form-data' data-form-id='<?php echo $this->formData->id; ?>' data-shortcode-id='<?php echo $this->shortcodeId; ?>' data-type='<?php echo esc_attr($type); ?>' data-page='<?php echo $this->currentPage; ?>' style='position: relative;z-index: 999;'>
-            <?php
-            $this->resultTableHead($type);
-            ?>
 
-            <tbody class="table-body">
-                <?php
-                $allRowsEmpty    = true;
-                foreach ($submissions as $this->submission) {
-                    // Skip if needed
-                    if ($type == 'others' && $this->submission->user_id == $this->user->ID) {
-                        continue;
-                    }
+            if ($this->writeTableRow($body)) {
+                // this row has contents
+                $allRowsEmpty    = false;
+            }
+        }
 
-                    if ($this->writeTableRow()) {
-                        // this row has contents
-                        $allRowsEmpty    = false;
-                    }
-                }
+        if ($allRowsEmpty) {
+            $table->remove();
 
-                if ($allRowsEmpty) {
-                    echo $this->emptyTable();
-                }
-                ?>
-            </tbody>
-        </table>
-    <?php
+            $this->emptyTable($parent);
+        }
     }
 
     /**
      * Render the navigation menu in case of multiple pages of results
      */
-    public function navigationMenu()
+    public function navigationMenu($parent)
     {
-        $pageSizeSelector    =  "<select class='page-size'";
-        foreach ([1000, 500, 200, 100, 50, 40, 20, 10] as $size) {
-            $selected    = '';
-            if ($this->pageSize == $size) {
-                $selected    = 'selected';
-            }
-            $pageSizeSelector    .= "<option $selected>$size</option>";
-        }
-        $pageSizeSelector    .= "</select>";
 
         if ($this->total <= $this->pageSize) {
-            return $pageSizeSelector;
+            return;
         }
 
-        $pageCount    =  ceil($this->total / $this->pageSize);
+        $pageCount =  ceil($this->total / $this->pageSize);
 
-        $html    = "<div class='form-result-navigation'>";
+        $navigator  = addElement('div', $parent, ['class' => 'form-result-navigation']);
+
         // include a back button if we are not on the first page
         $class = 'hidden';
         if ($this->currentPage > 0) {
             $class = '';
         }
-        $html    .= "<button class='button small prev $class' name='prev' value='prev'>← Previous</button>";
-        //show page numbers
-        $html    .= "<span class='page-number-wrapper'>";
+
+        $attributes = [
+            'class' => 'button small prev',
+            'name'  => 'prev',
+            'value' => 'prev'
+        ];
+
+        if ($this->currentPage == 0) {
+            $attributes['class']    .= ' hidden';
+        }
+
+        addElement('button', $navigator, $attributes, "← Previous");
+
+        /**
+         * show page numbers
+         */
+        addElement('span', $navigator, ['class' => 'page-number-wrapper']);
+
         for ($x = 0; $x < $pageCount; $x++) {
             $pageNr    = $x + 1;
 
@@ -2139,21 +2182,27 @@ class DisplayFormResults extends DisplayForm
             if ($this->currentPage == $x) {
                 $class    = "current";
             }
-            $html    .= "<span class='page-number $class' data-nr='$x'>$pageNr</span> ";
+            addElement('span', $navigator, ['class' => "page-number $class", 'data-nr' => '$x'], $pageNr);
         }
-        $html    .= "</span>";
 
         // Include a next button if we are not on the last page
         $class = 'hidden';
         if ($this->total > $this->pageSize && $this->currentPage != $pageCount - 1) {
             $class = '';
         }
-        $html    .= "<button class='button small next $class' name='next' value='next'>Next →</button>";
 
-        $html    .= $pageSizeSelector;
-        $html    .= "</div>";
+        addElement('button', $navigator, ['class' => "button small next $class", 'name' => 'next', 'value' => 'next'], "Next →");
 
-        echo $html;
+        $pageSizeSelector    =  addElement("select", $parent, ['class' => 'page-size']);
+
+        foreach ([1000, 500, 200, 100, 50, 40, 20, 10] as $size) {
+            $attributes    = [];
+            if ($this->pageSize == $size) {
+                $attributes['selected']    = 'selected';
+            }
+
+            addElement('option', $pageSizeSelector, $attributes, $size);
+        }
     }
 
     /**
@@ -2195,9 +2244,8 @@ class DisplayFormResults extends DisplayForm
          */
         $shouldShow    = apply_filters('tsjippy-formstable-should-show', true, $this, $type);
 
+        ob_end_clean();
         if ($shouldShow !== true) {
-            ob_end_clean();
-
             return     $shouldShow;
         }
 
@@ -2206,11 +2254,9 @@ class DisplayFormResults extends DisplayForm
             $userId    = get_current_user_id();
 
             if (!$userId) {
-                if (!empty($_REQUEST['hash']) && $_REQUEST['hash'] == wp_hash($_REQUEST['id'])) {
+                if (($_REQUEST['hash'] ?? '') == wp_hash($_REQUEST['id'] ?? '')) {
                     $userId        = $_REQUEST['hash'];
                 } else {
-                    ob_end_clean();
-
                     return $this->emptyTable();
                 }
             }
@@ -2225,7 +2271,7 @@ class DisplayFormResults extends DisplayForm
 
             // Default sort elements
             else {
-                $defaultSortElement        = $this->tableSettings->default_sort;
+                $defaultSortElement     = $this->tableSettings->default_sort;
                 $sortElement            = $this->getElementById($defaultSortElement);
 
                 // check if this is an sub id, use all elements in that case
@@ -2281,53 +2327,51 @@ class DisplayFormResults extends DisplayForm
             }
         }
 
-        echo "<div class='form-results-wrapper'>";
+        $wrapper    = addElement('div', '', ['class' => 'form-results-wrapper']);
+
         if ($type == 'own') {
-            echo "<h4>Your own submissions</h4>";
+            addElement('h4', $wrapper, [], "Your own submissions");
         } elseif ($type == 'others') {
             $type    = 'others';
-            echo "<h4>Submissions of others</h4>";
+            addElement('h4', $wrapper, [], "Submissions of others");
         }
 
-        echo $this->navigationMenu();
+        $this->navigationMenu($wrapper);
 
-        $this->theTable($type, $this->submissions);
-        echo "</div>";
+        $this->theTable($type, $this->submissions, $wrapper);
 
-        $this->printTableFooter();
+        $this->printTableFooter($wrapper);
 
-        return ob_get_clean();
+        return $wrapper->ownerDocument->saveHtml();
     }
 
-    private function printTableFooter()
+    private function printTableFooter($parent)
     {
-    ?>
-        <div class='tsjippy-table-footer'>
-            <p id="table-remark">Click on any cell with <span class="edit forms-table">underlined text</span> to edit its contents.<br>Click on any header to sort the column.</p>
+        $footer = addElement('div', $parent, ['class' => 'tsjippy-table-footer']);
 
-            <?php
-            //Add excel export button if allowed
-            //if ($this->tableEditPermissions) {
-            ?>
-            <div>
-                <form method="post" class="export-form" id="export-xls">
-                    <button class="button button-primary" type="submit" name="export-xls">Export data to excel</button>
-                </form>
-                <?php
-                if ((SETTINGS['pdf'] ?? '') ==  'enable') {
-                ?>
-                    <form method="post" class="export-form" id="export-pdf">
-                        <button class="button button-primary" type="submit" name="export-pdf">Export data to pdf</button>
-                    </form>
-                <?php
-                }
-                ?>
-            </div>
-            <?php
-            //}
-            ?>
-        </div>
-    <?php
+        $p      = addElement('p', $footer, ['id' => 'table-remark'], 'Click on any cell with ');
+
+        addElement('span', $p, ['class' => "edit forms-table"], "underlined text");
+
+        $p->append("to edit its contents.");
+
+        addElement('br', $p);
+
+        $p->append("Click on any header to sort the column.");
+
+        $formWrapper    = addElement('div', $footer);
+
+        $form           = addElement('form', $formWrapper, ['method' => "post", 'class' => "export-form", 'id' => "export-xls"]);
+
+        addElement('button', $form, ['class' => "button button-primary", 'type' => "submit", 'name' => "export-xls"], 'Export data to excel');
+
+        /**
+         * Runs within the formwrapper div of the results table
+         * 
+         * @param   NodeElement $parent The parent node
+         * @param   object      $object The DisplayFormResults instance
+         */
+        do_action('tsjippy-forms-results-table-footer', $formWrapper, $this);
     }
 
     /**
@@ -2379,7 +2423,7 @@ class DisplayFormResults extends DisplayForm
             echo $tableHtml;
             ?>
         </div>
-        <?php
+<?php
 
         //now we have rendered all the content we can export the excel if requested
         if (isset($_POST['export-xls'])) {
@@ -2401,121 +2445,133 @@ class DisplayFormResults extends DisplayForm
      *
      * @param    string        $type        Either 'own', 'others' or 'all'
      */
-    private function resultTableHead($type)
+    private function resultTableHead($type, $table)
     {
-        $excelRow    = [];
-        ?>
-        <thead>
-            <tr>
-                <?php
+        $excelRow = [];
+        $thead    = addElement('thead', $table);
+        $tr       = addElement('tr', $thead);
 
-                //add normal fields
-                foreach ($this->columnSettings as $elementId => $columnSetting) {
-                    if (!isset($columnSetting['view_right_roles']) || !is_array($columnSetting['view_right_roles'])) {
-                        $columnSetting['view_right_roles']    = [];
-                    }
+        // Loop over the column settings
+        foreach ($this->columnSettings as $elementId => $columnSetting) {
 
-                    if (
-                        !is_numeric($elementId)                ||
-                        !$columnSetting['show']                ||                                                //hidden column
-                        (
-                            !$this->ownData                ||                                                     //The table does not contain data of our own
-                            (
-                                $this->ownData            &&                                                     //or it does contain our own data but
-                                !in_array('own', $columnSetting['view_right_roles'])                        //we are not allowed to see it
-                            )
-                        ) &&
-                        !$this->tableEditPermissions                 &&                                        //no permission to edit the table and
-                        !empty($columnSetting['view_right_roles'])     &&                                         // there are view right permissions defined
-                        !array_intersect($this->userRoles, $columnSetting['view_right_roles'])                // and we do not have the view right role and
-                    ) {
-                        continue;
-                    }
+            if (
+                !is_numeric($elementId)                    ||
+                !$columnSetting['show']                    ||                          //hidden column
+                (
+                    !$this->ownData                        ||                          //The table does not contain data of our own
+                    (
+                        $this->ownData                      &&                         //or it does contain our own data but
+                        !in_array('own', $columnSetting['view_right_roles'] ?? [])     //we are not allowed to see it
+                    )
+                ) &&
+                !$this->tableEditPermissions                 &&                        // no permission to edit the table and
+                !array_intersect($this->userRoles, $columnSetting['view_right_roles'] ?? []) // and we do not have the view right role and
+            ) {
+                continue;
+            }
 
-                    $name            = $columnSetting['name'];
+            /**
+             * Build the class string
+             */
+            if (
+                in_array($columnSetting['slug'], $this->sortElementIds) ||
+                array_intersect($columnSetting['elementIds'] ?? [], $this->sortElementIds)
+            ) {
+                $class    = strtolower($this->sortDirection) . ' defaultsort';
+            } elseif ($this->tableSettings->default_sort == $elementId) {
+                $class    = "defaultsort";
+            } else {
+                $class    = "";
+            }
 
-                    //Determine class for sorting
-                    if (
-                        in_array($columnSetting['slug'], $this->sortElementIds) ||
-                        (
-                            !empty($columnSetting['elementIds']) &&
-                            array_intersect($columnSetting['elementIds'], $this->sortElementIds)
-                        )
-                    ) {
-                        $class    = strtolower($this->sortDirection) . ' defaultsort';
-                    } elseif ($this->tableSettings->default_sort == $elementId) {
-                        $class    = "defaultsort";
-                    } else {
-                        $class    = "";
-                    }
+            if (in_array($columnSetting['element_id'] ?? '', $this->sortElementIds)) {
+                $class    = strtolower($this->sortDirection) . ' defaultsort';
+            }
 
-                    if (in_array($columnSetting['element_id'] ?? [], $this->sortElementIds)) {
-                        $class    = strtolower($this->sortDirection) . ' defaultsort';
-                    }
+            if (!empty($this->hiddenColumns) && !empty($this->hiddenColumns[$columnSetting['slug']])) {
+                $class    .= ' hidden';
+            }
 
-                    if (!empty($this->hiddenColumns) && !empty($this->hiddenColumns[$columnSetting['slug']])) {
-                        $class    .= ' hidden';
-                    }
-                    $icon            = "<img class='visibility-icon visible' src='" . TSJIPPY\PICTURESURL . "/visible.png' width=20 height=20 loading='lazy' >";
+            $attributes = [
+                'class'          => $class,
+                'id'             => $columnSetting['slug'],
+                'data-nice-name' => $columnSetting['name'],
+            ];
 
-                    //Add a heading for each column
-                    $style            = '';
-                    if (!empty($columnSetting['width'])) {
-                        $style    = "style='max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;'";
-                    }
+            //Add a heading for each column
+            if (!empty($columnSetting['width'])) {
+                $attributes['style']    = "max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;";
+            }
 
-                    echo "<th class='$class' id='{$columnSetting['slug']}' data-nice-name='$name' $style>$name $icon</th>";
+            // add element using attribute array
+            $th = addElement(
+                'th',
+                $tr,
+                $attributes,
+                $columnSetting['name']
+            );
 
-                    $excelRow[]    = $name;
-                }
+            addElement(
+                'img',
+                $th,
+                [
+                    'class'   => 'visibility-icon visible',
+                    'src'     => TSJIPPY\PICTURESURL . "/visible.png",
+                    'width'   => 20,
+                    'height'  => 20,
+                    'loading' => 'lazy'
+                ]
+            );
 
-                //write header to excel
-                $this->excelContent[] = $excelRow;
+            $excelRow[]    = $columnSetting['name'];
+        }
 
-                //add a Actions heading if needed
-                $actions = [];
-                foreach ($this->formData->actions ?? [] as $action) {
-                    $actions[]    = $action;
-                }
-                $actions = apply_filters('tsjippy_form_actions', $actions);
+        //write header to excel
+        $this->excelContent[] = $excelRow;
 
-                //we have full permissions on this table
-                $addHeading    = false;
-                if ($this->tableEditPermissions && !empty($actions)) {
+        //add a Actions heading if needed
+        $actions = [];
+        foreach ($this->formData->actions ?? [] as $action) {
+            $actions[]    = $action;
+        }
+        $actions = apply_filters('tsjippy_form_actions', $actions);
+
+        //we have full permissions on this table
+        $addHeading    = false;
+        if ($this->tableEditPermissions && !empty($actions)) {
+            $addHeading    = true;
+        } else {
+            foreach ($actions as $action) {
+                //we have permission for this specific button
+                if (array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'] ?? [])) {
                     $addHeading    = true;
-                } else {
-                    foreach ($actions as $action) {
-                        //we have permission for this specific button
-                        if (isset($this->columnSettings[$action]['edit_right_roles']) && array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])) {
+                } elseif ($type != 'others') {
+                    //Loop over all submissions to see if the current user has permission for them
+                    foreach ($this->submissions as $submission) {
+                        //we have permission on this row for this button
+                        if (
+                            ($submission->user_id ?? '') == $this->user->ID    ||    // user_id is the current user
+                            $submission->user_id == $this->user->ID                        // current user submitted the form
+
+                        ) {
                             $addHeading    = true;
-                        } elseif ($type != 'others') {
-                            //Loop over all submissions to see if the current user has permission for them
-                            foreach ($this->submissions as $submission) {
-                                //we have permission on this row for this button
-                                if (
-                                    (
-                                        isset($submission->user_id) &&                // formresults contains a user_id
-                                        $submission->user_id == $this->user->ID        // user_id is the current user
-                                    ) ||
-                                    (
-                                        !isset($submission->user_id) &&                // formresults don't contain a user_id
-                                        $submission->user_id == $this->user->ID                        // current user submitted the form
-                                    )
-                                ) {
-                                    $addHeading    = true;
-                                }
-                            }
                         }
                     }
                 }
+            }
+        }
 
-                if ($addHeading) {
-                    echo "<th id='actions' data-nice-name='Actions'>Actions</th>";
-                }
-                ?>
-            </tr>
-        </thead>
-<?php
+        if ($addHeading) {
+            addElement(
+                'th',
+                $tr,
+                [
+                    'id'             => 'actions',
+                    'data-nice-name' => 'Actions'
+                ],
+                'Actions'
+            );
+        }
     }
 
     /**

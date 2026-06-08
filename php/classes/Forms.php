@@ -494,8 +494,8 @@ class Forms
         $slug    = str_replace([' ', '/'], '-', strtolower($slug));
 
         // Check if name already exists
-        $newName    = $slug;
-        $i            = 1;
+        $newName = $slug;
+        $i       = 1;
         while (true) {
             $result    = $wpdb->get_results(
                 $wpdb->prepare(
