@@ -938,7 +938,7 @@ class Forms
         $this->getAllFormElements('priority', $this->formData->id, true);
 
         foreach ($this->formElements as $index => $element) {
-            $this->elementMapping['id'][$element->id]            = $index;
+            $this->elementMapping['id'][$element->id]           = $index;
             $this->elementMapping['slug'][$element->slug][]     = $index;
             $this->elementMapping['type'][$element->type][]     = $index;
         }

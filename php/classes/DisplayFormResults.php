@@ -854,40 +854,51 @@ class DisplayFormResults extends DisplayForm
                         $relatedIds[$elId]    = $elIds;
                     }
 
-                    // Loop over the column settings to add the element ids
+                    $id = array_values($elIds)[0];
+                    if (!isset($this->columnSettings[$id])) {
+                        // Use the generic name to create the column setting
+                        $element    = $this->getElementById($id);
+                        $element->slug = strtolower(str_replace(' ', '-', $name));
+                        $element->name = ucfirst($name);
+
+                        $this->addColumnSetting($element, $relatedIds[$id]);
+                    }
+
+                   /*  // Loop over the column settings to add the element ids
                     foreach ($this->columnSettings as &$setting) {
                         // its already in settings, just add the extra element id
                         if ($setting['name'] == $name) {
                             $setting['elementIds']    = $elIds;
                         }
-                    }
+                    } */
                 }
             }
         }
 
         //loop over all elements to build a new array
         foreach ($this->formElements as $element) {
-            if (!empty(isset($this->columnSettings[$element->id]))) {
+
+            $id = $element->id;
+            // If it has related ids, its already added above
+            if (!empty($relatedIds[$id])) {
+                continue;   
+            }
+
+            if (!empty($this->columnSettings[$id])) {
                 // edit permissions
-                if (!isset($this->columnSettings[$element->id]['edit_right_roles'])) {
-                    $this->columnSettings[$element->id]['edit_right_roles']    = [];
+                if (!isset($this->columnSettings[$id]['edit_right_roles'])) {
+                    $this->columnSettings[$id]['edit_right_roles']    = [];
                 }
 
                 // View permissions
-                if (!isset($this->columnSettings[$element->id]['view_right_roles'])) {
-                    $this->columnSettings[$element->id]['view_right_roles']    = [];
+                if (!isset($this->columnSettings[$id]['view_right_roles'])) {
+                    $this->columnSettings[$id]['view_right_roles']    = [];
                 }
-            }
-
-            $id = $element->id;
-            //only the first element id is used for the column setting
-            if (!empty($relatedIds[$element->id])) {
-                $id = array_values($relatedIds[$element->id])[0];
             }
 
             //check if the element is in the array, if not add it
             if (!isset($this->columnSettings[$id])) {
-                $this->addColumnSetting($element, $relatedIds[$element->id] ?? []);
+                $this->addColumnSetting($element, $relatedIds[$id] ?? []);
             }
         }
 
@@ -1335,7 +1346,7 @@ class DisplayFormResults extends DisplayForm
      */
     protected function columnSettingsForm($class, $viewRoles, $editRoles)
     {
-?>
+    ?>
         <div class="tabcontent" id="column-settings-<?php echo esc_attr($this->shortcodeId); ?>">
             <form class="sortable-column-settings-rows">
                 <input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo esc_attr($this->shortcodeId); ?>'>
@@ -1482,27 +1493,27 @@ class DisplayFormResults extends DisplayForm
                     <select name="table-settings[default-sort]">
                         <?php
                         if ($this->tableSettings->default_sort == '') {
-                        ?><option value='' selected>---</option><?php
-                                                            } else {
-                                                                ?><option value=''>---</option><?php
-                                                                                            }
+                            ?><option value='' selected>---</option><?php
+                        } else {
+                            ?><option value=''>---</option><?php
+                        }
 
-                                                                                            foreach ($this->columnSettings as $key => $columnSetting) {
-                                                                                                if (!is_array($columnSetting)) {
-                                                                                                    continue;
-                                                                                                }
+                        foreach ($this->columnSettings as $key => $columnSetting) {
+                            if (!is_array($columnSetting)) {
+                                continue;
+                            }
 
-                                                                                                $name = $columnSetting['name'];
+                            $name = $columnSetting['name'];
 
-                                                                                                //Check which option is the selected one
-                                                                                                if ($this->tableSettings->default_sort != '' && $this->tableSettings->default_sort == $key) {
-                                                                                                    $selected = 'selected="selected"';
-                                                                                                } else {
-                                                                                                    $selected = '';
-                                                                                                }
-                                                                                                echo "<option value='$key' $selected>$name</option>";
-                                                                                            }
-                                                                                                ?>
+                            //Check which option is the selected one
+                            if ($this->tableSettings->default_sort != '' && $this->tableSettings->default_sort == $key) {
+                                $selected = 'selected="selected"';
+                            } else {
+                                $selected = '';
+                            }
+                            echo "<option value='$key' $selected>$name</option>";
+                        }
+                            ?>
                     </select>
 
                     <h4>Select the sort direction</h4>
@@ -1617,27 +1628,27 @@ class DisplayFormResults extends DisplayForm
                     <select name="table-settings[hide-row]">
                         <?php
                         if (($this->tableSettings->hide_row ?? '') == '') {
-                        ?><option value='' selected>---</option><?php
-                                                            } else {
-                                                                ?><option value=''>---</option><?php
-                                                                                            }
+                            ?><option value='' selected>---</option><?php
+                        } else {
+                            ?><option value=''>---</option><?php
+                        }
 
-                                                                                            foreach ($this->columnSettings as $key => $columnSetting) {
-                                                                                                if (!is_array($columnSetting)) {
-                                                                                                    continue;
-                                                                                                }
+                        foreach ($this->columnSettings as $key => $columnSetting) {
+                            if (!is_array($columnSetting)) {
+                                continue;
+                            }
 
-                                                                                                $name = $columnSetting['name'];
+                            $name = $columnSetting['name'];
 
-                                                                                                //Check which option is the selected one
-                                                                                                if (($this->tableSettings->hide_row ?? '') == $columnSetting['name']) {
-                                                                                                    $selected = 'selected="selected"';
-                                                                                                } else {
-                                                                                                    $selected = '';
-                                                                                                }
-                                                                                                echo "<option value='{$columnSetting['name']}' $selected>$name</option>";
-                                                                                            }
-                                                                                                ?>
+                            //Check which option is the selected one
+                            if (($this->tableSettings->hide_row ?? '') == $columnSetting['name']) {
+                                $selected = 'selected="selected"';
+                            } else {
+                                $selected = '';
+                            }
+                            echo "<option value='{$columnSetting['name']}' $selected>$name</option>";
+                        }
+                            ?>
                     </select>
                 </div>
 
@@ -1711,27 +1722,27 @@ class DisplayFormResults extends DisplayForm
                         <select name="form-settings[autoarchive-el]" class='inline' style="margin-right:10px;">
                             <?php
                             if (empty($this->formData->autoarchive_el)) {
-                            ?><option value='' selected>---</option><?php
-                                                                } else {
-                                                                    ?><option value=''>---</option><?php
-                                                                                                }
+                                ?><option value='' selected>---</option><?php
+                            } else {
+                                ?><option value=''>---</option><?php
+                            }
 
-                                                                                                foreach ($this->columnSettings as $key => $columnSetting) {
-                                                                                                    if (!is_array($columnSetting)) {
-                                                                                                        continue;
-                                                                                                    }
+                            foreach ($this->columnSettings as $key => $columnSetting) {
+                                if (!is_array($columnSetting)) {
+                                    continue;
+                                }
 
-                                                                                                    $name = $columnSetting['name'];
+                                $name = $columnSetting['name'];
 
-                                                                                                    //Check which option is the selected one
-                                                                                                    if ($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key) {
-                                                                                                        $selected = 'selected="selected"';
-                                                                                                    } else {
-                                                                                                        $selected = '';
-                                                                                                    }
-                                                                                                    echo "<option value='$key' $selected>$name</option>";
-                                                                                                }
-                                                                                                    ?>
+                                //Check which option is the selected one
+                                if ($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key) {
+                                    $selected = 'selected="selected"';
+                                } else {
+                                    $selected = '';
+                                }
+                                echo "<option value='$key' $selected>$name</option>";
+                            }
+                                ?>
                         </select>
                         <label style="margin:0 10px;">equals</label>
                         <input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo $this->formData->autoarchive_value ?? ''; ?>" style='max-width:200px;'>
