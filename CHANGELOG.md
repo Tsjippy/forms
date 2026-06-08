@@ -11,6 +11,7 @@
 - code layout
 - namespaced all constants
 - sanitize all posts and get vars
+- html to domelement
 
 ### Fixed
 - spacing problem
