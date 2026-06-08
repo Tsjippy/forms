@@ -17,6 +17,7 @@
 - spacing problem
 - foreach bug
 - space before dot bug
+- column setting initial name when indexed columnname
 
 ### Updated
 
