@@ -13,7 +13,7 @@ function postStates($states, $post)
 {
 
     if ($post->ID == SETTINGS['forms-page'] ?? '') {
-        $states[] = __('Form selector page', 'tsjippy');
+        $states[] = __('Form selector page', '%TEXTDOMAIN%');
     }
 
     return $states;
