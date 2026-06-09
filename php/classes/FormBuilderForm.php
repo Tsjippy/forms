@@ -1130,12 +1130,12 @@ class FormBuilderForm extends DisplayForm
                     <select class="warning-condition inline" name='<?php echo esc_attr($name); ?>[<?php echo esc_attr($conditionIndex); ?>][equation]'>
                         <?php
                         $optionArray    = [
-                            ''            => '---',
+                            ''          => '---',
                             '=='        => 'equals',
                             '!='        => 'is not',
-                            '>'            => 'greather than',
-                            '<'            => 'smaller than',
-                            'submitted'    => 'has submitted',
+                            '>'         => 'greather than',
+                            '<'         => 'smaller than',
+                            'submitted' => 'has submitted',
                         ];
                         foreach ($optionArray as $option => $optionLabel) {
                             if ($condition['equation'] == $option) {
@@ -2124,23 +2124,23 @@ class FormBuilderForm extends DisplayForm
                             <select class='element-condition condition-select equation' name='element-conditions[<?php echo esc_attr($conditionIndex); ?>][rules][<?php echo esc_attr($ruleIndex); ?>][equation]' required>
                                 <?php
                                 $optionArray    = [
-                                    ''            => '---',
-                                    'changed'    => 'has changed',
-                                    'clicked'    => 'is clicked',
+                                    ''          => '---',
+                                    'changed'   => 'has changed',
+                                    'clicked'   => 'is clicked',
                                     '=='        => 'equals',
                                     '!='        => 'is not',
-                                    '>'            => 'greather than',
-                                    '<'            => 'smaller than',
-                                    'checked'    => 'is checked',
-                                    '!checked'    => 'is not checked',
-                                    '== value'    => 'equals the value of',
-                                    '!= value'    => 'does not equal the value of',
-                                    '> value'    => 'greather than the value of',
-                                    '< value'    => 'smaller than the value of',
-                                    '-'            => 'minus the value of',
-                                    '+'            => 'plus the value of',
-                                    'visible'    => 'is visible',
-                                    'invisible'    => 'is not visible',
+                                    '>'         => 'greather than',
+                                    '<'         => 'smaller than',
+                                    'checked'   => 'is checked',
+                                    '!checked'  => 'is not checked',
+                                    '== value'  => 'equals the value of',
+                                    '!= value'  => 'does not equal the value of',
+                                    '> value'   => 'greather than the value of',
+                                    '< value'   => 'smaller than the value of',
+                                    '-'         => 'minus the value of',
+                                    '+'         => 'plus the value of',
+                                    'visible'   => 'is visible',
+                                    'invisible' => 'is not visible',
                                 ];
 
                                 foreach ($optionArray as $option => $optionLabel) {

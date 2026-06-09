@@ -588,7 +588,7 @@ class SubmitForm extends SaveFormSettings
     {
         $this->submission                    = new \stdClass();
 
-        $this->submission->form_id            = (int) $_POST['form-id'];
+        $this->submission->form_id           = (int) $_POST['form-id'];
 
         $this->getForm($this->submission->form_id);
 
@@ -650,8 +650,8 @@ class SubmitForm extends SaveFormSettings
         /**
          * Filters the form results
          *
-         * @param array        $formresults    The form results
-         * @param object    $object            The SubmitForm Instance
+         * @param array     $formresults    The form results
+         * @param object    $object         The SubmitForm Instance
          */
         $formresults                     = apply_filters('tsjippy_before_inserting_formdata', (object)$formresults, $this);
 
