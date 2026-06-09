@@ -8,7 +8,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-add_shortcode('formselector', __NAMESPACE__ . '\showFormSelector');
+add_shortcode('tsjippy_formselector', __NAMESPACE__ . '\showFormSelector');
 function showFormSelector($atts = [])
 {
     global $wpdb;
@@ -145,7 +145,7 @@ function showFormSelector($atts = [])
 }
 
 //shortcode to make forms
-add_shortcode('formbuilder', __NAMESPACE__ . '\showForm');
+add_shortcode('tsjippy_formbuilder', __NAMESPACE__ . '\showForm');
 /**
  * Displays a form based on the provided attributes
  *
@@ -164,7 +164,7 @@ function showForm($atts)
     return $html;
 }
 
-add_shortcode('formresults', __NAMESPACE__ . '\formResults');
+add_shortcode('tsjippy_formresults', __NAMESPACE__ . '\formResults');
 /**
  * Displays form results based on the provided attributes
  *
@@ -185,7 +185,7 @@ function formResults($atts)
 }
 
 //Shortcode for recommended fields
-add_shortcode("missing_form_fields", __NAMESPACE__ . '\missingFormFields');
+add_shortcode("tsjippy_missing_form_fields", __NAMESPACE__ . '\missingFormFields');
 
 /**
  * Displays recommended form fields based on the provided attributes

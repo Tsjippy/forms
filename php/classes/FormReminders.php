@@ -40,7 +40,7 @@ class FormReminders extends Forms
      */
     protected function getCache()
     {
-        $this->reminders  = get_transient('form_reminders');
+        $this->reminders  = get_transient('tsjippy_form_reminders');
 
         if (empty($this->reminders)) {
             $this->updateCache();
@@ -87,7 +87,7 @@ class FormReminders extends Forms
 
         $this->mapToUserId();
 
-        return set_transient('form_reminders', $this->reminders, WEEK_IN_SECONDS);
+        return set_transient('tsjippy_form_reminders', $this->reminders, WEEK_IN_SECONDS);
     }
 
     /**
