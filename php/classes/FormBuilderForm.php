@@ -1629,17 +1629,6 @@ class FormBuilderForm extends DisplayForm
             }
         }
 
-        $numericElements    = [];
-        $dateElements        = [];
-        foreach ($this->formElements as $el) {
-            if (in_array($el->type, ['date', 'number', 'range', 'week', 'month'])) {
-                $numericElements[]    = $el->id;
-            }
-            if (in_array($el->type, ['date', 'week', 'month'])) {
-                $dateElements[]    = $el->id;
-            }
-        }
-
         $nonInputClasses    = 'non-' . implode(' non-', $this->nonInputs);
 
         ob_start();
@@ -1983,12 +1972,21 @@ class FormBuilderForm extends DisplayForm
          */
         $formContents    = apply_filters('tsjippy-forms-element-form-content', ob_get_clean(), $this, $element);
 
+        /* 
+        Not sure where we need those for in js
+        $numericElements    = [];
+        $dateElements        = [];
+        foreach ($this->formElements as $el) {
+            if (in_array($el->type, ['date', 'number', 'range', 'week', 'month'])) {
+                $numericElements[]    = $el->id;
+            }
+            if (in_array($el->type, ['date', 'week', 'month'])) {
+                $dateElements[]    = $el->id;
+            }
+        } */
+
         ob_start();
         ?>
-        <script>
-            const numericElements = <?php echo json_encode($numericElements); ?>;
-            const dateElements = <?php echo json_encode($dateElements); ?>;
-        </script>
         <form action="" method="post" name="add-form-element-form" class="form-element-form tsjippy-form" data-add-empty=1>
             <div style="display: none;" class="error"></div>
             <?php
