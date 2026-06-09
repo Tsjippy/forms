@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [11.4.6] - 2026-06-09
+
+
+### Added
 - usage of wpdb->prepare for all queries
 - shared functionality loader
 - default value
@@ -19,8 +30,6 @@
 - space before dot bug
 - column setting initial name when indexed columnname
 - form submision archiving
-
-### Updated
 
 ## [11.4.5] - 2026-06-03
 
