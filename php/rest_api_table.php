@@ -268,11 +268,11 @@ function saveTablePrefs(\WP_REST_Request $request)
     $columnName                    = $request['column-name'];
 
     $userId                        = get_current_user_id();
-    $hiddenColumns                = (array)get_user_meta($userId, 'hidden_columns_' . $request['form-id'], true);
+    $hiddenColumns                = (array)get_user_meta($userId, 'tsjippy_hidden_columns_' . $request['form-id'], true);
 
     $hiddenColumns[$columnName]    = 'hidden';
 
-    update_user_meta($userId, 'hidden_columns_' . $request['form-id'], $hiddenColumns);
+    update_user_meta($userId, 'tsjippy_hidden_columns_' . $request['form-id'], $hiddenColumns);
 
     return 'Succesfully updated column settings';
 }
@@ -280,7 +280,7 @@ function saveTablePrefs(\WP_REST_Request $request)
 function deleteTablePrefs(\WP_REST_Request $request)
 {
     $userId        = get_current_user_id();
-    delete_user_meta($userId, 'hidden_columns_' . $request['form-id']);
+    delete_user_meta($userId, 'tsjippy_hidden_columns_' . $request['form-id']);
 
     return 'Succesfully reset column visibility';
 }

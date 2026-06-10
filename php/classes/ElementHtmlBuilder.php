@@ -197,7 +197,7 @@ class ElementHtmlBuilder extends SubmitForm
             }
 
             $name                                = $childData->display_name;
-            $birthDateString                    = get_user_meta($child, 'birthday', true);
+            $birthDateString                    = get_user_meta($child, 'tsjippy_birthday', true);
 
             $birthDate                             = new \DateTime($birthDateString);
             $currentDate                         = new \DateTime('today');
@@ -333,7 +333,7 @@ class ElementHtmlBuilder extends SubmitForm
 
         //add default values
         if (empty($element->multiple) || in_array($element->type, ['select', 'checkbox', 'radio'])) {
-            $key                            = $element->default_value;
+            $key                            = $element->default_value ?? '';
 
             if (!empty($key)) {
                 if (isset($this->defaultValues[$key])) {
@@ -482,7 +482,7 @@ class ElementHtmlBuilder extends SubmitForm
             }
 
             if ($userIdKey) {
-                $signalNumber    = get_user_meta($submission->$userIdKey, 'signal_number', true);
+                $signalNumber    = get_user_meta($submission->$userIdKey, 'tsjippy_signal_number', true);
             }
 
             foreach ($numbers as $number) {
@@ -937,14 +937,14 @@ class ElementHtmlBuilder extends SubmitForm
         if (empty($this->formData->save_in_meta)) {
             $library    = false;
             $metakey    = '';
-            $userId        = '';
+            $userId     = '';
         } else {
             $library    = $this->element->library;
             $metakey    = $name;
-            $userId        = $this->userId;
+            $userId     = $this->userId;
         }
         //Load js
-        $uploader         = new TSJIPPY\FILEUPLOAD\FileUploadHtml($userId, $metakey, $library, '', false, $this->usermeta[$metakey] ?? '');
+        $uploader       = new TSJIPPY\FILEUPLOAD\FileUploadHtml(userId: $userId, metaKey: $metakey, library: $library, metaValue: $this->usermeta[$metakey] ?? '');
 
         return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $options, $this->element->edit_image);
     }

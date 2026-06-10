@@ -20,7 +20,7 @@ trait ExportFormResults
     {
         $hiddenColumns        = [];
         if (!empty($this->user->ID)) {
-            $hiddenColumns        = get_user_meta($this->user->ID, 'hidden_columns_' . $this->formData->id, true);
+            $hiddenColumns        = get_user_meta($this->user->ID, 'tsjippy_hidden_columns_' . $this->formData->id, true);
         }
 
         $excludeIndexes        = [];

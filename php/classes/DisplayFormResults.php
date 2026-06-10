@@ -68,7 +68,7 @@ class DisplayFormResults extends DisplayForm
         if (empty($this->formData)) {
             $this->hiddenColumns        = [];
         } elseif (!empty($this->formData->id)) {
-            $hiddenColumns        = get_user_meta($this->user->ID, 'hidden_columns_' . $this->formData->id, true);
+            $hiddenColumns        = get_user_meta($this->user->ID, 'tsjippy_hidden_columns_' . $this->formData->id, true);
             if (empty($hiddenColumns)) {
                 $this->hiddenColumns    = [];
             }

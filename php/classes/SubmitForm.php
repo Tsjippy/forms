@@ -312,12 +312,12 @@ class SubmitForm extends SaveFormSettings
                 $targetFile = "$targetDir.$fileName($i)";
             }
 
-            //if rename is succesfull
+            // if rename is succesfull
             if (rename($path, $targetFile)) {
-                //update in formdata
+                //update in formdata, do not include ABSPATH to save db space
                 $this->submission->{$inputName}[$key]    = str_replace(ABSPATH, '', $targetFile);
             } else {
-                //update in formdata
+                //update in formdata, do not include ABSPATH to save db space
                 $this->submission->{$inputName}[$key]    = str_replace(ABSPATH, '', $path);
             }
         }
