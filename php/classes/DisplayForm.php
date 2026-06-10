@@ -395,7 +395,23 @@ class DisplayForm extends ElementHtmlBuilder
         /**
          * Form end
          */
-        if (!empty($this->formElements)) {
+        $inputElementsCount = 0;
+        $inputType          = '';
+        foreach ($this->formElements as $element) {
+            if (!in_array($element->type, $this->nonInputs)) {
+                $inputElementsCount++;
+                $inputType  = $element->type;
+
+                if($inputElementsCount> 1){
+                    break;
+                }
+            }
+        }
+
+        if (
+            $inputElementsCount > 1 || // We have more than one element
+            $inputElementsCount == 1 && !in_array($inputType, ['file', 'image']) // We only have one input element and its not a file element
+        ) {
             $hidden = '';
             $parent = $form;
 
