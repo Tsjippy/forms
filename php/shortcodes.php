@@ -69,12 +69,19 @@ function showFormSelector($atts = [])
                     <?php
                     foreach ($forms as $form) {
                         $name   = ucfirst(str_replace('_', ' ', $form->slug));
-                        if (($_REQUEST['form'] ?? '') == $form->slug || ($_REQUEST['form'] ?? '') == $form->id) {
-                            $selected = 'selected=selected';
-                        } else {
-                            $selected = '';
-                        }
-                        echo "<option value='$form->slug' $selected>$name</option>";
+
+                    ?>
+                        <option
+                            value='<?php echo esc_url($form->slug); ?>'
+                            <?php
+                            // phpcs:ignore
+                            if (($_REQUEST['form'] ?? '') == $form->slug || ($_REQUEST['form'] ?? '') == $form->id) {
+                                echo 'selected=selected';
+                            }
+                            ?>>
+                            <?php echo esc_html($name); ?>
+                        </option>
+                    <?php
                     }
                     ?>
                 </select>
@@ -82,6 +89,7 @@ function showFormSelector($atts = [])
         <?php
         }
 
+        // phpcs:ignore
         if (($_REQUEST['display'] ?? '') == 'results') {
             $formVis       = ' hidden';
             $resultVis     = '';
@@ -114,6 +122,7 @@ function showFormSelector($atts = [])
             }
 
             //Check if this form should be displayed
+            // phpcs:ignore
             if (isset($_REQUEST['form']) && ($_REQUEST['form'] == $form->slug || $_REQUEST['form'] == $form->id)) {
                 $hidden = '';
             } else {
@@ -122,20 +131,31 @@ function showFormSelector($atts = [])
 
             $id = strtolower(str_replace([' ', '_'], '-', $form->slug));
 
-            echo "<div id='$id' class='main-form-wrapper$hidden'>";
-            //only show button if not queried
-            if (!isset($_REQUEST['display'])) {
-                echo "<button class='button tablink$formActive' id='show-{$id}-form' data-target='{$id}-form'>Show form</button>";
-                echo "<button class='button formresults tablink$resultActive' id='show-{$id}_results' data-target='{$id}-results'>Show form results</button>";
-            }
+            ?>
+            <div id='<?php echo esc_attr($id);?>' class='main-form-wrapper<?php echo esc_attr($hidden);?>'>
+                <?php
+                //only show button if not queried
+                // phpcs:ignore
+                if (!isset($_REQUEST['display'])) {
+                    ?>
+                    <button class='button tablink<?php echo esc_attr($formActive);?>' id='show-<?php echo esc_attr($id);?>-form' data-target='<?php echo esc_attr($id);?>-form'>
+                        Show form
+                    </button>
+                    <button class='button formresults tablink<?php echo esc_attr($resultActive);?>' id='show-<?php echo esc_attr($id);?>_results' data-target='<?php echo esc_attr($id);?>-results'>
+                        Show form results
+                    </button>
+                    <?php
+                }
 
-            echo "<div id='{$id}-form' class='form-wrapper $formVis form-load-trigger' data-form-id={$form->id}>";
-            echo "</div>";
+                ?>
+                <div id='<?php echo esc_attr($id);?>-form' class='form-wrapper <?php echo esc_attr($formVis);?> form-load-trigger' data-form-id=<?php echo esc_attr($form->id);?>>
+                </div>
 
 
-            echo "<div id='{$id}-results' class='form-results-wrapper $resultVis form-load-trigger' data-shortcode-id=$shortcodeId>";
-            echo "</div>";
-            echo "</div>";
+                <div id='<?php echo esc_attr($id);?>-results' class='form-results-wrapper <?php echo esc_attr($resultVis);?> form-load-trigger' data-shortcode-id=<?php echo esc_attr($shortcodeId);?>>
+                </div>
+            </div>
+            <?php
         }
         ?>
     </div>

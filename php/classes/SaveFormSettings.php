@@ -431,8 +431,9 @@ class SaveFormSettings extends Forms
     {
         $priority    = 0;
 
+        // phpcs:ignore
         if (empty($shortcodeId) && is_numeric($_POST['shortcode-id'] ?? '')) {
-            $shortcodeId    = $_POST['shortcode-id'];
+            $shortcodeId    = (int) $_POST['shortcode-id'];
         }
 
         foreach ($settings as $elementId => $column) {

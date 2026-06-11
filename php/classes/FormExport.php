@@ -36,6 +36,13 @@ class FormExport extends FormBuilderForm
         // Set form version to 1
         $this->formData->version     = 1;
 
+        $backupName = $this->formData->slug . ".sform";
+        TSJIPPY\clearOutput();
+
+        header('Content-Type: application/octet-stream');
+        header("Content-Transfer-Encoding: Binary");
+        header("Content-disposition: attachment; filename=$backupName");
+
         $content    = "form: " . json_encode(serialize($this->formData)) . "\n";
 
         /**
@@ -74,14 +81,9 @@ class FormExport extends FormBuilderForm
             $content    .= "reminders: " . json_encode(serialize($reminders)) . "\n";
         }
 
-        $backupName = $this->formData->slug . ".sform";
-        TSJIPPY\clearOutput();
-
-        header('Content-Type: application/octet-stream');
-        header("Content-Transfer-Encoding: Binary");
-        header("Content-disposition: attachment; filename=$backupName");
-
+        // phpcs:ignore
         echo $content;
+        
         exit;
     }
 
@@ -267,17 +269,17 @@ class FormExport extends FormBuilderForm
         }
         global $wpdb;
 
-        $wpFileSystem   = TSJIPPY\loadWpFileSystem();
+        $wpFileSystem  = TSJIPPY\loadWpFileSystem();
 
-        $contents         = $wpFileSystem->get_contents($path);
+        $contents      = $wpFileSystem->get_contents($path);
 
         if (!str_contains($contents, 'form: ') || !str_contains($contents, 'elements: ')) {
             return "<div class='error'>Invalid sform file!</div>";
         }
 
-        $lines            = explode("\n", $contents);
+        $lines         = explode("\n", $contents);
 
-        $autoArchiveEl    = null;
+        $autoArchiveEl = null;
 
         foreach ($lines as $line) {
             if (empty($line)) {
@@ -350,10 +352,10 @@ class FormExport extends FormBuilderForm
             $wpdb->update(
                 $this->tableName,
                 array(
-                    'autoarchive_el'     => $elementIdMapping[$autoArchiveEl]
+                    'autoarchive_el' => $elementIdMapping[$autoArchiveEl]
                 ),
                 array(
-                    'id'        => $formId,
+                    'id'             => $this->formData->id 
                 ),
             );
         }

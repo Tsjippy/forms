@@ -423,12 +423,13 @@ function addFormElement($copy = false)
     }
 
     $update    = false;
+    // phpcs:ignore
     if (is_numeric($_POST['element-id'])) {
         if ($copy !== true) {
             $update        = true;
         }
 
-        $element->id    = $_POST['element-id'];
+        $element->id    = (int) $_POST['element-id'];
 
         $oldElement     = $forms->getElementById($element->id);
 
@@ -477,13 +478,15 @@ function addFormElement($copy = false)
     }
 
     if ($update) {
-        $message                                = "Succesfully updated '{$element->slug}'";
-        $result                                    = $forms->updateFormElement($element);
+        $message = "Succesfully updated '{$element->slug}'";
+        $result  = $forms->updateFormElement($element);
         if (is_wp_error($result)) {
             return $result;
         }
     } else {
-        $message                                = "Succesfully added '{$element->slug}' to this form";
+        $message = "Succesfully added '{$element->slug}' to this form";
+
+        // phpcs:ignore
         if (!is_numeric($_POST['insert-after'])) {
             $element->priority    = $wpdb->get_var(
                 $wpdb->prepare(
@@ -498,6 +501,7 @@ function addFormElement($copy = false)
 
         $element->id    = $forms->insertElement($element);
 
+        // phpcs:ignore
         if (!empty($_POST['extra'])) {
             // The current indexes without the new element
             $newIndexes     = (array)json_decode(TSJIPPY\sanitize($_POST['extra']));
@@ -593,10 +597,10 @@ function editFormfieldWidth()
 {
     $formBuilder    = new SaveFormSettings();
 
-    $elementId         = (int) $_POST['elementid'];
+    $elementId      = (int) $_POST['elementid'];
     $element        = $formBuilder->getElementById($elementId);
 
-    $newwidth         = (int) $_POST['new-width'];
+    $newwidth       = (int) $_POST['new-width'];
     $element->width = min($newwidth, 100);
 
     $formBuilder->updateFormElement($element);

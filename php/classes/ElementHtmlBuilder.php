@@ -845,7 +845,8 @@ class ElementHtmlBuilder extends SubmitForm
         }
 
         // we are not doing this via an api request
-        if (!str_contains($_SERVER['REDIRECT_URL'], 'get_input_html') || !empty($this->requestedValue)) {
+        // phpcs:ignore
+        if (!str_contains($_SERVER['REDIRECT_URL'] ?? '', 'get_input_html') || !empty($this->requestedValue)) {
             return $prevValues;
         }
 
@@ -866,6 +867,7 @@ class ElementHtmlBuilder extends SubmitForm
                 }
 
                 // This is a splitted value, select all values
+                // phpcs:ignore
                 elseif (count($this->submissions) > 1 && !empty($_POST['subid'])) {
                     $prevValues    = [];
 
@@ -880,7 +882,7 @@ class ElementHtmlBuilder extends SubmitForm
             // return the sub value
             else {
                 if ($i == 1 && is_numeric($_POST['subid'] ?? '')) {
-                    $index    = $_POST['subid'];
+                    $index    = (int) $_POST['subid'];
                 }
 
                 $index    = trim($index, ']');

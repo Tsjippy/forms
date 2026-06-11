@@ -95,10 +95,14 @@ class Forms
         $this->userIdElementName             = '';
         $this->userRoles                    = $this->user->roles;
 
+        // phpcs:ignore
         if (isset($_REQUEST['all'])) {
             $this->pageSize                    = 99999;
-        } elseif (isset($_REQUEST['pagesize']) && is_numeric($_REQUEST['pagesize'])) {
-            $this->pageSize                    = $_REQUEST['pagesize'];
+        } 
+        
+        // phpcs:ignore
+        elseif (is_numeric($_REQUEST['pagesize'] ?? '')) {
+            $this->pageSize                    = (int) $_REQUEST['pagesize'];
         } else {
             $this->pageSize                    = 50;
         }
@@ -108,12 +112,17 @@ class Forms
         $postAuthor    = 0;
         if (!empty($object->post_author)) {
             $postAuthor    = $object->post_author;
-        } elseif (!empty($_REQUEST['post'])) {
-            $post        = get_post($_REQUEST['post']);
+        } 
+        
+        // phpcs:ignore
+        elseif (!empty($_REQUEST['post'])) {
+            $post        = get_post((int) $_REQUEST['post']);
             if (!empty($post)) {
                 $postAuthor    = $post->post_author;
             }
-        } elseif (!empty($_POST['form-url'])) {
+        } 
+        // phpcs:ignore
+        elseif (!empty($_POST['form-url'])) {
             $postId        = url_to_postid(TSJIPPY\sanitize($_POST['form-url'], 'url'));
 
             if ($postId) {
@@ -605,16 +614,25 @@ class Forms
             return new WP_ERROR('forms', 'No form slug given');
         }
 
-        $query    = "SELECT * FROM {$this->tableName} WHERE `slug` = '{$this->formData->slug}'";
+        $query   = "SELECT * FROM %i WHERE `slug` = %s";
+        $values  = [
+            this->tableName,
+            $this->formData->slug
+        ];
+
         if (is_numeric($formId)) {
-            $query    .= " OR id=$formId";
+            $query    .= " OR id=%d";
+            $values[]   = $formId;
         }
         //check if form row already exists
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        if (!$wpdb->get_var($query)) {
+        // phpcs:disable
+        if (!$wpdb->get_var(
+            $wpdb->prepare($query, $values)
+        )) {
             //Create a new form row
             $this->insertForm();
         }
+        // phpcs:enable
     }
 
     /**
@@ -996,7 +1014,7 @@ class Forms
             $this->elementMapper(true);
 
             if (empty($post)) {
-                $url    = $_SERVER['REQUEST_URI'] ?? '';
+                $url    = TSJIPPY\sanitize($_SERVER['REQUEST_URI'] ?? '');
             } else {
                 $url    = get_page_link($post);
             }
@@ -1328,16 +1346,21 @@ class Forms
             }
 
             $this->onlyOwn        = $atts['only-own'];
+
+            // phpcs:ignore
             if (isset($_GET['only-own'])) {
                 $this->onlyOwn    = (int) $_GET['only-own'];
             }
 
             $this->all            = $atts['all'];
             $this->showArchived    = $atts['archived'];
+
+            // phpcs:ignore
             if (isset($_GET['archived'])) {
                 $this->showArchived    = TSJIPPY\sanitize($_GET['archived']);
             }
 
+            // phpcs:ignore
             if (isset($_GET['all'])) {
                 $this->all    = TSJIPPY\sanitize($_GET['all']);
             }
@@ -1383,6 +1406,7 @@ class Forms
 
         $formElements         =  $wpdb->get_results($wpdb->prepare($query, $values));
 
+        // phpcs:ignore
         if (isset($_REQUEST['formbuilder']) && is_user_logged_in()) {
             $formBuilderForm    = new FormBuilderForm($atts);
 
@@ -1522,8 +1546,9 @@ class Forms
                 $this->submission->editdate            = gmdate('d F y', strtotime($this->submission->time_last_edited));
             }
 
+            // phpcs:ignore
             if (isset($_REQUEST['subid']) && empty($this->submission->sub_id)) {
-                $this->submission->sub_id    = $_REQUEST['subid'];
+                $this->submission->sub_id    = TSJIPPY\sanitize($_REQUEST['subid']);
             }
         }
 

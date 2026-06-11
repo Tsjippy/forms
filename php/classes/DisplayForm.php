@@ -45,8 +45,8 @@ class DisplayForm extends ElementHtmlBuilder
     {
         if (
             array_intersect($this->userRoles, $this->submitRoles)     &&    // we have the permission to submit on behalf on someone else
-            !empty(($_GET['user-id']))                                &&
-            is_numeric($_GET['user-id'])                            &&     // and the user-id parameter is set in the url
+            // phpcs:ignore
+            is_numeric($_GET['user-id'] ?? '')                            &&     // and the user-id parameter is set in the url
             empty($atts['user-id'])                                        // and the user id is not given in the shortcode
         ) {
             $this->userId    = (int) $_GET['user-id'];

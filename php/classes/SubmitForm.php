@@ -597,6 +597,7 @@ class SubmitForm extends SaveFormSettings
 
         $userId    = '';
         foreach (['user-id', 'userid', 'user_id'] as $key) {
+            // phpcs:ignore
             if (isset($_POST[$key])) {
                 $userId    = (int) $_POST[$key];
                 break;

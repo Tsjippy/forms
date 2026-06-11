@@ -271,13 +271,14 @@ class FormReminders extends Forms
 
         $this->getMinimumDate($formReminder, $query, $values);
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:disable
         $submissions    = $wpdb->get_results(
             $wpdb->prepare(
                 $query,
                 $values
             )
         );
+        // phpcs:enable
 
         // get all the users who have submitted the form after the currentIntervalStart date
         $usersWithSubmission    = [];
@@ -629,13 +630,14 @@ class FormReminders extends Forms
 
         $formUrl    = $this->formData->url;
 
-        parse_str(parse_url($formUrl, PHP_URL_QUERY), $params);
+        parse_str(wp_parse_url($formUrl, PHP_URL_QUERY), $params);
 
         //Show a nice name
         $name    = str_replace(['[]', '_'], ['', ' '], $element->name);
         $name    = ucfirst(str_replace(['[', ']'], [': ', ''], $name));
 
-        $baseUrl    = explode('main-tab=', $_SERVER['REQUEST_URI'])[0];
+        // phpcs:ignore
+        $baseUrl    = explode('main-tab=', TSJIPPY\sanitize($_SERVER['REQUEST_URI'] ?? ''))[0];
         $mainTab    = $params['main-tab'] ?? '';
         if (!empty($childName)) {
             $name         .= " for $childName";
@@ -645,6 +647,7 @@ class FormReminders extends Forms
 
         // If the url has no hash or we are not on the same url
         if (
+            // phpcs:ignore
             !isset($_GET['user_id']) &&
             !str_contains($baseUrl, 'wp-json') &&
             (

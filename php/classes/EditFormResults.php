@@ -39,7 +39,7 @@ class EditFormResults extends DisplayFormResults
         } elseif (!empty($this->submission->id) && is_numeric($this->submission->id)) {
             $submissionId    = $this->submission->id;
         } elseif (is_numeric($_POST['submission-id'] ?? '')) {
-            $submissionId    = $_POST['submission-id'];
+            $submissionId    = (int) $_POST['submission-id'];
         } else {
             TSJIPPY\printArray('No submission id found');
             return false;
@@ -257,7 +257,7 @@ class EditFormResults extends DisplayFormResults
         if (is_numeric($this->submissionId)) {
             $submissionId    = $this->submissionId;
         } elseif (is_numeric($_POST['submission-id'] ?? '')) {
-            $submissionId    = $_POST['submission-id'];
+            $submissionId    = (int) $_POST['submission-id'];
         } elseif (!empty($this->submission->id)) {
             $submissionId    = $this->submission->id;
         } else {

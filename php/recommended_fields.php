@@ -41,6 +41,12 @@ function dashboardWarnings($userId)
     }
 
     if (!empty($html)) {
-        echo "<p>Please complete the following:<br></p>$html";
+        ?>
+        <p>
+            Please complete the following:
+            <br>
+        </p>
+        <?php
+        echo wp_kses_post($html);
     }
 }
