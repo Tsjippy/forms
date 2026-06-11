@@ -7,6 +7,7 @@
 
 ### Changed
 - prefixed post metas and shortcodes
+- no submit button when not needed
 
 ### Fixed
 
