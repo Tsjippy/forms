@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- implemented plugin check remmendations 1
 
 ### Fixed
 - shared code loader
