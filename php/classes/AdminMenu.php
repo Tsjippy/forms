@@ -41,6 +41,10 @@ class AdminMenu extends ADMIN\SubAdminMenu
         $forms    = new SaveFormSettings();
         $forms->getForms();
 
+        if(empty($forms->forms)){
+            return false;
+        }
+
         // sort the forms on name
         usort($forms->forms, function ($a, $b) {
             return strcasecmp($a->slug, $b->slug);
