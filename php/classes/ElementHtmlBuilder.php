@@ -937,16 +937,24 @@ class ElementHtmlBuilder extends SubmitForm
         if (empty($this->formData->save_in_meta)) {
             $library    = false;
             $metakey    = '';
-            $userId     = '';
+            $userId     = 0;
         } else {
             $library    = $this->element->library;
             $metakey    = $name;
             $userId     = $this->userId;
         }
         //Load js
-        $uploader       = new TSJIPPY\FILEUPLOAD\FileUploadHtml(userId: $userId, metaKey: $metakey, library: $library, metaValue: $this->usermeta[$metakey] ?? '');
+        $uploader       = new TSJIPPY\FILEUPLOAD\FileUploadHtml(userId: $userId, library: $library);
 
-        return $uploader->getUploadHtml($name, $targetDir, $this->element->multiple, $options, $this->element->edit_image);
+        return $uploader->getUploadHtml(
+            inputName: $name,
+            targetDir: $targetDir,
+            multiple: $this->element->multiple,
+            options: $options,
+            editBeforeUpload: $this->element->edit_image,
+            metaKey: $metakey,
+            value: $this->usermeta[$metakey] ?? ''
+        );
     }
 
     /**
