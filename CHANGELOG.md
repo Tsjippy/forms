@@ -10,6 +10,7 @@
 - no submit button when not needed
 
 ### Fixed
+- value
 
 ### Updated
 
