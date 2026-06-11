@@ -8,6 +8,7 @@
 ### Fixed
 - shared code loader
 - activation hook
+- do not show data tab i not needed admin menu
 
 ### Updated
 
