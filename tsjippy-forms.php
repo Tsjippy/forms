@@ -40,7 +40,9 @@ define(__NAMESPACE__ . '\SETTINGS', get_option('tsjippy_forms_settings', []));
 
 // run right before activation
 register_activation_hook(__FILE__, function () {
-    require_once(PLUGINPATH . 'php/classes/Forms.php');
+    if(file_exists(__DIR__  . '/shared-functionality/loader.php')){
+        require_once(__DIR__  . '/shared-functionality/loader.php');
+    }
 
     $forms = new Forms();
     $forms->createDbTables();
