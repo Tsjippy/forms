@@ -2254,16 +2254,24 @@ class DisplayFormResults extends DisplayForm
         /**
          * show page numbers
          */
-        addElement('span', $navigator, ['class' => 'page-number-wrapper']);
+        $pageNumberWrapper  = addElement('span', $navigator, ['class' => 'page-number-wrapper']);
 
-        for ($x = 0; $x < $pageCount; $x++) {
+        $step               =  max(1, round($pageCount/10)) - 1;
+
+        for ($x = 0; $x < $pageCount; $x += $step) { 
+            // First step is one smaller than the rest as we start on 1
+            if($x == $step){
+                $step++;
+            }
+
+            // Display 1 more as we start on zero
             $pageNr    = $x + 1;
 
             $class    = '';
             if ($this->currentPage == $x) {
                 $class    = "current";
             }
-            addElement('span', $navigator, ['class' => "page-number $class", 'data-nr' => '$x'], $pageNr);
+            addElement('span', $pageNumberWrapper, ['class' => "page-number $class", 'data-nr' => $x], $pageNr);
         }
 
         // Include a next button if we are not on the last page
@@ -2438,7 +2446,7 @@ class DisplayFormResults extends DisplayForm
 
         addElement('span', $p, ['class' => "edit forms-table"], "underlined text");
 
-        $p->append("to edit its contents.");
+        $p->append(" to edit its contents.");
 
         addElement('br', $p);
 

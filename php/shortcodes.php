@@ -201,6 +201,7 @@ add_shortcode('tsjippy_formresults', __NAMESPACE__ . '\formResults');
 function formResults($atts)
 {
     $object = new DisplayFormResults($atts);
+    $object->showArchived   = isset($_GET['archived']);
     $html   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
 
     //now we have rendered all the content we can export the excel if requested
