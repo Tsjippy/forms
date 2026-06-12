@@ -303,7 +303,7 @@ class FormExport extends FormBuilderForm
                 $post = array(
                     'post_type'        => 'page',
                     'post_title'    => "$object->name form",
-                    'post_content'  => "[formbuilder slug={$object->slug}]",
+                    'post_content'  => '[tsjippy_formbuilder slug={$object->slug}]',
                     'post_status'   => "publish",
                     'post_author'   => '1'
                 );

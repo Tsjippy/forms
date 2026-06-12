@@ -717,7 +717,7 @@ class Forms
             $wpdb->prepare(
                 "SELECT ID FROM %i WHERE post_content LIKE %s",
                 $wpdb->posts,
-                "%" . $wpdb->esc_like("[formbuilder slug={$this->formData->slug}]") . "%"
+                "%" . $wpdb->esc_like('[tsjippy_formbuilder slug={$this->formData->slug}]') . "%"
             )
         );
 
@@ -725,7 +725,7 @@ class Forms
         foreach ($results as $postId) {
             $post    = get_post($postId);
 
-            $post->post_content    = str_replace("[formbuilder slug={$this->formData->slug}]", '', $post->post_content);
+            $post->post_content    = str_replace('[tsjippy_formbuilder slug={$this->formData->slug}]', '', $post->post_content);
 
             // delete post
             if (empty($post->post_content)) {
