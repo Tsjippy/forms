@@ -5,6 +5,7 @@
 
 ### Changed
 - implemented plugin check remmendations 1
+- do not use  in classes
 
 ### Fixed
 - shared code loader
