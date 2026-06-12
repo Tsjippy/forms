@@ -13,20 +13,18 @@ class FormBuilderForm extends DisplayForm
 {
     public bool $inMultiAnswer;
     public bool $isInDiv;
+    public bool $showId;
+    public bool $showName;
 
 
-    public function __construct($atts = [])
+    public function __construct($atts = [], $showId=false, $showName=false, $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct();
+        parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
 
-        if (!empty($atts)) {
-            $this->processAtts($atts);
-            $this->getForm();
-            $this->getAllFormElements();
-        }
-
-        $this->inMultiAnswer    = false;
-        $this->isInDiv            = false;
+        $this->inMultiAnswer = false;
+        $this->isInDiv       = false;
+        $this->showName      = $showName;
+        $this->showId        = $showId;
     }
 
     /**
@@ -237,7 +235,7 @@ class FormBuilderForm extends DisplayForm
 
         $class    = 'element-id';
         // phpcs:ignore
-        if (!isset($_REQUEST['show-id'])) {
+        if (!$this->showId) {
             $class    .= ' hidden';
         }
         $this->addElement(
@@ -322,8 +320,7 @@ class FormBuilderForm extends DisplayForm
         }
 
         $hidden    = ' hidden';
-        // phpcs:ignore
-        if (isset($_REQUEST['show-name'])) {
+        if ($this->showName) {
             $hidden    = '';
         }
 
@@ -413,27 +410,13 @@ class FormBuilderForm extends DisplayForm
         // Load js
         wp_enqueue_script('tsjippy_forms_script');
 
-        // phpcs:ignore
-        if (is_numeric($_POST['export-form'] ?? '')) {
-            $formExport    = new FormExport();
-            $formExport->exportForm(TSJIPPY\sanitize($_POST['export-form']));
-        }
-
-        // phpcs:ignore
-        if (is_numeric($_POST['delete-form'] ?? '')) {
-            $saveFormSettings    = new SaveFormSettings();
-            $saveFormSettings->deleteForm(TSJIPPY\sanitize($_POST['delete-form']));
-
-            return "<div class='success'>Form successfully deleted.</div>";
-        }
-
         //Formbuilder js
         wp_enqueue_script('tsjippy_formbuilderjs');
 
         // make sure we use unique priorities
         ob_start();
 
-?>
+    ?>
         <div class="tsjippy-form-wrapper">
             <?php
             $this->addElementModal();
@@ -608,12 +591,12 @@ class FormBuilderForm extends DisplayForm
 
                     <label class="block">
                         <h4>Submit button text</h4>
-                        <input type='text' class='formbuilder form-element-setting' name='button-text' value="<?php echo esc_attr($$this->formData->button_text); ?>">
+                        <input type='text' class='formbuilder form-element-setting' name='button-text' value="<?php echo esc_attr($this->formData->button_text); ?>">
                     </label>
 
                     <label class="block">
                         <h4>Succes message</h4>
-                        <input type='text' class='formbuilder form-element-setting' name='succes-message' value="<?php echo esc_attr($$this->formData->succes_message); ?>">
+                        <input type='text' class='formbuilder form-element-setting' name='succes-message' value="<?php echo esc_attr($this->formData->succes_message); ?>">
                     </label>
 
                     <label class="block">
@@ -698,7 +681,7 @@ class FormBuilderForm extends DisplayForm
                                 value='<?php echo esc_attr($action); ?>' 
                                 <?php if (!empty($this->formData->actions[$action])) { echo  'checked'; } ?>
                             >
-                            <?php echo ucfirst(esc_html($action)); ?>
+                            <?php echo esc_html(ucfirst($action)); ?>
                         </label><br>
                         <?php
                     }
@@ -979,7 +962,7 @@ class FormBuilderForm extends DisplayForm
                     <label>
                         <h4>Recurring Submissions</h4>
                         Request new form submissions every
-                        <input type='number' name='frequency' value='<?php echo esc_attr($this->formReminder->frequency); ?>' style='max-width: 70px;'>
+                        <input type='number' name='frequency' value='<?php echo esc_attr($this->formReminder->frequency ?? ''); ?>' style='max-width: 70px;'>
                     </label>
 
                     <?php
@@ -1011,8 +994,8 @@ class FormBuilderForm extends DisplayForm
                     <label>
                         <h4>Date Window</h4>
                         Allow Submissions Within This Date Window<br>
-                        From <input type="date" name='window-start' value='<?php echo esc_attr($this->formReminder->window_start); ?>' <?php echo esc_attr($min); ?>>
-                        To <input type="date" name='window-end' value='<?php echo esc_attr($this->formReminder->window_end); ?>' <?php echo esc_attr($max); ?>>
+                        From <input type="date" name='window-start' value='<?php echo esc_attr($this->formReminder->window_start ?? ''); ?>' <?php echo esc_attr($min); ?>>
+                        To <input type="date" name='window-end' value='<?php echo esc_attr($this->formReminder->window_end ?? ''); ?>' <?php echo esc_attr($max); ?>>
                     </label>
                 </div>
             <?php
@@ -1040,17 +1023,17 @@ class FormBuilderForm extends DisplayForm
                 <?php
                 }
                 ?>
-                for <input type="number" name='reminder-amount' value='<?php echo esc_attr($this->formReminder->reminder_amount); ?>' style='width: 70px;'>
+                for <input type="number" name='reminder-amount' value='<?php echo esc_attr($this->formReminder->reminder_amount ?? ''); ?>' style='width: 70px;'>
             </label>
             times.
             <br>
             <label>
                 <h4>Start reminding from </h4>
-                <input type='date' name='reminder-start_date' value='<?php echo esc_attr($this->formReminder->reminder_start_date); ?>' <?php echo esc_attr("$min $max"); ?>>
+                <input type='date' name='reminder-start_date' value='<?php echo esc_attr($this->formReminder->reminder_start_date ?? ''); ?>' <?php echo esc_attr("$min $max"); ?>>
             </label>
 
             <h4>Warning Exclusions</h4>
-            <?php $this->warningConditionsForm('conditions', maybe_unserialize($this->formReminder->conditions)); ?>
+            <?php $this->warningConditionsForm('conditions', maybe_unserialize($this->formReminder->conditions ?? '')); ?>
 
             <?php
             TSJIPPY\addSaveButton('submit-form-reminder',  'Save form reminder');
@@ -1156,15 +1139,15 @@ class FormBuilderForm extends DisplayForm
                 }
             ?>
                 <div class='warning-conditions element-conditions' data-index='<?php echo esc_attr($conditionIndex); ?>'>
-                    <input type="hidden" class="no-reset warning-condition combinator" name="<?php echo esc_attr($name); ?>[<?php echo esc_attr($conditionIndex); ?>][combinator]" value="<?php echo esc_attr($condition['combinator']); ?>">
+                    <input type="hidden" class="no-reset warning-condition combinator" name="<?php echo esc_attr($name); ?>[<?php echo esc_attr($conditionIndex); ?>][combinator]" value="<?php echo esc_attr($condition['combinator'] ?? ''); ?>">
 
-                    <input type="text" class="warning-condition meta-key" name="<?php echo esc_attr($name); ?>[<?php echo esc_attr($conditionIndex); ?>][meta-key]" value="<?php echo esc_attr($condition['meta-key']); ?>" list="meta-key" style="width: fit-content;">
+                    <input type="text" class="warning-condition meta-key" name="<?php echo esc_attr($name); ?>[<?php echo esc_attr($conditionIndex); ?>][meta-key]" value="<?php echo esc_attr($condition['meta-key'] ?? ''); ?>" list="meta-key" style="width: fit-content;">
 
                     <span 
                         class="index-wrapper 
                         <?php if (empty($condition['meta-key-index'])) { echo 'hidden'; } ?>">
                         <span>and index</span>
-                        <input type="text" class="warning-condition meta-key-index" name='<?php echo esc_attr($name); ?>[<?php echo esc_attr($conditionIndex); ?>][meta-key-index]' value="<?php echo esc_attr($condition['meta-key-index']); ?>" list="meta-key-index[<?php echo esc_attr($conditionIndex); ?>]" style="width: fit-content;">
+                        <input type="text" class="warning-condition meta-key-index" name='<?php echo esc_attr($name); ?>[<?php echo esc_attr($conditionIndex); ?>][meta-key-index]' value="<?php echo esc_attr($condition['meta-key-index'] ?? ''); ?>" list="meta-key-index[<?php echo esc_attr($conditionIndex); ?>]" style="width: fit-content;">
                         <datalist class="meta-key-index-list warning-condition" id="meta-key-index[<?php echo esc_attr($conditionIndex); ?>]">
                             <?php
                             if (is_array($arrayKeys)) {
@@ -1202,7 +1185,7 @@ class FormBuilderForm extends DisplayForm
                         type='text' 
                         class='warning-condition' 
                         name='<?php echo esc_attr($name); ?>[<?php echo esc_attr($conditionIndex); ?>][conditional-value]' 
-                        value="<?php echo esc_attr($condition['conditional-value']); ?>" 
+                        value="<?php echo esc_attr($condition['conditional-value'] ?? ''); ?>" 
                         style="width: fit-content; 
                         <?php if ($condition['equation'] == 'submitted') { echo 'visibility:hidden;'; } ?>"
                     >
@@ -1726,6 +1709,7 @@ class FormBuilderForm extends DisplayForm
                                         <textarea 
                                             class='formbuilder form-element-setting' 
                                             name='emails[<?php echo esc_attr($key); ?>][headers]'>
+                                            // phpcs:ignore
                                             <?php echo $email->headers ?>
                                         </textarea>
                                     </div>
@@ -1737,6 +1721,7 @@ class FormBuilderForm extends DisplayForm
                                         <textarea 
                                             class='formbuilder form-element-setting' 
                                             name='emails[<?php echo esc_attr($key); ?>][files]'>
+                                            // phpcs:ignore
                                             <?php echo $email->files ?>
                                         </textarea>
                                     </div>
@@ -1775,7 +1760,7 @@ class FormBuilderForm extends DisplayForm
         $nonInputClasses    = 'non-' . implode(' non-', $this->nonInputs);
 
         ob_start();
-    ?>
+        ?>
         <div class="form-wrapper">
             <h4><?php echo wp_kses_post($heading); ?></h4><br>
 
@@ -1794,43 +1779,43 @@ class FormBuilderForm extends DisplayForm
             <input type="hidden" class="no-reset" name="formfield[width]" value="100">
 
             <label>Element type</label><br>
-            <select class="formbuilder element-type " name="formfield[type]" required>
+            <select class="formbuilder element-type" name="formfield[type]" required>
                 <optgroup label="Normal elements">
                     <?php
                     $options = [
-                        "button"    => "Button",
-                        "checkbox"    => "Checkbox",
-                        "color"        => "Color",
-                        "date"        => "Date",
-                        "select"    => "Dropdown",
-                        "email"        => "E-mail",
-                        "file"        => "File upload",
-                        "image"        => "Image upload",
-                        "label"        => "Label",
-                        "month"        => "Month",
-                        "number"    => "Number",
-                        "password"    => "Password",
-                        "tel"        => "Phonenumber",
-                        "radio"        => "Radio",
-                        "range"        => "Range",
-                        "text"        => "Text",
-                        "textarea"    => "Text (multiline)",
-                        "time"        => "Time",
-                        "url"        => "Url",
-                        "week"        => "Week"
+                        "button"   => "Button",
+                        "checkbox" => "Checkbox",
+                        "color"    => "Color",
+                        "date"     => "Date",
+                        "select"   => "Dropdown",
+                        "email"    => "E-mail",
+                        "file"     => "File upload",
+                        "image"    => "Image upload",
+                        "label"    => "Label",
+                        "month"    => "Month",
+                        "number"   => "Number",
+                        "password" => "Password",
+                        "tel"      => "Phonenumber",
+                        "radio"    => "Radio",
+                        "range"    => "Range",
+                        "text"     => "Text",
+                        "textarea" => "Text (multiline)",
+                        "time"     => "Time",
+                        "url"      => "Url",
+                        "week"     => "Week"
                     ];
 
                     foreach ($options as $key => $option) {
-                    ?>
+                        ?>
                         <option 
                             value='<?php echo esc_attr($key); ?>' 
-                            <?php if ($element != null && $element->type == $key) {  echo 'selected="selected"';  } ?>>
+                            <?php if ($element != null && $element->type == $key) {  echo 'selected="selected"';  } ?>
+                        >
                             <?php echo wp_kses_post($option); ?>
                         </option>
-                    <?php
+                        <?php
                     }
                     ?>
-
                 </optgroup>
                 <optgroup label="Special elements">
                     <?php
@@ -1852,14 +1837,13 @@ class FormBuilderForm extends DisplayForm
                     $options    = apply_filters('tsjippy-special-form-elements', $options);
 
                     foreach ($options as $key => $option) {
-
-                    ?>
+                        ?>
                         <option 
                             value='<?php echo esc_attr($key); ?>' 
                             <?php if ($element != null && $element->type == $key) {  echo 'selected="selected"';  } ?>>
                             <?php echo wp_kses_post($option); ?>
                         </option>
-                    <?php
+                        <?php
                     }
                     ?>
                 </optgroup>
@@ -1900,7 +1884,13 @@ class FormBuilderForm extends DisplayForm
 
             <div name='label-text' class='element-option label button formstep hidden wide' style='background-color: unset;'>
                 <label>
-                    <div style='text-align: left;'>Specify the <span class='element-type '>label</span> text</div>
+                    <div style='text-align: left;'>
+                        Specify the 
+                        <span class='element-type'>
+                            label
+                        </span>
+                         text
+                    </div>
                     <input type="text" class="formbuilder wide" name="formfield[text]" value="<?php echo esc_attr($element->text ?? ''); ?>">
                 </label>
                 <br><br>
@@ -2162,7 +2152,8 @@ class FormBuilderForm extends DisplayForm
             <div style="display: none;" class="error"></div>
             <?php
 
-            echo wp_kses_post($formContents);
+            // ignore
+            echo $formContents;
 
             TSJIPPY\addSaveButton('submit-form-element', "$text form element"); ?>
         </form>
@@ -2286,7 +2277,7 @@ class FormBuilderForm extends DisplayForm
                     foreach ($condition['rules'] as $ruleIndex => $rule) {
                     ?>
                         <div class='rule-row' data-rule-index='<?php echo esc_attr($ruleIndex); ?>'>
-                            <input type='hidden' class='no-reset element-condition combinator' name='element-conditions[<?php echo esc_attr($conditionIndex); ?>][rules][<?php echo esc_attr($ruleIndex); ?>][combinator]' value='<?php echo esc_attr($rule['combinator']); ?>'>
+                            <input type='hidden' class='no-reset element-condition combinator' name='element-conditions[<?php echo esc_attr($conditionIndex); ?>][rules][<?php echo esc_attr($ruleIndex); ?>][combinator]' value='<?php echo esc_attr($rule['combinator'] ?? ''); ?>'>
 
                             <select class='element-condition condition-select conditional-field' name='element-conditions[<?php echo esc_attr($conditionIndex); ?>][rules][<?php echo esc_attr($ruleIndex); ?>][conditional-field]' required>
                                 <?php
@@ -2461,10 +2452,10 @@ class FormBuilderForm extends DisplayForm
                                     value='value' <?php if ($condition['action'] == 'value') {echo 'checked'; } ?> required>
                                 Set property
                             </label>
-                            <input type="text" list="propertylist" name="element-conditions[<?php echo esc_attr($conditionIndex); ?>][property-name1]" class='element-condition' placeholder="property name" value="<?php echo esc_attr($condition['property-name1']); ?>">
+                            <input type="text" list="propertylist" name="element-conditions[<?php echo esc_attr($conditionIndex); ?>][property-name1]" class='element-condition' placeholder="property name" value="<?php echo esc_attr($condition['property-name1'] ?? ''); ?>">
                             <label> to:</label>
                             <textarea class='element-condition' name="element-conditions[<?php echo esc_attr($conditionIndex); ?>][action-value]" rows='1'>
-                                <?php echo esc_textarea($condition['action-value']); ?>
+                                <?php echo esc_textarea($condition['action-value'] ?? ''); ?>
                             </textarea>
                             <br>
                             <label>
@@ -2482,12 +2473,12 @@ class FormBuilderForm extends DisplayForm
                                 <option value="max">
                             </datalist>
                             <label>
-                                <input type="text" list="propertylist" name="element-conditions[<?php echo esc_attr($conditionIndex); ?>][property-name]" class='element-condition' placeholder="property name" value="<?php echo esc_attr($condition['property-name']); ?>">
+                                <input type="text" list="propertylist" name="element-conditions[<?php echo esc_attr($conditionIndex); ?>][property-name]" class='element-condition' placeholder="property name" value="<?php echo esc_attr($condition['property-name'] ?? ''); ?>">
                                 property to the value of
                             </label>
 
                             <select class='element-condition condition-select' name='element-conditions[<?php echo esc_attr($conditionIndex); ?>][property-value]'>
-                                <?php $this->inputDropdown($condition['property-value'], $elementId); ?>
+                                <?php $this->inputDropdown($condition['property-value'] ?? '', $elementId); ?>
                             </select>
 
                             <?php
@@ -2507,7 +2498,7 @@ class FormBuilderForm extends DisplayForm
                             }
                             ?>
                             <label class='addition <?php echo esc_attr($hidden); ?>'>
-                                + <input type='number' name="element-conditions[<?php echo esc_attr($conditionIndex); ?>][addition]" class='element-condition' value="<?php echo esc_attr($condition['addition']); ?>" style='width: 60px;'>
+                                + <input type='number' name="element-conditions[<?php echo esc_attr($conditionIndex); ?>][addition]" class='element-condition' value="<?php echo esc_attr($condition['addition'] ?? ''); ?>" style='width: 60px;'>
                                 <span class='days <?php echo esc_attr($hidden2); ?>'> days</span>
                             </label>
                             <br>

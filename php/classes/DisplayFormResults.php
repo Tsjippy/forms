@@ -38,11 +38,10 @@ class DisplayFormResults extends DisplayForm
      * Constructor for the DisplayFormResults class
      * @param array $atts The attributes passed to the shortcode
      */
-    public function __construct($atts)
+    public function __construct($atts, $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
         // call parent constructor
-        unset($atts['shortcode-id']);
-        parent::__construct($atts);
+        parent::__construct($atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
 
         global $wpdb;
 
@@ -574,7 +573,7 @@ class DisplayFormResults extends DisplayForm
         $userId    = apply_filters('tsjippy-forms-user_ids-to-retrieve', $userId, $this);
 
         // phpcs:ignore
-        if (isset($_REQUEST['all'])) {
+        if ($this->all) {
             $all    = true;
         }
 
@@ -1297,12 +1296,7 @@ class DisplayFormResults extends DisplayForm
             !is_numeric($this->shortcodeId) ||
             $this->shortcodeId == -1
         ) {
-            // phpcs:ignore
-            if (is_numeric($_POST['shortcode-id'] ?? '')) {
-                $this->shortcodeId    = TSJIPPY\sanitize($_POST['shortcode-id']);
-            } else {
-                return new WP_Error('forms', 'no shortcoode id');
-            }
+           return new WP_Error('forms', 'no shortcoode id');
         }
 
         $this->tableSettings         = $wpdb->get_results(
@@ -2310,9 +2304,7 @@ class DisplayFormResults extends DisplayForm
         // Check permissions
         if (
             $this->onlyOwn ||
-            !$this->tableViewPermissions ||
-            // phpcs:ignore
-            ($_REQUEST['only-own'] ?? false)
+            !$this->tableViewPermissions 
         ) {
             // we do not have permission to view someone elses submissions
             if ($type == 'others') {
@@ -2504,7 +2496,7 @@ class DisplayFormResults extends DisplayForm
         //Load js
         wp_enqueue_script('tsjippy_forms_table_script');
 
-    ?>
+        ?>
         <div class='form table-wrapper'>
             <div class='form table-head'>
                 <h2 class="table-title"><?php echo esc_html($this->tableSettings->title ?? ''); ?></h2><br>
@@ -2513,24 +2505,10 @@ class DisplayFormResults extends DisplayForm
                 ?>
             </div>
             <?php
-            // phpcs:ignore
-            echo $tableHtml;
+            echo wp_kses_post($tableHtml);
             ?>
         </div>
-<?php
-
-        //now we have rendered all the content we can export the excel if requested
-        // phpcs:ignore
-        if (isset($_POST['export-xls'])) {
-            $this->exportExcel();
-        }
-
-        //now we have rendered all the content we can export the pdf if requested
-        // phpcs:ignore
-        if (isset($_POST['export-pdf'])) {
-            // phpcs:ignore
-            echo $this->exportPdf();
-        }
+        <?php
 
         $html    = ob_get_clean();
 

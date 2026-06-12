@@ -18,9 +18,9 @@ class FormReminders extends Forms
     public array        $mandatoryElements;
     public array        $userReminders;
 
-    public function __construct()
+    public function __construct($userId=0)
     {
-        parent::__construct();
+        parent::__construct(userId: $userId);
 
         $this->metaForms         = [];
         $this->defaultForms      = [];
@@ -645,10 +645,11 @@ class FormReminders extends Forms
             $formUrl     = str_replace($params['main-tab'], $mainTab, $formUrl);
         }
 
-        // If the url has no hash or we are not on the same url
+        /**
+         * Return a hyperlink to another page
+         */
         if (
-            // phpcs:ignore
-            !isset($_GET['user_id']) &&
+            empty($this->userId) &&
             !str_contains($baseUrl, 'wp-json') &&
             (
                 empty($params['main-tab']) ||
@@ -658,7 +659,9 @@ class FormReminders extends Forms
             return "<li><a href='$formUrl#{$element->slug}'>$name</a></li>";
         }
 
-        //We are on the same page, just change the hash
+        /**
+         * We are on the same page, just change the hash
+         */
         $secondTab    = '';
         $names        = explode('[', $element->slug);
         if (count($names) > 1) {

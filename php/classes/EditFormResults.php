@@ -12,9 +12,9 @@ class EditFormResults extends DisplayFormResults
 {
     public int|false $submissionId;
 
-    public function __construct($atts = [])
+    public function __construct($atts = [], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct($atts);
+        parent::__construct($atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
 
         $this->submissionId    = false;
     }
@@ -38,8 +38,6 @@ class EditFormResults extends DisplayFormResults
             $submissionId    = $this->submissionId;
         } elseif (!empty($this->submission->id) && is_numeric($this->submission->id)) {
             $submissionId    = $this->submission->id;
-        } elseif (is_numeric($_POST['submission-id'] ?? '')) {
-            $submissionId    = (int) $_POST['submission-id'];
         } else {
             TSJIPPY\printArray('No submission id found');
             return false;
@@ -256,8 +254,6 @@ class EditFormResults extends DisplayFormResults
 
         if (is_numeric($this->submissionId)) {
             $submissionId    = $this->submissionId;
-        } elseif (is_numeric($_POST['submission-id'] ?? '')) {
-            $submissionId    = (int) $_POST['submission-id'];
         } elseif (!empty($this->submission->id)) {
             $submissionId    = $this->submission->id;
         } else {

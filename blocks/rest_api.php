@@ -12,9 +12,9 @@ function restApiInit()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/form-selector',
         array(
-            'methods'                 => 'GET',
-            'callback'                 =>     __NAMESPACE__ . '\showFormSelector',
-            'permission_callback'     => '__return_true',                            // Allow public access
+            'methods'             => 'GET',
+            'callback'            => __NAMESPACE__ . '\showFormSelector',
+            'permission_callback' => '__return_true',                            // Allow public access
         )
     );
 
@@ -23,9 +23,9 @@ function restApiInit()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/form_builder',
         array(
-            'methods'                 => 'POST,GET',
-            'callback'                 =>     __NAMESPACE__ . '\showFormBuilder',
-            'permission_callback'     => '__return_true',                        // Allow public access to be able access public available forms
+            'methods'             => 'POST,GET',
+            'callback'            => __NAMESPACE__ . '\showFormBuilder',
+            'permission_callback' => '__return_true',                        // Allow public access to be able access public available forms
         )
     );
 
@@ -34,9 +34,9 @@ function restApiInit()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/get_forms',
         array(
-            'methods'                 => 'POST,GET',
-            'callback'                 =>     __NAMESPACE__ . '\getAllForms',
-            'permission_callback'     => '__return_true',                // Allow public access to be able access public available forms
+            'methods'             => 'POST,GET',
+            'callback'            => __NAMESPACE__ . '\getAllForms',
+            'permission_callback' => '__return_true',                // Allow public access to be able access public available forms
         )
     );
 
@@ -45,9 +45,9 @@ function restApiInit()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/show_form_results',
         array(
-            'methods'                 => 'POST,GET',
-            'callback'                 =>     __NAMESPACE__ . '\showFormResults',
-            'permission_callback'     => '__return_true',            // Allow public access to be able access public available forms results, the function itself will check if the form is public or not and if the user has access to the results or not
+            'methods'             => 'POST,GET',
+            'callback'            => __NAMESPACE__ . '\showFormResults',
+            'permission_callback' => '__return_true',            // Allow public access to be able access public available forms results, the function itself will check if the form is public or not and if the user has access to the results or not
         )
     );
 
@@ -56,8 +56,8 @@ function restApiInit()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/missing_form_fields',
         array(
-            'methods'                 => 'POST,GET',
-            'callback'                 =>     function ($attributes) {
+            'methods'             => 'POST,GET',
+            'callback'            => function ($attributes) {
                 if ($attributes instanceof \WP_REST_Request) {
                     $attributes    = $_REQUEST;
                 }
@@ -67,7 +67,7 @@ function restApiInit()
                 }
                 return $result;
             },
-            'permission_callback'     => function ($rest) {
+            'permission_callback' => function ($rest) {
                 return current_user_can('read');        // Allow access to logged in users, the function itself will check if the user has access to the form and the fields or not
             },
         )
@@ -95,9 +95,9 @@ function showFormBuilder($attributes)
         }
     }
 
-    $forms = new Forms();
+    $forms = new DisplayForm($attributes);
 
-    $html    = $forms->determineForm($attributes);
+    $html    = $forms->determineForm();
     if (is_wp_error($html)) {
         $html = $html->get_error_message();
     }
@@ -146,20 +146,20 @@ function showFormResults($attributes)
     if ($attributes instanceof \WP_REST_Request) {
         if (!empty($_REQUEST['form-id'])) {
             $attributes = [
-                'form-id'         => $_REQUEST['form-id'],
-                'shortcode-id'    => $_REQUEST['shortcode-id']
+                'form-id'         => TSJIPPY\sanitize($_REQUEST['form-id']),
+                'shortcode-id'    => TSJIPPY\sanitize($_REQUEST['shortcode-id'])
             ];
 
             if (isset($_REQUEST['archived'])) {
-                $attributes['archived']    = $_REQUEST['archived'];
+                $attributes['archived'] = TSJIPPY\sanitize($_REQUEST['archived']);
             }
 
             if (isset($_REQUEST['only-own'])) {
-                $attributes['onlyOwn']    = $_REQUEST['only-own'];
+                $attributes['onlyOwn']  = TSJIPPY\sanitize($_REQUEST['only-own']);
             }
 
             if (isset($_REQUEST['all'])) {
-                $attributes['all']    = $_REQUEST['all'];
+                $attributes['all']      = TSJIPPY\sanitize($_REQUEST['all']);
             }
         } else {
             return false;
@@ -176,9 +176,22 @@ function showFormResults($attributes)
         $attributes['id']    = $attributes['tableid'];
     }
 
-    $displayFormResults = new DisplayFormResults($attributes);
+    $object = new DisplayFormResults($attributes); 
 
-    $html    = $displayFormResults->showFormresultsTable();
+    $html   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
+
+    //now we have rendered all the content we can export the excel if requested
+    // phpcs:ignore
+    if (isset($_POST['export-xls'])) {
+        $object->exportExcel();
+    }
+
+    //now we have rendered all the content we can export the pdf if requested
+    // phpcs:ignore
+    if (isset($_POST['export-pdf'])) {
+        // phpcs:ignore
+        echo $object->exportPdf();
+    }
 
     if (is_wp_error($html)) {
         $html = $html->get_error_message();

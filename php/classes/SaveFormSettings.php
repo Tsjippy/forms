@@ -15,9 +15,9 @@ class SaveFormSettings extends Forms
 {
     use CreateJs;
 
-    public function __construct()
+    public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct();
+        parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
     }
 
     /**
@@ -33,7 +33,7 @@ class SaveFormSettings extends Forms
         global $wpdb;
 
         // Make sure we only are working on the name
-        $exploded        = explode('\\', $element->slug);
+        $exploded         = explode('\\', $element->slug);
         $element->slug    = end($exploded);
 
         // Replace spaces with _
@@ -255,7 +255,7 @@ class SaveFormSettings extends Forms
     {
         global $wpdb;
 
-        $elId        = $element->id;
+        $elId          = $element->id;
         $oldElement    = $this->getElementById($elId);
 
         $this->insertOrUpdateData($this->elTableName, $element, ['id' => $elId]);
@@ -264,10 +264,6 @@ class SaveFormSettings extends Forms
 
         // Update the element in the formElements array
         $this->formElements[$oldElement->index]    = (object)$element;
-
-        if ($this->formData == null) {
-            $this->getForm((int) $_POST['form-id']);
-        }
 
         $formVersion    = 1;
         if (is_numeric($this->formData->version)) {
@@ -430,11 +426,6 @@ class SaveFormSettings extends Forms
     public function saveColumnSettings($settings = [], $shortcodeId = '')
     {
         $priority    = 0;
-
-        // phpcs:ignore
-        if (empty($shortcodeId) && is_numeric($_POST['shortcode-id'] ?? '')) {
-            $shortcodeId    = (int) $_POST['shortcode-id'];
-        }
 
         foreach ($settings as $elementId => $column) {
             if (!is_array($column)) {

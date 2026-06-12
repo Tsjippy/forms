@@ -519,7 +519,7 @@ function showCondionalFields(type, form) {
     case "button":
     case "formstep":
     case "label":
-      form.querySelector('[name="label-text"] .element-type').textContent =
+      form.querySelector('span.element-type').textContent =
         type;
       break;
     case "info":

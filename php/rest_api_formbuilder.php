@@ -53,11 +53,11 @@ function restApiInitForms()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/load_form_results',
         array(
-            'methods'                 => 'POST',
-            'callback'                 =>     __NAMESPACE__ . '\loadFormResults',
-            'permission_callback'     => '__return_true',
-            'args'                    => array(
-                'shortcode-id'        => array(
+            'methods'             => 'POST',
+            'callback'            =>     __NAMESPACE__ . '\loadFormResults',
+            'permission_callback' => '__return_true',
+            'args'                => array(
+                'shortcode-id'    => array(
                     'required'    => true,
                     'validate_callback' => function ($id) {
                         return is_numeric($id);
@@ -319,7 +319,20 @@ function restApiInitForms()
             'methods'                 => 'POST',
             'callback'                 =>     function () {
                 $formBuilder    = new SubmitForm();
-                return $formBuilder->formSubmit();
+
+                // The user id of the current user
+                $this->userId                        = $this->user->ID;
+
+                $userId    = '';
+                foreach (['user-id', 'userid', 'user_id'] as $key) {
+                    // phpcs:ignore
+                    if (isset($_POST[$key])) {
+                        $userId    = (int) $_POST[$key];
+                        break;
+                    }
+                }
+
+                return $formBuilder->formSubmit($userId, (int) $_POST['form-id'], TSJIPPY\sanitize($_POST));
             },
             'permission_callback'     => '__return_true',
             'args'                    => array(
@@ -382,7 +395,8 @@ function addFormElement($copy = false)
 {
     global $wpdb;
 
-    $forms    = new SaveFormSettings();
+
+    $forms    = new SaveFormSettings(formUrl: TSJIPPY\sanitize($_REQUEST['form-url'] ?? ''));
     $forms->getForm((int) $_POST['form-id']);
 
     $index        = 0;
@@ -602,6 +616,10 @@ function editFormfieldWidth()
 
     $newwidth       = (int) $_POST['new-width'];
     $element->width = min($newwidth, 100);
+
+    if ($formBuilder->formData == null) {
+        $formBuilder->getForm((int) $_POST['form-id']);
+    }
 
     $formBuilder->updateFormElement($element);
 

@@ -35,19 +35,19 @@ function restApiInitTable()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_table_prefs',
         array(
-            'methods'                 => \WP_REST_Server::CREATABLE,
-            'callback'                 => __NAMESPACE__ . '\saveTablePrefs',
-            'permission_callback'     => function ($request) {
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\saveTablePrefs',
+            'permission_callback' => function ($request) {
                 return current_user_can('read');        // Allow access to logged in users, tto be able to save theire column visibility preferences
             },
-            'args'                    => array(
-                'form-id'        => array(
+            'args'                => array(
+                'form-id'         => array(
                     'required'    => true,
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
                 ),
-                'column-name'    => array('required'    => true),
+                'column-name'     => array('required'    => true),
             )
         )
     );
@@ -57,13 +57,13 @@ function restApiInitTable()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/delete_table_prefs',
         array(
-            'methods'                 => \WP_REST_Server::CREATABLE,
-            'callback'                 => __NAMESPACE__ . '\deleteTablePrefs',
-            'permission_callback'     => function ($request) {
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\deleteTablePrefs',
+            'permission_callback' => function ($request) {
                 return current_user_can('read');        // Allow access to logged in users, to be able to reset theire column visibility preferences
             },
-            'args'                    => array(
-                'form-id'        => array(
+            'args'                => array(
+                'form-id'         => array(
                     'required'    => true,
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
@@ -78,20 +78,20 @@ function restApiInitTable()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_column_settings',
         array(
-            'methods'                 => \WP_REST_Server::CREATABLE,
-            'callback'                 => __NAMESPACE__ . '\saveColumnSettings',
-            'permission_callback'     => function () {
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\saveColumnSettings',
+            'permission_callback' => function () {
                 $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
                 return $formsTable->tableEditPermissions;
             },
-            'args'                    => array(
-                'shortcode-id'        => array(
+            'args'                => array(
+                'shortcode-id'    => array(
                     'required'    => true,
                     'validate_callback' => function ($shortcodeId) {
                         return is_numeric($shortcodeId);
                     }
                 ),
-                'column-settings'        => array(
+                'column-settings' => array(
                     'required'    => true,
                 ),
             )
@@ -103,20 +103,20 @@ function restApiInitTable()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_table_settings',
         array(
-            'methods'                 => \WP_REST_Server::CREATABLE,
-            'callback'                 => __NAMESPACE__ . '\saveTableSettings',
-            'permission_callback'     => function () {
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\saveTableSettings',
+            'permission_callback' => function () {
                 $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
                 return $formsTable->tableEditPermissions;
             },
-            'args'                    => array(
-                'shortcode-id'        => array(
+            'args'                => array(
+                'shortcode-id'    => array(
                     'required'    => true,
                     'validate_callback' => function ($shortcodeId) {
                         return is_numeric($shortcodeId);
                     }
                 ),
-                'table-settings'        => array(
+                'table-settings'  => array(
                     'required'    => true,
                 ),
             )
@@ -128,14 +128,14 @@ function restApiInitTable()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/remove_submission',
         array(
-            'methods'                 => \WP_REST_Server::CREATABLE,
-            'callback'                 => __NAMESPACE__ . '\removeSubmission',
-            'permission_callback'     => function () {
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\removeSubmission',
+            'permission_callback' => function () {
                 $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
                 return $formsTable->tableEditPermissions;
             },
-            'args'                    => array(
-                'submission-id'        => array(
+            'args'                => array(
+                'submission-id'   => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
@@ -150,20 +150,20 @@ function restApiInitTable()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/archive_submission',
         array(
-            'methods'                 => \WP_REST_Server::CREATABLE,
-            'callback'                 => __NAMESPACE__ . '\archiveSubmission',
-            'permission_callback'     => function () {
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\archiveSubmission',
+            'permission_callback' => function () {
                 $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
                 return $formsTable->tableEditPermissions;
             },
-            'args'                    => array(
-                'form-id'        => array(
+            'args'                => array(
+                'form-id'         => array(
                     'required'    => true,
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
                 ),
-                'submission-id'        => array(
+                'submission-id'   => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
@@ -178,23 +178,23 @@ function restApiInitTable()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/edit_value',
         array(
-            'methods'                 => \WP_REST_Server::CREATABLE,
-            'callback'                 => __NAMESPACE__ . '\editValue',
-            'permission_callback'     => '__return_true',     // Allow public access, the function itself will check if the user has permissions to edit the value or not
-            'args'                    => array(
-                'submission-id'        => array(
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\editValue',
+            'permission_callback' => '__return_true',     // Allow public access, the function itself will check if the user has permissions to edit the value or not
+            'args'                => array(
+                'submission-id'   => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
                     }
                 ),
-                'element-id'        => array(
+                'element-id'      => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
                     }
                 ),
-                'new-value'        => array(
+                'new-value'       => array(
                     'required'    => true,
                 ),
             )
@@ -206,14 +206,14 @@ function restApiInitTable()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/get_input_html',
         array(
-            'methods'                 => \WP_REST_Server::CREATABLE,
-            'callback'                 => __NAMESPACE__ . '\getInputHtml',
-            'permission_callback'     => '__return_true',                        // Allow public access, the function itself will check if the user has permissions to view the input or not
-            'args'                    => array(
-                'element-id'        => array(
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\getInputHtml',
+            'permission_callback' => '__return_true',                        // Allow public access, the function itself will check if the user has permissions to view the input or not
+            'args'                => array(
+                'element-id'      => array(
                     'required'    => true,
                 ),
-                'submission-id'        => array(
+                'submission-id'   => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
@@ -228,11 +228,11 @@ function restApiInitTable()
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/get_page',
         array(
-            'methods'                 => \WP_REST_Server::CREATABLE,
-            'callback'                 => __NAMESPACE__ . '\getPage',
-            'permission_callback'     => '__return_true',                        // Allow public access
-            'args'                    => array(
-                'form-id'        => array(
+            'methods'             => \WP_REST_Server::CREATABLE,
+            'callback'            => __NAMESPACE__ . '\getPage',
+            'permission_callback' => '__return_true',                        // Allow public access
+            'args'                => array(
+                'form-id'         => array(
                     'required'    => true,
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
@@ -245,15 +245,23 @@ function restApiInitTable()
 
 function getPage()
 {
-    $displayFormResults        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
+    $displayFormResults = new DisplayFormResults(atts: TSJIPPY\sanitize($_POST), pageSize: TSJIPPY\sanitize($_REQUEST['pagesize'] ?? 50)); 
 
     $displayFormResults->loadShortcodeData();
 
-    $tables    = [];
+    $tables             = [];
 
-    $types    = [TSJIPPY\sanitize($_POST['type'])];
+    $types              = [TSJIPPY\sanitize($_POST['type'])];
     if (TSJIPPY\sanitize($_POST['type']) == 'all' && $displayFormResults->tableSettings->split_table) {
-        $types    = ['own', 'others'];
+        $types          = ['own', 'others'];
+    }
+
+    if(!empty($_GET['only-own'])){
+        $displayFormResults->onlyOwn      = true;
+    }
+
+    if(!empty($_GET['archived'])){
+        $displayFormResults->showArchived = true;
     }
 
     foreach ($types as $type) {

@@ -13,98 +13,99 @@ if (! defined('ABSPATH')) {
 class Forms
 {
 
-    public bool         $all;            // do not page submissions
-    protected bool         $clonableFormStep;
-    public bool         $editRights;
-    public array         $elementMapping;
-    public string         $elTableName;
-    public array         $emailSettings;
-    public object         $formData;
-    public array         $formElements;
-    public string         $formEmailTable;
-    public int             $formId;
-    public object|null     $formReminder;
-    public string         $formReminderTable;
-    public array         $forms;
-    public int             $formStepCounter;
-    public bool         $isFormStep;
-    public bool         $isMultiStepForm;
-    public string         $jsFileName;
-    public array         $multiInputsHtml;
-    public bool         $multiwrap;
-    public array         $nonInputs;
-    public string         $objectName;
-    public bool         $onlyOwn;
-    public int             $pageSize;
-    public string         $shortcodeColumnSettingsTable;
-    public int             $shortcodeId;
-    public string         $shortcodeTable;
-    public bool         $showArchived;
-    public array         $slugs;
-    public object|null     $submission;
-    public array         $submissions;
-    public string         $submissionTableName;
-    public string         $submissionValuesTableName;
-    public array         $submitRoles;
-    protected array     $tableFormats;
-    public string         $tableName;
-    public \WP_User     $user;
-    public int             $userId;
-    protected string    $userIdElementName;
-    public array         $userRoles;
+    public bool        $all;            // do not page submissions
+    protected bool     $clonableFormStep;
+    public bool        $editRights;
+    public array       $elementMapping;
+    public string      $elTableName;
+    public array       $emailSettings;
+    public object      $formData;
+    public array       $formElements;
+    public string      $formEmailTable;
+    public int         $formId;
+    public object|null $formReminder;
+    public string      $formReminderTable;
+    public array       $forms;
+    public int         $formStepCounter;
+    public bool        $isFormStep;
+    public bool        $isMultiStepForm;
+    public string      $jsFileName;
+    public array       $multiInputsHtml;
+    public bool        $multiwrap;
+    public array       $nonInputs;
+    public string      $objectName;
+    public bool        $onlyOwn;
+    public int         $pageSize;
+    public string      $shortcodeColumnSettingsTable;
+    public int         $shortcodeId;
+    public string      $shortcodeTable;
+    public bool        $showArchived;
+    public array       $slugs;
+    public object|null $submission;
+    public array       $submissions;
+    public string      $submissionTableName;
+    public string      $submissionValuesTableName;
+    public array       $submitRoles;
+    protected array    $tableFormats;
+    public string      $tableName;
+    public \WP_User    $user;
+    public int         $userId;
+    protected string   $userIdElementName;
+    public array       $userRoles;
 
-    public function __construct()
+    public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='',  $userId=0)
     {
         global $wpdb;
 
-        $this->all                            = false;
-        $this->clonableFormStep                = false;
-        $this->elementMapping                = [];
-        $this->elTableName                    = $wpdb->prefix . 'tsjippy_form_elements';
-        $this->emailSettings                 = [];
-        $this->formData                        = new stdClass();
-        $this->formEmailTable                = $wpdb->prefix . 'tsjippy_form_emails';
-        $this->formElements                    = [];
-        $this->formId                        = -1;
+        $this->all                          = $all;
+        $this->clonableFormStep             = false;
+        $this->elementMapping               = [];
+        $this->elTableName                  = $wpdb->prefix . 'tsjippy_form_elements';
+        $this->emailSettings                = [];
+        $this->formData                     = new stdClass();
+        $this->formEmailTable               = $wpdb->prefix . 'tsjippy_form_emails';
+        $this->formElements                 = [];
+        $this->formId                       = -1;
         $this->formReminder                 = null;
         $this->formReminderTable            = $wpdb->prefix . 'tsjippy_form_reminders';
         $this->forms                        = [];
-        $this->formStepCounter                = 0;
-        $this->isFormStep                    = false;
-        $this->isMultiStepForm                = false;
-        $this->jsFileName                     = '';
-        $this->multiInputsHtml                = [];
+        $this->formStepCounter              = 0;
+        $this->isFormStep                   = false;
+        $this->isMultiStepForm              = false;
+        $this->jsFileName                   = '';
+        $this->multiInputsHtml              = [];
         $this->multiwrap                    = false;
         $this->nonInputs                    = ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi-start', 'multi-end', 'div-start', 'div-end'];
-        $this->objectName                     = '';
-        $this->onlyOwn                        = false;
-        $this->shortcodeColumnSettingsTable    = $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
-        $this->shortcodeId                     = -1;
-        $this->shortcodeTable                = $wpdb->prefix . 'tsjippy_form_shortcodes';
-        $this->showArchived                    = false;
-        $this->slugs                         = [];
-        $this->submission                     = null;
-        $this->submissions                     = [];
-        $this->submissionTableName            = $wpdb->prefix . 'tsjippy_form_submissions';
+        $this->objectName                   = '';
+        $this->onlyOwn                      = false;
+        $this->pageSize                     = $pageSize;
+        $this->shortcodeColumnSettingsTable = $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
+        $this->shortcodeId                  = -1;
+        $this->shortcodeTable               = $wpdb->prefix . 'tsjippy_form_shortcodes';
+        $this->showArchived                 = false;
+        $this->slugs                        = [];
+        $this->submission                   = null;
+        $this->submissions                  = [];
+        $this->submissionTableName          = $wpdb->prefix . 'tsjippy_form_submissions';
         $this->submissionValuesTableName    = $wpdb->prefix . 'tsjippy_form_submission_values';
-        $this->submitRoles                    = [];
+        $this->submitRoles                  = [];
         $this->tableFormats                 = [];
         $this->tableName                    = $wpdb->prefix . 'tsjippy_forms';
         $this->user                         = wp_get_current_user();
-        $this->userId                        = $this->user->ID;  // The user id for who we retrieve a form (results)
-        $this->userIdElementName             = '';
+        $this->userId                       = $this->user->ID;  // The user id for who we retrieve a form (results)
+        $this->userIdElementName            = '';
         $this->userRoles                    = $this->user->roles;
 
-        // phpcs:ignore
-        if (isset($_REQUEST['all'])) {
+        if ($all) {
             $this->pageSize                    = 99999;
-        } 
-        
-        // phpcs:ignore
-        elseif (is_numeric($_REQUEST['pagesize'] ?? '')) {
-            $this->pageSize                    = (int) $_REQUEST['pagesize'];
-        } else {
-            $this->pageSize                    = 50;
+        }
+
+        // $this->userId is the user id for whom the form is submitted
+        if (
+            array_intersect($this->userRoles, $this->submitRoles)     &&    // we have the permission to submit on behalf on someone else
+            $userId != 0
+        ) {
+            $this->userId    = $userId;
         }
 
         //calculate full form rights
@@ -115,15 +116,15 @@ class Forms
         } 
         
         // phpcs:ignore
-        elseif (!empty($_REQUEST['post'])) {
-            $post        = get_post((int) $_REQUEST['post']);
+        elseif (is_numeric($postId)) {
+            $post        = get_post($postId);
             if (!empty($post)) {
                 $postAuthor    = $post->post_author;
             }
         } 
         // phpcs:ignore
-        elseif (!empty($_POST['form-url'])) {
-            $postId        = url_to_postid(TSJIPPY\sanitize($_POST['form-url'], 'url'));
+        elseif (!empty($formUrl)) {
+            $postId        = url_to_postid($formUrl);
 
             if ($postId) {
                 $postAuthor    = get_post($postId)->post_author;
@@ -136,6 +137,10 @@ class Forms
             $this->editRights        = true;
         } else {
             $this->editRights        = false;
+        }
+
+        if(!empty($atts)){
+            $this->processAtts($atts);
         }
 
         $this->tableFormats();
@@ -806,7 +811,8 @@ class Forms
                 return new \WP_Error('forms', 'No form name or id given');
             }
 
-            $result                = $wpdb->get_results($wpdb->prepare($query, $values));
+            // phpcs:ignore
+            $result                = $wpdb->get_row($wpdb->prepare($query, $values));
 
             // Form does not exist yet
             if (empty($result)) {
@@ -817,7 +823,7 @@ class Forms
                 TSJIPPY\printArray("Form requested on {$post->post_type} on $url does not exist. Query used is '$query'");
                 $this->insertForm();
             } else {
-                $this->formData                     = (object)$result[0];
+                $this->formData                     = $result;
                 $this->formData->actions            = maybe_unserialize($this->formData->actions);
                 $this->formData->split              = maybe_unserialize($this->formData->split);
                 $this->formData->full_right_roles   = maybe_unserialize($this->formData->full_right_roles);
@@ -1257,6 +1263,7 @@ class Forms
             $values[]    = $sortCol;
         }
 
+        // phpcs:ignore
         $elements    = $wpdb->get_results($wpdb->prepare($query, $values));
 
         foreach ($elements as &$element) {
@@ -1290,54 +1297,54 @@ class Forms
         if (!isset($this->formData->slug)) {
             $atts    = shortcode_atts(
                 array(
-                    'slug'            => '',
-                    'formname'        => '',
-                    'form-name'        => '',
-                    'name'            => '',
-                    'user_id'        => 0,
-                    'user-id'        => 0,
-                    'search'        => '',
-                    'shortcodeid'    => -1,
-                    'shortcode-id'    => -1,
-                    'id'            => -1,
-                    'formid'        => -1,
-                    'form-id'        => -1,
-                    'only-own'        => false,
-                    'onlyown'        => false,
-                    'archived'        => false,
-                    'all'            => false,
+                    'slug'         => '',
+                    'formname'     => '',
+                    'form-name'    => '',
+                    'name'         => '',
+                    'user_id'      => 0,
+                    'user-id'      => 0,
+                    'search'       => '',
+                    'shortcodeid'  => -1,
+                    'shortcode-id' => -1,
+                    'id'           => -1,
+                    'formid'       => -1,
+                    'form-id'      => -1,
+                    'only-own'     => false,
+                    'onlyown'      => false,
+                    'archived'     => false,
+                    'all'          => false,
                 ),
                 $atts
             );
 
             if (empty($atts['form-name'])) {
                 if (!empty($atts['formname'])) {
-                    $atts['form-name']    = $atts['formname'];
+                    $atts['form-name']= $atts['formname'];
                 } elseif (!empty($atts['name'])) {
-                    $atts['form-name']    = $atts['name'];
+                    $atts['form-name']= $atts['name'];
                 } elseif (!empty($atts['slug'])) {
-                    $atts['form-name']    = ucfirst(str_replace('-', ' ', $atts['slug']));
+                    $atts['form-name']= ucfirst(str_replace('-', ' ', $atts['slug']));
                 }
             }
 
             if (empty($atts['slug'])) {
-                $atts['slug']    = str_replace(' ', '-', strtolower($atts['form-name']));
+                $atts['slug']         = str_replace(' ', '-', strtolower($atts['form-name']));
             }
 
             if ($atts['user-id'] == 0 && $atts['user_id'] !== 0) {
-                $atts['user-id']    = $atts['user_id'];
+                $atts['user-id']      = $atts['user_id'];
             }
 
             if ($atts['shortcode-id'] == -1 && $atts['shortcodeid'] !== -1) {
-                $atts['shortcode-id']    = $atts['shortcodeid'];
+                $atts['shortcode-id'] = $atts['shortcodeid'];
             }
 
             if ($atts['form-id'] == -1 && $atts['formid'] !== -1) {
-                $atts['form-id']    = $atts['formid'];
+                $atts['form-id']      = $atts['formid'];
             }
 
             if (empty($atts['only-own'])) {
-                $atts['only-own']    = $atts['onlyown'];
+                $atts['only-own']     = $atts['onlyown'];
             }
 
             $this->shortcodeId    = $atts['shortcode-id'];
@@ -1345,84 +1352,22 @@ class Forms
                 $this->shortcodeId    = $atts['id'];
             }
 
-            $this->onlyOwn        = $atts['only-own'];
+            $this->onlyOwn            = $atts['only-own'];
 
-            // phpcs:ignore
-            if (isset($_GET['only-own'])) {
-                $this->onlyOwn    = (int) $_GET['only-own'];
-            }
-
-            $this->all            = $atts['all'];
-            $this->showArchived    = $atts['archived'];
-
-            // phpcs:ignore
-            if (isset($_GET['archived'])) {
-                $this->showArchived    = TSJIPPY\sanitize($_GET['archived']);
-            }
-
-            // phpcs:ignore
-            if (isset($_GET['all'])) {
-                $this->all    = TSJIPPY\sanitize($_GET['all']);
-            }
+            $this->all                = $atts['all'];
+            $this->showArchived       = $atts['archived'];
 
             if (!empty($atts['user-id']) && is_numeric($atts['user-id'])) {
                 $this->userId    = $atts['user-id'];
             }
 
-            $this->formData->name     = TSJIPPY\sanitize($atts['form-name']);
-            $this->formData->slug     = TSJIPPY\sanitize($atts['slug']);
-            $this->formData->id       = TSJIPPY\sanitize($atts['form-id']);
+            $this->formData->name     = $atts['form-name'];
+            $this->formData->slug     = $atts['slug'];
+            $this->formData->id       = $atts['form-id'];
 
             $this->getForm();
-        }
-    }
 
-    /**
-     * Check if we should show the formbuilder or the form itself
-     *
-     * @param    array    $atts    The shortcode attributes
-     */
-    public function determineForm($atts)
-    {
-        global $wpdb;
-
-        $this->processAtts($atts);
-
-        wp_enqueue_style('tsjippy_forms_style');
-
-        $query                = "SELECT * FROM %i WHERE `form_id`=";
-        $values                = [$this->elTableName];
-
-        if (is_numeric($this->formData->id) && $this->formData->id > -1) {
-            $query    .= '%d';
-            $values[] = $this->formData->id;
-        } elseif (!empty($this->formData->slug)) {
-            $query    .= "(SELECT `id` FROM %i WHERE slug=%s LIMIT 1)";
-            $values[] = $this->tableName;
-            $values[] = $this->formData->slug;
-        } else {
-            return new WP_Error('forms', 'Which form do you have?');
-        }
-
-        $formElements         =  $wpdb->get_results($wpdb->prepare($query, $values));
-
-        // phpcs:ignore
-        if (isset($_REQUEST['formbuilder']) && is_user_logged_in()) {
-            $formBuilderForm    = new FormBuilderForm($atts);
-
-            return $formBuilderForm->showForm();
-        } elseif (empty($formElements)) {
-            $html    = "<div class='warning'>This form has no elements yet.<br>";
-            if ($this->editRights) {
-                $url     = add_query_arg('formbuilder', 1, TSJIPPY\getCurrentUrl());
-                $html    .= "<br><a href='$url' class='button small tsjippy'>Start Building the form</a>";
-            } else {
-                $html    .= "Ask an user with the editor role to start working on it";
-            }
-            return $html . "</div>";
-        } else {
-            $displayForm    = new DisplayForm($atts);
-            return $displayForm->showForm();
+            $this->getAllFormElements();
         }
     }
 
@@ -1482,11 +1427,13 @@ class Forms
 
         extract($filtered);
 
-        $query    = $baseQuery . implode(' AND ', $where);
+        $query      = $baseQuery . implode(' AND ', $where);
 
+        // phpcs:disable
         $results    = $wpdb->get_col(
             $wpdb->prepare($query, ...$values)
         );
+        // phpcs:enable
 
         $results = array_map(function ($value) {
             return maybe_unserialize($value);
@@ -1521,10 +1468,10 @@ class Forms
     /**
      * Replaces placeholder with the value
      *
-     * @param    string    $string            The string to check for placeholders
-     * @param    array    $replaceValues    An indexed array where the index is the keyword and the value the keyword should be replaced with. Default empty, in that case form results are used.
+     * @param    string   $string          The string to check for placeholders
+     * @param    array    $replaceValues   An indexed array where the index is the keyword and the value the keyword should be replaced with. Default empty, in that case form results are used.
      *
-     * @return    string                    The filtered string
+     * @return   string                    The filtered string
      */
     public function processPlaceholders($string, $replaceValues = '')
     {
@@ -1542,13 +1489,8 @@ class Forms
             }
 
             if (empty($this->submission->submissiondate)) {
-                $this->submission->submissiondate    = gmdate('d F y', strtotime($this->submission->time_created));
-                $this->submission->editdate            = gmdate('d F y', strtotime($this->submission->time_last_edited));
-            }
-
-            // phpcs:ignore
-            if (isset($_REQUEST['subid']) && empty($this->submission->sub_id)) {
-                $this->submission->sub_id    = TSJIPPY\sanitize($_REQUEST['subid']);
+                $this->submission->submissiondate = gmdate('d F y', strtotime($this->submission->time_created));
+                $this->submission->editdate       = gmdate('d F y', strtotime($this->submission->time_last_edited));
             }
         }
 

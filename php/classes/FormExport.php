@@ -11,9 +11,9 @@ if (! defined('ABSPATH')) {
 
 class FormExport extends FormBuilderForm
 {
-    public function __construct()
+    public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct();
+        parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
     }
 
     /**

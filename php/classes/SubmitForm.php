@@ -12,13 +12,9 @@ if (! defined('ABSPATH')) {
 
 class SubmitForm extends SaveFormSettings
 {
-    public function __construct($formData = null)
+    public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct();
-
-        if (!empty($formData)) {
-            $this->formData    = $formData;
-        }
+        parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
     }
 
     /**
@@ -584,25 +580,16 @@ class SubmitForm extends SaveFormSettings
     /**
      * Save a form submission to the db
      */
-    public function formSubmit()
+    public function formSubmit($userId, $formId, $formresults)
     {
         $this->submission                    = new \stdClass();
 
-        $this->submission->form_id           = (int) $_POST['form-id'];
+        $this->submission->form_id           = $formId;
 
         $this->getForm($this->submission->form_id);
 
         // The user id of the current user
         $this->userId                        = $this->user->ID;
-
-        $userId    = '';
-        foreach (['user-id', 'userid', 'user_id'] as $key) {
-            // phpcs:ignore
-            if (isset($_POST[$key])) {
-                $userId    = (int) $_POST[$key];
-                break;
-            }
-        }
 
         // Check if we are submitting for another user
         if (is_numeric($userId)) {
@@ -617,8 +604,6 @@ class SubmitForm extends SaveFormSettings
             }
         }
 
-        $formresults                         = TSJIPPY\sanitize($_POST);
-
         $this->submission->time_created      = gmdate("Y-m-d H:i:s");
 
         $this->submission->time_last_edited  = gmdate("Y-m-d H:i:s");
@@ -626,6 +611,8 @@ class SubmitForm extends SaveFormSettings
         $this->submission->user_id           = $userId;
 
         $this->submission->submitter_id      = $this->userId;
+
+        $orgFormResults                      = $formresults;
 
         // check for required empty elements
         foreach ($this->formElements as $element) {
@@ -681,7 +668,14 @@ class SubmitForm extends SaveFormSettings
             return $result;
         }
 
-        $message    = apply_filters('tsjippy_after_form_submission', $message, TSJIPPY\sanitize($_POST), $this);
+        /**
+         * Filters the message to be shown after form submission
+         * 
+         * @param string $message       The message to be shown
+         * @param array  $formResults   The submitted form results
+         * @param object $object        The SubmitForm object
+         */
+        $message    = apply_filters('tsjippy_after_form_submission', $message, $orgFormResults, $this);
 
         do_action('tsjippy-after-form-submit', $this);
 

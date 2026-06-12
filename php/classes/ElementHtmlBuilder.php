@@ -20,8 +20,6 @@ class ElementHtmlBuilder extends SubmitForm
     public object|null $dom;
     public object $element;
     public object $elementHtmlBuilder;
-    public object $formData;
-    public array $formElements;
     public DOMElement|null $formWrapper;
     public string $html;
     public int $minElForTabs;
@@ -31,7 +29,6 @@ class ElementHtmlBuilder extends SubmitForm
     public object|null $nextElement;
     public array $nonWrappable;
     public object|null $prevElement;
-    public array $submissions;
     public array $usermeta;
     public bool $wrap;
     private array $elementValues;
@@ -39,9 +36,9 @@ class ElementHtmlBuilder extends SubmitForm
     private mixed $selectedValue;
     private string $tagType;
 
-    public function __construct()
+    public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct();
+        parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
 
         $this->currentElement         = new stdClass();
         $this->defaultArrayValues     = [];
@@ -49,8 +46,6 @@ class ElementHtmlBuilder extends SubmitForm
         $this->dom                    = null;
         $this->element                = new stdClass();
         $this->elementHtmlBuilder     = new stdClass();
-        $this->formData               = new stdClass();
-        $this->formElements           = [];
         $this->formWrapper            = null;
         $this->html                   = '';
         $this->minElForTabs           = -1;
@@ -60,7 +55,6 @@ class ElementHtmlBuilder extends SubmitForm
         $this->nextElement            = null;
         $this->nonWrappable           = [];
         $this->prevElement            = null;
-        $this->submissions            = [];
         $this->wrap                   = false;
         $this->requestedValue         = null;
 

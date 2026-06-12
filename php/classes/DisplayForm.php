@@ -12,45 +12,22 @@ class DisplayForm extends ElementHtmlBuilder
 {
     use CreateJs;
 
-    public function __construct($atts = [])
+    public function __construct($atts = [], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct();
+        parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
 
-        $this->isFormStep                = false;
-        $this->nonWrappable                = [
+        $this->isFormStep      = false;
+        $this->nonWrappable    = [
             'select',
             'file',
             'image',
             'php'
         ];
-        $this->isMultiStepForm            = '';
-        $this->formStepCounter            = 0;
-        $this->minElForTabs                = 6;
-        if (!empty($atts)) {
-            $this->processAtts($atts);
-            $this->getForm();
-            $this->getAllFormElements();
+        $this->isMultiStepForm = '';
+        $this->formStepCounter = 0;
+        $this->minElForTabs    = 6;
 
-            $this->getUserId($atts);
-        }
-
-        $this->dom                         = new \DOMDocument();
-    }
-
-    /**
-     * Check if we are editing on behalf of someone else, and we have permission for that
-     *
-     */
-    protected function getUserId($atts = [])
-    {
-        if (
-            array_intersect($this->userRoles, $this->submitRoles)     &&    // we have the permission to submit on behalf on someone else
-            // phpcs:ignore
-            is_numeric($_GET['user-id'] ?? '')                            &&     // and the user-id parameter is set in the url
-            empty($atts['user-id'])                                        // and the user id is not given in the shortcode
-        ) {
-            $this->userId    = (int) $_GET['user-id'];
-        }
+        $this->dom             = new \DOMDocument();
     }
 
     /**
@@ -225,6 +202,47 @@ class DisplayForm extends ElementHtmlBuilder
         );
 
         return $nextWrapper;
+    }
+
+    /**
+     * Check if we should show the formbuilder or the form itself
+     */
+    public function determineForm()
+    {
+        global $wpdb;
+
+        wp_enqueue_style('tsjippy_forms_style');
+
+        $query        = "SELECT * FROM %i WHERE `form_id`=";
+        $values       = [$this->elTableName];
+
+        if (is_numeric($this->formData->id) && $this->formData->id > -1) {
+            $query    .= '%d';
+            $values[] = $this->formData->id;
+        } elseif (!empty($this->formData->slug)) {
+            $query    .= "(SELECT `id` FROM %i WHERE slug=%s LIMIT 1)";
+            $values[] = $this->tableName;
+            $values[] = $this->formData->slug;
+        } else {
+            return new \WP_Error('forms', 'Which form do you have?');
+        }
+
+        // phpcs:ignore
+        $formElements         =  $wpdb->get_results($wpdb->prepare($query, $values));
+
+        // phpcs:ignore
+        if (empty($formElements)) {
+            $html    = "<div class='warning'>This form has no elements yet.<br>";
+            if ($this->editRights) {
+                $url     = add_query_arg('formbuilder', 1, TSJIPPY\getCurrentUrl());
+                $html    .= "<br><a href='$url' class='button small tsjippy'>Start Building the form</a>";
+            } else {
+                $html    .= "Ask an user with the editor role to start working on it";
+            }
+            return $html . "</div>";
+        } else {
+            return $this->showForm();
+        }
     }
 
     /**

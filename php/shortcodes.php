@@ -175,8 +175,14 @@ add_shortcode('tsjippy_formbuilder', __NAMESPACE__ . '\showForm');
  */
 function showForm($atts)
 {
-    $forms   = new Forms();
-    $html       = $forms->determineForm($atts);
+    if(!empty($_GET['formbuilder'])){
+        $forms   = new FormBuilderForm($atts);
+        return $forms->showForm();
+    }
+    
+    $forms   = new DisplayForm($atts); 
+    
+    $html    = $forms->determineForm();
     if (is_wp_error($html)) {
         return "<div class='error'>" . $html->get_error_message() . "</div>";
     }
@@ -194,8 +200,21 @@ add_shortcode('tsjippy_formresults', __NAMESPACE__ . '\formResults');
  */
 function formResults($atts)
 {
-    $displayFormResults = new DisplayFormResults($atts);
-    $html   = $displayFormResults->showFormresultsTable();
+    $object = new DisplayFormResults($atts);
+    $html   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
+
+    //now we have rendered all the content we can export the excel if requested
+    // phpcs:ignore
+    if (isset($_POST['export-xls'])) {
+        $object->exportExcel();
+    }
+
+    //now we have rendered all the content we can export the pdf if requested
+    // phpcs:ignore
+    if (isset($_POST['export-pdf'])) {
+        // phpcs:ignore
+        echo $object->exportPdf();
+    }
 
     if (is_wp_error($html)) {
         return "<div class='error'>" . $html->get_error_message() . "</div>";
