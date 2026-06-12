@@ -6,6 +6,7 @@
 ### Changed
 - implemented plugin check remmendations 1
 - do not use  in classes
+- nice page selector
 
 ### Fixed
 - shared code loader
