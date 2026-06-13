@@ -1086,9 +1086,9 @@ class Forms
     /**
      * Finds an element by its slug
      *
-     * @param    string    $slug                The element slug
+     * @param    string    $slug               The element slug
      * @param    string    $key                A specific element attribute to return. Default empty
-     * @param    bool    $single                Wheter to return a singel element, default true
+     * @param    bool      $single             Wheter to return a singel element, default true
      *
      * @return    object|array|string|false    The element or an array of elements or an element property of false if not found
      */

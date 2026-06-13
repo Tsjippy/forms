@@ -321,8 +321,9 @@ function restApiInitForms()
                 $formBuilder    = new SubmitForm();
 
                 // The user id of the current user
-                $this->userId                        = $this->user->ID;
+                $formBuilder->userId = get_current_user_id();
 
+                // The user id for whom the form is submitted
                 $userId    = '';
                 foreach (['user-id', 'userid', 'user_id'] as $key) {
                     // phpcs:ignore

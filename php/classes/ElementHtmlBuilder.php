@@ -600,15 +600,16 @@ class ElementHtmlBuilder extends SubmitForm
         // Surpress errors
         libxml_use_internal_errors(true);
 
-        $dom->loadHTML($html);
+        // Load html without adding extra's
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
         // Clear any errors
         libxml_clear_errors();
 
         // Import the node
-        foreach ($dom->getElementsByTagName('body')->item(0)->childNodes as $node) {
-            $node         = $this->dom->importNode($node, true);
-            $node        = $parent->appendChild($node);
+        foreach ($dom->childNodes as $node) {
+            $node = $this->dom->importNode($node, true);
+            $node = $parent->appendChild($node);
         }
 
         return $node;

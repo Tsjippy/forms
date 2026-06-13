@@ -513,21 +513,27 @@ class SubmitForm extends SaveFormSettings
      */
     public function saveToUserMetaTable($formresults)
     {
-        $updateuserData    = false;
+        $updateUserData    = false;
 
         //get user data as array
         $userData      = (array)get_userdata($this->userId)->data;
         foreach ($formresults as $key => &$result) {
             $subKey    = false;
 
-            //remove empty elements from the array
+            /** 
+             * Determine if we are dealing with an indexed array ($test['test'])
+             */
             if (is_array($result)) {
                 $result = TSJIPPY\cleanUpNestedArray($result);
 
                 //check if we should only update one entry of the array
-                $el    = $this->getElementBySlug($key . '[' . array_keys($result)[0] . ']');
-                if (count(array_keys($result)) == 1 && $el) {
-                    $subKey    = array_keys($result)[0];
+                $index = array_keys($result)[0];
+
+                if(is_string($index)){
+                    $el     = $this->getElementBySlug($key . '[' . $index . ']');
+                    if (count(array_keys($result)) == 1 && $el) {
+                        $subKey    = array_keys($result)[0];
+                    }
                 }
             }
 
@@ -535,10 +541,10 @@ class SubmitForm extends SaveFormSettings
             if (isset($userData[$key])) {
                 if ($subKey) {
                     $userData[$key][$subKey] = $result;
-                    $updateuserData          = true;
+                    $updateUserData          = true;
                 } elseif ($userData[$key]    != $result) {
                     $userData[$key]          = $result;
-                    $updateuserData          = true;
+                    $updateUserData          = true;
                 }
             } 
             
@@ -565,18 +571,31 @@ class SubmitForm extends SaveFormSettings
                         $curValue[$subKey]    = $result[$subKey];
                     }
 
-                    update_user_meta($this->userId, $key, $result);
+                    update_user_meta($this->userId, $key, $curValue);
                 } else {
                     if (empty($result)) {
                         delete_user_meta($this->userId, $key);
-                    } else {
+                    } elseif(is_array($result)){
+                        $prevValues = get_user_meta($this->userId, $key);
+
+                        $added      = array_diff($result, $prevValues);
+                        $removed    = array_diff($prevValues, $result);
+
+                        foreach($added as $value){
+                            add_user_meta($this->userId, $key, $value);
+                        }
+
+                        foreach($removed as $value){
+                            delete_user_meta($this->userId, $key, $value);
+                        }
+                    }else {
                         update_user_meta($this->userId, $key, $result);
                     }
                 }
             }
         }
 
-        if ($updateuserData) {
+        if ($updateUserData) {
             wp_update_user($userData);
         }
 
@@ -647,13 +666,13 @@ class SubmitForm extends SaveFormSettings
          * @param array     $formresults    The form results
          * @param object    $object         The SubmitForm Instance
          */
-        $formresults                     = apply_filters('tsjippy_before_inserting_formdata', (object)$formresults, $this);
+        $formresults        = apply_filters('tsjippy_before_inserting_formdata', (object)$formresults, $this);
 
         if (is_wp_error($formresults)) {
             return $formresults;
         }
 
-        $this->submission     = (object)array_merge((array)$this->submission, (array)$formresults);
+        $this->submission   = (object)array_merge((array)$this->submission, (array)$formresults);
 
         $formresults        = (array) $formresults;
 

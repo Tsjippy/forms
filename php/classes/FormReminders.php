@@ -42,7 +42,7 @@ class FormReminders extends Forms
     {
         $this->reminders  = get_transient('tsjippy_form_reminders');
 
-        if (empty($this->reminders)) {
+       if (empty($this->reminders)) {
             $this->updateCache();
         }
     }
