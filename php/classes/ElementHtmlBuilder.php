@@ -119,11 +119,11 @@ class ElementHtmlBuilder extends SubmitForm
             return;
         }
 
-        $this->defaultValues        = (array)$this->user->data;
+        $this->defaultValues     = (array)$this->user->data;
 
         // We are getting the form results not for ourselves
         if ($this->userId != $this->user->ID) {
-            $this->defaultValues        = (array)get_userdata($this->userId)->data;
+            $this->defaultValues = (array)get_userdata($this->userId)->data;
         }
 
         //Change ID to user_id because its a confusing name
@@ -136,17 +136,17 @@ class ElementHtmlBuilder extends SubmitForm
 
         // Add family meta
         $family        = new TSJIPPY\FAMILY\Family();
-        $this->defaultValues['family_name']        = $family->getFamilyName($this->user->ID);
-        $this->defaultValues['family_picture']    = $family->getFamilyMeta($this->user, 'family_picture');
-        $this->defaultValues['family_partner']    = $family->getPartner($this->user);
-        $this->defaultValues['weddingdate']        = $family->getWeddingDate($this->user);
+        $this->defaultValues['family_name']    = $family->getFamilyName($this->user->ID);
+        $this->defaultValues['family_picture'] = $family->getFamilyMeta($this->user, 'family_picture');
+        $this->defaultValues['family_partner'] = $family->getPartner($this->user);
+        $this->defaultValues['weddingdate']    = $family->getWeddingDate($this->user);
 
         //get defaults from filters
-        $this->defaultValues        = apply_filters('tsjippy_add_form_defaults', $this->defaultValues, $this->userId, $this->formData->slug);
+        $this->defaultValues      = apply_filters('tsjippy_add_form_defaults', $this->defaultValues, $this->userId, $this->formData->slug);
 
         ksort($this->defaultValues);
 
-        $this->defaultArrayValues    = [];
+        $this->defaultArrayValues = [];
 
         foreach (TSJIPPY\getUserAccounts(false, false, [], [], [], true) as $user) {
             $this->defaultArrayValues['all_users'][$user->ID] = $user->display_name;
@@ -156,7 +156,7 @@ class ElementHtmlBuilder extends SubmitForm
          *  Add family member names
          */
         // Our own details
-        $familyNames                = [
+        $familyNames              = [
             $this->user->ID => $this->user->display_name
         ];
 
@@ -222,16 +222,18 @@ class ElementHtmlBuilder extends SubmitForm
     /**
      * Gets the meta value from for an element
      *
-     * @param    array    $elementNames    The names of the element, split in case of arrays
+     * @param    string    $metaKey    The meta key
+     * 
+     * @return   array                 The meta values
      */
-    function getMetaElementValue($elementNames)
+    function getMetaElementValues($metaKey)
     {
         if (empty($this->formData->save_in_meta)) {
             return '';
         }
 
         //only load usermeta once
-        if (!is_array($this->usermeta)) {
+        if (empty($this->usermeta)) {
             //usermeta comes as arrays, only keep the first
             foreach (get_user_meta($this->userId) as $key => $meta) {
                 $this->usermeta[$key]    = $meta[0];
@@ -239,37 +241,52 @@ class ElementHtmlBuilder extends SubmitForm
             $this->usermeta    = apply_filters('tsjippy_forms_load_userdata', $this->usermeta, $this->userId);
         }
 
-        $metaValue    = '';
+        if(!empty($this->defaultValues[$metaKey])){
+            $value  = $this->defaultValues[$metaKey];
 
-        if (count($elementNames) == 1) {
-            //non array name
-            $elementName            = $elementNames[0];
-
-            if (isset($this->usermeta[$elementName])) {
-                $metaValue    = (array)maybe_unserialize($this->usermeta[$elementName]);
+            if(!is_array($value)){
+                $value  = [$value];
             }
-        } elseif (!empty($this->usermeta[$elementNames[0]])) {
-            //an array of values, we only want a specific one
-            $metaValue    = (array)maybe_unserialize($this->usermeta[$elementNames[0]]);
 
-            unset($elementNames[0]);
+            return $value;
+        }
 
-            //loop over all the subkeys, and store the value until we have our final result
-            $resultFound    = false;
-            foreach ($elementNames as $v) {
-                if (isset($metaValue[$v])) {
-                    $metaValue         = (array)$metaValue[$v];
-                    $resultFound    = true;
+        if(!str_contains($metaKey, 'tsjippy_') && !in_array($metaKey, $this->wpMetaKeys)){
+            $metaKey    = 'tsjippy_' . $metaKey;
+        }
+
+        if(empty($this->usermeta[$metaKey])){
+            return '';
+        }
+
+        // Get the meta value
+        $metaValues    = (array)maybe_unserialize($this->usermeta[$metaKey]);
+
+        /**
+         * Check if indexed
+         */
+        $indexes        = explode('[', $metaKey);
+        unset($indexes[0]);
+
+        foreach($metaValues as &$metaValue){
+            if(!empty($indexes)){
+                //loop over all the subkeys, and store the value until we have our final result
+                $resultFound    = false;
+                foreach ($indexes as $v) {
+                    if (isset($metaValue[$v])) {
+                        $metaValue      = (array)$metaValue[$v];
+                        $resultFound    = true;
+                    }
                 }
-            }
 
-            // somehow it does not exist, return an empty value
-            if (!$resultFound) {
-                $metaValue    = '';
+                // somehow it does not exist, return an empty value
+                if (!$resultFound) {
+                    $metaValue    = '';
+                }
             }
         }
 
-        return $metaValue;
+        return $metaValues;
     }
 
     /**
@@ -297,9 +314,6 @@ class ElementHtmlBuilder extends SubmitForm
 
         $this->buildDefaultsArray();
 
-        //get the elementName, remove [] and split on remaining [
-        $elementNames        = explode('[', trim($element->slug, '[]'));
-
         /**
          * Gets values from the element settings
          */
@@ -321,7 +335,7 @@ class ElementHtmlBuilder extends SubmitForm
         }
 
         //retrieve meta values if needed
-        $values['metavalue']    = $this->getMetaElementValue($elementNames);
+        $values['metavalue']    = $this->getMetaElementValues(trim($element->slug, '[]'));
 
         //add default values
         if (empty($element->multiple) || in_array($element->type, ['select', 'checkbox', 'radio'])) {
@@ -1044,7 +1058,9 @@ class ElementHtmlBuilder extends SubmitForm
                 )
             ) {
                 $this->selectedValue        = $this->elementValues['defaults'];
-            } elseif (!empty($this->elementValues['metavalue'])) {
+            } 
+            
+            elseif (!empty($this->elementValues['metavalue'])) {
                 $elIndex    = 0;
                 if (str_contains($this->element->slug, '[]')) {
                     // Check if there are multiple elements with the same name

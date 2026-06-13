@@ -452,8 +452,6 @@ class FormReminders extends Forms
             // Unserialize the warning conditions
             $warningCondition = maybe_unserialize($element->warning_conditions);
 
-            $metakey          = explode('[', $element->slug)[0];
-
             // Loop over the users
             foreach ($this->userIds as $userId) {
                 //check if this element applies to this user
@@ -461,11 +459,17 @@ class FormReminders extends Forms
                     continue;
                 }
 
-                $name        = $element->slug;
+                $name       = $element->slug;
                 if (str_contains($name, '[')) {
                     $value  = TSJIPPY\getMetaArrayValue($userId, $name, $value);
                 } else {
-                    $value  = get_user_meta($userId, $metakey, true);
+                    $metaKey          = explode('[', $element->slug)[0];
+                    
+                    if(!str_contains($metaKey, 'tsjippy_') && !in_array($metaKey, $this->wpMetaKeys)){
+                        $metaKey    = 'tsjippy_' . $metaKey;
+                    }
+
+                    $value  = get_user_meta($userId, $metaKey, true);
                 }
 
                 // Element has a value

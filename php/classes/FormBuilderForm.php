@@ -1056,8 +1056,8 @@ class FormBuilderForm extends DisplayForm
         if (empty($conditions) || !is_array($conditions)) {
             $conditions    = [
                 [
-                    "user_meta_key"    => '',
-                    "equation"        => ''
+                    "user_meta_key" => '',
+                    "equation"      => ''
                 ]
             ];
         }
@@ -1067,14 +1067,14 @@ class FormBuilderForm extends DisplayForm
         }
 
         // get all possible user meta keys, not just the one the current user has
-        $userMetaKeys    = apply_filters('tsjippy-forms-user-meta-keys', $wpdb->get_col("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}` ORDER BY `meta_key` ASC"));
+        $userMetaKeys = apply_filters('tsjippy-forms-user-meta-keys', $wpdb->get_col("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}` ORDER BY `meta_key` ASC"));
 
         sort($userMetaKeys, SORT_STRING | SORT_FLAG_CASE);
 
-        $userMetas        = get_user_meta($this->user->ID);
+        $userMetas    = get_user_meta($this->user->ID);
 
         //Get all available roles
-        $userRoles = $wp_roles->role_names;
+        $userRoles    = $wp_roles->role_names;
 
         //Sort the roles
         asort($userRoles);

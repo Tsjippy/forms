@@ -516,13 +516,13 @@ class SubmitForm extends SaveFormSettings
         $updateuserData    = false;
 
         //get user data as array
-        $userData        = (array)get_userdata($this->userId)->data;
+        $userData      = (array)get_userdata($this->userId)->data;
         foreach ($formresults as $key => &$result) {
             $subKey    = false;
 
             //remove empty elements from the array
             if (is_array($result)) {
-                $result    = TSJIPPY\cleanUpNestedArray($result);
+                $result = TSJIPPY\cleanUpNestedArray($result);
 
                 //check if we should only update one entry of the array
                 $el    = $this->getElementBySlug($key . '[' . array_keys($result)[0] . ']');
@@ -534,16 +534,20 @@ class SubmitForm extends SaveFormSettings
             // update in the users table
             if (isset($userData[$key])) {
                 if ($subKey) {
-                    $userData[$key][$subKey]        = $result;
-                    $updateuserData                    = true;
+                    $userData[$key][$subKey] = $result;
+                    $updateuserData          = true;
                 } elseif ($userData[$key]    != $result) {
-                    $userData[$key]        = $result;
-                    $updateuserData        = true;
+                    $userData[$key]          = $result;
+                    $updateuserData          = true;
                 }
             } 
             
             //update user meta
             else {
+                if(!str_contains($key, 'tsjippy_') && !in_array($key, $this->wpMetaKeys)){
+                    $key    = 'tsjippy_' . $key;
+                }
+
                 // update an indexed value
                 if ($subKey) {
                     $curValue    = get_user_meta($this->userId, $key, true);

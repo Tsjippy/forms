@@ -33,6 +33,7 @@ class Forms
     public array       $multiInputsHtml;
     public bool        $multiwrap;
     public array       $nonInputs;
+    public array       $wpMetaKeys;
     public string      $objectName;
     public bool        $onlyOwn;
     public int         $pageSize;
@@ -75,7 +76,45 @@ class Forms
         $this->jsFileName                   = '';
         $this->multiInputsHtml              = [];
         $this->multiwrap                    = false;
-        $this->nonInputs                    = ['label', 'button', 'datalist', 'formstep', 'info', 'p', 'php', 'multi-start', 'multi-end', 'div-start', 'div-end'];
+
+        $this->nonInputs                    = [
+            'label', 
+            'button', 
+            'datalist', 
+            'formstep', 
+            'info', 
+            'p', 
+            'php', 
+            'multi-start', 
+            'multi-end', 
+            'div-start', 
+            'div-end'
+        ];
+
+        $this->wpMetaKeys                   = [
+            'nickname',
+            'first_name',
+            'last_name',
+            'description',
+            'rich_editing',
+            'syntax_highlighting',
+            'comment_shortcuts',
+            'admin_color',
+            'use_ssl',
+            'show_admin_bar_front',
+            'locale',
+            'wp_capabilities',
+            'wp_user_level',
+            'dismissed_wp_pointers',
+            'show_welcome_panel',
+            'session_tokens',
+            'wp_dashboard_quick_press_last_post_id',
+            'wp_user-settings',
+            'wp_user-settings-time',
+            'wp_persisted_preferences',
+            '2fa_hash'
+        ];
+        
         $this->objectName                   = '';
         $this->onlyOwn                      = false;
         $this->pageSize                     = $pageSize;
