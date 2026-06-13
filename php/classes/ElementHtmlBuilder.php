@@ -681,8 +681,6 @@ class ElementHtmlBuilder extends SubmitForm
      */
     protected function renderButtons($parent)
     {
-        ob_start();
-
         $addText    = '+';
         if (!empty($this->element->add)) {
             $addText    = $this->element->add;
