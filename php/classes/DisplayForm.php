@@ -277,7 +277,7 @@ class DisplayForm extends ElementHtmlBuilder
 
         $initialHtml    = apply_filters('tsjippy-forms-before-showing-form', '', $this);
         if (!empty($initialHtml)) {
-            $this->dom->loadHTML($initialHtml);
+            $this->addRawHtml($initialHtml, $this->dom);
         }
 
         $this->formWrapper = $this->addElement('div', $this->dom, ['class' => 'tsjippy-form-wrapper']);
@@ -446,9 +446,7 @@ class DisplayForm extends ElementHtmlBuilder
             $this->addRawHtml(TSJIPPY\addSaveButton('submit-form', $buttonText, $hidden, false), $parent);
         }
 
-        $html =  $this->dom->saveHTML();
-
-        return $html;
+        return $this->dom->saveHTML();
     }
 
     /**

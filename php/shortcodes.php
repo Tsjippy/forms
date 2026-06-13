@@ -175,6 +175,30 @@ add_shortcode('tsjippy_formbuilder', __NAMESPACE__ . '\showForm');
  */
 function showForm($atts)
 {
+    if(!empty($_POST['export-form'])){
+        $forms   = new FormExport($atts);
+
+        $formId = (int) $_POST['export-form'];
+
+        if(!TSJIPPY\verifyNonce('nonce', 'form-export-'.$formId)){
+            return "<div class='error'>Invalid nonce</div>";
+        }
+
+        return $forms->exportForm($formId);
+    }
+
+    if(!empty($_POST['delete-form'])){
+        $forms   = new Forms($atts);
+
+        $formId = (int) $_POST['export-form'];
+
+        if(!TSJIPPY\verifyNonce('nonce', 'form-delete-'.$formId)){
+            return "<div class='error'>Invalid nonce</div>";
+        }
+        
+        return $forms->deleteForm($formId);
+    }
+
     if(!empty($_GET['formbuilder'])){
         $forms   = new FormBuilderForm($atts);
         return $forms->showForm();

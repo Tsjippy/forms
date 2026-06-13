@@ -95,7 +95,11 @@ function showFormBuilder($attributes)
         }
     }
 
-    $forms = new DisplayForm($attributes);
+    if(!empty($_REQUEST['formbuilder'])){
+        $forms = new FormBuilderForm($attributes);
+    }else{
+        $forms = new DisplayForm($attributes);
+    }
 
     $html    = $forms->determineForm();
     if (is_wp_error($html)) {

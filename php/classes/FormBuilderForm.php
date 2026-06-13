@@ -422,14 +422,17 @@ class FormBuilderForm extends DisplayForm
             $this->addElementModal();
 
             ?>
-            <button class="button tablink formbuilder-form<?php if (!empty($this->formElements)) {
-                                                                echo ' active';
-                                                            } ?>" id="show-element-form" data-target="element-form">
+            <button 
+                class="button tablink formbuilder-form
+                <?php if (!empty($this->formElements)) {echo ' active'; } ?>" 
+                id="show-element-form" 
+                data-target="element-form"
+                >
                 Form elements
             </button>
-            <button class="button tablink formbuilder-form<?php if (empty($this->formElements)) {
-                                                                echo ' active';
-                                                            } ?>" id="show-form-settings" data-target="form-settings">
+            <button 
+                class="button tablink formbuilder-form
+                <?php if (empty($this->formElements)) {  echo ' active'; } ?>" id="show-form-settings" data-target="form-settings">
                 Form settings
             </button>
             <button class="button tablink formbuilder-form" id="show-form-reminders" data-target="form-reminders">
@@ -439,21 +442,19 @@ class FormBuilderForm extends DisplayForm
                 Form emails
             </button>
 
-            <div class="tabcontent<?php if (empty($this->formElements)) {
-                                        echo ' hidden';
-                                    } ?>" id="element-form">
+            <div class="tabcontent
+                <?php if (empty($this->formElements)) { echo ' hidden'; } ?>" id="element-form">
                 <?php $this->formElementsForm(); ?>
             </div>
 
-            <div class="tabcontent<?php if (!empty($this->formElements)) {
-                                        echo ' hidden';
-                                    } ?>" id="form-settings">
+            <div class="tabcontent
+            <?php if (!empty($this->formElements)) {  echo ' hidden'; } ?>" id="form-settings">
                 <?php $this->formSettingsForm(); ?>
             </div>
 
-            <div class="tabcontent<?php if (!empty($this->formElements)) {
-                                        echo ' hidden';
-                                    } ?>" id="form-reminders">
+            <div class="tabcontent
+                <?php if (!empty($this->formElements)) { echo ' hidden'; } ?>" 
+                id="form-reminders">
                 <?php $this->formReminderForm(); ?>
             </div>
 
@@ -888,12 +889,14 @@ class FormBuilderForm extends DisplayForm
                 ?>
             </form>
             <form method="POST" style='display: inline-block;'>
+                <input type="hidden" name='nonce' value='<?php echo esc_attr(wp_create_nonce('form-export-'.$this->formData->id)); ?>'>
                 <button type='submit' class='button' name="export-form" value='<?php echo esc_attr($this->formData->id); ?>'>
                     Export this form
                 </button>
             </form>
             <form method="POST" style='display: inline-block;'>
                 <input type="hidden" class="no-reset" name="page-id" value='<?php echo esc_attr(get_the_ID()); ?>'>
+                <input type="hidden" name='nonce' value='<?php echo esc_attr(wp_create_nonce('form-delete-'.$this->formData->id)); ?>'>
                 <button type='submit' class='button' name="delete-form" value='<?php echo esc_attr($this->formData->id); ?>'>
                     Delete this form
                 </button>
