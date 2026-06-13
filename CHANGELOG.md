@@ -4,6 +4,15 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.4.8] - 2026-06-13
+
+
+### Changed
 - implemented plugin check remmendations 1
 - do not use  in classes
 - nice page selector
@@ -18,8 +27,6 @@
 - prefix data stored in meta table
 - export forms
 - unmatched ob_start() call
-
-### Updated
 
 ## [11.4.7] - 2026-06-11
 
