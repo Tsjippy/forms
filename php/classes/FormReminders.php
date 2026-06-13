@@ -54,13 +54,13 @@ class FormReminders extends Forms
     {
         delete_transient('form_reminders');
 
-        $this->reminders            = [
+        $this->reminders  = [
             'metaforms'    => [],
             'defaultforms' => []
         ];
 
         //Retrieve all users
-        $this->userIds                      = TSJIPPY\getUserAccounts(false, false, 'ID');
+        $this->userIds    = TSJIPPY\getUserAccounts(false, false, 'ID');
 
         $this->getMandatoryElements();
 
@@ -450,9 +450,9 @@ class FormReminders extends Forms
             $this->getForm($element->form_id);
 
             // Unserialize the warning conditions
-            $warningCondition    = maybe_unserialize($element->warning_conditions);
+            $warningCondition = maybe_unserialize($element->warning_conditions);
 
-            $metakey     = explode('[', $element->slug)[0];
+            $metakey          = explode('[', $element->slug)[0];
 
             // Loop over the users
             foreach ($this->userIds as $userId) {
@@ -614,7 +614,7 @@ class FormReminders extends Forms
      * @param   int     $elementId     The element id to get the html for
      * @param   string  $type          The type of reminder to get the html for
      * @param   string  $childName     The name of the child to include in the reminder text if applicable
-     * @return  string                  The html for the element reminder
+     * @return  string                 The html for the element reminder
      *
      */
     protected function getElementReminderHtml($elementId, $type = 'all', $childName = '')
@@ -633,14 +633,13 @@ class FormReminders extends Forms
         parse_str(wp_parse_url($formUrl, PHP_URL_QUERY), $params);
 
         //Show a nice name
-        $name    = str_replace(['[]', '_'], ['', ' '], $element->name);
-        $name    = ucfirst(str_replace(['[', ']'], [': ', ''], $name));
+        $name    = ucfirst( $element->name);
 
         // phpcs:ignore
         $baseUrl    = explode('main-tab=', TSJIPPY\sanitize($_SERVER['REQUEST_URI'] ?? ''))[0];
         $mainTab    = $params['main-tab'] ?? '';
         if (!empty($childName)) {
-            $name         .= " for $childName";
+            $name        .= " for $childName";
             $mainTab     = strtolower($childName);
             $formUrl     = str_replace($params['main-tab'], $mainTab, $formUrl);
         }
@@ -708,14 +707,14 @@ class FormReminders extends Forms
             return '';
         }
 
-        $family                = new TSJIPPY\FAMILY\Family();
-        $child                = $family->isChild($userId);
-        $childName          = '';
+        $family        = new TSJIPPY\FAMILY\Family();
+        $child         = $family->isChild($userId);
+        $childName     = '';
         if ($child) {
-            $childName        = get_userdata($userId)->first_name;
+            $childName = get_userdata($userId)->first_name;
         }
 
-        $html                = '';
+        $html          = '';
 
         // HTML for individual elements on a meta form
         if (!empty($this->userReminders[$userId]['metaforms'])) {

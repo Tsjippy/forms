@@ -372,7 +372,7 @@ class DisplayForm extends ElementHtmlBuilder
              * Check if we should change the parent node
              */
             if (
-                !empty($node) &&                                                            // the node is set
+                !empty($node) &&                                                             // the node is set
                 (
                     (
                         $element->wrap &&                                                    // this is the first wraping element
@@ -382,7 +382,7 @@ class DisplayForm extends ElementHtmlBuilder
                         )
                     ) ||
                     in_array($element->type, ['formstep', 'div-start', 'multi-start']) ||    // this is a wrapping element type
-                    $this->clonableFormStep                                                    // this is a clonable forstep multi-start
+                    $this->clonableFormStep                                                  // this is a clonable forstep multi-start
                 )
             ) {
                 // Make the first child-div the parent of the concuring elements

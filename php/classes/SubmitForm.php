@@ -531,7 +531,7 @@ class SubmitForm extends SaveFormSettings
                 }
             }
 
-            //update in the users table
+            // update in the users table
             if (isset($userData[$key])) {
                 if ($subKey) {
                     $userData[$key][$subKey]        = $result;
@@ -540,8 +540,10 @@ class SubmitForm extends SaveFormSettings
                     $userData[$key]        = $result;
                     $updateuserData        = true;
                 }
-                //update user meta
-            } else {
+            } 
+            
+            //update user meta
+            else {
                 // update an indexed value
                 if ($subKey) {
                     $curValue    = get_user_meta($this->userId, $key, true);

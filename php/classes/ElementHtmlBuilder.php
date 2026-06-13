@@ -163,48 +163,46 @@ class ElementHtmlBuilder extends SubmitForm
         // Partner
         $partner    = $family->getPartner($this->user->ID, true);
         if ($partner) {
-            $familyNames[$partner->ID]    = $partner->display_name;
+            $familyNames[$partner->ID]       = $partner->display_name;
         }
 
         // Siblings
         $siblings    = $family->getSiblings($this->user->ID);
         foreach ($siblings as $sibling) {
-            $siblingData    = get_userdata($sibling);
+            $siblingData                     = get_userdata($sibling);
 
             if (!$siblingData) {
                 continue;
             }
 
-            $familyNames[$sibling]                = $siblingData->display_name;
+            $familyNames[$sibling]           = $siblingData->display_name;
         }
 
-        $familyNamesWithChildAge                = $familyNames;
+        $familyNamesWithChildAge             = $familyNames;
 
         // Children
-        $children        = $family->getChildren($this->user->ID);
-        $childrenNames    = [];
-        $childrenAges    = [];
+        $children                            = $family->getChildren($this->user->ID);
+        $childrenNames                       = [];
+        $childrenAges                        = [];
         foreach ($children as $child) {
-            $childData                            = get_userdata($child);
+            $childData                       = get_userdata($child);
             if (!$childData) {
                 continue;
             }
 
-            $name                                = $childData->display_name;
-            $birthDateString                    = get_user_meta($child, 'tsjippy_birthday', true);
-
-            $birthDate                             = new \DateTime($birthDateString);
-            $currentDate                         = new \DateTime('today');
+            $name                            = $childData->display_name;
+            $birthDateString                 = get_user_meta($child, 'tsjippy_birthday', true);
+            $birthDate                       = new \DateTime($birthDateString);
+            $currentDate                     = new \DateTime('today');
 
             // Calculate the difference between the two dates
-            $interval                             = $currentDate->diff($birthDate);
+            $interval                        = $currentDate->diff($birthDate);
 
             // Extract the number of years from the interval
-            $age                                 = $interval->y;
-
-            $childrenNames[$child]                = $name;
-            $childrenAges[$child]                = $age;
-            $familyNamesWithChildAge[$child]    = "$name ($age)";
+            $age                             = $interval->y;
+            $childrenNames[$child]           = $name;
+            $childrenAges[$child]            = $age;
+            $familyNamesWithChildAge[$child] = "$name ($age)";
         }
 
         $familyNames                                                = $familyNames + $childrenNames;
@@ -414,7 +412,9 @@ class ElementHtmlBuilder extends SubmitForm
             return $string;
         }
 
-        //convert arrays to strings
+        /**
+         * Array to strings
+         */
         if (is_array($string)) {
             $output = '';
 
@@ -440,9 +440,14 @@ class ElementHtmlBuilder extends SubmitForm
             }
             $output     = "<a href='mailto:$string?subject=Regarding your {$this->formData->slug} with id $submission->id&body={$name}'>$string</a>";
             //Convert link to clickable link if not already
-        } elseif (
+        } 
+        
+        /**
+         * Hyperlinks
+         */
+        elseif (
             (
-                str_contains($string, 'https://')    ||
+                str_contains($string, 'https://')   ||
                 str_contains($string, 'http://')    ||
                 str_contains($string, '/form_uploads/')
             ) &&
@@ -450,45 +455,26 @@ class ElementHtmlBuilder extends SubmitForm
             !str_contains($string, '<img')
         ) {
             $url    = str_replace(['https://', 'http://'], '', TSJIPPY\SITEURL);
-            $string    = str_replace(str_replace('\\', '/', ABSPATH), '', $string);
+            $string = str_replace(str_replace('\\', '/', ABSPATH), '', $string);
 
             if (!str_contains($string, $url)) {
                 $string        = TSJIPPY\SITEURL . "/$string";
             }
 
-            $text    = "Link";
+            $text   = "Link";
 
             if (getimagesize(TSJIPPY\urlToPath($string)) !== false) {
-                $text    = "<img src='$string' alt='form_upload' style='width:150px;' loading='lazy'>";
+                $text = "<img src='$string' alt='form_upload' style='width:150px;' loading='lazy'>";
             }
-            $output        = "<a href='$string'>$text</a>";
+            $output = "<a href='$string'>$text</a>";
             // Convert phonenumber to signal link
-        } elseif (gettype($string) == 'string' && $string[0] == '+') {
-            $numbers        = explode(" ", $string);
-            $output            = '';
-            $signalNumber    = '';
+        } 
 
-            $userIdKey    = false;
-            if (isset($submission->user_id)) {
-                $userIdKey    = 'user_id';
-            } elseif (isset($submission->user_id)) {
-                $userIdKey    = 'user_id';
-            }
-
-            if ($userIdKey) {
-                $signalNumber    = get_user_meta($submission->$userIdKey, 'tsjippy_signal_number', true);
-            }
-
-            foreach ($numbers as $number) {
-                if ($userIdKey && $number == $signalNumber) {
-                    $output    .= "<a href='https://signal.me/#p/$number'>$number</a><br>";
-                } else {
-                    $output    .= "<a href='https://api.whatsapp.com/send?phone=$number&text=Regarding%20your%20submission%20of%20{$this->formData->name}%20with%20id%20$submission->id'>$number</a><br>";
-                }
-            }
-            //display dates in a nice way
-        } elseif (strtotime($string) && gmdate('Y', strtotime($string)) < 2200 && gmdate('Y', strtotime($string)) > 1900) {
-            $date        = date_parse($string);
+        /**
+         * Dates
+         */
+        elseif (strtotime($string) && gmdate('Y', strtotime($string)) < 2200 && gmdate('Y', strtotime($string)) > 1900) {
+            $date   = date_parse($string);
 
             //Only transform if everything is there
             if ($date['year'] && $date['month'] && $date['day']) {
@@ -503,7 +489,7 @@ class ElementHtmlBuilder extends SubmitForm
             }
         }
 
-        $output = apply_filters('tsjippy_transform_formtable_data', $output, $elementSlug);
+        $output = apply_filters('tsjippy_transform_formtable_data', $output, $elementSlug, $submission);
         return $output;
     }
 
