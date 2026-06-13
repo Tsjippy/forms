@@ -7,6 +7,7 @@
 - implemented plugin check remmendations 1
 - do not use  in classes
 - nice page selector
+- moved phonenumber transform to signal plugin
 
 ### Fixed
 - shared code loader
