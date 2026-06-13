@@ -8,6 +8,7 @@
 - do not use  in classes
 - nice page selector
 - moved phonenumber transform to signal plugin
+- better handling of storing meta form submissions
 
 ### Fixed
 - shared code loader
