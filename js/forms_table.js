@@ -70,6 +70,7 @@ async function removeSubmission(target) {
     let formData = new FormData();
     formData.append("form-id", table.dataset.formId);
     formData.append("submission-id", submissionId);
+    formData.append("shortcode-id", table.dataset.shortcodeId);
 
     //display loading gif
     Main.showLoader(target);

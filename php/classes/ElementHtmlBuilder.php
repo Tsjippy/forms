@@ -414,13 +414,13 @@ class ElementHtmlBuilder extends SubmitForm
     /**
      * Transforms a given string to hyperlinks or other formats
      *
-     * @param     string    $string            the string to convert
-     * @param    string    $elementSlug    The slug of the element the string value belongs to
-     * @param    object    $submission        The submission this string belongs to
+     * @param    string    $string         The string to convert
+     * @param    object    $element        The element the string value belongs to
+     * @param    object    $submission     The submission this string belongs to
      *
-     * @return    string                    The transformed string
+     * @return    string                   The transformed string
      */
-    public function transformInputData($string, $elementSlug, $submission)
+    public function transformInputData($string, $element, $submission)
     {
         if (empty($string)) {
             return $string;
@@ -436,7 +436,7 @@ class ElementHtmlBuilder extends SubmitForm
                 if (!empty($output)) {
                     $output .= "<br>";
                 }
-                $output .= $this->transformInputData($sub, $elementSlug, $submission);
+                $output .= $this->transformInputData($sub, $element, $submission);
             }
             return $output;
         }
@@ -454,7 +454,72 @@ class ElementHtmlBuilder extends SubmitForm
             }
             $output     = "<a href='mailto:$string?subject=Regarding your {$this->formData->slug} with id $submission->id&body={$name}'>$string</a>";
             //Convert link to clickable link if not already
-        } 
+        }
+
+        /**
+         * File Uploads
+         */
+        elseif ( in_array($element->type, ['image', 'file']) ){
+            $path   = $this->uploadDir($element).'/'.$string;
+
+            $type   = mime_content_type($path);
+
+            $url    = TSJIPPY\pathToUrl($path);
+
+            $html   = '';
+
+            if(!$type){
+                $name   = explode($submission->id.'_', $string)[1];
+                $output = "<a href='$url' target='_blank'>$name</a>";
+            }else{
+                list($mainType, $subType) = explode('/', $type);
+
+                if($mainType == 'image'){
+                    $html = "<img src='$url' alt='image' width=100 height=100 loading='lazy'>";
+                }else if($type == 'video'){
+                    ob_start();
+                    ?>
+                    <video preload="none" autoplay="false" muted="false" loop="false">
+                        <source src="<?php echo esc_url($url);?>" type="<?php esc_attr($type);?>">
+                        Your browser does not support the video tag.
+                    </video>
+                    <?php
+                    $html = ob_get_clean();
+                }else if($subType == 'pdf'){
+                    $html = "<embed src='$url' type='$type'>";
+                }else if($type == 'audio'){
+                    ob_start();
+                    ?>
+                    <audio>
+                        <source src="<?php echo esc_url($url);?>" type="<?php esc_attr($type);?>">
+                        Your browser does not support the audio tag.
+                    </audio>
+                    <?php
+                    $html = ob_get_clean();
+                }else{
+                    $name   = explode($submission->id.'_', $string)[1];
+                    $output = "<a href='$url' target='_blank'>$name</a>";
+                }
+
+                /**
+                 * Create a fullscreen preview of the file
+                 */
+                if(!empty($html)){
+                    ob_start();
+                    ?>
+                    <div class='file-preview-wrapper'>
+                        <?php echo $html;?>
+                        <div class='file-preview'>
+                            <?php
+                            echo $html;
+                            ?>
+                        </div>
+                    </div>
+                    <?php
+                    $output = ob_get_clean();
+                }
+            }
+        }
         
         /**
          * Hyperlinks
@@ -462,14 +527,13 @@ class ElementHtmlBuilder extends SubmitForm
         elseif (
             (
                 str_contains($string, 'https://')   ||
-                str_contains($string, 'http://')    ||
-                str_contains($string, '/form_uploads/')
+                str_contains($string, 'http://')
             ) &&
             !str_contains($string, 'href') &&
             !str_contains($string, '<img')
         ) {
             $url    = str_replace(['https://', 'http://'], '', TSJIPPY\SITEURL);
-            $string = str_replace(str_replace('\\', '/', ABSPATH), '', $string);
+            $string = str_replace(wp_normalize_path(ABSPATH), '', $string);
 
             if (!str_contains($string, $url)) {
                 $string        = TSJIPPY\SITEURL . "/$string";
@@ -503,7 +567,7 @@ class ElementHtmlBuilder extends SubmitForm
             }
         }
 
-        $output = apply_filters('tsjippy_transform_formtable_data', $output, $elementSlug, $submission);
+        $output = apply_filters('tsjippy_transform_formtable_data', $output, $element, $submission, $this);
         return $output;
     }
 
@@ -601,13 +665,13 @@ class ElementHtmlBuilder extends SubmitForm
         libxml_use_internal_errors(true);
 
         // Load html without adding extra's
-        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $dom->loadHTML($html, LIBXML_HTML_NODEFDTD);
 
         // Clear any errors
         libxml_clear_errors();
 
         // Import the node
-        foreach ($dom->childNodes as $node) {
+        foreach ($dom->getElementsByTagName('body')[0]->childNodes as $node) {
             $node = $this->dom->importNode($node, true);
             $node = $parent->appendChild($node);
         }
@@ -900,16 +964,11 @@ class ElementHtmlBuilder extends SubmitForm
     }
 
     /**
-     * Gets the html for a file or image element
+     * Determines the target dir for a file/image element
+     * 
+     * @return string   THe path for uploads
      */
-    protected function uploaderHtml()
-    {
-        $name        = $this->element->slug;
-
-        $options    = $this->attributes;
-        unset($options['name']);
-        unset($options['class']);
-
+    protected function uploadDir(){
         // Element setting
         if (!empty($this->element->folder_name)) {
             if (str_contains($this->element->folder_name, "private/")) {
@@ -926,29 +985,51 @@ class ElementHtmlBuilder extends SubmitForm
 
         // Default setting
         if (empty($targetDir)) {
-            $targetDir = 'form_uploads/' . $this->formData->slug;
+            $targetDir = 'private/form_uploads/' . $this->formData->slug;
         }
+
+        $baseDir    = wp_upload_dir()['basedir'];
+        if(!str_contains($targetDir, $baseDir)){
+            $targetDir   = $baseDir . '/' . $targetDir;
+        }
+
+        return wp_normalize_path($targetDir);
+    }
+
+    /**
+     * Gets the html for a file or image element
+     */
+    protected function uploaderHtml()
+    {
+        $name        = $this->element->slug;
+
+        $options     = $this->attributes;
+        unset($options['name']);
+        unset($options['class']);
 
         if (empty($this->formData->save_in_meta)) {
             $library    = false;
             $metakey    = '';
             $userId     = 0;
+            $auto       = false;
         } else {
             $library    = $this->element->library;
             $metakey    = $name;
             $userId     = $this->userId;
+            $auto       = true;
         }
         //Load js
         $uploader       = new TSJIPPY\FILEUPLOAD\FileUploadHtml(userId: $userId, library: $library);
 
         return $uploader->getUploadHtml(
-            inputName: $name,
-            targetDir: $targetDir,
-            multiple: $this->element->multiple,
-            options: $options,
+            inputName:        $name,
+            targetDir:        $this->uploadDir(),
+            multiple:         $this->element->multiple,
+            options:          $options,
             editBeforeUpload: $this->element->edit_image,
-            metaKey: $metakey,
-            value: $this->usermeta[$metakey] ?? ''
+            metaKey:          $metakey,
+            value:            $this->usermeta[$metakey] ?? '',
+            auto:             $auto
         );
     }
 
@@ -1176,7 +1257,7 @@ class ElementHtmlBuilder extends SubmitForm
             // Add all the list items
             foreach ($this->requestedValue as $v) {
                 if (method_exists($this, 'transformInputData') && !empty($this->submissions)) {
-                    $transValue        = $this->transformInputData($v, $this->element->slug, $this->submissions[0]);
+                    $transValue        = $this->transformInputData($v, $this->element, $this->submissions[0]);
                 } else {
                     $transValue        = $v;
                 }

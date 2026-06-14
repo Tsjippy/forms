@@ -281,42 +281,48 @@ class SubmitForm extends SaveFormSettings
      * @param    array    $uploadedFiles        The array of filepaths
      * @param    string    $inputName            The name for the file
      */
-    public function processFiles($uploadedFiles, $inputName)
+    public function processFiles(&$formResults)
     {
-        //loop over all files uploaded in this fileinput
-        foreach ($uploadedFiles as $key => $url) {
-            $urlParts     = explode('/', $url);
-            $fileName    = end($urlParts);
-            $path        = TSJIPPY\urlToPath($url);
-            $targetDir    = str_replace($fileName, '', $path);
+        // Get the target dir from the form
+        if(!empty($formResults['file-upload-target-dir'])){
+            $targetDir  = TSJIPPY\sanitize($formResults['file-upload-target-dir']);
 
-            //add input name to filename
-            $fileName    = "{$inputName}_$fileName";
+            // Do not store in form results
+            unset($formResults['file-upload-target-dir']);
+        }else{
+            // Store files in the private upload folder 
+            $targetDir    = wp_upload_dir()['basedir']."/private/form_uploads/".$this->formData->slug;
+        }
 
-            //also add submission id if not saving to meta
-            if (empty($this->formData->save_in_meta)) {
+        $fileUploader = new TSJIPPY\FILEUPLOAD\FileUploader( userId: $this->userId );
+
+        /**
+         * Loop pver all file/image inputs
+         */
+        foreach($_FILES as $inputName => $fileData){
+            $fileNames  = [];
+            $inputName  = str_replace('-files', '', $inputName);
+
+            /**
+             * Loop over all sumitted files
+             */
+            foreach($fileData['name'] as $fileName){
+                //add input name to filename
+                $fileName    = "{$inputName}_$fileName";
+
                 $fileName    = $this->submission->id . "_$fileName";
+
+                $fileNames[] = $fileName;
             }
 
-            //Create the filename
-            $i = 0;
-            $targetFile = $targetDir . $fileName;
+            $fileUploader->processFiles(files: $fileData, targetDir: $targetDir, targetFileNames: $fileNames);
 
-            //add a number if the file already exists
-            while (file_exists($targetFile)) {
-                $i++;
-                $targetFile = "$targetDir.$fileName($i)";
-            }
-
-            // if rename is succesfull
-            if (rename($path, $targetFile)) {
-                //update in formdata, do not include ABSPATH to save db space
-                $this->submission->{$inputName}[$key]    = str_replace(ABSPATH, '', $targetFile);
-            } else {
-                //update in formdata, do not include ABSPATH to save db space
-                $this->submission->{$inputName}[$key]    = str_replace(ABSPATH, '', $path);
+            // Store potentially updated file names in the submission
+            foreach($fileUploader->filesArr as $key => $data){
+                $formResults[$inputName][$key] = $data['fileName'];
             }
         }
+        
     }
 
     /**
@@ -442,22 +448,20 @@ class SubmitForm extends SaveFormSettings
         // Add a security hash for submissions from outside
         $formresults['viewhash']        = wp_hash($this->submission->id);
 
-        //sort arrays
+        /**
+         * Handle File Uploads
+         */
+        if(!empty($_FILES)){
+            $this->processFiles($formresults);
+        }
+
+        /**
+         * Process Results
+         */
         foreach ($formresults as $key => &$result) {
             if (is_array($result)) {
-                //check if this an aray of uploaded files
-                if (!is_array(array_values($result)[0]) && str_contains(array_values($result)[0], 'wp-content/uploads/')) {
-                    //rename the file
-                    $this->processFiles($result, $key);
-                    $result    = $this->submission->{$key};
-                } else {
-                    //sort the array
-                    ksort($result);
-                }
-            } elseif (str_contains($result, 'wp-content/uploads/')) {
-                //rename the file
-                $this->processFiles([$result], $key);
-                $result    = $this->submission->{$key}[0];
+                //sort the array
+                ksort($result);
             }
 
             $result    = TSJIPPY\cleanUpNestedArray($result);
@@ -477,7 +481,7 @@ class SubmitForm extends SaveFormSettings
 
             //insert the data
             $data    = [
-                'submission_id'    => $this->submission->id,
+                'submission_id' => $this->submission->id,
                 'element_id'    => $elementId,
                 'value'         => $result
             ];
@@ -488,13 +492,13 @@ class SubmitForm extends SaveFormSettings
             );
         }
 
-        $placeholders                = $formresults;
+        $placeholders            = $formresults;
 
-        $placeholders['id']            = $this->submission->id;
+        $placeholders['id']      = $this->submission->id;
 
-        $placeholders['formurl']    = $formUrl;
+        $placeholders['formurl'] = $formUrl;
 
-        $placeholders['formid']        = $this->submission->form_id;
+        $placeholders['formid']  = $this->submission->form_id;
 
         $this->sendEmail('submitted', $placeholders);
 

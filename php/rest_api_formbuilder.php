@@ -697,7 +697,7 @@ function saveFormSettings()
     $formBuilder->formData->slug    = str_replace(' ', '-', strtolower($formBuilder->formData->name));
 
     //remove double slashes
-    $formSettings['upload_path']    = str_replace('\\\\', '\\', $formSettings['upload_path'] ?? '');
+    $formSettings['upload_path']    = wp_normalize_path($formSettings['upload_path'] ?? '');
 
     $formBuilder->maybeInsertForm((int) $_POST['form-id']);
 

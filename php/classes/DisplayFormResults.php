@@ -67,8 +67,8 @@ class DisplayFormResults extends DisplayForm
         if (empty($this->formData)) {
             $this->hiddenColumns        = [];
         } elseif (!empty($this->formData->id)) {
-            $hiddenColumns        = get_user_meta($this->user->ID, 'tsjippy_hidden_columns_' . $this->formData->id, true);
-            if (empty($hiddenColumns)) {
+            $this->hiddenColumns        = get_user_meta($this->user->ID, 'tsjippy_hidden_columns_' . $this->formData->id, true);
+            if (empty($this->hiddenColumns)) {
                 $this->hiddenColumns    = [];
             }
         } else {
@@ -1085,10 +1085,10 @@ class DisplayFormResults extends DisplayForm
                 $orgFieldValue    = $value;
 
                 $value            = apply_filters('tsjippy-form-result-table-value', $value, $columnSetting, $this->submission, $this);
-                $value            = $this->transformInputData($value, $class, $this->submission);
+                $value            = $this->transformInputData($value, $this->getElementBySlug($class), $this->submission);
 
                 //show original email in excel
-                if (gettype($value) == 'string' && str_contains($value, '@')) {
+                if (gettype($value) == 'string' && (str_contains($value, '@') || str_contains($value, '<'))) {
                     $excelRow[]        = $orgFieldValue;
                 } elseif (gettype($value) == 'string' && str_contains($value, '<a href=') && str_contains($value, 'form_upload')) {
                     // add the url to excel
@@ -1135,7 +1135,7 @@ class DisplayFormResults extends DisplayForm
             $attributes['class'] = trim($class);
 
             //Convert underscores to spaces, but not in urls
-            if (!str_contains($value, 'href=')) {
+            if (!str_contains($value, 'href=') && !str_contains($value, 'src=')) {
                 $value    = str_replace('_', ' ', $value);
             }
 
@@ -2513,7 +2513,7 @@ class DisplayFormResults extends DisplayForm
                 ?>
             </div>
             <?php
-            echo wp_kses_post($tableHtml);
+            echo $tableHtml;
             ?>
         </div>
         <?php

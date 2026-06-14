@@ -1329,8 +1329,8 @@ class FormBuilderForm extends DisplayForm
                                     -
                                 </button>
                                 <div style='width:100%;'>
-                                    <input type='hidden' class='no-reset' name='emails[<?php echo esc_attr($key); ?>][email-id]' value='<?php echo esc_attr($email->id); ?>'>
-                                    <input type='hidden' class='no-reset' name='emails[<?php echo esc_attr($key); ?>][form-id]' value='<?php echo esc_attr($email->form_id); ?>'>
+                                    <input type='hidden' class='no-reset' name='emails[<?php echo esc_attr($key); ?>][email-id]' value='<?php echo esc_attr($email->id ?? ''); ?>'>
+                                    <input type='hidden' class='no-reset' name='emails[<?php echo esc_attr($key); ?>][form-id]' value='<?php echo esc_attr($email->form_id ?? ''); ?>'>
 
                                     <div class="formfield form-label" style="margin-top:10px;">
                                         <h4>Trigger</h4>
@@ -1341,7 +1341,7 @@ class FormBuilderForm extends DisplayForm
                                                 name='emails[<?php echo esc_attr($key); ?>][email-trigger]' 
                                                 class='email-trigger' 
                                                 value='submitted' 
-                                                <?php if ($email->email_trigger == 'submitted') { echo 'checked'; } ?>
+                                                <?php if (($email->email_trigger ?? '') == 'submitted') { echo 'checked'; } ?>
                                             >
                                             The form is submitted
                                         </label>
@@ -1353,7 +1353,7 @@ class FormBuilderForm extends DisplayForm
                                                 name='emails[<?php echo esc_attr($key); ?>][email-trigger]' 
                                                 class='email-trigger' 
                                                 value='shouldsubmit' 
-                                                <?php if ($email->email_trigger == 'shouldsubmit') { echo 'checked'; } ?>
+                                                <?php if (($email->email_trigger ?? '') == 'shouldsubmit') { echo 'checked'; } ?>
                                             >
                                             The form is due for submission
                                         </label><br>
@@ -1364,14 +1364,14 @@ class FormBuilderForm extends DisplayForm
                                                 name='emails[<?php echo esc_attr($key); ?>][email-trigger]' 
                                                 class='email-trigger' 
                                                 value='submittedcond' 
-                                                <?php if ($email->email_trigger == 'submittedcond') { echo 'checked'; } ?>
+                                                <?php if (($email->email_trigger ?? '') == 'submittedcond') { echo 'checked'; } ?>
                                             >
                                             The form is submitted and meets a condition
                                         </label><br>
 
                                         <div 
                                             class='submitted-type 
-                                            <?php if ($email->email_trigger != 'submittedcond') { echo 'hidden'; } ?>'>
+                                            <?php if (($email->email_trigger ?? '') != 'submittedcond') { echo 'hidden'; } ?>'>
                                             <div class='submitted-trigger-type'>
                                                 Element
                                                 <select class='' name='emails[<?php echo esc_attr($key); ?>][submitted-trigger][element]'>
@@ -1434,24 +1434,24 @@ class FormBuilderForm extends DisplayForm
                                                 name='emails[<?php echo esc_attr($key); ?>][email-trigger]' 
                                                 class='email-trigger' 
                                                 value='fieldchanged' 
-                                                <?php if ($email->email_trigger == 'fieldchanged') { echo 'checked'; } ?>
+                                                <?php if (($email->email_trigger ?? '') == 'fieldchanged') { echo 'checked'; } ?>
                                             >
                                             A field has changed to a value
                                         </label>
                                         <div 
                                             class='conditional-field-wrapper 
-                                            <?php if ($email->email_trigger != 'fieldchanged') { echo 'hidden'; } ?>'
+                                            <?php if (($email->email_trigger ?? '') != 'fieldchanged') { echo 'hidden'; } ?>'
                                         >
                                             <label class="formfield form-label">Field</label>
                                             <select name='emails[<?php echo esc_attr($key); ?>][conditional-field]'>
                                                 <?php
-                                                $this->inputDropdown($email->conditional_field);
+                                                $this->inputDropdown($email->conditional_field ?? '');
                                                 ?>
                                             </select>
 
                                             <label class="formfield form-label">
                                                 Value
-                                                <input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][conditional-value]' value="<?php echo esc_attr($email->conditional_value); ?>" style='width:fit-content;'>
+                                                <input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][conditional-value]' value="<?php echo esc_attr($email->conditional_value ?? ''); ?>" style='width:fit-content;'>
                                             </label>
                                         </div>
 
@@ -1462,17 +1462,17 @@ class FormBuilderForm extends DisplayForm
                                                 name='emails[<?php echo esc_attr($key); ?>][email-trigger]' 
                                                 class='email-trigger' 
                                                 value='fieldschanged' 
-                                                <?php if ($email->email_trigger == 'fieldschanged') { echo 'checked'; } ?>
+                                                <?php if (($email->email_trigger ?? '') == 'fieldschanged') { echo 'checked'; } ?>
                                             >
                                             One or more fields have changed
                                         </label>
                                         <div 
                                             class='conditional-fields-wrapper 
-                                            <?php if ($email->email_trigger != 'fieldschanged') {  echo 'hidden';  } ?>'>
+                                            <?php if (($email->email_trigger ?? '') != 'fieldschanged') {  echo 'hidden';  } ?>'>
                                             <label class="formfield form-label">Field(s)</label>
                                             <select name='emails[<?php echo esc_attr($key); ?>][conditional-fields][]' multiple='multiple'>
                                                 <?php
-                                                $this->inputDropdown($email->conditional_fields);
+                                                $this->inputDropdown($email->conditional_fields ?? []);
                                                 ?>
                                             </select>
                                         </div>
@@ -1484,7 +1484,7 @@ class FormBuilderForm extends DisplayForm
                                                 name='emails[<?php echo esc_attr($key); ?>][email-trigger]' 
                                                 class='email-trigger' 
                                                 value='removed' 
-                                                <?php if ($email->email_trigger == 'removed') {  echo 'checked'; } ?>
+                                                <?php if (($email->email_trigger ?? '') == 'removed') {  echo 'checked'; } ?>
                                             >
                                             The submission is archived or deleted
                                         </label>
@@ -1495,7 +1495,7 @@ class FormBuilderForm extends DisplayForm
                                                 type='radio' 
                                                 name='emails[<?php echo esc_attr($key); ?>][email-trigger]' 
                                                 class='email-trigger' value='disabled' 
-                                                <?php if ($email->email_trigger == 'disabled') {  echo 'checked'; } ?>
+                                                <?php if (($email->email_trigger ?? '') == 'disabled') {  echo 'checked'; } ?>
                                             >
                                             Do not send this e-mail
                                         </label>
@@ -1519,7 +1519,7 @@ class FormBuilderForm extends DisplayForm
                                                 type='radio' 
                                                 name='emails[<?php echo esc_attr($key); ?>][from-email]' 
                                                 class='from-email' value='conditional' 
-                                                <?php if ($email->from_email == 'conditional') { echo 'checked'; } ?>>
+                                                <?php if (($email->from_email ?? '') == 'conditional') { echo 'checked'; } ?>>
                                             Conditional e-mail adress
                                         </label><br>
                                     </div>
@@ -1539,10 +1539,10 @@ class FormBuilderForm extends DisplayForm
 
                                     <div 
                                         class='emailfromconditional 
-                                        <?php if ($email->from_email != 'conditional') { echo 'hidden'; } ?>'>
+                                        <?php if (($email->from_email ?? '') != 'conditional') { echo 'hidden'; } ?>'>
                                         <div class='clone-divs-wrapper'>
                                             <?php
-                                            if (!is_array($email->conditional_from_email)) {
+                                            if (!is_array($email->conditional_from_email ?? '')) {
                                                 $email->conditional_from_email = [
                                                     [
                                                         'fieldid'    => '',
@@ -1551,7 +1551,7 @@ class FormBuilderForm extends DisplayForm
                                                     ]
                                                 ];
                                             }
-                                            foreach (array_values($email->conditional_from_email) as $fromKey => $fromEmail) {
+                                            foreach (array_values(($email->conditional_from_email ?? [] )) as $fromKey => $fromEmail) {
                                             ?>
                                                 <div class='clone-div' data-div-id='<?php echo esc_attr($fromKey); ?>'>
                                                     <fieldset class='form-email-fieldset'>
@@ -1582,7 +1582,7 @@ class FormBuilderForm extends DisplayForm
                                             <br>
                                             <label class="formfield form-label">
                                                 Else the e-mail will be
-                                                <input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][else-from]' value="<?php echo esc_attr($email->else_from); ?>">
+                                                <input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][else-from]' value="<?php echo esc_attr($email->else_from ?? ''); ?>">
                                             </label>
                                         </div>
                                     </div>
@@ -1626,10 +1626,10 @@ class FormBuilderForm extends DisplayForm
 
                                     <div 
                                         class='email-toconditional 
-                                        <?php if ($email->email_to != 'conditional') { echo 'hidden'; } ?>'>
+                                        <?php if (($email->email_to ?? '') != 'conditional') { echo 'hidden'; } ?>'>
                                         <div class='clone-divs-wrapper'>
                                             <?php
-                                            if (!is_array($email->conditional_email_to)) {
+                                            if (!is_array($email->conditional_email_to ?? '')) {
                                                 $email->conditional_email_to = [
                                                     [
                                                         'fieldid'    => '',
@@ -1639,7 +1639,7 @@ class FormBuilderForm extends DisplayForm
                                                 ];
                                             }
 
-                                            foreach ($email->conditional_email_to as $toKey => $toEmail) {
+                                            foreach (($email->conditional_email_to ?? []) as $toKey => $toEmail) {
                                             ?>
                                                 <div class='clone-div' data-div-id='<?php echo esc_attr($toKey); ?>'>
                                                     <fieldset class='form-email-fieldset button-wrapper'>
@@ -1674,7 +1674,7 @@ class FormBuilderForm extends DisplayForm
                                             <br>
                                             <label class="formfield form-label">
                                                 Else the e-mail will be
-                                                <input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][else-to]' value="<?php echo esc_attr($email->else_to); ?>">
+                                                <input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][else-to]' value="<?php echo esc_attr($email->else_to ?? ''); ?>">
                                             </label>
                                         </div>
                                     </div>
@@ -1682,7 +1682,7 @@ class FormBuilderForm extends DisplayForm
                                     <br>
                                     <div class="formfield form-label">
                                         <h4>Subject</h4>
-                                        <input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][subject]' value="<?php echo esc_attr($email->subject) ?>">
+                                        <input type='text' class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][subject]' value="<?php echo esc_attr($email->subject ?? '') ?>">
                                     </div>
 
                                     <br>
@@ -1699,7 +1699,7 @@ class FormBuilderForm extends DisplayForm
                                         );
 
                                         wp_editor(
-                                            $email->message,
+                                            $email->message ?? '',
                                             "{$this->formData->slug}_email_message_$key",
                                             $settings
                                         );
@@ -1713,7 +1713,7 @@ class FormBuilderForm extends DisplayForm
                                             class='formbuilder form-element-setting' 
                                             name='emails[<?php echo esc_attr($key); ?>][headers]'>
                                             // phpcs:ignore
-                                            <?php echo $email->headers ?>
+                                            <?php echo $email->headers ?? '' ?>
                                         </textarea>
                                     </div>
 
@@ -1725,7 +1725,7 @@ class FormBuilderForm extends DisplayForm
                                             class='formbuilder form-element-setting' 
                                             name='emails[<?php echo esc_attr($key); ?>][files]'>
                                             // phpcs:ignore
-                                            <?php echo $email->files ?>
+                                            <?php echo $email->files ?? '' ?>
                                         </textarea>
                                     </div>
                                 </div>
