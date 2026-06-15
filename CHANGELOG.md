@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- 'tsjippy-file-upload-delete-permission' filter
 
 ### Changed
 - file uploads are now only done of form submit when not saving in user meta
