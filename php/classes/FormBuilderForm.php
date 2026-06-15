@@ -258,12 +258,15 @@ class FormBuilderForm extends DisplayForm
 
         //if the current element is required or this is a label and the next element is required
         if (
-            $element->required == true            ||
-            $element->mandatory == true            ||
-            $element->type == 'label'            &&
+            $element->required == true           ||
+            $element->mandatory == true          ||
             (
-                $this->nextElement->required    ||
-                $this->nextElement->mandatory
+                $element->type == 'label'        &&
+                !empty($this->nextElement)       &&
+                (
+                    $this->nextElement->required ||
+                    $this->nextElement->mandatory
+                )
             )
         ) {
             $hidden .= ' required';
