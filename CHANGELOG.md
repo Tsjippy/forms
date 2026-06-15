@@ -7,6 +7,7 @@
 
 ### Fixed
 - typo
+- bug when next element is null
 
 ### Updated
 
