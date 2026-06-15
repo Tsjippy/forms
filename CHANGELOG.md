@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [11.5.0] - 2026-06-15
+
+
+### Added
 - 'tsjippy-file-upload-delete-permission' filter
 
 ### Changed
@@ -9,8 +20,6 @@
 
 ### Fixed
 - add raw html
-
-### Updated
 
 ## [11.4.9] - 2026-06-13
 
