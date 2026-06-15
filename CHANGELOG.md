@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- typo
-- bug when next element is null
 
 ### Updated
+
+## [11.5.1] - 2026-06-15
+
+
+### Fixed
+- typo
+- bug when next element is null
 
 ## [11.5.0] - 2026-06-15
 
