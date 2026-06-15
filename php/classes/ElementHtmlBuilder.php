@@ -57,6 +57,7 @@ class ElementHtmlBuilder extends SubmitForm
         $this->prevElement            = null;
         $this->wrap                   = false;
         $this->requestedValue         = null;
+        $this->usermeta               = [];
 
         $this->reset();
     }
@@ -67,7 +68,6 @@ class ElementHtmlBuilder extends SubmitForm
         $this->tagType                = '';
         $this->selectedValue          = '';
         $this->attributes             = ['class' => ''];
-        $this->usermeta               = [];
     }
 
     /**
@@ -251,7 +251,11 @@ class ElementHtmlBuilder extends SubmitForm
             return $value;
         }
 
-        if(!str_contains($metaKey, 'tsjippy_') && !in_array($metaKey, $this->wpMetaKeys)){
+        if(
+            !str_contains($metaKey, 'tsjippy_') && 
+            !in_array($metaKey, $this->wpMetaKeys) &&
+            !in_array($metaKey, TSJIPPY\FAMILY\getFamilyMetaKeys($familyMetaKeys))
+        ){
             $metaKey    = 'tsjippy_' . $metaKey;
         }
 
