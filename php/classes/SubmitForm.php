@@ -530,6 +530,11 @@ class SubmitForm extends SaveFormSettings
             if (is_array($result)) {
                 $result = TSJIPPY\cleanUpNestedArray($result);
 
+                if(empty($result)){
+                    delete_user_meta($this->userId, $key);
+                    continue;
+                }
+
                 //check if we should only update one entry of the array
                 $index = array_keys($result)[0];
 

@@ -619,7 +619,7 @@ class ElementHtmlBuilder extends SubmitForm
         }
 
         foreach ($attributes as $attribute => $value) {
-            if ($value == null) {
+            if ($value === null) {
                 continue;
             }
 
