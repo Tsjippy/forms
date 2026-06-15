@@ -9,6 +9,12 @@
 
 ### Updated
 
+## [11.5.2] - 2026-06-15
+
+
+### Fixed
+- unserialize conditions
+
 ## [11.5.1] - 2026-06-15
 
 
