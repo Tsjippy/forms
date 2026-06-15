@@ -7,6 +7,7 @@
 - file uploads are now only done of form submit when not saving in user meta
 
 ### Fixed
+- add raw html
 
 ### Updated
 
