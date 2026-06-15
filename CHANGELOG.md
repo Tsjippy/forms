@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- problem when adding an attrbute with an empty value
 
 ### Updated
+
+## [11.5.5] - 2026-06-15
+
+
+### Fixed
+- problem when adding an attrbute with an empty value
 
 ## [11.5.4] - 2026-06-15
 
