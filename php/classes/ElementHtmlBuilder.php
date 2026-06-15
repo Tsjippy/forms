@@ -671,7 +671,7 @@ class ElementHtmlBuilder extends SubmitForm
         libxml_clear_errors();
 
         // Import the node
-        foreach ($dom->getElementsByTagName('body')[0]->childNodes as $node) {
+        foreach ($dom->getElementsByTagName('body')->item(0)->childNodes as $node) {
             $node = $this->dom->importNode($node, true);
             $node = $parent->appendChild($node);
         }
