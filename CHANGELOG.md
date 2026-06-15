@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- problem when adding an attrbute with an empty value
 
 ### Updated
 
