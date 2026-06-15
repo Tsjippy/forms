@@ -343,21 +343,21 @@ class ElementHtmlBuilder extends SubmitForm
 
         //add default values
         if (empty($element->multiple) || in_array($element->type, ['select', 'checkbox', 'radio'])) {
-            $key                            = $element->default_value ?? '';
+            $key                          = $element->default_value ?? '';
 
             if (!empty($key)) {
                 if (isset($this->defaultValues[$key])) {
-                    $values['defaults']        = array_merge($values['defaults'], (array)$this->defaultValues[$key]);
+                    $values['defaults']   = array_merge($values['defaults'], (array)$this->defaultValues[$key]);
                 } elseif (!in_array($key, $values['defaults'])) {
-                    $values['defaults'][]    = $key;
+                    $values['defaults'][] = $key;
                 }
             }
         }
 
         if (!empty($element->default_array_value)) {
-            $key                        = $element->default_array_value;
+            $key                          = $element->default_array_value;
             if (!empty($this->defaultArrayValues[$key]) && is_array($this->defaultArrayValues[$key])) {
-                $values['defaults']        = $this->defaultArrayValues[$key] + $values['defaults'];
+                $values['defaults']       = $this->defaultArrayValues[$key] + $values['defaults'];
             }
         }
 
@@ -846,7 +846,7 @@ class ElementHtmlBuilder extends SubmitForm
                 $options = $curNode->getElementsByTagName('option');
 
                 foreach ($options as $option) {
-                    if ($option->attributes['value'] == $value) {
+                    if ($option->attributes['value']->value == $value) {
                         $option->setAttribute('selected', 'selected');
                     } else
                         $option->removeAttribute('selected');
@@ -860,7 +860,7 @@ class ElementHtmlBuilder extends SubmitForm
                 $nodes = $curNode->getElementsByTagName($this->element->type);
 
                 foreach ($nodes as $nd) {
-                    if ($nd->attributes['value'] == $value) {
+                    if ($nd->attributes['value']->value  == $value) {
                         $nd->setAttribute('checked', 'checked');
                     } else
                         $nd->removeAttribute('checked');
