@@ -7,6 +7,7 @@
 
 ### Fixed
 - do not prefix family meta keys
+- set value of multiple elements
 
 ### Updated
 
