@@ -1734,9 +1734,9 @@ class ElementHtmlBuilder extends SubmitForm
     {
         $this->reset();
 
-        $this->element                = $element;
-        $this->requestedValue        = $requestedValue;
-        $returnHtml                 = false;
+        $this->element        = $element;
+        $this->requestedValue = $requestedValue;
+        $returnHtml           = false;
 
         if (empty($parent)) {
             // Create a new DOMDocument object

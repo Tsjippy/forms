@@ -1353,7 +1353,7 @@ class DisplayFormResults extends DisplayForm
      */
     protected function columnSettingsForm($class, $viewRoles, $editRoles)
     {
-?>
+        ?>
         <div class="tabcontent" id="column-settings-<?php echo esc_attr($this->shortcodeId); ?>">
             <form class="sortable-column-settings-rows">
                 <input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo esc_attr($this->shortcodeId); ?>'>
@@ -1474,7 +1474,7 @@ class DisplayFormResults extends DisplayForm
                 ?>
             </form>
         </div>
-    <?php
+        <?php
     }
 
     /**
