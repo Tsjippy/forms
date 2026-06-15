@@ -18,3 +18,10 @@ function postStates($states, $post)
 
     return $states;
 }
+
+add_filter('tsjippy-file-upload-delete-permission', function($permission){
+    $displayForm    = new DisplayFormResults(['form-id' => (int) $_POST['form-id']]);
+
+    return  $displayForm->tableEditPermissions;
+    return $permission;
+});
