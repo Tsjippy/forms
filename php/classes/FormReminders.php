@@ -637,7 +637,7 @@ class FormReminders extends Forms
         parse_str(wp_parse_url($formUrl, PHP_URL_QUERY), $params);
 
         //Show a nice name
-        $name    = ucfirst( $element->name);
+        $name       = ucfirst( $element->name);
 
         // phpcs:ignore
         $baseUrl    = explode('main-tab=', TSJIPPY\sanitize($_SERVER['REQUEST_URI'] ?? ''))[0];

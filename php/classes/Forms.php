@@ -865,8 +865,8 @@ class Forms
                 $this->formData                     = $result;
                 $this->formData->actions            = maybe_unserialize($this->formData->actions);
                 $this->formData->split              = maybe_unserialize($this->formData->split);
-                $this->formData->full_right_roles   = maybe_unserialize($this->formData->full_right_roles);
-                $this->formData->submit_others_form = maybe_unserialize($this->formData->submit_others_form);
+                $this->formData->full_right_roles   = (array) maybe_unserialize($this->formData->full_right_roles);
+                $this->formData->submit_others_form = (array) maybe_unserialize($this->formData->submit_others_form);
 
                 /**
                  * Filters the elements the submission data should be splitted on

@@ -629,7 +629,7 @@ class FormBuilderForm extends DisplayForm
 
                     <label class="block">
                         <h4>Form name</h4>
-                        <input type='text' class='formbuilder form-element-setting' name='form-name' value="<?php echo esc_attr($this->formData->name) ?>">
+                        <input type='text' class='formbuilder form-element-setting' name='name' value="<?php echo esc_attr($this->formData->name) ?>">
                     </label>
                     <br>
 
@@ -649,7 +649,7 @@ class FormBuilderForm extends DisplayForm
                         }
 
                         ?>
-                        <input type='url' class='formbuilder form-element-setting' name='form-url' value="<?php echo esc_url($url) ?>">
+                        <input type='url' class='formbuilder form-element-setting' name='url' value="<?php echo esc_url($url) ?>">
                     </label>
                     <br>
 
@@ -849,7 +849,7 @@ class FormBuilderForm extends DisplayForm
                                     ?>
                                     <option 
                                         value='<?php esc_attr($key);?>' 
-                                        <?php if (in_array($key, $this->formData->full_right_roles ?? [])) { echo 'selected';} ?>
+                                        <?php if (in_array($key, $this->formData->full_right_roles)) { echo 'selected';} ?>
                                     >
                                         <?php echo esc_html($roleName);?>
                                     </option>

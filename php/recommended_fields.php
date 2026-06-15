@@ -47,6 +47,6 @@ function dashboardWarnings($userId)
             <br>
         </p>
         <?php
-        echo wp_kses_post($html);
+        echo $html;
     }
 }
