@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- do not prefix family meta keys
-- set value of multiple elements
 
 ### Updated
+
+## [11.5.3] - 2026-06-15
+
+
+### Fixed
+- do not prefix family meta keys
+- set value of multiple elements
 
 ## [11.5.2] - 2026-06-15
 
