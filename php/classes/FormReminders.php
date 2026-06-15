@@ -632,6 +632,16 @@ class FormReminders extends Forms
             return '';
         }
 
+        /**
+         * Check if still invalid
+         */
+        // Unserialize the warning conditions
+        $warningCondition = maybe_unserialize($element->warning_conditions);
+
+        if(!$this->checkIfConditionsAppliesToUser($warningCondition, $this->userId)){
+            return '';
+        }
+
         $formUrl    = $this->formData->url;
 
         parse_str(wp_parse_url($formUrl, PHP_URL_QUERY), $params);
