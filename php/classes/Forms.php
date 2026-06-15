@@ -660,7 +660,7 @@ class Forms
 
         $query   = "SELECT * FROM %i WHERE `slug` = %s";
         $values  = [
-            this->tableName,
+            $this->tableName,
             $this->formData->slug
         ];
 
