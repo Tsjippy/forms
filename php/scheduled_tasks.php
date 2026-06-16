@@ -12,9 +12,9 @@ add_action('init', __NAMESPACE__ . '\initTasks');
 function initTasks()
 {
     //add action for use in scheduled task
-    add_action('auto_archive_action', __NAMESPACE__ . '\autoArchiveFormEntries');
+    add_action('tsjippy-auto-archive', __NAMESPACE__ . '\autoArchiveFormEntries');
 
-    add_action('form_reminder_action', __NAMESPACE__ . '\formReminder');
+    add_action('tsjippy-form-reminder', __NAMESPACE__ . '\formReminder');
 }
 
 function autoArchiveFormEntries()

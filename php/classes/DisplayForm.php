@@ -299,7 +299,7 @@ class DisplayForm extends ElementHtmlBuilder
         if (array_intersect($this->userRoles, $this->submitRoles) && !empty($this->formData->save_in_meta)) {
             $this->addRawHtml(TSJIPPY\userSelect("Select an user to show the data of:"), $this->formWrapper);
         }
-        $this->addRawHtml(apply_filters('tsjippy_before_form', '', $this->formData->slug), $this->formWrapper);
+        $this->addRawHtml(apply_filters('tsjippy-before-form', '', $this->formData->slug), $this->formWrapper);
 
         /**
          * Form container

@@ -8,7 +8,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-add_filter('tsjippy_mandatory_html_filter', __NAMESPACE__ . '\addChildFields', 10, 3);
+add_filter('tsjippy-mandatory-html-filter', __NAMESPACE__ . '\addChildFields', 10, 3);
 function addChildFields($html, $userId, $object)
 {
     // Add warnings for child fields
@@ -27,7 +27,7 @@ function addChildFields($html, $userId, $object)
     return $html;
 }
 
-add_action('tsjippy_dashboard_warnings', __NAMESPACE__ . '\dashboardWarnings');
+add_action('tsjippy-dashboard-warnings', __NAMESPACE__ . '\dashboardWarnings');
 function dashboardWarnings($userId)
 {
     $forms    = new FormReminders();

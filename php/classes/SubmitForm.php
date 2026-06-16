@@ -250,7 +250,7 @@ class SubmitForm extends SaveFormSettings
             }
 
             // add the form specific footer filter
-            add_filter('tsjippy_email_footer_url', [$this, 'emailFooter']);
+            add_filter('tsjippy-email-footer-url', [$this, 'emailFooter']);
 
             add_filter('wp_mail', [$this, 'addFormData'], 1);
 
@@ -271,7 +271,7 @@ class SubmitForm extends SaveFormSettings
             }
 
             // remove the form specific footer filter
-            remove_filter('tsjippy_email_footer_url', [$this, 'emailFooter']);
+            remove_filter('tsjippy-email-footer-url', [$this, 'emailFooter']);
         }
     }
 
@@ -675,7 +675,7 @@ class SubmitForm extends SaveFormSettings
          * @param array     $formresults    The form results
          * @param object    $object         The SubmitForm Instance
          */
-        $formresults        = apply_filters('tsjippy_before_inserting_formdata', (object)$formresults, $this);
+        $formresults        = apply_filters('tsjippy-before-inserting-formdata', (object)$formresults, $this);
 
         if (is_wp_error($formresults)) {
             return $formresults;
@@ -709,7 +709,7 @@ class SubmitForm extends SaveFormSettings
          * @param array  $formResults   The submitted form results
          * @param object $object        The SubmitForm object
          */
-        $message    = apply_filters('tsjippy_after_form_submission', $message, $orgFormResults, $this);
+        $message    = apply_filters('tsjippy-after-form-submission', $message, $orgFormResults, $this);
 
         do_action('tsjippy-after-form-submit', $this);
 

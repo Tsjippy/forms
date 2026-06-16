@@ -247,7 +247,7 @@ class DisplayFormResults extends DisplayForm
          * Add the metas to the submissions
          */
         $filtered    = apply_filters(
-            'tsjippy_formdata_retrieval_query',
+            'tsjippy-formdata-retrieval-query',
             [
                 'baseQuery'    => $baseQuery,
                 'where'        => $where,
@@ -309,7 +309,7 @@ class DisplayFormResults extends DisplayForm
             }
         }
 
-        return apply_filters('tsjippy_retrieved_formdata', $submissions, $userId, $this);
+        return apply_filters('tsjippy-retrieved-formdata', $submissions, $userId, $this);
     }
 
     /**
@@ -570,7 +570,7 @@ class DisplayFormResults extends DisplayForm
     {
         global $wpdb;
 
-        $userId    = apply_filters('tsjippy-forms-user_ids-to-retrieve', $userId, $this);
+        $userId    = apply_filters('tsjippy-forms-user-ids-to-retrieve', $userId, $this);
 
         // phpcs:ignore
         if ($this->all) {
@@ -656,7 +656,7 @@ class DisplayFormResults extends DisplayForm
          * @var array    $values        Array of values for the where statements
          */
         $filtered    = apply_filters(
-            'tsjippy_formdata_retrieval_query',
+            'tsjippy-formdata-retrieval-query',
             [
                 'query'        => '',
                 'where'        => $where,
@@ -679,7 +679,7 @@ class DisplayFormResults extends DisplayForm
         $this->total    = $wpdb->get_var($wpdb->prepare($countQuery, ...$values));
 
         if (empty($this->total)) {
-            return apply_filters('tsjippy_retrieved_formdata', [], $userId, $this);
+            return apply_filters('tsjippy-retrieved-formdata', [], $userId, $this);
         }
 
         /**
@@ -759,7 +759,7 @@ class DisplayFormResults extends DisplayForm
             }
         }
 
-        $submissions    = apply_filters('tsjippy_retrieved_formdata', $submissions, $userId, $this);
+        $submissions    = apply_filters('tsjippy-retrieved-formdata', $submissions, $userId, $this);
 
         return $submissions;
     }
@@ -916,7 +916,7 @@ class DisplayFormResults extends DisplayForm
             $actions[]    = $action;
         }
 
-        $actions = apply_filters('tsjippy_form_actions', $actions);
+        $actions = apply_filters('tsjippy-form-actions', $actions);
         foreach ($actions as $action) {
             if (!isset($this->columnSettings[$action]) || !is_array($this->columnSettings[$action])) {
                 $this->columnSettings[$action] = [
@@ -2498,8 +2498,8 @@ class DisplayFormResults extends DisplayForm
 
         ob_start();
         //process any $_GET acions
-        do_action('tsjippy_formtable_GET_actions');
-        do_action('tsjippy_formtable_POST_actions');
+        do_action('tsjippy-formtable-GET-actions');
+        do_action('tsjippy-formtable-POST-actions');
 
         //Load js
         wp_enqueue_script('tsjippy_forms_table_script');
@@ -2617,7 +2617,7 @@ class DisplayFormResults extends DisplayForm
         foreach ($this->formData->actions ?? [] as $action) {
             $actions[]    = $action;
         }
-        $actions = apply_filters('tsjippy_form_actions', $actions);
+        $actions = apply_filters('tsjippy-form-actions', $actions);
 
         //we have full permissions on this table
         $addHeading    = false;

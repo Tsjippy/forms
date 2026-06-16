@@ -142,7 +142,7 @@ class ElementHtmlBuilder extends SubmitForm
         $this->defaultValues['weddingdate']    = $family->getWeddingDate($this->user);
 
         //get defaults from filters
-        $this->defaultValues      = apply_filters('tsjippy_add_form_defaults', $this->defaultValues, $this->userId, $this->formData->slug);
+        $this->defaultValues      = apply_filters('tsjippy-add-form-defaults', $this->defaultValues, $this->userId, $this->formData->slug);
 
         ksort($this->defaultValues);
 
@@ -214,7 +214,7 @@ class ElementHtmlBuilder extends SubmitForm
         $this->defaultArrayValues['family_member_names']            = $familyNames;
         $this->defaultArrayValues['family_member_names_and_age']    = $familyNamesWithChildAge;
 
-        $this->defaultArrayValues    = apply_filters('tsjippy_add_form_multi_defaults', $this->defaultArrayValues, $this->userId, $this->formData->slug);
+        $this->defaultArrayValues    = apply_filters('tsjippy-add-form-multi-defaults', $this->defaultArrayValues, $this->userId, $this->formData->slug);
 
         ksort($this->defaultArrayValues);
     }
@@ -238,7 +238,7 @@ class ElementHtmlBuilder extends SubmitForm
             foreach (get_user_meta($this->userId) as $key => $meta) {
                 $this->usermeta[$key]    = $meta[0];
             }
-            $this->usermeta    = apply_filters('tsjippy_forms_load_userdata', $this->usermeta, $this->userId);
+            $this->usermeta    = apply_filters('tsjippy-forms-load-userdata', $this->usermeta, $this->userId);
         }
 
         if(!empty($this->defaultValues[$metaKey])){
@@ -571,7 +571,7 @@ class ElementHtmlBuilder extends SubmitForm
             }
         }
 
-        $output = apply_filters('tsjippy_transform_formtable_data', $output, $element, $submission, $this);
+        $output = apply_filters('tsjippy-transform-formtable-data', $output, $element, $submission, $this);
         return $output;
     }
 

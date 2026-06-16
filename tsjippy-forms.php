@@ -53,9 +53,9 @@ register_activation_hook(__FILE__, function () {
     $settings['forms-page']    = TSJIPPY\ADMIN\createDefaultPage('Form selector', '[tsjippy_formselector]');
     update_option('tsjippy_forms_settings', $settings);
 
-    TSJIPPY\scheduleTask('auto_archive_action', 'daily');
+    TSJIPPY\scheduleTask('auto_archive', 'daily');
 
-    TSJIPPY\scheduleTask('form_reminder_action', 'daily');
+    TSJIPPY\scheduleTask('form_reminder', 'daily');
 });
 
 register_deactivation_hook(__FILE__, function () {
