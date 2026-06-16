@@ -137,7 +137,7 @@ class ElementHtmlBuilder extends SubmitForm
         // Add family meta
         $family        = new TSJIPPY\FAMILY\Family();
         $this->defaultValues['family_name']    = $family->getFamilyName($this->user->ID);
-        $this->defaultValues['family_picture'] = $family->getFamilyMeta($this->user, 'family_picture');
+        $this->defaultValues['family_picture'] = $family->getFamilyMeta($this->user, 'family_picture', true);
         $this->defaultValues['family_partner'] = $family->getPartner($this->user);
         $this->defaultValues['weddingdate']    = $family->getWeddingDate($this->user);
 
