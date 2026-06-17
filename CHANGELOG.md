@@ -8,6 +8,7 @@
 - hook and filter name update
 
 ### Fixed
+- admin date page
 
 ### Updated
 
