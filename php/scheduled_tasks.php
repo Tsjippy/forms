@@ -11,10 +11,9 @@ if (! defined('ABSPATH')) {
 add_action('init', __NAMESPACE__ . '\initTasks');
 function initTasks()
 {
-    //add action for use in scheduled task
-    add_action('tsjippy-auto-archive', __NAMESPACE__ . '\autoArchiveFormEntries');
+    TSJIPPY\scheduleTask('tsjippy-forms-auto-archive', 'daily', __NAMESPACE__, 'autoArchiveFormEntries');
 
-    add_action('tsjippy-form-reminder', __NAMESPACE__ . '\formReminder');
+    TSJIPPY\scheduleTask('tsjippy-forms-reminder', 'daily', __NAMESPACE__, 'formReminder');
 }
 
 function autoArchiveFormEntries()

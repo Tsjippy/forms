@@ -675,7 +675,7 @@ class SubmitForm extends SaveFormSettings
          * @param array     $formresults    The form results
          * @param object    $object         The SubmitForm Instance
          */
-        $formresults        = apply_filters('tsjippy-before-inserting-formdata', (object)$formresults, $this);
+        $formresults        = apply_filters('tsjippy-forms-before-inserting-formdata', (object)$formresults, $this);
 
         if (is_wp_error($formresults)) {
             return $formresults;
@@ -709,9 +709,9 @@ class SubmitForm extends SaveFormSettings
          * @param array  $formResults   The submitted form results
          * @param object $object        The SubmitForm object
          */
-        $message    = apply_filters('tsjippy-after-form-submission', $message, $orgFormResults, $this);
+        $message    = apply_filters('tsjippy-forms-after-form-submission', $message, $orgFormResults, $this);
 
-        do_action('tsjippy-after-form-submit', $this);
+        do_action('tsjippy-forms-after-form-submit', $this);
 
         return $message;
     }

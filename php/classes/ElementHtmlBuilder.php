@@ -142,7 +142,7 @@ class ElementHtmlBuilder extends SubmitForm
         $this->defaultValues['weddingdate']    = $family->getWeddingDate($this->user);
 
         //get defaults from filters
-        $this->defaultValues      = apply_filters('tsjippy-add-form-defaults', $this->defaultValues, $this->userId, $this->formData->slug);
+        $this->defaultValues      = apply_filters('tsjippy-forms-add-form-defaults', $this->defaultValues, $this->userId, $this->formData->slug);
 
         ksort($this->defaultValues);
 
@@ -214,7 +214,7 @@ class ElementHtmlBuilder extends SubmitForm
         $this->defaultArrayValues['family_member_names']            = $familyNames;
         $this->defaultArrayValues['family_member_names_and_age']    = $familyNamesWithChildAge;
 
-        $this->defaultArrayValues    = apply_filters('tsjippy-add-form-multi-defaults', $this->defaultArrayValues, $this->userId, $this->formData->slug);
+        $this->defaultArrayValues    = apply_filters('tsjippy-forms-add-form-multi-defaults', $this->defaultArrayValues, $this->userId, $this->formData->slug);
 
         ksort($this->defaultArrayValues);
     }
@@ -571,7 +571,7 @@ class ElementHtmlBuilder extends SubmitForm
             }
         }
 
-        $output = apply_filters('tsjippy-transform-formtable-data', $output, $element, $submission, $this);
+        $output = apply_filters('tsjippy-forms-transform-formtable-data', $output, $element, $submission, $this);
         return $output;
     }
 
@@ -1754,7 +1754,7 @@ class ElementHtmlBuilder extends SubmitForm
         /**
          * Override filter, return a node to bypass this function
          */
-        $node                     = apply_filters('tsjippy-form-element-html-short-circuit', null, $parent, $this);
+        $node                     = apply_filters('tsjippy-forms-element-html-short-circuit', null, $parent, $this);
         if (!empty($node)) {
             if ($returnHtml) {
                 return $this->dom->saveHtml();
@@ -1916,7 +1916,7 @@ class ElementHtmlBuilder extends SubmitForm
             }
         } */
 
-        $node = apply_filters('tsjippy-form-element-html', $node, $this);
+        $node = apply_filters('tsjippy-forms-element-html', $node, $this);
 
         if ($returnHtml) {
             return $this->dom->saveHtml();

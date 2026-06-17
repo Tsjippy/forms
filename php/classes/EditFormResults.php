@@ -55,7 +55,7 @@ class EditFormResults extends DisplayFormResults
          * @param int            $subId            The sub id of the value
          * @param object        $object            The EditFormResults Instance
          */
-        $value                 = apply_filters('tsjippy-before-updating-formdata', $value, $elementId, $subId, $this);
+        $value                 = apply_filters('tsjippy-forms-before-updating-formdata', $value, $elementId, $subId, $this);
 
         if ($value === null || is_wp_error($value)) {
             return $value;
@@ -160,7 +160,7 @@ class EditFormResults extends DisplayFormResults
             }
         }
 
-        do_action('tsjippy-after-updating-formdata', $value, $elementId, $subId, $this);
+        do_action('tsjippy-forms-after-updating-formdata', $value, $elementId, $subId, $this);
 
         $this->sendEmail('fieldchanged');
         $this->sendEmail('fieldschanged');

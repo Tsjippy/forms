@@ -579,7 +579,7 @@ trait CreateJs
          * @param object $form The current form object
          * @param bool   $minified Whether the js code will be added to the minified version of the js file or the normal version
          **/
-        $extraJs   = apply_filters('tsjippy-form-extra-js', '', $this, false);
+        $extraJs   = apply_filters('tsjippy-forms-extra-js', '', $this, false);
         if (!empty($extraJs)) {
             if (empty($checks)) {
                 $js = $extraJs;
@@ -621,7 +621,7 @@ trait CreateJs
             $minifiedJs
         );
 
-        $extraJs   = apply_filters('tsjippy-form-extra-js', '', $this, true);
+        $extraJs   = apply_filters('tsjippy-forms-extra-js', '', $this, true);
         if (!empty($extraJs)) {
             $minifiedJs .= "\n\n";
             $minifiedJs .= $extraJs;

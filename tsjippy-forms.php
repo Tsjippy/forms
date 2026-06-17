@@ -52,10 +52,6 @@ register_activation_hook(__FILE__, function () {
     // Create frontend posting page
     $settings['forms-page']    = TSJIPPY\ADMIN\createDefaultPage('Form selector', '[tsjippy_formselector]');
     update_option('tsjippy_forms_settings', $settings);
-
-    TSJIPPY\scheduleTask('auto-archive', 'daily');
-
-    TSJIPPY\scheduleTask('form-reminder', 'daily');
 });
 
 register_deactivation_hook(__FILE__, function () {
@@ -63,7 +59,4 @@ register_deactivation_hook(__FILE__, function () {
         // Remove the auto created page
         wp_delete_post($page, true);
     }
-
-    wp_clear_scheduled_hook('auto_archive_action');
-    wp_clear_scheduled_hook('mandatory_fields_reminder_action');
 });

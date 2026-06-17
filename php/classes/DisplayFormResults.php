@@ -247,7 +247,7 @@ class DisplayFormResults extends DisplayForm
          * Add the metas to the submissions
          */
         $filtered    = apply_filters(
-            'tsjippy-formdata-retrieval-query',
+            'tsjippy-forms-formdata-retrieval-query',
             [
                 'baseQuery'    => $baseQuery,
                 'where'        => $where,
@@ -309,7 +309,7 @@ class DisplayFormResults extends DisplayForm
             }
         }
 
-        return apply_filters('tsjippy-retrieved-formdata', $submissions, $userId, $this);
+        return apply_filters('tsjippy-forms-retrieved-formdata', $submissions, $userId, $this);
     }
 
     /**
@@ -656,7 +656,7 @@ class DisplayFormResults extends DisplayForm
          * @var array    $values        Array of values for the where statements
          */
         $filtered    = apply_filters(
-            'tsjippy-formdata-retrieval-query',
+            'tsjippy-forms-formdata-retrieval-query',
             [
                 'query'        => '',
                 'where'        => $where,
@@ -679,7 +679,7 @@ class DisplayFormResults extends DisplayForm
         $this->total    = $wpdb->get_var($wpdb->prepare($countQuery, ...$values));
 
         if (empty($this->total)) {
-            return apply_filters('tsjippy-retrieved-formdata', [], $userId, $this);
+            return apply_filters('tsjippy-forms-retrieved-formdata', [], $userId, $this);
         }
 
         /**
@@ -759,7 +759,7 @@ class DisplayFormResults extends DisplayForm
             }
         }
 
-        $submissions    = apply_filters('tsjippy-retrieved-formdata', $submissions, $userId, $this);
+        $submissions    = apply_filters('tsjippy-forms-retrieved-formdata', $submissions, $userId, $this);
 
         return $submissions;
     }
@@ -916,7 +916,7 @@ class DisplayFormResults extends DisplayForm
             $actions[]    = $action;
         }
 
-        $actions = apply_filters('tsjippy-form-actions', $actions);
+        $actions = apply_filters('tsjippy-forms-actions', $actions);
         foreach ($actions as $action) {
             if (!isset($this->columnSettings[$action]) || !is_array($this->columnSettings[$action])) {
                 $this->columnSettings[$action] = [
@@ -1084,7 +1084,7 @@ class DisplayFormResults extends DisplayForm
                 //transform if needed
                 $orgFieldValue    = $value;
 
-                $value            = apply_filters('tsjippy-form-result-table-value', $value, $columnSetting, $this->submission, $this);
+                $value            = apply_filters('tsjippy-forms-result-table-value', $value, $columnSetting, $this->submission, $this);
                 $value            = $this->transformInputData($value, $this->getElementBySlug($class), $this->submission);
 
                 //show original email in excel
@@ -1156,7 +1156,7 @@ class DisplayFormResults extends DisplayForm
              * @param   array   $columnSetting          The current column settings array
              * @param   array   $submission             The current submission
              */
-            $attributes    = apply_filters('tsjippy-formresult-cell-attributes', $attributes, $this, $columnSetting, $this->submission);
+            $attributes    = apply_filters('tsjippy-forms-result-cell-attributes', $attributes, $this, $columnSetting, $this->submission);
 
             $td = addElement('td', $tr, $attributes);
 
@@ -1241,7 +1241,7 @@ class DisplayFormResults extends DisplayForm
          * @param   object  $submission The current submission
          * @param   object  $object     The current DisplayFormResults object
          */
-        $attributes = apply_filters('tsjippy-formresults-row-actions', $attributes, $this->submission, $this);
+        $attributes = apply_filters('tsjippy-forms-results-row-actions', $attributes, $this->submission, $this);
 
         $cell       = addElement('td', $row);
         //we have the attributes now, check for which one we have permission
@@ -1824,7 +1824,7 @@ class DisplayFormResults extends DisplayForm
                 </div>
 
                 <?php
-                do_action('tsjippy-formstable-after-table-settings', $this);
+                do_action('tsjippy-forms-after-table-settings', $this);
                 ?>
 
                 <div style='margin-top:10px;'>
@@ -2024,7 +2024,7 @@ class DisplayFormResults extends DisplayForm
                 $this->tableEditPermissions = false;
             }
 
-            $this->tableEditPermissions    = apply_filters('tsjippy-table-edit-permissions', $this->tableEditPermissions, $this);
+            $this->tableEditPermissions    = apply_filters('tsjippy-forms-table-edit-permissions', $this->tableEditPermissions, $this);
         }
 
         $this->tableViewPermissions    = true;
@@ -2042,7 +2042,7 @@ class DisplayFormResults extends DisplayForm
             $this->tableViewPermissions     = false;
         }
 
-        $this->tableViewPermissions    = apply_filters('tsjippy-table-view-permissions', $this->tableViewPermissions, $this);
+        $this->tableViewPermissions    = apply_filters('tsjippy-forms-table-view-permissions', $this->tableViewPermissions, $this);
     }
 
     /**
@@ -2330,7 +2330,7 @@ class DisplayFormResults extends DisplayForm
          * @param    object $object     The current instance of the form table class, can be used to get more information about the form and the user to decide whether or not to show the table
          * @param    string $type       The type of results that would be shown, either 'own', 'others' or 'all'
          */
-        $shouldShow    = apply_filters('tsjippy-formstable-should-show', true, $this, $type);
+        $shouldShow    = apply_filters('tsjippy-forms-table-should-show', true, $this, $type);
 
         ob_end_clean();
         if ($shouldShow !== true) {
@@ -2498,8 +2498,8 @@ class DisplayFormResults extends DisplayForm
 
         ob_start();
         //process any $_GET acions
-        do_action('tsjippy-formtable-GET-actions');
-        do_action('tsjippy-formtable-POST-actions');
+        do_action('tsjippy-forms-table-GET-actions');
+        do_action('tsjippy-forms-table-POST-actions');
 
         //Load js
         wp_enqueue_script('tsjippy_forms_table_script');
@@ -2617,7 +2617,7 @@ class DisplayFormResults extends DisplayForm
         foreach ($this->formData->actions ?? [] as $action) {
             $actions[]    = $action;
         }
-        $actions = apply_filters('tsjippy-form-actions', $actions);
+        $actions = apply_filters('tsjippy-forms-actions', $actions);
 
         //we have full permissions on this table
         $addHeading    = false;

@@ -1279,7 +1279,7 @@ class FormBuilderForm extends DisplayForm
                                 <?php
                             }
                         }
-                        do_action('tsjippy-add-email-placeholder-option', $this);
+                        do_action('tsjippy-forms-add-email-placeholder-option', $this);
                         ?>
                     </select>
 
@@ -1840,7 +1840,7 @@ class FormBuilderForm extends DisplayForm
                         "php"             => "Custom code"
                     ];
 
-                    $options    = apply_filters('tsjippy-special-form-elements', $options);
+                    $options    = apply_filters('tsjippy-forms-special-form-elements', $options);
 
                     foreach ($options as $key => $option) {
                         ?>
@@ -2037,7 +2037,7 @@ class FormBuilderForm extends DisplayForm
             </div>
 
             <?php
-            do_action('tsjippy-after-formbuilder-element-options', $element);
+            do_action('tsjippy-forms-after-formbuilder-element-options', $element);
             ?>
             <br>
             <div name='element-options' class='element-option reverse not-php <?php echo esc_attr($nonInputClasses); ?> shouldhide'>

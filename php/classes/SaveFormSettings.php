@@ -281,7 +281,7 @@ class SaveFormSettings extends Forms
             return new WP_Error('forms', $wpdb->last_error);
         }
 
-        do_action('tsjippy-after-formelement-updated', $element, $this, $oldElement);
+        do_action('tsjippy-forms-after-formelement-updated', $element, $this, $oldElement);
 
         return $result;
     }
@@ -412,7 +412,7 @@ class SaveFormSettings extends Forms
             return $result;
         }
 
-        do_action('tsjippy-after-form-reminder-save', $settings, $this);
+        do_action('tsjippy-forms-after-form-reminder-save', $settings, $this);
 
         return true;
     }

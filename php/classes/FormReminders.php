@@ -310,7 +310,7 @@ class FormReminders extends Forms
                 $this->elTableName
             )
         );
-        $this->mandatoryElements    = apply_filters("tsjippy-elements-filter", $this->mandatoryElements, $this);
+        $this->mandatoryElements    = apply_filters("tsjippy-forms-elements-filter", $this->mandatoryElements, $this);
     }
 
     /**
@@ -757,7 +757,7 @@ class FormReminders extends Forms
             $html    = "<ul>$html</ul>";
         }
 
-        $html    = apply_filters("tsjippy-manadatory-html-filter", $html, $userId, $this);
+        $html    = apply_filters("tsjippy-forms-manadatory-html-filter", $html, $userId, $this);
 
         return $html;
     }
