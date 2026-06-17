@@ -61,25 +61,23 @@ class AdminMenu extends ADMIN\SubAdminMenu
         $tbody  = addElement('tbody', $table);
 
         foreach ($forms->forms as $form) {
-            $formSlug    = $form->slug;
-            $formUrl    = $form->url;
-            if (empty($formUrl)) {
-                $formUrl    .= "Not set";
-            } else {
-                $formUrl    .= "<a href='$formUrl' target='_blank'>Link</a>";
-            }
-
             $tr     = addElement('tr', $tbody);
             addElement('td', $tr, [], $form->id);
-            addElement('td', $tr, [], $formSlug);
-            addElement('td', $tr, [], $formUrl);
+            addElement('td', $tr, [], $form->name ?? 'Not Set');
+            $td     = addElement('td', $tr, []);
+            
+            $formUrl  = $form->url;
+            if (empty($formUrl)) {
+                $td->append("Not set");
+            } else {
+                addElement('a', $td, ['href' => $formUrl, 'target' => '_blank'], 'Link');
+            }
 
-
-            $td     = addElement('td', $tr, [], $formUrl);
-            $formEl   = addElement('form', $td, ['method' => 'post', 'style' => 'display: inline-block; margin-right:10px;']);
+            $td     = addElement('td', $tr, []);
+            $formEl = addElement('form', $td, ['method' => 'post', 'style' => 'display: inline-block; margin-right:10px;']);
             addElement('button', $formEl, ['class' => 'small', 'name' => 'export', 'value' => $form->id], 'Export');
 
-            $formEl   = addElement('form', $td, ['method' => 'post', 'style' => 'display: inline-block;']);
+            $formEl = addElement('form', $td, ['method' => 'post', 'style' => 'display: inline-block;']);
             addElement('button', $formEl, ['class' => 'small', 'name' => 'delete', 'value' => $form->id], 'Delete');
         }
 
