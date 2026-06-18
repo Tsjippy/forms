@@ -566,7 +566,7 @@ class DisplayFormResults extends DisplayForm
      *
      * @return    array                        array of results
      */
-    public function getSubmissions($userId = null, $submissionId = null, $all = false, $where    = [], $values = [])
+    public function getSubmissions($userId = null, $submissionId = null, $all = false, $where = [], $values = [])
     {
         global $wpdb;
 

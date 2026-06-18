@@ -329,8 +329,8 @@ class EditFormResults extends DisplayFormResults
 
             $this->getForm($form->id);
 
-            $triggerId        = $form->autoarchive_el;
-            $triggerValue    = $form->autoarchive_value;
+            $triggerId    = $form->autoarchive_el;
+            $triggerValue = $form->autoarchive_value;
 
             if (empty($triggerId) || empty($triggerValue)) {
                 continue;
@@ -379,14 +379,12 @@ class EditFormResults extends DisplayFormResults
                 }
             }
 
-            $submissions        = $this->getSubmissions(
-                null,
-                null,
-                true,
-                [
+            $submissions = $this->getSubmissions(
+                all:   true,
+                where: [
                     "$triggerId $compare %s"
                 ],
-                [
+                values: [
                     $triggerValue
                 ]
             );
