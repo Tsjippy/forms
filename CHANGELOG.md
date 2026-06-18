@@ -4,14 +4,21 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.5.6] - 2026-06-18
+
+
+### Changed
 - hook and filter name update
 - hook and filter name update
 - code layout
 
 ### Fixed
 - admin date page
-
-### Updated
 
 ## [11.5.5] - 2026-06-15
 
