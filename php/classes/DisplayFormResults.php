@@ -67,10 +67,12 @@ class DisplayFormResults extends DisplayForm
         if (empty($this->formData)) {
             $this->hiddenColumns        = [];
         } elseif (!empty($this->formData->id)) {
-            $this->hiddenColumns        = get_user_meta($this->user->ID, 'tsjippy_hidden_columns_' . $this->formData->id, true);
-            if (empty($this->hiddenColumns)) {
-                $this->hiddenColumns    = [];
+            $value  = get_user_meta($this->user->ID, 'tsjippy_hidden_columns_' . $this->formData->id, true);
+            if(!is_array($value)){
+                $value  = [];
             }
+            $this->hiddenColumns        = $value;
+
         } else {
             return new WP_Error('forms', 'No form data found for the given form results shortcode');
         }

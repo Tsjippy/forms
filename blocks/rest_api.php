@@ -85,11 +85,11 @@ function showFormBuilder($attributes)
     if ($attributes instanceof \WP_REST_Request) {
         $isRest    = true;
         if (!empty($_REQUEST['formname'])) {
-            $attributes = ['formname' => $_REQUEST['formname']];
+            $attributes = ['formname' => TSJIPPY\sanitize($_REQUEST['formname'])];
         } elseif (!empty($_REQUEST['slug'])) {
-            $attributes = ['slug' => $_REQUEST['slug']];
+            $attributes = ['slug' => TSJIPPY\sanitize($_REQUEST['slug'])];
         } elseif (!empty($_REQUEST['form-id'])) {
-            $attributes = ['form-id' => $_REQUEST['form-id']];
+            $attributes = ['form-id' => (int) $_REQUEST['form-id']];
         } else {
             return false;
         }
