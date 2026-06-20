@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- get all user_meta including family_meta
 
 ### Updated
+
+## [11.5.8] - 2026-06-20
+
+
+### Fixed
+- get all user_meta including family_meta
 
 ## [11.5.7] - 2026-06-19
 
