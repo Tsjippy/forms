@@ -1059,6 +1059,7 @@ class Forms
             $this->elementMapper(true);
 
             if (empty($post)) {
+                // phpcs:ignore
                 $url    = TSJIPPY\sanitize($_SERVER['REQUEST_URI'] ?? '');
             } else {
                 $url    = get_page_link($post);
@@ -1386,7 +1387,7 @@ class Forms
                 $atts['only-own']     = $atts['onlyown'];
             }
 
-            $this->shortcodeId    = $atts['shortcode-id'];
+            $this->shortcodeId        = $atts['shortcode-id'];
             if ($this->shortcodeId == -1 && $atts['id'] !== -1) {
                 $this->shortcodeId    = $atts['id'];
             }

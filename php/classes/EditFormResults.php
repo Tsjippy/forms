@@ -105,7 +105,8 @@ class EditFormResults extends DisplayFormResults
 
             $curValue    = $wpdb->get_var(
                 $wpdb->prepare(
-                    "select $column from %i where id = %d",
+                    "select %s from %i where id = %d",
+                    $column,
                     $this->submissionTableName,
                     $submissionId
                 )

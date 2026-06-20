@@ -56,7 +56,7 @@ function showFormSelector($atts = [])
         return strcasecmp($a->slug, $b->slug);
     });
 
-?>
+    ?>
     <div id="forms-wrapper">
         <?php
         //only show selector if not queried
@@ -159,7 +159,7 @@ function showFormSelector($atts = [])
         }
         ?>
     </div>
-<?php
+    <?php
 
     return ob_get_clean();
 }

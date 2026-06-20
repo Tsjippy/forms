@@ -37,14 +37,14 @@ var insertFormShortcodeDialog = {
         ).value;
         if (formName != "") {
           tinymce.activeEditor.insertContent(
-            `[formbuilder formname=${formName}]`,
+            `[tsjippy_formbuilder slug=${formName}]`,
           );
           Main.displayMessage(
             "Form succesfully inserted.\n\n Please publish the page, then visit the new page to start building your form",
           );
         } else if (formSelector != "") {
           tinymce.activeEditor.insertContent(
-            `[formresults formname=${formSelector}]`,
+            `[tsjippy_formresults slug=${formSelector}]`,
           );
 
           alert(

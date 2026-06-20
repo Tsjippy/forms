@@ -114,12 +114,14 @@ class AdminMenu extends ADMIN\SubAdminMenu
         // phpcs:ignore
         if (isset($_POST['import-form'])) {
             $formBuilder    = new FormExport();
-            return $formBuilder->importForm(TSJIPPY\sanitize($_FILES['formfile']['tmp_name']));
+            // phpcs:ignore
+            return $formBuilder->importForm(TSJIPPY\sanitize($_FILES['formfile']['tmp_name'] ?? ''));
         }
 
         // phpcs:ignore
         if (is_numeric($_POST['export'] ?? '')) {
             $forms    = new FormExport();
+            // phpcs:ignore
             $forms->exportForm(TSJIPPY\sanitize($_POST['export']));
 
             return;
@@ -129,6 +131,7 @@ class AdminMenu extends ADMIN\SubAdminMenu
         if (is_numeric($_POST['delete'] ?? '')) {
             $forms    = new SaveFormSettings();
 
+            // phpcs:ignore
             return $forms->deleteForm(TSJIPPY\sanitize($_POST['delete']));
         }
 

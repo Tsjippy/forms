@@ -168,114 +168,59 @@ class DisplayFormResults extends DisplayForm
      */
     public function getMetaKeyFormSubmissions($userId = null, $all = false)
     {
-        global $wpdb;
-
-        // also check the users table
-        $colNames    = $wpdb->get_results("DESC {$wpdb->users}");
-        $usedCols    = ['ID', 'user_registered'];
-        foreach ($colNames as &$desc) {
-            $desc    = $desc->Field;
-        }
-
-        $baseQuery            = "SELECT * FROM %i WHERE ";
-        $where                = [];
-        $values                = [$wpdb->usermeta];
-
-        if (is_numeric($userId)) {
-            $where[]            = "user_id = %d ";
-            $values[]            = $userId;
-        }
-
-        $or    = [];
-
-        // Loop over all form elements to see which metas/userdata we need to get
-        foreach ($this->formElements as $element) {
-            if (!in_array($element->type, $this->nonInputs) && $element->id >= 0) {
-                $name            = trim($element->slug, '[]');
-
-                if (in_array($name, $colNames)) {
-                    $usedCols[]    = $name;
-                } else {
-                    $or[]            .= "%s";
-                    $values[]         = $name;
-                }
-            }
-        }
-
-        $where[]    = 'meta_key IN (' . implode(',', $or) . ')';
-
         $submissions = [];
+
         /**
          * Build the base submission
          */
-        $values    = [implode(',', $usedCols), $wpdb->users];
-
-        $w    = '';
-        if (is_numeric($userId)) {
-            $w            = "where user_id = %d ";
-            $values[]    = $userId;
-        }
-        $users        = $wpdb->get_results(
-            $wpdb->prepare("select %s from %i $w", $values)
-        );
-
         $counter    = 0;
+        if(is_numeric($userId)){
+            $users  = [get_userdata($userId)];
+        }else{
+            $users  = get_users();
+        }
+
+        $needed = str_replace('[]', '', array_keys($this->elementMapping['slug']));
+
         foreach ($users as $user) {
             $submission     = new \stdClass();
 
-            $submission->id                    = $counter;
-            $submission->form_id            = $this->formData->id;
+            $submission->id               = $counter;
+            $submission->form_id          = $this->formData->id;
 
             // Base submission data
-            $submission->time_created        = $user->user_registered;
-            $submission->time_last_edited        = $user->user_registered;
-            unset($usedCols['user_registered']);
+            $submission->time_created     = $user->user_registered;
+            $submission->time_last_edited = $user->user_registered;
 
-            $submission->user_id                = $user->ID;
-            $submission->submitter_id        = $user->ID;
-            unset($usedCols['ID']);
+            $submission->user_id          = $user->ID;
+            $submission->submitter_id     = $user->ID;
 
             // Add the remaining user data if any
-            foreach ($usedCols as $col) {
-                $submission->$col    = $user->$col;
+            foreach ($user->data as $key => $value) {
+                if(!in_array($key, $needed)){
+                    continue;
+                }
+                $submission->$key    = $value;
             }
 
-            $submissions[$user->ID]    = $submission;
+            // Meta values
+            // parse results to merge based on userId
+            foreach (get_user_meta($user->ID) as $key => $meta) {
+                $key    = str_replace('tsjippy_', '', $key);
+                if(!in_array($key, $needed)){
+                    continue;
+                }
+
+                $meta   = array_map('maybe_unserialize', $meta);
+                if(count($meta) < 2){
+                    $meta   = $meta[0];
+                }
+                $submission->$key   = $meta;
+            }
+
+            $submissions[$user->ID] = $submission;
 
             $counter++;
-        }
-
-        /**
-         * Add the metas to the submissions
-         */
-        $filtered    = apply_filters(
-            'tsjippy-forms-formdata-retrieval-query',
-            [
-                'baseQuery'    => $baseQuery,
-                'where'        => $where,
-                'values'    => $values,
-            ],
-            $userId,
-            $this
-        );
-        extract($filtered);
-
-        $query    = $baseQuery . implode(' AND ', $where);
-
-        if (count($values) != substr_count($query, '%')) {
-            TSJIPPY\printArray($query);
-            TSJIPPY\printArray($values);
-        }
-
-        // phpcs:disable
-        $metas        = $wpdb->get_results(
-            $wpdb->prepare($query, $values)
-        );
-        // phpcs:enable
-
-        // parse results to merge based on userId
-        foreach ($metas as $meta) {
-            $submissions[$meta->user_id]->{$meta->meta_key}    = maybe_unserialize($meta->meta_value);
         }
 
         // Get the total
@@ -284,6 +229,7 @@ class DisplayFormResults extends DisplayForm
         // Limit the amount to 100
         // phpcs:ignore
         if (!$all && is_numeric($_REQUEST['page-number'] ?? '') && $this->total > $this->pageSize) {
+            // phpcs:ignore
             $this->currentPage    = TSJIPPY\sanitize($_REQUEST['page-number']);
 
             // phpcs:ignore
@@ -560,13 +506,13 @@ class DisplayFormResults extends DisplayForm
     /**
      * Get formresults of the current form
      *
-     * @param    int|array    $userId            Optional the user id to get the results of or an array of user ids. Default null
-     * @param    int            $submissionId    Optional a specific submission id. Default null
+     * @param    int|array   $userId         Optional the user id to get the results of or an array of user ids. Default null
+     * @param    int         $submissionId   Optional a specific submission id. Default null
      * @param    bool        $all            Whether to retrieve all submissions or paged. Default false
-     * @param    array        $where            Optional array of where conditions. Default empty array
-     * @param    array        $values            Optional array of values for the where conditions. Default empty array
+     * @param    array       $where          Optional array of where conditions. Default empty array
+     * @param    array       $values         Optional array of values for the where conditions. Default empty array
      *
-     * @return    array                        array of results
+     * @return    array                      Array of results
      */
     public function getSubmissions($userId = null, $submissionId = null, $all = false, $where = [], $values = [])
     {
@@ -582,6 +528,7 @@ class DisplayFormResults extends DisplayForm
         // Submission id
         // phpcs:ignore
         if (empty($submissionId) && !empty($_REQUEST['id'])) {
+            // phpcs:ignore
             $submissionId    = TSJIPPY\sanitize($_REQUEST['id']);
         }
 
@@ -690,6 +637,7 @@ class DisplayFormResults extends DisplayForm
         // Limit the amount to 100
         // phpcs:ignore
         if (is_numeric($_REQUEST['page-number'] ?? '')) {
+            // phpcs:ignore
             $this->currentPage    = TSJIPPY\sanitize($_REQUEST['page-number']);
 
             // phpcs:ignore
@@ -914,7 +862,7 @@ class DisplayFormResults extends DisplayForm
 
         //Add a row for each table action as well
         $actions    = [];
-        foreach ($this->formData->actions as $action) {
+        foreach ($this->formData->actions ?? [] as $action) {
             $actions[]    = $action;
         }
 
@@ -991,17 +939,17 @@ class DisplayFormResults extends DisplayForm
                     !$ownEntry ||
                     (                                                                           //not our own entry
                         $ownEntry &&                                                            //or it is our own
-                        !in_array('own', (array)$columnSetting['view_right_roles'] ?? [])       //but we are not allowed to see it
+                        !in_array('own', (array)$columnSetting['view_right_roles'])       //but we are not allowed to see it
                     )
                 )    &&
                 !$this->tableEditPermissions &&                                                 //no permission to edit the table and
-                !empty($columnSetting['view_right_roles'] ?? []) &&                                   // there are view right permissions defined
-                !array_intersect($this->userRoles, $columnSetting['view_right_roles'] ?? [])          // and we do not have the view right role
+                !empty($columnSetting['view_right_roles']) &&                                   // there are view right permissions defined
+                !array_intersect($this->userRoles, $columnSetting['view_right_roles'])          // and we do not have the view right role
             ) {
                 //later on there will be a row with data in this column
                 if (
                     $this->ownData &&                                                           // we are only showing own data
-                    in_array('own', $columnSetting['view_right_roles'] ?? [])                         // and this column can be viewed by owner
+                    in_array('own', $columnSetting['view_right_roles'])                         // and this column can be viewed by owner
                 ) {
                     $value = 'X'; // we cannot see this value, but we can see other values in this column
                 } else {
@@ -1019,16 +967,16 @@ class DisplayFormResults extends DisplayForm
                         empty($values[trim($this->tableSettings->hide_row, '[]')])               // also check the name without []
                     )
                 ) &&
-                !array_intersect($this->userRoles, (array)$columnSetting['edit_right_roles'] ?? [])    &&        // And we have no right to edit this specific column
+                !array_intersect($this->userRoles, (array)$columnSetting['edit_right_roles'])    &&        // And we have no right to edit this specific column
                 !$this->tableEditPermissions                                                            // and we have no right to edit all table data
             ) {
                 return;
             }
 
             if (
-                in_array('own', $columnSetting['edit_right_roles'] ?? []) &&
+                in_array('own', $columnSetting['edit_right_roles']) &&
                 $ownEntry ||
-                array_intersect($this->userRoles, $columnSetting['edit_right_roles'] ?? []) ||
+                array_intersect($this->userRoles, $columnSetting['edit_right_roles']) ||
                 $this->tableEditPermissions
             ) {
                 $elementEditRights = true;
@@ -1041,7 +989,7 @@ class DisplayFormResults extends DisplayForm
             /*
                 Write the content to the cell, convert to something if needed
             */
-            $class          = $columnSetting['slug'];
+            $class          = str_replace('[]', '', $columnSetting['slug']);
 
             $elementName    = $columnSetting['name'];
 
@@ -1209,7 +1157,7 @@ class DisplayFormResults extends DisplayForm
             if (
                 !$this->tableEditPermissions                  &&      // if we are notallowed to do all actions
                 $this->submission->user_id != $this->user->ID &&      //  this is not our own entry
-                !array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'] ?? [])
+                !array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])
             ) {
                 continue;
             }
@@ -1426,7 +1374,7 @@ class DisplayFormResults extends DisplayForm
                                             ?>
                                                 <option 
                                                     value='<?php echo esc_attr($key); ?>' 
-                                                    <?php if (in_array($key, $columnSetting['view_right_roles'] ?? [])) { echo "selected=selected"; } ?>
+                                                    <?php if (in_array($key, $columnSetting['view_right_roles'])) { echo "selected=selected"; } ?>
                                                 >
                                                     <?php echo esc_html($roleName); ?>
                                                 </option>
@@ -1447,7 +1395,7 @@ class DisplayFormResults extends DisplayForm
                                         <?php
                                         foreach ($editRoles as $key => $roleName) {
                                         ?>
-                                            <option value='<?php echo esc_attr($key); ?>' <?php if (in_array($key, $columnSetting['edit_right_roles'] ?? [])) {
+                                            <option value='<?php echo esc_attr($key); ?>' <?php if (in_array($key, $columnSetting['edit_right_roles'])) {
                                                                                                 echo "selected=selected";
                                                                                             } ?>>
                                                 <?php echo esc_html($roleName); ?>
@@ -1490,7 +1438,7 @@ class DisplayFormResults extends DisplayForm
      */
     protected function tableSettingsForm($class, $viewRoles, $editRoles)
     {
-    ?>
+        ?>
         <div class="tabcontent <?php echo esc_attr($class); ?>" id="table-rights-<?php echo esc_attr($this->shortcodeId); ?>">
             <form>
                 <input type='hidden' class='no-reset' class='shortcode-settings' name='shortcode-id' value='<?php echo esc_attr($this->shortcodeId); ?>'>
@@ -1922,7 +1870,7 @@ class DisplayFormResults extends DisplayForm
                 ?>
             </form>
         </div>
-    <?php
+        <?php
     }
 
     /**
@@ -1957,7 +1905,7 @@ class DisplayFormResults extends DisplayForm
         }
 
         ob_start();
-    ?>
+        ?>
         <div class="modal form-shortcode-settings hidden">
             <!-- Modal content -->
             <div class="modal-content" style='max-width:100vw;min-width:90vw;'>
@@ -1977,7 +1925,7 @@ class DisplayFormResults extends DisplayForm
                 ?>
             </div>
         </div>
-    <?php
+        <?php
 
         return ob_get_clean();
     }
@@ -2073,6 +2021,7 @@ class DisplayFormResults extends DisplayForm
 
             // phpcs:ignore
             if (!empty($_POST[$filterKey])) {
+                // phpcs:ignore
                 $filterValue    = TSJIPPY\sanitize($_POST[$filterKey]);
             }
 
@@ -2346,6 +2295,7 @@ class DisplayFormResults extends DisplayForm
             if (!$userId) {
                 // phpcs:ignore
                 if (($_REQUEST['hash'] ?? '') == wp_hash($_REQUEST['id'] ?? '')) {
+                    // phpcs:ignore
                     $userId        = TSJIPPY\sanitize($_REQUEST['hash']);
                 } else {
                     return $this->emptyTable();
@@ -2359,6 +2309,7 @@ class DisplayFormResults extends DisplayForm
             // Get the sort column from $_POST
             // phpcs:ignore
             if (isset($_REQUEST['sortcol'])) {
+                // phpcs:ignore
                 $this->sortElementIds    = [TSJIPPY\sanitize($_REQUEST['sortcol'])];
             }
 
@@ -2390,6 +2341,7 @@ class DisplayFormResults extends DisplayForm
 
         // phpcs:ignore
         if (isset($_REQUEST['sortdir'])) {
+            // phpcs:ignore
             $this->sortDirection    = TSJIPPY\sanitize($_REQUEST['sortdir']);
         }
 
@@ -2515,6 +2467,7 @@ class DisplayFormResults extends DisplayForm
                 ?>
             </div>
             <?php
+            // phpcs:ignore
             echo $tableHtml;
             ?>
         </div>
@@ -2545,12 +2498,13 @@ class DisplayFormResults extends DisplayForm
                 (
                     !$this->ownData                        ||                          //The table does not contain data of our own
                     (
-                        $this->ownData                      &&                         //or it does contain our own data but
-                        !in_array('own', $columnSetting['view_right_roles'] ?? [])     //we are not allowed to see it
+                        $this->ownData                      &&                  //or it does contain our own data but
+                        !empty($columnSetting['view_right_roles']) &&                      
+                        !in_array('own', $columnSetting['view_right_roles'])     //we are not allowed to see it
                     )
                 ) &&
                 !$this->tableEditPermissions                 &&                        // no permission to edit the table and
-                !array_intersect($this->userRoles, $columnSetting['view_right_roles'] ?? []) // and we do not have the view right role and
+                !array_intersect($this->userRoles, $columnSetting['view_right_roles']) // and we do not have the view right role and
             ) {
                 continue;
             }
@@ -2628,7 +2582,7 @@ class DisplayFormResults extends DisplayForm
         } else {
             foreach ($actions as $action) {
                 //we have permission for this specific button
-                if (array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'] ?? [])) {
+                if (array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])) {
                     $addHeading    = true;
                 } elseif ($type != 'others') {
                     //Loop over all submissions to see if the current user has permission for them
@@ -2691,7 +2645,7 @@ class DisplayFormResults extends DisplayForm
     public function checkForFormShortcode($data)
     {
         //find any formresults shortcode
-        $pattern = "/\[formresults([^\]]*{formname,slug}=(.*)[^\]]*)\]/s";
+        $pattern = "/\[tsjippy_formresults([^\]]*[formname,slug]=(.*)[^\]]*)\]/s";
 
         //if there are matches
         if (preg_match_all($pattern, $data['post_content'], $matches)) {

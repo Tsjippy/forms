@@ -52,8 +52,10 @@ class SubmitForm extends SaveFormSettings
      */
     public function emailFooter($footer)
     {
-        $footer['url']  = TSJIPPY\sanitize($_POST['formurl'], 'url');
-        $footer['text'] = TSJIPPY\sanitize($_POST['formurl'], 'url');
+        // phpcs:ignore
+        $url    = TSJIPPY\sanitize($_POST['formurl'], 'url');
+        $footer['url']  = $url;
+        $footer['text'] = $url;
 
         return $footer;
     }

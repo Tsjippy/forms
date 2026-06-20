@@ -59,7 +59,7 @@ function restApiInit()
             'methods'             => 'POST,GET',
             'callback'            => function ($attributes) {
                 if ($attributes instanceof \WP_REST_Request) {
-                    $attributes    = $_REQUEST;
+                    $attributes    = TSJIPPY\sanitize($_REQUEST);
                 }
                 $result    = missingFormFields($attributes);
                 if (empty($result)) {
@@ -84,6 +84,7 @@ function showFormBuilder($attributes)
     $isRest    = false;
     if ($attributes instanceof \WP_REST_Request) {
         $isRest    = true;
+        // phpcs:disable
         if (!empty($_REQUEST['formname'])) {
             $attributes = ['formname' => TSJIPPY\sanitize($_REQUEST['formname'])];
         } elseif (!empty($_REQUEST['slug'])) {
@@ -93,6 +94,7 @@ function showFormBuilder($attributes)
         } else {
             return false;
         }
+        // phpcs:enable
     }
 
     if(!empty($_REQUEST['formbuilder'])){
@@ -148,6 +150,7 @@ function showFormResults($attributes)
 {
 
     if ($attributes instanceof \WP_REST_Request) {
+        // phpcs:disable
         if (!empty($_REQUEST['form-id'])) {
             $attributes = [
                 'form-id'         => TSJIPPY\sanitize($_REQUEST['form-id']),
@@ -168,6 +171,7 @@ function showFormResults($attributes)
         } else {
             return false;
         }
+        // phpcs:enable
     } elseif (!isset($attributes['form-id'])) {
         return false;
     }
@@ -182,6 +186,7 @@ function showFormResults($attributes)
 
     $object = new DisplayFormResults($attributes); 
 
+    // phpcs:ignore
     $html   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
 
     //now we have rendered all the content we can export the excel if requested

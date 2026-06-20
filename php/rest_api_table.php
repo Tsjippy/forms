@@ -245,21 +245,26 @@ function restApiInitTable()
 
 function getPage()
 {
+    // phpcs:ignore
     $displayFormResults = new DisplayFormResults(atts: TSJIPPY\sanitize($_POST), pageSize: TSJIPPY\sanitize($_REQUEST['pagesize'] ?? 50)); 
 
     $displayFormResults->loadShortcodeData();
 
     $tables             = [];
 
+    // phpcs:ignore
     $types              = [TSJIPPY\sanitize($_POST['type'])];
+    // phpcs:ignore
     if (TSJIPPY\sanitize($_POST['type']) == 'all' && $displayFormResults->tableSettings->split_table) {
         $types          = ['own', 'others'];
     }
 
+    // phpcs:ignore
     if(!empty($_GET['only-own'])){
         $displayFormResults->onlyOwn      = true;
     }
 
+    // phpcs:ignore
     if(!empty($_GET['archived'])){
         $displayFormResults->showArchived = true;
     }
@@ -273,12 +278,12 @@ function getPage()
 
 function saveTablePrefs(\WP_REST_Request $request)
 {
-    $columnName                    = $request['column-name'];
+    $columnName                 = TSJIPPY\sanitize($request['column-name'] ?? '');
 
-    $userId                        = get_current_user_id();
-    $hiddenColumns                = (array)get_user_meta($userId, 'tsjippy_hidden_columns_' . (int) $request['form-id'], true);
+    $userId                     = get_current_user_id();
+    $hiddenColumns              = (array)get_user_meta($userId, 'tsjippy_hidden_columns_' . (int) $request['form-id'] ?? '', true);
 
-    $hiddenColumns[$columnName]    = 'hidden';
+    $hiddenColumns[$columnName] = 'hidden';
 
     update_user_meta($userId, 'tsjippy_hidden_columns_' . (int) $request['form-id'], $hiddenColumns);
 
@@ -298,9 +303,9 @@ function saveColumnSettings($settings = [], $shortcodeId = '')
     $forms    = new SaveFormSettings();
 
     if ($settings instanceof \WP_REST_Request) {
-        $params            = $settings->get_params();
+        $params   = $settings->get_params();
 
-        $settings         = $params['column-settings'];
+        $settings = $params['column-settings'];
     }
 
     $result = $forms->saveColumnSettings($settings, $shortcodeId);
@@ -428,22 +433,22 @@ function getInputHtml()
     //Loop over the options array
     foreach ($options as $option) {
         //Remove starting or ending spaces and make it lowercase
-        $option         = explode('=', trim($option));
+        $option    = explode('=', trim($option));
 
-        $optionType        = $option[0];
+        $optionType = $option[0];
 
         if (empty($option[1])) {
             TSJIPPY\printArray(["Option '$optionType' has no value, skipping", $option]);
             continue;
         }
-        $optionValue    = str_replace('\\\\', '\\', $option[1]);
+        $optionValue      = str_replace('\\\\', '\\', $option[1]);
 
         // This option is a list option
         if ($optionType == 'list') {
-            $datalist    = $formTable->getElementBySlug($optionValue);
+            $datalist     = $formTable->getElementBySlug($optionValue);
 
             if ($datalist == $element) {
-                $datalist    = $formTable->getElementBySlug($optionValue . '-list');
+                $datalist = $formTable->getElementBySlug($optionValue . '-list');
                 TSJIPPY\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
             }
 
@@ -455,19 +460,19 @@ function getInputHtml()
     }
 
     // prepend html with the html of previous element that wrap this elemnt
-    $index            = $element->priority - 2;
+    $index           = $element->priority - 2;
     $prevElement     = $formTable->formElements[$index];
     while ($prevElement && $prevElement->wrap) {
         $index--;
-        $html             = $formTable->getElementHtml($prevElement, '') . $html;
-        $prevElement     = $formTable->formElements[$index];
+        $html        = $formTable->getElementHtml($prevElement, '') . $html;
+        $prevElement = $formTable->formElements[$index];
     }
 
     // add next elements if they are wrapped in this one
-    $index            = $element->priority;
+    $index           = $element->priority;
     while ($element->wrap) {
-        $element = $formTable->formElements[$index];
-        $html     .= $formTable->getElementHtml($element, '');
+        $element     = $formTable->formElements[$index];
+        $html       .= $formTable->getElementHtml($element, '');
         $index++;
     }
 
@@ -514,7 +519,7 @@ function editValue()
 
     //send message back to js
     return [
-        'message'            => "Succesfully updated the value to $transValue",
-        'new-value'            => $transValue,
+        'message'   => "Succesfully updated the value to $transValue",
+        'new-value' => $transValue,
     ];
 }

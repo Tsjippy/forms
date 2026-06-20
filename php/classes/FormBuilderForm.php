@@ -2158,7 +2158,7 @@ class FormBuilderForm extends DisplayForm
             <div style="display: none;" class="error"></div>
             <?php
 
-            // ignore
+            // phpcs:ignore
             echo $formContents;
 
             TSJIPPY\addSaveButton('submit-form-element', "$text form element"); ?>

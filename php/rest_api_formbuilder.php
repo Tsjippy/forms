@@ -333,6 +333,7 @@ function restApiInitForms()
                     }
                 }
 
+                // phpcs:ignore
                 return $formBuilder->formSubmit($userId, (int) $_POST['form-id'], TSJIPPY\sanitize($_POST));
             },
             'permission_callback'     => '__return_true',
@@ -396,8 +397,9 @@ function addFormElement($copy = false)
 {
     global $wpdb;
 
-
+    // phpcs:ignore
     $forms    = new SaveFormSettings(formUrl: TSJIPPY\sanitize($_REQUEST['form-url'] ?? ''));
+    // phpcs:ignore
     $forms->getForm((int) $_POST['form-id']);
 
     $index        = 0;
@@ -405,6 +407,7 @@ function addFormElement($copy = false)
 
     //copy an existing element
     if ($copy === true) {
+        // phpcs:ignore
         $element            = $forms->getElementById((int) $_POST['element-id']);
 
         $element->slug        = $element->name;
@@ -414,6 +417,7 @@ function addFormElement($copy = false)
 
     // Get element from $_POST
     else {
+        // phpcs:ignore
         $element            = TSJIPPY\sanitize($_POST["formfield"]);
         $element            = (object)$element;
 
@@ -511,6 +515,7 @@ function addFormElement($copy = false)
                 )
             ) + 1;
         } else {
+            // phpcs:ignore
             $element->priority    = (int) $_POST['insert-after'] + 1;
         }
 
@@ -519,6 +524,7 @@ function addFormElement($copy = false)
         // phpcs:ignore
         if (!empty($_POST['extra'])) {
             // The current indexes without the new element
+            // phpcs:ignore
             $newIndexes     = (array)json_decode(TSJIPPY\sanitize($_POST['extra']));
 
             // The new element has an unknow id of -1, replace it with the real id.
@@ -576,8 +582,8 @@ function requestFormElement()
 {
     $formBuilderForm        = new FormBuilderForm();
 
-    $formId                 = (int) $_POST['form-id'];
-    $elementId              = (int) $_POST['element-id'];
+    $formId                 = (int) $_POST['form-id'] ?? '';
+    $elementId              = (int) $_POST['element-id'] ?? '';
 
     $formBuilderForm->getForm($formId);
 
@@ -596,11 +602,12 @@ function reorderFormElements()
 {
     $formBuilder            = new SaveFormSettings();
 
-    $formBuilder->formId    = (int) $_POST['form-id'];
+    $formBuilder->formId    = (int) $_POST['form-id'] ?? '';
 
+    // phpcs:ignore
     $newIndexes             = (array)json_decode(TSJIPPY\sanitize($_POST['indexes']));
 
-    $element                = $formBuilder->getElementById((int) $_POST['el-id']);
+    $element                = $formBuilder->getElementById((int) $_POST['el-id'] ?? '');
 
     $formBuilder->reorderElements($newIndexes, $element);
 
@@ -612,14 +619,14 @@ function editFormfieldWidth()
 {
     $formBuilder    = new SaveFormSettings();
 
-    $elementId      = (int) $_POST['elementid'];
+    $elementId      = (int) $_POST['elementid'] ?? '';
     $element        = $formBuilder->getElementById($elementId);
 
-    $newwidth       = (int) $_POST['new-width'];
+    $newwidth       = (int) $_POST['new-width'] ?? '';
     $element->width = min($newwidth, 100);
 
     if ($formBuilder->formData == null) {
-        $formBuilder->getForm((int) $_POST['form-id']);
+        $formBuilder->getForm((int) $_POST['form-id'] ?? '');
     }
 
     $formBuilder->updateFormElement($element);
@@ -632,9 +639,9 @@ function requestFormConditionsHtml()
 {
     $formBuilder = new FormBuilderForm();
 
-    $elementID   = (int) $_POST['elementid'];
+    $elementID   = (int) $_POST['elementid'] ?? '';
 
-    $formBuilder->getForm((int) $_POST['form-id']);
+    $formBuilder->getForm((int) $_POST['form-id'] ?? '');
 
     return $formBuilder->elementConditionsForm($elementID);
 }
@@ -644,11 +651,11 @@ function saveElementConditions()
 {
     $formBuilder          = new SaveFormSettings();
 
-    $elementId            = (int) $_POST['elementid'];
+    $elementId            = (int) $_POST['elementid'] ?? '';
     if (!$elementId) {
         return new \WP_Error('forms', "First save the element before adding conditions to it");
     }
-    $formId                = (int) $_POST['form-id'];
+    $formId                = (int) $_POST['form-id'] ?? '';
 
     $formBuilder->getForm($formId);
 

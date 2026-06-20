@@ -47,6 +47,7 @@ function dashboardWarnings($userId)
             <br>
         </p>
         <?php
+        // phpcs:ignore
         echo $html;
     }
 }

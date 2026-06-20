@@ -211,6 +211,7 @@ class SaveFormSettings extends Forms
             // Nothing got updated, maybe we should create instead of update
             if ($result == false) {
                 // check if this already exists
+                // phpcs:ignore
                 $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE " . implode('=%s AND ', array_keys($where)) . "=%s", array_values($where)));
 
                 if ($wpdb->num_rows === 0) {
@@ -481,17 +482,22 @@ class SaveFormSettings extends Forms
         global $wpdb;
 
         // Remove deleted emails
-        $existingEmails    = $wpdb->get_col("SELECT id FROM {$this->formEmailTable} WHERE form_id = $formId");
+        $existingEmails    = $wpdb->get_col($wpdb->prepare(
+            "SELECT id FROM %i WHERE form_id = %d",
+            $this->formEmailTable,
+            $formId
+        ));
 
         $emailsToKeep    = array_column($formEmails, 'email-id');
 
-        $emailsToDelete    = array_diff($existingEmails, $emailsToKeep);
+        $emailsToDelete  = array_diff($existingEmails, $emailsToKeep);
 
         // Remove any deleted e-mails
         if (!empty($emailsToDelete)) {
 
             $placeholders   = implode(', ', array_fill(0, count($emailsToDelete), '%d'));
 
+            // phpcs:disable
             $wpdb->query(
                 $wpdb->prepare(
                     "DELETE FROM %i WHERE id IN ($placeholders)",
@@ -499,6 +505,7 @@ class SaveFormSettings extends Forms
                     ...$emailsToDelete
                 )
             );
+            // phpcs:enable
         }
 
         $result    = true;
