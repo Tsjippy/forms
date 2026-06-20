@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- get all user_meta including family_meta
 
 ### Updated
 
