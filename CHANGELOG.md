@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- append table to parent node
 
 ### Fixed
 
