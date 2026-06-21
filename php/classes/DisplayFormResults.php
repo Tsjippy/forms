@@ -1108,9 +1108,11 @@ class DisplayFormResults extends DisplayForm
              */
             $attributes    = apply_filters('tsjippy-forms-result-cell-attributes', $attributes, $this, $columnSetting, $this->submission);
 
-            $td = addElement('td', $tr, $attributes);
+            $td            = addElement('td', $tr, $attributes);
 
-            TSJIPPY\addRawHtml($value, $td);
+            if(!empty($value)){
+                TSJIPPY\addRawHtml($value, $td);
+            }
 
             // Add a copy option to the value
             if (isset($columnSetting['copy'])) {

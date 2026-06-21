@@ -272,11 +272,11 @@ class FormReminders extends Forms
         $this->getMinimumDate($formReminder, $query, $values);
 
         // phpcs:disable
-        $submissions    = $wpdb->get_results(
-            $wpdb->prepare(
-                $query,
-                $values
-            )
+        $submissions    = TSJIPPY\getFromDb(
+            "get_submissions_".$formReminder->form_id,
+            'forms',
+            $query,
+            $values
         );
         // phpcs:enable
 
@@ -302,13 +302,11 @@ class FormReminders extends Forms
      */
     protected function getMandatoryElements()
     {
-        global $wpdb;
-
-        $this->mandatoryElements    = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM %i WHERE mandatory=1 OR recommended=1",
-                $this->elTableName
-            )
+        $this->mandatoryElements    = TSJIPPY\getFromDb(
+            "manadatory_elements",
+            "forms",
+            "SELECT * FROM %i WHERE mandatory=1 OR recommended=1",
+            $this->elTableName
         );
         $this->mandatoryElements    = apply_filters("tsjippy-forms-elements-filter", $this->mandatoryElements, $this);
     }

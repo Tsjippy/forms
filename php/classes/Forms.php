@@ -784,11 +784,11 @@ class Forms
     {
         global $wpdb;
 
-        $this->forms                    = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM %i",
-                $this->tableName
-            )
+        $this->forms =  TSJIPPY\getFromDb(
+            "get_all_forms",
+            "forms",
+            "SELECT * FROM %i",
+            $this->tableName
         );
     }
 
@@ -915,19 +915,18 @@ class Forms
      */
     public function getFormReminder($formId = '')
     {
-        global $wpdb;
 
         if (empty($formId)) {
             $formId    = $this->formData->id;
         }
         $this->formReminder    = new stdClass();
 
-        $results    = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM %i WHERE form_id = %d",
-                $this->formReminderTable,
-                $formId
-            )
+        $results    =  TSJIPPY\getFromDb(
+            "get_form_reminders_$formId",
+            "forms",
+            "SELECT * FROM %i WHERE form_id = %d",
+            $this->formReminderTable,
+            $formId
         );
 
         if (empty($results)) {
@@ -952,8 +951,12 @@ class Forms
             return new WP_Error('forms', "no form is loaded");
         }
 
-        $this->emailSettings                = $wpdb->get_results(
-            $wpdb->prepare("select * from %i where form_id=%d", $this->formEmailTable, $this->formData->id)
+        $this->emailSettings =  TSJIPPY\getFromDb(
+            "get_email_settings_".$this->formData->id,
+            "forms",
+            "select * from %i where form_id=%d", 
+            $this->formEmailTable, 
+            $this->formData->id
         );
 
         foreach ($this->emailSettings as &$emailSetting) {
@@ -1267,9 +1270,9 @@ class Forms
     /**
      * Get all elements belonging to the current form
      *
-     * @param    string    $sortCol    the column to sort on. Default empty
-     * @param    int        $formId        The id of the form to get elements for, default empty
-     * @param    bool    $force        Whether to requery, default false
+     * @param    string     $sortCol        the column to sort on. Default empty
+     * @param    int        $formId         The id of the form to get elements for, default empty
+     * @param    bool       $force          Whether to requery, default false
      */
     public function getAllFormElements($sortCol = '', $formId = '', $force = false)
     {
@@ -1297,14 +1300,16 @@ class Forms
             $this->elTableName,
             $formId
         ];
+        $cacheKey   = "form_elements_$formId";
 
         if (!empty($sortCol)) {
-            $query .= " ORDER BY %s ASC";
+            $query      .= " ORDER BY %s ASC";
             $values[]    = $sortCol;
+            $cacheKey   .= "_sorted_$sortCol";
         }
 
         // phpcs:ignore
-        $elements    = $wpdb->get_results($wpdb->prepare($query, $values));
+        $elements    =  TSJIPPY\getFromDb($cacheKey, "forms", $query, $values);
 
         foreach ($elements as &$element) {
             if (!empty($element->conditions)) {

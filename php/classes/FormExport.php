@@ -57,8 +57,12 @@ class FormExport extends FormBuilderForm
         /**
          * Form E-mails
          */
-        $emailSettings    = $wpdb->get_results(
-            $wpdb->prepare("select * from %i where form_id=%d", $this->formEmailTable, $this->formData->id)
+        $emailSettings    = TSJIPPY\getFromDb(
+            "get_email_settings_$formId",
+            'forms',
+            "select * from %i where form_id=%d", 
+            $this->formEmailTable, 
+            $this->formData->id
         );
 
         foreach ($emailSettings as &$emailSetting) {
@@ -72,8 +76,12 @@ class FormExport extends FormBuilderForm
         /**
          * Form Reminders
          */
-        $reminders            = $wpdb->get_results(
-            $wpdb->prepare("SELECT * FROM %i WHERE form_id = %d", $this->formReminderTable, $formId)
+        $reminders            = TSJIPPY\getFromDb(
+            "form_reminders_$formId",
+            'forms',
+            "SELECT * FROM %i WHERE form_id = %d", 
+            $this->formReminderTable, 
+            $formId
         );
 
         if (!empty($reminders)) {

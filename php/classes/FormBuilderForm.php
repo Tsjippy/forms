@@ -1073,7 +1073,7 @@ class FormBuilderForm extends DisplayForm
         }
 
         // get all possible user meta keys, not just the one the current user has
-        $userMetaKeys = apply_filters('tsjippy-forms-user-meta-keys', $wpdb->get_col("SELECT DISTINCT `meta_key` FROM `{$wpdb->usermeta}` ORDER BY `meta_key` ASC"));
+        $userMetaKeys = apply_filters('tsjippy-forms-user-meta-keys', TSJIPPY\getFromDb('get_all_meta_keys', 'forms', "SELECT DISTINCT `meta_key` FROM %i ORDER BY `meta_key` ASC", $wpdb->usermeta));
 
         sort($userMetaKeys, SORT_STRING | SORT_FLAG_CASE);
 

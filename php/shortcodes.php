@@ -220,7 +220,7 @@ add_shortcode('tsjippy_formresults', __NAMESPACE__ . '\formResults');
  *
  * @param   array   $atts    The shortcode attributes
  *
- * @return  string            The HTML for the form results
+ * @return  string           The HTML for the form results
  */
 function formResults($atts)
 {
@@ -228,7 +228,7 @@ function formResults($atts)
     $object->showArchived   = isset($_GET['archived']);
     $html   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
 
-    //now we have rendered all the content we can export the excel if requested
+    //now we have rendered all the content, we can export the excel if requested
     // phpcs:ignore
     if (isset($_POST['export-xls'])) {
         $object->exportExcel();
