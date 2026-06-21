@@ -2119,7 +2119,7 @@ class DisplayFormResults extends DisplayForm
         addElement('td', $table, [], 'No records found');
 
         if (empty($parent)) {
-            return $table->ownerDocument->saveHTML();
+            return $table;
         }
     }
 
@@ -2248,13 +2248,14 @@ class DisplayFormResults extends DisplayForm
     /**
      * Writes a result table to the screen
      *
-     * @param    string        $type        Either 'own', 'others' or 'all'
-     * @param    bool        $force        Whether to retrieve submissions even if already done
-     * @param    bool        $all        Retrieve all bookings or paged, default false for paged
+     * @param    string      $type     Either 'own', 'others' or 'all'
+     * @param    bool        $force    Whether to retrieve submissions even if already done
+     * @param    bool        $all      Retrieve all bookings or paged, default false for paged
+     * @param    \DOMElement  $parent   The DOM Element to apped to default empty for new dom document creation
      *
-     * @return    string|false            False on no records found, else the html
+     * @return   \DOMElement|false     The created element
      */
-    public function renderTable($type, $force = false, $all = false)
+    public function renderTable($type, $force = false, $all = false, $parent='')
     {
         global $wpdb;
 
@@ -2276,7 +2277,9 @@ class DisplayFormResults extends DisplayForm
         ob_start();
 
         /**
-         * Filter whether or not to show the table, this can be used to for example show a message instead of the table when there are no submissions or when the user has no permissions
+         * Filter whether or not to show the table, 
+         * this can be used to for example show a message instead of the table when there are no submissions or when the user has no permissions
+         * 
          * @param    bool   $shouldShow Whether or not to show the table, default true
          * @param    object $object     The current instance of the form table class, can be used to get more information about the form and the user to decide whether or not to show the table
          * @param    string $type       The type of results that would be shown, either 'own', 'others' or 'all'
@@ -2374,7 +2377,7 @@ class DisplayFormResults extends DisplayForm
             }
         }
 
-        $wrapper    = addElement('div', '', ['class' => 'form-results-wrapper']);
+        $wrapper    = addElement('div', $parent, ['class' => 'form-results-wrapper']);
 
         if ($type == 'own') {
             addElement('h4', $wrapper, [], "Your own submissions");
@@ -2389,7 +2392,7 @@ class DisplayFormResults extends DisplayForm
 
         $this->printTableFooter($wrapper);
 
-        return $wrapper->ownerDocument->saveHtml();
+        return $wrapper;
     }
 
     private function printTableFooter($parent)
