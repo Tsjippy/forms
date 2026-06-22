@@ -13,6 +13,7 @@
 
 ### Fixed
 - archive whole splitted submission
+- addElement
 
 ### Updated
 
