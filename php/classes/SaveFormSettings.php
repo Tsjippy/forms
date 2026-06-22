@@ -199,24 +199,14 @@ class SaveFormSettings extends Forms
             );
         } else {
             //Update element
-            $wpdb->update(
+            $result = TSJIPPY\updateDbValue(
                 $table,
                 $data,
                 $where,
                 $formats,
-                $whereFormat
+                $whereFormat,
+                'forms'
             );
-
-            /**
-             * Flush db cache
-             */
-            if(wp_cache_supports( 'flush_group' )){
-                wp_cache_flush_group('forms');
-            }else{
-                wp_cache_flush();
-            }
-
-            $result    = $wpdb->rows_affected;
 
             // Nothing got updated, maybe we should create instead of update
             if ($result == false) {
@@ -281,23 +271,17 @@ class SaveFormSettings extends Forms
         }
 
         //Update form version
-        $result = $wpdb->update(
+        $result = TSJIPPY\updateDbValue(
             $this->tableName,
             ['version'    => $formVersion],
             ['id'        => $this->formData->id],
+            ['%d'],
+            ['%d'],
+            'forms'
         );
 
-        /**
-         * Flush db cache
-         */
-        if(wp_cache_supports( 'flush_group' )){
-            wp_cache_flush_group('forms');
-        }else{
-            wp_cache_flush();
-        }
-
-        if ($wpdb->last_error !== '') {
-            return new WP_Error('forms', $wpdb->last_error);
+        if (is_wp_error($result)) {
+            return $result;
         }
 
         do_action('tsjippy-forms-after-formelement-updated', $element, $this, $oldElement);
@@ -331,27 +315,21 @@ class SaveFormSettings extends Forms
         global $wpdb;
 
         //Update the database
-        $result = $wpdb->update(
+        $result = TSJIPPY\updateDbValue(
             $this->elTableName,
             array(
-                'priority'    => $element->priority
+                'priority' => $element->priority
             ),
             array(
-                'id'        => $element->id
+                'id'       => $element->id
             ),
+            ['%d'],
+            ['%d'],
+            'forms'
         );
 
-        /**
-         * Flush db cache
-         */
-        if(wp_cache_supports( 'flush_group' )){
-            wp_cache_flush_group('forms');
-        }else{
-            wp_cache_flush();
-        }
-
-        if ($wpdb->last_error !== '') {
-            return new WP_Error('forms', $wpdb->print_error());
+        if (is_wp_error($result)) {
+            return $result;
         }
 
         return $result;

@@ -357,7 +357,7 @@ class FormExport extends FormBuilderForm
 
         // update autoarchive element id
         if (!empty($autoArchiveEl)) {
-            $wpdb->update(
+            $result = TSJIPPY\updateDbValue(
                 $this->tableName,
                 array(
                     'autoarchive_el' => $elementIdMapping[$autoArchiveEl]
@@ -365,16 +365,12 @@ class FormExport extends FormBuilderForm
                 array(
                     'id'             => $this->formData->id 
                 ),
+                [
+                    '%s'
+                ],
+                ['%d'],
+                'forms'
             );
-
-            /**
-             * Flush db cache
-             */
-            if(wp_cache_supports( 'flush_group' )){
-                wp_cache_flush_group('forms');
-            }else{
-                wp_cache_flush();
-            }
         }
 
         return "<div class='success'>Import of the form '{$object->formData->slug}' finished successfully.<br>Visit the created form <a href='$url' target='_blank'>here</a></div>";

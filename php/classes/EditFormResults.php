@@ -84,31 +84,21 @@ class EditFormResults extends DisplayFormResults
         }
 
         // Update the main submission data
-        $result = $wpdb->update(
+        $result = TSJIPPY\updateDbValue(
             $this->submissionTableName,
             $data,
             array(
-                'id'                => $submissionId,
+                'id' => $submissionId,
             ),
-            $formats
+            $formats,
+            [
+                '%d'
+            ],
+            'forms'
         );
 
-        /**
-         * Flush db cache
-         */
-        if(wp_cache_supports( 'flush_group' )){
-            wp_cache_flush_group('forms');
-        }else{
-            wp_cache_flush();
-        }
-
-        if ($wpdb->last_error !== '') {
-            $message    = $wpdb->print_error();
-            if (defined('REST_REQUEST')) {
-                return new \WP_Error('form error', $message);
-            } else {
-                TSJIPPY\printArray($message);
-            }
+        if (is_wp_error($result)) {
+            return $result;
         } elseif (!$result) {
             $column   = array_keys($data)[0];
 
@@ -286,37 +276,27 @@ class EditFormResults extends DisplayFormResults
         }
 
         // Mark as (un)archived
-        $result = $wpdb->update(
+        $result = TSJIPPY\updateDbValue(
             $this->submissionTableName,
             array(
-                'time_last_edited'    => gmdate("Y-m-d H:i:s"),
-                'archived'            => $archive
+                'time_last_edited' => gmdate("Y-m-d H:i:s"),
+                'archived'         => $archive
             ),
             array(
-                'id'                => $submissionId,
+                'id'               => $submissionId,
             ),
             array(
                 '%s',
                 '%d'
-            )
+            ),
+            [
+                '%d'
+            ],
+            'forms'
         );
 
-        /**
-         * Flush db cache
-         */
-        if(wp_cache_supports( 'flush_group' )){
-            wp_cache_flush_group('forms');
-        }else{
-            wp_cache_flush();
-        }
-
-        if ($wpdb->last_error !== '') {
-            $message    = $wpdb->print_error();
-            if (defined('REST_REQUEST')) {
-                return new \WP_Error('form error', $message);
-            } else {
-                TSJIPPY\printArray($message);
-            }
+        if (is_wp_error($result)) {
+            return $result;
         } elseif (!$result) {
             $message    = "No row with id $submissionId found";
             if (defined('REST_REQUEST')) {
