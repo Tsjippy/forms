@@ -119,14 +119,14 @@ async function archiveSubmission(target) {
     );
     response = await alerter.promise;
 
-    if (response == "custom") {
+    if (response == "confirm") {
       formData.append("subid", tableRow.dataset.subid);
     } else if (response == "cancel") {
       return;
     }
   }
 
-  if (!(await askConfirmation(action))) {
+  else if (!(await askConfirmation(action))) {
     return;
   }
 

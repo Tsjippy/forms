@@ -608,9 +608,9 @@ class DisplayFormResults extends DisplayForm
         $filtered    = apply_filters(
             'tsjippy-forms-formdata-retrieval-query',
             [
-                'query'        => '',
-                'where'        => $where,
-                'values'    => $values,
+                'query'  => '',
+                'where'  => $where,
+                'values' => $values,
             ],
             $userId,
             $this
@@ -1090,7 +1090,7 @@ class DisplayFormResults extends DisplayForm
             $attributes['class'] = trim($class);
 
             //Convert underscores to spaces, but not in urls
-            if (!str_contains($value, 'href=') && !str_contains($value, 'src=')) {
+            if (is_string($value) && !str_contains($value, 'href=') && !str_contains($value, 'src=')) {
                 $value    = str_replace('_', ' ', $value);
             }
 
@@ -1116,6 +1116,9 @@ class DisplayFormResults extends DisplayForm
             $td            = addElement('td', $tr, $attributes);
 
             if(!empty($value)){
+                if(is_array($value)){
+                    $value  = implode(', ', $value);
+                }
                 TSJIPPY\addRawHtml($value, $td);
             }
 
@@ -1246,8 +1249,6 @@ class DisplayFormResults extends DisplayForm
      */
     public function loadShortcodeData()
     {
-        global $wpdb;
-
         if (
             !isset($this->shortcodeId) ||
             !is_numeric($this->shortcodeId) ||
@@ -1280,9 +1281,9 @@ class DisplayFormResults extends DisplayForm
         foreach ($results as $setting) {
             // do not add if the element does not exist anymore
             if (
-                is_numeric($setting['element_id']) &&
-                $setting['element_id']    > -1 &&
-                !isset($this->elementMapping['id'][$setting['element_id']])
+                is_numeric($setting->element_id) &&
+                $setting->element_id    > -1 &&
+                !isset($this->elementMapping['id'][$setting->element_id])
             ) {
                 continue;
             }
@@ -1292,7 +1293,15 @@ class DisplayFormResults extends DisplayForm
                 $value    = maybe_unserialize($value);
             }
 
-            $this->columnSettings[$setting['element_id']] = $setting;
+            if(empty($setting->view_right_roles)){
+                $setting->view_right_roles    = [];
+            }
+
+            if(empty($setting->edit_right_roles)){
+                $setting->edit_right_roles    = [];
+            }
+
+            $this->columnSettings[$setting->element_id] = (array)$setting;
         }
 
         return true;
@@ -2006,52 +2015,48 @@ class DisplayFormResults extends DisplayForm
      *
      * @return string    The html
      */
-    protected function renderFilterForm($parent = '')
+    protected function renderFilterForm($parent)
     {
-        $html    = '';
-
         // Filtering not enabled
         if (empty($this->tableSettings->filter)) {
-            return $html;
+            return;
         }
 
-        $filterOption    = '';
+        $form           = addElement('form', $parent, ['method' => 'post', 'class' => 'filter-options']);
+        $filterWrapper  = addElement('div', $form, ['class' => 'filter-wrapper', 'style' => "margin-top: 10px;"]);
+
+        $hasFilters    = false;
         foreach ($this->tableSettings->filter as $filter) {
-            $filterElement    = $this->getElementById($filter['element']);
-            $filterValue    = false;
-            $filterKey        = strtolower($filter['name']);
+            $filterElement = $this->getElementById($filter['element']);
+            $filterValue   = false;
+            $filterKey     = strtolower($filter['name']);
 
             if (!$filterElement || empty($filterKey)) {
                 continue;
             }
 
+            $hasFilters = true;
+
             // phpcs:ignore
             if (!empty($_POST[$filterKey])) {
                 // phpcs:ignore
-                $filterValue    = TSJIPPY\sanitize($_POST[$filterKey]);
+                $filterValue = TSJIPPY\sanitize($_POST[$filterKey]);
             }
 
-            $elementHtml    = $this->getElementHtml($filterElement, $parent, $filterValue);
+            $wrapperSpan    = addElement('span', $filterWrapper, ['class' => 'filter-option']);
+            addElement('h4', $wrapperSpan, [], ucfirst($filterKey));
+
+            $elementNode    = $this->getElementHtml($filterElement, $wrapperSpan, $filterValue);
 
             // make sure the name is not the element name but the filtername
-            $elementHtml    = str_replace("name=\"{$filterElement->slug}\"", "name='$filterKey'", $elementHtml);
-
-            $filterOption    .= "<span class='filter-option'>";
-            $filterOption    .= "<label>" . ucfirst($filterKey) . ": </label>";
-            $filterOption    .= $elementHtml;
-            $filterOption    .= "</span>";
+            $elementNode->setAttribute('name', $filterKey);
         }
 
-        if (!empty($filterOption)) {
-            $html    = "<form method='post' class='filter-options'>";
-            $html    .= "<div class='filter-wrapper'>";
-            $html    .= $filterOption;
-            $html    .= "<button class='button filter-results' type='button' style='height: fit-content;'>Filter</button>";
-            $html    .= "</div>";
-            $html    .= "</form>";
+        if(!$hasFilters){
+            $form->remove();
         }
 
-        return $html;
+        addElement('button', $filterWrapper, ['class' => 'button filter-results', 'type' => 'button', 'style' => 'height: fit-content;'], 'Filter');
     }
 
     /**
@@ -2059,20 +2064,21 @@ class DisplayFormResults extends DisplayForm
      *
      * @return string    The html
      */
-    public function renderTableButtons()
+    public function renderTableButtons($parent)
     {
-        $html    = "<div class='table-buttons-wrapper'>";
+        $tableButtonsWrapper    = addElement('div', $parent, ['class' => 'table-buttons-wrapper']);
+
         //Show form properties button if we have form edit permissions
         if ($this->tableEditPermissions) {
-            $html    .= "<button class='button small edit-formshortcode-settings'>Edit settings</button>";
-            $html    .= $this->addShortcodeSettingsModal();
+            addElement('button', $tableButtonsWrapper, ['class' => 'button small edit-formshortcode-settings'], 'Edit settings');
+            TSJIPPY\addRawHtml($this->addShortcodeSettingsModal(), $tableButtonsWrapper);
         }
 
         // Archived button
         if ($this->showArchived) {
-            $html    .= "<button class='button tsjippy small archive-switch-hide'>Hide archived entries</button>";
+            addElement('button', $tableButtonsWrapper, ['class' => 'button tsjippy small archive-switch-hide'], 'Hide archived entries');
         } else {
-            $html    .= "<button class='button tsjippy small archive-switch-show'>Show archived entries</button>";
+            addElement('button', $tableButtonsWrapper, ['class' => 'button tsjippy small archive-switch-show'], 'Show archived entries');
         }
 
         // Only own button
@@ -2081,7 +2087,7 @@ class DisplayFormResults extends DisplayForm
             $this->onlyOwn ||
             (($this->tableSettings->result_type ?? '') == 'personal' && !$this->all)
         ) {
-            $html    .= "<button class='button tsjippy small only-own-switch-all'>Show all entries</button>";
+            addElement('button', $tableButtonsWrapper, ['class' => 'button tsjippy small only-own-switch-all'], 'Show all entries');
         } elseif (
             $this->tableViewPermissions &&
             (
@@ -2090,21 +2096,18 @@ class DisplayFormResults extends DisplayForm
                 ($this->tableSettings->result_type ?? '') != 'personal'
             )
         ) {
-            $html    .= "<button class='button tsjippy small only-own-switch-on'>Show only my own entries</button>";
+            addElement('button', $tableButtonsWrapper, ['class' => 'button tsjippy small only-own-switch-on'], 'Show only my own entries');
         }
 
-        $html    .= "<button type='button' class='button small show fullscreenbutton'>Show full screen</button>";
+        addElement('button', $tableButtonsWrapper, ['class' => 'button small show fullscreenbutton'], 'Show full screen');
 
         $hidden    = '';
         if (empty($this->hiddenColumns)) {
             $hidden    = 'hidden';
         }
-        $html    .= "<button type='button' class='button small reset-col-vis $hidden' data-form-id='{$this->formData->id}'>Reset visibility</button>";
-        $html    .= "</div>";
+        addElement('button', $tableButtonsWrapper, ['class' => "button small reset-col-vis $hidden", "data-form-id" => $this->formData->id], 'Reset visibility');
 
-        $html    .= $this->renderFilterForm();
-
-        return $html;
+        $this->renderFilterForm($tableButtonsWrapper);
     }
 
     /**
@@ -2263,8 +2266,6 @@ class DisplayFormResults extends DisplayForm
      */
     public function renderTable($type, $force = false, $all = false, $parent='')
     {
-        global $wpdb;
-
         $userId    = null;
 
         // Check permissions
@@ -2388,7 +2389,9 @@ class DisplayFormResults extends DisplayForm
             }
         }
 
-        $wrapper    = addElement('div', $parent, ['class' => 'form-results-wrapper']);
+        $wrapper    = addElement('div', $parent, ['class' => 'form-results-wrapper', 'style' => 'margin-top: 10px;']);
+
+        $this->renderTableButtons($wrapper);
 
         if ($type == 'own') {
             addElement('h4', $wrapper, [], "Your own submissions");
@@ -2445,26 +2448,6 @@ class DisplayFormResults extends DisplayForm
      */
     public function showFormresultsTable($split = null, $all = false)
     {
-        // first render the table so we now how many results we have
-        $tableHtml    = '';
-        if (
-            (
-                $split === null    &&                                    // we should use the table settings
-                $this->tableSettings->split_table ?? false            // and we should split
-            ) ||
-            $split == true                                            // we should always split
-        ) {
-            $buttons        = $this->renderTableButtons();
-            $tableHtml      .= $this->renderTable('own', true, $all);
-
-            $buttons        = $this->renderTableButtons();
-            $tableHtml      .= $this->renderTable('others', true, $all);
-        } else {
-            $buttons        = $this->renderTableButtons();
-            $tableHtml      = $this->renderTable('all', false, $all);
-        }
-
-        ob_start();
         //process any $_GET acions
         do_action('tsjippy-forms-table-GET-actions');
         do_action('tsjippy-forms-table-POST-actions');
@@ -2472,24 +2455,34 @@ class DisplayFormResults extends DisplayForm
         //Load js
         wp_enqueue_script('tsjippy_forms_table_script');
 
-        ?>
-        <div class='form table-wrapper'>
-            <div class='form table-head'>
-                <h2 class="table-title"><?php echo esc_html($this->tableSettings->title ?? ''); ?></h2><br>
-                <?php
-                echo wp_kses_post($buttons);
-                ?>
-            </div>
-            <?php
-            // phpcs:ignore
-            echo $tableHtml;
-            ?>
-        </div>
-        <?php
+        $formTableWrapper   = addElement('div', '', ['class' => 'form table-wrapper']);
+        $tableHead          = addElement('div', $formTableWrapper, ['class' => 'form table-head']);
+        addElement('h2', $tableHead, ['class' => "table-title"], $this->tableSettings->title ?? '');
+        addElement('br', $tableHead);
 
-        $html    = ob_get_clean();
+        if (
+            (
+                $split === null    &&                                    // we should use the table settings
+                $this->tableSettings->split_table ?? false            // and we should split
+            ) ||
+            $split == true                                            // we should always split
+        ) {
+            $this->renderTable('own', true, $all, $formTableWrapper);
 
-        return apply_filters('tsjippy-forms-form-results-html', $html, $this);
+            $this->renderTable('others', true, $all, $formTableWrapper);
+        } else {
+            $this->renderTable('all', false, $all, $formTableWrapper);
+        }
+
+        /**
+         * Allows to change the DOMElements
+         * 
+         * @param   \DOMElement  $formTableWrapper   The formtable node
+         * @param   object      $object             The DisplayFormResults instance
+         */
+        do_action('tsjippy-forms-results-html', $formTableWrapper, $this);
+
+        return $formTableWrapper->ownerDocument->saveHTML();
     }
 
     /**

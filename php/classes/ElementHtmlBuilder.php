@@ -7,6 +7,9 @@ use stdClass;
 use TSJIPPY;
 use WP_Error;
 
+use function TSJIPPY\addElement as addElement;
+use function TSJIPPY\addRawHtml as addRawHtml;
+
 if (! defined('ABSPATH')) {
     exit;
 }
@@ -17,7 +20,6 @@ class ElementHtmlBuilder extends SubmitForm
     public object $currentElement;
     public array $defaultArrayValues;
     public array $defaultValues;
-    public object|null $dom;
     public object $element;
     public object $elementHtmlBuilder;
     public DOMElement|null $formWrapper;
@@ -43,7 +45,6 @@ class ElementHtmlBuilder extends SubmitForm
         $this->currentElement         = new stdClass();
         $this->defaultArrayValues     = [];
         $this->defaultValues          = [];
-        $this->dom                    = null;
         $this->element                = new stdClass();
         $this->elementHtmlBuilder     = new stdClass();
         $this->formWrapper            = null;
@@ -387,11 +388,11 @@ class ElementHtmlBuilder extends SubmitForm
         $content     = str_replace(['<p>', '</p>'], '', $text);
         $content     = TSJIPPY\deslash($content);
 
-        $node        = $this->addElement('div', $parent, ['class' => 'info-box'], '', $dom);
-        $wrapper    = $this->addElement('div', $node, ['style' => "float:right"], '', $dom);
-        $paragraph    = $this->addElement('p', $wrapper, ['class' => "info-icon"], '', $dom);
+        $node        = addElement('div', $parent, ['class' => 'info-box'], '', $dom);
+        $wrapper     = addElement('div', $node, ['style' => "float:right"], '', $dom);
+        $paragraph   = addElement('p', $wrapper, ['class' => "info-icon"], '', $dom);
 
-        $this->addElement(
+        addElement(
             'img',
             $paragraph,
             [
@@ -406,7 +407,7 @@ class ElementHtmlBuilder extends SubmitForm
             $dom
         );
 
-        $this->addElement('span', $node, ['class' => "info-text"], $content, $dom);
+        addElement('span', $node, ['class' => "info-text"], $content, $dom);
 
         if ($returnHtml) {
             return $dom->saveHtml($parent);
@@ -576,114 +577,6 @@ class ElementHtmlBuilder extends SubmitForm
     }
 
     /**
-     * Adds an element and its attributes to a parent element
-     *
-     * @param    string    $type            The element tagname
-     * @param    object    $parent            The parent node
-     * @param    array    $attributes        An array of attribute names and values
-     * @param    string    $textContent    The text content of the element
-     * @param    object    $dom            Domdocument to use, default empty for this->dom
-     *
-     * @return    object                    The created node
-     */
-    public function addElement($type, $parent, $attributes = [], $textContent = '', $dom = '')
-    {
-        if (empty($parent)) {
-            return;
-        }
-
-        if (empty($dom)) {
-            $dom    = $this->dom;
-        }
-
-        if (empty($textContent)) {
-            $textContent    = '';
-        }
-
-        try {
-            // Text content should not contain <br> tags, replace them with new line characters
-            $textContent = str_replace('<br>', "\n", $textContent);
-
-            $node = $dom->createElement($type, $textContent);
-        } catch (\DOMException $e) {
-            // Catch the specific DOMException
-            TSJIPPY\printArray("Caught DOMException: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
-        } catch (\Exception $e) {
-            // Catch any other general exceptions if needed
-            TSJIPPY\printArray("Caught general Exception: " . $e->getMessage());
-        }
-
-        // Type should come first
-        if (!empty($attributes['type'])) {
-            $attributes = ['type' => $attributes['type']] + $attributes;
-        }
-
-        foreach ($attributes as $attribute => $value) {
-            if ($value === null) {
-                continue;
-            }
-
-            try {
-                $node->setAttribute($attribute, $value);
-            } catch (\DOMException $e) {
-                // Catch the specific DOMException
-                TSJIPPY\printArray("Caught DOMException for attribute '$attribute' " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
-            } catch (\Exception $e) {
-                // Catch any other general exceptions if needed
-                TSJIPPY\printArray("Caught general Exception: " . $e->getMessage());
-            }
-        }
-
-        try {
-            $parent->appendChild($node);
-        } catch (\DOMException $e) {
-            // Catch the specific DOMException
-            TSJIPPY\printArray("Caught DOMException: " . $e->getMessage() . " (Code: " . $e->getCode() . ")");
-        } catch (\Exception $e) {
-            // Catch any other general exceptions if needed
-            TSJIPPY\printArray("Caught general Exception: " . $e->getMessage());
-        }
-
-        return $node;
-    }
-
-    /**
-     * Creates nodes from raw html and adds it to the parent
-     *
-     * @param    string    $html        The html
-     * @param    object    $parent        The parent Node
-     *
-     * @return    object                The created node
-     */
-    public function addRawHtml($html, $parent)
-    {
-        if (empty($html)) {
-            return false;
-        }
-
-        $html        = trim(force_balance_tags($html));
-
-        $dom         = new \DOMDocument();
-
-        // Surpress errors
-        libxml_use_internal_errors(true);
-
-        // Load html without adding extra's
-        $dom->loadHTML($html, LIBXML_HTML_NODEFDTD);
-
-        // Clear any errors
-        libxml_clear_errors();
-
-        // Import the node
-        foreach ($dom->getElementsByTagName('body')->item(0)->childNodes as $node) {
-            $node = $this->dom->importNode($node, true);
-            $node = $parent->appendChild($node);
-        }
-
-        return $node;
-    }
-
-    /**
      * Gets the elment attributes
      */
     protected function getAttributes()
@@ -759,7 +652,7 @@ class ElementHtmlBuilder extends SubmitForm
             $removeText    = $this->element->remove;
         }
 
-        $wrapper    = $this->addElement(
+        $wrapper    = addElement(
             'div',
             $parent,
             [
@@ -768,7 +661,7 @@ class ElementHtmlBuilder extends SubmitForm
             ]
         );
 
-        $this->addElement(
+        addElement(
             'button',
             $wrapper,
             [
@@ -779,7 +672,7 @@ class ElementHtmlBuilder extends SubmitForm
             $addText
         );
 
-        $this->addElement(
+        addElement(
             'button',
             $wrapper,
             [
@@ -1210,10 +1103,10 @@ class ElementHtmlBuilder extends SubmitForm
                 }
                 break;
             case 'formstep':
-                $this->addElement("h3", $node, [], $this->element->text);
+                addElement("h3", $node, [], $this->element->text);
                 break;
             case 'label':
-                $this->addElement("h4", $node, ['class' => 'label-text'], $this->element->text);
+                addElement("h4", $node, ['class' => 'label-text'], $this->element->text);
                 break;
             case 'button':
                 $node->nodeValue = $this->element->text;
@@ -1249,13 +1142,13 @@ class ElementHtmlBuilder extends SubmitForm
             $elName    .= '[]';
         }
 
-        $wrapper = $this->addElement("div", $parent, ['class' => 'option-wrapper']);
+        $wrapper = addElement("div", $parent, ['class' => 'option-wrapper']);
 
         /**
          * The list of prefileld values
          */
         // The unoredered list for choices made
-        $selectionList    = $this->addElement("ul", $wrapper, ['class' => 'list-selection-list']);
+        $selectionList    = addElement("ul", $wrapper, ['class' => 'list-selection-list']);
 
         if (!empty($this->requestedValue)) {
             // Add all the list items
@@ -1266,9 +1159,9 @@ class ElementHtmlBuilder extends SubmitForm
                     $transValue        = $v;
                 }
 
-                $listItem    = $this->addElement('li', $selectionList, ['class' => 'list-selection']);
+                $listItem    = addElement('li', $selectionList, ['class' => 'list-selection']);
 
-                $button        = $this->addElement(
+                $button        = addElement(
                     'button',
                     $listItem,
                     [
@@ -1277,27 +1170,27 @@ class ElementHtmlBuilder extends SubmitForm
                     ]
                 );
 
-                $this->addElement('span', $button, ['class' => 'remove-list-selection'], '×');
+                addElement('span', $button, ['class' => 'remove-list-selection'], '×');
 
-                $this->addElement(
+                addElement(
                     'input',
                     $listItem,
                     [
-                        'type'    => 'hidden',
-                        'class'    => 'no-reset',
-                        'name'    => $elName,
-                        'value'    => $v
+                        'type'  => 'hidden',
+                        'class' => 'no-reset',
+                        'name'  => $elName,
+                        'value' => $v
                     ]
                 );
 
-                $this->addElement('span', $listItem, ['class' => 'selected-name'], $transValue);
+                addElement('span', $listItem, ['class' => 'selected-name'], $transValue);
             }
         }
 
         /**
          * Add the actual text input
          */
-        $inputWrapper            = $this->addElement(
+        $inputWrapper        = addElement(
             'div',
             $wrapper,
             [
@@ -1305,14 +1198,14 @@ class ElementHtmlBuilder extends SubmitForm
             ]
         );
 
-        $attributes                = $this->attributes;
-        $attributes['type']        = 'text';
-        $attributes['name']        = $elName;
-        $attributes['class']    .= " datalistinput multiple";
+        $attributes          = $this->attributes;
+        $attributes['type']  = 'text';
+        $attributes['name']  = $elName;
+        $attributes['class'] .= " datalistinput multiple";
 
-        $this->addElement('input', $inputWrapper, $attributes);
+        addElement('input', $inputWrapper, $attributes);
 
-        $this->addElement('button', $inputWrapper, ['type' => "button", 'class' => "small add-list-selection hidden"], 'add');
+        addElement('button', $inputWrapper, ['type' => "button", 'class' => "small add-list-selection hidden"], 'add');
 
         return $wrapper;
     }
@@ -1366,7 +1259,7 @@ class ElementHtmlBuilder extends SubmitForm
             $parent        = $node->parentNode;
         }
 
-        $multiWrapper     = $this->addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
+        $multiWrapper     = addElement('div', $parent, ['class' => 'clone-divs-wrapper']);
 
         //create as many inputs as the maximum value found
         for ($index = 0; $index < $this->multiWrapValueCount; $index++) {
@@ -1376,7 +1269,7 @@ class ElementHtmlBuilder extends SubmitForm
             }
 
             // Add the clone div
-            $cloneDiv    = $this->addElement("div", $multiWrapper, ["class" => 'clone-div', "data-div-id" => $index]);
+            $cloneDiv    = addElement("div", $multiWrapper, ["class" => 'clone-div', "data-div-id" => $index]);
 
             // Add label to each entry if prev element is a label and wrapped with this one
             $parentNode = $cloneDiv;
@@ -1408,7 +1301,7 @@ class ElementHtmlBuilder extends SubmitForm
     public function addSelectOptions($node)
     {
         // Empty option on the top
-        $this->addElement("option", $node, ['value' => ''], '---');
+        addElement("option", $node, ['value' => ''], '---');
 
         $selValues    = [];
         if (!empty($this->elementValues['metavalue'])) {
@@ -1437,7 +1330,7 @@ class ElementHtmlBuilder extends SubmitForm
             ) {
                 $attributes['selected'] = "selected";
             }
-            $this->addElement("option", $node, $attributes, $option);
+            addElement("option", $node, $attributes, $option);
         }
     }
 
@@ -1460,7 +1353,7 @@ class ElementHtmlBuilder extends SubmitForm
                 $elContent = $option['display'];
             }
 
-            $this->addElement(
+            addElement(
                 "option",
                 $node,
                 [
@@ -1548,12 +1441,12 @@ class ElementHtmlBuilder extends SubmitForm
             $totalLength    += strlen($option);
         }
 
-        $checkboxWrapper = $this->addElement('div', $parent, ['class' => 'checkbox-options-group formfield']);
+        $checkboxWrapper = addElement('div', $parent, ['class' => 'checkbox-options-group formfield']);
 
         // build the options
         foreach ($options as $key => $option) {
             // Add a wrapping label
-            $label = $this->addElement('label', $checkboxWrapper, ['class' => 'checkbox-label']);
+            $label = addElement('label', $checkboxWrapper, ['class' => 'checkbox-label']);
 
             // Default attributes
             $attributes = $this->attributes;
@@ -1578,14 +1471,14 @@ class ElementHtmlBuilder extends SubmitForm
             $attributes['value']    = $key;
 
             // Add the input
-            $this->addElement(
+            addElement(
                 "input",
                 $label,
                 $attributes
             );
 
             // Text for the checkbox or radio
-            $this->addElement(
+            addElement(
                 "span",
                 $label,
                 ['class' => 'optionlabel'],
@@ -1594,7 +1487,7 @@ class ElementHtmlBuilder extends SubmitForm
 
             // one of the options is longer than 8 or the total is more than 30, add each checkbox on a seperate line
             if ($maxLength > 8 || $totalLength > 30) {
-                $this->addElement("br", $checkboxWrapper);
+                addElement("br", $checkboxWrapper);
             }
         }
 
@@ -1656,7 +1549,7 @@ class ElementHtmlBuilder extends SubmitForm
             'name' => $name
         ];
 
-        $multiWrapper = $this->addElement("div", $parent, $attributes);
+        $multiWrapper = addElement("div", $parent, $attributes);
 
         // We do not need to continue if this is a formstep
         if ($this->clonableFormStep && $this->element->type == 'formstep') {
@@ -1689,7 +1582,7 @@ class ElementHtmlBuilder extends SubmitForm
                 }
 
                 // Add the button to switch to a certain tab
-                $this->addElement(
+                addElement(
                     'button',
                     $multiWrapper,
                     [
@@ -1708,7 +1601,7 @@ class ElementHtmlBuilder extends SubmitForm
             }
 
             // Add the clone-div
-            $cloneDiv    = $this->addElement(
+            $cloneDiv    = addElement(
                 'div',
                 $multiWrapper,
                 $attributes
@@ -1728,11 +1621,11 @@ class ElementHtmlBuilder extends SubmitForm
     /**
      * Gets the html of form element
      *
-     * @param    object            $element        The element data
-     * @param    object            $parent            The parent node to append to, default empty to return html string
-     * @param    string|false    $requestedValue    The value the element should have, false for no value, default empty
+     * @param    object                 $element        The element data
+     * @param    object                 $parent         The parent node to append to, default empty to return html string
+     * @param    string|false           $requestedValue The value the element should have, false for no value, default empty
      *
-     * @return    object|string|WP_Error            A DomDocumentNode or the raw html
+     * @return    object|string|WP_Error                A DomDocumentNode or the raw html
      */
     public function getElementHtml($element, $parent = '', $requestedValue = '')
     {
@@ -1740,24 +1633,14 @@ class ElementHtmlBuilder extends SubmitForm
 
         $this->element        = $element;
         $this->requestedValue = $requestedValue;
-        $returnHtml           = false;
-
-        if (empty($parent)) {
-            // Create a new DOMDocument object
-            $this->dom     = new \DOMDocument();
-
-            $parent     = $this->dom;
-
-            $returnHtml = true;
-        }
 
         /**
          * Override filter, return a node to bypass this function
          */
-        $node                     = apply_filters('tsjippy-forms-element-html-short-circuit', null, $parent, $this);
+        $node = apply_filters('tsjippy-forms-element-html-short-circuit', null, $parent, $this);
         if (!empty($node)) {
-            if ($returnHtml) {
-                return $this->dom->saveHtml();
+            if (empty($parent)) {
+                return $node->ownerDocument->saveHtml();
             }
 
             return $node;
@@ -1780,9 +1663,9 @@ class ElementHtmlBuilder extends SubmitForm
                 $content     = wp_kses_post($this->element->text);
                 $content    = TSJIPPY\deslash($content);
 
-                $node        = $this->addElement('div', $parent, ['name' => $this->element->slug]);
+                $node        = addElement('div', $parent, ['name' => $this->element->slug]);
 
-                $this->addRawHtml($content, $node);
+                addRawHtml($content, $node);
                 break;
             case 'php':
                 //we store the function_name in the html variable replace any double \ with a single \
@@ -1790,9 +1673,9 @@ class ElementHtmlBuilder extends SubmitForm
 
                 //only continue if the function exists
                 if (function_exists($functionName)) {
-                    $node        = $this->addRawHtml($functionName($this->userId), $parent);
+                    $node        = addRawHtml($functionName($this->userId), $parent);
                 } else {
-                    $node        = $this->addElement('text', $parent, [], "php function '$functionName' not found");
+                    $node        = addElement('text', $parent, [], "php function '$functionName' not found");
                 }
 
                 break;
@@ -1802,7 +1685,7 @@ class ElementHtmlBuilder extends SubmitForm
                     $attributes["class"] = 'hidden';
                 }
 
-                $node        = $this->addElement('div', $parent, $attributes);
+                $node        = addElement('div', $parent, $attributes);
                 break;
             case 'multi-start':
                 $node = $this->multiwrapStart($parent);
@@ -1825,7 +1708,7 @@ class ElementHtmlBuilder extends SubmitForm
                 break;
             case 'file':
             case 'image':
-                $node        = $this->addRawHtml($this->uploaderHtml(), $parent);
+                $node        = addRawHtml($this->uploaderHtml(), $parent);
                 break;
             case 'radio':
             case 'checkbox':
@@ -1838,7 +1721,7 @@ class ElementHtmlBuilder extends SubmitForm
 
                     $this->getTagType();
 
-                    $node     = $this->addElement($this->tagType, $parent, $this->attributes);
+                    $node     = addElement($this->tagType, $parent, $this->attributes);
 
                     // do this after the creation of the element
                     $this->getTagContent($node);
@@ -1918,8 +1801,8 @@ class ElementHtmlBuilder extends SubmitForm
 
         $node = apply_filters('tsjippy-forms-element-html', $node, $this);
 
-        if ($returnHtml) {
-            return $this->dom->saveHtml();
+        if (empty($parent)) {
+            return $node->ownerDocument->saveHtml();
         }
 
         return $node;
