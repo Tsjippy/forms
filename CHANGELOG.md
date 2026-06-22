@@ -9,6 +9,7 @@
 - implemented db caching
 - implemented db caching
 - replaced wpdb->update with updateDbFunction
+- find phonenumber by slug phone_number
 
 ### Fixed
 
