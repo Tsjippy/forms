@@ -4,6 +4,9 @@ namespace TSJIPPY\FORMS;
 
 use TSJIPPY;
 
+use function TSJIPPY\addElement as addElement;
+use function TSJIPPY\addRawHtml as addRawHtml;
+
 if (! defined('ABSPATH')) {
     exit;
 }
@@ -26,8 +29,6 @@ class DisplayForm extends ElementHtmlBuilder
         $this->isMultiStepForm = '';
         $this->formStepCounter = 0;
         $this->minElForTabs    = 6;
-
-        $this->dom             = new \DOMDocument();
     }
 
     /**
@@ -48,7 +49,7 @@ class DisplayForm extends ElementHtmlBuilder
             if ($element->hidden) {
                 $class    .= " hidden";
             }
-            return $this->addElement(
+            return addElement(
                 'div',
                 $parent,
                 [
@@ -117,7 +118,7 @@ class DisplayForm extends ElementHtmlBuilder
                 $style = "width:$width%;";
             }
 
-            $parent = $this->addElement('div', $parent, ['class' => $class, 'style' => $style]);
+            $parent = addElement('div', $parent, ['class' => $class, 'style' => $style]);
         }
 
         // Only add element if this is not a clonable formstep
@@ -137,7 +138,7 @@ class DisplayForm extends ElementHtmlBuilder
         if ($element->type == 'formstep') {
             // First step of the form
             if (!$this->isFormStep && !empty($node)) {
-                $this->addElement('div', $node, ['class' => "loader-image-trigger"]);
+                addElement('div', $node, ['class' => "loader-image-trigger"]);
             }
 
             $this->isFormStep        = true;
@@ -162,14 +163,14 @@ class DisplayForm extends ElementHtmlBuilder
             return $parent;
         }
 
-        $formstepButtonWrapper     = $this->addElement("div", $parent, ['class' => 'multi-step-controls hidden']);
-        $wrapper                 = $this->addElement("div", $formstepButtonWrapper, ['class' => 'multi-step-controls-wrapper']);
-        $prevWrapper             = $this->addElement('div', $wrapper,    ['style' => 'flex:1;']);
+        $formstepButtonWrapper     = addElement("div", $parent, ['class' => 'multi-step-controls hidden']);
+        $wrapper                 = addElement("div", $formstepButtonWrapper, ['class' => 'multi-step-controls-wrapper']);
+        $prevWrapper             = addElement('div', $wrapper,    ['style' => 'flex:1;']);
 
         /**
          * Previous button
          */
-        $this->addElement(
+        addElement(
             "button",
             $prevWrapper,
             [
@@ -181,16 +182,16 @@ class DisplayForm extends ElementHtmlBuilder
         );
 
         //Circles which indicates the steps of the form:
-        $indicatorWrapper = $this->addElement('div', $wrapper,    ['class' => 'step-wrapper', 'style' => 'flex:1;text-align:center;margin:auto;']);
+        $indicatorWrapper = addElement('div', $wrapper,    ['class' => 'step-wrapper', 'style' => 'flex:1;text-align:center;margin:auto;']);
         for ($x = 1; $x <= $this->formStepCounter; $x++) {
-            $this->addElement('span', $indicatorWrapper, ['class' => 'step']);
+            addElement('span', $indicatorWrapper, ['class' => 'step']);
         }
 
         /**
          * Next button
          */
-        $nextWrapper = $this->addElement("div", $wrapper, ['style' => 'flex:1;']);
-        $this->addElement(
+        $nextWrapper = addElement("div", $wrapper, ['style' => 'flex:1;']);
+        addElement(
             'button',
             $nextWrapper,
             [
@@ -278,12 +279,12 @@ class DisplayForm extends ElementHtmlBuilder
             wp_enqueue_script("dynamic_{$this->formData->slug}forms", TSJIPPY\pathToUrl($jsPath), array('tsjippy_forms_script'), $this->formData->version, true);
         }
 
+        $this->formWrapper = addElement('div', '', ['class' => 'tsjippy-form-wrapper']);
+
         $initialHtml    = apply_filters('tsjippy-forms-before-showing-form', '', $this);
         if (!empty($initialHtml)) {
-            $this->addRawHtml($initialHtml, $this->dom);
+            addRawHtml($initialHtml, $this->formWrapper);
         }
-
-        $this->formWrapper = $this->addElement('div', $this->dom, ['class' => 'tsjippy-form-wrapper']);
 
         // Formbuilder button
         if ($this->editRights) {
@@ -291,18 +292,18 @@ class DisplayForm extends ElementHtmlBuilder
                 'type'     => 'button',
                 'class' => 'button small formbuilder-switch'
             ];
-            $this->addElement('button', $this->formWrapper, $attributes, 'Switch to formbuilder');
+            addElement('button', $this->formWrapper, $attributes, 'Switch to formbuilder');
         }
 
         $formName    = $this->formData->name;
         if (!empty($formName)) {
-            $this->addElement("h3", $this->formWrapper, [], $formName);
+            addElement("h3", $this->formWrapper, [], $formName);
         }
 
         if (array_intersect($this->userRoles, $this->submitRoles) && !empty($this->formData->save_in_meta)) {
-            $this->addRawHtml(TSJIPPY\userSelect("Select an user to show the data of:"), $this->formWrapper);
+            addRawHtml(TSJIPPY\userSelect("Select an user to show the data of:"), $this->formWrapper);
         }
-        $this->addRawHtml(apply_filters('tsjippy-forms-before-form', '', $this->formData->slug), $this->formWrapper);
+        addRawHtml(apply_filters('tsjippy-forms-before-form', '', $this->formData->slug), $this->formWrapper);
 
         /**
          * Form container
@@ -320,9 +321,9 @@ class DisplayForm extends ElementHtmlBuilder
             // make sure empty checkboxes show up in form results
             $attributes["data-add-empty"]    = 1;
         }
-        $form = $this->addElement("form", $this->formWrapper, $attributes);
+        $form = addElement("form", $this->formWrapper, $attributes);
 
-        $this->addElement('div', $form, ['class' => 'form-elements']);
+        addElement('div', $form, ['class' => 'form-elements']);
 
         /**
          * Hidden input for form id
@@ -333,7 +334,7 @@ class DisplayForm extends ElementHtmlBuilder
             'name'        => 'form-id',
             'value'        => $this->formData->id
         ];
-        $this->addElement('input', $form, $attributes);
+        addElement('input', $form, $attributes);
 
         /**
          * Hidden input for form url
@@ -344,7 +345,7 @@ class DisplayForm extends ElementHtmlBuilder
             'name'        => 'formurl',
             'value'        => TSJIPPY\currentUrl(true)
         ];
-        $this->addElement('input', $form, $attributes);
+        addElement('input', $form, $attributes);
 
         /**
          * Loop over all form elements and add the nodes
@@ -446,10 +447,10 @@ class DisplayForm extends ElementHtmlBuilder
                 $parent = $this->formStepControls($parent);
             }
 
-            $this->addRawHtml(TSJIPPY\addSaveButton('submit-form', $buttonText, $hidden, false), $parent);
+            addRawHtml(TSJIPPY\addSaveButton('submit-form', $buttonText, $hidden, false), $parent);
         }
 
-        return $this->dom->saveHTML();
+        return $this->formWrapper->ownerDocument->saveHTML();
     }
 
     /**

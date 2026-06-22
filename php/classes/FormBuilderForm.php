@@ -5,6 +5,9 @@ namespace TSJIPPY\FORMS;
 use TSJIPPY;
 use stdClass;
 
+use function TSJIPPY\addElement as addElement;
+use function TSJIPPY\addRawHtml as addRawHtml;
+
 if (! defined('ABSPATH')) {
     exit;
 }
@@ -142,7 +145,7 @@ class FormBuilderForm extends DisplayForm
         $right    = $icons[array_key_last($icons)]['right'] + 30;
 
         foreach ($icons as $icon) {
-            $div    = $this->addElement(
+            $div    = addElement(
                 'div',
                 $parent,
                 [
@@ -151,7 +154,7 @@ class FormBuilderForm extends DisplayForm
                 ]
             );
 
-            $this->addElement(
+            addElement(
                 'span',
                 $div,
                 [
@@ -161,7 +164,7 @@ class FormBuilderForm extends DisplayForm
                 $icon['content']
             );
 
-            $this->addElement(
+            addElement(
                 'span',
                 $div,
                 [
@@ -177,24 +180,13 @@ class FormBuilderForm extends DisplayForm
      * Build all html for a particular element including edit controls.
      *
      * @param    object    $element        The element
-     * @param    object    $parent            The parent node
-     * @param    int        $key            The key in case of a multi element. Default 0
+     * @param    object    $parent         The parent node
+     * @param    int       $key            The key in case of a multi element. Default 0
      *
-     * @return    string                    The html
+     * @return    string                   The html
      */
     public function buildHtml($element, $parent = '', $key = 0)
     {
-        $returnHtml = false;
-
-        if (empty($parent)) {
-            // Create a new DOMDocument object
-            $this->dom         = new \DOMDocument();
-
-            $parent     = $this->dom;
-
-            $returnHtml = true;
-        }
-
         $class        = 'form-element-wrapper';
         if ($this->inMultiAnswer) {
             $class    .= 'multi-answer-element';
@@ -208,20 +200,20 @@ class FormBuilderForm extends DisplayForm
         }
 
         //Add form edit controls if needed
-        $controlsWrapper    = $this->addElement(
+        $controlsWrapper    = addElement(
             'div',
             $parent,
             [
                 'class'             => $class,
-                'data-element-id'     => $element->id,
-                'data-form-id'         => $this->formData->id,
+                'data-element-id'   => $element->id,
+                'data-form-id'      => $this->formData->id,
                 'data-priority'     => $element->priority,
                 'data-type'         => $element->type,
                 'style'             => $style
             ]
         );
 
-        $span    = $this->addElement(
+        $span    = addElement(
             'span',
             $controlsWrapper,
             [
@@ -231,14 +223,14 @@ class FormBuilderForm extends DisplayForm
             ':::'
         );
 
-        $this->addElement('br', $span);
+        addElement('br', $span);
 
         $class    = 'element-id';
         // phpcs:ignore
         if (!$this->showId) {
             $class    .= ' hidden';
         }
-        $this->addElement(
+        addElement(
             'span',
             $span,
             [
@@ -248,7 +240,7 @@ class FormBuilderForm extends DisplayForm
             $element->id
         );
 
-        $resizerWrapper    = $this->addElement('div', $controlsWrapper, ['class' => 'resizer-wrapper']);
+        $resizerWrapper    = addElement('div', $controlsWrapper, ['class' => 'resizer-wrapper']);
 
         //Check if element needs to be hidden
         $hidden = '';
@@ -315,7 +307,7 @@ class FormBuilderForm extends DisplayForm
             $this->isInDiv    = false;
         }
 
-        $resizer    = $this->addElement('div', $resizerWrapper, $attributes, $text);
+        $resizer    = addElement('div', $resizerWrapper, $attributes, $text);
 
         if (!in_array($element->type, ['multi-start', 'multi-end', 'div-start', 'div-end'])) {
             //Load default values for this element
@@ -327,7 +319,7 @@ class FormBuilderForm extends DisplayForm
             $hidden    = '';
         }
 
-        $this->addElement(
+        addElement(
             'span',
             $resizer,
             [
@@ -339,9 +331,9 @@ class FormBuilderForm extends DisplayForm
 
         $this->addMetaSymbols($resizer, $element);
 
-        $this->addElement('span', $resizer, ['class' => 'width-percentage formfield-button']);
+        addElement('span', $resizer, ['class' => 'width-percentage formfield-button']);
 
-        $this->addElement(
+        addElement(
             'button',
             $controlsWrapper,
             [
@@ -352,7 +344,7 @@ class FormBuilderForm extends DisplayForm
             '+'
         );
 
-        $this->addElement(
+        addElement(
             'button',
             $controlsWrapper,
             [
@@ -363,7 +355,7 @@ class FormBuilderForm extends DisplayForm
             '-'
         );
 
-        $this->addElement(
+        addElement(
             'button',
             $controlsWrapper,
             [
@@ -374,7 +366,7 @@ class FormBuilderForm extends DisplayForm
             'Edit'
         );
 
-        $copyButton    = $this->addElement(
+        $copyButton    = addElement(
             'button',
             $controlsWrapper,
             [
@@ -384,7 +376,7 @@ class FormBuilderForm extends DisplayForm
             ]
         );
 
-        $this->addElement(
+        addElement(
             'img',
             $copyButton,
             [
@@ -394,8 +386,8 @@ class FormBuilderForm extends DisplayForm
             ]
         );
 
-        if ($returnHtml) {
-            return $this->dom->saveHtml();
+        if (empty($parent)) {
+            return $controlsWrapper->ownerDocument->saveHtml();
         }
 
         return $controlsWrapper;
@@ -500,11 +492,9 @@ class FormBuilderForm extends DisplayForm
         <?php
         }
 
-        $this->dom    = new \DOMDocument();
-
-        $form        = $this->addElement(
+        $form        = addElement(
             'form',
-            $this->dom,
+            '',
             [
                 'action'    => '',
                 'method'    => 'post',
@@ -512,9 +502,9 @@ class FormBuilderForm extends DisplayForm
             ]
         );
 
-        $wrapper    = $this->addElement('div', $form, ['class'    => 'form-elements']);
+        $wrapper    = addElement('div', $form, ['class'    => 'form-elements']);
 
-        $this->addElement(
+        addElement(
             'input',
             $wrapper,
             [
@@ -542,7 +532,7 @@ class FormBuilderForm extends DisplayForm
 
         // Print the html
         // phpcs:ignore
-        echo $this->dom->saveHtml();
+        echo $form->ownerDocument->saveHtml();
     }
 
     /**
