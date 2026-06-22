@@ -2636,17 +2636,17 @@ class DisplayFormResults extends DisplayForm
      */
     public function insertInDb($formId)
     {
-        global $wpdb;
-
         //add new row in db
-        $wpdb->insert(
+        return TSJIPPY\insertInDb(
             $this->shortcodeTable,
             array(
-                'form_id'            => $formId,
-            )
+                'form_id' => $formId,
+            ),
+            [
+                '%d'
+            ],
+            'forms'
         );
-
-        return $wpdb->insert_id;
     }
 
     /**

@@ -93,6 +93,15 @@ class EditFormResults extends DisplayFormResults
             $formats
         );
 
+        /**
+         * Flush db cache
+         */
+        if(wp_cache_supports( 'flush_group' )){
+            wp_cache_flush_group('forms');
+        }else{
+            wp_cache_flush();
+        }
+
         if ($wpdb->last_error !== '') {
             $message    = $wpdb->print_error();
             if (defined('REST_REQUEST')) {
@@ -187,32 +196,39 @@ class EditFormResults extends DisplayFormResults
 
         // Add the index to the archived indexes
         if ($archive) {
-            $result = $wpdb->insert(
+            $result = TSJIPPY\insertInDb(
                 $this->submissionValuesTableName,
                 array(
-                    'submission_id'    => $submissionId,
+                    'submission_id' => $submissionId,
                     'sub_id'        => $subId,
                     'element_id'    => -6,
-                    'value'            => 1
+                    'value'         => 1
                 ),
                 array(
                     '%d',
                     '%d',
                     '%d',
                     '%d'
-                )
+                ),
+                'forms'
             );
         }
 
         // Remove the index from the archived indexes
         else {
-            $result = $wpdb->delete(
+            $result = TSJIPPY\removeFromDb(
                 $this->submissionValuesTableName,
                 array(
                     'submission_id'    => $submissionId,
                     'element_id'    => -6,
                     'sub_id'        => $subId
-                )
+                ),
+                [
+                    '%d',
+                    '%d',
+                    '%s'
+                ],
+                'forms'
             );
         }
 
@@ -284,6 +300,15 @@ class EditFormResults extends DisplayFormResults
                 '%d'
             )
         );
+
+        /**
+         * Flush db cache
+         */
+        if(wp_cache_supports( 'flush_group' )){
+            wp_cache_flush_group('forms');
+        }else{
+            wp_cache_flush();
+        }
 
         if ($wpdb->last_error !== '') {
             $message    = $wpdb->print_error();
@@ -447,21 +472,15 @@ class EditFormResults extends DisplayFormResults
      */
     public function deleteSubmission($submissionId)
     {
-        global $wpdb;
-
-        $result = $wpdb->delete(
+        TSJIPPY\removeFromDb(
             $this->submissionTableName,
             array(
-                'id'        => $submissionId
-            )
+                'id' => $submissionId
+            ),
+            ['%d'],
+            'forms'
         );
 
-        if ($result === false) {
-            return new \WP_Error('tsjippy forms', "Submission removal failed");
-        }
-
         $this->sendEmail('removed');
-
-        return $result;
     }
 }

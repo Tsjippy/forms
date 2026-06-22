@@ -366,6 +366,15 @@ class FormExport extends FormBuilderForm
                     'id'             => $this->formData->id 
                 ),
             );
+
+            /**
+             * Flush db cache
+             */
+            if(wp_cache_supports( 'flush_group' )){
+                wp_cache_flush_group('forms');
+            }else{
+                wp_cache_flush();
+            }
         }
 
         return "<div class='success'>Import of the form '{$object->formData->slug}' finished successfully.<br>Visit the created form <a href='$url' target='_blank'>here</a></div>";

@@ -555,9 +555,11 @@ function removeElement()
 
     $elementId        = (int) $_POST['elementindex'];
 
-    $wpdb->delete(
+    TSJIPPY\removeFromDb(
         $formBuilder->elTableName,
         ['id' => $elementId],
+        ['%d'],
+        'forms'
     );
 
     // Fix priorities

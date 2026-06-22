@@ -365,7 +365,7 @@ class SubmitForm extends SaveFormSettings
                         $elementId    = $this->getElementBySlug($matches[1] . "[$in][$subKey]", 'id');
 
                         // insert the value
-                        $wpdb->insert(
+                        TSJIPPY\insertInDb(
                             $this->submissionValuesTableName,
                             [
                                 'submission_id' => $this->submission->id,
@@ -378,7 +378,8 @@ class SubmitForm extends SaveFormSettings
                                 '%d',
                                 '%d',
                                 '%s'
-                            ]
+                            ],
+                            'forms'
                         );
                     }
                 }
@@ -397,7 +398,7 @@ class SubmitForm extends SaveFormSettings
 
                     $elementId = $this->getElementBySlug($slug . '[' . $key . ']', 'id');
 
-                    $wpdb->insert(
+                    TSJIPPY\insertInDb(
                         $this->submissionValuesTableName,
                         [
                             'submission_id' => $this->submission->id,
@@ -410,7 +411,8 @@ class SubmitForm extends SaveFormSettings
                             '%d',
                             '%s',
                             '%s'
-                        ]
+                        ],
+                        'forms'
                     );
                 }
 

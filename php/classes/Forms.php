@@ -366,7 +366,7 @@ class Forms
     }
 
     /**
-     * Defines the formats of each column in each table for use in $wpdb->insert and $wpdb->update
+     * Defines the formats of each column in each table
      */
     private function tableFormats()
     {
@@ -568,38 +568,56 @@ class Forms
 
         $this->formData->slug    = $newName;
 
-        $wpdb->insert(
+        $result = TSJIPPY\insertInDb(
             $this->tableName,
             array(
                 'slug'            => $this->formData->slug,
                 'version'         => 1
-            )
+            ),
+            [
+                '%s',
+                '%d'
+            ],
+            'forms'
         );
 
-        if (!empty($wpdb->last_error)) {
-            return new \WP_Error('error', $wpdb->print_error());
+        if (is_wp_error($result)) {
+            return $result;
         }
 
-        $formId = $wpdb->insert_id;
+        $formId = $result;
 
         /**
          * insert default elements
          */
 
         // First create the name element as we need its id for the user id element conditions
-        $wpdb->insert(
+        $result = TSJIPPY\insertInDb(
             $this->elTableName,
             array(
-                'form_id'         => $formId,
-                'type'             => 'text',
-                'slug'            => 'name',
-                'options'         => 'list=users',
+                'form_id'       => $formId,
+                'type'          => 'text',
+                'slug'          => 'name',
+                'options'       => 'list=users',
                 'default_value' => 'display_name',
-                'priority'        => 3
-            )
+                'priority'      => 3
+            ),
+            [
+                '%d',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%d'
+            ],
+            'forms'
         );
 
-        $elementId    = $wpdb->insert_id;
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        $elementId    = $result;
 
         $elements = [
             array(
@@ -640,9 +658,11 @@ class Forms
         foreach ($elements as $element) {
             $element['form_id'] = $formId;
 
-            $wpdb->insert(
+            TSJIPPY\insertInDb(
                 $this->elTableName,
-                $element
+                $element,
+                [],
+                'forms'
             );
         }
     }
@@ -691,45 +711,51 @@ class Forms
         global $wpdb;
 
         // Remove the form
-        $wpdb->delete(
+        TSJIPPY\removeFromDb(
             $this->tableName,
             ['id' => $formId],
-            ['%d']
+            ['%d'],
+            'forms'
         );
 
         // remove the form elements
-        $wpdb->delete(
+        TSJIPPY\removeFromDb(
             $this->elTableName,
             ['form_id' => $formId],
-            ['%d']
+            ['%d'],
+            'forms'
         );
 
         // emails
-        $wpdb->delete(
+        TSJIPPY\removeFromDb(
             $this->formEmailTable,
             ['form_id' => $formId],
-            ['%d']
+            ['%d'],
+            'forms'
         );
 
         // reminders
-        $wpdb->delete(
+        TSJIPPY\removeFromDb(
             $this->formReminderTable,
             ['form_id' => $formId],
-            ['%d']
+            ['%d'],
+            'forms'
         );
 
-        //sortcodes
-        $wpdb->delete(
+        //shortcodes
+        TSJIPPY\removeFromDb(
             $this->shortcodeTable,
             ['form_id' => $formId],
-            ['%d']
+            ['%d'],
+            'forms'
         );
 
         // shortcode setttings
-        $wpdb->delete(
+        TSJIPPY\removeFromDb(
             $this->shortcodeColumnSettingsTable,
             ['form_id' => $formId],
-            ['%d']
+            ['%d'],
+            'forms'
         );
 
         // submission values
@@ -745,10 +771,11 @@ class Forms
         );
 
         // remove the form submissions
-        $wpdb->delete(
+        TSJIPPY\removeFromDb(
             $this->submissionTableName,
             ['form_id' => $formId],
-            ['%d']
+            ['%d'],
+            'forms'
         );
 
         // update or delete posts with this form
@@ -772,6 +799,15 @@ class Forms
             } else {
                 wp_update_post($post);
             }
+        }
+
+        /**
+         * Flush db cache
+         */
+        if(wp_cache_supports( 'flush_group' )){
+            wp_cache_flush_group('forms');
+        }else{
+            wp_cache_flush();
         }
 
         return "<div class='success'>Deletion of the form with id '$formId' finished successfully.</div>";

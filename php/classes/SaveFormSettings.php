@@ -7,6 +7,8 @@ use TSJIPPY;
 use WP_Embed;
 use WP_Error;
 
+use function TSJIPPY\removeFromDb;
+
 if (! defined('ABSPATH')) {
     exit;
 }
@@ -189,13 +191,12 @@ class SaveFormSettings extends Forms
         ksort($data);
 
         if (empty($where)) {
-            $wpdb->insert(
+            $result = TSJIPPY\insertInDb(
                 $table,
                 $data,
-                $formats
+                $formats,
+                'forms'
             );
-
-            $result    = $wpdb->insert_id;
         } else {
             //Update element
             $wpdb->update(
@@ -205,6 +206,15 @@ class SaveFormSettings extends Forms
                 $formats,
                 $whereFormat
             );
+
+            /**
+             * Flush db cache
+             */
+            if(wp_cache_supports( 'flush_group' )){
+                wp_cache_flush_group('forms');
+            }else{
+                wp_cache_flush();
+            }
 
             $result    = $wpdb->rows_affected;
 
@@ -216,13 +226,12 @@ class SaveFormSettings extends Forms
 
                 if ($wpdb->num_rows === 0) {
                     // Insert instead
-                    $wpdb->insert(
+                    $result = TSJIPPY\insertInDb(
                         $table,
                         $data,
-                        $formats
+                        $formats,
+                        'forms'
                     );
-
-                    $result    = $wpdb->insert_id;
                 }
             }
         }
@@ -278,6 +287,15 @@ class SaveFormSettings extends Forms
             ['id'        => $this->formData->id],
         );
 
+        /**
+         * Flush db cache
+         */
+        if(wp_cache_supports( 'flush_group' )){
+            wp_cache_flush_group('forms');
+        }else{
+            wp_cache_flush();
+        }
+
         if ($wpdb->last_error !== '') {
             return new WP_Error('forms', $wpdb->last_error);
         }
@@ -322,6 +340,15 @@ class SaveFormSettings extends Forms
                 'id'        => $element->id
             ),
         );
+
+        /**
+         * Flush db cache
+         */
+        if(wp_cache_supports( 'flush_group' )){
+            wp_cache_flush_group('forms');
+        }else{
+            wp_cache_flush();
+        }
 
         if ($wpdb->last_error !== '') {
             return new WP_Error('forms', $wpdb->print_error());
@@ -499,15 +526,16 @@ class SaveFormSettings extends Forms
 
             $placeholders   = implode(', ', array_fill(0, count($emailsToDelete), '%d'));
 
-            // phpcs:disable
-            $wpdb->query(
-                $wpdb->prepare(
+            removeFromDb(
+                $this->formEmailTable,
+                [
                     "DELETE FROM %i WHERE id IN ($placeholders)",
                     $this->formEmailTable,
                     ...$emailsToDelete
-                )
+                ],
+                [],
+                'forms'
             );
-            // phpcs:enable
         }
 
         $result    = true;
