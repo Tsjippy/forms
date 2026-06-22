@@ -6,6 +6,7 @@
 ### Changed
 - append table to parent node
 - implemented db caching
+- implemented db caching
 
 ### Fixed
 
