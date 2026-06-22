@@ -1273,8 +1273,10 @@ class Forms
 
         if ($this->getElementBySlug('phone')) {
             $phonenumberKey    = 'phone';
-        } elseif ($this->getElementBySlug('phonenumber')) {
+        }elseif ($this->getElementBySlug('phonenumber')) {
             $phonenumberKey    = 'phonenumber';
+        }elseif ($this->getElementBySlug('phone_number')) {
+            $phonenumberKey    = 'phone_number';
         }
 
         return $phonenumberKey;

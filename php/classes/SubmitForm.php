@@ -162,7 +162,7 @@ class SubmitForm extends SaveFormSettings
         $this->getEmailSettings();
 
         foreach ($this->emailSettings as $key => $email) {
-            $email    = (object)$email;
+            $email    = (object)map_deep($email, 'trim');
 
             if (!$this->checkEmailConditions($email, $trigger)) {
                 continue;
@@ -243,7 +243,7 @@ class SubmitForm extends SaveFormSettings
             }
 
             $files        = [];
-            if (is_string($email->files)) {
+            if (!empty($email->files) && is_string($email->files)) {
                 $files        = $this->processPlaceholders($email->files, $replaceValues);
 
                 if (is_string($files)) {
