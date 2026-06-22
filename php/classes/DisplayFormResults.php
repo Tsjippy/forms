@@ -304,12 +304,13 @@ class DisplayFormResults extends DisplayForm
             if (count($exploded) > 1) {
                 $filterIndex        = str_replace(']', '', end($exploded));
 
-                $filterElementIds    = $wpdb->get_col(
-                    $wpdb->prepare(
-                        "SELECT id FROM %i WHERE `name` LIKE %s",
-                        $this->elTableName,
-                        "{$exploded[0]}[%][$filterIndex]"
-                    )
+                $name               = "{$exploded[0]}[%][$filterIndex]";
+                $filterElementIds   = TSJIPPY\getFromDb(
+                    "get_element_where_name_is_$name",
+                    "forms",
+                    "SELECT id FROM %i WHERE `name` LIKE %s",
+                    $this->elTableName,
+                    $name
                 );
             } else {
                 $filterElementIds    = [$filter['element']];
@@ -1035,7 +1036,11 @@ class DisplayFormResults extends DisplayForm
                 $orgFieldValue    = $value;
 
                 $value            = apply_filters('tsjippy-forms-result-table-value', $value, $columnSetting, $this->submission, $this);
-                $value            = $this->transformInputData($value, $this->getElementBySlug($class), $this->submission);
+
+                $element          = $this->getElementBySlug($class);
+                if($element){
+                    $value        = $this->transformInputData($value, $element, $this->submission);
+                }
 
                 //show original email in excel
                 if (gettype($value) == 'string' && (str_contains($value, '@') || str_contains($value, '<'))) {
@@ -1251,12 +1256,12 @@ class DisplayFormResults extends DisplayForm
            return new WP_Error('forms', 'no shortcoode id');
         }
 
-        $this->tableSettings         = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM %i WHERE id = %d",
-                $this->shortcodeTable,
-                $this->shortcodeId
-            )
+        $this->tableSettings = TSJIPPY\getFromDb(
+            "get_shortcode_$this->shortcodeId",
+            "forms",
+            "SELECT * FROM %i WHERE id = %d",
+            $this->shortcodeTable,
+            $this->shortcodeId
         )[0];
 
         foreach ($this->tableSettings as &$value) {
@@ -1264,13 +1269,12 @@ class DisplayFormResults extends DisplayForm
         }
 
         $this->columnSettings        = [];
-        $results                     = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM %i WHERE shortcode_id = %d ORDER BY `priority` ASC",
-                $this->shortcodeColumnSettingsTable,
-                $this->shortcodeId
-            ),
-            ARRAY_A
+        $results                     = TSJIPPY\getFromDb(
+            "get_shortcode_settings_$this->shortcodeId",
+            "forms",
+            "SELECT * FROM %i WHERE shortcode_id = %d ORDER BY `priority` ASC",
+            $this->shortcodeColumnSettingsTable,
+            $this->shortcodeId
         );
 
         foreach ($results as $setting) {
@@ -2328,10 +2332,15 @@ class DisplayFormResults extends DisplayForm
                     $exploded            = explode('[', $sortElement->slug);
 
                     if (count($exploded) > 1) {
-                        $sort                = str_replace(']', '', end($exploded));
+                        $sort = str_replace(']', '', end($exploded));
+                        $name = "{$exploded[0]}[%][$sort]";
 
-                        $this->sortElementIds    = $wpdb->get_col(
-                            $wpdb->prepare("SELECT id FROM %i WHERE `name` LIKE %s", $this->elTableName, "{$exploded[0]}[%][$sort]")
+                        $this->sortElementIds    = TSJIPPY\getFromDb(
+                            "get_element_id_by_name_$name",
+                            "forms",
+                            "SELECT id FROM %i WHERE `name` LIKE %s", 
+                            $this->elTableName, 
+                            $name
                         );
                     } else {
                         $this->sortElementIds    = [$defaultSortElement];

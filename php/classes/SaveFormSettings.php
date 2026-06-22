@@ -482,11 +482,13 @@ class SaveFormSettings extends Forms
         global $wpdb;
 
         // Remove deleted emails
-        $existingEmails    = $wpdb->get_col($wpdb->prepare(
+        $existingEmails    = TSJIPPY\getFromDb(
+            "get_email_ids_for_form_$formId",
+            "forms",
             "SELECT id FROM %i WHERE form_id = %d",
             $this->formEmailTable,
             $formId
-        ));
+        );
 
         $emailsToKeep    = array_column($formEmails, 'email-id');
 

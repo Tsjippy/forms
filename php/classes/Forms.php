@@ -658,7 +658,7 @@ class Forms
             return new WP_ERROR('forms', 'No form slug given');
         }
 
-        $query   = "SELECT * FROM %i WHERE `slug` = %s";
+        $query   = "SELECT slug FROM %i WHERE `slug` = %s";
         $values  = [
             $this->tableName,
             $this->formData->slug
@@ -782,8 +782,6 @@ class Forms
      */
     public function getForms()
     {
-        global $wpdb;
-
         $this->forms =  TSJIPPY\getFromDb(
             "get_all_forms",
             "forms",
@@ -799,14 +797,12 @@ class Forms
      */
     public function getFormBySubmissionId($submisisonId)
     {
-        global $wpdb;
-
-        $formId        = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT form_id FROM %i WHERE id = %d",
-                $this->submissionTableName,
-                $submisisonId
-            )
+        $formId        = TSJIPPY\getFromDb(
+            "get_form_by_submission_id_$submisisonId",
+            "forms",
+            "SELECT form_id FROM %i WHERE id = %d LIMIT 1",
+            $this->submissionTableName,
+            $submisisonId
         );
 
         if (empty($formId)) {
@@ -1462,8 +1458,8 @@ class Forms
         $filtered    = apply_filters(
             'tsjippy-formdata-retrieval-query',
             [
-                'baseQuery'    => $baseQuery,
-                'where'        => $where,
+                'baseQuery' => $baseQuery,
+                'where'     => $where,
                 'values'    => $values,
             ],
             $this->userId,

@@ -106,12 +106,12 @@ function showFormSelector($atts = [])
          * Loop over the forms to add both the form and the submission data
          */
         foreach ($forms as $form) {
-            $shortcodeData     = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT * FROM %i WHERE form_id= %d",
-                    $formTable->shortcodeTable,
-                    $form->id
-                )
+            $shortcodeData     = TSJIPPY\getFromDb(
+                "get_shortcodes_for_form_$form->id",
+                "forms",
+                "SELECT * FROM %i WHERE form_id = %d",
+                $formTable->shortcodeTable,
+                $form->id
             );
 
             //Create shortcode data if not existing

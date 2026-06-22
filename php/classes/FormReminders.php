@@ -136,14 +136,14 @@ class FormReminders extends Forms
         }
 
         // Get the forms that have a stardate in the past
-        $date                = gmdate('Y-m-d');
+        $date    = gmdate('Y-m-d');
 
-        $results            = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM %i WHERE reminder_start_date <= %s",
-                $this->formReminderTable,
-                $date
-            )
+        $results = TSJIPPY\getFromDb(
+            "get_form_reminders_before_$date",
+            "forms",
+            "SELECT * FROM %i WHERE reminder_start_date <= %s",
+            $this->formReminderTable,
+            $date
         );
 
         foreach ($results as $formReminder) {

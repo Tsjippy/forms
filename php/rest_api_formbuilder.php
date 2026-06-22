@@ -507,12 +507,12 @@ function addFormElement($copy = false)
 
         // phpcs:ignore
         if (!is_numeric($_POST['insert-after'])) {
-            $element->priority    = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT COUNT(`id`) FROM %i WHERE `form_id`=%d",
-                    $forms->elTableName,
-                    $element->form_id
-                )
+            $element->priority    = TSJIPPY\getFromDb(
+                "get_form_elements_count_for_$element->form_id",
+                "forms",
+                "SELECT COUNT(`id`) FROM %i WHERE `form_id`=%d LIMIT 1",
+                $forms->elTableName,
+                $element->form_id
             ) + 1;
         } else {
             // phpcs:ignore

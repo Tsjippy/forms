@@ -101,9 +101,9 @@ class EditFormResults extends DisplayFormResults
                 TSJIPPY\printArray($message);
             }
         } elseif (!$result) {
-            $column        = array_keys($data)[0];
+            $column   = array_keys($data)[0];
 
-            $curValue    = $wpdb->get_var(
+            $curValue = $wpdb->get_var(
                 $wpdb->prepare(
                     "select %s from %i where id = %d",
                     $column,

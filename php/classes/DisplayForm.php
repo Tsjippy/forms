@@ -216,19 +216,22 @@ class DisplayForm extends ElementHtmlBuilder
         $query        = "SELECT * FROM %i WHERE `form_id`=";
         $values       = [$this->elTableName];
 
+        $cacheKey     = "get_form_elments_for_form_";
         if (is_numeric($this->formData->id) && $this->formData->id > -1) {
             $query    .= '%d';
-            $values[] = $this->formData->id;
+            $values[]  = $this->formData->id;
+            $cacheKey .= $this->formData->id;
         } elseif (!empty($this->formData->slug)) {
             $query    .= "(SELECT `id` FROM %i WHERE slug=%s LIMIT 1)";
-            $values[] = $this->tableName;
-            $values[] = $this->formData->slug;
+            $values[]  = $this->tableName;
+            $values[]  = $this->formData->slug;
+            $cacheKey .= $this->formData->slug;
         } else {
             return new \WP_Error('forms', 'Which form do you have?');
         }
 
         // phpcs:ignore
-        $formElements         =  $wpdb->get_results($wpdb->prepare($query, $values));
+        $formElements  =  TSJIPPY\getFromDb($cacheKey, "forms", $query, $values);
 
         // phpcs:ignore
         if (empty($formElements)) {

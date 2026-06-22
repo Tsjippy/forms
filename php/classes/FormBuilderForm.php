@@ -1091,17 +1091,16 @@ class FormBuilderForm extends DisplayForm
                 if (isset($userMetas[$key])) {
                     $value    = $userMetas[$key][0];
                 } else {
-                    $value    = $wpdb->get_var(
-                        $wpdb->prepare(
-                            "SELECT `meta_value` FROM %i WHERE meta_key = %s",
-                            $wpdb->usermeta,
-                            $key
-                        )
+                    $value    = TSJIPPY\getFromDb(
+                        "get_meta_values_for_$key",
+                        "forms",
+                        "SELECT `meta_value` FROM %i WHERE meta_key = %s LIMIT 1",
+                        $wpdb->usermeta,
+                        $key
                     );
                 }
 
                 // Check if array, store array keys
-                $value     = maybe_unserialize($value);
                 $data    = '';
                 if (is_array($value)) {
                     $keys    = implode(',', array_keys($value));
