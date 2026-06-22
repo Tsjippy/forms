@@ -12,6 +12,7 @@
 - find phonenumber by slug phone_number
 
 ### Fixed
+- archive whole splitted submission
 
 ### Updated
 
