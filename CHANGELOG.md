@@ -4,6 +4,15 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.6.0] - 2026-06-23
+
+
+### Changed
 - append table to parent node
 - implemented db caching
 - implemented db caching
@@ -14,8 +23,6 @@
 ### Fixed
 - archive whole splitted submission
 - addElement
-
-### Updated
 
 ## [11.5.9] - 2026-06-21
 
