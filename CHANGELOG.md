@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- hooks
 
 ### Fixed
 
 ### Updated
+
+## [11.6.4] - 2026-06-23
+
+
+### Changed
+- hooks
 
 ## [11.6.3] - 2026-06-23
 
