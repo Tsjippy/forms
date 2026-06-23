@@ -411,7 +411,7 @@ class FormBuilderForm extends DisplayForm
         // make sure we use unique priorities
         ob_start();
 
-    ?>
+        ?>
         <div class="tsjippy-form-wrapper">
             <?php
             $this->addElementModal();
@@ -468,14 +468,14 @@ class FormBuilderForm extends DisplayForm
     public function formElementsForm()
     {
         if (empty($this->formElements)) {
-        ?>
+            ?>
             <div name="formbuildbutton">
                 <p>No formfield defined yet.</p>
                 <button name='createform' class='button' data-slug='<?php echo esc_attr($this->formData->slug); ?>'>
                     Add fields to this form
                 </button>
             </div>
-        <?php
+            <?php
         } else {
         ?>
             <div class="form-edit-buttons-wrapper">
@@ -489,7 +489,7 @@ class FormBuilderForm extends DisplayForm
                     Show enduser form
                 </button>
             </div>
-        <?php
+            <?php
         }
 
         $form        = addElement(
@@ -516,6 +516,12 @@ class FormBuilderForm extends DisplayForm
         );
 
         $this->nextElement        = null;
+
+        // Sort on priority
+        usort($this->formElements, function ($a, $b){
+            return $a->priority <=> $b->priority;
+        });
+
         foreach ($this->formElements as $key => $element) {
             if (isset($this->formElements[$key + 1])) {
                 $this->nextElement        = $this->formElements[$key + 1];
@@ -544,7 +550,7 @@ class FormBuilderForm extends DisplayForm
         <div class="modal add-form-element-modal hidden">
             <!-- Modal content -->
             <div class="modal-content" style='max-width:90%; width:max-content;'>
-                <span id="modal-close" class="close">&times;</span>
+                <?php echo TSJIPPY\addCloseButtton();?>
 
                 <button class="button tablink formbuilder-form active" id="show-element-builder" data-target="element-builder">
                     Form element

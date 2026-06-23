@@ -312,8 +312,6 @@ class SaveFormSettings extends Forms
      */
     public function updatePriority($element)
     {
-        global $wpdb;
-
         //Update the database
         $result = TSJIPPY\updateDbValue(
             $this->elTableName,
@@ -338,21 +336,21 @@ class SaveFormSettings extends Forms
     /**
      * Change the order of form elements
      *
-     * @param    array            $newIndexes        The updated array of element id - priority pairs
-     * @param    object            $element        The element to change the priority of
+     * @param    array  $elementIds     Array of element ids in the order they should be shown
      */
-    public function reorderElements(array $newIndexes, $element)
+    public function reorderElements($elementIds)
     {
-        if (!isset($this->formData->id) && !empty($element) && isset($element->form_id)) {
-            $this->formData->id    = $element->form_id;
+        if (!isset($this->formData->id)) {
+            return new WP_Error('tsjippy-forms', 'No form data loaded');
         }
 
         // Get all elements of this form
         $this->getAllFormElements('priority', $this->formData->id, true);
 
-        foreach ($this->formElements    as &$el) {
-            if (is_numeric($newIndexes[$el->id]) && $el->priority != $newIndexes[$el->id]) {
-                $el->priority    = $newIndexes[$el->id];
+        foreach ($this->formElements as &$el) {
+            $priority   = array_search($el->id, $elementIds) + 1;
+            if ($el->priority != $priority) {
+                $el->priority    = $priority;
 
                 $this->updatePriority($el);
             }

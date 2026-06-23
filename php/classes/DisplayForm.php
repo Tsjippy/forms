@@ -210,8 +210,6 @@ class DisplayForm extends ElementHtmlBuilder
      */
     public function determineForm()
     {
-        global $wpdb;
-
         wp_enqueue_style('tsjippy_forms_style');
 
         $query        = "SELECT * FROM %i WHERE `form_id`=";
@@ -352,6 +350,12 @@ class DisplayForm extends ElementHtmlBuilder
          */
         $parents             = ['root' => $form];
         $this->prevElement    = null;
+        
+        // Sort on priority
+        usort($this->formElements, function ($a, $b){
+            return $a->priority <=> $b->priority;
+        });
+
         foreach ($this->formElements as $index => $element) {
             /**
              * Store the current and the next elements

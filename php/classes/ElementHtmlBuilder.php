@@ -1625,6 +1625,10 @@ class ElementHtmlBuilder extends SubmitForm
 
         /**
          * Override filter, return a node to bypass this function
+         *
+         * @param object $override  default null, return a node to skip element html rendering
+         * @param object $parent    The parent form element
+         * @param object $object    The form object
          */
         $node = apply_filters('tsjippy-forms-element-html-short-circuit', null, $parent, $this);
         if (!empty($node)) {

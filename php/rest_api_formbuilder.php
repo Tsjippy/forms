@@ -179,12 +179,6 @@ function restApiInitForms()
                         return is_numeric($formId);
                     }
                 ),
-                'el-id'        => array(
-                    'required'    => true,
-                    'validate_callback' => function ($elementId) {
-                        return is_numeric($elementId);
-                    }
-                ),
                 'indexes'        => array(
                     'required'    => true
                 )
@@ -395,8 +389,6 @@ function copyFormElement()
 // DONE
 function addFormElement($copy = false)
 {
-    global $wpdb;
-
     // phpcs:ignore
     $forms    = new SaveFormSettings(formUrl: TSJIPPY\sanitize($_REQUEST['form-url'] ?? ''));
     // phpcs:ignore
@@ -520,29 +512,16 @@ function addFormElement($copy = false)
         }
 
         $element->id    = $forms->insertElement($element);
-
-        // phpcs:ignore
-        if (!empty($_POST['extra'])) {
-            // The current indexes without the new element
-            // phpcs:ignore
-            $newIndexes     = (array)json_decode(TSJIPPY\sanitize($_POST['extra']));
-
-            // The new element has an unknow id of -1, replace it with the real id.
-            $newIndexes[$element->id]    = $newIndexes[-1];
-            unset($newIndexes[-1]);
-
-            $forms->reorderElements($newIndexes, $element);
-        }
     }
 
     $formBuilderForm    = new FormBuilderForm();
     $formBuilderForm->getForm((int) $_POST['form-id']);
 
-    $html                 = $formBuilderForm->buildHtml($element, '', $index);
+    $html         = $formBuilderForm->buildHtml($element, '', $index);
 
     return [
-        'message'        => $message,
-        'html'            => $html
+        'message' => $message,
+        'html'    => $html
     ];
 }
 
@@ -602,16 +581,12 @@ function requestFormElement()
 // DONE
 function reorderFormElements()
 {
-    $formBuilder            = new SaveFormSettings();
-
-    $formBuilder->formId    = (int) $_POST['form-id'] ?? '';
+    $formBuilder            = new SaveFormSettings(['formid' => (int) $_POST['form-id'] ?? '']);
 
     // phpcs:ignore
-    $newIndexes             = (array)json_decode(TSJIPPY\sanitize($_POST['indexes']));
+    $elementIds             = (array)json_decode(TSJIPPY\sanitize($_POST['indexes']));
 
-    $element                = $formBuilder->getElementById((int) $_POST['el-id'] ?? '');
-
-    $formBuilder->reorderElements($newIndexes, $element);
+    $formBuilder->reorderElements($elementIds);
 
     return "Succesfully saved new form order";
 }

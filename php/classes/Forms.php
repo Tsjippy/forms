@@ -409,7 +409,7 @@ class Forms
 
         // Form Elements
         $formats        = [
-            'form_id'                => '%d',
+            'form_id'             => '%d',
             'type'                => '%s',
             'priority'            => '%d',
             'width'               => '%d',
@@ -1314,8 +1314,6 @@ class Forms
             return '';
         }
 
-        global $wpdb;
-
         if (!is_numeric($formId) && $this->formData && is_numeric($this->formData->id)) {
             $formId    = $this->formData->id;
         }
@@ -1345,19 +1343,11 @@ class Forms
         // phpcs:ignore
         $elements    =  TSJIPPY\getFromDb($cacheKey, "forms", $query, $values);
 
-        foreach ($elements as &$element) {
-            if (!empty($element->conditions)) {
-                while (is_serialized($element->conditions)) {
-                    $element->conditions    = maybe_unserialize($element->conditions);
-                }
-            }
-        }
-
         /**
          * Filters the elements of this form,
-         * @param    array    $elements        The elements array
-         * @param    object    $object            The form instance
-         * @param    bool    $force            Wheter to force a requery
+         * @param    array   $elements  The elements array
+         * @param    object  $object    The form instance
+         * @param    bool    $force     Wheter to force a requery
          */
         $this->formElements         =  apply_filters('tsjippy-forms-elements', $elements, $this, false);
     }

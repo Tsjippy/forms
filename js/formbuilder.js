@@ -1,6 +1,6 @@
 import Sortable from "sortablejs";
 
-var reorderingBusy, formWrapper, formElementWrapper, modal;
+var formWrapper, formElementWrapper, modal;
 
 console.log("Formbuilder.js loaded");
 
@@ -124,12 +124,6 @@ function clearFormInputs() {
   }
 }
 
-function fixElementNumbering(form) {
-  form.querySelectorAll(".form-element-wrapper").forEach((el, index) => {
-    el.dataset.priority = index + 1;
-  });
-}
-
 //edit existing or add new element
 async function requestEditElementData(target, requestNew = false) {
   target.classList.add("clicked");
@@ -223,7 +217,6 @@ async function addFormElement(target, copying = false) {
   }
 
   let wrapper;
-  let priority;
 
   let referenceNode = document.querySelector(".form-elements .clicked");
 
@@ -242,30 +235,15 @@ async function addFormElement(target, copying = false) {
     }
 
     wrapper = document.querySelector(".form-elements");
-
-    priority = 1;
   } else {
     wrapper = referenceNode.closest(".form-element-wrapper");
-
-    priority = parseInt(wrapper.dataset.priority) + 1;
   }
 
   // Show loader
   if (!editing) {
     let loader = Main.showLoader(wrapper, false);
-    loader.dataset.priority = priority;
     loader.classList.add("form-element-wrapper");
     loader.dataset.elementId = -1;
-
-    // make sure all priorities are correct
-    fixElementNumbering(referenceNode.closest("form"));
-
-    var indexes = {};
-    document.querySelectorAll(`.form-element-wrapper`).forEach((el) => {
-      indexes[el.dataset.elementId] = el.dataset.priority;
-    });
-
-    indexes = JSON.stringify(indexes);
   }
 
   let response;
@@ -273,8 +251,6 @@ async function addFormElement(target, copying = false) {
     let formData = new FormData();
     formData.append("element-id", wrapper.dataset.elementId);
     formData.append("form-id", wrapper.dataset.formId);
-    formData.append("order", indexes);
-    formData.append("insert-after", formElementWrapper.dataset.priority);
 
     response = await FormSubmit.fetchRestApi(
       "forms/copy_form_element",
@@ -285,8 +261,7 @@ async function addFormElement(target, copying = false) {
   } else {
     response = await FormSubmit.submitForm(
       target,
-      "forms/add_form_element",
-      indexes,
+      "forms/add_form_element"
     );
   }
 
@@ -320,6 +295,8 @@ async function addFormElement(target, copying = false) {
 
   // Remove loaders
   document.querySelectorAll(`.loader-wrapper`).forEach((el) => el.remove());
+
+  reorderFormElements(wrapper.dataset.formId);
 }
 
 async function sendElementSize(el, widthPercentage) {
@@ -355,21 +332,21 @@ async function sendElementSize(el, widthPercentage) {
 }
 
 async function removeElement(target) {
-  let parent = target.parentNode;
+  let parent         = target.parentNode;
   let elementWrapper = target.closest(".form-element-wrapper");
-  let formId = elementWrapper.dataset.formId;
-  let elementIndex = elementWrapper.dataset.elementId;
-  let form = target.closest("form");
+  let formId         = elementWrapper.dataset.formId;
+  let elementId       = elementWrapper.dataset.elementId;
+  let form           = target.closest("form");
 
   Main.showLoader(target);
-  let loader = parent.querySelector(".loader-wrapper");
+  let loader                = parent.querySelector(".loader-wrapper");
   loader.style.paddingRight = "10px";
   loader.classList.remove("loader-wrapper");
 
   let formData = new FormData();
   formData.append("form-id", formId);
 
-  formData.append("elementindex", elementIndex);
+  formData.append("elementindex", elementId);
 
   let response = await FormSubmit.fetchRestApi(
     "forms/remove_element",
@@ -380,46 +357,35 @@ async function removeElement(target) {
     //remove the formelement row
     elementWrapper.remove();
 
-    fixElementNumbering(form);
-
     Main.displayMessage(response);
   }
+
+  reorderFormElements(formId);
+}
+
+function onReorderEnd(event){
+  reorderFormElements(event.item.dataset.formId);
 }
 
 //Fires after element reorder
-async function reorderformelements(event) {
-  if (!reorderingBusy) {
-    reorderingBusy = true;
+async function reorderFormElements(formId) {
+  let formData = new FormData();
+  formData.append("form-id", formId);
 
-    fixElementNumbering(event.item.closest("form"));
+  let elementIds = [];
+  document.querySelectorAll(`.form-element-wrapper`).forEach((el) => {
+    elementIds.push(el.dataset.elementId);
+  });
 
-    let formData = new FormData();
-    formData.append("form-id", event.item.dataset.formId);
-    formData.append("el-id", event.item.dataset.elementId);
+  formData.append("indexes", JSON.stringify(elementIds));
 
-    let indexes = {};
-    document.querySelectorAll(`.form-element-wrapper`).forEach((el) => {
-      indexes[el.dataset.elementId] = el.dataset.priority;
-    });
+  let response = await FormSubmit.fetchRestApi(
+    "forms/reorder-form-elements",
+    formData,
+  );
 
-    formData.append("indexes", JSON.stringify(indexes));
-
-    let response = await FormSubmit.fetchRestApi(
-      "forms/reorder-form-elements",
-      formData,
-    );
-
-    if (response) {
-      reorderingBusy = false;
-
-      Main.displayMessage(response);
-    }
-  } else {
-    let options = {
-      title: "Ordering already in progress, please wait",
-    };
-
-    new Main.Alert(text + "?", "error", options);
+  if (response) {
+    Main.displayMessage(response);
   }
 }
 
@@ -1001,13 +967,12 @@ function focusFirst() {
   modal.querySelector('[name="add-form-element-form"] .nice-select').focus();
 }
 
-reorderingBusy = false;
 document.addEventListener("DOMContentLoaded", function () {
   //Make the form-elements div sortable
   let options = {
     handle: ".movecontrol",
     animation: 150,
-    onEnd: reorderformelements,
+    onEnd: onReorderEnd,
   };
 
   document.querySelectorAll(".form-elements").forEach((el) => {
