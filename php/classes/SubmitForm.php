@@ -694,11 +694,13 @@ class SubmitForm extends SaveFormSettings
             $message = 'succes';
         }
 
-        //save to submission table
+        // Save to submission table
         if (empty($this->formData->save_in_meta)) {
             $result    = $this->saveToSubmissionTable($formresults, $formUrl, $message);
-            //save to user meta
-        } else {
+        } 
+        
+        // Save to user meta
+        else {
             $result    = $this->saveToUserMetaTable($formresults);
         }
 
