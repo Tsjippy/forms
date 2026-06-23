@@ -379,7 +379,7 @@ class DisplayForm extends ElementHtmlBuilder
                 !empty($node) &&                                                             // the node is set
                 (
                     (
-                        $element->wrap &&                                                    // this is the first wraping element
+                        $element->wrap &&                                                    // this is the first wrapping element
                         (
                             empty($this->formElements[$index - 1]) ||
                             !$this->formElements[$index - 1]->wrap

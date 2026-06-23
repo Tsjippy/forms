@@ -375,22 +375,13 @@ class ElementHtmlBuilder extends SubmitForm
      */
     public function infoBoxHtml($text, $parent = null)
     {
-        $returnHtml         = false;
-        $dom            = '';
-
-        if (empty($parent)) {
-            $returnHtml    = true;
-            $dom     = new \DOMDocument();
-            $parent    = $dom;
-        }
-
         //remove any paragraphs
         $content     = str_replace(['<p>', '</p>'], '', $text);
         $content     = TSJIPPY\deslash($content);
 
-        $node        = addElement('div', $parent, ['class' => 'info-box'], '', $dom);
-        $wrapper     = addElement('div', $node, ['style' => "float:right"], '', $dom);
-        $paragraph   = addElement('p', $wrapper, ['class' => "info-icon"], '', $dom);
+        $node        = addElement('div', $parent, ['class' => 'info-box']);
+        $wrapper     = addElement('div', $node, ['style' => "float:right"]);
+        $paragraph   = addElement('p', $wrapper, ['class' => "info-icon"]);
 
         addElement(
             'img',
@@ -402,15 +393,13 @@ class ElementHtmlBuilder extends SubmitForm
                 'alt'        => "ℹ",
                 'src'        => TSJIPPY\PICTURESURL . '/info.png',
                 'loading'    => "lazy"
-            ],
-            '',
-            $dom
+            ]
         );
 
-        addElement('span', $node, ['class' => "info-text"], $content, $dom);
+        addElement('span', $node, ['class' => "info-text"], $content);
 
-        if ($returnHtml) {
-            return $dom->saveHtml($parent);
+        if (empty($parent)) {
+            return $node->ownerDocument->saveHtml($parent);
         }
 
         return $node;
@@ -1646,7 +1635,7 @@ class ElementHtmlBuilder extends SubmitForm
             return $node;
         }
 
-        $this->elementValues        = $this->getElementValues($element);
+        $this->elementValues    = $this->getElementValues($element);
 
         $this->getAttributes();
 
