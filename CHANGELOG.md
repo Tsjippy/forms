@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.6.3] - 2026-06-23
+
+
+### Changed
 - order form elements logic
 
 ### Fixed
 - addElement code
-
-### Updated
 
 ## [11.6.2] - 2026-06-23
 
