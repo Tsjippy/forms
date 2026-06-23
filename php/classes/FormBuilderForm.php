@@ -524,16 +524,16 @@ class FormBuilderForm extends DisplayForm
 
         foreach ($this->formElements as $key => $element) {
             if (isset($this->formElements[$key + 1])) {
-                $this->nextElement        = $this->formElements[$key + 1];
+                $this->nextElement = $this->formElements[$key + 1];
             } else {
-                $this->nextElement        = null;
+                $this->nextElement = null;
             }
 
-            $this->currentElement    = $element;
+            $this->currentElement  = $element;
 
             $this->buildHtml($element, $wrapper, $key);
 
-            $this->prevElement    = $element;
+            $this->prevElement     = $element;
         }
 
         // Print the html
@@ -827,7 +827,7 @@ class FormBuilderForm extends DisplayForm
                                             value='<?php echo esc_attr($id);?>'
                                             <?php if (in_array($id, $this->formData->split ?? [])) { echo 'checked'; } ?>
                                         >
-                                        $name;
+                                        <?php echo esc_html($name);?>
                                     </label>
                                     <br>
                                     <?php

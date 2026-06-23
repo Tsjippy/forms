@@ -713,9 +713,9 @@ class SubmitForm extends SaveFormSettings
          * @param array  $formResults   The submitted form results
          * @param object $object        The SubmitForm object
          */
-        $message    = apply_filters('tsjippy-forms-after-form-submission', $message, $orgFormResults, $this);
+        $message    = apply_filters('tsjippy-forms-after-submission', $message, $orgFormResults, $this);
 
-        do_action('tsjippy-forms-after-form-submit', $this);
+        do_action('tsjippy-forms-after-submit', $this);
 
         return $message;
     }

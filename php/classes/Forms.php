@@ -759,15 +759,16 @@ class Forms
         );
 
         // submission values
-        $wpdb->query(
-            $wpdb->prepare(
-                "DELETE sv FROM %i sv
-                JOIN %i s ON sv.submission_id = s.id
-                WHERE s.form_id = %d",
+        TSJIPPY\removeFromDb(
+            $this->submissionValuesTableName,
+            [
+                "DELETE sv FROM %i sv JOIN %i s ON sv.submission_id = s.id WHERE s.form_id = %d",
                 $this->submissionValuesTableName,
                 $this->submissionTableName,
                 $formId
-            )
+            ],
+            [],
+            'forms'
         );
 
         // remove the form submissions
@@ -1484,7 +1485,7 @@ class Forms
          * Add the metas to the submissions
          */
         $filtered    = apply_filters(
-            'tsjippy-formdata-retrieval-query',
+            'tsjippy-forms-formdata-retrieval-query',
             [
                 'baseQuery' => $baseQuery,
                 'where'     => $where,

@@ -507,13 +507,13 @@ class DisplayFormResults extends DisplayForm
     /**
      * Get formresults of the current form
      *
-     * @param    int|array   $userId         Optional the user id to get the results of or an array of user ids. Default null
-     * @param    int         $submissionId   Optional a specific submission id. Default null
-     * @param    bool        $all            Whether to retrieve all submissions or paged. Default false
-     * @param    array       $where          Optional array of where conditions. Default empty array
-     * @param    array       $values         Optional array of values for the where conditions. Default empty array
+     * @param    int|array $userId       Optional the user id to get the results of or an array of user ids. Default null
+     * @param    int       $submissionId Optional a specific submission id. Default null
+     * @param    bool      $all          Whether to retrieve all submissions or paged. Default false
+     * @param    array     $where        Optional array of where conditions. Default empty array
+     * @param    array     $values       Optional array of values for the where conditions. Default empty array
      *
-     * @return    array                      Array of results
+     * @return    array                  Array of results
      */
     public function getSubmissions($userId = null, $submissionId = null, $all = false, $where = [], $values = [])
     {
@@ -542,7 +542,7 @@ class DisplayFormResults extends DisplayForm
         }
 
         // We want to see archived entries if a specific submission id is queried
-        $this->showArchived = $this->showArchived || is_numeric($submissionId);
+        $showArchived = $this->showArchived || is_numeric($submissionId);
 
         // Check if a form is loaded
         if (empty($this->formData) && !empty($submissionId)) {
@@ -564,7 +564,7 @@ class DisplayFormResults extends DisplayForm
         }
 
         // Archived
-        if (!$this->showArchived && $submissionId == null) {
+        if (!$showArchived && $submissionId == null) {
             $where[]    =  "S.archived=0";
         }
 
@@ -718,19 +718,21 @@ class DisplayFormResults extends DisplayForm
     /**
      * Set formresults of the current form
      *
-     * @param    int        $userId            Optional the user id to get the results of. Default null
-     * @param    int        $submissionId    Optional a specific id. Default null
-     * @param    bool    $all            Whether to retrieve all submissions or paged
-     * @param    bool    $force            Whether to retrieve submissions even if already done
+     * @param    int     $userId       Optional the user id to get the results of. Default null
+     * @param    int     $submissionId Optional a specific id. Default null
+     * @param    bool    $all          Whether to retrieve all submissions or paged
+     * @param    bool    $force        Whether to retrieve submissions even if already done
+     * @param    array   $where        Optional array of where conditions. Default empty array
+     * @param    array   $values       Optional array of values for the where conditions. Default empty array
      */
-    public function parseSubmissions($userId = null, $submissionId = null, $all = false, $force = false)
+    public function parseSubmissions($userId = null, $submissionId = null, $all = false, $force = false, $where=[], $values=[])
     {
         // no need to this again
         if (!empty($this->submissions) && !$force && empty($submissionId)) {
             return;
         }
 
-        $this->submissions        = $this->getSubmissions($userId, $submissionId, $all);
+        $this->submissions        = $this->getSubmissions($userId, $submissionId, $all, $where, $values);
 
         if (count($this->submissions) == 1) {
             $this->submission    = array_values($this->submissions)[0];
@@ -1190,7 +1192,8 @@ class DisplayFormResults extends DisplayForm
                 "class" => "$action button forms-table-action",
                 "name"  => "{$action}-action",
                 "value" => $action,
-                "text"  => ucfirst($action)
+                "text"  => ucfirst($action),
+                'type'  => 'button'
             ];
         }
 
@@ -2280,20 +2283,17 @@ class DisplayFormResults extends DisplayForm
             $type        = 'own';
         }
 
-        // Ob_start here in case the filter is echoing something
-        ob_start();
-
         /**
          * Filter whether or not to show the table, 
          * this can be used to for example show a message instead of the table when there are no submissions or when the user has no permissions
          * 
-         * @param    bool   $shouldShow Whether or not to show the table, default true
-         * @param    object $object     The current instance of the form table class, can be used to get more information about the form and the user to decide whether or not to show the table
-         * @param    string $type       The type of results that would be shown, either 'own', 'others' or 'all'
+         * @param    bool           $shouldShow Whether or not to show the table, default true
+         * @param    object         $object     The current instance of the form table class, can be used to get more information about the form and the user to decide whether or not to show the table
+         * @param    string         $type       The type of results that would be shown, either 'own', 'others' or 'all'
+         * @param    \DOMElement    $parent     The parent node to append to
          */
-        $shouldShow    = apply_filters('tsjippy-forms-table-should-show', true, $this, $type);
+        $shouldShow    = apply_filters('tsjippy-forms-table-should-show', true, $this, $type, $parent);
 
-        ob_end_clean();
         if ($shouldShow !== true) {
             return     $shouldShow;
         }
