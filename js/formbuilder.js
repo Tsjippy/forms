@@ -1061,7 +1061,7 @@ function placeholderSelect(target) {
     let options = {
       title: "Success",
       ConfirmButtonText: `Yes, delete it!`,
-      timer: 1500,
+      timer: 3000,
     };
 
     new Main.Alert("Copied " + value, "success", options);
