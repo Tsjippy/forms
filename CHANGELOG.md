@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- message timer
 
 ### Fixed
 
 ### Updated
+
+## [11.6.2] - 2026-06-23
+
+
+### Changed
+- message timer
 
 ## [11.6.1] - 2026-06-23
 
