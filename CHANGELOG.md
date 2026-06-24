@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- some extra db caching
 
 ### Fixed
 
