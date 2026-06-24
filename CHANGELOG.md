@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- conditional email senders
 
 ### Updated
 
