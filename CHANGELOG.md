@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- conditional email senders
 
 ### Updated
+
+## [11.6.6] - 2026-06-24
+
+
+### Fixed
+- conditional email senders
 
 ## [11.6.5] - 2026-06-24
 
