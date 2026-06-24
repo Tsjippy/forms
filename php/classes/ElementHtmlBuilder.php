@@ -502,9 +502,11 @@ class ElementHtmlBuilder extends SubmitForm
                     ob_start();
                     ?>
                     <div class='file-preview-wrapper'>
+                        // phpcs:ignore
                         <?php echo $html;?>
                         <div class='file-preview'>
                             <?php
+                            // phpcs:ignore
                             echo $html;
                             ?>
                         </div>

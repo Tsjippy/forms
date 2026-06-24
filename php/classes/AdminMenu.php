@@ -141,11 +141,11 @@ class AdminMenu extends ADMIN\SubAdminMenu
 
             global $wpdb;
 
-            $emptyForms    = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT * FROM %i WHERE `version` = 1 and `button_text` IS NULL",
-                    "{$wpdb->prefix}tsjippy_forms"
-                )
+            $emptyForms    = TSJIPPY\getFromDb(
+                "empty_forms",
+                "forms",
+                "SELECT * FROM %i WHERE `version` = 1 and `button_text` IS NULL",
+                "{$wpdb->prefix}tsjippy_forms"
             );
 
             foreach ($emptyForms as $form) {

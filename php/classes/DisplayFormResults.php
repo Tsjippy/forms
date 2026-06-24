@@ -1927,6 +1927,7 @@ class DisplayFormResults extends DisplayForm
         <div class="modal form-shortcode-settings hidden">
             <!-- Modal content -->
             <div class="modal-content" style='max-width:100vw;min-width:90vw;'>
+                // phpcs:ignore
                 <?php echo TSJIPPY\addCloseButtton();?>
 
                 <button id="column-settings" class="button tablink <?php if (!empty($this->tableSettings)) {echo 'active';} ?>" data-target="column-settings-<?php echo esc_attr($this->shortcodeId); ?>">

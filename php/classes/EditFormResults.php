@@ -102,13 +102,13 @@ class EditFormResults extends DisplayFormResults
         } elseif (!$result) {
             $column   = array_keys($data)[0];
 
-            $curValue = $wpdb->get_var(
-                $wpdb->prepare(
-                    "select %s from %i where id = %d",
-                    $column,
-                    $this->submissionTableName,
-                    $submissionId
-                )
+            $curValue = TSJIPPY\getFromDb(
+                "get_{$column}_for_submission_$submissionId",
+                "forms",
+                "select %s from %i where id = %d LIMIT 1",
+                $column,
+                $this->submissionTableName,
+                $submissionId
             );
 
             if ($curValue != $data[$column]) {

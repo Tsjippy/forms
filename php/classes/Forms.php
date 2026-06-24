@@ -550,12 +550,12 @@ class Forms
         $newName = $slug;
         $i       = 1;
         while (true) {
-            $result    = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT * FROM %i WHERE slug = %s",
-                    $this->tableName,
-                    $newName
-                )
+            $result    = TSJIPPY\getFromDb(
+                "get_form_with_slug_$newName",
+                "forms",
+                "SELECT * FROM %i WHERE slug = %s",
+                $this->tableName,
+                $newName
             );
 
             if (empty($result)) {

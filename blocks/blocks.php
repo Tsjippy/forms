@@ -4,6 +4,8 @@ namespace TSJIPPY\FORMS;
 
 use TSJIPPY;
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 add_action('init', __NAMESPACE__ . '\initBlocks');
 function initBlocks()
 {
