@@ -29,7 +29,7 @@ class SubmitForm extends SaveFormSettings
         //loop over all conditions
         foreach ($conditions as $condition) {
 
-            $elementName    = $this->getElementById($condition['fieldid'], 'name');
+            $elementName    = $this->getElementById($condition['fieldid'], 'slug');
 
             //get the submitted form value
             $formValue = $this->submission->{$elementName};
