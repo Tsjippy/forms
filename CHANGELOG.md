@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- some extra db caching
 
 ### Fixed
 
 ### Updated
+
+## [11.6.7] - 2026-06-25
+
+
+### Changed
+- some extra db caching
 
 ## [11.6.6] - 2026-06-24
 
