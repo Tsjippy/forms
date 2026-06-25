@@ -253,8 +253,6 @@ class SaveFormSettings extends Forms
      */
     public function updateFormElement($element)
     {
-        global $wpdb;
-
         $elId          = $element->id;
         $oldElement    = $this->getElementById($elId);
 
@@ -273,8 +271,8 @@ class SaveFormSettings extends Forms
         //Update form version
         $result = TSJIPPY\updateDbValue(
             $this->tableName,
-            ['version'    => $formVersion],
-            ['id'        => $this->formData->id],
+            ['version' => $formVersion],
+            ['id'      => $this->formData->id],
             ['%d'],
             ['%d'],
             'forms'
@@ -360,12 +358,12 @@ class SaveFormSettings extends Forms
     /**
      * Update form settings
      *
-     * @param    int|string    $formId    The id of the form to update the settings for
-     * @param    array        $settings    The settings to update, this should be an associative array where the keys are the column names in the db and the values are the values to update
+     * @param    int|string   $formId   The id of the form to update the settings for
+     * @param    array        $request  The sanitized request data
      *
-     * @return    true|WP_Error                The result or error on failure
+     * @return    true|WP_Error          The result or error on failure
      */
-    public function updateFormSettings($formId = '', $settings = '')
+    public function updateFormSettings($formId = '', $request = '')
     {
         if (empty($formId)) {
             if (!empty($this->formData->id)) {
@@ -375,13 +373,9 @@ class SaveFormSettings extends Forms
             }
         }
 
-        if (empty($settings)) {
-            return new \WP_Error('Error', 'Please supply the form settings');
-        }
+        $request    = apply_filters('tsjippy-forms-before-saving-settings', $request, $this, $formId);
 
-        $settings    = apply_filters('tsjippy-forms-before-saving-settings', $settings, $this, $formId);
-
-        $result    = $this->insertOrUpdateData($this->tableName, $settings, ['id' => $formId]);
+        $result    = $this->insertOrUpdateData($this->tableName, $request, ['id' => $formId]);
         if (is_wp_error($result)) {
             return $result;
         }

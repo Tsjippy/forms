@@ -618,11 +618,11 @@ class SubmitForm extends SaveFormSettings
     /**
      * Save a form submission to the db
      */
-    public function formSubmit($userId, $formId, $formresults)
+    public function formSubmit($userId, $request)
     {
         $this->submission                    = new \stdClass();
 
-        $this->submission->form_id           = $formId;
+        $this->submission->form_id           = $request['form-id'];
 
         $this->getForm($this->submission->form_id);
 
@@ -650,7 +650,7 @@ class SubmitForm extends SaveFormSettings
 
         $this->submission->submitter_id      = $this->userId;
 
-        $orgFormResults                      = $formresults;
+        $orgFormResults                      = $request;
 
         // check for required empty elements
         foreach ($this->formElements as $element) {
@@ -662,24 +662,24 @@ class SubmitForm extends SaveFormSettings
 
         $this->submission->archived         = false;
 
-        $formUrl                            = $formresults['formurl'];
+        $formUrl                            = $request['formurl'];
 
         // remove the action and other unnecary info
-        unset($formresults['form-slug']);
-        unset($formresults['fileupload']);
-        unset($formresults['user_id']);
-        unset($formresults['form-id']);
-        unset($formresults['_wpnonce']);
-        unset($formresults['formurl']);
-        unset($formresults['form-id']);
+        unset($request['form-slug']);
+        unset($request['fileupload']);
+        unset($request['user_id']);
+        unset($request['form-id']);
+        unset($request['_wpnonce']);
+        unset($request['formurl']);
+        unset($request['form-id']);
 
         /**
          * Filters the form results
          *
-         * @param array     $formresults    The form results
-         * @param object    $object         The SubmitForm Instance
+         * @param array     $request    The sanitized request data
+         * @param object    $object     The SubmitForm Instance
          */
-        $formresults        = apply_filters('tsjippy-forms-before-inserting-formdata', (object)$formresults, $this);
+        $formresults        = apply_filters('tsjippy-forms-before-inserting-formdata', (object)$request, $this);
 
         if (is_wp_error($formresults)) {
             return $formresults;

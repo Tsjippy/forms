@@ -109,30 +109,30 @@ class AdminMenu extends ADMIN\SubAdminMenu
         return true;
     }
 
-    public function postActions()
+    public function postActions($request)
     {
         // phpcs:ignore
-        if (isset($_POST['import-form'])) {
+        if (isset($request['import-form'])) {
             $formBuilder    = new FormExport();
             // phpcs:ignore
             return $formBuilder->importForm(TSJIPPY\sanitize($_FILES['formfile']['tmp_name'] ?? ''));
         }
 
         // phpcs:ignore
-        if (is_numeric($_POST['export'] ?? '')) {
+        if (is_numeric($request['export'] ?? '')) {
             $forms    = new FormExport();
             // phpcs:ignore
-            $forms->exportForm(TSJIPPY\sanitize($_POST['export']));
+            $forms->exportForm($request['export']);
 
             return;
         }
 
         // phpcs:ignore
-        if (is_numeric($_POST['delete'] ?? '')) {
+        if (is_numeric($request['delete'] ?? '')) {
             $forms    = new SaveFormSettings();
 
             // phpcs:ignore
-            return $forms->deleteForm(TSJIPPY\sanitize($_POST['delete']));
+            return $forms->deleteForm($request['delete']);
         }
 
         // phpcs:ignore

@@ -328,7 +328,7 @@ function restApiInitForms()
                 }
 
                 // phpcs:ignore
-                return $formBuilder->formSubmit($userId, (int) $_POST['form-id'], TSJIPPY\sanitize($_POST));
+                return $formBuilder->formSubmit($userId, TSJIPPY\sanitize($_POST));
             },
             'permission_callback'     => '__return_true',
             'args'                    => array(
@@ -667,25 +667,26 @@ function saveElementConditions()
 // DONE
 function saveFormSettings()
 {
-    $formBuilder   = new SaveFormSettings();
+    $formBuilder = new SaveFormSettings();
+    $request     = TSJIPPY\sanitize($_POST);
 
-    $formSettings  = TSJIPPY\sanitize($_POST);
-    unset($formSettings['_wpnonce']);
-    unset($formSettings['form-id']);
+    $formId        = $request['form-id'];
+    unset($request['_wpnonce']);
+    unset($request['form-id']);
 
     if (empty($formBuilder->formData)) {
         $formBuilder->formData    = new stdClass();
     }
 
-    $formBuilder->formData->name    = TSJIPPY\sanitize($formSettings['form-name']);
+    $formBuilder->formData->name    = $request['form-name'];
     $formBuilder->formData->slug    = str_replace(' ', '-', strtolower($formBuilder->formData->name));
 
     //remove double slashes
-    $formSettings['upload_path']    = wp_normalize_path($formSettings['upload_path'] ?? '');
+    $request['upload_path']    = wp_normalize_path($request['upload_path'] ?? '');
 
-    $formBuilder->maybeInsertForm((int) $_POST['form-id']);
+    $formBuilder->maybeInsertForm($formId);
 
-    $result    = $formBuilder->updateFormSettings((int) $_POST['form-id'], $formSettings);
+    $result    = $formBuilder->updateFormSettings($formId, $request);
 
     if (is_wp_error($result)) {
         return $result;
@@ -700,7 +701,7 @@ function saveFormReminder()
     $formReminder  = TSJIPPY\sanitize($_POST);
     unset($formReminder['_wpnonce']);
 
-    $result    = $formBuilder->updateFormReminder((int) $_POST['form-id'], $formReminder);
+    $result    = $formBuilder->updateFormReminder($formReminder['form-id'], $formReminder);
 
     if (is_wp_error($result)) {
         return $result;

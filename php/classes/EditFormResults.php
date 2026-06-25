@@ -253,7 +253,7 @@ class EditFormResults extends DisplayFormResults
      *
      * @param    bool    $archive    Whether we should archive or unarchive the submission. Default false
      *
-     * @return    true|WP_Error        The result or error on failure
+     * @return    true|\WP_Error        The result or error on failure
      */
     public function archiveSubmission($archive, $subId = null)
     {
