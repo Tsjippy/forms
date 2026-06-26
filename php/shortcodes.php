@@ -237,8 +237,7 @@ function formResults($atts)
     //now we have rendered all the content we can export the pdf if requested
     // phpcs:ignore
     if (isset($_POST['export-pdf'])) {
-        // phpcs:ignore
-        echo $object->exportPdf();
+        $object->exportPdf();
     }
 
     if (is_wp_error($html)) {

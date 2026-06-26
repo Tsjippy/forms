@@ -168,8 +168,6 @@ class Forms
             if ($postId) {
                 $postAuthor    = get_post($postId)->post_author;
             }
-        } else {
-            echo '';
         }
 
         if (array_intersect(['administrator', 'editor'], $this->userRoles) || $postAuthor == $this->user->ID) {

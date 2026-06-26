@@ -399,7 +399,7 @@ class ElementHtmlBuilder extends SubmitForm
         addElement('span', $node, ['class' => "info-text"], $content);
 
         if (empty($parent)) {
-            return $node->ownerDocument->saveHtml($parent);
+            echo $node->ownerDocument->saveHtml($parent);
         }
 
         return $node;

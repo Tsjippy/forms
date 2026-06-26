@@ -35,19 +35,17 @@ function dashboardWarnings($userId)
     $html     = $forms->getReminderHtml($userId, 'recommended');
 
     if (empty($html)) {
-        echo "<p>All your data is up to date, well done.</p>";
-    } else {
-        echo "<h3>Please finish your account:</h3>";
-    }
-
-    if (!empty($html)) {
         ?>
         <p>
-            Please complete the following:
-            <br>
+            All your data is up to date, well done.
         </p>
         <?php
-        // phpcs:ignore
-        echo $html;
+    } else {
+        ?>
+        <h3>
+            Please finish your account:
+        </h3>
+        <?php
+        echo wp_kses_post($html);
     }
 }

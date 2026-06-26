@@ -1392,7 +1392,7 @@ class DisplayFormResults extends DisplayForm
                                             ?>
                                                 <option 
                                                     value='<?php echo esc_attr($key); ?>' 
-                                                    <?php if (in_array($key, $columnSetting['view_right_roles'])) { echo "selected=selected"; } ?>
+                                                    <?php if (in_array($key, $columnSetting['view_right_roles'])) echo "selected=selected";  ?>
                                                 >
                                                     <?php echo esc_html($roleName); ?>
                                                 </option>
@@ -1413,9 +1413,7 @@ class DisplayFormResults extends DisplayForm
                                         <?php
                                         foreach ($editRoles as $key => $roleName) {
                                         ?>
-                                            <option value='<?php echo esc_attr($key); ?>' <?php if (in_array($key, $columnSetting['edit_right_roles'])) {
-                                                                                                echo "selected=selected";
-                                                                                            } ?>>
+                                            <option value='<?php echo esc_attr($key); ?>' <?php if (in_array($key, $columnSetting['edit_right_roles'])) echo "selected=selected"; ?>>
                                                 <?php echo esc_html($roleName); ?>
                                             </option>
                                         <?php
@@ -1427,9 +1425,7 @@ class DisplayFormResults extends DisplayForm
                                     <input type="number" class="column-settings" name="column-settings[<?php echo esc_attr($elementIndex); ?>][width]" value="<?php echo esc_attr($width); ?>" placeholder="200" min="100" style="max-width: 80px; margin-right:0px;">px
                                 </td>
                                 <td>
-                                    <input type="checkbox" class="column-settings" name="column-settings[<?php echo esc_attr($elementIndex); ?>][copy]" value="1" <?php if (isset($columnSetting['copy'])) {
-                                                                                                                                                                        echo 'checked';
-                                                                                                                                                                    } ?> style="max-width: 40px; margin-right:0px;">
+                                    <input type="checkbox" class="column-settings" name="column-settings[<?php echo esc_attr($elementIndex); ?>][copy]" value="1" <?php if (isset($columnSetting['copy'])) echo 'checked'; ?> style="max-width: 40px; margin-right:0px;">
                                 </td>
                             </tr>
                         <?php
@@ -1469,9 +1465,7 @@ class DisplayFormResults extends DisplayForm
                     <h4>Select the default column the table is sorted on</h4>
                     <select name="table-settings[default-sort]">
                         <option
-                            value='' <?php if ($this->tableSettings->default_sort == '') {
-                                            echo 'selected=selected';
-                                        } ?>>
+                            value='' <?php if ($this->tableSettings->default_sort == '') echo 'selected=selected'; ?>>
                             ---
                         </option>
 
@@ -1487,9 +1481,7 @@ class DisplayFormResults extends DisplayForm
                         ?>
                             <option
                                 value='<?php echo esc_attr($key); ?>'
-                                <?php if (($this->tableSettings->default_sort ?? '') == $key) {
-                                    echo "selected=selected";
-                                } ?>>
+                                <?php if (($this->tableSettings->default_sort ?? '') == $key) echo "selected=selected"; ?>>
                                 <?php echo esc_html($name); ?>
                             </option>
                         <?php
@@ -1504,9 +1496,7 @@ class DisplayFormResults extends DisplayForm
                             name='table-settings[sort-direction]'
                             id='sort-direction'
                             value='asc'
-                            <?php if (($this->tableSettings->sort_direction ?? '') == 'asc') {
-                                echo 'checked';
-                            } ?>>
+                            <?php if (($this->tableSettings->sort_direction ?? '') == 'asc') echo 'checked'; ?>>
                         Ascending
                     </label>
                     <label>
@@ -1515,9 +1505,7 @@ class DisplayFormResults extends DisplayForm
                             name='table-settings[sort-direction]'
                             id='sort-direction'
                             value='dsc'
-                            <?php if (($this->tableSettings->sort_direction ?? '') == 'dsc') {
-                                echo 'checked';
-                            } ?>>
+                            <?php if (($this->tableSettings->sort_direction ?? '') == 'dsc') echo 'checked'; ?>>
                         Decending
                     </label>
                 </div>
@@ -1551,9 +1539,7 @@ class DisplayFormResults extends DisplayForm
                                         ?>
                                             <option
                                                 value='<?php echo esc_attr($key); ?>'
-                                                <?php if ($this->tableSettings->filter[$index]['element'] == $key) {
-                                                    echo 'selected="selected"';
-                                                } ?>>
+                                                <?php if ($this->tableSettings->filter[$index]['element'] == $key) echo 'selected="selected"'; ?>>
                                                 <?php echo esc_html($name); ?>
                                             </option>
                                         <?php
@@ -1570,9 +1556,7 @@ class DisplayFormResults extends DisplayForm
                                         ?>
                                             <option
                                                 value='<?php echo esc_attr($type); ?>'
-                                                <?php if ($this->tableSettings->filter[$index]['type'] == $type) {
-                                                    echo 'selected="selected"';
-                                                } ?>>
+                                                <?php if ($this->tableSettings->filter[$index]['type'] == $type) echo 'selected="selected"'; ?>>
                                                 <?php echo esc_html($type); ?>
                                             </option>
                                         <?php
@@ -1589,9 +1573,7 @@ class DisplayFormResults extends DisplayForm
                                         ?>
                                             <option
                                                 value='<?php echo esc_attr($type); ?>'
-                                                <?php if ($this->tableSettings->filter[$index]['type'] == $type) {
-                                                    echo 'selected="selected"';
-                                                } ?>>
+                                                <?php if ($this->tableSettings->filter[$index]['type'] == $type) echo 'selected="selected"'; ?>>
                                                 <?php echo esc_html($type); ?>
                                             </option>
                                         <?php
@@ -1623,9 +1605,7 @@ class DisplayFormResults extends DisplayForm
                         The row will be hidden if a cell in this column has no value and the viewer has no right to edit.
                     </label>
                     <select name="table-settings[hide-row]">
-                        <option value='' <?php if (empty($this->tableSettings->hide_row ?? '')) {
-                                                echo 'selected';
-                                            } ?>>---</option>
+                        <option value='' <?php if (empty($this->tableSettings->hide_row ?? '')) echo 'selected'; ?>>---</option>
                         <?php
 
                         foreach ($this->columnSettings as $key => $columnSetting) {
@@ -1639,7 +1619,7 @@ class DisplayFormResults extends DisplayForm
                                 value='<?php echo esc_attr($columnSetting['name']); ?>'
                                 <?php
                                 if (($this->tableSettings->hide_row ?? '') == $columnSetting['name']) {
-                                    echo 'selected="selected"';
+ echo 'selected="selected"';
                                 }
                                 ?>>
                                 <?php echo esc_html($name); ?>
@@ -1655,17 +1635,13 @@ class DisplayFormResults extends DisplayForm
                     <select name="table-settings[result-type]">
                         <option
                             value="personal"
-                            <?php if (($this->tableSettings->result_type ?? '') == 'personal') {
-                                echo 'selected';
-                            } ?>>
+                            <?php if (($this->tableSettings->result_type ?? '') == 'personal') echo 'selected'; ?>>
                             Only personal
                         </option>
 
                         <option
                             value="all"
-                            <?php if (($this->tableSettings->result_type ?? '') == 'all') {
-                                echo 'selected';
-                            } ?>>
+                            <?php if (($this->tableSettings->result_type ?? '') == 'all') echo 'selected'; ?>>
                             All the viewer has permission for
                         </option>
                     </select>
@@ -1675,9 +1651,7 @@ class DisplayFormResults extends DisplayForm
                             type='checkbox'
                             name='table-settings[split-table]'
                             value='1'
-                            <?php if ($this->tableSettings->split_table ?? false) {
-                                echo 'checked';
-                            } ?>>
+                            <?php if ($this->tableSettings->split_table ?? false) echo 'checked'; ?>>
                         Split the results in own entries and others entries
                     </label>
 
@@ -1699,9 +1673,7 @@ class DisplayFormResults extends DisplayForm
                             type="radio"
                             name="table-settings[archived]"
                             value="1"
-                            <?php if ($this->tableSettings->archived ?? false) {
-                                echo 'checked';
-                            } ?>>
+                            <?php if ($this->tableSettings->archived ?? false) echo 'checked'; ?>>
                         Yes
                     </label>
                     <label>
@@ -1709,9 +1681,7 @@ class DisplayFormResults extends DisplayForm
                             type="radio"
                             name="table-settings[archived]"
                             value="0"
-                            <?php if (!($this->tableSettings->archived ?? false)) {
-                                echo 'checked';
-                            } ?>>
+                            <?php if (!($this->tableSettings->archived ?? false)) echo 'checked'; ?>>
                         No
                     </label>
                 </div>
@@ -1724,9 +1694,7 @@ class DisplayFormResults extends DisplayForm
                             type="radio"
                             name="form-settings[autoarchive]"
                             value="1"
-                            <?php if ($this->tableSettings->autoarchive ?? false) {
-                                echo 'checked';
-                            } ?>>
+                            <?php if ($this->tableSettings->autoarchive ?? false) echo 'checked'; ?>>
                         Yes
                     </label>
                     <label>
@@ -1734,25 +1702,21 @@ class DisplayFormResults extends DisplayForm
                             type="radio"
                             name="form-settings[autoarchive]"
                             value="0"
-                            <?php if (!($this->tableSettings->autoarchive ?? false)) {
-                                echo 'checked';
-                            } ?>>
+                            <?php if (!($this->tableSettings->autoarchive ?? false)) echo 'checked'; ?>>
                         No
                     </label>
                     <br>
                     <br>
                     <div
                         class='auto-archive-logic
-                        <?php if ($this->tableSettings->autoarchive ?? false) {
-                            echo 'hidden';
-                        } ?>'>
+                        <?php if ($this->tableSettings->autoarchive ?? false) echo 'hidden'; ?>'>
                         Auto archive a (sub) entry when field<br>
                         <select name="form-settings[autoarchive-el]" class='inline' style="margin-right:10px;">
                             <option
                                 value=''
                                 <?php
                                 if (empty($this->formData->autoarchive_el)) {
-                                    echo 'selected';
+ echo 'selected';
                                 } ?>>
                                 ---
                             </option>
@@ -1786,7 +1750,7 @@ class DisplayFormResults extends DisplayForm
                         <input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo esc_attr($this->formData->autoarchive_value ?? ''); ?>" style='max-width:200px;'>
 
                         <?php
-                        echo wp_kses_post($this->infoBoxHtml("You can use placeholders like '%today%+3days' for a value"));
+                        $this->infoBoxHtml("You can use placeholders like '%today%+3days' for a value");
                         ?>
                     </div>
                 </div>
@@ -1827,7 +1791,7 @@ class DisplayFormResults extends DisplayForm
                                     //Check which option is the selected one
                                     ?>
                                     <label>
-                                        <input type='checkbox' name='form-settings[split][]' value='<?php echo esc_attr($id);?>' <?php if (in_array($id, $this->formData->split ?? [])) { echo 'checked';} ?>> 
+                                        <input type='checkbox' name='form-settings[split][]' value='<?php echo esc_attr($id);?>' <?php if (in_array($id, $this->formData->split ?? [])) echo 'checked'; ?>> 
                                         <?php echo esc_html($name);?>
                                     </label>
                                     <br>
@@ -1846,7 +1810,7 @@ class DisplayFormResults extends DisplayForm
                                 <?php
                                 foreach ($viewRoles as $key => $roleName) {
                                     ?>
-                                    <option value='<?php echo esc_attr($key);?>' <?php if (in_array($key, $this->tableSettings->view_right_roles ?? [])) {echo 'selected';} ?>>
+                                    <option value='<?php echo esc_attr($key);?>' <?php if (in_array($key, $this->tableSettings->view_right_roles ?? [])) echo 'selected'; ?>>
                                         <?php echo esc_html($roleName);?>
                                     </option>
                                     <?php
@@ -1867,7 +1831,7 @@ class DisplayFormResults extends DisplayForm
                                 <?php
                                 foreach ($viewRoles as $key => $roleName) {
                                     ?>
-                                    <option value='<?php echo esc_attr($key);?>' <?php if (in_array($key, $this->tableSettings->edit_right_roles ?? [])) {echo 'selected';} ?>>
+                                    <option value='<?php echo esc_attr($key);?>' <?php if (in_array($key, $this->tableSettings->edit_right_roles ?? [])) echo 'selected'; ?>>
                                         <?php echo esc_html($roleName);?>
                                     </option>
                                     <?php
@@ -1929,10 +1893,10 @@ class DisplayFormResults extends DisplayForm
             <div class="modal-content" style='max-width:100vw;min-width:90vw;'>
                 <?php TSJIPPY\addCloseButtton();?>
 
-                <button id="column-settings" class="button tablink <?php if (!empty($this->tableSettings)) {echo 'active';} ?>" data-target="column-settings-<?php echo esc_attr($this->shortcodeId); ?>">
+                <button id="column-settings" class="button tablink <?php if (!empty($this->tableSettings)) echo 'active'; ?>" data-target="column-settings-<?php echo esc_attr($this->shortcodeId); ?>">
                     Column settings
                 </button>
-                <button id="table-settings"  class="button tablink <?php if (empty($this->tableSettings)) {echo 'active';} ?>" data-target="table-rights-<?php echo esc_attr($this->shortcodeId); ?>">
+                <button id="table-settings"  class="button tablink <?php if (empty($this->tableSettings)) echo 'active'; ?>" data-target="table-rights-<?php echo esc_attr($this->shortcodeId); ?>">
                     Table settings
                 </button>
 
