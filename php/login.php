@@ -16,10 +16,7 @@ function loginRedirect($redirect, $requestedRedirect, $user)
         return $redirect;
     }
 
-    $url            = false;
-    if (defined('TSJIPPY\USERMANAGEMENT\SETTINGS') && !empty(TSJIPPY\USERMANAGEMENT\SETTINGS['account_page'])) {
-        $url            = get_permalink(TSJIPPY\USERMANAGEMENT\SETTINGS['account_page']);
-    }
+    $url            = get_edit_profile_url($user->ID);
 
     if (!$url) {
         return $redirect;
