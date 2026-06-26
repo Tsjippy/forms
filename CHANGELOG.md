@@ -3,6 +3,7 @@
 
 ### Added
 - attribute escaping
+- usage of get_edit_profile_url
 
 ### Changed
 - plugin tested up to 7.0
