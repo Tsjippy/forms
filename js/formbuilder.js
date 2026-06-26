@@ -383,10 +383,6 @@ async function reorderFormElements(formId) {
     "forms/reorder-form-elements",
     formData,
   );
-
-  if (response) {
-    Main.displayMessage(response);
-  }
 }
 
 async function saveFormConditions(target) {

@@ -389,29 +389,25 @@ function copyFormElement()
 // DONE
 function addFormElement($copy = false)
 {
-    // phpcs:ignore
-    $forms    = new SaveFormSettings(formUrl: TSJIPPY\sanitize($_REQUEST['form-url'] ?? ''));
-    // phpcs:ignore
-    $forms->getForm((int) $_POST['form-id']);
+    $request    = TSJIPPY\sanitize($_REQUEST);
 
-    $index        = 0;
-    $oldElement    = new stdClass();
+    $forms      = new SaveFormSettings(atts: ['formid' => $request['form-id']]);
+
+    $index      = 0;
+    $oldElement = new stdClass();
 
     //copy an existing element
     if ($copy === true) {
-        // phpcs:ignore
-        $element            = $forms->getElementById((int) $_POST['element-id']);
+        $element           = $forms->getElementById((int) $request['element-id']);
 
-        $element->slug        = $element->name;
+        $element->slug     = $element->name;
 
-        $element->infotext    = $element->text;
+        $element->infotext = $element->text;
     }
 
-    // Get element from $_POST
+    // Get element from $request
     else {
-        // phpcs:ignore
-        $element            = TSJIPPY\sanitize($_POST["formfield"]);
-        $element            = (object)$element;
+        $element            = (object)$request["formfield"];
 
         // make sure all data is clean
         foreach ($element as $prop => $val) {
@@ -434,22 +430,19 @@ function addFormElement($copy = false)
     }
 
     $update    = false;
-    // phpcs:ignore
-    if (is_numeric($_POST['element-id'])) {
+    if (is_numeric($request['element-id'])) {
         if ($copy !== true) {
             $update        = true;
         }
 
-        $element->id    = (int) $_POST['element-id'];
+        $element->id    = (int) $request['element-id'];
 
         $oldElement     = $forms->getElementById($element->id);
-
-        //$index        = $oldElement->index;
     }
 
     if ($element->type == 'php') {
         //we store the function_name in the html variable replace any double \ with a single \
-        $element->slug            = $element->function_name;
+        $element->slug = $element->function_name;
 
         //only continue if the function exists
         if (! function_exists($element->function_name)) {
@@ -498,7 +491,7 @@ function addFormElement($copy = false)
         $message = "Succesfully added '{$element->slug}' to this form";
 
         // phpcs:ignore
-        if (!is_numeric($_POST['insert-after'])) {
+        if (!is_numeric($request['insert-after'])) {
             $element->priority    = TSJIPPY\getFromDb(
                 "get_form_elements_count_for_$element->form_id",
                 "forms",
@@ -508,16 +501,15 @@ function addFormElement($copy = false)
             ) + 1;
         } else {
             // phpcs:ignore
-            $element->priority    = (int) $_POST['insert-after'] + 1;
+            $element->priority    = (int) $request['insert-after'] + 1;
         }
 
         $element->id    = $forms->insertElement($element);
     }
 
-    $formBuilderForm    = new FormBuilderForm();
-    $formBuilderForm->getForm((int) $_POST['form-id']);
+    $formBuilderForm    = new FormBuilderForm(atts: ['formid' => $request['form-id']]);
 
-    $html         = $formBuilderForm->buildHtml($element, '', $index);
+    $html               = $formBuilderForm->buildHtml($element, '', $index);
 
     return [
         'message' => $message,
