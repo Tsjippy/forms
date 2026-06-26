@@ -4,12 +4,17 @@
 ### Added
 
 ### Changed
-- sanitize post on original function
-- print close buttont in funtion
 
 ### Fixed
 
 ### Updated
+
+## [11.6.8] - 2026-06-26
+
+
+### Changed
+- sanitize post on original function
+- print close buttont in funtion
 
 ## [11.6.7] - 2026-06-25
 
