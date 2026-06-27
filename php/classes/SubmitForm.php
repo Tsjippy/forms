@@ -655,7 +655,7 @@ class SubmitForm extends SaveFormSettings
         // check for required empty elements
         foreach ($this->formElements as $element) {
             // element is required but has no value
-            if ($element->required && ($formresults[str_replace('[]', '', $element->slug)] ?? '') === '') {
+            if ($element->required && ($request[str_replace('[]', '', $element->slug)] ?? '') === '') {
                 return new \WP_Error('Error', "$element->name is required!");
             }
         }
@@ -672,6 +672,8 @@ class SubmitForm extends SaveFormSettings
         unset($request['_wpnonce']);
         unset($request['formurl']);
         unset($request['form-id']);
+
+        $request    = TSJIPPY\cleanUpNestedArray($request);
 
         /**
          * Filters the form results

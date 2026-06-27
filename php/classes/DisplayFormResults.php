@@ -1618,10 +1618,7 @@ class DisplayFormResults extends DisplayForm
                             <option
                                 value='<?php echo esc_attr($columnSetting['name']); ?>'
                                 <?php
-                                if (($this->tableSettings->hide_row ?? '') == $columnSetting['name']) {
- echo 'selected="selected"';
-                                }
-                                ?>>
+                                if (($this->tableSettings->hide_row ?? '') == $columnSetting['name']) echo 'selected="selected"';?> >
                                 <?php echo esc_html($name); ?>
                             </option>
                         <?php
@@ -1712,12 +1709,7 @@ class DisplayFormResults extends DisplayForm
                         <?php if ($this->tableSettings->autoarchive ?? false) echo 'hidden'; ?>'>
                         Auto archive a (sub) entry when field<br>
                         <select name="form-settings[autoarchive-el]" class='inline' style="margin-right:10px;">
-                            <option
-                                value=''
-                                <?php
-                                if (empty($this->formData->autoarchive_el)) {
- echo 'selected';
-                                } ?>>
+                            <option value=''  <?php if (empty($this->formData->autoarchive_el))  echo 'selected'; ?>>
                                 ---
                             </option>
                             <?php
@@ -2396,7 +2388,7 @@ class DisplayFormResults extends DisplayForm
         /**
          * Runs within the formwrapper div of the results table
          * 
-         * @param   NodeElement $parent The parent node
+         * @param   \DOMElement $parent The parent node
          * @param   object      $object The DisplayFormResults instance
          */
         do_action('tsjippy-forms-results-table-footer', $formWrapper, $this);
