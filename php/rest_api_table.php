@@ -324,7 +324,7 @@ function saveTableSettings()
     // Check invalid filter names
     if (isset($tableSettings->filter)) {
         foreach ($tableSettings->filter as $filter) {
-            if (in_array($filter['name'], ['accept-charset', 'action', 'autocomplete', 'enctype', 'method', 'name', 'novalidate', 'rel', 'target'])) {
+            if (isset(['accept-charset' => 1, 'action' => 1, 'autocomplete' => 1, 'enctype' => 1, 'method' => 1, 'name' => 1, 'novalidate' => 1, 'rel' => 1, 'target' => 1][$filter['name']])) {
                 return new WP_Error('forms', "Invalid filter name '{$filter['name']}', use a different one");
             }
         }

@@ -53,8 +53,10 @@ class Forms
     public int         $userId;
     protected string   $userIdElementName;
     public array       $userRoles;
+    public array       $inputTags;
+    public array       $checkboxTypes;
 
-    public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='',  $userId=0)
+    public function __construct($atts = [], $all = false, $pageSize = 50, $postId = '', $formUrl = '',  $userId = 0)
     {
         global $wpdb;
 
@@ -78,43 +80,54 @@ class Forms
         $this->multiwrap                    = false;
 
         $this->nonInputs                    = [
-            'label', 
-            'button', 
-            'datalist', 
-            'formstep', 
-            'info', 
-            'p', 
-            'php', 
-            'multi-start', 
-            'multi-end', 
-            'div-start', 
-            'div-end'
+            'label'       => 1,
+            'button'      => 1,
+            'datalist'    => 1,
+            'formstep'    => 1,
+            'info'        => 1,
+            'p'           => 1,
+            'php'         => 1,
+            'multi-start' => 1,
+            'multi-end'   => 1,
+            'div-start'   => 1,
+            'div-end'     => 1
+        ];
+
+        $this->inputTags    = [
+            'input' => 1, 
+            'textarea' => 1, 
+            'select' => 1
+        ];
+
+        $this->checkboxTypes    = [
+            'checkbox'  => true,
+            'radio'     => true
         ];
 
         $this->wpMetaKeys                   = [
-            'nickname',
-            'first_name',
-            'last_name',
-            'description',
-            'rich_editing',
-            'syntax_highlighting',
-            'comment_shortcuts',
-            'admin_color',
-            'use_ssl',
-            'show_admin_bar_front',
-            'locale',
-            'wp_capabilities',
-            'wp_user_level',
-            'dismissed_wp_pointers',
-            'show_welcome_panel',
-            'session_tokens',
-            'wp_dashboard_quick_press_last_post_id',
-            'wp_user-settings',
-            'wp_user-settings-time',
-            'wp_persisted_preferences',
-            '2fa_hash'
+            'nickname'                              => 1,
+            'first_name'                            => 1,
+            'last_name'                             => 1,
+            'description'                           => 1,
+            'rich_editing'                          => 1,
+            'syntax_highlighting'                   => 1,
+            'comment_shortcuts'                     => 1,
+            'admin_color'                           => 1,
+            'use_ssl'                               => 1,
+            'show_admin_bar_front'                  => 1,
+            'locale'                                => 1,
+            'wp_capabilities'                       => 1,
+            'wp_user_level'                         => 1,
+            'dismissed_wp_pointers'                 => 1,
+            'show_welcome_panel'                    => 1,
+            'session_tokens'                        => 1,
+            'wp_dashboard_quick_press_last_post_id' => 1,
+            'wp_user-settings'                      => 1,
+            'wp_user-settings-time'                 => 1,
+            'wp_persisted_preferences'              => 1,
+            '2fa_hash'                              => 1
         ];
-        
+
         $this->objectName                   = '';
         $this->onlyOwn                      = false;
         $this->pageSize                     = $pageSize;
@@ -152,15 +165,15 @@ class Forms
         $postAuthor    = 0;
         if (!empty($object->post_author)) {
             $postAuthor    = $object->post_author;
-        } 
-        
+        }
+
         // phpcs:ignore
         elseif (is_numeric($postId)) {
             $post        = get_post($postId);
             if (!empty($post)) {
                 $postAuthor    = $post->post_author;
             }
-        } 
+        }
         // phpcs:ignore
         elseif (!empty($formUrl)) {
             $postId        = url_to_postid($formUrl);
@@ -176,7 +189,7 @@ class Forms
             $this->editRights        = false;
         }
 
-        if(!empty($atts)){
+        if (!empty($atts)) {
             $this->processAtts($atts);
         }
 
@@ -803,9 +816,9 @@ class Forms
         /**
          * Flush db cache
          */
-        if(wp_cache_supports( 'flush_group' )){
+        if (wp_cache_supports('flush_group')) {
             wp_cache_flush_group('forms');
-        }else{
+        } else {
             wp_cache_flush();
         }
 
@@ -866,8 +879,8 @@ class Forms
             )
         ) {
             // Get the form data
-            $query                = "SELECT * FROM %i WHERE ";
-            $values                = [$this->tableName];
+            $query  = "SELECT * FROM %i WHERE ";
+            $values = [$this->tableName];
             if (is_numeric($formId)) {
                 $query    .= "id= %d";
                 $values[] = $formId;
@@ -882,22 +895,30 @@ class Forms
             }
 
             // phpcs:ignore
-            $result                = $wpdb->get_row($wpdb->prepare($query, $values));
+            $result = $wpdb->get_row($wpdb->prepare($query, $values));
 
             // Form does not exist yet
             if (empty($result)) {
                 global $post;
 
-                $url    = get_page_link($post);
+                $url = get_page_link($post);
 
                 TSJIPPY\printArray("Form requested on {$post->post_type} on $url does not exist. Query used is '$query'");
                 $this->insertForm();
             } else {
-                $this->formData                     = $result;
-                $this->formData->actions            = maybe_unserialize($this->formData->actions);
-                $this->formData->split              = maybe_unserialize($this->formData->split);
-                $this->formData->full_right_roles   = (array) maybe_unserialize($this->formData->full_right_roles);
-                $this->formData->submit_others_form = (array) maybe_unserialize($this->formData->submit_others_form);
+                $result                      = map_deep($result, 'maybe_unserialize');
+
+                foreach( [ 'full_right_roles', 'submit_others_form', 'split'] as $key){
+                    if(!is_array($result->$key)){
+                        $result->$key   = [];
+                    }
+                }
+
+                // Use the values as keys as well to allow for faster searching with isset
+                $result->full_right_roles    = array_combine($result->full_right_roles, $result->full_right_roles);
+                $result->submit_others_form  = array_combine($result->submit_others_form, $result->submit_others_form);
+
+                $this->formData              = $result;
 
                 /**
                  * Filters the elements the submission data should be splitted on
@@ -964,11 +985,7 @@ class Forms
             return;
         }
 
-        $this->formReminder    = $results[0];
-
-        foreach ($this->formReminder as &$setting) {
-            $setting    = maybe_unserialize($setting);
-        }
+        $this->formReminder    = map_deep($results[0], 'maybe_unserialize');
     }
 
     /**
@@ -983,18 +1000,12 @@ class Forms
         }
 
         $this->emailSettings =  TSJIPPY\getFromDb(
-            "get_email_settings_".$this->formData->id,
+            "get_email_settings_" . $this->formData->id,
             "forms",
-            "select * from %i where form_id=%d", 
-            $this->formEmailTable, 
+            "select * from %i where form_id=%d",
+            $this->formEmailTable,
             $this->formData->id
         );
-
-        foreach ($this->emailSettings as &$emailSetting) {
-            foreach ($emailSetting as &$setting) {
-                $setting    = maybe_unserialize($setting);
-            }
-        }
 
         if (empty($this->emailSettings)) {
             $emails[0]["from"]            = "";
@@ -1035,9 +1046,9 @@ class Forms
         $this->getAllFormElements('priority', $this->formData->id, true);
 
         foreach ($this->formElements as $index => $element) {
-            $this->elementMapping['id'][$element->id]           = $index;
-            $this->elementMapping['slug'][$element->slug][]     = $index;
-            $this->elementMapping['type'][$element->type][]     = $index;
+            $this->elementMapping['id'][$element->id]               = $index;
+            $this->elementMapping['slug'][$element->slug][$index]   = $index;
+            $this->elementMapping['type'][$element->type][$index]   = $index;
         }
     }
 
@@ -1272,9 +1283,9 @@ class Forms
 
         if ($this->getElementBySlug('phone')) {
             $phonenumberKey    = 'phone';
-        }elseif ($this->getElementBySlug('phonenumber')) {
+        } elseif ($this->getElementBySlug('phonenumber')) {
             $phonenumberKey    = 'phonenumber';
-        }elseif ($this->getElementBySlug('phone_number')) {
+        } elseif ($this->getElementBySlug('phone_number')) {
             $phonenumberKey    = 'phone_number';
         }
 
@@ -1387,11 +1398,11 @@ class Forms
 
             if (empty($atts['form-name'])) {
                 if (!empty($atts['formname'])) {
-                    $atts['form-name']= $atts['formname'];
+                    $atts['form-name'] = $atts['formname'];
                 } elseif (!empty($atts['name'])) {
-                    $atts['form-name']= $atts['name'];
+                    $atts['form-name'] = $atts['name'];
                 } elseif (!empty($atts['slug'])) {
-                    $atts['form-name']= ucfirst(str_replace('-', ' ', $atts['slug']));
+                    $atts['form-name'] = ucfirst(str_replace('-', ' ', $atts['slug']));
                 }
             }
 

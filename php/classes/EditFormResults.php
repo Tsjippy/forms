@@ -377,7 +377,7 @@ class EditFormResults extends DisplayFormResults
             // Find the name of the trigger element
             foreach ($splittedElements as $baseName) {
                 foreach ($baseName as $name => $splitElementIds) {
-                    if (in_array($triggerId, $splitElementIds)) {
+                    if (isset($splitElementIds[$triggerId])) {
                         $triggerId    = $name;
 
                         break 2;

@@ -57,7 +57,7 @@ class DisplayForm extends ElementHtmlBuilder
                     'class'    => $class
                 ]
             );
-        } elseif (in_array($element->type, ['div-end'])) {
+        } elseif ($element->type == 'div-end') {
             return;
         }
 
@@ -389,7 +389,7 @@ class DisplayForm extends ElementHtmlBuilder
                             !$this->formElements[$index - 1]->wrap
                         )
                     ) ||
-                    in_array($element->type, ['formstep', 'div-start', 'multi-start']) ||    // this is a wrapping element type
+                    isset(['formstep' => 1, 'div-start' => 1, 'multi-start' => 1][$element->type]) ||    // this is a wrapping element type
                     $this->clonableFormStep                                                  // this is a clonable forstep multi-start
                 )
             ) {
@@ -407,7 +407,7 @@ class DisplayForm extends ElementHtmlBuilder
                     !empty($this->formElements[$index - 1]) &&
                     $this->formElements[$index - 1]->wrap
                 ) ||
-                in_array($element->type, ['div-end', 'multi-end'])
+                isset(['div-end' => 1, 'multi-end' => 1][$element->type])
             ) {
                 array_pop($parents);
             }
@@ -424,7 +424,7 @@ class DisplayForm extends ElementHtmlBuilder
         $inputElementsCount = 0;
         $inputType          = '';
         foreach ($this->formElements as $element) {
-            if (!in_array($element->type, $this->nonInputs)) {
+            if (!isset($this->nonInputs[$element->type])) {
                 $inputElementsCount++;
                 $inputType  = $element->type;
 
@@ -436,7 +436,7 @@ class DisplayForm extends ElementHtmlBuilder
 
         if (
             $inputElementsCount > 1 || // We have more than one element
-            $inputElementsCount == 1 && !in_array($inputType, ['file', 'image']) // We only have one input element and its not a file element
+            $inputElementsCount == 1 && !isset(['file' => 1, 'image' => 1][$inputType]) // We only have one input element and its not a file element
         ) {
             $hidden = '';
             $parent = $form;
@@ -472,9 +472,9 @@ class DisplayForm extends ElementHtmlBuilder
             return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
         }
 
-        $this->formData->split    = maybe_unserialize($this->formData->split);
-
-        // loop over all element ids that data should be splitted on
+        /**
+         * loop over all element ids that data should be splitted on
+         */
         foreach ($this->formData->split as $splitElementId) {
             // Get the element slug
             $slug    = $this->getElementById($splitElementId, 'slug');
@@ -484,10 +484,10 @@ class DisplayForm extends ElementHtmlBuilder
 
             // This slug matches the pattern
             if (preg_match($pattern, $slug, $matches)) {
-                $baseNames[]    = $matches[1];
+                $baseNames[$matches[1]]      = $matches[1];
             } else {
                 // Splitted element with just normal multiple values slug[index]
-                $elementIds[]    = $splitElementId;
+                $elementIds[$splitElementId] = $splitElementId;
             }
         }
 
@@ -495,7 +495,9 @@ class DisplayForm extends ElementHtmlBuilder
             return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
         }
 
-        // Loop over all elements to find splitted ones
+        /**
+         * Loop over all elements to find splitted ones
+         */
         foreach ($this->formElements as $element) {
             // Check if this is an indexed splitted element basename[index][keyname]
             if (str_contains($element->slug, '[')) {

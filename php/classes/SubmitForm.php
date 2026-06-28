@@ -563,7 +563,7 @@ class SubmitForm extends SaveFormSettings
             
             //update user meta
             else {
-                if(!str_contains($key, 'tsjippy_') && !in_array($key, $this->wpMetaKeys)){
+                if(!str_contains($key, 'tsjippy_') && !isset($this->wpMetaKeys[$key])){
                     $key    = 'tsjippy_' . $key;
                 }
 

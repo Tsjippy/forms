@@ -333,8 +333,7 @@ class FormReminders extends Forms
             // Check if user has one of the roles
             $user    = get_userdata($userId);
             if ($user) {
-                $userRoles    = $user->roles;
-                $intersect    = array_intersect($conditions['roles'], $userRoles);
+                $intersect    = array_intersect($conditions['roles'], $user->roles);
                 if (!empty($intersect)) {
                     // There is at least one overlapping role
                     return true;
@@ -347,7 +346,11 @@ class FormReminders extends Forms
 
         foreach ($conditions as $check) {
             // get the user value
-            $value        = get_user_meta($userId, $check['meta-key'], true);
+            $metaKey = $check['meta-key'];
+            if(!str_starts_with('tsjippy_', $metaKey)){
+                $metaKey    = "tsjippy_$metaKey";
+            }
+            $value        = get_user_meta($userId, $metaKey, true);
 
             $metaIndex  = trim($check['meta-key-index']);
             if (!empty($metaIndex)) {
@@ -373,8 +376,8 @@ class FormReminders extends Forms
             // Get the compare value
             $checkValue    = '';
             if (isset($check['conditional-value'])) {
-                $checkValue            = $check['conditional-value'];
-                $conditionalValue    = strtotime($check['conditional-value']);
+                $checkValue        = $check['conditional-value'];
+                $conditionalValue  = strtotime($check['conditional-value']);
                 if ($conditionalValue && gmdate('Y', $conditionalValue) < 2200) {
                     $checkValue    = gmdate('Y-m-d', $conditionalValue);
                 }
@@ -463,7 +466,7 @@ class FormReminders extends Forms
                 } else {
                     $metaKey          = explode('[', $element->slug)[0];
                     
-                    if(!str_contains($metaKey, 'tsjippy_') && !in_array($metaKey, $this->wpMetaKeys)){
+                    if(!str_contains($metaKey, 'tsjippy_') && !isset($this->wpMetaKeys[$metaKey])){
                         $metaKey    = 'tsjippy_' . $metaKey;
                     }
 

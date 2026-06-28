@@ -450,7 +450,7 @@ function addFormElement($copy = false)
         }
     }
 
-    if (in_array($element->type, ['label', 'button', 'formstep'])) {
+    if (isset(['label' => 1, 'button' => 1, 'formstep' => 1][$element->type])) {
         $element->name    = $element->text;
     } elseif (empty($element->name)) {
         return new \WP_Error('Error', "Please enter a name");
@@ -461,7 +461,7 @@ function addFormElement($copy = false)
     $element->slug    = str_replace(' ', '-', strtolower($element->name));
 
     if (
-        in_array($element->type, $forms->nonInputs)         &&     // this is a non-input
+        isset($forms->nonInputs[$element->type])         &&     // this is a non-input
         $element->type != 'datalist'                        &&     // but not a datalist
         !str_contains($element->slug, $element->type)            // and the type is not yet added to the name
     ) {
@@ -477,7 +477,7 @@ function addFormElement($copy = false)
     }
 
     //Store info text in text column
-    if (in_array($element->type, ['info', 'p'])) {
+    if (isset(['info' => 1, 'p' => 1][$element->type])) {
         $element->text     = wp_kses_post($element->infotext);
     }
 

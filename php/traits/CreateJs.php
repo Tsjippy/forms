@@ -88,7 +88,7 @@ trait CreateJs
                         if (str_contains($conditionalFieldName, '[]')) {
                             $propCompare            = 'el.id';
                             $conditionalFieldName    = 'E' . $conditionalElement->id;
-                        } elseif (in_array($conditionalElement->type, ['radio', 'checkbox']) && !str_contains($conditionalFieldName, '[]')) {
+                        } elseif (isset($this->checkboxTypes[$conditionalElement->type]) && !str_contains($conditionalFieldName, '[]')) {
                             $conditionalFieldName .= '[]';
                         }
 
@@ -106,7 +106,7 @@ trait CreateJs
                             if (str_contains($conditionalField2Name, '[]')) {
                                 $propCompare            = 'el.id';
                                 $conditionalField2Name    = 'E' . $conditionalElement2->id;
-                            } elseif (in_array($conditionalElement2->type, ['radio', 'checkbox']) && !str_contains($conditionalField2Name, '[]')) {
+                            } elseif (isset($this->checkboxTypes[$conditionalElement2->type]) && !str_contains($conditionalField2Name, '[]')) {
                                 $conditionalField2Name .= '[]';
                             }
                         }
@@ -119,7 +119,7 @@ trait CreateJs
                         }
 
                         //make sure we do not include other fields in changed or click rules
-                        if (in_array($equation, ['changed', 'clicked'])) {
+                        if (isset(['changed' => 1, 'clicked' => 1][$equation])) {
                             // do not add the same element name twice
                             if (!str_contains($fieldCheckIf, $conditionalFieldName)) {
                                 if (!empty($fieldCheckIf)) {
@@ -182,7 +182,7 @@ trait CreateJs
                             NOW WE KNOW THAT THE CHANGED FIELD BELONGS TO THIS CONDITION
                             LETS CHECK IF ALL THE VALUES ARE MET AS WELL
                         */
-                        if (!in_array($equation, ['changed', 'clicked', 'checked', '!checked', 'visible', 'invisible'])) {
+                        if (!isset(['changed' => 1, 'clicked' => 1, 'checked' => 1, '!checked' => 1, 'visible' => 1, 'invisible' => 1][$equation])) {
                             $conditionVariables[]      = "var value_$fieldNumber1 = this.get_field_value('$conditionalFieldName', form, true, $compareValue2, true);";
 
                             if (is_numeric($rule['conditional-field-2'] ?? '')) {
@@ -281,8 +281,8 @@ trait CreateJs
                         //formstep do not have an input-wrapper
                         if ($element->type == 'formstep') {
                             $actionCode    = "form.querySelector('[name=\"$name\"]').classList.$action('hidden');";
-                            if (!in_array($actionCode, $actionArray)) {
-                                $actionArray[] = $actionCode;
+                            if (!isset($actionArray[$actionCode])) {
+                                $actionArray[$actionCode] = $actionCode;
                             }
                         } else {
                             //only add if there is no wrapping element with the same condition.
@@ -310,8 +310,8 @@ trait CreateJs
                             //formstep do not have an input-wrapper
                             if ($copyToElement->type == 'formstep') {
                                 $actionCode    = "form.querySelector('[name=\"$copyToElement->slug\"]').classList.$action('hidden');";
-                                if (!in_array($actionCode, $actionArray)) {
-                                    $actionArray[] = $actionCode;
+                                if (!isset($actionArray[$actionCode])) {
+                                    $actionArray[$actionCode] = $actionCode;
                                 }
                             } else {
                                 $actionArray['querystrings'][$action][]    = $copyToElement;
@@ -346,7 +346,7 @@ trait CreateJs
                             if (str_contains($copyFieldName, '[]')) {
                                 $propCompare            = 'el.id';
                                 $copyFieldName    = 'E' . $copyElement->id;
-                            } elseif (in_array($copyElement->type, ['radio', 'checkbox']) && !str_contains($copyFieldName, '[]')) {
+                            } elseif (isset($this->checkboxTypes[$copyElement->type]) && !str_contains($copyFieldName, '[]')) {
                                 $copyFieldName .= '[]';
                             }
 
@@ -365,13 +365,13 @@ trait CreateJs
 
                         if ($propertyName == 'value') {
                             $actionCode    = "this.change_field_value('$selector', $varName, {$this->objectName}.processFields, form, $addition);";
-                            if (!in_array($actionCode, $actionArray)) {
-                                $actionArray[] = $actionCode;
+                            if (!isset($actionArray[$actionCode])) {
+                                $actionArray[$actionCode] = $actionCode;
                             }
                         } else {
                             $actionCode    = "this.change_field_property('$selector', '$propertyName', $varName, {$this->objectName}.processFields, form, $addition);";
-                            if (!in_array($actionCode, $actionArray)) {
-                                $actionArray[] = $actionCode;
+                            if (!isset($actionArray[$actionCode])) {
+                                $actionArray[$actionCode] = $actionCode;
                             }
                         }
                     } else {
@@ -696,11 +696,11 @@ trait CreateJs
 
         if (str_contains($name, '[]')) {
             $queryById          = true;
-        } elseif (in_array($element->type, ['radio', 'checkbox']) && !str_contains($name, '[]')) {
+        } elseif (isset($this->checkboxTypes[$element->type]) && !str_contains($name, '[]')) {
             $name .= '[]';
         }
 
-        if (in_array($element->type, ['file', 'image'])) {
+        if (isset(['file' => 1, 'image' => 1][$element->type])) {
             $name .= '_files[]';
         }
 

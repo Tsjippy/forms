@@ -102,7 +102,7 @@ function afterInsertPost($postId, $post)
     if ($hasFormbuilderShortcode || has_shortcode($post->post_content, 'formselector') || has_block('tsjippy/formbuilder', $post)) {
         $pages  = SETTINGS['formbuilder-pages'] ?? [];
 
-        $pages[]  = $postId;
+        $pages[ $postId] = $postId;
 
         $settings   = SETTINGS;
         $settings['formbuilder-pages'] = $pages;
@@ -138,7 +138,7 @@ function registerScripts()
 
     if (is_numeric(get_the_ID())) {
         $pages  = SETTINGS['formbuilder-pages'] ?? [];
-        if (in_array(get_the_ID(), $pages)) {
+        if (isset($pages[get_the_ID()])) {
             wp_enqueue_style('tsjippy_forms_style');
         }
     }

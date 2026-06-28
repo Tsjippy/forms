@@ -135,9 +135,9 @@ class DisplayFormResults extends DisplayForm
 
         if (!empty($this->formData->split)) {
             $this->extraElements[-5] = [
-                'slug'                => 'sub_id',
-                'name'            => 'Sub-Id',
-                'type'                => 'number'
+                'slug' => 'sub_id',
+                'name' => 'Sub-Id',
+                'type' => 'number'
             ];
         }
 
@@ -180,7 +180,7 @@ class DisplayFormResults extends DisplayForm
             $users  = get_users();
         }
 
-        $needed = str_replace('[]', '', array_keys($this->elementMapping['slug']));
+        $needed = str_replace('[]', '', $this->elementMapping['slug']);
 
         foreach ($users as $user) {
             $submission     = new \stdClass();
@@ -197,7 +197,7 @@ class DisplayFormResults extends DisplayForm
 
             // Add the remaining user data if any
             foreach ($user->data as $key => $value) {
-                if(!in_array($key, $needed)){
+                if(!isset($needed[$key])){
                     continue;
                 }
                 $submission->$key    = $value;
@@ -207,7 +207,7 @@ class DisplayFormResults extends DisplayForm
             // parse results to merge based on userId
             foreach (get_user_meta($user->ID) as $key => $meta) {
                 $key    = str_replace('tsjippy_', '', $key);
-                if(!in_array($key, $needed)){
+                if(!isset($needed[$key])){
                     continue;
                 }
 
@@ -344,16 +344,15 @@ class DisplayFormResults extends DisplayForm
      */
     private function splittedValuesQueries(&$finalWhere, &$innerJoinString)
     {
-        $splitElements        = $this->formData->split ?? [];
+        $splitElements        = $this->formData->split;
         if (empty($splitElements)) {
             return;
         }
 
-        $innerJoinString    = "\n\tLEFT JOIN SubIdValues as V ON E.id = V.Sid";
+        $innerJoinString = "\n\tLEFT JOIN SubIdValues as V ON E.id = V.Sid";
 
-        $ect                    = ",\nSubIdValues AS (\n\tSELECT \n\t\tid AS Sid, \n\t\tsub_id,\n\t\t";
-
-        $splitColumns        = [];
+        $ect             = ",\nSubIdValues AS (\n\tSELECT \n\t\tid AS Sid, \n\t\tsub_id,\n\t\t";
+        $splitColumns    = [];
 
         /**
          * Process split elements with the form base[index][key]
@@ -370,15 +369,14 @@ class DisplayFormResults extends DisplayForm
                 $splitColumns[] = "MAX(CASE WHEN element_id IN ($implodedIds) THEN value END) AS '$columnName'";
 
                 // Make sure we sort on the $columnName if needed
-                foreach ($this->sortElementIds as &$elementId) {
-                    if (in_array($elementId, $ids)) {
-                        $elementId = $columnName;
+                foreach ($this->sortElementIds as $elementId => $value) {
+                    if (isset($ids[$elementId])) {
+                        unset($this->sortElementIds[$elementId] );
+                        $this->sortElementIds[$columnName] = $columnName;
                     }
                 }
                 unset($elementId);
             }
-
-            $this->sortElementIds    = array_unique($this->sortElementIds);
         }
 
         /**
@@ -419,7 +417,7 @@ class DisplayFormResults extends DisplayForm
         /**
          * Build the Common Table Expressions (CTE) needed to make the pivot query
          */
-        $splitElements        = (array) ($this->formData->split ?? []);
+        $splitElements      = $this->formData->split;
         $existingColumns    = ['id', 'form_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
 
         $columns            = $existingColumns;
@@ -479,7 +477,7 @@ class DisplayFormResults extends DisplayForm
 
         foreach ($this->formElements as $element) {
             // Negative element ids are from the submission table
-            if ($element->id < 0 || in_array($element->id, $splitElements) || in_array($element->type, $this->nonInputs)) {
+            if ($element->id < 0 || in_array($element->id, $splitElements) || isset($this->nonInputs[$element->type])) {
                 continue;
             }
 
@@ -667,7 +665,7 @@ class DisplayFormResults extends DisplayForm
 
             $query        .= " \nORDER BY ";
             $sortables    = [];
-            foreach ($this->sortElementIds as $elementId) {
+            foreach ($this->sortElementIds as $elementId => $value) {
                 if ($elementId < 0) {
                     $elementId     = $this->extraElements[$elementId]['slug'];
                 }
@@ -752,7 +750,7 @@ class DisplayFormResults extends DisplayForm
     public function addColumnSetting($element, $elementIds = [])
     {
         //do not show non-input elements
-        if (in_array($element->type, $this->nonInputs)) {
+        if (isset($this->nonInputs[$element->type])) {
             return false;
         }
 
@@ -889,12 +887,12 @@ class DisplayFormResults extends DisplayForm
                 continue;
             }
 
-            if (in_array($setting['name'], $names)) {
+            if (isset($names[$setting['name']])) {
                 //remove the duplicate element: same name but different id
                 unset($this->columnSettings[$key]);
             }
 
-            $names[]    = $setting['name'];
+            $names[$setting['name']] = 1;
 
             if (!$setting['show']) {
 
@@ -942,7 +940,7 @@ class DisplayFormResults extends DisplayForm
                     !$ownEntry ||
                     (                                                                           //not our own entry
                         $ownEntry &&                                                            //or it is our own
-                        !in_array('own', (array)$columnSetting['view_right_roles'])       //but we are not allowed to see it
+                        !isset($columnSetting['view_right_roles']['own'])       //but we are not allowed to see it
                     )
                 )    &&
                 !$this->tableEditPermissions &&                                                 //no permission to edit the table and
@@ -952,7 +950,7 @@ class DisplayFormResults extends DisplayForm
                 //later on there will be a row with data in this column
                 if (
                     $this->ownData &&                                                           // we are only showing own data
-                    in_array('own', $columnSetting['view_right_roles'])                         // and this column can be viewed by owner
+                    isset($columnSetting['view_right_roles']['own'])                         // and this column can be viewed by owner
                 ) {
                     $value = 'X'; // we cannot see this value, but we can see other values in this column
                 } else {
@@ -977,7 +975,7 @@ class DisplayFormResults extends DisplayForm
             }
 
             if (
-                in_array('own', $columnSetting['edit_right_roles']) &&
+                isset($columnSetting['edit_right_roles']['own']) &&
                 $ownEntry ||
                 array_intersect($this->userRoles, $columnSetting['edit_right_roles']) ||
                 $this->tableEditPermissions
@@ -1003,7 +1001,7 @@ class DisplayFormResults extends DisplayForm
                 /**
                  * Find splitted element values
                  */
-                if (in_array($elementId, $columnSetting['elementIds'] ?? [])) {
+                if (isset($columnSetting['elementIds'] ?? [][$elementId])) {
                     if (!empty($this->submission->sub_id)) {
                         $attributes["data-subid"] = $this->submission->sub_id;
                     }
@@ -1390,10 +1388,7 @@ class DisplayFormResults extends DisplayForm
                                             <?php
                                             foreach ($viewRoles as $key => $roleName) {
                                             ?>
-                                                <option 
-                                                    value='<?php echo esc_attr($key); ?>' 
-                                                    <?php if (in_array($key, $columnSetting['view_right_roles'])) echo "selected=selected";  ?>
-                                                >
+                                                <option  value='<?php echo esc_attr($key); ?>'  <?php if (isset($columnSetting['view_right_roles'][$key])) echo "selected=selected";  ?> >
                                                     <?php echo esc_html($roleName); ?>
                                                 </option>
                                             <?php
@@ -1413,7 +1408,7 @@ class DisplayFormResults extends DisplayForm
                                         <?php
                                         foreach ($editRoles as $key => $roleName) {
                                         ?>
-                                            <option value='<?php echo esc_attr($key); ?>' <?php if (in_array($key, $columnSetting['edit_right_roles'])) echo "selected=selected"; ?>>
+                                            <option value='<?php echo esc_attr($key); ?>' <?php if (isset($columnSetting['edit_right_roles'][$key])) echo "selected=selected"; ?>>
                                                 <?php echo esc_html($roleName); ?>
                                             </option>
                                         <?php
@@ -1764,10 +1759,10 @@ class DisplayFormResults extends DisplayForm
                             $pattern = "/([^\[]+)\[[0-9]*\]/i";
 
                             if (
-                                preg_match($pattern, $element->slug, $matches)    &&        // preg match was succesfull
-                                !in_array($matches[1], $foundElements)                    // the match is not yet in the found elements
+                                preg_match($pattern, $element->slug, $matches)    &&   // preg match was succesfull
+                                !isset($foundElements[$matches[1]])         // the match is not yet in the found elements
                             ) {
-                                $foundElements[$element->id]    = $matches[1];
+                                $foundElements[$matches[1]] = $element->id;
                             }
                         }
 
@@ -1777,13 +1772,13 @@ class DisplayFormResults extends DisplayForm
                                 <h4>Select fields where you want to create seperate rows for</h4>
                                 <?php
 
-                                foreach ($foundElements as $id => $element) {
+                                foreach ($foundElements as $element => $id) {
                                     $name    = ucfirst(strtolower(str_replace('_', ' ', $element)));
 
                                     //Check which option is the selected one
                                     ?>
                                     <label>
-                                        <input type='checkbox' name='form-settings[split][]' value='<?php echo esc_attr($id);?>' <?php if (in_array($id, $this->formData->split ?? [])) echo 'checked'; ?>> 
+                                        <input type='checkbox' name='form-settings[split][<?php echo esc_attr($id);?>]' value='1' <?php if (in_array($id, $this->formData->split)) echo 'checked'; ?>> 
                                         <?php echo esc_html($name);?>
                                     </label>
                                     <br>
@@ -1802,7 +1797,7 @@ class DisplayFormResults extends DisplayForm
                                 <?php
                                 foreach ($viewRoles as $key => $roleName) {
                                     ?>
-                                    <option value='<?php echo esc_attr($key);?>' <?php if (in_array($key, $this->tableSettings->view_right_roles ?? [])) echo 'selected'; ?>>
+                                    <option value='<?php echo esc_attr($key);?>' <?php if (isset($this->tableSettings->view_right_roles[$key])) echo 'selected'; ?>>
                                         <?php echo esc_html($roleName);?>
                                     </option>
                                     <?php
@@ -1823,7 +1818,7 @@ class DisplayFormResults extends DisplayForm
                                 <?php
                                 foreach ($viewRoles as $key => $roleName) {
                                     ?>
-                                    <option value='<?php echo esc_attr($key);?>' <?php if (in_array($key, $this->tableSettings->edit_right_roles ?? [])) echo 'selected'; ?>>
+                                    <option value='<?php echo esc_attr($key);?>' <?php if (isset($this->tableSettings->edit_right_roles[$key])) echo 'selected'; ?>>
                                         <?php echo esc_html($roleName);?>
                                     </option>
                                     <?php
@@ -1834,7 +1829,7 @@ class DisplayFormResults extends DisplayForm
                             <br>
                             <h4>Select users with permission to EDIT the table</h4>
                             <?php
-                            TSJIPPY\userSelect(onlyAdults: true, id: "table-settings[edit-right-roles][]", userId: $this->tableSettings->edit_right_roles ?? [], excludeIds: [1], multiple: true, echo: true);
+                            TSJIPPY\userSelect(onlyAdults: true, id: "table-settings[edit-right-roles][]", userId: $this->tableSettings->edit_right_roles, excludeIds: [1], multiple: true, echo: true);
                             ?>
                         </div>
                     </div>
@@ -1919,14 +1914,14 @@ class DisplayFormResults extends DisplayForm
         if (!isset($this->formEditPermissions) || !$this->formEditPermissions) {
             if (
                 array_intersect(                                                       // We have full rights to the forms
-                    (array)$this->userRoles,
-                    array_keys((array)$this->formData->full_right_roles)
+                    $this->userRoles,
+                    $this->formData->full_right_roles
                 )    ||
                 (
                     isset($this->tableSettings->full_right_roles) &&                    // we have full rights to the table
                     array_intersect(
-                        (array)$this->userRoles,
-                        array_keys((array)$this->tableSettings->full_right_roles)
+                        $this->userRoles,
+                        $this->tableSettings->full_right_roles
                     )
                 )    ||
                 $this->editRights                                                        // we have edit rights on the form
@@ -1940,8 +1935,8 @@ class DisplayFormResults extends DisplayForm
         //check if we have rights on this table
         if (!isset($this->tableEditPermissions) || !$this->tableEditPermissions) {
             if (
-                array_intersect($this->userRoles, (array)$this->tableSettings->edit_right_roles) ||
-                in_array($this->userId, (array)$this->tableSettings->edit_right_roles)
+                array_intersect($this->userRoles, $this->tableSettings->edit_right_roles) ||
+                isset($this->tableSettings->edit_right_roles[$this->userId])
             ) {
                 $this->tableEditPermissions = true;
             } else {
@@ -1959,8 +1954,8 @@ class DisplayFormResults extends DisplayForm
                 !$this->all
             )    ||
             !$this->tableEditPermissions                            &&
-            !array_intersect($this->userRoles, (array)$this->tableSettings->view_right_roles) &&
-            !in_array($this->userId, (array)$this->tableSettings->view_right_roles) &&
+            !array_intersect($this->userRoles, $this->tableSettings->view_right_roles) &&
+            !isset($this->tableSettings->view_right_roles[$this->userId]) &&
             !wp_doing_cron()
         ) {
             $this->tableViewPermissions     = false;
@@ -2276,7 +2271,8 @@ class DisplayFormResults extends DisplayForm
             // phpcs:ignore
             if (isset($_REQUEST['sortcol'])) {
                 // phpcs:ignore
-                $this->sortElementIds    = [TSJIPPY\sanitize($_REQUEST['sortcol'])];
+                $sortCol    = TSJIPPY\sanitize($_REQUEST['sortcol']);
+                $this->sortElementIds    = [ $sortCol => $sortCol];
             }
 
             // Default sort elements
@@ -2300,7 +2296,7 @@ class DisplayFormResults extends DisplayForm
                             $name
                         );
                     } else {
-                        $this->sortElementIds    = [$defaultSortElement];
+                        $this->sortElementIds    = [$defaultSortElement =>  $defaultSortElement];
                     }
                 }
             }
@@ -2463,7 +2459,7 @@ class DisplayFormResults extends DisplayForm
                     (
                         $this->ownData                      &&                  //or it does contain our own data but
                         !empty($columnSetting['view_right_roles']) &&                      
-                        !in_array('own', $columnSetting['view_right_roles'])     //we are not allowed to see it
+                        !isset($columnSetting['view_right_roles']['own'])     //we are not allowed to see it
                     )
                 ) &&
                 !$this->tableEditPermissions                 &&                        // no permission to edit the table and
@@ -2476,7 +2472,7 @@ class DisplayFormResults extends DisplayForm
              * Build the class string
              */
             if (
-                in_array($columnSetting['slug'], $this->sortElementIds) ||
+                isset($this->sortElementIds[$columnSetting['slug']]) ||
                 array_intersect($columnSetting['elementIds'] ?? [], $this->sortElementIds)
             ) {
                 $class    = strtolower($this->sortDirection) . ' defaultsort';
@@ -2486,7 +2482,7 @@ class DisplayFormResults extends DisplayForm
                 $class    = "";
             }
 
-            if (in_array($columnSetting['element_id'] ?? '', $this->sortElementIds)) {
+            if (isset($this->sortElementIds[$columnSetting['element_id'] ?? ''])) {
                 $class    = strtolower($this->sortDirection) . ' defaultsort';
             }
 

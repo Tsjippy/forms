@@ -254,8 +254,8 @@ class ElementHtmlBuilder extends SubmitForm
 
         if(
             !str_contains($metaKey, 'tsjippy_') && 
-            !in_array($metaKey, $this->wpMetaKeys) &&
-            !in_array($metaKey, TSJIPPY\FAMILY\getFamilyMetaKeys($familyMetaKeys))
+            !isset($this->wpMetaKeys[$metaKey]) &&
+            !isset(TSJIPPY\FAMILY\getFamilyMetaKeys($familyMetaKeys)[$metaKey])
         ){
             $metaKey    = 'tsjippy_' . $metaKey;
         }
@@ -308,13 +308,13 @@ class ElementHtmlBuilder extends SubmitForm
             //return $values;
         }
 
-        if (in_array($element->type, $this->nonInputs) && $element->type != 'datalist') {
+        if (isset($this->nonInputs[$element->type]) && $element->type != 'datalist') {
             return [];
         }
 
         $values    = [
-            'defaults'    => [],
-            'metavalue'    => []
+            'defaults'  => [],
+            'metavalue' => []
         ];
 
         $this->buildDefaultsArray();
@@ -332,9 +332,9 @@ class ElementHtmlBuilder extends SubmitForm
                 $exploded        = explode('|', $elementValue);
 
                 if (count($exploded) > 1) {
-                    $values['defaults'][$exploded[0]]                = $exploded[1];
+                    $values['defaults'][$exploded[0]]              = $exploded[1];
                 } else {
-                    $values['defaults'][strtolower($elementValue)]    = $elementValue;
+                    $values['defaults'][strtolower($elementValue)] = $elementValue;
                 }
             }
         }
@@ -343,14 +343,14 @@ class ElementHtmlBuilder extends SubmitForm
         $values['metavalue']    = $this->getMetaElementValues(trim($element->slug, '[]'));
 
         //add default values
-        if (empty($element->multiple) || in_array($element->type, ['select', 'checkbox', 'radio'])) {
+        if (empty($element->multiple) || isset(['select' => 1, 'checkbox' => 1, 'radio' => 1][$element->type])) {
             $key                          = $element->default_value ?? '';
 
             if (!empty($key)) {
                 if (isset($this->defaultValues[$key])) {
                     $values['defaults']   = array_merge($values['defaults'], (array)$this->defaultValues[$key]);
-                } elseif (!in_array($key, $values['defaults'])) {
-                    $values['defaults'][] = $key;
+                } elseif (!isset($values['defaults'][$key])) {
+                    $values['defaults'][$key] = $key;
                 }
             }
         }
@@ -453,8 +453,8 @@ class ElementHtmlBuilder extends SubmitForm
         /**
          * File Uploads
          */
-        elseif ( in_array($element->type, ['image', 'file']) ){
-            $path   = $this->uploadDir($element).'/'.$string;
+        elseif ( isset(['image' => 1, 'file' => 1][$element->type]) ){
+            $path   = $this->uploadDir().'/'.$string;
 
             $type   = mime_content_type($path);
 
@@ -601,7 +601,7 @@ class ElementHtmlBuilder extends SubmitForm
             $optionType        = $option[0];
             $optionValue    = str_replace('\\\\', '\\', $option[1]);
 
-            if ($removeMin && in_array($optionType, ['min', 'max'])) {
+            if ($removeMin && isset(['min' => 1, 'max' => 1][$optionType])) {
                 continue;
             }
 
@@ -614,7 +614,7 @@ class ElementHtmlBuilder extends SubmitForm
                 // Parse a date value
                 if (
                     $this->element->type == 'date' &&
-                    in_array($optionType, ['min', 'max', 'value']) &&
+                    isset(['min' => 1, 'max' => 1, 'value' => 1][$optionType]) &&
                     strtotime($optionValue)
                 ) {
                     $optionValue    = gmdate('Y-m-d', strtotime($optionValue));
@@ -687,14 +687,14 @@ class ElementHtmlBuilder extends SubmitForm
     function changeNodeAttributes($index, $value, $node)
     {
         // the node is already an input
-        if (in_array($node->tagName, ['input', 'textarea', 'select'])) {
+        if (isset($this->inputTags[$node->tagName])) {
             $nodes    = [$node];
         } else {
             $nodes    = $node->getElementsByTagName('*');
         }
 
         foreach ($nodes as $curNode) {
-            if (!in_array($curNode->tagName, ['input', 'textarea', 'select'])) {
+            if (!isset($this->inputTags[$curNode->tagName])) {
                 continue;
             }
 
@@ -740,7 +740,7 @@ class ElementHtmlBuilder extends SubmitForm
             /**
              * Change selected checkbox
              */
-            elseif (in_array($this->element->type, ['radio', 'checkbox'])) {
+            elseif (isset($this->checkboxTypes[$this->element->type])) {
                 $nodes = $curNode->getElementsByTagName($this->element->type);
 
                 foreach ($nodes as $nd) {
@@ -926,9 +926,9 @@ class ElementHtmlBuilder extends SubmitForm
      */
     protected function getTagType()
     {
-        if (in_array($this->element->type, ['formstep', 'info', 'div-start'])) {
+        if (isset(['formstep' => 1, 'info' => 1, 'div-start' => 1][$this->element->type])) {
             $this->tagType        = "div";
-        } elseif (in_array($this->element->type, array_merge($this->nonInputs, ['select', 'textarea']))) {
+        } elseif (isset(array_merge($this->nonInputs, ['select' => 1, 'textarea' => 1])[$this->element->type])) {
             $this->tagType        = $this->element->type;
         } else {
             $this->attributes['type'] = $this->element->type;
@@ -945,7 +945,7 @@ class ElementHtmlBuilder extends SubmitForm
         $this->element->slug    = trim($this->element->slug, " \n\r\t\v\0_");
 
         // [] not yet added to name
-        if (in_array($this->element->type, ['radio', 'checkbox']) && !str_contains($this->element->slug, '[]')) {
+        if (isset($this->checkboxTypes[$this->element->type]) && !str_contains($this->element->slug, '[]')) {
             $this->element->slug .= '[]';
         }
 
@@ -994,7 +994,7 @@ class ElementHtmlBuilder extends SubmitForm
      */
     protected function getValue()
     {
-        if (in_array($this->element->type, $this->nonInputs) || $this->requestedValue === false) {
+        if (isset($this->nonInputs[$this->element->type]) || $this->requestedValue === false) {
             return '';
         }
 
@@ -1047,14 +1047,14 @@ class ElementHtmlBuilder extends SubmitForm
 
         if (
             !empty($this->selectedValue) &&
-            !in_array($this->element->type, ['radio', 'checkbox'])
+            !isset($this->checkboxTypes[$this->element->type])
         ) {
             if (is_array($this->selectedValue)) {
                 $this->selectedValue    = array_values($this->selectedValue)[0];
             }
 
             // if there is a datalist attached to this element we should use the corresponding name
-            if (in_array('list', array_keys($this->attributes))) {
+            if (isset($this->attributes['list'])) {
                 $listElement    = $this->getElementBySlug($this->attributes['list']);
 
                 if ($listElement && !empty($this->defaultArrayValues[$listElement->default_array_value])) {
@@ -1210,7 +1210,7 @@ class ElementHtmlBuilder extends SubmitForm
     {
         if (
             empty($this->element->multiple) ||
-            in_array($this->element->type, ['file', 'image', 'text']) ||
+            isset(['file' => 1, 'image' => 1, 'text' => 1][$this->element->type]) ||
             get_class($this) === "TSJIPPY\FORMS\FormBuilderForm"
         ) {
             return false;
@@ -1309,15 +1309,17 @@ class ElementHtmlBuilder extends SubmitForm
             }
         }
 
+        $selValues  = array_flip($selValues);
+
         foreach ($this->elementValues['defaults'] as $key => $option) {
             $attributes = [
                 'value' => $key
             ];
 
             if (
-                in_array(strtolower($option), $selValues) ||
-                in_array(strtolower($key), $selValues) ||
-                in_array($this->element->default_value, [$key, $option])
+                isset($selValues[strtolower($option)]) ||
+                isset($selValues[strtolower($key)]) ||
+                isset([$key => 1, $option => 1][$this->element->default_value])
             ) {
                 $attributes['selected'] = "selected";
             }
@@ -1369,9 +1371,9 @@ class ElementHtmlBuilder extends SubmitForm
          */
         $selected    = [];
 
-        $defaultKey                = $this->element->default_value;
+        $defaultKey     = $this->element->default_value;
         if (!empty($defaultKey) && !empty($this->elementValues['defaults'][$defaultKey])) {
-            $selected[]        = strtolower($this->elementValues['defaults'][$defaultKey]);
+            $selected[ strtolower($this->elementValues['defaults'][$defaultKey]) ] = 1;
         }
 
         if (!empty($this->elementValues['metavalue'])) {
@@ -1380,14 +1382,14 @@ class ElementHtmlBuilder extends SubmitForm
                     foreach ($val as $v) {
                         if (is_array($v)) {
                             foreach ($v as $v2) {
-                                $selected[] = strtolower($v2);
+                                $selected[strtolower($v2)]  = 1;
                             }
                         } else {
-                            $selected[] = strtolower($v);
+                            $selected[strtolower($v)] = 1;
                         }
                     }
                 } else {
-                    $selected[] = strtolower($val);
+                    $selected[strtolower($val)] = 1;
                 }
             }
         }
@@ -1399,18 +1401,18 @@ class ElementHtmlBuilder extends SubmitForm
                         foreach ($v as $av) {
                             if (is_array($av)) {
                                 foreach ($av as $aav) {
-                                    $selected[] = strtolower($aav);
+                                    $selected[strtolower($aav)] = 1;
                                 }
                             } else {
-                                $selected[] = strtolower($av);
+                                $selected[strtolower($av)] = 1 ;
                             }
                         }
                     } else {
-                        $selected[] = strtolower($v);
+                        $selected[strtolower($v)] = 1;
                     }
                 }
             } else {
-                $selected[] = strtolower($this->requestedValue);
+                $selected[strtolower($this->requestedValue)] = 1;
             }
         }
 
@@ -1444,9 +1446,9 @@ class ElementHtmlBuilder extends SubmitForm
 
             // Checked attribute
             if (
-                in_array(strtolower($option), $selected) ||
-                in_array(strtolower($key), $selected) ||
-                in_array($this->element->default_value, [$key, $option])
+                isset($selected[strtolower($option)]) ||
+                isset($selected[strtolower($key)]) ||
+                isset([$key, $option][$this->element->default_value])
             ) {
                 $attributes['checked']    = 'checked';
             }
@@ -1508,7 +1510,7 @@ class ElementHtmlBuilder extends SubmitForm
 
             $this->multiWrapElementCount++;
 
-            if (in_array($type, $this->nonInputs)) {
+            if (isset($this->nonInputs[$type])) {
                 continue;
             }
 

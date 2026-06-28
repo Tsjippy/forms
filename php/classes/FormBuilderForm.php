@@ -33,7 +33,7 @@ class FormBuilderForm extends DisplayForm
     /**
      * Prints a dropdown with all form elements
      *
-     * @param    int        $selectedId    The id of the current selected element in the dropdown. Default empty
+     * @param    int|array        $selectedId    The id of the current selected element in the dropdown. Default empty
      * @param    int        $elementId    the id of the element
      *
      */
@@ -56,7 +56,7 @@ class FormBuilderForm extends DisplayForm
 
         foreach ($elements as $element) {
             //do not include the element itself do not include non-input types
-            if ($element->id != $elementId && !in_array($element->type, ['label', 'info', 'datalist', 'formstep', 'div-end'])) {
+            if ($element->id != $elementId && !isset(['label' => 1, 'info' => 1, 'datalist' => 1, 'formstep' => 1, 'div-end' => 1][$element->type])) {
                 $slug = ucfirst(str_replace('_', ' ', $element->slug));
 
                 // add the id if non-unique name
@@ -309,7 +309,7 @@ class FormBuilderForm extends DisplayForm
 
         $resizer    = addElement('div', $resizerWrapper, $attributes, $text);
 
-        if (!in_array($element->type, ['multi-start', 'multi-end', 'div-start', 'div-end'])) {
+        if (!isset(['multi-start' => 1, 'multi-end' => 1, 'div-start' => 1, 'div-end' => 1][$element->type])) {
             //Load default values for this element
             $this->getElementHtml($element, $resizer);
         }
@@ -728,7 +728,7 @@ class FormBuilderForm extends DisplayForm
 
                                 $processed = [];
                                 foreach ($this->formElements as $key => $element) {
-                                    if (in_array($element->type, $this->nonInputs)) {
+                                    if (isset($this->nonInputs[$element->type])) {
                                         continue;
                                     }
 
@@ -737,9 +737,9 @@ class FormBuilderForm extends DisplayForm
                                     $slug = $element->slug;
                                     if (preg_match($pattern, $element->slug, $matches)) {
                                         //We found a keyword, check if we already got the same one
-                                        if (!in_array($matches[1], $processed)) {
+                                        if (!isset($processed[$matches[1]])) {
                                             //Add to the processed array
-                                            $processed[]    = $matches[1];
+                                            $processed[$matches[1]] = 1;
 
                                             //replace the slug
                                             $slug        = $matches[1];
@@ -790,8 +790,8 @@ class FormBuilderForm extends DisplayForm
                                         $nextKey++;
                                         $nextElement    = $this->formElements[$nextKey];
 
-                                        if (!in_array($nextElement->type, $this->nonInputs)) {
-                                            $foundElements[$nextElement->id] = $nextElement->slug;
+                                        if (!isset($this->nonInputs[$nextElement->type])) {
+                                            $foundElements[$nextElement->slug] = $nextElement->id;
                                         }
 
                                         if ($nextElement->type == 'multi-end') {
@@ -804,8 +804,8 @@ class FormBuilderForm extends DisplayForm
 
                                 if (preg_match($pattern, $element->slug, $matches)) {
                                     //Only add if not found before
-                                    if (!in_array($matches[1], $foundElements)) {
-                                        $foundElements[$element->id]    = $matches[1];
+                                    if (!isset($foundElements[$matches[1]])) {
+                                        $foundElements[$matches[1]] = $element->id;
                                     }
                                 }
                             }
@@ -815,8 +815,8 @@ class FormBuilderForm extends DisplayForm
                                 <h4>Select fields where you want to create seperate rows for</h4>
                             <?php
 
-                                foreach ($foundElements as $id => $element) {
-                                    $name    = ucfirst(strtolower(str_replace('_', ' ', $element)));
+                                foreach ($foundElements as $slug => $id) {
+                                    $name    = ucfirst(strtolower(str_replace('_', ' ', $slug)));
 
                                     //Check which option is the selected one
                                     ?>
@@ -825,7 +825,7 @@ class FormBuilderForm extends DisplayForm
                                             type='checkbox' 
                                             name='split[]' 
                                             value='<?php echo esc_attr($id);?>'
-                                            <?php if (in_array($id, $this->formData->split ?? [])) echo 'checked';  ?>
+                                            <?php if (in_array($id, $this->formData->split)) echo 'checked';  ?>
                                         >
                                         <?php echo esc_html($name);?>
                                     </label>
@@ -845,7 +845,7 @@ class FormBuilderForm extends DisplayForm
                                     ?>
                                     <option 
                                         value='<?php esc_attr($key);?>' 
-                                        <?php if (in_array($key, $this->formData->full_right_roles)) echo 'selected'; ?>
+                                        <?php if (isset($this->formData->full_right_roles[$key])) echo 'selected'; ?>
                                     >
                                         <?php echo esc_html($roleName);?>
                                     </option>
@@ -867,7 +867,7 @@ class FormBuilderForm extends DisplayForm
                                     ?>
                                     <option 
                                         value='<?php esc_attr($key);?>' 
-                                        <?php if (in_array($key, $this->formData->submit_others_form ?? [])) echo 'selected'; ?>
+                                        <?php if (isset($this->formData->submit_others_form[$key])) echo 'selected'; ?>
                                     >
                                         <?php echo esc_html($roleName);?>
                                     </option>
@@ -1035,7 +1035,7 @@ class FormBuilderForm extends DisplayForm
             </label>
 
             <h4>Warning Exclusions</h4>
-            <?php $this->warningConditionsForm('conditions', maybe_unserialize($this->formReminder->conditions ?? '')); ?>
+            <?php $this->warningConditionsForm('conditions', $this->formReminder->conditions); ?>
 
             <?php
             TSJIPPY\addSaveButton('submit-form-reminder',  'Save form reminder');
@@ -1117,7 +1117,7 @@ class FormBuilderForm extends DisplayForm
                 ?>
                 <option 
                     value='<?php esc_attr($key);?>' 
-                    <?php if (in_array($key, $conditions['roles'])) echo 'selected'; ?>
+                    <?php if (isset($conditions['roles'][$key])) echo 'selected'; ?>
                 >
                     <?php echo esc_html($roleName);?>
                 </option>
@@ -1268,7 +1268,7 @@ class FormBuilderForm extends DisplayForm
                         <?php
                         foreach ($this->formElements as $element) {
                             $element->slug    = str_replace('[]', '', $element->slug);
-                            if (!in_array($element->type, ['label', 'info', 'button', 'datalist', 'formstep'])) {
+                            if (!isset(['label' => 1, 'info' => 1, 'button' => 1, 'datalist' => 1, 'formstep' => 1][$element->type])) {
                                 ?>
                                 <option>
                                     %<?php echo esc_attr($element->slug);?>%
@@ -1411,14 +1411,14 @@ class FormBuilderForm extends DisplayForm
 
                                                 <label 
                                                     class='staticvalue 
-                                                    <?php if (empty($triggerEquation) || !in_array($triggerEquation, ['==', '!=', '>', '<'])) echo 'hidden';  ?>'
+                                                    <?php if (empty($triggerEquation) || !isset(['==' => 1, '!=' => 1, '>' => 1, '<' => 1][$triggerEquation])) echo 'hidden';  ?>'
                                                 >
                                                     <input type='text' name='emails[<?php echo esc_attr($key); ?>][submitted-trigger][value]' value="<?php echo esc_attr($triggerValue); ?>" style='width: auto;'>
                                                 </label>
 
                                                 <select 
                                                     class='dynamicvalue 
-                                                    <?php if (empty($triggerEquation) || in_array($triggerEquation, ['==', '!=', '>', '<', 'checked', '!checked'])) echo 'hidden';  ?>' 
+                                                    <?php if (empty($triggerEquation) || isset(['==' => 1, '!=' => 1, '>' => 1, '<' => 1, 'checked' => 1, '!checked' => 1][$triggerEquation])) echo 'hidden';  ?>' 
                                                     name='emails[<?php echo esc_attr($key); ?>][submitted-trigger][value-element]'
                                                 >
                                                     <?php
@@ -2132,19 +2132,6 @@ class FormBuilderForm extends DisplayForm
          */
         $formContents    = apply_filters('tsjippy-forms-element-form-content', ob_get_clean(), $this, $element);
 
-        /* 
-        Not sure where we need those for in js
-        $numericElements    = [];
-        $dateElements        = [];
-        foreach ($this->formElements as $el) {
-            if (in_array($el->type, ['date', 'number', 'range', 'week', 'month'])) {
-                $numericElements[]    = $el->id;
-            }
-            if (in_array($el->type, ['date', 'week', 'month'])) {
-                $dateElements[]    = $el->id;
-            }
-        } */
-
         ob_start();
         ?>
         <form action="" method="post" name="add-form-element-form" class="form-element-form tsjippy-form" data-add-empty=1>
@@ -2218,10 +2205,10 @@ class FormBuilderForm extends DisplayForm
         ob_start();
         $counter = 0;
         foreach ($this->formElements as $el) {
-            $copyTo    = (array)maybe_unserialize($el->conditions);
+            $copyTo    = $el->conditions;
             if (!empty($copyTo['copyto']) && in_array($elementId, $copyTo['copyto'])) {
                 $counter++;
-        ?>
+                ?>
                 <div class="form-element-wrapper" data-element-id="<?php echo esc_attr($el->id); ?>" data-form-id="<?php echo esc_attr($this->formData->id); ?>">
                     <button type="button" class="edit-form-element button" title="Jump to conditions element">
                         View conditions of '<?php echo esc_attr($el->slug); ?>'
@@ -2366,7 +2353,7 @@ class FormBuilderForm extends DisplayForm
                                 </select>
                             </span>
                             <?php
-                            if (str_contains($rule['equation'], 'value') || in_array($rule['equation'], ['changed', 'checked', '!checked', 'visible', 'invisible'])) {
+                            if (str_contains($rule['equation'], 'value') || isset(['changed' => 1, 'checked' => 1, '!checked' => 1, 'visible' => 1, 'invisible' => 1][$rule['equation']])) {
                                 $hidden = 'hidden';
                             } else {
                                 $hidden = '';
@@ -2488,10 +2475,10 @@ class FormBuilderForm extends DisplayForm
                             }
                             $hidden  = 'hidden';
                             $hidden2 = 'hidden';
-                            if (in_array($type, ['date', 'number', 'range', 'week', 'month'])) {
+                            if (isset(['date' => 1, 'number' => 1, 'range' => 1, 'week' => 1, 'month' => 1][$type])) {
                                 $hidden    = '';
 
-                                if (in_array($type, ['date', 'week', 'month'])) {
+                                if (isset(['date' => 1, 'week' => 1, 'month' => 1][$type])) {
                                     $hidden2    = '';
                                 }
                             }
