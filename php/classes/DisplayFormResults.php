@@ -1001,13 +1001,14 @@ class DisplayFormResults extends DisplayForm
                 /**
                  * Find splitted element values
                  */
-                if (isset($columnSetting['elementIds'] ?? [][$elementId])) {
+                $columnElements = $columnSetting['elementIds'] ?? [];
+                if (isset($columnElements[$elementId])) {
                     if (!empty($this->submission->sub_id)) {
                         $attributes["data-subid"] = $this->submission->sub_id;
                     }
 
                     // Find the splitted value
-                    foreach ($columnSetting['elementIds'] as $id) {
+                    foreach ($columnElements as $id) {
                         if (!empty($this->submission->{$id})) {
                             $value    = $this->submission->{$id};
                             break;
