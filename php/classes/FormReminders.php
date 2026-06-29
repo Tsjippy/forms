@@ -347,7 +347,7 @@ class FormReminders extends Forms
         foreach ($conditions as $check) {
             // get the user value
             $metaKey = $check['meta-key'];
-            if(!str_starts_with('tsjippy_', $metaKey)){
+            if(!str_starts_with($metaKey, 'tsjippy_')){
                 $metaKey    = "tsjippy_$metaKey";
             }
             $value        = get_user_meta($userId, $metaKey, true);
