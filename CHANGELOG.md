@@ -11,6 +11,7 @@
 
 ### Fixed
 - submission bug
+- isset bug
 
 ### Updated
 
