@@ -113,7 +113,7 @@ class ElementHtmlBuilder extends SubmitForm
     /**
      * Builds the array with default values for the current user
      */
-    function buildDefaultsArray()
+    protected function buildDefaultsArray()
     {
         //Only create one time, and only for logged in users
         if (!empty($this->defaultValues) || $this->user->ID === 0) {
@@ -206,14 +206,14 @@ class ElementHtmlBuilder extends SubmitForm
             $familyNamesWithChildAge[$child] = "$name ($age)";
         }
 
-        $familyNames                                                = $familyNames + $childrenNames;
+        $familyNames                                             = $familyNames + $childrenNames;
 
         // Add everything to the defaults array
-        $this->defaultArrayValues['children_names']                    = $childrenNames;
-        $this->defaultArrayValues['children_ages']                    = $childrenAges;
+        $this->defaultArrayValues['children_names']              = $childrenNames;
+        $this->defaultArrayValues['children_ages']               = $childrenAges;
 
-        $this->defaultArrayValues['family_member_names']            = $familyNames;
-        $this->defaultArrayValues['family_member_names_and_age']    = $familyNamesWithChildAge;
+        $this->defaultArrayValues['family_member_names']         = $familyNames;
+        $this->defaultArrayValues['family_member_names_and_age'] = $familyNamesWithChildAge;
 
         $this->defaultArrayValues    = apply_filters('tsjippy-forms-add-form-multi-defaults', $this->defaultArrayValues, $this->userId, $this->formData->slug);
 
@@ -227,17 +227,19 @@ class ElementHtmlBuilder extends SubmitForm
      * 
      * @return   array                 The meta values
      */
-    function getMetaElementValues($metaKey)
+    protected function getMetaElementValues($metaKey)
     {
-        if (empty($this->formData->save_in_meta)) {
+        if ($this->userId === 0) {
             return '';
         }
 
         //only load usermeta once
         if (empty($this->usermeta)) {
             //usermeta comes as arrays, only keep the first
-            foreach (get_user_meta($this->userId) as $key => $meta) {
-                $this->usermeta[$key]    = $meta[0];
+            foreach (get_user_meta($this->userId) as $key => $value) {
+                $value  = map_deep($value, 'maybe_unserialize');
+
+                $this->usermeta[$key]    = $value;
             }
             $this->usermeta    = apply_filters('tsjippy-forms-load-userdata', $this->usermeta, $this->userId);
         }
@@ -252,20 +254,16 @@ class ElementHtmlBuilder extends SubmitForm
             return $value;
         }
 
-        if(
-            !str_contains($metaKey, 'tsjippy_') && 
-            !isset($this->wpMetaKeys[$metaKey]) &&
-            !isset(TSJIPPY\FAMILY\getFamilyMetaKeys($familyMetaKeys)[$metaKey])
-        ){
-            $metaKey    = 'tsjippy_' . $metaKey;
-        }
-
         if(empty($this->usermeta[$metaKey])){
-            return '';
+            if(empty($this->usermeta[$metaKey])){
+
+                $metaKey    = "tsjippy_$metaKey";
+                return '';
+            }
         }
 
         // Get the meta value
-        $metaValues    = (array)maybe_unserialize($this->usermeta[$metaKey]);
+        $metaValues    = $this->usermeta[$metaKey];
 
         /**
          * Check if indexed
@@ -295,13 +293,45 @@ class ElementHtmlBuilder extends SubmitForm
     }
 
     /**
+     * Gets all unique user meta data keys
+     * 
+     * @return array $allMetaKeys     Array containing all user meta keys
+     */
+    protected function userMetaKeys(){
+        $value = wp_cache_get('user-meta-keys', 'forms', false, $found);
+
+        if ($found) {
+            return $value;
+        }
+
+        global $wpdb;
+
+        $allMetaKeys    = array_flip(TSJIPPY\getFromDb(
+            'all-meta-keys',
+            'forms',
+            "SELECT distinct meta_key FROM %i ORDER BY `meta_key` ASC",
+            $wpdb->usermeta
+        ));
+
+        $familyMetaKeys = TSJIPPY\FAMILY\getFamilyMetaKeys();
+
+        $metaKeys   = array_merge($allMetaKeys, $familyMetaKeys);
+
+        ksort($metaKeys, SORT_STRING | SORT_FLAG_CASE);
+
+        wp_cache_set('user-meta-keys', $metaKeys, 'forms');
+
+        return $metaKeys;
+    }
+
+    /**
      * Gets the prefilled values of an element
      *
      * @param    object    $element        The element
      *
      * @return    array                    The array of values
      */
-    function getElementValues($element)
+    protected function getElementValues($element)
     {
         // Do not return default values when requesting the html over rest api
         if (defined('REST_REQUEST')) {
@@ -350,14 +380,22 @@ class ElementHtmlBuilder extends SubmitForm
                 if (isset($this->defaultValues[$key])) {
                     $values['defaults']   = array_merge($values['defaults'], (array)$this->defaultValues[$key]);
                 } elseif (!isset($values['defaults'][$key])) {
-                    $values['defaults'][$key] = $key;
+                    /**
+                     * Current user has no value for this key, check if it is a valid user meta key
+                     */
+                    $allMetaKeys   = $this->userMetaKeys();
+
+                    // The key is also not a registered user meta key
+                    if(isset($allMetaKeys[$key]) && !isset($allMetaKeys["tsjippy_$key"])){
+                        $values['defaults'][$key] = $key;
+                    }
                 }
             }
         }
 
         if (!empty($element->default_array_value)) {
             $key                          = $element->default_array_value;
-            if (!empty($this->defaultArrayValues[$key]) && is_array($this->defaultArrayValues[$key])) {
+            if (is_array($this->defaultArrayValues[$key] ?? '')) {
                 $values['defaults']       = $this->defaultArrayValues[$key] + $values['defaults'];
             }
         }
@@ -377,7 +415,7 @@ class ElementHtmlBuilder extends SubmitForm
     {
         //remove any paragraphs
         $content     = str_replace(['<p>', '</p>'], '', $text);
-        $content     = TSJIPPY\deslash($content);
+        $content     = wp_unslash($content);
 
         $node        = addElement('div', $parent, ['class' => 'info-box']);
         $wrapper     = addElement('div', $node, ['style' => "float:right"]);
@@ -474,7 +512,7 @@ class ElementHtmlBuilder extends SubmitForm
                     ob_start();
                     ?>
                     <video preload="none" autoplay="false" muted="false" loop="false">
-                        <source src="<?php echo esc_url($url);?>" type="<?php esc_attr($type);?>">
+                        <source src="<?php echo esc_url($url);?>" type="<?php echo esc_attr($type);?>">
                         Your browser does not support the video tag.
                     </video>
                     <?php
@@ -485,7 +523,7 @@ class ElementHtmlBuilder extends SubmitForm
                     ob_start();
                     ?>
                     <audio>
-                        <source src="<?php echo esc_url($url);?>" type="<?php esc_attr($type);?>">
+                        <source src="<?php echo esc_url($url);?>" type="<?php echo esc_attr($type);?>">
                         Your browser does not support the audio tag.
                     </audio>
                     <?php
@@ -684,7 +722,7 @@ class ElementHtmlBuilder extends SubmitForm
      * @param    string|array    $value            The value to add
      * @param    object            $node            The node to edit
      */
-    function changeNodeAttributes($index, $value, $node)
+    protected function changeNodeAttributes($index, $value, $node)
     {
         // the node is already an input
         if (isset($this->inputTags[$node->tagName])) {
@@ -776,7 +814,7 @@ class ElementHtmlBuilder extends SubmitForm
     /**
      * Get the previous values of a element
      */
-    function getPrevValues($returnArray = false)
+    protected function getPrevValues($returnArray = false)
     {
         if (empty($this->submissions)) {
             return;
@@ -1658,7 +1696,7 @@ class ElementHtmlBuilder extends SubmitForm
         switch ($this->element->type) {
             case 'p':
                 $content     = wp_kses_post($this->element->text);
-                $content    = TSJIPPY\deslash($content);
+                $content     = wp_unslash($content);
 
                 $node        = addElement('div', $parent, ['name' => $this->element->slug]);
 

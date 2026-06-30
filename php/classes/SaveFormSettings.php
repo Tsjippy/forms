@@ -375,8 +375,13 @@ class SaveFormSettings extends Forms
 
         $request    = apply_filters('tsjippy-forms-before-saving-settings', $request, $this, $formId);
 
-        $request['full_right_roles']    = array_flip($request['full_right_roles']);
-        $request['submit_others_form']  = array_flip($request['submit_others_form']);
+        if(isset($request['full_right_roles'][0])){
+            $request['full_right_roles']    = array_flip($request['full_right_roles']);
+        }
+
+        if(isset($request['submit_others_form'][0])){
+            $request['submit_others_form']  = array_flip($request['submit_others_form']);
+        }
 
         $result    = $this->insertOrUpdateData($this->tableName, $request, ['id' => $formId]);
         if (is_wp_error($result)) {
@@ -407,6 +412,9 @@ class SaveFormSettings extends Forms
         if (empty($settings)) {
             return new \WP_Error('Error', 'Please supply the form settings');
         }
+
+        // Store roles inversed for use in isset
+        $settings['conditions']['roles']    = array_flip($settings['conditions']['roles'] ?? []);
 
         $result    = $this->insertOrUpdateData($this->formReminderTable, $settings, ['form_id' => $formId]);
         if (is_wp_error($result)) {
@@ -517,9 +525,9 @@ class SaveFormSettings extends Forms
         // Update each email
         foreach ($formEmails as $email) {
             $email['form_id']    = $formId;
-            $email['message']    = trim(TSJIPPY\deslash($email['message']));
+            $email['message']    = trim(wp_unslash($email['message']));
 
-            $where                = [];
+            $where               = [];
 
             // Its an update to an existing one
             if (!empty($email['email-id'])) {
@@ -527,6 +535,8 @@ class SaveFormSettings extends Forms
                     'id' => $email['email-id']
                 ];
             }
+
+            $email    = TSJIPPY\cleanUpNestedArray($email);
 
             $result    = $this->insertOrUpdateData($this->formEmailTable, $email, $where);
 

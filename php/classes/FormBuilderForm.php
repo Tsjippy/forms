@@ -423,18 +423,18 @@ class FormBuilderForm extends DisplayForm
                 id="show-element-form" 
                 data-target="element-form"
                 >
-                Form elements
+                Elements
             </button>
             <button 
                 class="button tablink formbuilder-form
                 <?php if (empty($this->formElements)) echo ' active';  ?>" id="show-form-settings" data-target="form-settings">
-                Form settings
+                Settings
             </button>
             <button class="button tablink formbuilder-form" id="show-form-reminders" data-target="form-reminders">
-                Form reminders
+                Reminders
             </button>
             <button class="button tablink formbuilder-form" id="show-form-emails" data-target="form-emails">
-                Form emails
+                E-mails
             </button>
 
             <div class="tabcontent
@@ -811,9 +811,9 @@ class FormBuilderForm extends DisplayForm
                             }
 
                             if (!empty($foundElements)) {
-                            ?>
-                                <h4>Select fields where you want to create seperate rows for</h4>
-                            <?php
+                                ?>
+                                    <h4>Select fields where you want to create seperate rows for</h4>
+                                <?php
 
                                 foreach ($foundElements as $slug => $id) {
                                     $name    = ucfirst(strtolower(str_replace('_', ' ', $slug)));
@@ -835,8 +835,10 @@ class FormBuilderForm extends DisplayForm
                             }
                             ?>
 
-                            <h4>Select roles with form edit rights</h4>
-                            <select name='full-right-roles[]' multiple>
+                            <h4>
+                                Select roles with form edit rights
+                            </h4>
+                            <select name='full_right_roles[]' multiple>
                                 <option value=''>
                                     ---
                                 </option>
@@ -844,7 +846,7 @@ class FormBuilderForm extends DisplayForm
                                 foreach ($userRoles as $key => $roleName) {
                                     ?>
                                     <option 
-                                        value='<?php esc_attr($key);?>' 
+                                        value='<?php echo esc_attr($key);?>' 
                                         <?php if (isset($this->formData->full_right_roles[$key])) echo 'selected'; ?>
                                     >
                                         <?php echo esc_html($roleName);?>
@@ -860,13 +862,13 @@ class FormBuilderForm extends DisplayForm
                             ?>
 
                             <h4>Select roles who can submit the form on behalve of somebody else</h4>
-                            <select name='submit-others-form[]' multiple>
+                            <select name='submit_others_form[]' multiple>
                                 <option value=''>---</option>
                                 <?php
                                 foreach ($userRoles as $key => $roleName) {
                                     ?>
                                     <option 
-                                        value='<?php esc_attr($key);?>' 
+                                        value='<?php echo esc_attr($key);?>' 
                                         <?php if (isset($this->formData->submit_others_form[$key])) echo 'selected'; ?>
                                     >
                                         <?php echo esc_html($roleName);?>
@@ -994,7 +996,9 @@ class FormBuilderForm extends DisplayForm
 
                     <br>
                     <label>
-                        <h4>Date Window</h4>
+                        <h4>
+                            Date Window
+                        </h4>
                         Allow Submissions Within This Date Window<br>
                         From <input type="date" name='window-start' value='<?php echo esc_attr($this->formReminder->window_start ?? ''); ?>' <?php echo esc_attr($min); ?>>
                         To <input type="date" name='window-end' value='<?php echo esc_attr($this->formReminder->window_end ?? ''); ?>' <?php echo esc_attr($max); ?>>
@@ -1005,7 +1009,9 @@ class FormBuilderForm extends DisplayForm
             ?>
 
             <label>
-                <h4>Reminder Amount</h4>
+                <h4>
+                    Reminder Amount
+                </h4>
                 How many times should people be reminded?<br>
                 Leave empty for unlimited.<br>
                 Once every
@@ -1030,12 +1036,16 @@ class FormBuilderForm extends DisplayForm
             times.
             <br>
             <label>
-                <h4>Start reminding from </h4>
+                <h4>
+                    Start reminding from 
+                </h4>
                 <input type='date' name='reminder-start_date' value='<?php echo esc_attr($this->formReminder->reminder_start_date ?? ''); ?>' <?php echo esc_attr("$min $max"); ?>>
             </label>
 
-            <h4>Warning Exclusions</h4>
-            <?php $this->warningConditionsForm('conditions', $this->formReminder->conditions); ?>
+            <h4>
+                Warning Exclusions
+            </h4>
+            <?php $this->warningConditionsForm('conditions', $this->formReminder->conditions ?? []); ?>
 
             <?php
             TSJIPPY\addSaveButton('submit-form-reminder',  'Save form reminder');
@@ -1047,21 +1057,24 @@ class FormBuilderForm extends DisplayForm
     /**
      * Form to add warning conditions to an element
      *
-     * @param    string    $name       The basename for the form conditions inputs.
-     * @param    int       $conditions The existing conditions
+     * @param    string    $name        The basename for the form conditions inputs.
+     * @param    array      $conditions The existing conditions
      */
-    public function warningConditionsForm($name, $conditions = '')
+    public function warningConditionsForm($name, $conditions = [])
     {
         global $wpdb;
         global $wp_roles;
 
-        if (empty($conditions) || !is_array($conditions)) {
-            $conditions    = [
-                [
-                    "user_meta_key" => '',
-                    "equation"      => ''
-                ]
-            ];
+        if(!isset($conditions[0])){
+            $conditions[0] = [];
+        }
+
+        if(!isset($conditions[0]["meta-key"])){
+            $conditions[0]["meta-key"] = '';
+        }
+
+        if(!isset($conditions[0]["equation"])){
+            $conditions[0]["equation"] = '';
         }
 
         if (!isset($conditions['roles'])) {
@@ -1069,9 +1082,7 @@ class FormBuilderForm extends DisplayForm
         }
 
         // get all possible user meta keys, not just the one the current user has
-        $userMetaKeys = apply_filters('tsjippy-forms-user-meta-keys', TSJIPPY\getFromDb('get_all_meta_keys', 'forms', "SELECT DISTINCT `meta_key` FROM %i ORDER BY `meta_key` ASC", $wpdb->usermeta));
-
-        sort($userMetaKeys, SORT_STRING | SORT_FLAG_CASE);
+        $userMetaKeys = $this->userMetaKeys();
 
         $userMetas    = get_user_meta($this->user->ID);
 
@@ -1083,10 +1094,13 @@ class FormBuilderForm extends DisplayForm
         ?>
         <datalist id="meta-key">
             <?php
-            foreach ($userMetaKeys as $key) {
+            foreach ($userMetaKeys as $key => $value) {
+                // Value for the current user
                 if (isset($userMetas[$key])) {
                     $value    = $userMetas[$key][0];
-                } else {
+                } 
+                // Value for a random user
+                else {
                     $value    = TSJIPPY\getFromDb(
                         "get_meta_values_for_$key",
                         "forms",
@@ -1103,22 +1117,23 @@ class FormBuilderForm extends DisplayForm
                     $data    = "data-keys=$keys";
                 }
                 ?>
-                <option value='<?php esc_attr($key)?>' <?php esc_attr($data);?>>
+                <option value='<?php echo esc_attr($key)?>' <?php echo esc_attr($data);?>>
                 <?php
             }
 
             ?>
         </datalist>
-        <label>Do not warn if user has role</label>
+        <label>
+            Do not warn if user has role
+        </label>
         <select name='<?php echo esc_attr($name); ?>[roles][]' multiple>
-            <option value=''>---</option>
+            <option value=''>
+                ---
+            </option>
             <?php
             foreach ($userRoles as $key => $roleName) {
                 ?>
-                <option 
-                    value='<?php esc_attr($key);?>' 
-                    <?php if (isset($conditions['roles'][$key])) echo 'selected'; ?>
-                >
+                <option  value='<?php echo esc_attr($key);?>' <?php if (isset($conditions['roles'][$key])) echo 'selected'; ?> >
                     <?php echo esc_html($roleName);?>
                 </option>
                 <?php
@@ -1126,7 +1141,9 @@ class FormBuilderForm extends DisplayForm
             ?>
         </select>
         <br>
-        <label>Or this user meta evaluation is true</label>
+        <label>
+            Or this user meta evaluation is true
+        </label>
         <div class="conditions-wrapper" style='width: 90vw;z-index: 9999;position: relative;'>
             <?php
             foreach ($conditions as $conditionIndex => $condition) {
@@ -1136,7 +1153,7 @@ class FormBuilderForm extends DisplayForm
 
                 $arrayKeys    = [];
                 if (!empty($condition['meta-key']) && !empty($userMetaKeys[$condition['meta-key']])) {
-                    $arrayKeys    = maybe_unserialize($userMetaKeys[$condition['meta-key']][0]);
+                    $arrayKeys    = $userMetaKeys[$condition['meta-key']][0];
                 }
             ?>
                 <div class='warning-conditions element-conditions' data-index='<?php echo esc_attr($conditionIndex); ?>'>
@@ -1175,7 +1192,7 @@ class FormBuilderForm extends DisplayForm
                         foreach ($optionArray as $option => $optionLabel) {
                             ?>
                             <option 
-                                value='<?php esc_attr($option);?>' 
+                                value='<?php echo esc_attr($option);?>' 
                                 <?php if ($condition['equation'] == $option) echo 'selected'; ?>
                             >
                                 <?php echo esc_html($optionLabel);?>
@@ -1294,8 +1311,8 @@ class FormBuilderForm extends DisplayForm
                                 class='button tablink formbuilder-form 
                                 <?php if ($key === 0) echo  'active';  ?>' 
                                 type='button' 
-                                id='show-email-$key' 
-                                data-target='email-$key' 
+                                id='show-email-<?php echo esc_attr($key);?>' 
+                                data-target='email-<?php echo esc_attr($key);?>' 
                                 style='margin-right:4px;'
                             >
                                 E-mail <?php echo esc_attr($nr);?>
@@ -1399,7 +1416,7 @@ class FormBuilderForm extends DisplayForm
                                                     foreach ($optionArray as $option => $optionLabel) {
                                                         ?>
                                                         <option 
-                                                            value='<?php esc_attr($option);?>' 
+                                                            value='<?php echo esc_attr($option);?>' 
                                                             <?php if ($triggerEquation == $option) echo 'selected'; ?>
                                                         >
                                                             <?php echo esc_html($optionLabel);?>
@@ -1706,24 +1723,26 @@ class FormBuilderForm extends DisplayForm
 
                                     <br>
                                     <div class="formfield form-label">
-                                        <h4>Additional headers like 'Reply-To'</h4>
+                                        <h4>
+                                            Additional headers like 'Reply-To'
+                                        </h4>
                                         <textarea 
                                             class='formbuilder form-element-setting' 
                                             name='emails[<?php echo esc_attr($key); ?>][headers]'>
-                                            // phpcs:ignore
-                                            <?php echo $email->headers ?? '' ?>
+                                            <?php echo trim(wp_kses_post($email->headers ?? '')); ?>
                                         </textarea>
                                     </div>
 
                                     <br>
                                     <div class="formfield form-label">
-                                        <h4>Attachments</h4>
+                                        <h4>
+                                            Attachments
+                                        </h4>
                                         Form values that should be attached to the e-mail
                                         <textarea 
                                             class='formbuilder form-element-setting' 
                                             name='emails[<?php echo esc_attr($key); ?>][files]'>
-                                            // phpcs:ignore
-                                            <?php echo $email->files ?? '' ?>
+                                            <?php echo wp_kses_post($email->files ?? ''); ?>
                                         </textarea>
                                     </div>
                                 </div>
@@ -2070,7 +2089,7 @@ class FormBuilderForm extends DisplayForm
                     <div <?php if ($element == null || (!$element->mandatory && !$element->recommended)) echo "class='hidden'"; ?>>
                         <?php
                         if ($element == null) {
-                            $conditions    = '';
+                            $conditions    = [];
                         } else {
                             $conditions = $element->warning_conditions;
                         }
@@ -2206,7 +2225,7 @@ class FormBuilderForm extends DisplayForm
         $counter = 0;
         foreach ($this->formElements as $el) {
             $copyTo    = $el->conditions;
-            if (!empty($copyTo['copyto']) && in_array($elementId, $copyTo['copyto'])) {
+            if (in_array($elementId, $copyTo['copyto'] ?? [])) {
                 $counter++;
                 ?>
                 <div class="form-element-wrapper" data-element-id="<?php echo esc_attr($el->id); ?>" data-form-id="<?php echo esc_attr($this->formData->id); ?>">

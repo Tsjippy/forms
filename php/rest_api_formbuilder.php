@@ -424,7 +424,7 @@ function addFormElement($copy = false)
             if (is_array($val)) {
                 $val    = serialize($val);
             } else {
-                $val    = TSJIPPY\deslash($val);
+                $val    = wp_unslash($val);
             }
         }
     }

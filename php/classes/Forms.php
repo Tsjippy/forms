@@ -182,7 +182,7 @@ class Forms
         }
 
         // $this->userId is the user id for whom the form is submitted
-        $this->userId    = $userId;
+        $this->userId    = $userId === 0 ? $this->user->ID : $userId;
 
         if (!empty($atts)) {
             $this->processAtts($atts);
@@ -862,8 +862,6 @@ class Forms
      */
     public function getForm($formId = '')
     {
-        global $wpdb;
-
         // first check if needed
         if (
             !isset($this->formData->version) ||
@@ -874,23 +872,34 @@ class Forms
             )
         ) {
             // Get the form data
-            $query  = "SELECT * FROM %i WHERE ";
-            $values = [$this->tableName];
+            $query      = "SELECT * FROM %i WHERE ";
+            $values     = [$this->tableName];
+            $cacheKey   = "get-form-";
+
             if (is_numeric($formId)) {
                 $query    .= "id= %d";
                 $values[] = $formId;
+                $cacheKey .= $formId;
             } elseif (is_numeric($this->formData->id ?? '') && $this->formData->id > -1) {
                 $query    .= "id= %d";
                 $values[] = $this->formData->id;
+                $cacheKey .= $this->formData->id;
             } elseif (!empty($this->formData->slug)) {
                 $query    .= "slug= %s";
                 $values[] = $this->formData->slug;
+                $cacheKey .= $this->formData->slug;
             } else {
                 return new \WP_Error('forms', 'No form name or id given');
             }
 
-            // phpcs:ignore
-            $result = $wpdb->get_row($wpdb->prepare($query, $values));
+            $query  .= ' limit 1';
+
+            $result = TSJIPPY\getFromDb(
+                $cacheKey,
+                'forms',
+                $query, 
+                $values
+            );
 
             // Form does not exist yet
             if (empty($result)) {
@@ -903,15 +912,12 @@ class Forms
             } else {
                 $result                      = map_deep($result, 'maybe_unserialize');
 
+                // Make sure these are arrays
                 foreach( [ 'full_right_roles', 'submit_others_form', 'split'] as $key){
                     if(!is_array($result->$key)){
                         $result->$key   = [];
                     }
                 }
-
-                // Use the values as keys as well to allow for faster searching with isset
-                $result->full_right_roles    = array_combine($result->full_right_roles, $result->full_right_roles);
-                $result->submit_others_form  = array_combine($result->submit_others_form, $result->submit_others_form);
 
                 $this->formData              = $result;
 
@@ -947,13 +953,9 @@ class Forms
             $this->submitRoles    = $this->formData->submit_others_form;
 
             // $this->userId is the user id for whom the form is submitted
-            if ( !array_intersect_key($this->userRoles, $this->submitRoles) ) {
+            if ( !array_intersect_key($this->userRoles, $this->submitRoles) && !isset($this->submitRoles[$this->user->ID])) {
                 $this->userId    = $this->user->ID;
             }
-        }
-
-        if ($wpdb->last_error !== '') {
-            TSJIPPY\printArray($wpdb->print_error());
         }
 
         $this->jsFileName    = plugin_dir_path(__DIR__) . "../js/dynamic/{$this->formData->slug}forms";
