@@ -1726,9 +1726,7 @@ class FormBuilderForm extends DisplayForm
                                         <h4>
                                             Additional headers like 'Reply-To'
                                         </h4>
-                                        <textarea 
-                                            class='formbuilder form-element-setting' 
-                                            name='emails[<?php echo esc_attr($key); ?>][headers]'>
+                                        <textarea class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][headers]'>
                                             <?php echo trim(wp_kses_post($email->headers ?? '')); ?>
                                         </textarea>
                                     </div>
@@ -1739,9 +1737,7 @@ class FormBuilderForm extends DisplayForm
                                             Attachments
                                         </h4>
                                         Form values that should be attached to the e-mail
-                                        <textarea 
-                                            class='formbuilder form-element-setting' 
-                                            name='emails[<?php echo esc_attr($key); ?>][files]'>
+                                        <textarea class='formbuilder form-element-setting' name='emails[<?php echo esc_attr($key); ?>][files]'>
                                             <?php echo wp_kses_post($email->files ?? ''); ?>
                                         </textarea>
                                     </div>
