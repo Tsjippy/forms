@@ -4,6 +4,7 @@
 ### Added
 - attribute escaping
 - usage of get_edit_profile_url
+- activate shared code function
 
 ### Changed
 - plugin tested up to 7.0
