@@ -14,6 +14,7 @@
 - submission bug
 - isset bug
 - str_starts_with error
+- bugs
 
 ### Updated
 
