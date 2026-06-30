@@ -86,7 +86,7 @@ class DisplayFormResults extends DisplayForm
         $this->user->partnerId      = $family->getPartner($this->user->ID);
 
         if (function_exists('is_user_logged_in') && is_user_logged_in()) {
-            $this->userRoles[]      = 'everyone'; //used to indicate view rights on permissions
+            $this->userRoles['everyone'] = 1; //used to indicate view rights on permissions
         }
 
         $result    = $this->enrichColumnSettings();
@@ -944,8 +944,7 @@ class DisplayFormResults extends DisplayForm
                     )
                 )    &&
                 !$this->tableEditPermissions &&                                                 //no permission to edit the table and
-                !empty($columnSetting['view_right_roles']) &&                                   // there are view right permissions defined
-                !array_intersect($this->userRoles, $columnSetting['view_right_roles'])          // and we do not have the view right role
+                !array_intersect_key($this->userRoles, $columnSetting['view_right_roles'] ?? [])          // and we do not have the view right role
             ) {
                 //later on there will be a row with data in this column
                 if (
@@ -960,15 +959,14 @@ class DisplayFormResults extends DisplayForm
 
             //if this row has no value in this column remove the row
             if (
-                !empty($this->tableSettings->hide_row) &&                                        // There is a column defined
-                $columnSetting['name'] == $this->tableSettings->hide_row &&                      // We are currently checking a cell in that column
+                $columnSetting['name'] == ($this->tableSettings->hide_row ?? '') &&                      // We are currently checking a cell in that column
                 (
                     (
                         empty($values[$this->tableSettings->hide_row]) &&                        // The cell has no value
                         empty($values[trim($this->tableSettings->hide_row, '[]')])               // also check the name without []
                     )
                 ) &&
-                !array_intersect($this->userRoles, (array)$columnSetting['edit_right_roles'])    &&        // And we have no right to edit this specific column
+                !array_intersect_key($this->userRoles, $columnSetting['edit_right_roles'])    &&        // And we have no right to edit this specific column
                 !$this->tableEditPermissions                                                            // and we have no right to edit all table data
             ) {
                 return;
@@ -977,7 +975,7 @@ class DisplayFormResults extends DisplayForm
             if (
                 isset($columnSetting['edit_right_roles']['own']) &&
                 $ownEntry ||
-                array_intersect($this->userRoles, $columnSetting['edit_right_roles']) ||
+                array_intersect_key($this->userRoles, $columnSetting['edit_right_roles']) ||
                 $this->tableEditPermissions
             ) {
                 $elementEditRights = true;
@@ -1168,7 +1166,7 @@ class DisplayFormResults extends DisplayForm
             if (
                 !$this->tableEditPermissions                  &&      // if we are notallowed to do all actions
                 $this->submission->user_id != $this->user->ID &&      //  this is not our own entry
-                !array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])
+                !array_intersect_key($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])
             ) {
                 continue;
             }
@@ -1266,10 +1264,6 @@ class DisplayFormResults extends DisplayForm
             $this->shortcodeTable,
             $this->shortcodeId
         )[0];
-
-        foreach ($this->tableSettings as &$value) {
-            $value    = maybe_unserialize($value);
-        }
 
         $this->columnSettings        = [];
         $results                     = TSJIPPY\getFromDb(
@@ -1389,7 +1383,7 @@ class DisplayFormResults extends DisplayForm
                                             <?php
                                             foreach ($viewRoles as $key => $roleName) {
                                             ?>
-                                                <option  value='<?php echo esc_attr($key); ?>'  <?php if (isset($columnSetting['view_right_roles'][$key])) echo "selected=selected";  ?> >
+                                                <option value='<?php echo esc_attr($key); ?>'  <?php if (isset($columnSetting['view_right_roles'][$key])) echo "selected=selected";  ?> >
                                                     <?php echo esc_html($roleName); ?>
                                                 </option>
                                             <?php
@@ -1912,18 +1906,12 @@ class DisplayFormResults extends DisplayForm
         }
 
         //check if we have rights on this form
-        if (!isset($this->formEditPermissions) || !$this->formEditPermissions) {
+        if (!$this->formEditPermissions ?? false) {
             if (
-                array_intersect(                                                       // We have full rights to the forms
-                    $this->userRoles,
-                    $this->formData->full_right_roles
-                )    ||
+                array_intersect_key( $this->userRoles,  $this->formData->full_right_roles )    ||
                 (
                     isset($this->tableSettings->full_right_roles) &&                    // we have full rights to the table
-                    array_intersect(
-                        $this->userRoles,
-                        $this->tableSettings->full_right_roles
-                    )
+                    array_intersect_key($this->userRoles, $this->tableSettings->full_right_roles )
                 )    ||
                 $this->editRights                                                        // we have edit rights on the form
             ) {
@@ -1936,7 +1924,7 @@ class DisplayFormResults extends DisplayForm
         //check if we have rights on this table
         if (!isset($this->tableEditPermissions) || !$this->tableEditPermissions) {
             if (
-                array_intersect($this->userRoles, $this->tableSettings->edit_right_roles) ||
+                array_intersect_key($this->userRoles, $this->tableSettings->edit_right_roles) ||
                 isset($this->tableSettings->edit_right_roles[$this->userId])
             ) {
                 $this->tableEditPermissions = true;
@@ -1955,7 +1943,7 @@ class DisplayFormResults extends DisplayForm
                 !$this->all
             )    ||
             !$this->tableEditPermissions                            &&
-            !array_intersect($this->userRoles, $this->tableSettings->view_right_roles) &&
+            !array_intersect_key($this->userRoles, $this->tableSettings->view_right_roles) &&
             !isset($this->tableSettings->view_right_roles[$this->userId]) &&
             !wp_doing_cron()
         ) {
@@ -2459,12 +2447,11 @@ class DisplayFormResults extends DisplayForm
                     !$this->ownData                        ||                          //The table does not contain data of our own
                     (
                         $this->ownData                      &&                  //or it does contain our own data but
-                        !empty($columnSetting['view_right_roles']) &&                      
                         !isset($columnSetting['view_right_roles']['own'])     //we are not allowed to see it
                     )
                 ) &&
                 !$this->tableEditPermissions                 &&                        // no permission to edit the table and
-                !array_intersect($this->userRoles, $columnSetting['view_right_roles']) // and we do not have the view right role and
+                !array_intersect_key($this->userRoles, $columnSetting['view_right_roles']) // and we do not have the view right role and
             ) {
                 continue;
             }
@@ -2542,7 +2529,7 @@ class DisplayFormResults extends DisplayForm
         } else {
             foreach ($actions as $action) {
                 //we have permission for this specific button
-                if (array_intersect($this->userRoles, (array)$this->columnSettings[$action]['edit_right_roles'])) {
+                if (array_intersect_key($this->userRoles, $this->columnSettings[$action]['edit_right_roles'])) {
                     $addHeading    = true;
                 } elseif ($type != 'others') {
                     //Loop over all submissions to see if the current user has permission for them

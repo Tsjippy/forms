@@ -375,6 +375,9 @@ class SaveFormSettings extends Forms
 
         $request    = apply_filters('tsjippy-forms-before-saving-settings', $request, $this, $formId);
 
+        $request['full_right_roles']    = array_flip($request['full_right_roles']);
+        $request['submit_others_form']  = array_flip($request['submit_others_form']);
+
         $result    = $this->insertOrUpdateData($this->tableName, $request, ['id' => $formId]);
         if (is_wp_error($result)) {
             return $result;
@@ -431,11 +434,11 @@ class SaveFormSettings extends Forms
             }
 
             $priority++;
-            $column['priority']        = $priority;
+            $column['priority']     = $priority;
 
-            $column['element_id']    = $elementId;
+            $column['element_id']   = $elementId;
 
-            $column['shortcode_id']    = $shortcodeId;
+            $column['shortcode_id'] = $shortcodeId;
 
             //if there are edit rights defined
             if (!empty($column['edit-right-roles'])) {
@@ -445,8 +448,9 @@ class SaveFormSettings extends Forms
                 }
 
                 //merge and save
-                $column['view-right-roles'] = array_merge($column['view-right-roles'], $column['edit-right-roles']);
+                $column['view-right-roles'] = array_flip(array_merge($column['view-right-roles'], $column['edit-right-roles']));
             }
+            $column['edit-right-roles']     = array_flip($column['edit-right-roles']);
 
             $where    = [];
 

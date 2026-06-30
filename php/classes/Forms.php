@@ -146,18 +146,10 @@ class Forms
         $this->user                         = wp_get_current_user();
         $this->userId                       = $this->user->ID;  // The user id for who we retrieve a form (results)
         $this->userIdElementName            = '';
-        $this->userRoles                    = $this->user->roles;
+        $this->userRoles                    = array_flip($this->user->roles);
 
         if ($all) {
             $this->pageSize                    = 99999;
-        }
-
-        // $this->userId is the user id for whom the form is submitted
-        if (
-            array_intersect($this->userRoles, $this->submitRoles)     &&    // we have the permission to submit on behalf on someone else
-            $userId != 0
-        ) {
-            $this->userId    = $userId;
         }
 
         //calculate full form rights
@@ -183,11 +175,14 @@ class Forms
             }
         }
 
-        if (array_intersect(['administrator', 'editor'], $this->userRoles) || $postAuthor == $this->user->ID) {
+        if (array_intersect_key(['administrator' => 1, 'editor' => 1], $this->userRoles) || $postAuthor == $this->user->ID) {
             $this->editRights        = true;
         } else {
             $this->editRights        = false;
         }
+
+        // $this->userId is the user id for whom the form is submitted
+        $this->userId    = $userId;
 
         if (!empty($atts)) {
             $this->processAtts($atts);
@@ -941,15 +936,20 @@ class Forms
             //calculate full form rights
             $object    = get_queried_object();
 
-            if (array_intersect($editRoles, (array)$this->userRoles) || (!empty($object) && $object->post_author == $this->user->ID)) {
+            if (array_intersect_key($editRoles, $this->userRoles) || (!empty($object) && $object->post_author == $this->user->ID)) {
                 $this->editRights        = true;
             } else {
                 $this->editRights        = false;
             }
         }
 
-        if (isset($this->formData->submit_others_form)) {
-            $this->submitRoles    = (array)$this->formData->submit_others_form;
+        if (!empty($this->formData->submit_others_form)) {
+            $this->submitRoles    = $this->formData->submit_others_form;
+
+            // $this->userId is the user id for whom the form is submitted
+            if ( !array_intersect_key($this->userRoles, $this->submitRoles) ) {
+                $this->userId    = $this->user->ID;
+            }
         }
 
         if ($wpdb->last_error !== '') {

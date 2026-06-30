@@ -330,6 +330,9 @@ function saveTableSettings()
         }
     }
 
+    $tableSettings->view_right_roles   = array_flip($tableSettings->view_right_roles);
+    $tableSettings->edit_right_roles   = array_flip($tableSettings->edit_right_roles);
+
     //update table settings
     $forms    = new SaveFormSettings();
 

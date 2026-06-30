@@ -633,7 +633,7 @@ class SubmitForm extends SaveFormSettings
         if (is_numeric($userId)) {
             //If we are submitting for someone else and we do not have the right to save the form for someone else
             if (
-                array_intersect($this->userRoles, $this->submitRoles) === false &&
+                array_intersect_key($this->userRoles, $this->submitRoles) === false &&
                 $this->user->ID != $userId
             ) {
                 return new \WP_Error('Error', "You do not have permission to save data for user with id $userId");
