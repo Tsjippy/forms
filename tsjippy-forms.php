@@ -14,7 +14,7 @@ use TSJIPPY;
  * Requires PHP:         8.3
  * Tested up to:         7.0
  * Plugin URI:            https://github.com/Tsjippy/forms/
- * Tested:                6.9
+ * Tested:               7.0
  * TextDomain:            tsjippy
  * Requires Plugins:    
  * License: GPLv2 or later
@@ -52,6 +52,10 @@ register_activation_hook(__FILE__, function () {
     // Create frontend posting page
     $settings['forms-page']    = TSJIPPY\ADMIN\createDefaultPage('Form selector', '[tsjippy_formselector]');
     update_option('tsjippy_forms_settings', $settings);
+
+    if(function_exists('TSJIPPY\activate')){
+        \TSJIPPY\activate();
+    }
 });
 
 register_deactivation_hook(__FILE__, function () {
