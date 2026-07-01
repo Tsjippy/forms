@@ -18,6 +18,11 @@ class FormReminders extends Forms
     public array        $mandatoryElements;
     public array        $userReminders;
 
+    /**
+     * Constructor
+     *
+     * @param   int $userId    The user id to get the reminders for
+     */
     public function __construct($userId=0)
     {
         parent::__construct(userId: $userId);
@@ -214,6 +219,8 @@ class FormReminders extends Forms
      * Get the minimum form submission date
      *
      * @param   object  $formReminder   The form reminder obejct
+     * @param   string  $query          The query to add the minimum date to
+     * @param   array   $values         The values to add the minimum date to
      *
      * @return  string                  The minimum date for form submissions to be included in the reminders
      */
@@ -260,8 +267,6 @@ class FormReminders extends Forms
      */
     protected function processDefaultForm($formReminder)
     {
-        global $wpdb;
-
         // Get all submissions created inside the current submission window
         $query            = "SELECT * FROM %i WHERE form_id=%d";
         $values            = [
@@ -271,14 +276,12 @@ class FormReminders extends Forms
 
         $this->getMinimumDate($formReminder, $query, $values);
 
-        // phpcs:disable
         $submissions    = TSJIPPY\getFromDb(
             "get_submissions_".$formReminder->form_id,
             'forms',
             $query,
             $values
         );
-        // phpcs:enable
 
         // get all the users who have submitted the form after the currentIntervalStart date
         $usersWithSubmission    = [];
@@ -350,9 +353,9 @@ class FormReminders extends Forms
             if(!str_starts_with($metaKey, 'tsjippy_')){
                 $metaKey    = "tsjippy_$metaKey";
             }
-            $value        = get_user_meta($userId, $metaKey, true);
+            $value        = get_user_meta($userId, $metaKey);
 
-            $metaIndex  = trim($check['meta-key-index']);
+            $metaIndex  = trim($check['meta-key-index'] ?? '');
             if (!empty($metaIndex)) {
                 if (!empty($value[$metaIndex])) {
                     $value        = $value[$metaIndex];

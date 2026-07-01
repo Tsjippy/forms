@@ -904,6 +904,13 @@ class DisplayFormResults extends DisplayForm
         }
     }
 
+    /**
+     * Get the contents of a row for the table
+     *
+     * @param object $tr The submission object for the current row
+     *
+     * @return array The contents of the row as an array
+     */
     protected function getRowContents($tr)
     {
         $excelRow    = [];
@@ -1151,6 +1158,10 @@ class DisplayFormResults extends DisplayForm
 
     /**
      * Action Buttons
+     * 
+     * @param object $row The submission object for the current row
+     * 
+     * 
      */
     protected function actionButtons($row)
     {
@@ -1214,6 +1225,9 @@ class DisplayFormResults extends DisplayForm
     /**
      * Writes a row of the table to the screen
      *
+     * @param string $body The contents of the row
+     * 
+     * 
      */
     protected function writeTableRow($body)
     {
@@ -1977,6 +1991,8 @@ class DisplayFormResults extends DisplayForm
 
     /**
      * Renders the table filter html
+     * 
+     * @param    string        $parent        The parent element to add the filter form to
      *
      * @return string    The html
      */
@@ -2026,6 +2042,8 @@ class DisplayFormResults extends DisplayForm
 
     /**
      * Renders the table buttons html
+     * 
+     * @param \DOMElement        $parent        The parent element to add the buttons to
      *
      * @return string    The html
      */
@@ -2100,10 +2118,11 @@ class DisplayFormResults extends DisplayForm
     /**
      * creates the main table html
      *
-     * @param    string        $type            Either 'own', 'others' or 'all'
-     * @param    array        $submissions    Array of Submissions
+     * @param    string       $type          Either 'own', 'others' or 'all'
+     * @param    array        $submissions   Array of Submissions
+     * @param    \DOMElement  $parent        The parent element to add the table to
      *
-     * @return    bool                        If there are submissions or not
+     * @return    bool                       If there are submissions or not
      */
     public function theTable($type, $submissions, $parent)
     {
@@ -2146,6 +2165,8 @@ class DisplayFormResults extends DisplayForm
 
     /**
      * Render the navigation menu in case of multiple pages of results
+     * 
+     * @param    \DOMElement  $parent   The parent element to add the navigation menu to
      */
     public function navigationMenu($parent)
     {
@@ -2372,6 +2393,11 @@ class DisplayFormResults extends DisplayForm
         return $wrapper;
     }
 
+    /**
+     * Prints the table footer
+     *
+     * @param    \DOMElement    $parent    The parent node to append to
+     */
     private function printTableFooter($parent)
     {
         $footer = addElement('div', $parent, ['class' => 'tsjippy-table-footer']);
@@ -2452,6 +2478,7 @@ class DisplayFormResults extends DisplayForm
      * Prints the results table head
      *
      * @param    string        $type        Either 'own', 'others' or 'all'
+     * @param    \DOMElement   $table       The table node to add the head to
      */
     private function resultTableHead($type, $table)
     {

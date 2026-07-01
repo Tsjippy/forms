@@ -188,7 +188,7 @@ export function fixNumbering(wrapper) {
   wrapper.querySelectorAll(":scope > .clone-div").forEach(updateNumbers);
 
   // Run for tablinks seperately so the index starts over
-  wrapper.querySelectorAll(":scope > .tablink").forEach(updateNumbers);
+  wrapper.querySelectorAll(":scope > .tablink:not(.dummy)").forEach(updateNumbers);
 
   function updateNumbers(clone, index) {
     //Update the new number

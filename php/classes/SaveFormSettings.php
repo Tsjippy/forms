@@ -2,9 +2,7 @@
 
 namespace TSJIPPY\FORMS;
 
-use ParseSplittedFormResults;
 use TSJIPPY;
-use WP_Embed;
 use WP_Error;
 
 use function TSJIPPY\removeFromDb;
@@ -17,6 +15,16 @@ class SaveFormSettings extends Forms
 {
     use CreateJs;
 
+    /**
+     * Constructor
+     *
+     * @param    array    $atts        The attributes for the form
+     * @param    bool    $all        Whether to show all elements or only the visible ones
+     * @param    int        $pageSize    The number of elements to show per page
+     * @param    string    $postId        The post id to get the form for
+     * @param    string    $formUrl        The url of the form
+     * @param    int        $userId        The user id to get the form for
+     */
     public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
         parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
@@ -249,7 +257,7 @@ class SaveFormSettings extends Forms
      *
      * @param    object|array    $element    The new element data
      *
-     * @return    true|WP_Error                The result or error on failure
+     * @return   true|WP_Error               The result or error on failure
      */
     public function updateFormElement($element)
     {

@@ -12,6 +12,16 @@ class EditFormResults extends DisplayFormResults
 {
     public int|false $submissionId;
 
+    /**
+     * Constructor
+     * 
+     * @param    array      $atts       The attributes passed to the shortcode
+     * @param    bool       $all        Whether to show all submissions or only the current
+     * @param    int        $pageSize   The number of submissions to display per page
+     * @param    string     $postId     The post ID
+     * @param    string     $formUrl    The form URL
+     * @param    int        $userId     The user ID
+     */
     public function __construct($atts = [], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
         parent::__construct($atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
@@ -171,9 +181,11 @@ class EditFormResults extends DisplayFormResults
     /**
      * (un)Archive an existing form submission
      *
-     * @param    bool    $archive    Whether we should archive or unarchive the submission. Default false
+     * @param    bool    $archive      Whether we should archive or unarchive the submission. Default false
+     * @param    int     $subId        The sub id in case of multiple values for the same key, default null
+     * @param    int     $submissionId The submission ID
      *
-     * @return    true|WP_Error        The result or error on failure
+     * @return    true|\WP_Error       The result or error on failure
      */
     public function archiveSubSubmission($archive, $subId, $submissionId)
     {
@@ -206,7 +218,7 @@ class EditFormResults extends DisplayFormResults
 
         // Remove the index from the archived indexes
         else {
-            $result = TSJIPPY\removeFromDb(
+            TSJIPPY\removeFromDb(
                 $this->submissionValuesTableName,
                 array(
                     'submission_id'    => $submissionId,
@@ -220,23 +232,6 @@ class EditFormResults extends DisplayFormResults
                 ],
                 'forms'
             );
-        }
-
-        if ($wpdb->last_error !== '') {
-            $message    = $wpdb->print_error();
-            if (defined('REST_REQUEST')) {
-                return new \WP_Error('form error', $message);
-            } else {
-                TSJIPPY\printArray($message);
-            }
-        } elseif (!$result) {
-            $message    = "No row with id $submissionId found";
-            if (defined('REST_REQUEST')) {
-                return new \WP_Error('form error', $message);
-            } else {
-                TSJIPPY\printArray($message);
-                TSJIPPY\printArray($this->submission);
-            }
         }
 
         // We did not archive the whole submission, so stop here
@@ -448,7 +443,7 @@ class EditFormResults extends DisplayFormResults
      *
      * @param    int    $submissionId        The id of the submission to delete
      *
-     * @return    int|WP_Error            The number of rows updated, or an WP_Error on error.
+     * @return    int|\WP_Error            The number of rows updated, or an WP_Error on error.
      */
     public function deleteSubmission($submissionId)
     {

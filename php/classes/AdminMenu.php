@@ -26,16 +26,31 @@ class AdminMenu extends ADMIN\SubAdminMenu
         parent::__construct($settings, $name);
     }
 
+    /**
+     * Get the menu slug for the admin menu
+     *
+     * @return string The menu slug for the admin menu
+     */
     public function settings($parent)
     {
         return false;
     }
 
+    /**
+     * Get the menu slug for the admin menu
+     *
+     * @return string The menu slug for the admin menu
+     */
     public function emails($parent)
     {
         return false;
     }
 
+    /**
+     * Get the menu slug for the admin menu
+     *
+     * @return string The menu slug for the admin menu
+     */
     public function data($parent = '')
     {
         $forms    = new SaveFormSettings();
@@ -84,10 +99,15 @@ class AdminMenu extends ADMIN\SubAdminMenu
         return true;
     }
 
+    /**
+     * Get the menu slug for the admin menu
+     *
+     * @return string The menu slug for the admin menu
+     */
     public function functions($parent)
     {
         ob_start();
-?>
+        ?>
         <h4>
             Form import
         </h4>
@@ -104,13 +124,20 @@ class AdminMenu extends ADMIN\SubAdminMenu
             <button type='submit' name='import-form'>Import the form</button>
         </form>
 
-<?php
+        <?php
 
         addRawHtml(ob_get_clean(), $parent);
 
         return true;
     }
 
+    /**
+     * Handle post actions for the admin menu
+     *
+     * @param array $request The request data
+     *
+     * @return string The response to the post action
+     */
     public function postActions($request)
     {
         // phpcs:ignore

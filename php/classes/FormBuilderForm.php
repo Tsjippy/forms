@@ -19,7 +19,18 @@ class FormBuilderForm extends DisplayForm
     public bool $showId;
     public bool $showName;
 
-
+    /**
+     * Constructor for the FormBuilderForm class.
+     *
+     * @param array $atts        Optional. An array of attributes for the form. Default empty array.
+     * @param bool $showId       Optional. Whether to show the element IDs. Default false.
+     * @param bool $showName     Optional. Whether to show the element names. Default false.
+     * @param bool $all          Optional. Whether to show all elements. Default false.
+     * @param int $pageSize      Optional. The number of elements per page. Default 50.
+     * @param string $postId     Optional. The ID of the post associated with the form. Default empty string.
+     * @param string $formUrl    Optional. The URL of the form. Default empty string.
+     * @param int $userId        Optional. The ID of the user associated with the form. Default 0.
+     */
     public function __construct($atts = [], $showId = false, $showName = false, $all = false, $pageSize = 50, $postId = '', $formUrl = '', $userId = 0)
     {
         parent::__construct(atts: $atts, all: $all, pageSize: $pageSize, postId: $postId, formUrl: $formUrl, userId: $userId);

@@ -12,6 +12,13 @@ if (! defined('ABSPATH')) {
 
 // Allow rest api urls for non-logged in users
 add_filter('tsjippy-allowed-rest-api-urls', __NAMESPACE__ . '\addRestUrls');
+/**
+ * Add REST API URLs for forms
+ *
+ * @param array $urls The array of allowed REST API URLs
+ * 
+ * @return array The updated array of allowed REST API URLs
+ */
 function addRestUrls($urls)
 {
     $urls[] = TSJIPPY\RESTAPIPREFIX . '/forms/save_form_input';
@@ -19,6 +26,11 @@ function addRestUrls($urls)
     return $urls;
 }
 
+/**
+ * Check permissions for form editing
+ *
+ * @return bool Whether the user has permission to edit forms
+ */
 function checkPermissions()
 {
     $forms    = new Forms();
@@ -27,6 +39,9 @@ function checkPermissions()
 }
 
 add_action('rest_api_init', __NAMESPACE__ . '\restApiInitForms');
+/**
+ * Register REST API routes for forms
+ */
 function restApiInitForms()
 {
     // load form
@@ -363,6 +378,13 @@ function restApiInitForms()
     );
 }
 
+/**
+ * Prepare properties for saving to the database
+ *
+ * @param mixed $prop The property to prepare
+ * 
+ * @return mixed The prepared property
+ */
 function prepareProperties($prop)
 {
     if (is_array($prop)) {
@@ -378,12 +400,23 @@ function prepareProperties($prop)
     return $prop;
 }
 
+/**
+ * Copy a form element
+ *
+ * @return array    An array containing a success message and the HTML of the copied element
+ */
 function copyFormElement()
 {
     return addFormElement(true);
 }
 
-// DONE
+/**
+ * Add a form element
+ *
+ * @param bool $copy Whether to copy an existing element or create a new one
+ * 
+ * @return array    An array containing a success message and the HTML of the added element
+ */
 function addFormElement($copy = false)
 {
     $request    = TSJIPPY\sanitize($_REQUEST);
@@ -467,7 +500,7 @@ function addFormElement($copy = false)
 
     //Get an unique name if needed
     if (!$update || $element->slug != $oldElement->slug) {
-        $element->slug        = $forms->getUniqueName($element, $update, $oldElement, $forms);
+        $element->slug        = $forms->getUniqueName($element, $update, $oldElement);
         if (is_wp_error($element->slug)) {
             return $element->slug;
         }
@@ -514,7 +547,11 @@ function addFormElement($copy = false)
     ];
 }
 
-// DONE
+/**
+ * Remove a form element
+ *
+ * @return string    A success message indicating that the element was removed successfully
+ */
 function removeElement()
 {
     global $wpdb;
@@ -547,7 +584,11 @@ function removeElement()
     return "Succesfully removed the element";
 }
 
-// DONE
+/**
+ * Request a form element
+ *
+ * @return array    An array containing the HTML of the requested element and its conditions
+ */
 function requestFormElement()
 {
     $formBuilderForm        = new FormBuilderForm();
@@ -567,7 +608,11 @@ function requestFormElement()
     ];
 }
 
-// DONE
+/**
+ * Reorder form elements
+ *
+ * @return string    A success message indicating that the new order was saved successfully
+ */
 function reorderFormElements()
 {
     $formBuilder            = new SaveFormSettings(['formid' => (int) $_POST['form-id'] ?? '']);
@@ -580,7 +625,11 @@ function reorderFormElements()
     return "Succesfully saved new form order";
 }
 
-// DONE
+/**
+ * Edit the width of a form field
+ *
+ * @return string    A success message indicating that the width was updated successfully
+ */
 function editFormfieldWidth()
 {
     $formBuilder    = new SaveFormSettings();
@@ -600,7 +649,11 @@ function editFormfieldWidth()
     return "Succesfully updated formelement width to $newwidth%";
 }
 
-// DONE
+/**
+ * Request the HTML for form conditions
+ *
+ * @return string    The HTML for the form conditions
+ */
 function requestFormConditionsHtml()
 {
     $formBuilder = new FormBuilderForm();
@@ -612,7 +665,11 @@ function requestFormConditionsHtml()
     return $formBuilder->elementConditionsForm($elementID);
 }
 
-// DONE
+/**
+ * Save the conditions for a form element
+ *
+ * @return string    A success message indicating that the conditions were saved successfully
+ */
 function saveElementConditions()
 {
     $formBuilder          = new SaveFormSettings();
@@ -653,7 +710,11 @@ function saveElementConditions()
     return $message;
 }
 
-// DONE
+/**
+ * Save the settings for a form
+ *
+ * @return string    A success message indicating that the settings were saved successfully
+ */
 function saveFormSettings()
 {
     $formBuilder = new SaveFormSettings();
@@ -683,6 +744,11 @@ function saveFormSettings()
     return "Succesfully saved your form settings";
 }
 
+/**
+ * Save the reminder settings for a form
+ *
+ * @return string    A success message indicating that the reminder settings were saved successfully
+ */
 function saveFormReminder()
 {
     $formBuilder   = new SaveFormSettings();
@@ -698,7 +764,11 @@ function saveFormReminder()
     return "Succesfully saved your form reminder settings";
 }
 
-// DONE
+/**
+ * Save the email settings for a form
+ *
+ * @return string    A success message indicating that the email settings were saved successfully
+ */
 function saveFormEmails()
 {
     $formBuilder    = new SaveFormSettings();
@@ -715,6 +785,11 @@ function saveFormEmails()
     return "Succesfully saved your form e-mail configuration";
 }
 
+/**
+ * Load the content of a post by its ID
+ *
+ * @return string    The content of the post, or an error message if no content is found
+ */
 function loadForm()
 {
     $displayForm    = new DisplayForm(['form-id' => (int) $_POST['form-id']]);
@@ -722,6 +797,11 @@ function loadForm()
     return $displayForm->showForm();
 }
 
+/**
+ * Load the results of a form by its shortcode ID
+ *
+ * @return string    The HTML of the form results table, or an error message if no results are found
+ */
 function loadFormResults()
 {
     $displayFormResults = new DisplayFormResults(['shortcode-id' => (int) $_POST['shortcode-id']]);
