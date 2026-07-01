@@ -87,10 +87,7 @@ function restApiInitForms()
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
                     }
-                ),
-                'order'        => array(
-                    'required'    => true
-                ),
+                )
             )
         )
     );

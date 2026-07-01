@@ -65,8 +65,8 @@ async function saveFormInput(target) {
 }
 
 async function formbuilderSwitch(target) {
-  let wrapper = target.closest(".tsjippy-form-wrapper");
-  let button = target.outerHTML;
+  let wrapper  = target.closest(".tsjippy-form-wrapper");
+  let button   = target.outerHTML;
 
   let formData = new FormData();
   let formId;
@@ -228,12 +228,20 @@ document.addEventListener("click", function (event) {
 
   //add element
   if (target.matches(".add")) {
+    let wrapper = target.closest(".clone-divs-wrapper");
     let orgNode = target.closest(".clone-div");
+
+    // Check if the orgNode is still in the wrapper, if not, find the first clone-div in the wrapper
+    if (orgNode == null || wrapper.contains(orgNode) == false) {
+      orgNode = wrapper.querySelector(
+        ".clone-div",
+      );
+    }
 
     let newNode = copyFormInput(orgNode);
 
     // Fix in nodes
-    fixNumbering(target.closest(".clone-divs-wrapper"));
+    fixNumbering(wrapper);
 
     //add tinymce's can only be done when node is inserted and id is unique
     newNode.querySelectorAll(".wp-editor-area").forEach((el, index) => {
@@ -260,11 +268,13 @@ document.addEventListener("click", function (event) {
         }
 
         tinymce.init(settings);
-        //window.tinyMCE.execCommand('mceAddEditor', false, el.id);
+      }else{
+        tinymce.execCommand("mceRemoveEditor", false, el.id);
+        tinymce.execCommand("mceAddEditor", false, el.id);
       }
     });
 
-    target.remove();
+    //target.remove();
   }
 
   //remove element

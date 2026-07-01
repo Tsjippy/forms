@@ -110,15 +110,44 @@ export function copyFormInput(originalNode) {
     // Hide original
     originalNode.classList.add("hidden");
 
+    // Show this one
+    newNode.classList.remove("hidden");
+
+    let isDummy = true;
+
     // Add button for the new one
     let orgButton = originalNode
       .closest(".clone-divs-wrapper")
-      .querySelector(`.tablink.active`);
+      .querySelector(`.tablink.dummy`);
+
+    if (orgButton == null) {
+      orgButton = originalNode
+        .closest(".clone-divs-wrapper")
+        .querySelector(`.tablink.active`);
+
+      isDummy = false;
+    }
+
     if (orgButton != null) {
       let newButton = cloneNode(orgButton);
 
-      // make the org butto inactive
-      orgButton.classList.remove("active");
+      // make the org button inactive
+      newButton.classList.remove("dummy", "hidden");
+
+      // remove the active class from the current active button
+      originalNode
+        .closest(".clone-divs-wrapper")
+        .querySelector(`.tablink.active`)
+        .classList.remove("active");
+
+      // hide all tabcontent divs
+      originalNode
+        .closest(".clone-divs-wrapper")
+        .querySelectorAll(`.tabcontent:not(.hidden)`)
+        .forEach((el) => el.classList.add("hidden"));
+
+      // Make the new button the active one
+      newButton.classList.add("active");
 
       //Insert the clone
       orgButton.parentNode.insertBefore(newButton, orgButton.nextSibling);
@@ -231,7 +260,7 @@ export function removeNode(target) {
 
     //Move the add button one up
     let prev = node.previousElementSibling;
-    if (prev.querySelector(".button-wrapper .add") == null) {
+    if (prev.querySelector(".button-wrapper") != null && prev.querySelector(".button-wrapper .add") == null) {
       prev.querySelector(".button-wrapper").appendChild(addElement);
     }
   }

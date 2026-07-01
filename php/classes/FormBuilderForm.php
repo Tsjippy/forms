@@ -550,7 +550,7 @@ class FormBuilderForm extends DisplayForm
         ?>
         <div class="modal add-form-element-modal hidden">
             <!-- Modal content -->
-            <div class="modal-content" style='max-width:90%; width:max-content;'>
+            <div class="modal-content" style='max-width:90%; width:max-content;min-width: calc(100vw - 200px);'>
                 <?php TSJIPPY\addCloseButtton(); ?>
 
                 <button class="button tablink formbuilder-form active" id="show-element-builder" data-target="element-builder">

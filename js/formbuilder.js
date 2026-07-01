@@ -1070,7 +1070,7 @@ function removeWarningCondition(target) {
 
 //Catch click events
 window.addEventListener("click", (event) => {
-  let target = event.target;
+  let target = event.target; 
 
   formWrapper = target.closest(".tsjippy-form-wrapper");
   formElementWrapper = target.closest(".form-element-wrapper");
