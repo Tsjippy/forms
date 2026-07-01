@@ -5,6 +5,7 @@
 - attribute escaping
 - usage of get_edit_profile_url
 - activate shared code function
+- support for tab buttons outside clone-divs
 
 ### Changed
 - plugin tested up to 7.0
