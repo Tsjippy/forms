@@ -41,7 +41,7 @@ class AdminMenu extends ADMIN\SubAdminMenu
         $forms    = new SaveFormSettings();
         $forms->getForms();
 
-        if(empty($forms->forms)){
+        if (empty($forms->forms)) {
             return false;
         }
 
@@ -65,7 +65,7 @@ class AdminMenu extends ADMIN\SubAdminMenu
             addElement('td', $tr, [], $form->id);
             addElement('td', $tr, [], $form->name ?? 'Not Set');
             $td     = addElement('td', $tr, []);
-            
+
             $formUrl  = $form->url;
             if (empty($formUrl)) {
                 $td->append("Not set");
@@ -88,7 +88,9 @@ class AdminMenu extends ADMIN\SubAdminMenu
     {
         ob_start();
 ?>
-        <h4>Form import</h4>
+        <h4>
+            Form import
+        </h4>
         <p>
             It is possible to import forms exported from this plugin previously.<br>
             Use the button below to do so.
