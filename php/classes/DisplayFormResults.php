@@ -1523,7 +1523,7 @@ class DisplayFormResults extends DisplayForm
                     <h4>
                         Select the fields the table can be filtered on
                     </h4>
-                    <table class='clone-divs-wrapper' style='border: none;'>
+                    <table class='no-border clone-divs-wrapper'>
                         <?php
                         $filters    = $this->tableSettings->filter;
 
@@ -1534,8 +1534,8 @@ class DisplayFormResults extends DisplayForm
 
                         foreach ($filters as $index => $filter) {
                         ?>
-                            <tr class='clone-div' data-div-id='<?php echo esc_attr($index); ?>' style='border: none;'>
-                                <td style='border: none;'>
+                            <tr class='clone-div' data-div-id='<?php echo esc_attr($index); ?>'>
+                                <td>
                                     <select name='table-settings[filter][<?php echo esc_attr($index); ?>][element]' class='inline'>
                                         <?php
                                         foreach ($this->columnSettings as $key => $columnSetting) {
@@ -1559,7 +1559,7 @@ class DisplayFormResults extends DisplayForm
                                     </select>
                                 </td>
 
-                                <td style='border: none;'>
+                                <td>
                                     filter type
                                     <select name='table-settings[filter][<?php echo esc_attr($index); ?>][type]' class='inline'>
                                         <?php
@@ -1576,7 +1576,7 @@ class DisplayFormResults extends DisplayForm
                                     </select>
                                 </td>
 
-                                <td style='border: none;'>
+                                <td>
                                     filter type
                                     <select name='table-settings[filter][<?php echo esc_attr($index); ?>][type]' class='inline'>
                                         <?php
@@ -1593,14 +1593,14 @@ class DisplayFormResults extends DisplayForm
                                     </select>
                                 </td>
 
-                                <td style='border: none;'>
+                                <td>
                                     Filter name
                                     <input name='table-settings[filter][<?php echo esc_attr($index); ?>][name]' value='<?php echo esc_attr($this->tableSettings->filter[$index]['name']); ?>'>
                                 </td>
-                                <td style='border: none;'>
+                                <td>
                                     <button type='button' class='add button'>+</button>
                                 </td>
-                                <td style='border: none;'>
+                                <td>
                                     <button type='button' class='remove button'>-</button>
                                 </td>
                             </tr>
