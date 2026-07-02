@@ -595,6 +595,17 @@ class FormBuilderForm extends DisplayForm
         //Sort the roles
         asort($userRoles);
 
+        
+        $users  = TSJIPPY\getUserAccounts(returnFamily: false, adults: true, uniqueDisplayName: true);
+        foreach($users as $key => $user){
+            unset($users[$key]);
+
+            $users[$user->ID] = $user->display_name;
+        }
+
+        //Sort the users
+        asort($users);
+
     ?>
         <div class="element-settings-wrapper">
             <form action='' method='post' class='tsjippy-form builder'>
@@ -855,56 +866,76 @@ class FormBuilderForm extends DisplayForm
                             ?>
 
                             <h4>
-                                Select roles with form edit rights
+                                Select roles or users with form edit rights
                             </h4>
                             <select name='full_right_roles[]' multiple>
                                 <option value=''>
                                     ---
                                 </option>
-                                <?php
-                                foreach ($userRoles as $key => $roleName) {
-                                ?>
-                                    <option
-                                        value='<?php echo esc_attr($key); ?>'
-                                        <?php if (isset($this->formData->full_right_roles[$key])) echo 'selected'; ?>>
-                                        <?php echo esc_html($roleName); ?>
-                                    </option>
-                                <?php
-                                }
-                                ?>
+
+                                <optgroup label="Roles">
+                                    <?php
+                                    foreach ($userRoles as $key => $name) {
+                                    ?>
+                                        <option
+                                            value='<?php echo esc_attr($key); ?>'
+                                            <?php if (isset($this->formData->full_right_roles[$key])) echo 'selected'; ?>>
+                                            <?php echo esc_html($name); ?>
+                                        </option>
+                                    <?php
+                                    }
+                                    ?>
+                                </optgroup>
+                                <optgroup label="Users">
+                                    <?php
+                                    foreach ($users as $key => $name) {
+                                    ?>
+                                        <option
+                                            value='<?php echo esc_attr($key); ?>'
+                                            <?php if (isset($this->formData->full_right_roles[$key])) echo 'selected'; ?>>
+                                            <?php echo esc_html($name); ?>
+                                        </option>
+                                    <?php
+                                    }
+                                    ?>
+                                </optgroup> 
                             </select>
                             <br>
-                            <h4>
-                                Select users with form edit rights
-                            </h4>
-                            <?php
-                            TSJIPPY\userSelect(onlyAdults: true, id: 'full_right_roles', userId: $this->formData->full_right_roles, excludeIds: [1], multiple: true, echo: true);
-                            ?>
-
                             <h4>
                                 Select roles who can submit the form on behalve of somebody else
                             </h4>
                             <select name='submit_others_form[]' multiple>
-                                <option value=''>---</option>
-                                <?php
-                                foreach ($userRoles as $key => $roleName) {
-                                ?>
-                                    <option
-                                        value='<?php echo esc_attr($key); ?>'
-                                        <?php if (isset($this->formData->submit_others_form[$key])) echo 'selected'; ?>>
-                                        <?php echo esc_html($roleName); ?>
-                                    </option>
-                                <?php
-                                }
-                                ?>
-                            </select>
+                                <option value=''>
+                                    ---
+                                </option>
 
-                            <h4>
-                                Select users who can submit the form on behalve of somebody else
-                            </h4>
-                            <?php
-                            TSJIPPY\userSelect(onlyAdults: true, id: 'submit_others_form', userId: $this->formData->submit_others_form, excludeIds: [1], multiple: true, echo: true);
-                            ?>
+                                <optgroup label="Roles">
+                                    <?php
+                                    foreach ($userRoles as $key => $name) {
+                                        ?>
+                                        <option
+                                            value='<?php echo esc_attr($key); ?>'
+                                            <?php if (isset($this->formData->submit_others_form[$key])) echo 'selected'; ?>>
+                                            <?php echo esc_html($name); ?>
+                                        </option>
+                                    <?php
+                                    }
+                                    ?>
+                                </optgroup>
+                                <optgroup label="Users">
+                                    <?php
+                                    foreach ($users as $key => $name) {
+                                    ?>
+                                        <option
+                                            value='<?php echo esc_attr($key); ?>'
+                                            <?php if (isset($this->formData->submit_others_form[$key])) echo 'selected'; ?>>
+                                            <?php echo esc_html($name); ?>
+                                        </option>
+                                    <?php
+                                    }
+                                    ?>
+                                </optgroup> 
+                            </select>
                         </div>
                     </div>
                 </div>

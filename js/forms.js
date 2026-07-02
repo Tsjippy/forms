@@ -175,6 +175,54 @@ async function onlyOwnSwitch(target) {
   requestNewFormResults(target);
 }
 
+function addNode(target){
+  let wrapper = target.closest(".clone-divs-wrapper");
+  let orgNode = target.closest(".clone-div");
+
+  // Check if the orgNode is still in the wrapper, if not, find the last clone-div in the wrapper
+  if (orgNode == null || wrapper.contains(orgNode) == false) {
+    orgNode = wrapper.querySelector(`:scope >.clone-div:last-child`);
+  }
+
+  let newNode = copyFormInput(orgNode);
+
+  // Fix in nodes
+  fixNumbering(wrapper);
+
+  //add tinymce's can only be done when node is inserted and id is unique
+  newNode.querySelectorAll(".wp-editor-area").forEach((el, index) => {
+    // find org node settings
+    let tn = tinymce.get(
+      orgNode.querySelectorAll(".wp-editor-area")[index].id,
+    );
+    if (tn != null) {
+      let settings = tn.settings;
+
+      // update the settings for the clone
+      for (const key in settings) {
+        console.log(`${key}: ${settings[key]}`);
+
+        if (typeof settings[key] == "string") {
+          settings[key] = settings[key].replace(
+            /(.*)([0-9])/,
+            (match, prefix, nr) => {
+              const newNumber = parseInt(nr) + 1;
+              return prefix + newNumber;
+            },
+          );
+        }
+      }
+
+      tinymce.init(settings);
+    }else{
+      tinymce.execCommand("mceRemoveEditor", false, el.id);
+      tinymce.execCommand("mceAddEditor", false, el.id);
+    }
+  });
+
+  //target.remove();
+}
+
 //Load after page load
 document.addEventListener("DOMContentLoaded", () => {
   let html = Main.showLoader("", false, 100, "Please wait...", true);
@@ -228,53 +276,7 @@ document.addEventListener("click", function (event) {
 
   //add element
   if (target.matches(".add")) {
-    let wrapper = target.closest(".clone-divs-wrapper");
-    let orgNode = target.closest(".clone-div");
-
-    // Check if the orgNode is still in the wrapper, if not, find the first clone-div in the wrapper
-    if (orgNode == null || wrapper.contains(orgNode) == false) {
-      orgNode = wrapper.querySelector(
-        ".clone-div",
-      );
-    }
-
-    let newNode = copyFormInput(orgNode);
-
-    // Fix in nodes
-    fixNumbering(wrapper);
-
-    //add tinymce's can only be done when node is inserted and id is unique
-    newNode.querySelectorAll(".wp-editor-area").forEach((el, index) => {
-      // find org node settings
-      let tn = tinymce.get(
-        orgNode.querySelectorAll(".wp-editor-area")[index].id,
-      );
-      if (tn != null) {
-        let settings = tn.settings;
-
-        // update the settings for the clone
-        for (const key in settings) {
-          console.log(`${key}: ${settings[key]}`);
-
-          if (typeof settings[key] == "string") {
-            settings[key] = settings[key].replace(
-              /(.*)([0-9])/,
-              (match, prefix, nr) => {
-                const newNumber = parseInt(nr) + 1;
-                return prefix + newNumber;
-              },
-            );
-          }
-        }
-
-        tinymce.init(settings);
-      }else{
-        tinymce.execCommand("mceRemoveEditor", false, el.id);
-        tinymce.execCommand("mceAddEditor", false, el.id);
-      }
-    });
-
-    //target.remove();
+    addNode(target);
   }
 
   //remove element

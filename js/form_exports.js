@@ -107,8 +107,8 @@ export function copyFormInput(originalNode) {
 
   // process tab buttons
   if (originalNode.matches(".tabcontent")) {
-    // Hide original
-    originalNode.classList.add("hidden");
+    // Hide all
+    originalNode.closest(`.clone-divs-wrapper`).querySelectorAll(`:scope > .tabcontent:not(.hidden)`).forEach(el => el.classList.add("hidden"));
 
     // Show this one
     newNode.classList.remove("hidden");
@@ -121,9 +121,10 @@ export function copyFormInput(originalNode) {
       .querySelector(`.tablink.dummy`);
 
     if (orgButton == null) {
+      // Clone the tablink button belonging to this tabcontent
       orgButton = originalNode
         .closest(".clone-divs-wrapper")
-        .querySelector(`.tablink.active`);
+        .querySelector(`.tablink[data-target="${originalNode.id}"]`);
 
       isDummy = false;
     }
@@ -140,14 +141,13 @@ export function copyFormInput(originalNode) {
         .querySelector(`.tablink.active`)
         .classList.remove("active");
 
-      // hide all tabcontent divs
-      originalNode
-        .closest(".clone-divs-wrapper")
-        .querySelectorAll(`.tabcontent:not(.hidden)`)
-        .forEach((el) => el.classList.add("hidden"));
-
       // Make the new button the active one
       newButton.classList.add("active");
+
+      // Change the name if it does not contain a number
+      if(!/\d/.test(newButton.textContent)){
+        newButton.textContent = 'New';
+      }
 
       //Insert the clone
       orgButton.parentNode.insertBefore(newButton, orgButton.nextSibling);
@@ -188,7 +188,7 @@ export function fixNumbering(wrapper) {
   wrapper.querySelectorAll(":scope > .clone-div").forEach(updateNumbers);
 
   // Run for tablinks seperately so the index starts over
-  wrapper.querySelectorAll(":scope > .tablink:not(.dummy)").forEach(updateNumbers);
+  wrapper.querySelectorAll(":scope > .tablink").forEach(updateNumbers);
 
   function updateNumbers(clone, index) {
     //Update the new number
