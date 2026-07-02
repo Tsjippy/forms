@@ -11,6 +11,7 @@
 - plugin tested up to 7.0
 - replaced in_array with isset
 - use array_intersect_key
+- select users and roles in one drop down
 
 ### Fixed
 - submission bug
