@@ -56,6 +56,16 @@ class Forms
     public array       $inputTags;
     public array       $checkboxTypes;
 
+    /**
+     * Constructor
+     *
+     * @param array    $atts        Shortcode attributes
+     * @param bool     $all         Whether to retrieve all submissions or not
+     * @param int      $pageSize    Number of submissions per page
+     * @param int      $postId      Post ID to retrieve form for
+     * @param string   $formUrl     Form URL to retrieve form for
+     * @param int      $userId      User ID to retrieve form for
+     */
     public function __construct($atts = [], $all = false, $pageSize = 50, $postId = '', $formUrl = '',  $userId = 0)
     {
         global $wpdb;

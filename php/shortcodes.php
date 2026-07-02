@@ -9,10 +9,15 @@ if (! defined('ABSPATH')) {
 }
 
 add_shortcode('tsjippy_formselector', __NAMESPACE__ . '\showFormSelector');
+/**
+ * Displays a form selector based on the provided attributes
+ *
+ * @param   array   $atts    The shortcode attributes
+ *
+ * @return  string           The HTML for the form selector
+ */
 function showFormSelector($atts = [])
 {
-    global $wpdb;
-
     wp_enqueue_script('tsjippy_forms_script');
 
     wp_enqueue_script('tsjippy_forms_table_script');

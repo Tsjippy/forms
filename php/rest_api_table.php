@@ -28,6 +28,9 @@ function addFormResultUrls($urls)
 }
 
 add_action('rest_api_init', __NAMESPACE__ . '\restApiInitTable');
+/**
+ * Initializes the REST API routes for form table actions
+ */
 function restApiInitTable()
 {
     //save_table_prefs
@@ -243,6 +246,11 @@ function restApiInitTable()
     );
 }
 
+/**
+ * Retrieves the next or previous page of the form results table
+ *
+ * @return array The table html for the next or previous page
+ */
 function getPage()
 {
     // phpcs:ignore
@@ -276,6 +284,12 @@ function getPage()
     return $tables;
 }
 
+/**
+ * Saves the user's table preferences for column visibility
+ *
+ * @param \WP_REST_Request $request The REST API request object
+ * @return string A success message indicating that the column settings were updated
+ */
 function saveTablePrefs(\WP_REST_Request $request)
 {
     $columnName                 = TSJIPPY\sanitize($request['column-name'] ?? '');
@@ -290,6 +304,12 @@ function saveTablePrefs(\WP_REST_Request $request)
     return 'Succesfully updated column settings';
 }
 
+/**
+ * Deletes the user's table preferences for column visibility
+ *
+ * @param \WP_REST_Request $request The REST API request object
+ * @return string A success message indicating that the column settings were reset
+ */
 function deleteTablePrefs(\WP_REST_Request $request)
 {
     $userId        = get_current_user_id();
@@ -298,6 +318,13 @@ function deleteTablePrefs(\WP_REST_Request $request)
     return 'Succesfully reset column visibility';
 }
 
+/**
+ * Saves the column settings for a specific shortcode
+ *
+ * @param array|\WP_REST_Request $settings The column settings to save
+ * @param string $shortcodeId The ID of the shortcode to save the settings for
+ * @return string|WP_Error A success message or a WP_Error object if an error occurred
+ */
 function saveColumnSettings($settings = [], $shortcodeId = '')
 {
     $forms    = new SaveFormSettings();
@@ -317,6 +344,11 @@ function saveColumnSettings($settings = [], $shortcodeId = '')
     return "Succesfully saved your column settings";
 }
 
+/**
+ * Saves the table settings for a specific shortcode
+ *
+ * @return string|WP_Error A success message or a WP_Error object if an error occurred
+ */
 function saveTableSettings()
 {
     $tableSettings     = TSJIPPY\sanitize($_POST['table-settings']);
@@ -358,6 +390,9 @@ function saveTableSettings()
     return "Succesfully saved your table settings";
 }
 
+/**
+ * Removes a submission from the form results table
+ */
 function removeSubmission()
 {
     $formTable    = new EditFormResults(TSJIPPY\sanitize($_POST));

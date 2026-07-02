@@ -9,6 +9,13 @@ if (! defined('ABSPATH')) {
 }
 
 add_filter('login_redirect', __NAMESPACE__ . '\loginRedirect', 10, 3);
+/**
+ * Redirects the user to the account page if they have mandatory or recommended fields to fill in
+ *
+ * @param   string  $redirect           The redirect URL
+ * @param   string  $requestedRedirect  The requested redirect URL
+ * @param   object  $user               The user object
+ */
 function loginRedirect($redirect, $requestedRedirect, $user)
 {
 

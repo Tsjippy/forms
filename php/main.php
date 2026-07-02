@@ -9,6 +9,12 @@ if (! defined('ABSPATH')) {
 }
 
 add_filter('display_post_states', __NAMESPACE__ . '\postStates', 10, 2);
+/**
+ * Adds a post state to the forms page
+ *
+ * @param   array   $states     The post states
+ * @param   object  $post       The post object
+ */
 function postStates($states, $post)
 {
 

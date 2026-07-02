@@ -9,6 +9,9 @@ if (! defined('ABSPATH')) {
 }
 
 add_action('init', __NAMESPACE__ . '\tinyMceInit');
+/**
+ * Initializes the TinyMCE editor for the plugin
+ */
 function tinyMceInit()
 {
     //Add tinymce plugin
@@ -18,6 +21,13 @@ function tinyMceInit()
     add_filter('mce_buttons', __NAMESPACE__ . '\mceButtons', 999);
 }
 
+/**
+ * Adds the TinyMCE plugin for inserting form shortcodes
+ *
+ * @param   array   $plugins    The existing TinyMCE plugins
+ *
+ * @return  array               The modified TinyMCE plugins
+ */
 function mcePlugins($plugins)
 {
     global $wp_scripts;
@@ -46,6 +56,13 @@ function mcePlugins($plugins)
     return $plugins;
 }
 
+/**
+ * Adds the TinyMCE button for inserting form shortcodes
+ *
+ * @param   array   $buttons    The existing TinyMCE buttons
+ *
+ * @return  array               The modified TinyMCE buttons
+ */
 function mceButtons($buttons)
 {
     array_push($buttons, 'insert_form_shortcode');

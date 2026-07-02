@@ -38,6 +38,16 @@ class ElementHtmlBuilder extends SubmitForm
     private mixed $selectedValue;
     private string $tagType;
 
+    /**
+     * ElementHtmlBuilder constructor.
+     *
+     * @param   array   $atts       The attributes for the form
+     * @param   bool    $all        Whether to get all elements or only the ones for the current user
+     * @param   int     $pageSize   The number of elements to get per page
+     * @param   string  $postId     The post id to get the elements for
+     * @param   string  $formUrl    The url of the form
+     * @param   int     $userId     The user id to get the elements for
+     */
     public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
         parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
@@ -63,6 +73,9 @@ class ElementHtmlBuilder extends SubmitForm
         $this->reset();
     }
 
+    /**
+     * Resets the element html builder to its default state
+     */
     public function reset()
     {
         $this->elementValues          = [];

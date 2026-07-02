@@ -12,6 +12,16 @@ if (! defined('ABSPATH')) {
 
 class SubmitForm extends SaveFormSettings
 {
+    /**
+     * Constructor
+     *
+     * @param array    $atts        Shortcode attributes
+     * @param bool     $all         Whether to retrieve all submissions or not
+     * @param int      $pageSize    Number of submissions per page
+     * @param int      $postId      Post ID to retrieve form for
+     * @param string   $formUrl     Form URL to retrieve form for
+     * @param int      $userId      User ID to retrieve form for
+     */
     public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
         parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
@@ -280,8 +290,7 @@ class SubmitForm extends SaveFormSettings
     /**
      * Rename any existing files to include the form id.
      *
-     * @param    array    $uploadedFiles        The array of filepaths
-     * @param    string    $inputName            The name for the file
+     * @param    array    $formResults    The form results array
      */
     public function processFiles(&$formResults)
     {
@@ -617,6 +626,9 @@ class SubmitForm extends SaveFormSettings
 
     /**
      * Save a form submission to the db
+     * 
+     * @param    int        $userId        The user id to save the form for
+     * @param    array    $request        The request data to save
      */
     public function formSubmit($userId, $request)
     {

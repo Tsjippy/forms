@@ -9,6 +9,9 @@ if (! defined('ABSPATH')) {
 }
 
 add_action('init', __NAMESPACE__ . '\initTasks');
+/**
+ * Initializes the scheduled tasks for the plugin
+ */
 function initTasks()
 {
     TSJIPPY\scheduleTask('tsjippy-forms-auto-archive', 'daily', __NAMESPACE__, 'autoArchiveFormEntries');
@@ -16,6 +19,9 @@ function initTasks()
     TSJIPPY\scheduleTask('tsjippy-forms-reminder', 'daily', __NAMESPACE__, 'formReminder');
 }
 
+/**
+ * Archives form entries that are older than the specified number of days
+ */
 function autoArchiveFormEntries()
 {
     $editFormResults = new EditFormResults([]);

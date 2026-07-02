@@ -11,6 +11,16 @@ if (! defined('ABSPATH')) {
 
 class FormExport extends FormBuilderForm
 {
+    /**
+     * FormExport constructor.
+     *
+     * @param array    $atts        Shortcode attributes
+     * @param bool     $all        Whether to export all forms or just one
+     * @param int      $pageSize    Number of forms to export per page
+     * @param string   $postId    Post ID to export forms for
+     * @param string   $formUrl    URL of the form to export
+     * @param int      $userId    User ID to export forms for
+     */
     public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
         parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
@@ -18,6 +28,10 @@ class FormExport extends FormBuilderForm
 
     /**
      * Writes the form export to the output buffer for download
+     * 
+     * @param int    $formId    ID of the form to export
+     * 
+     * @return void
      */
     public function exportForm($formId)
     {
@@ -101,7 +115,7 @@ class FormExport extends FormBuilderForm
      * @param array    $formElements        Array of form elements to insert
      * @param array    $elementIdMapping     Mapping of old element ids to new element ids
      *
-     * @return array|WP_Error            Array of old element ids to new element ids or WP_Error on failure
+     * @return array|\WP_Error            Array of old element ids to new element ids or WP_Error on failure
      */
     protected function insertFormElements($formElements, $elementIdMapping = [])
     {
@@ -188,10 +202,10 @@ class FormExport extends FormBuilderForm
     /**
      * Inserts form elements, while updating conditions with new element ids
      *
-     * @param array    $formElements        Array of form elements to insert
+     * @param array    $formEmails        Array of form emails to insert
      * @param array    $elementIdMapping     Mapping of old element ids to new element ids
      *
-     * @return array|WP_Error            Array of old element ids to new element ids or WP_Error on failure
+     * @return array|\WP_Error            Array of old element ids to new element ids or WP_Error on failure
      */
     protected function insertFormEmails($formEmails, $elementIdMapping)
     {
@@ -270,13 +284,18 @@ class FormExport extends FormBuilderForm
         return true;
     }
 
+    /**
+     * Imports a form from a file
+     *
+     * @param string    $path        Path to the form file
+     *
+     * @return string|\WP_Error        Success message or WP_Error on failure
+     */
     public function importForm($path)
     {
         if (!file_exists($path)) {
             return new \WP_Error('forms', "$path does not exist");
         }
-        global $wpdb;
-
         $wpFileSystem  = TSJIPPY\loadWpFileSystem();
 
         $contents      = $wpFileSystem->get_contents($path);
@@ -285,9 +304,11 @@ class FormExport extends FormBuilderForm
             return "<div class='error'>Invalid sform file!</div>";
         }
 
-        $lines         = explode("\n", $contents);
+        $lines              = explode("\n", $contents);
 
-        $autoArchiveEl = null;
+        $autoArchiveEl      = null;
+        $elementIdMapping   = [];
+        $url                = '';   
 
         foreach ($lines as $line) {
             if (empty($line)) {

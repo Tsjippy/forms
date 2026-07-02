@@ -38,6 +38,12 @@ function checkFormExistence($slug)
 }
 
 add_action('wp_after_insert_post', __NAMESPACE__ . '\afterInsertPost', 10, 2);
+/**
+ * Checks if a formbuilder shortcode exists in the post content and adds the form to the database if it does not exist yet
+ *
+ * @param   int     $postId     The post id
+ * @param   object  $post       The post object
+ */
 function afterInsertPost($postId, $post)
 {
     if (has_block('tsjippy/formbuilder', $post)) {
@@ -125,6 +131,9 @@ function afterInsertPost($postId, $post)
 add_action('wp_enqueue_scripts', __NAMESPACE__ . '\registerScripts');
 add_action('admin_enqueue_scripts', __NAMESPACE__ . '\registerScripts');
 
+/**
+ * Registers the scripts and styles for the forms
+ */
 function registerScripts()
 {
     wp_register_style('tsjippy_forms_style', TSJIPPY\pathToUrl(PLUGINPATH . 'css/forms.min.css'), array(), PLUGINVERSION);

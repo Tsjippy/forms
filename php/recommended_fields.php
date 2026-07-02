@@ -9,6 +9,13 @@ if (! defined('ABSPATH')) {
 }
 
 add_filter('tsjippy-mandatory-html-filter', __NAMESPACE__ . '\addChildFields', 10, 3);
+/**
+ * Adds the mandatory fields for children to the html
+ *
+ * @param   string  $html       The html to add to
+ * @param   int     $userId     The user id to get the children for
+ * @param   object  $object     The object to get the reminder html from
+ */
 function addChildFields($html, $userId, $object)
 {
     // Add warnings for child fields
@@ -28,6 +35,11 @@ function addChildFields($html, $userId, $object)
 }
 
 add_action('tsjippy-user-management-dashboard-warnings', __NAMESPACE__ . '\dashboardWarnings');
+/**
+ * Displays the dashboard warnings for the user
+ *
+ * @param   int     $userId     The user id to get the warnings for
+ */
 function dashboardWarnings($userId)
 {
     $forms    = new FormReminders();
