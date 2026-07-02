@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [11.6.9] - 2026-07-02
+
+
+### Added
 - attribute escaping
 - usage of get_edit_profile_url
 - activate shared code function
@@ -18,8 +29,6 @@
 - isset bug
 - str_starts_with error
 - bugs
-
-### Updated
 
 ## [11.6.8] - 2026-06-26
 
