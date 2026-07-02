@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- no-border class to table
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [11.7.0] - 2026-07-02
+
+
+### Added
+- no-border class to table
 
 ## [11.6.9] - 2026-07-02
 
