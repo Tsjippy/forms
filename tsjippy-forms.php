@@ -47,11 +47,7 @@ register_activation_hook(__FILE__, function () {
     $forms = new Forms();
     $forms->createDbTables();
 
-    $settings    = SETTINGS;
-
-    // Create frontend posting page
-    $settings['forms-page']    = TSJIPPY\ADMIN\createDefaultPage('Form selector', '[tsjippy_formselector]');
-    update_option('tsjippy_forms_settings', $settings);
+    createDefaultPages();
 
     if(function_exists('TSJIPPY\activate')){
         \TSJIPPY\activate();
@@ -59,8 +55,30 @@ register_activation_hook(__FILE__, function () {
 });
 
 register_deactivation_hook(__FILE__, function () {
-    foreach (SETTINGS['forms-pages'] ?? [] as $page) {
-        // Remove the auto created page
-        wp_delete_post($page, true);
-    }
+    // Remove the auto created page
+    wp_delete_post(SETTINGS['forms-page'] ?? 0, true);
 });
+
+
+/**
+ * Creates default pages if needed
+ * 
+ * @param string    $returnKey  The key to return a value for, default empty
+ */
+function createDefaultPages($returnKey=''){
+    /**
+     *  Default pages
+     */
+    $settings    = SETTINGS;
+
+    // Create frontend posting page
+    if(!isset($settings['forms-page'])){
+        $settings['forms-page']    = TSJIPPY\ADMIN\createDefaultPage('Form selector', '[tsjippy_formselector]');
+    }
+
+    update_option('tsjippy_forms_settings', $settings);
+
+    if(!empty($returnKey) && isset($settings[$returnKey])){
+        return $settings[$returnKey];
+    }
+}

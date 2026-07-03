@@ -317,9 +317,9 @@ class DisplayForm extends ElementHtmlBuilder
          * Form container
          */
         $attributes = [
-            'method'        => 'post',
-            'class'            => 'tsjippy-form-wrapper',
-            'data-form-id'    => $this->formData->id
+            'method'       => 'post',
+            'class'        => 'tsjippy-form-wrapper',
+            'data-form-id' => $this->formData->id
         ];
 
         // Reset a form when not saving to meta
