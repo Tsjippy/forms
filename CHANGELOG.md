@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- rewrite element html builder
 
 ### Fixed
 
