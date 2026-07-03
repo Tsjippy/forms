@@ -1448,7 +1448,7 @@ class Forms
             $this->all                = $atts['all'];
             $this->showArchived       = $atts['archived'];
 
-            if (!empty($atts['user-id']) && is_numeric($atts['user-id'])) {
+            if ( is_numeric($atts['user-id'] ?? '') && $atts['user-id'] > 0) {
                 $this->userId    = $atts['user-id'];
             }
 

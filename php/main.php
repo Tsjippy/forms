@@ -30,3 +30,15 @@ add_filter('tsjippy-file-upload-delete-permission', function($permission){
 
     return  $displayForm->tableEditPermissions;
 });
+
+//flush caches
+add_action('update_user_meta', function($metaId, $userId, $metaKey){
+    wp_cache_delete("default-meta-values-".$userId, 'forms');
+    wp_cache_delete("default-array-meta-values-".$userId, 'forms');
+
+    // Check if this key is not yet in the cache
+    $keys = wp_cache_get('user-meta-keys', 'forms', false, $found);
+    if(is_array($keys) && !isset($keys[$metaKey])){
+        wp_cache_delete("user-meta-keys", 'forms');
+    }
+}, 10, 3);

@@ -208,6 +208,11 @@ function showForm($atts)
         $forms   = new FormBuilderForm($atts);
         return $forms->showForm();
     }
+
+    // If requesting for another user
+    if(is_numeric($_REQUEST['user-id'] ?? '')){
+        $atts['user-id'] = $_REQUEST['user-id'];
+    }
     
     $forms   = new DisplayForm($atts); 
     

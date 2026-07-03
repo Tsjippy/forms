@@ -251,7 +251,7 @@ class FormReminders extends Forms
                 $since = $date1->format('Y-m-d');
             }
 
-            $query .= "AND time_created >= %s";
+            $query .= " AND time_created >= %s";
             $values[] = $since;
         }
 
