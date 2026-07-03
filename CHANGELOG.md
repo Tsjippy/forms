@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- rewrite element html builder
 
 ### Fixed
 
 ### Updated
+
+## [11.7.1] - 2026-07-03
+
+
+### Changed
+- rewrite element html builder
 
 ## [11.7.0] - 2026-07-02
 
