@@ -579,6 +579,10 @@ class ElementHtmlBuilder extends SubmitForm
          * File Uploads
          */
         elseif ( isset(['image' => 1, 'file' => 1][$element->type]) ){
+            if($string == 'X'){
+                return $string;
+            }
+            
             $path   = $this->uploadDir().'/'.$string;
 
             $type   = mime_content_type($path);

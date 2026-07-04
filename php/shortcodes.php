@@ -68,7 +68,9 @@ function showFormSelector($atts = [])
         if (!isset($_REQUEST['form'])) {
         ?>
             <div id="form-selector-wrapper">
-                <label>Select the form you want to submit or view the results of</label>
+                <label>
+                    Select the form you want to submit or view the results of
+                </label>
                 <br>
                 <select id="tsjippy-forms-selector">
                     <?php

@@ -11,15 +11,17 @@ if (! defined('ABSPATH')) {
 /**
  * Checks if a form exists
  * @param   string  $slug   The form slug or form name
+ * @param   bool    $found  Filled by reference, true if the form already exists
+ * 
+ * @return  string          THe form slug
  */
-function checkFormExistence($slug)
+function checkFormExistence($slug, &$found=false)
 {
     $slug   = strtolower(str_replace(' ', '-', $slug));
     $forms  = new Forms();
     $forms->getForms();
 
     // check if a form with this slug already exists
-    $found  = false;
     foreach ($forms->forms as $form) {
         if ($form->slug == $slug || $form->id == $slug) {
             $found  = true;
