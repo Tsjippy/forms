@@ -114,6 +114,7 @@ function initBlocks()
     );
 }
 
+add_action('enqueue_block_editor_assets', __NAMESPACE__ . '\loadAssets');
 add_action('enqueue_block_assets', __NAMESPACE__ . '\loadAssets');
 function loadAssets()
 {
@@ -126,4 +127,7 @@ function loadAssets()
     wp_enqueue_script('tsjippy_formbuilderjs');
 
     wp_enqueue_script('tsjippy_forms_table_script');
+
+    wp_enqueue_style('tsjippy_forms_style');
+    wp_enqueue_style('tsjippy_formtable_style');
 }
