@@ -5,6 +5,7 @@
 
 ### Changed
 - blocks to php only blocks
+- abspath to get_home_path()
 
 ### Fixed
 
