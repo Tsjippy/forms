@@ -658,7 +658,7 @@ class ElementHtmlBuilder extends SubmitForm
             !str_contains($string, '<img')
         ) {
             $url    = str_replace(['https://', 'http://'], '', TSJIPPY\SITEURL);
-            $string = str_replace(wp_normalize_path(ABSPATH), '', $string);
+            $string = str_replace(get_home_path(), '', $string);
 
             if (!str_contains($string, $url)) {
                 $string        = TSJIPPY\SITEURL . "/$string";
