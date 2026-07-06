@@ -4,10 +4,17 @@
 ### Added
 
 ### Changed
-- blocks to php only blocks
-- abspath to get_home_path()
 
 ### Fixed
+
+### Updated
+
+## [11.7.3] - 2026-07-06
+
+
+### Changed
+- blocks to php only blocks
+- abspath to get_home_path()
 
 ### Updated
 - css
