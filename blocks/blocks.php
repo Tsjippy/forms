@@ -20,9 +20,7 @@ function initBlocks()
                     'default' => false,
                 )
             ),
-            'render_callback' => function ( $attributes ) {
-                return showFormSelector( $attributes );
-            },
+            'render_callback' => __NAMESPACE__.'\showFormSelector',
             'supports'        => array(
                 'autoRegister' => true,
             ),
@@ -40,55 +38,48 @@ function initBlocks()
                     'default' => '',
                 )
             ),
-            'render_callback' => function ( $attributes ) {
-                if(empty($attributes['form_name'])){
-                    return "<p>Please enter a formname</p>";
-                }
-
-                $formName   = $attributes['form_name'];
-
-                $formSlug   = checkFormExistence($formName, $found);
-
-                $attributes['slug'] = $formSlug;
-
-                if($found){
-                    $forms  = new DisplayForm( $attributes );
-                }else{
-                    $forms  = new FormBuilderForm( $attributes );
-                }
-                return $forms->showForm();
-            },
+            'render_callback' => __NAMESPACE__.'\showFormBuilder',
             'supports'        => array(
                 'autoRegister' => true,
             ),
         )
     );
 
+    $forms  = new Forms();
+    $forms->getForms();
+    $formNames = [];
+
+    foreach($forms->forms as $form){
+        if(empty($form->name)){
+            continue;
+        }
+
+        $formNames[]    = trim($form->name);
+    }
+
     register_block_type(
         'tsjippy-forms/forms-results',
         array(
             'title'           => __( 'Form Results', 'tsjippy' ),
             'attributes'      => [
-                'formId' => [
-                    'type' => 'string'
+                'form-name' => [
+                    'label'   => __( 'Form name', 'tsjippy' ),
+                    'type'    => 'string',
+                    'enum'    => $formNames
                 ],
-                'onlyOwn'  => [
+                'only-own'  => [
                     'label'   => __( 'Show The Results of the Current User Only', 'tsjippy' ),
                     'type'    => 'boolean',
                     'default' => true,
                 ],
                 'archived'  => [
                     'label'   => __( 'Show Archived Results', 'tsjippy' ),
-                    'type'  => 'boolean',
+                    'type'    => 'boolean',
                     'default' => false,
-                ],
-                'tableId'  => [
-                    'type'    => 'integer',
-                    'default' => -1,
-                ],
+                ]
             ],
-            'render_callback' => __NAMESPACE__ . '\showFormResults',
-            'supports'        => array(
+            'render_callback' => __NAMESPACE__ . '\formResults',
+            'supports'         => array(
                 'autoRegister' => true,
             ),
         )
@@ -130,4 +121,84 @@ function loadAssets()
 
     wp_enqueue_style('tsjippy_forms_style');
     wp_enqueue_style('tsjippy_formtable_style');
+}
+
+function showFormBuilder($attributes){
+    if(empty($attributes['form_name'])){
+        return "<p>Please enter a formname</p>";
+    }
+
+    $formName   = $attributes['form_name'];
+
+    if(!empty($_POST['export-form'])){
+        $forms   = new FormExport($attributes);
+
+        $formId = (int) $_POST['export-form'];
+
+        if(!TSJIPPY\verifyNonce('nonce', 'form-export-'.$formId)){
+            return "<div class='error'>Invalid nonce</div>";
+        }
+
+        return $forms->exportForm($formId);
+    }
+
+    if(!empty($_POST['delete-form'])){
+        $forms   = new Forms($attributes);
+
+        $formId = (int) $_POST['export-form'];
+
+        if(!TSJIPPY\verifyNonce('nonce', 'form-delete-'.$formId)){
+            return "<div class='error'>Invalid nonce</div>";
+        }
+        
+        return $forms->deleteForm($formId);
+    }
+
+        // If requesting for another user
+    if(is_numeric($_REQUEST['user-id'] ?? '')){
+        $attributes['user-id'] = $_REQUEST['user-id'];
+    }
+
+    $formSlug   = checkFormExistence($formName, $found);
+
+    $attributes['slug'] = $formSlug;
+
+    if($found){
+        $forms  = new DisplayForm( $attributes );
+    }else{
+        $forms  = new FormBuilderForm( $attributes );
+    }
+    return $forms->showForm();
+}
+
+/**
+ * Displays form results based on the provided attributes
+ *
+ * @param   array   $atts    The shortcode attributes
+ *
+ * @return  string           The HTML for the form results
+ */
+function formResults($atts)
+{
+    $object = new DisplayFormResults($atts);
+    $object->showArchived   = isset($_GET['archived']);
+    $html   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
+
+    //now we have rendered all the content, we can export the excel if requested
+    // phpcs:ignore
+    if (isset($_POST['export-xls'])) {
+        $object->exportExcel();
+    }
+
+    //now we have rendered all the content we can export the pdf if requested
+    // phpcs:ignore
+    if (isset($_POST['export-pdf'])) {
+        $object->exportPdf();
+    }
+
+    if (is_wp_error($html)) {
+        return "<div class='error'>" . $html->get_error_message() . "</div>";
+    }
+
+    return $html;
 }

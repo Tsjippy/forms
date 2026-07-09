@@ -259,8 +259,12 @@ class DisplayForm extends ElementHtmlBuilder
 
     /**
      * Show the form
+     * 
+     * @param   bool    $echo   Whether to print to screen or return the html. Default false
+     * 
+     * @return  string|void     THe html if echo is false  
      */
-    public function showForm()
+    public function showForm($echo=false)
     {
         //Load conditional js if available and needed
         if (wp_get_environment_type() === 'local') {
@@ -464,7 +468,13 @@ class DisplayForm extends ElementHtmlBuilder
             addRawHtml(TSJIPPY\addSaveButton('submit-form', $buttonText, $hidden, false), $parent);
         }
 
-        return $this->formWrapper->ownerDocument->saveHTML();
+        $html = $this->formWrapper->ownerDocument->saveHTML();
+        if($echo){
+            // phpcs:ignore
+            echo $html;
+        }
+
+        return $html;
     }
 
     /**

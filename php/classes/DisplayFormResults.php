@@ -2578,7 +2578,7 @@ class DisplayFormResults extends DisplayForm
         } else {
             foreach ($actions as $action) {
                 //we have permission for this specific button
-                if (array_intersect_key($this->userRoles, $this->columnSettings[$action]['edit_right_roles'])) {
+                if (array_intersect_key($this->userRoles, $this->columnSettings[$action]['edit_right_roles'] ?? [])) {
                     $addHeading    = true;
                 } elseif ($type != 'others') {
                     //Loop over all submissions to see if the current user has permission for them

@@ -8,7 +8,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-add_shortcode('tsjippy_formselector', __NAMESPACE__ . '\showFormSelector');
+//add_shortcode('tsjippy_formselector', __NAMESPACE__ . '\showFormSelector');
 /**
  * Displays a form selector based on the provided attributes
  *
@@ -172,7 +172,7 @@ function showFormSelector($atts = [])
 }
 
 //shortcode to make forms
-add_shortcode('tsjippy_formbuilder', __NAMESPACE__ . '\showForm');
+//add_shortcode('tsjippy_formbuilder', __NAMESPACE__ . '\showForm');
 /**
  * Displays a form based on the provided attributes
  *
@@ -226,41 +226,10 @@ function showForm($atts)
     return $html;
 }
 
-add_shortcode('tsjippy_formresults', __NAMESPACE__ . '\formResults');
-/**
- * Displays form results based on the provided attributes
- *
- * @param   array   $atts    The shortcode attributes
- *
- * @return  string           The HTML for the form results
- */
-function formResults($atts)
-{
-    $object = new DisplayFormResults($atts);
-    $object->showArchived   = isset($_GET['archived']);
-    $html   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
-
-    //now we have rendered all the content, we can export the excel if requested
-    // phpcs:ignore
-    if (isset($_POST['export-xls'])) {
-        $object->exportExcel();
-    }
-
-    //now we have rendered all the content we can export the pdf if requested
-    // phpcs:ignore
-    if (isset($_POST['export-pdf'])) {
-        $object->exportPdf();
-    }
-
-    if (is_wp_error($html)) {
-        return "<div class='error'>" . $html->get_error_message() . "</div>";
-    }
-
-    return $html;
-}
+//add_shortcode('tsjippy_formresults', __NAMESPACE__ . '\formResults');
 
 //Shortcode for recommended fields
-add_shortcode("tsjippy_missing_form_fields", __NAMESPACE__ . '\missingFormFields');
+//add_shortcode("tsjippy_missing_form_fields", __NAMESPACE__ . '\missingFormFields');
 
 /**
  * Displays recommended form fields based on the provided attributes
