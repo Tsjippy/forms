@@ -1262,7 +1262,7 @@ class ElementHtmlBuilder extends SubmitForm
         $wrapper = addElement("div", $parent, ['class' => 'option-wrapper']);
 
         /**
-         * The list of prefileld values
+         * The list of prefilled values
          */
         // The unoredered list for choices made
         $selectionList    = addElement("ul", $wrapper, ['class' => 'list-selection-list']);

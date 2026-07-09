@@ -32,7 +32,7 @@ function initBlocks()
         array(
             'title'           => __( 'Insert A Form', 'tsjippy' ),
             'attributes'      => array(
-                'form_name'   => array(
+                'formname'   => array(
                     'label'   => __( 'Form Name', 'tsjippy' ),
                     'type'    => 'string',
                     'default' => '',
@@ -124,11 +124,11 @@ function loadAssets()
 }
 
 function showFormBuilder($attributes){
-    if(empty($attributes['form_name'])){
+    if(empty($attributes['formname'])){
         return "<p>Please enter a formname</p>";
     }
 
-    $formName   = $attributes['form_name'];
+    $formName   = $attributes['formname'];
 
     if(!empty($_POST['export-form'])){
         $forms   = new FormExport($attributes);
@@ -180,9 +180,9 @@ function showFormBuilder($attributes){
  */
 function formResults($atts)
 {
-    $object = new DisplayFormResults($atts);
+    $object                 = new DisplayFormResults($atts);
     $object->showArchived   = isset($_GET['archived']);
-    $html   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
+    $html                   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
 
     //now we have rendered all the content, we can export the excel if requested
     // phpcs:ignore
