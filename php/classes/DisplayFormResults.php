@@ -269,8 +269,6 @@ class DisplayFormResults extends DisplayForm
      */
     protected function addFilterQueries(&$where, &$values)
     {
-        global $wpdb;
-
         if (empty($this->tableSettings->filter)) {
             return;
         }
@@ -785,8 +783,8 @@ class DisplayFormResults extends DisplayForm
 
             $this->getForm($this->tableSettings->form_id);
 
-            if (empty($this->tableSettings)) {
-                $this->tableSettings    = new \stdClass();
+            if (empty($this->tableSettings->view_right_roles)) {
+                $this->tableSettings->view_right_roles    = [];
             }
 
             if (empty($this->tableSettings->edit_right_roles)) {

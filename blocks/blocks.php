@@ -125,7 +125,11 @@ function loadAssets()
 
 function showFormBuilder($attributes){
     if(empty($attributes['formname'])){
-        return "<p>Please enter a formname</p>";
+        if(!empty($attributes['slug'])){
+            $attributes['formname'] = $attributes['slug'];
+        }else{
+            return "<p>Please enter a formname</p>";
+        }
     }
 
     $formName   = $attributes['formname'];

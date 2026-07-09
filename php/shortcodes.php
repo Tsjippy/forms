@@ -75,11 +75,15 @@ function showFormSelector($atts = [])
                 <select id="tsjippy-forms-selector">
                     <?php
                     foreach ($forms as $form) {
-                        $name   = ucfirst(str_replace('_', ' ', $form->slug));
+                        $name   = $form->slug;
 
-                    ?>
+                        if(empty($name)){
+                            $name   = ucfirst(str_replace('_', ' ', $form->slug));
+                        }
+
+                        ?>
                         <option
-                            value='<?php echo esc_url($form->slug); ?>'
+                            value='<?php echo esc_attr($form->slug); ?>'
                             <?php
                             // phpcs:ignore
                             if (($_REQUEST['form'] ?? '') == $form->slug || ($_REQUEST['form'] ?? '') == $form->id) {
@@ -88,7 +92,7 @@ function showFormSelector($atts = [])
                             ?>>
                             <?php echo esc_html($name); ?>
                         </option>
-                    <?php
+                        <?php
                     }
                     ?>
                 </select>
