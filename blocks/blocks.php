@@ -24,6 +24,7 @@ function initBlocks()
             'supports'        => array(
                 'autoRegister' => true,
             ),
+            'icon'  => 'forms'
         )
     );
 
@@ -42,6 +43,7 @@ function initBlocks()
             'supports'        => array(
                 'autoRegister' => true,
             ),
+            'icon'  => 'forms'
         )
     );
 
@@ -82,6 +84,7 @@ function initBlocks()
             'supports'         => array(
                 'autoRegister' => true,
             ),
+            'icon'  => 'table'
         )
     );
 
@@ -101,6 +104,7 @@ function initBlocks()
             'supports'        => array(
                 'autoRegister' => true,
             ),
+            'icon'  => 'ellipsis'
         )
     );
 }
