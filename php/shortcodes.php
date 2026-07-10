@@ -259,7 +259,7 @@ function missingFormFields($atts)
         $html .=  '<p>It would be very helpfull if you could fill in the following:</p>';
         $html .=  $fieldHtml;
         $html .=  '</div>';
-    }elseif(($_REQUEST['action'] ?? '') == 'edit'){
+    }elseif(($_REQUEST['action'] ?? $_REQUEST['context'] ?? '') == 'edit'){
         $html   = "<div>No actions needed.</div>";
     }
 
