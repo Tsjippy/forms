@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- block name change
 
 ### Updated
 
