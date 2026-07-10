@@ -8,6 +8,7 @@
 
 ### Fixed
 - block name change
+- check if edit screen
 
 ### Updated
 
