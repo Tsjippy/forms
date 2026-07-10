@@ -8,6 +8,7 @@
 
 ### Fixed
 - forms selector
+- event listener in dynamic js
 
 ### Updated
 
