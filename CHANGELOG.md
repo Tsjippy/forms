@@ -4,13 +4,20 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.7.6] - 2026-07-10
+
+
+### Changed
 - default page content
 
 ### Fixed
 - block name change
 - check if edit screen
-
-### Updated
 
 ## [11.7.5] - 2026-07-10
 

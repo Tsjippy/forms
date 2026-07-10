@@ -7,7 +7,7 @@ use TSJIPPY;
 /**
  * Plugin Name:          Tsjippy Forms
  * Description:          Versatile form builder
- * Version:              11.7.5
+ * Version:              11.7.6
  * Author:               Ewald Harmsen
  * AuthorURI:            harmseninnigeria.nl
  * Requires at least:    6.3
