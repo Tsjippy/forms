@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [11.7.4] - 2026-07-10
+
+
+### Added
 - block icon
 
 ### Changed
@@ -10,8 +21,6 @@
 ### Fixed
 - forms selector
 - event listener in dynamic js
-
-### Updated
 
 ## [11.7.3] - 2026-07-06
 
