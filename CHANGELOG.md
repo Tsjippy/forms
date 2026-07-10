@@ -7,6 +7,7 @@
 - directly print form to screen
 
 ### Fixed
+- forms selector
 
 ### Updated
 
