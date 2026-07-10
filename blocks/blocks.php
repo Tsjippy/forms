@@ -91,7 +91,7 @@ function initBlocks()
     register_block_type(
         'tsjippy-forms/missing-form-inputs',
         array(
-            'title'           => __( 'Form Results', 'tsjippy' ),
+            'title'           => __( 'Missing Form Entries', 'tsjippy' ),
             'attributes'      => [
                 'type' => [
                     'label'   => __( 'Which type', 'tsjippy' ),
