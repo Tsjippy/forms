@@ -73,7 +73,7 @@ function createDefaultPages($returnKey=''){
 
     // Create frontend posting page
     if(!isset($settings['forms-page'])){
-        $settings['forms-page']    = TSJIPPY\ADMIN\createDefaultPage('Form selector', '[tsjippy_formselector]');
+        $settings['forms-page']    = TSJIPPY\ADMIN\createDefaultPage('Form selector', '<!-- wp:tsjippy-forms/form-selector /-->');
     }
 
     update_option('tsjippy_forms_settings', $settings);
