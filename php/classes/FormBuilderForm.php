@@ -408,8 +408,10 @@ class FormBuilderForm extends DisplayForm
 
     /**
      * Main function to show all
+     * 
+     * @param   bool    $echo   Wheter or not to print to screen
      */
-    public function showForm()
+    public function showForm($echo=false)
     {
         if (!is_user_logged_in()) {
             return false;
@@ -421,8 +423,9 @@ class FormBuilderForm extends DisplayForm
         //Formbuilder js
         wp_enqueue_script('tsjippy_formbuilderjs');
 
-        // make sure we use unique priorities
-        ob_start();
+        if(!$echo){
+            ob_start();
+        }
 
         ?>
         <div class="tsjippy-form-wrapper">
@@ -471,7 +474,9 @@ class FormBuilderForm extends DisplayForm
         </div>
         <?php
 
-        return ob_get_clean();
+        if(!$echo){
+            return ob_get_clean();
+        }
     }
 
     /**
@@ -2312,14 +2317,14 @@ class FormBuilderForm extends DisplayForm
 
             <?php
             // get the last numeric array key
-            $numericKeys    = array_filter(array_keys($conditions), 'is_int');
-            $lastCondtionKey = end($numericKeys);
+            $numericKeys     = array_filter(array_keys($conditions ?? []), 'is_int');
+            $lastCondtionKey = array_key_last($numericKeys);
 
             foreach ($conditions as $conditionIndex => $condition) {
                 if (!is_numeric($conditionIndex)) {
                     continue;
                 }
-            ?>
+                ?>
                 <div class='condition-row' data-condition-index='<?php echo esc_attr($conditionIndex); ?>'>
                     <span style='font-weight: 600;'>If</span>
                     <br>

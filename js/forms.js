@@ -68,44 +68,17 @@ async function formbuilderSwitch(target) {
   let wrapper  = target.closest(".tsjippy-form-wrapper");
   let button   = target.outerHTML;
 
-  let formData = new FormData();
-  let formId;
-
   const url = new URL(window.location);
+
+  let searchParams = new URLSearchParams(window.location.search);
+
   if (target.matches(".formbuilder-switch")) {
-    formData.append("formbuilder", true);
-    url.searchParams.set("formbuilder", true);
-
-    formId = wrapper.querySelector("form.tsjippy-form-wrapper").dataset.formId;
+    searchParams.set("formbuilder", true);
   } else {
-    url.searchParams.delete("formbuilder");
-    formId = wrapper.querySelector('[name="form-id"]').value;
+    searchParams.delete("formbuilder");
   }
-  window.history.pushState({}, "", url);
 
-  formData.append("form-id", formId);
-
-  let loader = Main.showLoader(target, false, 50, "Requesting form...");
-  wrapper.innerHTML = loader.outerHTML;
-
-  let response = await FormSubmit.fetchRestApi("forms/form_builder", formData);
-
-  if (response) {
-    wrapper.innerHTML = response.html;
-
-    addStyles(response, document);
-
-    // Activate tinyMce's again
-    /* 	wrapper.querySelectorAll('.wp-editor-area').forEach(el =>{
-			window.tinyMCE.execCommand('mceAddEditor', false, el.id);
-		});
-
-		wrapper.querySelectorAll('select').forEach(function(select){
-			Main.attachNiceSelect(select);
-		}); */
-  } else {
-    loader.outerHTML = button;
-  }
+  window.location.search = searchParams.toString();
 }
 
 async function requestNewFormResults(target) {

@@ -1202,8 +1202,8 @@ class Forms
 
         foreach ($elementIndexes as $index) {
             $element        = $this->formElements[$index];
-            $element->index    = $index;
-            $elements[]        = $element;
+            $element->index = $index;
+            $elements[]     = $element;
         }
 
         if (!$single) {
@@ -1253,8 +1253,8 @@ class Forms
 
         foreach ($elementIndexes as $index) {
             $element        = $this->formElements[$index];
-            $element->index    = $index;
-            $elements[]        = $element;
+            $element->index = $index;
+            $elements[]     = $element;
         }
 
         return $elements;

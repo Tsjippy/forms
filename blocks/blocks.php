@@ -167,7 +167,7 @@ function showFormBuilder($attributes){
 
     $attributes['slug'] = $formSlug;
 
-    if($found){
+    if($found && !isset($_REQUEST['formbuilder'])){
         $forms  = new DisplayForm( $attributes );
     }else{
         $forms  = new FormBuilderForm( $attributes );

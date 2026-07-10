@@ -468,8 +468,8 @@ trait CreateJs
     init = () => {
         console.log('Dynamic {$this->formData->slug} forms js loaded');
 
-        window.addEventListener('click', this.listener);
-        window.addEventListener('input', this.listener);
+        document.addEventListener('click', this.listener);
+        document.addEventListener('input', this.listener);
 
         FormFunctions.tidyMultiInputs();
         $tabJs
