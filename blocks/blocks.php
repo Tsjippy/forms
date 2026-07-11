@@ -47,16 +47,16 @@ function initBlocks()
         )
     );
 
-    $forms  = new Forms();
+    $forms      = new Forms();
     $forms->getForms();
-    $formNames = [];
+    $formNames  = [];
 
     foreach($forms->forms as $form){
         if(empty($form->name)){
             continue;
         }
 
-        $formNames[]    = trim($form->name);
+        $formNames[]    = trim($form->slug);
     }
 
     register_block_type(
@@ -64,7 +64,7 @@ function initBlocks()
         array(
             'title'           => __( 'Form Results', 'tsjippy' ),
             'attributes'      => [
-                'form-name' => [
+                'formname' => [
                     'label'   => __( 'Form name', 'tsjippy' ),
                     'type'    => 'string',
                     'enum'    => $formNames
@@ -78,6 +78,10 @@ function initBlocks()
                     'label'   => __( 'Show Archived Results', 'tsjippy' ),
                     'type'    => 'boolean',
                     'default' => false,
+                ],
+                'id'  => [
+                    'type'    => 'integer',
+                    'default' => -1,
                 ]
             ],
             'render_callback' => __NAMESPACE__ . '\formResults',
@@ -188,6 +192,9 @@ function showFormBuilder($attributes){
  */
 function formResults($atts)
 {
+    if($atts['id'] == -1){
+        return "<div class='error'>No valid shortcode id yet</div>";
+    }
     $object                 = new DisplayFormResults($atts);
     $object->showArchived   = isset($_GET['archived']);
     $html                   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
