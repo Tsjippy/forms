@@ -7,6 +7,7 @@
 - select roles and users in one dropdown
 
 ### Fixed
+- form results block
 
 ### Updated
 
