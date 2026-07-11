@@ -1453,7 +1453,17 @@ class DisplayFormResults extends DisplayForm
      */
     protected function tableSettingsForm($class, $viewRoles, $editRoles)
     {
-    ?>
+        $users  = TSJIPPY\getUserAccounts(returnFamily: false, adults: true, uniqueDisplayName: true);
+        foreach($users as $key => $user){
+            unset($users[$key]);
+
+            $users[$user->ID] = $user->display_name;
+        }
+
+        //Sort the users
+        asort($users);
+
+        ?>
         <div class="tabcontent <?php echo esc_attr($class); ?>" id="table-rights-<?php echo esc_attr($this->shortcodeId); ?>">
             <form>
                 <input type='hidden' class='no-reset' class='shortcode-settings' name='shortcode-id' value='<?php echo esc_attr($this->shortcodeId); ?>'>
@@ -1667,100 +1677,6 @@ class DisplayFormResults extends DisplayForm
 
                 </div>
 
-                <div class="table-rights-wrapper">
-                    <h4 class="label">Select if you want to view archived results by default</h4>
-                    <?php
-                    if ($this->tableSettings->archived ?? false) {
-                        $checked1    = 'checked';
-                        $checked2    = '';
-                    } else {
-                        $checked1    = '';
-                        $checked2    = 'checked';
-                    }
-                    ?>
-                    <label>
-                        <input
-                            type="radio"
-                            name="table-settings[archived]"
-                            value="1"
-                            <?php if ($this->tableSettings->archived ?? false) echo 'checked'; ?>>
-                        Yes
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="table-settings[archived]"
-                            value="0"
-                            <?php if (!($this->tableSettings->archived ?? false)) echo 'checked'; ?>>
-                        No
-                    </label>
-                </div>
-
-                <!-- We can define auto archive field both on table and on form settings-->
-                <div class="table-rights-wrapper">
-                    <h4 class="label">Auto archive results</h4>
-                    <label>
-                        <input
-                            type="radio"
-                            name="form-settings[autoarchive]"
-                            value="1"
-                            <?php if ($this->tableSettings->autoarchive ?? false) echo 'checked'; ?>>
-                        Yes
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="form-settings[autoarchive]"
-                            value="0"
-                            <?php if (!($this->tableSettings->autoarchive ?? false)) echo 'checked'; ?>>
-                        No
-                    </label>
-                    <br>
-                    <br>
-                    <div
-                        class='auto-archive-logic
-                        <?php if ($this->tableSettings->autoarchive ?? false) echo 'hidden'; ?>'>
-                        Auto archive a (sub) entry when field<br>
-                        <select name="form-settings[autoarchive-el]" class='inline' style="margin-right:10px;">
-                            <option value='' <?php if (empty($this->formData->autoarchive_el))  echo 'selected'; ?>>
-                                ---
-                            </option>
-                            <?php
-
-                            foreach ($this->columnSettings as $key => $columnSetting) {
-                                if (!is_array($columnSetting)) {
-                                    continue;
-                                }
-
-                                $name = $columnSetting['name'];
-
-                                //Check which option is the selected one
-                                if ($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key) {
-                                    $selected = 'selected="selected"';
-                                } else {
-                                    $selected = '';
-                                }
-                            ?>
-                                <option
-                                    value='<?php echo esc_attr($key); ?>'
-                                    <?php if (($this->formData->autoarchive_el ?? '') == $key) {
-                                        echo 'selected';
-                                    } ?>>
-                                    <?php echo esc_html($name); ?>
-                                </option>
-                            <?php
-                            }
-                            ?>
-                        </select>
-                        <label style="margin:0 10px;">equals</label>
-                        <input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo esc_attr($this->formData->autoarchive_value ?? ''); ?>" style='max-width:200px;'>
-
-                        <?php
-                        $this->infoBoxHtml("You can use placeholders like '%today%+3days' for a value");
-                        ?>
-                    </div>
-                </div>
-
                 <?php
                 do_action('tsjippy-forms-after-table-settings', $this);
                 ?>
@@ -1786,7 +1702,7 @@ class DisplayFormResults extends DisplayForm
                         }
 
                         if (!empty($foundElements)) {
-                        ?>
+                            ?>
                             <div class="table-rights-wrapper">
                                 <h4>
                                     Select fields where you want to create seperate rows for
@@ -1797,68 +1713,177 @@ class DisplayFormResults extends DisplayForm
                                     $name    = ucfirst(strtolower(str_replace('_', ' ', $element)));
 
                                     //Check which option is the selected one
-                                ?>
+                                    ?>
                                     <label>
                                         <input type='checkbox' name='form-settings[split][<?php echo esc_attr($id); ?>]' value='1' <?php if (in_array($id, $this->formData->split)) echo 'checked'; ?>>
                                         <?php echo esc_html($name); ?>
                                     </label>
                                     <br>
-                                <?php
+                                    <?php
                                 }
                                 ?>
                             </div>
-                        <?php
+                            <?php
                         }
                         ?>
                         <div class="table-rights-wrapper">
                             <h4>
-                                Select roles with permission to VIEW the table, finetune it per column on the 'column settings' tab
+                                Roles or users with permission to VIEW the table
                             </h4>
-
+                            Finetune it per column on the 'column settings' tab
                             <select name='table-settings[view-right-roles][]' multiple>
-                                <option value=''>---</option>
-                                <?php
-                                foreach ($viewRoles as $key => $roleName) {
-                                ?>
-                                    <option value='<?php echo esc_attr($key); ?>' <?php if (isset($this->tableSettings->view_right_roles[$key])) echo 'selected'; ?>>
-                                        <?php echo esc_html($roleName); ?>
-                                    </option>
-                                <?php
-                                }
-                                ?>
+                                <option value=''>
+                                    ---
+                                </option>
+
+                                <optgroup label="Roles">
+                                    <?php
+                                    foreach ($viewRoles as $key => $roleName) {
+                                        ?>
+                                        <option value='<?php echo esc_attr($key); ?>' <?php if (isset($this->tableSettings->view_right_roles[$key])) echo 'selected'; ?>>
+                                            <?php echo esc_html($roleName); ?>
+                                        </option>
+                                        <?php
+                                    }
+                                    ?>
+                                </optgroup>
+                                <optgroup label="Users">
+                                    <?php
+                                    foreach ($users as $key => $name) {
+                                        ?>
+                                        <option
+                                            value='<?php echo esc_attr($key); ?>'
+                                            <?php if (isset($this->formData->view_right_roles[$key])) echo 'selected'; ?>>
+                                            <?php echo esc_html($name); ?>
+                                        </option>
+                                        <?php
+                                    }
+                                    ?>
+                                </optgroup> 
                             </select>
-
                             <br>
-                            <h4>
-                                Select users with permission to VIEW the table
-                            </h4>
-                            <?php
-                            TSJIPPY\userSelect(onlyAdults: true, id: "table-settings[view-right-roles][]", userId: $this->tableSettings->view_right_roles, excludeIds: [1], multiple: true, echo: true);
-                            ?>
 
                             <h4>
-                                Select roles with permission to edit ALL form submission data
+                                Roles or users with permission to EDIT the table
                             </h4>
-
+                            Finetune it per column on the 'column settings' tab
                             <select name='table-settings[edit-right-roles][]' multiple>
-                                <option value=''>---</option>
+                                <option value=''>
+                                    ---
+                                </option>
+
+                                <optgroup label="Roles">
+                                    <?php
+                                    foreach ($editRoles as $key => $roleName) {
+                                        ?>
+                                        <option value='<?php echo esc_attr($key); ?>' <?php if (isset($this->tableSettings->edit_right_roles[$key])) echo 'selected'; ?>>
+                                            <?php echo esc_html($roleName); ?>
+                                        </option>
+                                        <?php
+                                    }
+                                    ?>
+                                </optgroup>
+                                <optgroup label="Users">
+                                    <?php
+                                    foreach ($users as $key => $name) {
+                                    ?>
+                                        <option
+                                            value='<?php echo esc_attr($key); ?>'
+                                            <?php if (isset($this->formData->edit_right_roles[$key])) echo 'selected'; ?>>
+                                            <?php echo esc_html($name); ?>
+                                        </option>
+                                    <?php
+                                    }
+                                    ?>
+                                </optgroup> 
+                            </select>
+                        </div>
+
+                        <div class="table-rights-wrapper">
+                            <h4 class="label">
+                                View archived results by default
+                            </h4>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="table-settings[archived]"
+                                    value="1"
+                                    <?php if ($this->tableSettings->archived ?? false) echo 'checked'; ?>>
+                                Yes
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="table-settings[archived]"
+                                    value="0"
+                                    <?php if (!($this->tableSettings->archived ?? false)) echo 'checked'; ?>>
+                                No
+                            </label>
+                        </div>
+
+                        <!-- We can define auto archive field both on table and on form settings-->
+                        <div class="table-rights-wrapper">
+                            <h4 class="label">
+                                Auto archive results
+                            </h4>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="form-settings[autoarchive]"
+                                    value="1"
+                                    <?php if ($this->tableSettings->autoarchive ?? false) echo 'checked'; ?>>
+                                Yes
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="form-settings[autoarchive]"
+                                    value="0"
+                                    <?php if (!($this->tableSettings->autoarchive ?? false)) echo 'checked'; ?>>
+                                No
+                            </label>
+                        </div>
+
+                        <div
+                            class='auto-archive-logic
+                            <?php if ($this->tableSettings->autoarchive ?? false) echo 'hidden'; ?>'>
+                            Auto archive a (sub) entry when field<br>
+                            <select name="form-settings[autoarchive-el]" class='inline' style="margin-right:10px;">
+                                <option value='' <?php if (empty($this->formData->autoarchive_el))  echo 'selected'; ?>>
+                                    ---
+                                </option>
                                 <?php
-                                foreach ($viewRoles as $key => $roleName) {
+
+                                foreach ($this->columnSettings as $key => $columnSetting) {
+                                    if (!is_array($columnSetting)) {
+                                        continue;
+                                    }
+
+                                    $name = $columnSetting['name'];
+
+                                    //Check which option is the selected one
+                                    if ($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key) {
+                                        $selected = 'selected="selected"';
+                                    } else {
+                                        $selected = '';
+                                    }
                                 ?>
-                                    <option value='<?php echo esc_attr($key); ?>' <?php if (isset($this->tableSettings->edit_right_roles[$key])) echo 'selected'; ?>>
-                                        <?php echo esc_html($roleName); ?>
+                                    <option
+                                        value='<?php echo esc_attr($key); ?>'
+                                        <?php if (($this->formData->autoarchive_el ?? '') == $key) {
+                                            echo 'selected';
+                                        } ?>>
+                                        <?php echo esc_html($name); ?>
                                     </option>
                                 <?php
                                 }
                                 ?>
                             </select>
+                            <label style="margin:0 10px;">equals</label>
+                            <input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo esc_attr($this->formData->autoarchive_value ?? ''); ?>" style='max-width:200px;'>
 
-                            <br>
-                            <h4>
-                                Select users with permission to EDIT the table
-                            </h4>
                             <?php
-                            TSJIPPY\userSelect(onlyAdults: true, id: "table-settings[edit-right-roles][]", userId: $this->tableSettings->edit_right_roles, excludeIds: [1], multiple: true, echo: true);
+                            $this->infoBoxHtml("You can use placeholders like '%today%+3days' for a value");
                             ?>
                         </div>
                     </div>
@@ -1923,7 +1948,7 @@ class DisplayFormResults extends DisplayForm
                 ?>
             </div>
         </div>
-<?php
+        <?php
 
         return ob_get_clean();
     }
