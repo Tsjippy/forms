@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- select roles and users in one dropdown
 
 ### Fixed
 
