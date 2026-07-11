@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.7.7] - 2026-07-11
+
+
+### Changed
 - select roles and users in one dropdown
 
 ### Fixed
 - form results block
-
-### Updated
 
 ## [11.7.6] - 2026-07-10
 
