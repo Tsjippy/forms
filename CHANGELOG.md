@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.7.9] - 2026-07-12
+
+
+### Changed
 - uses %TEXTDOMAIN% as placeholder for translation domain
 
 ### Fixed
 - bug
-
-### Updated
 
 ## [11.7.8] - 2026-07-11
 
