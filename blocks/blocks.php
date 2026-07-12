@@ -12,10 +12,10 @@ function initBlocks()
     register_block_type(
         'tsjippy-forms/form-selector',
         array(
-            'title'           => __( 'Forms Selector', 'tsjippy' ),
+            'title'           => __( 'Forms Selector', '%TEXTDOMAIN%' ),
             'attributes'      => array(
                 'hide_meta_forms'   => array(
-                    'label'   => __( 'Hide forms that save to user meta', 'tsjippy' ),
+                    'label'   => __( 'Hide forms that save to user meta', '%TEXTDOMAIN%' ),
                     'type'    => 'boolean',
                     'default' => false,
                 )
@@ -31,10 +31,10 @@ function initBlocks()
     register_block_type(
         'tsjippy-forms/form-builder',
         array(
-            'title'           => __( 'Insert A Form', 'tsjippy' ),
+            'title'           => __( 'Insert A Form', '%TEXTDOMAIN%' ),
             'attributes'      => array(
                 'formname'   => array(
-                    'label'   => __( 'Form Name', 'tsjippy' ),
+                    'label'   => __( 'Form Name', '%TEXTDOMAIN%' ),
                     'type'    => 'string',
                     'default' => '',
                 )
@@ -62,20 +62,20 @@ function initBlocks()
     register_block_type(
         'tsjippy-forms/forms-results',
         array(
-            'title'           => __( 'Form Results', 'tsjippy' ),
+            'title'           => __( 'Form Results', '%TEXTDOMAIN%' ),
             'attributes'      => [
                 'formname' => [
-                    'label'   => __( 'Form name', 'tsjippy' ),
+                    'label'   => __( 'Form name', '%TEXTDOMAIN%' ),
                     'type'    => 'string',
                     'enum'    => $formNames
                 ],
                 'only-own'  => [
-                    'label'   => __( 'Show The Results of the Current User Only', 'tsjippy' ),
+                    'label'   => __( 'Show The Results of the Current User Only', '%TEXTDOMAIN%' ),
                     'type'    => 'boolean',
                     'default' => true,
                 ],
                 'archived'  => [
-                    'label'   => __( 'Show Archived Results', 'tsjippy' ),
+                    'label'   => __( 'Show Archived Results', '%TEXTDOMAIN%' ),
                     'type'    => 'boolean',
                     'default' => false,
                 ],
@@ -95,10 +95,10 @@ function initBlocks()
     register_block_type(
         'tsjippy-forms/missing-form-inputs',
         array(
-            'title'           => __( 'Missing Form Entries', 'tsjippy' ),
+            'title'           => __( 'Missing Form Entries', '%TEXTDOMAIN%' ),
             'attributes'      => [
                 'type' => [
-                    'label'   => __( 'Which type', 'tsjippy' ),
+                    'label'   => __( 'Which type', '%TEXTDOMAIN%' ),
                     'type'    => 'string',
                     'enum'    => ['mandatory', 'recommended', 'all'],
                     'default' => 'all',
