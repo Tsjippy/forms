@@ -27,9 +27,10 @@ class AdminMenu extends ADMIN\SubAdminMenu
     }
 
     /**
-     * Get the menu slug for the admin menu
+     * Add the settings page to the admin menu
      *
-     * @return string The menu slug for the admin menu
+     * @param string $parent The parent menu slug
+     * @return bool True if the settings page was added, false otherwise
      */
     public function settings($parent)
     {
