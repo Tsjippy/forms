@@ -295,6 +295,13 @@ class ElementHtmlBuilder extends SubmitForm
         $this->defaultArrayValues['family_member_names']         = $familyNames;
         $this->defaultArrayValues['family_member_names_and_age'] = $familyNamesWithChildAge;
 
+        /**
+         * Filters the default array values array
+         * 
+         * @param   array   $defaultArrayValues Array defaults
+         * @param   int     $userID             User Id
+         * @param   string  $formSlug           The form slug
+         */
         $this->defaultArrayValues    = apply_filters('tsjippy-forms-add-form-multi-defaults', $this->defaultArrayValues, $this->userId, $this->formData->slug);
 
         ksort($this->defaultArrayValues);
@@ -696,6 +703,14 @@ class ElementHtmlBuilder extends SubmitForm
             }
         }
 
+        /**
+         * Filters the string transform
+         * 
+         * @param   mixed   $output     The string
+         * @param   object  $element    The form element
+         * @param   object  $submission The form submission data
+         * @param   object  $object     The current instance
+         */
         $output = apply_filters('tsjippy-forms-transform-formtable-data', $output, $element, $submission, $this);
         return $output;
     }

@@ -1505,6 +1505,15 @@ class Forms
         /**
          * Add the metas to the submissions
          */
+        /**
+         * Apply filter to modify the query
+         * @param array containing
+         *    string $base        The base query
+         *    array    $where       Array of where statements
+         *    array    $values      Array of values for the where statements
+         * @param   int     $userId   The user Id
+         * @param   object  $object The current instance
+         */
         $filtered    = apply_filters(
             'tsjippy-forms-formdata-retrieval-query',
             [

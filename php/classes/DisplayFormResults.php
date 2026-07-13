@@ -602,9 +602,12 @@ class DisplayFormResults extends DisplayForm
 
         /**
          * Apply filter to modify the query
-         * @var string    $base        The base query
-         * @var array    $where        Array of where statements
-         * @var array    $values        Array of values for the where statements
+         * @param array containing
+         *    string $base        The base query
+         *    array    $where       Array of where statements
+         *    array    $values      Array of values for the where statements
+         * @param   int     $userId   The user Id
+         * @param   object  $object The current instance
          */
         $filtered    = apply_filters(
             'tsjippy-forms-formdata-retrieval-query',
@@ -870,6 +873,11 @@ class DisplayFormResults extends DisplayForm
             $actions[]    = $action;
         }
 
+        /**
+         * Filters the forms actions
+         * 
+         * @param   array   $actions The form table actions
+         */
         $actions = apply_filters('tsjippy-forms-actions', $actions);
         foreach ($actions as $action) {
             if (!isset($this->columnSettings[$action]) || !is_array($this->columnSettings[$action])) {
@@ -2598,6 +2606,12 @@ class DisplayFormResults extends DisplayForm
         foreach ($this->formData->actions ?? [] as $action) {
             $actions[]    = $action;
         }
+
+        /**
+         * Filters the forms actions
+         * 
+         * @param   array   $actions The form table actions
+         */
         $actions = apply_filters('tsjippy-forms-actions', $actions);
 
         //we have full permissions on this table
