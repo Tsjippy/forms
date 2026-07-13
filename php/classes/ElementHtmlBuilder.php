@@ -585,6 +585,10 @@ class ElementHtmlBuilder extends SubmitForm
             
             $path   = $this->uploadDir().'/'.$string;
 
+            if(!file_exists($path)){
+                return $string;
+            }
+
             $type   = mime_content_type($path);
 
             $url    = TSJIPPY\pathToUrl($path);

@@ -355,6 +355,12 @@ class DisplayFormResults extends DisplayForm
          * Process split elements with the form base[index][key]
          */
         foreach ($this->findSplitElementIds() as $base) {
+            if(!is_array($base)){
+                TSJIPPY\printArray([
+                    $this->findSplitElementIds(),
+                    $base
+                ]);
+            }
             foreach ($base as $columnName => $ids) {
                 // Make the array of elements that share the same name a comma separated string for the query
                 $implodedIds    = implode(", ", array_values($ids));
@@ -1603,7 +1609,7 @@ class DisplayFormResults extends DisplayForm
 
                                 <td>
                                     Filter name
-                                    <input name='table-settings[filter][<?php echo esc_attr($index); ?>][name]' value='<?php echo esc_attr($this->tableSettings->filter[$index]['name']); ?>'>
+                                    <input name='table-settings[filter][<?php echo esc_attr($index); ?>][name]' value='<?php echo esc_attr($this->tableSettings->filter[$index]['name'] ?? ''); ?>'>
                                 </td>
                                 <td>
                                     <button type='button' class='add button'>+</button>
