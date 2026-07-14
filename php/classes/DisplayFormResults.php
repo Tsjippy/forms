@@ -546,7 +546,7 @@ class DisplayFormResults extends DisplayForm
         $showArchived = $this->showArchived || is_numeric($submissionId);
 
         // Check if a form is loaded
-        if (empty($this->formData) && !empty($submissionId)) {
+        if (empty($this->formData->id) && !empty($submissionId)) {
             // Load the form before loading the submission, because we need the form elements to load the submission data
             $this->getFormBySubmissionId($submissionId);
         }
@@ -602,7 +602,7 @@ class DisplayFormResults extends DisplayForm
 
         /**
          * Apply filter to modify the query
-         * @param array containing
+         * @param array params
          *    string $base        The base query
          *    array    $where       Array of where statements
          *    array    $values      Array of values for the where statements
@@ -1339,7 +1339,7 @@ class DisplayFormResults extends DisplayForm
      */
     protected function columnSettingsForm($class, $viewRoles, $editRoles)
     {
-?>
+        ?>
         <div class="tabcontent" id="column-settings-<?php echo esc_attr($this->shortcodeId); ?>">
             <form class="sortable-column-settings-rows">
                 <input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo esc_attr($this->shortcodeId); ?>'>
@@ -1453,7 +1453,7 @@ class DisplayFormResults extends DisplayForm
                 ?>
             </form>
         </div>
-    <?php
+        <?php
     }
 
     /**
