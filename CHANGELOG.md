@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- load form when no form is given
 
 ### Updated
+
+## [11.8.4] - 2026-07-14
+
+
+### Fixed
+- load form when no form is given
 
 ## [11.8.3] - 2026-07-13
 
