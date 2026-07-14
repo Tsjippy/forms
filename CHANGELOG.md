@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- load form when no form is given
 
 ### Updated
 
