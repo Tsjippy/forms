@@ -172,8 +172,6 @@ class SubmitForm extends SaveFormSettings
         $this->getEmailSettings();
 
         foreach ($this->emailSettings as $key => $email) {
-            $email    = (object)map_deep($email, 'trim');
-
             if (!$this->checkEmailConditions($email, $trigger)) {
                 continue;
             }

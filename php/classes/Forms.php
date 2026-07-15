@@ -1196,7 +1196,7 @@ class Forms
                 return false;
             }
         }
-        $elementIndexes    = $this->elementMapping['slug'][$slug];
+        $elementIndexes    = $this->elementMapping['slug'][str_replace('[]', '', $slug)];
 
         $elements        = [];
 
