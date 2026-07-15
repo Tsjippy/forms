@@ -7,6 +7,7 @@
 - no need to serilize before insertInDb
 
 ### Fixed
+- form submit bug
 
 ### Updated
 
