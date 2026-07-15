@@ -380,7 +380,7 @@ class SubmitForm extends SaveFormSettings
                                 'submission_id' => $this->submission->id,
                                 'sub_id'        => $in,
                                 'element_id'    => $elementId,
-                                'value'         => maybe_serialize($subValue)
+                                'value'         => $subValue
                             ],
                             [
                                 '%d',
@@ -413,7 +413,7 @@ class SubmitForm extends SaveFormSettings
                             'submission_id' => $this->submission->id,
                             'sub_id'        => $index,
                             'element_id'    => $elementId,
-                            'value'         => maybe_serialize($subValue)
+                            'value'         => $subValue
                         ],
                         [
                             '%d',
