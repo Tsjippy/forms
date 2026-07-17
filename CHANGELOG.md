@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [11.8.7] - 2026-07-15
+
+
+### Changed
 - no need to serilize before insertInDb
 
 ### Fixed
 - form submit bug
-
-### Updated
 
 ## [11.8.6] - 2026-07-15
 
