@@ -548,16 +548,16 @@ class Forms
      */
     public function insertForm($slug = '')
     {
-        global $wpdb;
-
         if (empty($this->formData)) {
             $this->formData     =  new \stdClass();
         }
 
-        if (empty($slug) && !empty($this->formData->slug)) {
-            $slug = $this->formData->slug;
-        } else {
-            return new WP_Error('forms', 'No form slug given');
+        if (empty($slug)){
+            if(!empty($this->formData->slug)) {
+                $slug = $this->formData->slug;
+            } else {
+                return new WP_Error('forms', 'No form slug given');
+            }
         }
 
         $slug    = str_replace([' ', '/'], '-', strtolower($slug));
@@ -601,7 +601,7 @@ class Forms
             return $result;
         }
 
-        $formId = $result;
+        $this->formData->id = $result;
 
         /**
          * insert default elements
@@ -611,7 +611,7 @@ class Forms
         $result = TSJIPPY\insertInDb(
             $this->elTableName,
             array(
-                'form_id'       => $formId,
+                'form_id'       => $this->formData->id,
                 'type'          => 'text',
                 'slug'          => 'name',
                 'options'       => 'list=users',
@@ -637,13 +637,13 @@ class Forms
 
         $elements = [
             array(
-                'type'                     => 'number',
-                'slug'                    => 'user_id',
-                'default_value'         => 'user_id',
-                'hidden'                => true,
-                'conditions'            => serialize([
+                'type'          => 'number',
+                'slug'          => 'user_id',
+                'default_value' => 'user_id',
+                'hidden'        => true,
+                'conditions'    => serialize([
                     [
-                        'rules'                => [
+                        'rules' => [
                             [
                                 'conditional-field'    => $elementId,
                                 'equation'            => 'changed',
@@ -654,17 +654,17 @@ class Forms
                         'property-value'    => $elementId
                     ]
                 ]),
-                'priority'                => 1
+                'priority'      => 1
             ),
             array(
-                'type'                     => 'label',
-                'slug'                    => 'name-label',
-                'text'                     => 'Your Name',
-                'wrap'                    => true,
-                'priority'                => 2
+                'type'     => 'label',
+                'slug'     => 'name-label',
+                'text'     => 'Your Name',
+                'wrap'     => true,
+                'priority' => 2
             ),
             array(
-                'type'                     => 'datalist',
+                'type'                    => 'datalist',
                 'slug'                    => 'users',
                 'default_array_value'     => 'all_users',
                 'priority'                => 4
@@ -672,7 +672,7 @@ class Forms
         ];
 
         foreach ($elements as $element) {
-            $element['form_id'] = $formId;
+            $element['form_id'] = $this->formData->id;
 
             TSJIPPY\insertInDb(
                 $this->elTableName,
@@ -1171,10 +1171,10 @@ class Forms
 
             if (isset($this->elementMapping['slug'][$slugNew])) {
                 // remove '[]'
-                $slug    .= $slugNew;
+                $slug    = $slugNew;
             } elseif (isset($this->elementMapping['slug'][$slug . '[]'])) {
                 // add []
-                $slug    .= '[]';
+                $slug    = '[]';
             } elseif (!empty($this->formData->split)) {
                 // only the last part of a splitted name is given
                 $mainName    = explode('[', $this->getElementById($this->formData->split[0], 'name'))[0];
@@ -1196,7 +1196,7 @@ class Forms
                 return false;
             }
         }
-        $elementIndexes    = $this->elementMapping['slug'][str_replace('[]', '', $slug)];
+        $elementIndexes    = $this->elementMapping['slug'][$slug];
 
         $elements        = [];
 

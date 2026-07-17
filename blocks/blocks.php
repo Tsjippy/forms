@@ -9,6 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 add_action('init', __NAMESPACE__ . '\initBlocks');
 function initBlocks()
 {
+    // Register all js blocks
+    wp_register_block_types_from_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
+    
     register_block_type(
         'tsjippy-forms/form-selector',
         array(

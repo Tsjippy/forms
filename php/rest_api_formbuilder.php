@@ -238,7 +238,7 @@ function restApiInitForms()
             'callback'                 =>     __NAMESPACE__ . '\requestFormConditionsHtml',
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
             'args'                    => array(
-                'form-id'        => array(
+                'formid'        => array(
                     'required'    => true,
                     'validate_callback' => function ($formId) {
                         return is_numeric($formId);
@@ -247,7 +247,7 @@ function restApiInitForms()
                 'elementid'        => array(
                     'required'    => true,
                     'validate_callback' => function ($elementId) {
-                        return is_numeric($elementId);
+                        return is_numeric($elementId) || is_string($elementId);
                     }
                 )
             )
@@ -374,6 +374,101 @@ function restApiInitForms()
                 ),
 
             )
+        )
+    );
+
+    // Retrieve the form reminder form
+    register_rest_route(
+        TSJIPPY\RESTAPIPREFIX . '/forms',
+        '/get_form_reminder_form',
+        array(
+            'methods'             => 'POST',
+            'callback'            => function(){
+                $forms  = new FormBuilderForm();
+                ob_start();
+                $forms->formReminderForm();
+                return ob_get_clean();
+            },
+            'permission_callback' => __NAMESPACE__ . '\checkPermissions'
+        )
+    );
+
+    // Retrieve the form emails form
+    register_rest_route(
+        TSJIPPY\RESTAPIPREFIX . '/forms',
+        '/get_emails_form',
+        array(
+            'methods'             => 'POST',
+            'callback'            => function(){
+                $forms  = new FormBuilderForm();
+                ob_start();
+                $forms->formEmailsForm();
+                return ob_get_clean();
+            },
+            'permission_callback' => __NAMESPACE__ . '\checkPermissions'
+        )
+    );
+
+    // Get all roles 
+    register_rest_route(
+        TSJIPPY\RESTAPIPREFIX . '/forms',
+        '/get_roles',
+        array(
+            'methods'     => 'POST',
+            'callback'     => function ($wpRestRequest) {
+                require_once ABSPATH . 'wp-admin/includes/user.php';
+                
+                $array  = [];
+                foreach( get_editable_roles() as $key => $data){
+                    $array[] = [
+                        'value' => $key,
+                        'label' => $data['name']
+                    ];
+                }
+
+                return $array;
+            },
+            'permission_callback' => function(){
+                return current_user_can('edit_users');
+            }
+        )
+    );
+
+    // Get all form actions 
+    register_rest_route(
+        TSJIPPY\RESTAPIPREFIX . '/forms',
+        '/get_form_actions',
+        array(
+            'methods'     => 'POST',
+            'callback'     => function ($wpRestRequest) {
+                /**
+                 * Filters the forms actions
+                 * 
+                 * @param   array   $actions The form table actions
+                 */
+                return apply_filters('tsjippy-forms-actions', ['archive', 'delete']);
+            },
+            'permission_callback' => function(){
+                return current_user_can('edit_users');
+            }
+        )
+    );
+
+    // Register a new form
+    register_rest_route(
+        TSJIPPY\RESTAPIPREFIX . '/forms',
+        '/register_form',
+        array(
+            'methods'  => 'POST',
+            'callback' => function ($wpRestRequest) {
+                $forms  = new Forms();
+                $forms->insertForm($wpRestRequest->get_param('slug'));
+
+                return $forms->formData->id;
+            },
+            'permission_callback' => function(){
+                return current_user_can('edit_users');
+            }
         )
     );
 }

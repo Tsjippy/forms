@@ -50,7 +50,7 @@ class FormBuilderForm extends DisplayForm
      */
     protected function inputDropdown($selectedId, $elementId = '')
     {
-?>
+        ?>
         <option value='' <?php if (empty($selectedId)) {
                                 echo 'selected';
                             } ?>>
@@ -1109,7 +1109,7 @@ class FormBuilderForm extends DisplayForm
             TSJIPPY\addSaveButton('submit-form-reminder',  'Save form reminder');
             ?>
         </form>
-    <?php
+        <?php
     }
 
     /**
@@ -1305,7 +1305,7 @@ class FormBuilderForm extends DisplayForm
         $emails         = $this->emailSettings;
         $defaultFrom    = get_option('admin_email');
 
-    ?>
+        ?>
         <div class="emails-wrapper">
             <form action='' method='post' class='tsjippy-form builder'>
                 <div class='form-elements'>
@@ -1807,7 +1807,7 @@ class FormBuilderForm extends DisplayForm
                 ?>
             </form>
         </div>
-    <?php
+        <?php
     }
 
     /**
@@ -1830,7 +1830,7 @@ class FormBuilderForm extends DisplayForm
         $nonInputClasses    = 'non-' . implode(' non-', $this->nonInputs);
 
         ob_start();
-    ?>
+        ?>
         <div class="form-wrapper">
             <h4>
                 <?php echo wp_kses_post($heading); ?>
@@ -2613,7 +2613,7 @@ class FormBuilderForm extends DisplayForm
             <?php
             TSJIPPY\addSaveButton('submit-form-condition', 'Save conditions'); ?>
         </form>
-<?php
+        <?php
         return ob_get_clean();
     }
 }

@@ -1,0 +1,75 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "tsjippy-forms/formbuilder",
+	"version": "0.1.0",
+	"title": "Form Builder Test",
+	"category": "widgets",
+	"icon": "forms",
+	"description": "Form builder using blocks",
+	"example": {},
+	"supports": {
+		"html": false
+	},
+	"textdomain": "tsjippy",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"attributes": {
+		"id": {
+			"type": "integer",
+			"default": -1
+		},
+		"type": {
+			"type": "string",
+			"default": "post"
+		},
+		"submission_message": {
+			"type": "string",
+			"default": "Succesfully received your request"
+		},
+		"submission_id": {
+			"type": "boolean",
+			"default": true
+		},
+		"name": {
+			"type": "string",
+			"default": ""
+		},
+		"actions": {
+			"type": "array",
+			"default": [
+				"archive",
+				"delete"
+			]
+		},
+		"user_meta": {
+			"type": "boolean",
+			"default": true
+		},
+		"edit_roles": {
+			"type": "array",
+			"default": []
+		},
+		"auto_archive_element": {
+			"type": "string",
+			"default": ""
+		},
+		
+		"auto_archive_value": {
+			"type": "string",
+			"default": ""
+		},
+		"submission_roles": {
+			"type": "array",
+			"default": []
+		},
+		"split_elements": {
+			"type": "array",
+			"default": []
+		}
+		
+		
+	}
+}

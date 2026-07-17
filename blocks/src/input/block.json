@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "tsjippy-forms/input",
+	"version": "0.1.0",
+	"title": "Form Input Element",
+	"category": "widgets",
+	"icon": "forms",
+	"description": "Input element for a form",
+	"example": {},
+	"supports": {
+		"html": false
+	},
+	"textdomain": "tsjippy",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"attributes": {
+		"type": {
+			"type": "string",
+			"default": "text"
+		},
+		"name": {
+			"type": "string",
+			"default": ""
+		},
+		"value": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
