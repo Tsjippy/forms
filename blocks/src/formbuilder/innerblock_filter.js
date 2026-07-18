@@ -15,6 +15,12 @@ import { addFilter } from '@wordpress/hooks';
 const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
     return ( props ) => {
 
+        if(!props.isSelected){
+            return (
+                <BlockEdit {...props} />
+            );
+        }
+
         const [ isConditionsFormVisible, setConditionsFormVisibility ]  = useState( false );
         const [ conditionsForm, setConditionsForm ]                     = useState( '' );
 
@@ -24,12 +30,17 @@ const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
 
         let parentId	= -1;
 
-        parents.forEach(e => {
+        /* parents.forEach(e => {
             if(e.name == "tsjippy-forms/formbuilder"){ 
                 isChild 	= true;
                 parentId	= e.attributes.id;
             }
-        });
+        }); */
+
+        if(parents.length > 0 && parents[0].name == "tsjippy-forms/formbuilder"){ 
+            isChild 	= true;
+            parentId	= parents[0].attributes.id;
+        }
 
         // Not a child, do not do anything
         if(!isChild){
@@ -44,6 +55,8 @@ const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
          * Load the conditions form on first render to prevent waiting
          */
         useEffect( () => {
+            console.log(elementName);
+
             apiFetch({
                 path: tsjippy.restApiPrefix + `/forms/request_form_conditions_html`,
                 method: "POST",
@@ -52,8 +65,6 @@ const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
                     elementid: elementName
                 },
             }).then((res) => {
-
-                console.log(props)
                 setConditionsForm(res);
             });
         },
@@ -66,7 +77,6 @@ const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
          * @param {boolean} toggled 
          */
         const getConditionsForm = (toggled) => {
-            console.log(toggled);
             setConditionsFormVisibility(toggled);
         }
 
@@ -102,7 +112,7 @@ const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
                 buttonText  = "Close Conditions Form";
             }
             return (
-                <Flex>
+                <Flex class="form-element-wrapper">
                     <FlexItem>
                         <BlockEdit {...props} />
                     </FlexItem>

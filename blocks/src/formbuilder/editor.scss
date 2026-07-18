@@ -6,3 +6,23 @@
 @use "./../../../../tsjippy-shared-functionality/css/scss/global" as *;
 @use "./../../../../tsjippy-shared-functionality/css/scss/main";
 
+form.wp-block-tsjippy-forms-formbuilder{
+    > .components-flex:nth-child(even){
+        background-color: aliceblue;
+    }
+
+    > .components-flex:nth-child(odd){
+        background-color: lightgray;
+    }
+    
+    .block-list-appender{
+        padding: 10px;
+        text-align: center;
+        position: relative;
+
+        .add-form-element-button{
+            background-color: $primaryColor;
+            color: white;
+        }
+    }
+}

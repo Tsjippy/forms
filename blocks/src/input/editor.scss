@@ -4,6 +4,17 @@
  * Replace them with your own styles or remove the file completely.
  */
 
-.wp-block-formbuilder-my-block {
-	border: 1px dotted #f00;
+.attributes-form{
+	margin-top: 20px;
+    background-color: gainsboro;
+    padding: 10px;
+
+	.components-base-control{
+		margin-top: 20px;
+
+		.components-base-control__label{
+			margin-bottom: 1px;
+			margin-left: 5px;
+		}
+	}
 }

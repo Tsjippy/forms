@@ -20,9 +20,18 @@ importers:
       '@wordpress/components':
         specifier: latest
         version: 37.0.0(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.31)(postcss@8.5.19)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@6.0.3))
+      '@wordpress/data':
+        specifier: latest
+        version: 10.51.0(@types/react@18.3.31)(react@18.3.1)
+      '@wordpress/element':
+        specifier: latest
+        version: 8.3.0
       '@wordpress/i18n':
         specifier: latest
         version: 6.24.0
+      '@wordpress/icons':
+        specifier: latest
+        version: 15.2.0(@types/react@18.3.31)(react@18.3.1)
     devDependencies:
       '@wordpress/scripts':
         specifier: ^33.0.0

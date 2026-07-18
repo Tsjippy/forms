@@ -1,13 +1,9 @@
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
-import { Button, Dropdown, SelectControl, PanelBody, TextControl, Disabled } from '@wordpress/components';
+import { Button, Dropdown, SelectControl, PanelBody, TextControl, Disabled, ToggleControl, __experimentalNumberControl as NumberControl, CheckboxControl, RadioControl  } from '@wordpress/components';
 import './editor.scss';
-
-const MY_TEMPLATE = [
-    [ 'core/image', {} ],
-    [ 'core/heading', { placeholder: 'Book Title' } ],
-    [ 'core/paragraph', { placeholder: 'Summary' } ],
-];
+import * as elementAttributes from './element_attributes.js';
+import { dynamicInputs } from './dynamic_inputs.js';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -17,38 +13,12 @@ const MY_TEMPLATE = [
  *
  * @return {Element} Element to render.
  */
-export default function Edit({ attributes, setAttributes }) {
+export default function Edit({ attributes, setAttributes, isSelected }) {
 	const blockProps = useBlockProps();
-    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps, {
-		template: MY_TEMPLATE
-	});
 
 	const getTypeOptions = () => {
 		let typeOptions	= [];
-		[
-			"button",
-			"checkbox",
-			"color",
-			"date",
-			"datetime-local",
-			"email",
-			"file",
-			"hidden",
-			"image",
-			"month",
-			"number",
-			"password",
-			"radio",
-			"range",
-			"reset",
-			"search",
-			"submit",
-			"tel",
-			"text",
-			"time",
-			"url",
-			"week",
-		].forEach( type => { 
+		elementAttributes.inputTypes.forEach( type => { 
 			typeOptions.push( {label: type, value: type });
 		}); 
 	
@@ -66,6 +36,66 @@ export default function Edit({ attributes, setAttributes }) {
 				value    = { attributes.value }
 				onChange = { ( value ) => setAttributes({ value: value })}
 			/>
+		);
+	}
+
+	/**
+	 * Stores the input attribute value
+	 */
+	const storeAttributeAttributes = (value, name) => {
+
+		let inputAttributes	= {... attributes.inputAttributes};
+
+		inputAttributes[name]	= value;
+
+		setAttributes({ inputAttributes: inputAttributes })
+	}
+
+	/**
+	 * Shows the input attributes form if this is an selected input
+	 * 
+	 * @returns 
+	 */
+	const propertiesForm = () => {
+		if(!isSelected){
+			return '';
+		}
+
+		// First set an input type
+		if(attributes.type == ''){
+			return (
+				<SelectControl
+					label    = "Input Type"
+					value    = { attributes.type }
+					options  = { getTypeOptions() }
+					onChange = { ( type ) => setAttributes({ type: type })}
+				/>
+			);
+		}
+		
+		let attributeControls	= dynamicInputs(elementAttributes.inputSchema.sharedAttributes, attributes.inputAttributes, storeAttributeAttributes);
+
+		let ariaControls 		= [];
+
+		/**
+		 * Add aria attributes if we need them
+		 */
+		if(attributes.ariaAttributes){
+			ariaControls	= dynamicInputs(elementAttributes.inputSchema.ariaAttributes, attributes.inputAttributes, storeAttributeAttributes);
+		}		
+
+		return ( 
+			<div class="attributes-form">
+				<h3>Input properties</h3>
+				{ attributeControls }
+
+				<ToggleControl
+					label    = { __('Add aria attributes', 'tsjippy') }
+					checked  = {!!attributes.ariaAttributes}
+					onChange = { ( checked ) => setAttributes({ ariaAttributes: checked })}
+				/>
+				{ariaControls}
+			</div> 
 		);
 	}
 
@@ -87,8 +117,10 @@ export default function Edit({ attributes, setAttributes }) {
 				{ inputValue() }
 			</PanelBody>
 		</InspectorControls>
-		<div { ...blockProps }>
+
+		<div { ...blockProps } style = {{padding: '20px'}}>
 			<input type={ attributes.type } name={ attributes.name } value={ attributes.value } class='formbuilder'/>
+			{ propertiesForm() }
 		</div>
 		</>
 	);

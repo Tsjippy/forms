@@ -1084,3 +1084,19 @@ button.remove-list-selection {
 button.expand {
   font-size: 12px;
 }
+
+form.wp-block-tsjippy-forms-formbuilder > .components-flex:nth-child(even) {
+  background-color: aliceblue;
+}
+form.wp-block-tsjippy-forms-formbuilder > .components-flex:nth-child(odd) {
+  background-color: lightgray;
+}
+form.wp-block-tsjippy-forms-formbuilder .block-list-appender {
+  padding: 10px;
+  text-align: center;
+  position: relative;
+}
+form.wp-block-tsjippy-forms-formbuilder .block-list-appender .add-form-element-button {
+  background-color: #bd2919;
+  color: white;
+}

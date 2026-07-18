@@ -21,6 +21,8 @@ export default function save() {
 
 
 	return (
-		<form {...innerBlocksProps}> </form>
-	);
+		<form { ...blockProps }>
+			<div {...innerBlocksProps} />
+		</form>
+	)
 }

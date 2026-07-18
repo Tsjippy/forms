@@ -4,7 +4,7 @@
   "name": "tsjippy-forms/input",
   "version": "0.1.0",
   "title": "Form Input Element",
-  "category": "widgets",
+  "category": "form-elements",
   "icon": "forms",
   "description": "Input element for a form",
   "example": {},
@@ -28,6 +28,14 @@
     "value": {
       "type": "string",
       "default": ""
+    },
+    "inputAttributes": {
+      "type": "object",
+      "default": {}
+    },
+    "ariaAttributes": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

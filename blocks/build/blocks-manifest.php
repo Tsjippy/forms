@@ -7,7 +7,7 @@ return array(
 		'name' => 'tsjippy-forms/formbuilder',
 		'version' => '0.1.0',
 		'title' => 'Form Builder Test',
-		'category' => 'widgets',
+		'category' => 'form-elements',
 		'icon' => 'forms',
 		'description' => 'Form builder using blocks',
 		'example' => array(
@@ -81,13 +81,40 @@ return array(
 			)
 		)
 	),
+	'formstep' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'tsjippy-forms/formstep',
+		'version' => '0.1.0',
+		'title' => 'Formstep element',
+		'category' => 'form-elements',
+		'icon' => 'forms',
+		'description' => 'Allows splitting the form in steps',
+		'example' => array(
+			
+		),
+		'supports' => array(
+			'html' => false
+		),
+		'textdomain' => 'tsjippy',
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'viewScript' => 'file:./view.js',
+		'attributes' => array(
+			'text' => array(
+				'type' => 'string',
+				'default' => ''
+			)
+		)
+	),
 	'input' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
 		'apiVersion' => 3,
 		'name' => 'tsjippy-forms/input',
 		'version' => '0.1.0',
 		'title' => 'Form Input Element',
-		'category' => 'widgets',
+		'category' => 'form-elements',
 		'icon' => 'forms',
 		'description' => 'Input element for a form',
 		'example' => array(
@@ -111,6 +138,43 @@ return array(
 				'default' => ''
 			),
 			'value' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'inputAttributes' => array(
+				'type' => 'object',
+				'default' => array(
+					
+				)
+			),
+			'ariaAttributes' => array(
+				'type' => 'boolean',
+				'default' => false
+			)
+		)
+	),
+	'label' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'tsjippy-forms/label',
+		'version' => '0.1.0',
+		'title' => 'Form Input Element Label',
+		'category' => 'form-elements',
+		'icon' => 'forms',
+		'description' => 'Input element label for a form',
+		'example' => array(
+			
+		),
+		'supports' => array(
+			'html' => false
+		),
+		'textdomain' => 'tsjippy',
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'viewScript' => 'file:./view.js',
+		'attributes' => array(
+			'text' => array(
 				'type' => 'string',
 				'default' => ''
 			)

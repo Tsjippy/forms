@@ -220,3 +220,19 @@ function formResults($atts)
 
     return $html;
 }
+
+
+add_filter( 'block_categories_all', __NAMESPACE__.'\addFormsCategory', 10, 2 );
+
+function addFormsCategory( $categories, $block_editor_context ) {
+    return array_merge(
+        $categories,
+        array(
+            array(
+                'slug'  => 'form-elements', // Your unique category slug
+                'title' => __( 'Elements for the formbuilder block', '%TEXTDOMAIN%' ), // Category display name
+                'icon'  => 'forms', // Optional Dashicon
+            ),
+        )
+    );
+}

@@ -1,17 +1,24 @@
 import { __ } from '@wordpress/i18n';
-import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
-import { RadioControl, PanelBody, Button, Popover, TextControl, ToggleControl, CheckboxControl, SelectControl } from '@wordpress/components';
+import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls, Inserter  } from '@wordpress/block-editor';
+import { RadioControl, PanelBody, Button, Popover, TextControl, ToggleControl, CheckboxControl, SelectControl, Placeholder  } from '@wordpress/components';
 import { useState, useEffect } from 'react';
 import apiFetch from "@wordpress/api-fetch";
 import { RawHTML, Fragment } from '@wordpress/element';
 import { useSelect, useDispatch } from "@wordpress/data";
 import { store as blockEditorStore } from '@wordpress/block-editor';
+import { Icon, plus } from '@wordpress/icons';
 import './editor.scss';
 import './innerblock_filter.js';
 
 
 const MY_TEMPLATE = [
-	[ 'tsjippy-forms/input', { type: 'number', name: 'user-id' } ],
+	[ 
+		'tsjippy-forms/label', 
+		{ text: "Your Name"}, 
+		[
+        	[ 'tsjippy-forms/input', { type: 'number', name: 'amount'} ]
+    	] 
+	],
 	[ 'tsjippy-forms/input', { type: 'submit', name: 'submit', value: 'Submit the form'} ],
 ];
 
@@ -59,12 +66,33 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 		});
 	}
 
+		const CustomAppender = ({ clientId }) => {
+			return (
+				<Inserter
+					rootClientId={clientId}
+					// renderToggle passes the function to open the inline popup
+					renderToggle={({ onToggle, isOpen }) => (
+						<Button
+							className="add-form-element-button"
+							onClick={onToggle}
+							aria-expanded={isOpen}
+							variant="tertiary"
+						>
+							<Icon icon={plus} />
+							Add More Form Blocks
+						</Button>
+					)}
+					isAppender
+				/>
+			);
+		};
+
 	const blockProps = useBlockProps();
     const { children, ...innerBlocksProps }  = useInnerBlocksProps( 
 		blockProps, 
 		{
 			template: MY_TEMPLATE,
-			templateInsertUpdatesSelection: true
+			renderAppender: CustomAppender
 		}
 	);
 
@@ -169,7 +197,6 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 	, [clientId]);
 
 	const getFormElements = () => {
-
 		let blockNames	= [];
 
 		innerBlocks.map((block) => {
@@ -206,6 +233,51 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 		)
 	}
 
+	/**
+	 * Render the formstep controls
+	 * 
+	 */
+	const formstepControls = () => {
+		let formsteps = innerBlocks.filter(block => block.attributes.name == 'tsjippy-forms/formstep');
+
+		console.log(formsteps);
+
+		if(formsteps.length > 0){
+			return (
+				<div class="multi-step-controls">
+					<div class="multi-step-controls-wrapper">
+						<div style="flex:1;">
+							<button type="button" class="button hidden" name="previous-button">
+								Previous
+							</button>
+						</div>
+
+						<div class="step-wrapper" style="flex:1;text-align:center;margin:auto;">
+							<span class="step active"></span>
+							<span class="step"></span>
+							<span class="step"></span>
+							<span class="step"></span>
+						</div>
+						
+						<div style="flex:1;">
+							<button type="button" class="button next-button" name="next-button">
+								Next
+							</button>
+							<div class="submit-wrapper">
+								<button type="button" class="button form-submit hidden" name="submit-form">
+									Submit travel request
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			);
+		}
+
+		return '';
+	}
+
+
 	const resultingForm = () => {
 		if(isEmailsFormVisible){
 			return (<RawHTML> { emailsForm } </RawHTML>);
@@ -218,6 +290,8 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 		return(
 			<form {...innerBlocksProps} style={{border: 'solid' }} >
 				{ children }
+
+				{ formstepControls() }
 			</form>
 		);
 	}

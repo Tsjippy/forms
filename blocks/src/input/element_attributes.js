@@ -1,0 +1,402 @@
+export const inputTypes = [
+    "button",
+    "checkbox",
+    "color",
+    "date",
+    "datetime-local",
+    "email",
+    "file",
+    "hidden",
+    "image",
+    "month",
+    "number",
+    "password",
+    "radio",
+    "range",
+    "reset",
+    "search",
+    "submit",
+    "tel",
+    "text",
+    "time",
+    "url",
+    "week",
+];
+
+export const inputSchema = {
+  sharedAttributes: [
+    { attribute: "id", expectedType: "string" },
+    { attribute: "class", expectedType: "string" },
+    { attribute: "style", expectedType: "string" },
+    { attribute: "title", expectedType: "string" },
+    { attribute: "hidden", expectedType: "boolean" },
+    { attribute: "lang", expectedType: "string" },
+    { attribute: "dir", expectedType: "ltr|rtl|auto" },
+    { attribute: "role", expectedType: "string" },
+    { attribute: "tabindex", expectedType: "number" },
+    { attribute: "accesskey", expectedType: "string" },
+    { attribute: "contenteditable", expectedType: "boolean" },
+    { attribute: "draggable", expectedType: "boolean" },
+    { attribute: "translate", expectedType: "boolean" },
+    { attribute: "data-*", expectedType: "string" }
+  ],
+
+  types: {
+    button: [
+      { attribute: "value", expectedType: "string" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "formaction", expectedType: "string" },
+      { attribute: "formenctype", expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain" },
+      { attribute: "formmethod", expectedType: "get|post|dialog" },
+      { attribute: "formnovalidate", expectedType: "boolean" },
+      { attribute: "formtarget", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "popovertarget", expectedType: "string" },
+      { attribute: "popovertargetaction", expectedType: "hide|show|toggle" }
+    ],
+
+    checkbox: [
+      { attribute: "checked", expectedType: "boolean" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    color: [
+      { attribute: "value", expectedType: "string" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "alpha", expectedType: "boolean" },
+      { attribute: "colorspace", expectedType: "limited-srgb|display-p3" }
+    ],
+
+    date: [
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "max", expectedType: "string" },
+      { attribute: "min", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "step", expectedType: "number|any" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    "datetime-local": [
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "max", expectedType: "string" },
+      { attribute: "min", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "step", expectedType: "number|any" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    email: [
+      { attribute: "autocomplete", expectedType: "string" },
+      { attribute: "autofocus", expectedType: "boolean" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "maxlength", expectedType: "number" },
+      { attribute: "minlength", expectedType: "number" },
+      { attribute: "multiple", expectedType: "boolean" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "pattern", expectedType: "string" },
+      { attribute: "placeholder", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "size", expectedType: "number" },
+      { attribute: "value", expectedType: "string" },
+      { attribute: "dirname", expectedType: "string" }
+    ],
+
+    file: [
+      { attribute: "accept", expectedType: "string" },
+      { attribute: "autocomplete", expectedType: "string" },
+      { attribute: "autofocus", expectedType: "boolean" },
+      { attribute: "capture", expectedType: "user|environment|boolean" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "multiple", expectedType: "boolean" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "required", expectedType: "boolean" }
+    ],
+
+    hidden: [
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "value", expectedType: "string" },
+      { attribute: "dirname", expectedType: "string" }
+    ],
+
+    image: [
+      { attribute: "alt", expectedType: "string" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "formaction", expectedType: "string" },
+      { attribute: "formenctype", expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain" },
+      { attribute: "formmethod", expectedType: "get|post|dialog" },
+      { attribute: "formnovalidate", expectedType: "boolean" },
+      { attribute: "formtarget", expectedType: "string" },
+      { attribute: "height", expectedType: "number" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "src", expectedType: "string" },
+      { attribute: "width", expectedType: "number" }
+    ],
+
+    month: [
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "max", expectedType: "string" },
+      { attribute: "min", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "step", expectedType: "number|any" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    number: [
+      { attribute: "autocomplete", expectedType: "string" },
+      { attribute: "autofocus", expectedType: "boolean" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "max", expectedType: "string|number" },
+      { attribute: "min", expectedType: "string|number" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "placeholder", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "step", expectedType: "number|any" },
+      { attribute: "value", expectedType: "string|number" }
+    ],
+
+    password: [
+      { attribute: "autocomplete", expectedType: "string" },
+      { attribute: "autofocus", expectedType: "boolean" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "maxlength", expectedType: "number" },
+      { attribute: "minlength", expectedType: "number" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "pattern", expectedType: "string" },
+      { attribute: "placeholder", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "size", expectedType: "number" },
+      { attribute: "value", expectedType: "string" },
+      { attribute: "dirname", expectedType: "string" }
+    ],
+
+    radio: [
+      { attribute: "checked", expectedType: "boolean" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    range: [
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "max", expectedType: "string|number" },
+      { attribute: "min", expectedType: "string|number" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "step", expectedType: "number|any" },
+      { attribute: "value", expectedType: "string|number" }
+    ],
+
+    reset: [
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "formaction", expectedType: "string" },
+      { attribute: "formenctype", expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain" },
+      { attribute: "formmethod", expectedType: "get|post|dialog" },
+      { attribute: "formnovalidate", expectedType: "boolean" },
+      { attribute: "formtarget", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    search: [
+      { attribute: "autocomplete", expectedType: "string" },
+      { attribute: "autofocus", expectedType: "boolean" },
+      { attribute: "dirname", expectedType: "string" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "maxlength", expectedType: "number" },
+      { attribute: "minlength", expectedType: "number" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "pattern", expectedType: "string" },
+      { attribute: "placeholder", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "size", expectedType: "number" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    submit: [
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "formaction", expectedType: "string" },
+      { attribute: "formenctype", expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain" },
+      { attribute: "formmethod", expectedType: "get|post|dialog" },
+      { attribute: "formnovalidate", expectedType: "boolean" },
+      { attribute: "formtarget", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    tel: [
+      { attribute: "autocomplete", expectedType: "string" },
+      { attribute: "autofocus", expectedType: "boolean" },
+      { attribute: "dirname", expectedType: "string" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "maxlength", expectedType: "number" },
+      { attribute: "minlength", expectedType: "number" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "pattern", expectedType: "string" },
+      { attribute: "placeholder", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "size", expectedType: "number" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    text: [
+      { attribute: "autocomplete", expectedType: "string" },
+      { attribute: "autofocus", expectedType: "boolean" },
+      { attribute: "dirname", expectedType: "string" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "maxlength", expectedType: "number" },
+      { attribute: "minlength", expectedType: "number" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "pattern", expectedType: "string" },
+      { attribute: "placeholder", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "size", expectedType: "number" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    time: [
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "max", expectedType: "string" },
+      { attribute: "min", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "step", expectedType: "number|any" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    url: [
+      { attribute: "autocomplete", expectedType: "string" },
+      { attribute: "autofocus", expectedType: "boolean" },
+      { attribute: "dirname", expectedType: "string" },
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "maxlength", expectedType: "number" },
+      { attribute: "minlength", expectedType: "number" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "pattern", expectedType: "string" },
+      { attribute: "placeholder", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "size", expectedType: "number" },
+      { attribute: "value", expectedType: "string" }
+    ],
+
+    week: [
+      { attribute: "disabled", expectedType: "boolean" },
+      { attribute: "form", expectedType: "string" },
+      { attribute: "list", expectedType: "string" },
+      { attribute: "max", expectedType: "string" },
+      { attribute: "min", expectedType: "string" },
+      { attribute: "name", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "step", expectedType: "number|any" },
+      { attribute: "value", expectedType: "string" }
+    ]
+   },
+
+    ariaAttributes: [
+        { attribute: "activedescendant", expectedType: "string" },
+        { attribute: "atomic", expectedType: "boolean" },
+        { attribute: "autocomplete", expectedType: "inline|list|both|none" },
+        { attribute: "braillelabel", expectedType: "string" },
+        { attribute: "brailleroledescription", expectedType: "string" },
+        { attribute: "busy", expectedType: "boolean" },
+        { attribute: "checked", expectedType: "boolean|mixed" },
+        { attribute: "colcount", expectedType: "number" },
+        { attribute: "colindex", expectedType: "number" },
+        { attribute: "colindextext", expectedType: "string" },
+        { attribute: "colspan", expectedType: "number" },
+        { attribute: "controls", expectedType: "string" },
+        { attribute: "current", expectedType: "boolean|page|step|location|date|time" },
+        { attribute: "describedby", expectedType: "string" },
+        { attribute: "description", expectedType: "string" },
+        { attribute: "details", expectedType: "string" },
+        { attribute: "disabled", expectedType: "boolean" },
+        { attribute: "dropeffect", expectedType: "copy|move|link|execute|popup|none" },
+        { attribute: "errormessage", expectedType: "string" },
+        { attribute: "expanded", expectedType: "boolean" },
+        { attribute: "flowto", expectedType: "string" },
+        { attribute: "grabbed", expectedType: "boolean" },
+        { attribute: "haspopup", expectedType: "boolean|menu|listbox|tree|grid|dialog" },
+        { attribute: "hidden", expectedType: "boolean" },
+        { attribute: "invalid", expectedType: "boolean|grammar|spelling" },
+        { attribute: "keyshortcuts", expectedType: "string" },
+        { attribute: "label", expectedType: "string" },
+        { attribute: "labelledby", expectedType: "string" },
+        { attribute: "level", expectedType: "number" },
+        { attribute: "live", expectedType: "off|polite|assertive" },
+        { attribute: "modal", expectedType: "boolean" },
+        { attribute: "multiline", expectedType: "boolean" },
+        { attribute: "multiselectable", expectedType: "boolean" },
+        { attribute: "orientation", expectedType: "horizontal|vertical" },
+        { attribute: "owns", expectedType: "string" },
+        { attribute: "placeholder", expectedType: "string" },
+        { attribute: "posinset", expectedType: "number" },
+        { attribute: "pressed", expectedType: "boolean|mixed" },
+        { attribute: "readonly", expectedType: "boolean" },
+        { attribute: "relevant", expectedType: "additions|removals|text|all|additions text|additions removals|removals text|additions removals text" },
+        { attribute: "required", expectedType: "boolean" },
+        { attribute: "roledescription", expectedType: "string" },
+        { attribute: "rowcount", expectedType: "number" },
+        { attribute: "rowindex", expectedType: "number" },
+        { attribute: "rowindextext", expectedType: "string" },
+        { attribute: "rowspan", expectedType: "number" },
+        { attribute: "selected", expectedType: "boolean" },
+        { attribute: "setsize", expectedType: "number" },
+        { attribute: "sort", expectedType: "ascending|descending|none|other" },
+        { attribute: "valuemax", expectedType: "number" },
+        { attribute: "valuemin", expectedType: "number" },
+        { attribute: "valuenow", expectedType: "number" },
+        { attribute: "valuetext", expectedType: "string" }
+    ]
+};
