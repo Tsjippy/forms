@@ -5,6 +5,7 @@
 - very first version of block builder form
 
 ### Changed
+- added input element attributes form
 
 ### Fixed
 
