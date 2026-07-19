@@ -87,6 +87,9 @@ return array(
 		'name' => 'tsjippy-forms/formstep',
 		'version' => '0.1.0',
 		'title' => 'Formstep element',
+		'parent' => array(
+			'tsjippy-forms/formbuilder'
+		),
 		'category' => 'form-elements',
 		'icon' => 'forms',
 		'description' => 'Allows splitting the form in steps',
@@ -107,6 +110,30 @@ return array(
 				'default' => ''
 			)
 		)
+	),
+	'formstep-controls' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'tsjippy-forms/formstep-controls',
+		'version' => '0.1.0',
+		'title' => 'Formstep Controls Element',
+		'parent' => array(
+			'tsjippy-forms/formbuilder'
+		),
+		'category' => 'form-elements',
+		'icon' => 'forms',
+		'description' => 'Shows the formstep controls and a previous and next button',
+		'example' => array(
+			
+		),
+		'supports' => array(
+			'html' => false
+		),
+		'textdomain' => 'tsjippy',
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'viewScript' => 'file:./view.js'
 	),
 	'input' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',

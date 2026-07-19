@@ -1,0 +1,20 @@
+/**
+ * The following styles get applied inside the editor only.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+
+.attributes-form{
+	margin-top: 20px;
+    background-color: gainsboro;
+    padding: 10px;
+
+	.components-base-control{
+		margin-top: 20px;
+
+		.components-base-control__label{
+			margin-bottom: 1px;
+			margin-left: 5px;
+		}
+	}
+}

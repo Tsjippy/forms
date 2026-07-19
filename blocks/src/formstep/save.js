@@ -19,8 +19,6 @@ export default function save() {
 	const blockProps 		= useBlockProps.save();
     const innerBlocksProps 	= useInnerBlocksProps.save( blockProps );
 
-	console.log(innerBlocksProps);
-
 	return (
 		<div { ...blockProps }>
 			<div {...innerBlocksProps} />

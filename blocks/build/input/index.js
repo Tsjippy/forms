@@ -28,8 +28,6 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 const storeDataAtributes = (type, newValue, name, saveFunction, all) => {
-  console.log(type);
-
   // Remove old entry if it is a name update
   if (type == 'name') {
     all[newValue] = all[name] ?? '';
@@ -212,6 +210,33 @@ function Edit({
   };
 
   /**
+   * The input type selector
+   */
+  const inputTypeSelector = () => {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+      label: "Input Type",
+      value: attributes.type,
+      options: getTypeOptions(),
+      onChange: type => setAttributes({
+        type: type
+      })
+    });
+  };
+
+  /**
+   * The input name component
+   */
+  const inputName = () => {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+      label: "Input Name",
+      value: attributes.name,
+      onChange: name => setAttributes({
+        name: name
+      })
+    });
+  };
+
+  /**
    * Shows the input attributes form if this is an selected input
    * 
    * @returns 
@@ -223,14 +248,12 @@ function Edit({
 
     // First set an input type
     if (attributes.type == '') {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
-        label: "Input Type",
-        value: attributes.type,
-        options: getTypeOptions(),
-        onChange: type => setAttributes({
-          type: type
-        })
-      });
+      return inputTypeSelector();
+    }
+
+    // Then set a name
+    if (attributes.name == '') {
+      return inputName();
     }
     let attributeControls = (0,_dynamic_inputs_js__WEBPACK_IMPORTED_MODULE_5__.dynamicInputs)(_element_attributes_js__WEBPACK_IMPORTED_MODULE_4__.inputSchema.sharedAttributes, attributes.inputAttributes, storeAttributeAttributes);
     let ariaControls = [];
@@ -241,17 +264,19 @@ function Edit({
     if (attributes.ariaAttributes) {
       ariaControls = (0,_dynamic_inputs_js__WEBPACK_IMPORTED_MODULE_5__.dynamicInputs)(_element_attributes_js__WEBPACK_IMPORTED_MODULE_4__.inputSchema.ariaAttributes, attributes.inputAttributes, storeAttributeAttributes);
     }
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
-      class: "attributes-form",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
-        children: "Input properties"
-      }), attributeControls, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
-        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add aria attributes', 'tsjippy'),
-        checked: !!attributes.ariaAttributes,
-        onChange: checked => setAttributes({
-          ariaAttributes: checked
-        })
-      }), ariaControls]
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
+      children: [inputTypeSelector(), inputName(), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
+        class: "attributes-form",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
+          children: "Input properties"
+        }), attributeControls, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add aria attributes', 'tsjippy'),
+          checked: !!attributes.ariaAttributes,
+          onChange: checked => setAttributes({
+            ariaAttributes: checked
+          })
+        }), ariaControls]
+      })]
     });
   };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
@@ -273,17 +298,18 @@ function Edit({
           })
         }), inputValue()]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
       ...blockProps,
-      style: {
-        padding: '20px'
-      },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
-        type: attributes.type,
-        name: attributes.name,
-        value: attributes.value,
-        class: "formbuilder"
-      }), propertiesForm()]
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("fieldset", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("legend", {
+          children: [attributes.type.charAt(0).toUpperCase() + attributes.type.slice(1), " input"]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
+          type: attributes.type,
+          name: attributes.name,
+          value: attributes.value,
+          class: "formbuilder"
+        }), propertiesForm()]
+      })
     })]
   });
 }
@@ -398,6 +424,9 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "value",
+      expectedType: "string"
+    }, {
+      attribute: "label",
       expectedType: "string"
     }],
     color: [{
@@ -745,6 +774,9 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "value",
+      expectedType: "string"
+    }, {
+      attribute: "label",
       expectedType: "string"
     }],
     range: [{
@@ -1325,12 +1357,17 @@ __webpack_require__.r(__webpack_exports__);
  * @return {Element} Element to render.
  */
 
-function save() {
+function save({
+  attributes
+}) {
   const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save();
-  const innerBlocksProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useInnerBlocksProps.save(blockProps);
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("form", {
-    ...innerBlocksProps,
-    children: " "
+  console.log(attributes);
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+    type: attributes.type,
+    ...blockProps,
+    name: attributes.name,
+    ...attributes.inputAttributes,
+    ...attributes.ariaAttributes
   });
 }
 

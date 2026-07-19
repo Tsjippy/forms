@@ -1,19 +1,20 @@
 import { __ } from '@wordpress/i18n';
-import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
-import { RadioControl, PanelBody, Button, Popover, TextControl, ToggleControl, CheckboxControl, SelectControl, Spinner, Flex, FlexItem } from '@wordpress/components';
+import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls, BlockControls  } from '@wordpress/block-editor';
+import { RadioControl, PanelBody, Button, Popover, TextControl, ToggleControl, CheckboxControl, SelectControl, Spinner, Flex, FlexItem, ToolbarGroup, ToolbarButton } from '@wordpress/components';
 import { useState, useEffect } from 'react';
 import apiFetch from "@wordpress/api-fetch";
 import { RawHTML, Fragment } from '@wordpress/element';
 import { useSelect, useDispatch } from "@wordpress/data";
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { addFilter } from '@wordpress/hooks';
+import { addFilter, currentFilter } from '@wordpress/hooks';
+import { seen } from '@wordpress/icons';
 
 /**
  * Add a button behind each child block
  */
 const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
-    return ( props ) => {
+    return ( props) => {
 
         if(!props.isSelected){
             return (
@@ -55,18 +56,19 @@ const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
          * Load the conditions form on first render to prevent waiting
          */
         useEffect( () => {
-            console.log(elementName);
+            if(elementName != undefined){
 
-            apiFetch({
-                path: tsjippy.restApiPrefix + `/forms/request_form_conditions_html`,
-                method: "POST",
-                data: {
-                    formid: parentId,
-                    elementid: elementName
-                },
-            }).then((res) => {
-                setConditionsForm(res);
-            });
+                apiFetch({
+                    path: tsjippy.restApiPrefix + `/forms/request_form_conditions_html`,
+                    method: "POST",
+                    data: {
+                        formid: parentId,
+                        elementid: elementName
+                    },
+                }).then((res) => {
+                    setConditionsForm(res);
+                });
+            }
         },
         []
     )
@@ -94,38 +96,36 @@ const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
                 if( conditionsForm == ''){
                     return (
                         [
+                            <br></br>,
+                            <b>Loading Conditins Form...</b>,
                             <Spinner />,
-                            <b>Loading Conditins Form...</b>
                         ]
                     )
                 }
-                return (<RawHTML> { conditionsForm } </RawHTML>);
+                return (<RawHTML>{ conditionsForm } </RawHTML>);
             }
 
-            return '';
+            return;
         }
 
-        const showMain  = () => {
+        const blockControls  = () => {
             let buttonText  = "Set Input Conditions";
 
             if(isConditionsFormVisible){
                 buttonText  = "Close Conditions Form";
             }
             return (
-                <Flex class="form-element-wrapper">
-                    <FlexItem>
-                        <BlockEdit {...props} />
-                    </FlexItem>
-
-                    <FlexItem>
-                        <Button
-                            variant = "secundary"
+                <>
+                <BlockControls>
+                    <ToolbarGroup>
+                        <ToolbarButton
+                            icon    = { seen }
+                            label   = { __( buttonText, 'tsjippy' ) }
                             onClick = { toggleConditionsForm }
-                        >
-                            { buttonText }
-                        </Button>
-                    </FlexItem>
-                </Flex>
+                        />
+                    </ToolbarGroup>
+                </BlockControls>
+                </>
             )
         }
 
@@ -134,8 +134,9 @@ const addButtonToInnerBlocks = createHigherOrderComponent( ( BlockEdit ) => {
          */
         return (
             <Fragment>
-                { showMain() }
+                { blockControls() }
                 { showConditionsForm() }
+                <BlockEdit {...props} />
 
                 <InspectorControls>
                     <PanelBody  title = {__("Block Conditions", "tsjippy")} initialOpen = {false} onToggle={(value) => getConditionsForm(value)}>

@@ -91,6 +91,7 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
     const { children, ...innerBlocksProps }  = useInnerBlocksProps( 
 		blockProps, 
 		{
+			orientation: 'vertical', // Enables drag & drop functionality
 			template: MY_TEMPLATE,
 			renderAppender: CustomAppender
 		}
@@ -233,51 +234,6 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 		)
 	}
 
-	/**
-	 * Render the formstep controls
-	 * 
-	 */
-	const formstepControls = () => {
-		let formsteps = innerBlocks.filter(block => block.attributes.name == 'tsjippy-forms/formstep');
-
-		console.log(formsteps);
-
-		if(formsteps.length > 0){
-			return (
-				<div class="multi-step-controls">
-					<div class="multi-step-controls-wrapper">
-						<div style="flex:1;">
-							<button type="button" class="button hidden" name="previous-button">
-								Previous
-							</button>
-						</div>
-
-						<div class="step-wrapper" style="flex:1;text-align:center;margin:auto;">
-							<span class="step active"></span>
-							<span class="step"></span>
-							<span class="step"></span>
-							<span class="step"></span>
-						</div>
-						
-						<div style="flex:1;">
-							<button type="button" class="button next-button" name="next-button">
-								Next
-							</button>
-							<div class="submit-wrapper">
-								<button type="button" class="button form-submit hidden" name="submit-form">
-									Submit travel request
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			);
-		}
-
-		return '';
-	}
-
-
 	const resultingForm = () => {
 		if(isEmailsFormVisible){
 			return (<RawHTML> { emailsForm } </RawHTML>);
@@ -288,11 +244,14 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 		}
 
 		return(
-			<form {...innerBlocksProps} style={{border: 'solid' }} >
-				{ children }
-
-				{ formstepControls() }
-			</form>
+			<fieldset>
+    			<legend>
+					{ (attributes.name).charAt(0).toUpperCase() + (attributes.name).slice(1) } Form
+				</legend>
+				<form {...innerBlocksProps} >
+					{ children }
+				</form>
+			</fieldset>
 		);
 	}
 

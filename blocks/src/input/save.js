@@ -4,7 +4,7 @@
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import { useBlockProps, useInnerBlocksProps  } from '@wordpress/block-editor';
+import { useBlockProps  } from '@wordpress/block-editor';
 
 /**
  * The save function defines the way in which the different attributes should
@@ -15,12 +15,12 @@ import { useBlockProps, useInnerBlocksProps  } from '@wordpress/block-editor';
  *
  * @return {Element} Element to render.
  */
-export default function save() {
+export default function save({ attributes }) {
 	const blockProps = useBlockProps.save();
-    const innerBlocksProps = useInnerBlocksProps.save( blockProps );
+    console.log(attributes)
 
 
 	return (
-		<form {...innerBlocksProps}> </form>
+		<input type={ attributes.type } {...blockProps} name={ attributes.name} {...attributes.inputAttributes} {...attributes.ariaAttributes} />
 	);
 }

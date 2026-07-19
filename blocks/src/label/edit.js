@@ -2,8 +2,6 @@ import { __ } from '@wordpress/i18n';
 import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
 import { Button, Dropdown, SelectControl, PanelBody, TextControl, Placeholder } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-
-
 import './editor.scss';
 
 /**
@@ -16,7 +14,11 @@ import './editor.scss';
  */
 export default function Edit({ attributes, setAttributes, clientId }) {
 	const blockProps = useBlockProps();
-    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps);
+    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps,
+		{
+			orientation: 'vertical', // Enables drag & drop functionality
+		}
+	);
 
 	/**
 	 * Check for child blocks
@@ -61,14 +63,15 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				/>
 			</PanelBody>
 		</InspectorControls>
-
-		<div { ...innerBlocksProps }>
+    			
+		<fieldset { ...innerBlocksProps }>
+			<legend>Label Element</legend>
 			<label >
 				{ attributes.text }
 				{ children }
 				<InnerBlocks.ButtonBlockAppender />
 			</label>
-		</div>
+		</fieldset>
 		</>
 	);
 }

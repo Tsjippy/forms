@@ -1,8 +1,10 @@
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
 import { Button, Dropdown, SelectControl, PanelBody, TextControl, Placeholder } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { createBlock } from '@wordpress/blocks';
 import './editor.scss';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -14,7 +16,9 @@ import './editor.scss';
  */
 export default function Edit({ attributes, setAttributes, clientId }) {
 	const blockProps = useBlockProps();
-    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps);
+    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps, { 
+        orientation: 'vertical', // Enables drag & drop functionality
+     });
 
 	/**
 	 * Check for child blocks
@@ -27,6 +31,35 @@ export default function Edit({ attributes, setAttributes, clientId }) {
         },
         [ clientId ]
     );
+
+    /**
+     * Find the parent form builder block
+     * And add a formstep control block if needed
+     */
+
+    // Get the parent block ids
+    const parentIds = wp.data.select( 'core/block-editor' ).getBlockParents(clientId); 
+    // Get the blocks
+    const parents 	= wp.data.select('core/block-editor').getBlocksByClientId(parentIds);
+
+    // Loop over all the parents to find the formbuilder block
+    parents.forEach(parent => {
+        if(parent.name == "tsjippy-forms/formbuilder"){
+            // Check if it is not already there
+            if(parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep-controls').length > 0){
+                return '';
+            }
+
+            let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
+
+            // Create a formstep controls block
+            const newBlock = createBlock( "tsjippy-forms/formstep-controls");
+
+            // Insert the new block into the parent's inner blocks
+            const { insertBlock } = useDispatch( 'core/block-editor' );
+            insertBlock( newBlock, undefined, parent.clientId );
+        }
+    });
 
 	if ( ! hasInnerBlocks ) {
         return (

@@ -9,9 +9,6 @@ import { Button, Dropdown, SelectControl, PanelBody, TextControl, Disabled, Togg
  * @param {*} all 
  */
 const storeDataAtributes   = (type, newValue, name, saveFunction, all) => {
-
-    console.log(type);
-
     // Remove old entry if it is a name update
     if(type == 'name'){
         all[newValue]   = all[name] ?? '';

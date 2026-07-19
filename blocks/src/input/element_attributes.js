@@ -62,7 +62,8 @@ export const inputSchema = {
       { attribute: "form", expectedType: "string" },
       { attribute: "name", expectedType: "string" },
       { attribute: "required", expectedType: "boolean" },
-      { attribute: "value", expectedType: "string" }
+      { attribute: "value", expectedType: "string" },
+      { attribute: "label", expectedType: "string" }
     ],
 
     color: [
@@ -207,7 +208,8 @@ export const inputSchema = {
       { attribute: "form", expectedType: "string" },
       { attribute: "name", expectedType: "string" },
       { attribute: "required", expectedType: "boolean" },
-      { attribute: "value", expectedType: "string" }
+      { attribute: "value", expectedType: "string" },
+      { attribute: "label", expectedType: "string" }
     ],
 
     range: [

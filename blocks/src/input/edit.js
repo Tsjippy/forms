@@ -52,6 +52,33 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 	}
 
 	/**
+	 * The input type selector
+	 */
+	const inputTypeSelector = () => {
+		return (
+			<SelectControl
+				label    = "Input Type"
+				value    = { attributes.type }
+				options  = { getTypeOptions() }
+				onChange = { ( type ) => setAttributes({ type: type })}
+			/>
+		)
+	}
+
+	/**
+	 * The input name component
+	 */
+	const inputName = () => {
+		return (
+			<TextControl
+				label    = "Input Name"
+				value    = { attributes.name }
+				onChange = { ( name ) => setAttributes({ name: name })}
+			/>
+		)
+	}
+
+	/**
 	 * Shows the input attributes form if this is an selected input
 	 * 
 	 * @returns 
@@ -64,12 +91,14 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 		// First set an input type
 		if(attributes.type == ''){
 			return (
-				<SelectControl
-					label    = "Input Type"
-					value    = { attributes.type }
-					options  = { getTypeOptions() }
-					onChange = { ( type ) => setAttributes({ type: type })}
-				/>
+				inputTypeSelector()
+			);
+		}
+
+		// Then set a name
+		if(attributes.name == ''){
+			return (
+				inputName()
 			);
 		}
 		
@@ -85,6 +114,9 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 		}		
 
 		return ( 
+			<>
+			{ inputTypeSelector() }
+			{ inputName() }
 			<div class="attributes-form">
 				<h3>Input properties</h3>
 				{ attributeControls }
@@ -96,6 +128,7 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 				/>
 				{ariaControls}
 			</div> 
+			</>
 		);
 	}
 
@@ -118,9 +151,14 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 			</PanelBody>
 		</InspectorControls>
 
-		<div { ...blockProps } style = {{padding: '20px'}}>
-			<input type={ attributes.type } name={ attributes.name } value={ attributes.value } class='formbuilder'/>
-			{ propertiesForm() }
+		<div { ...blockProps } >
+			<fieldset>
+    			<legend>
+					{ (attributes.type).charAt(0).toUpperCase() + (attributes.type).slice(1) } input
+				</legend>
+				<input type={ attributes.type } name={ attributes.name } value={ attributes.value } class='formbuilder'/>
+				{ propertiesForm() }
+			</fieldset>
 		</div>
 		</>
 	);

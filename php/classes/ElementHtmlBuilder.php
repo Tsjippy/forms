@@ -126,7 +126,7 @@ class ElementHtmlBuilder extends SubmitForm
     /**
      * Builds an array with all user(meta)data for the current user
      */
-    protected function buildDefaultsArray()
+    public function buildDefaultsArray()
     {
         global $wpdb;
 
