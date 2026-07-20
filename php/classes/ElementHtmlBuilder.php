@@ -135,12 +135,12 @@ class ElementHtmlBuilder extends SubmitForm
             return;
         }
 
-        $value = wp_cache_get("default-meta-values-".$this->userId, 'forms', false, $found1);
+        $value = wp_cache_get("default-meta-values-".$this->userId, 'tsjippy_forms', false, $found1);
         if($found1){
             $this->defaultValues    = $value;
         }
 
-        $value = wp_cache_get("default-array-meta-values-".$this->userId, 'forms', false, $found2);
+        $value = wp_cache_get("default-array-meta-values-".$this->userId, 'tsjippy_forms', false, $found2);
         if($found2){
             $this->defaultArrayValues    = $value;
         }
@@ -306,8 +306,8 @@ class ElementHtmlBuilder extends SubmitForm
 
         ksort($this->defaultArrayValues);
 
-        wp_cache_set("default-meta-values-".$this->userId, $this->defaultValues, 'forms');
-        wp_cache_set("default-array-meta-values-".$this->userId, $this->defaultArrayValues, 'forms');
+        wp_cache_set("default-meta-values-".$this->userId, $this->defaultValues, 'tsjippy_forms');
+        wp_cache_set("default-array-meta-values-".$this->userId, $this->defaultArrayValues, 'tsjippy_forms');
     }
 
     /**
@@ -389,7 +389,7 @@ class ElementHtmlBuilder extends SubmitForm
      * @return array $allMetaKeys     Array containing all user meta keys
      */
     protected function userMetaKeys(){
-        $value = wp_cache_get('user-meta-keys', 'forms', false, $found);
+        $value = wp_cache_get('user-meta-keys', 'tsjippy_forms', false, $found);
 
         if ($found) {
             return $value;
@@ -411,7 +411,7 @@ class ElementHtmlBuilder extends SubmitForm
 
         ksort($metaKeys, SORT_STRING | SORT_FLAG_CASE);
 
-        wp_cache_set('user-meta-keys', $metaKeys, 'forms');
+        wp_cache_set('user-meta-keys', $metaKeys, 'tsjippy_forms');
 
         return $metaKeys;
     }

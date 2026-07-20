@@ -822,7 +822,7 @@ class Forms
          * Flush db cache
          */
         if (wp_cache_supports('flush_group')) {
-            wp_cache_flush_group('forms');
+            wp_cache_flush_group('tsjippy_forms');
         } else {
             wp_cache_flush();
         }
