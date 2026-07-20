@@ -21,9 +21,17 @@
       "type": "integer",
       "default": -1
     },
-    "type": {
+    "method": {
       "type": "string",
       "default": "post"
+    },
+    "target": {
+      "type": "string",
+      "default": "_self"
+    },
+    "autocomplete": {
+      "type": "boolean",
+      "default": true
     },
     "submission_message": {
       "type": "string",

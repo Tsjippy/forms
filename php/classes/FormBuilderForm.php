@@ -2243,8 +2243,9 @@ class FormBuilderForm extends DisplayForm
      *    It is also stored at the conditional fields to be able to create efficient JavaScript
      *
      * @param int    $elementId    The id of the element. Default -1 for empty
+     * @param   bool    $echo       Wheter to print to screen or return html
      */
-    public function elementConditionsForm($elementId = -1)
+    public function elementConditionsForm($elementId = -1, $echo=false)
     {
         $element    = null;
         if ($elementId != -1) {
@@ -2272,19 +2273,22 @@ class FormBuilderForm extends DisplayForm
 
         $conditions = $element->conditions;
 
-        ob_start();
+        if(!$echo){
+            ob_start();
+        }
+
         $counter = 0;
         foreach ($this->formElements as $el) {
             $copyTo    = $el->conditions;
             if (in_array($elementId, $copyTo['copyto'] ?? [])) {
                 $counter++;
-        ?>
+                ?>
                 <div class="form-element-wrapper" data-element-id="<?php echo esc_attr($el->id); ?>" data-form-id="<?php echo esc_attr($this->formData->id); ?>">
                     <button type="button" class="edit-form-element button" title="Jump to conditions element">
                         View conditions of '<?php echo esc_attr($el->slug); ?>'
                     </button>
                 </div>
-            <?php
+                <?php
             }
         }
 
@@ -2614,6 +2618,8 @@ class FormBuilderForm extends DisplayForm
             TSJIPPY\addSaveButton('submit-form-condition', 'Save conditions'); ?>
         </form>
         <?php
-        return ob_get_clean();
+        if(!$echo){
+            return ob_get_clean();
+        }
     }
 }

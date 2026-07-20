@@ -12,13 +12,13 @@ import './innerblock_filter.js';
 
 
 const MY_TEMPLATE = [
-	[ 
+	/* [ 
 		'tsjippy-forms/label', 
 		{ text: "Your Name"}, 
 		[
         	[ 'tsjippy-forms/input', { type: 'number', name: 'amount'} ]
     	] 
-	],
+	], */
 	[ 'tsjippy-forms/input', { type: 'submit', name: 'submit', value: 'Submit the form'} ],
 ];
 
@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
  * @return {Element} Element to render.
  */
 export default function Edit({ attributes, setAttributes, clientId, isSelected }) {
+	
 	/**
 	 * Register the form if not done yet
 	 */
@@ -236,15 +237,15 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 
 	const resultingForm = () => {
 		if(isEmailsFormVisible){
-			return (<RawHTML> { emailsForm } </RawHTML>);
+			return (<div { ...blockProps }><RawHTML> { emailsForm } </RawHTML></div>);
 		}
 
 		else if(isRemindersFormVisible){
-			return (<RawHTML> { formRemindersForm } </RawHTML>);
+			return (<div { ...blockProps }><RawHTML> { formRemindersForm } </RawHTML></div>);
 		}
 
 		return(
-			<fieldset>
+			<fieldset { ...blockProps }>
     			<legend>
 					{ (attributes.name).charAt(0).toUpperCase() + (attributes.name).slice(1) } Form
 				</legend>
@@ -260,20 +261,40 @@ export default function Edit({ attributes, setAttributes, clientId, isSelected }
 		<InspectorControls>
 			<PanelBody title={__('Form Settings', 'tsjippy')}>
 				<RadioControl
-					label    = "Form type"
+					label    = "Form Method"
 					help     = "The type of the form, get adds all form values to the url, post is invisble"
-					selected = { attributes.type }
+					selected = { attributes.method }
 					options  = { [
 						{ label: 'Get', value: 'get' },
 						{ label: 'Post', value: 'post' },
 					] }
-					onChange = { ( type ) => setAttributes({ type: type })}
+					onChange = { ( method ) => setAttributes({ method: method })}
 				/>
 
 				<TextControl
 					label    = "Form Name"
 					value    = { attributes.name }
 					onChange = { ( value ) => setAttributes({ name: value })}
+				/>
+
+				<RadioControl
+					label    = "Form Target"
+					help     = "Target location for the form response"
+					selected = { attributes.target }
+					options  = { [
+						{ label: 'New Tab', value: '_blank' },
+						{ label: 'Current page', value: '_self' },
+						{ label: 'Parent Frame', value: '_parent' },
+						{ label: 'In the body', value: '_top' },
+						{ label: 'iframe', value: 'iframe' }
+					] }
+					onChange = { ( target ) => setAttributes({ target: target })}
+				/>
+
+				<ToggleControl
+					label    = {__("Enable autocomplete", "tsjippy")}
+					checked  = {!!attributes.autocomplete}
+					onChange = {() => setAttributes({ autocomplete: !attributes.autocomplete }) }
 				/>
 
 				<TextControl

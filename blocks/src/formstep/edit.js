@@ -16,9 +16,11 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
  */
 export default function Edit({ attributes, setAttributes, clientId }) {
 	const blockProps = useBlockProps();
-    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps, { 
-        orientation: 'vertical', // Enables drag & drop functionality
-     });
+    const { children, ...innerBlocksProps }  = useInnerBlocksProps( 
+        blockProps, { 
+            orientation: 'vertical', // Enables drag & drop functionality
+        }
+    );
 
 	/**
 	 * Check for child blocks
@@ -53,7 +55,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
             let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
 
             // Create a formstep controls block
-            const newBlock = createBlock( "tsjippy-forms/formstep-controls");
+            const newBlock = createBlock( "tsjippy-forms/formstep-controls", { amount: formsteps.length});
 
             // Insert the new block into the parent's inner blocks
             const { insertBlock } = useDispatch( 'core/block-editor' );

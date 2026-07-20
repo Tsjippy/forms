@@ -16,45 +16,52 @@ import { Flex, FlexItem } from '@wordpress/components';
  *
  * @return {Element} Element to render.
  */
-export default function save() {
+export default function save({ attributes }) {
 	const blockProps = useBlockProps.save();
 
+	const getStepIndicators	= () => {
+		let indicators	= [];
+		for (let i = 0; i < attributes.amount; i++) {
+			if(i === 0){
+				indicators.push(
+					<span class="step active"></span>
+				);
+			}else{
+				indicators.push(
+					<span class="step"></span>
+				);
+			}
+		}
+
+		return indicators;
+	}
 
 	return (
-		<div class="multi-step-controls">
+		<div  {...blockProps} class="multi-step-controls">
 			<div class="multi-step-controls-wrapper">
-				<Flex class="form-element-wrapper">
-					<FlexItem>
+				<div class="multi-step-controls-wrapper">
+					<div style="flex:1;">
 						<button type="button" class="button hidden" name="previous-button">
 							Previous
 						</button>
-					</FlexItem>
-				</Flex>
-
-				<Flex>
-					<FlexItem>
-						<span class="step active"></span>
-						<span class="step"></span>
-						<span class="step"></span>
-						<span class="step"></span>
-					</FlexItem>
-				</Flex>
-				
-				<Flex>
-					<FlexItem>
+					</div>
+					
+					<div class="step-wrapper" style="flex:1;text-align:center;margin:auto;">
+						{ getStepIndicators() }
+					</div>
+					
+					<div style="flex:1;">
 						<button type="button" class="button next-button" name="next-button">
 							Next
 						</button>
-					</FlexItem>
-
-					<FlexItem>
+					
 						<div class="submit-wrapper">
-							<button type="button" class="button form-submit hidden" name="submit-form">
-								Submit travel request
+        					<button type="button" class="button form-submit hidden" name="submit-form">
+           						Submit travel request
 							</button>
 						</div>
-					</FlexItem>
-				</Flex>
+					</div>
+				</div>
 			</div>
 		</div>
 	);

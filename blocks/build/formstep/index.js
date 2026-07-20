@@ -86,7 +86,9 @@ function Edit({
       let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
 
       // Create a formstep controls block
-      const newBlock = (0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_4__.createBlock)("tsjippy-forms/formstep-controls");
+      const newBlock = (0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_4__.createBlock)("tsjippy-forms/formstep-controls", {
+        amount: formsteps.length
+      });
 
       // Insert the new block into the parent's inner blocks
       const {
@@ -217,10 +219,7 @@ function save() {
   const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save();
   const innerBlocksProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useInnerBlocksProps.save(blockProps);
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-    ...blockProps,
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-      ...innerBlocksProps
-    })
+    ...innerBlocksProps
   });
 }
 
@@ -316,7 +315,7 @@ module.exports = window["wp"]["i18n"];
   \*********************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formstep","version":"0.1.0","title":"Formstep element","parent":["tsjippy-forms/formbuilder"],"category":"form-elements","icon":"forms","description":"Allows splitting the form in steps","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"text":{"type":"string","default":""}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formstep","version":"0.1.0","title":"Formstep element","category":"form-elements","icon":"forms","description":"Allows splitting the form in steps","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"text":{"type":"string","default":""}}}');
 
 /***/ }
 

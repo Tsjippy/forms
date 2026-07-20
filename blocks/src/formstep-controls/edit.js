@@ -11,8 +11,45 @@ import './editor.scss';
  *
  * @return {Element} Element to render.
  */
-export default function Edit({ attributes, setAttributes, isSelected }) {
+export default function Edit({ attributes, setAttributes, isSelected, clientId }) {
 	const blockProps = useBlockProps();
+
+	const getStepIndicators	= () => {
+		/**
+		 * Find the parent form builder block
+		 * And add a formstep control block if needed
+		 */
+
+		// Get the parent block ids
+		const parentIds = wp.data.select( 'core/block-editor' ).getBlockParents(clientId); 
+		// Get the blocks
+		const parents 	= wp.data.select('core/block-editor').getBlocksByClientId(parentIds);
+
+		// Loop over all the parents to find the formbuilder block
+		parents.forEach(parent => {
+			if(parent.name == "tsjippy-forms/formbuilder"){
+
+				let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
+
+				setAttributes({ amount: formsteps.length })
+			}
+		});
+
+		let indicators	= [];
+		for (let i = 0; i < attributes.amount; i++) {
+			if(i === 0){
+				indicators.push(
+					<span class="step active"></span>
+				);
+			}else{
+				indicators.push(
+					<span class="step"></span>
+				);
+			}
+		}
+
+		return indicators;
+	}
 
 	return (
 		<div { ...blockProps } class="multi-step-controls">
@@ -27,10 +64,7 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 
 				<Flex>
 					<FlexItem>
-						<span class="step active"></span>
-						<span class="step"></span>
-						<span class="step"></span>
-						<span class="step"></span>
+						{ getStepIndicators() }
 					</FlexItem>
 				</Flex>
 				

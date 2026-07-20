@@ -4,7 +4,6 @@
 	"name": "tsjippy-forms/formstep-controls",
 	"version": "0.1.0",
 	"title": "Formstep Controls Element",
-	"parent": [ "tsjippy-forms/formbuilder" ],
 	"category": "form-elements",
 	"icon": "forms",
 	"description": "Shows the formstep controls and a previous and next button",
@@ -16,5 +15,11 @@
 	"editorScript": "file:./index.js",
 	"editorStyle": "file:./index.css",
 	"style": "file:./style-index.css",
-	"viewScript": "file:./view.js"
+	"viewScript": "file:./view.js",
+	"attributes": {
+		"amount": {
+			"type": "integer",
+			"default": 0
+		}
+	}
 }

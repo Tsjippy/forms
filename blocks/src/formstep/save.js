@@ -20,8 +20,6 @@ export default function save() {
     const innerBlocksProps 	= useInnerBlocksProps.save( blockProps );
 
 	return (
-		<div { ...blockProps }>
-			<div {...innerBlocksProps} />
-		</div>
+		<div {...innerBlocksProps} />
 	);
 }

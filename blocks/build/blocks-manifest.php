@@ -26,9 +26,17 @@ return array(
 				'type' => 'integer',
 				'default' => -1
 			),
-			'type' => array(
+			'method' => array(
 				'type' => 'string',
 				'default' => 'post'
+			),
+			'target' => array(
+				'type' => 'string',
+				'default' => '_self'
+			),
+			'autocomplete' => array(
+				'type' => 'boolean',
+				'default' => true
 			),
 			'submission_message' => array(
 				'type' => 'string',
@@ -87,9 +95,6 @@ return array(
 		'name' => 'tsjippy-forms/formstep',
 		'version' => '0.1.0',
 		'title' => 'Formstep element',
-		'parent' => array(
-			'tsjippy-forms/formbuilder'
-		),
 		'category' => 'form-elements',
 		'icon' => 'forms',
 		'description' => 'Allows splitting the form in steps',
@@ -117,9 +122,6 @@ return array(
 		'name' => 'tsjippy-forms/formstep-controls',
 		'version' => '0.1.0',
 		'title' => 'Formstep Controls Element',
-		'parent' => array(
-			'tsjippy-forms/formbuilder'
-		),
 		'category' => 'form-elements',
 		'icon' => 'forms',
 		'description' => 'Shows the formstep controls and a previous and next button',
@@ -133,7 +135,13 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js'
+		'viewScript' => 'file:./view.js',
+		'attributes' => array(
+			'amount' => array(
+				'type' => 'integer',
+				'default' => 0
+			)
+		)
 	),
 	'input' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',

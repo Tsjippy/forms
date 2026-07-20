@@ -17,8 +17,6 @@ import { useBlockProps  } from '@wordpress/block-editor';
  */
 export default function save({ attributes }) {
 	const blockProps = useBlockProps.save();
-    console.log(attributes)
-
 
 	return (
 		<input type={ attributes.type } {...blockProps} name={ attributes.name} {...attributes.inputAttributes} {...attributes.ariaAttributes} />

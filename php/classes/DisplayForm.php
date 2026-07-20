@@ -173,7 +173,7 @@ class DisplayForm extends ElementHtmlBuilder
             return $parent;
         }
 
-        $formstepButtonWrapper     = addElement("div", $parent, ['class' => 'multi-step-controls hidden']);
+        $formstepButtonWrapper   = addElement("div", $parent, ['class' => 'multi-step-controls hidden']);
         $wrapper                 = addElement("div", $formstepButtonWrapper, ['class' => 'multi-step-controls-wrapper']);
         $prevWrapper             = addElement('div', $wrapper,    ['style' => 'flex:1;']);
 

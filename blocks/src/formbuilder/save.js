@@ -15,14 +15,11 @@ import { useBlockProps, useInnerBlocksProps  } from '@wordpress/block-editor';
  *
  * @return {Element} Element to render.
  */
-export default function save() {
+export default function save({ attributes }) {
 	const blockProps = useBlockProps.save();
     const innerBlocksProps = useInnerBlocksProps.save( blockProps );
 
-
 	return (
-		<form { ...blockProps }>
-			<div {...innerBlocksProps} />
-		</form>
+		<form method={ attributes.method} target={ attributes.target} autocomplete={ attributes.autocomplete} { ...innerBlocksProps } />
 	)
 }

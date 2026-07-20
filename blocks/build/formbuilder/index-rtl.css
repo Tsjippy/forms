@@ -1100,3 +1100,7 @@ form.wp-block-tsjippy-forms-formbuilder .block-list-appender .add-form-element-b
   background-color: #bd2919;
   color: white;
 }
+
+.condition-if {
+  font-weight: 600;
+}
