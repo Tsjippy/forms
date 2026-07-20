@@ -6,6 +6,7 @@
 
 ### Changed
 - added input element attributes form
+- prefixed cache group
 
 ### Fixed
 
