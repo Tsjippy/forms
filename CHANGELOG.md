@@ -7,6 +7,7 @@
 ### Changed
 - added input element attributes form
 - prefixed cache group
+- added data store for element conditions
 
 ### Fixed
 
