@@ -1,373 +1,280 @@
 import { __ } from '@wordpress/i18n';
-import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls, Inserter  } from '@wordpress/block-editor';
-import { RadioControl, PanelBody, Button, Popover, TextControl, ToggleControl, CheckboxControl, SelectControl, Placeholder  } from '@wordpress/components';
-import { useState, useEffect } from 'react';
-import apiFetch from "@wordpress/api-fetch";
-import { RawHTML, Fragment } from '@wordpress/element';
-import { useSelect, useDispatch } from "@wordpress/data";
-import { store as blockEditorStore } from '@wordpress/block-editor';
-import { Icon, plus } from '@wordpress/icons';
+import {
+	InnerBlocks,
+	useBlockProps,
+	useInnerBlocksProps,
+	InspectorControls,
+	Inserter,
+} from '@wordpress/block-editor';
+import {
+	PanelBody,
+	RadioControl,
+	CheckboxControl,
+	Button,
+} from '@wordpress/components';
+import { useState, useEffect, useCallback } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { useSelect } from '@wordpress/data';
+import { plus } from '@wordpress/icons';
+
 import './editor.scss';
-import './innerblock_filter.js';
+import './filters/addButtonToInnerBlocks.js';
 
-
+/* Default inner block template for the form. */
 const MY_TEMPLATE = [
-	/* [ 
-		'tsjippy-forms/label', 
-		{ text: "Your Name"}, 
-		[
-        	[ 'tsjippy-forms/input', { type: 'number', name: 'amount'} ]
-    	] 
-	], */
-	[ 'tsjippy-forms/input', { type: 'submit', name: 'submit', value: 'Submit the form'} ],
+	[
+		'tsjippy-forms/input',
+		{ type: 'submit', name: 'submit', value: 'Submit the form' },
+	],
 ];
 
-var formRemindersForm = '';
-document.addEventListener("DOMContentLoaded", () => {
-	apiFetch({
-		path: tsjippy.restApiPrefix + `/forms/get_form_reminder_form`,
-		method: "POST",
-	}).then((res) => {
-		formRemindersForm = res;
-	});
-});
-
-var emailsForm = '';
-document.addEventListener("DOMContentLoaded", () => {
-	apiFetch({
-		path: tsjippy.restApiPrefix + `/forms/get_emails_form`,
-		method: "POST",
-	}).then((res) => {
-		emailsForm = res;
-	});
-});
-
 /**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- *
- * @return {Element} Element to render.
+ * Gutenberg block edit component.
+ * This is the editor-side UI for the form block.
  */
-export default function Edit({ attributes, setAttributes, clientId, isSelected }) {
-	
-	/**
-	 * Register the form if not done yet
-	 */
-	if(attributes.name != '' && attributes.id == -1){
-		apiFetch({
-			path: tsjippy.restApiPrefix + `/forms/register_form`,
-			method: "POST",
-			data: {
-				slug: attributes.name
-			},
-		}).then((res) => {
-			setAttributes({ id: res });
-		});
-	}
+export default function Edit({ attributes, setAttributes, clientId }) {
+	const {
+		name = '',
+		id = -1,
+		actions = [],
+		roles = [],
+		method = 'post',
+	} = attributes;
 
-		const CustomAppender = ({ clientId }) => {
-			return (
-				<Inserter
-					rootClientId={clientId}
-					// renderToggle passes the function to open the inline popup
-					renderToggle={({ onToggle, isOpen }) => (
-						<Button
-							className="add-form-element-button"
-							onClick={onToggle}
-							aria-expanded={isOpen}
-							variant="tertiary"
-						>
-							<Icon icon={plus} />
-							Add More Form Blocks
-						</Button>
-					)}
-					isAppender
-				/>
-			);
-		};
-
-	const blockProps = useBlockProps();
-    const { children, ...innerBlocksProps }  = useInnerBlocksProps( 
-		blockProps, 
-		{
-			orientation: 'vertical', // Enables drag & drop functionality
-			template: MY_TEMPLATE,
-			renderAppender: CustomAppender
-		}
-	);
-
-	// Get roles
+	/* Local state for available roles and actions fetched from the API. */
 	const [availableRoles, setAvailableRoles] = useState([]);
-	useEffect(() => {
-		apiFetch({
-			path: tsjippy.restApiPrefix + `/forms/get_roles`,
-			method: "POST",
-		}).then((res) => {
-			setAvailableRoles(res);
-		});
-	}, []);
-
-	/**
-	 * Actions
-	 */
-	// Get available actions
 	const [availableActions, setAvailableActions] = useState([]);
+	const [isEmailsFormVisible, setEmailsFormVisibility] = useState(false);
+	const [isRemindersFormVisible, setRemindersFormVisibility] = useState(false);
+
+	/* Register the form if it has a name but has not been saved yet. */
 	useEffect(() => {
-		apiFetch({
-			path: tsjippy.restApiPrefix + `/forms/get_form_actions`,
-			method: "POST",
-		}).then((res) => {
-			setAvailableActions(res);
-		});
-	}, []);
-
-	// Build the checkboxes
-	const getActionCheckboxes = () => {
-		return [
-			<b>Select available actions for form submission data</b>,
-			availableActions.map((action) => {
-				return (
-					<CheckboxControl
-						key      = {action}
-						label    = {action}
-						onChange = {(checked) => actionSelected( checked, action ) }
-						checked  = {attributes.actions.indexOf(action) > -1}
-					/>
-				);
-			}),
-		];
-	};
-
-	// Store the settings
-	const actionSelected = function (checked, action) {
-      let actions = attributes.actions;
-
-      // An action just got selected
-      if (checked) {
-        // Add to stored roles
-        actions.push(action);
-      } else {
-        // remove from array
-        actions = actions.filter((p) => {
-          return p != action;
-        });
-      }
-
-      // Store in Attributes
-      // We need to set a new array to trigger a re-render
-      setAttributes({ actions: [...actions] });
-    };
-
-	// Stores whetther to show the forms or the main form
-	const [ isEmailsFormVisible, setEmailsFormVisibility ] = useState( false );
-	const [ isRemindersFormVisible, setRemindersFormVisibility ] = useState( false );
-
-	/**
-	 * ROLES
-	 */
-	/**
-     * Runs when a role gets (de)selected
-     * @param {bool} checked true when selected, false otherwise
-     */
-    const onRoleSelected = function (checked, roleSlug) {
-      let roles = attributes.roles;
-
-      // A role just got selected
-      if (checked) {
-        // Add to stored roles
-        roles.push(roleSlug);
-      } else {
-        // remove from array
-        roles = roles.filter((p) => {
-          return p != roleSlug;
-        });
-      }
-
-      // Store in Attributes
-      // Store as a new array to trigger a new render
-      setAttributes({ roles: [...roles] });
-
-    };
-
-	/**
-	 * Get form elements as select options
-	 */
-	const innerBlocks = useSelect((select) => 
-		select('core/block-editor').getBlocks(clientId)
-	, [clientId]);
-
-	const getFormElements = () => {
-		let blockNames	= [];
-
-		innerBlocks.map((block) => {
-			blockNames.push( { label: block.attributes.name, value: block.attributes.name });
-		});
-
-		return blockNames;
-	}
-
-	const getSplitElements = () => {
-		let splittable	= [];
-
-		innerBlocks.map((block) => {
-			if( block.attributes.name != undefined && (block.attributes.name).search(/\[[\d*]*\]/) > -1 ){
-				splittable.push( { label: block.attributes.name, value: block.attributes.name });
-			}
-		});
-
-		if(splittable.length === 0){
+		if (!name || id !== -1) {
 			return;
 		}
 
-		return (
-			<PanelBody title={__('Formdata Splitting', 'tsjippy')} initialOpen={false}>
-				<SelectControl
-					__next40pxDefaultSize = {true}
-					multiple
-					label    = { __("Split Form Submissions on these input values") }
-					value    = { attributes.split_elements }
-					options  = { splittable }
-					onChange = { ( blockName ) => setAttributes({ split_elements: blockName })}
+		apiFetch({
+			path: `${tsjippy.restApiPrefix}/forms/register_form`,
+			method: 'POST',
+			data: {
+				name,
+			},
+		}).then((res) => {
+			if (res?.id) {
+				setAttributes({
+					id: res.id,
+				});
+			}
+		});
+	}, [name, id, setAttributes]);
+
+	/* Load available roles from the server for the inspector panel. */
+	useEffect(() => {
+		apiFetch({
+			path: `${tsjippy.restApiPrefix}/forms/get_roles`,
+			method: 'POST',
+		}).then((res) => {
+			setAvailableRoles(Array.isArray(res) ? res : []);
+		});
+	}, []);
+
+	/* Load available actions from the server for the inspector panel. */
+	useEffect(() => {
+		apiFetch({
+			path: `${tsjippy.restApiPrefix}/forms/get_form_actions`,
+			method: 'POST',
+		}).then((res) => {
+			setAvailableActions(Array.isArray(res) ? res : []);
+		});
+	}, []);
+
+	/* Read inner blocks so the editor can inspect nested form elements if needed. */
+	useSelect(
+		(select) => select('core/block-editor').getBlocks(clientId),
+		[clientId]
+	);
+
+	/* Block wrapper props. */
+	const blockProps = useBlockProps();
+
+	/* Configure inner blocks and custom appender. */
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(blockProps, {
+		orientation: 'vertical',
+		template: MY_TEMPLATE,
+		renderAppender: () => (
+			<Inserter
+				rootClientId={clientId}
+				isAppender
+				renderToggle={({ onToggle }) => (
+					<Button
+						variant="primary"
+						onClick={onToggle}
+						icon={plus}
+					>
+						{__('Add More Form Blocks', 'tsjippy')}
+					</Button>
+				)}
+			/>
+		),
+	});
+
+	/* Add or remove a role from the stored attributes. */
+	const onRoleSelected = useCallback(
+		(checked, roleSlug) => {
+			let nextRoles = Array.isArray(roles) ? [...roles] : [];
+
+			if (checked) {
+				if (!nextRoles.includes(roleSlug)) {
+					nextRoles.push(roleSlug);
+				}
+			} else {
+				nextRoles = nextRoles.filter((role) => role !== roleSlug);
+			}
+
+			setAttributes({ roles: nextRoles });
+		},
+		[roles, setAttributes]
+	);
+
+	/* Add or remove an action from the stored attributes. */
+	const actionSelected = useCallback(
+		(checked, action) => {
+			let nextActions = Array.isArray(actions) ? [...actions] : [];
+
+			if (checked) {
+				if (!nextActions.includes(action)) {
+					nextActions.push(action);
+				}
+			} else {
+				nextActions = nextActions.filter((item) => item !== action);
+			}
+
+			setAttributes({ actions: nextActions });
+		},
+		[actions, setAttributes]
+	);
+
+	/* Build role checkboxes for the inspector panel. */
+	const getRoleCheckboxes = () => {
+		if (!availableRoles.length) {
+			return <p>{__('No roles available.', 'tsjippy')}</p>;
+		}
+
+		return availableRoles.map((role) => {
+			const roleSlug = role.slug || role.value || role;
+			const roleLabel = role.label || role.name || roleSlug;
+
+			return (
+				<CheckboxControl
+					key={roleSlug}
+					label={roleLabel}
+					checked={(roles || []).includes(roleSlug)}
+					onChange={(checked) => onRoleSelected(checked, roleSlug)}
 				/>
-			</PanelBody>
-		)
-	}
+			);
+		});
+	};
 
+	/* Build action checkboxes for the inspector panel. */
+	const getActionCheckboxes = () => {
+		if (!availableActions.length) {
+			return <p>{__('No actions available.', 'tsjippy')}</p>;
+		}
+
+		return availableActions.map((action) => {
+			const actionSlug = action.slug || action.value || action;
+			const actionLabel = action.label || action.name || actionSlug;
+
+			return (
+				<CheckboxControl
+					key={actionSlug}
+					label={actionLabel}
+					checked={(actions || []).includes(actionSlug)}
+					onChange={(checked) => actionSelected(checked, actionSlug)}
+				/>
+			);
+		});
+	};
+
+	/* Toggleable placeholder panels for additional form-related UI. */
 	const resultingForm = () => {
-		if(isEmailsFormVisible){
-			return (<div { ...blockProps }><RawHTML> { emailsForm } </RawHTML></div>);
+		if (isEmailsFormVisible) {
+			return (
+				<div className="tsjippy-form-secondary-panel">
+					<p>{__('Emails form is visible.', 'tsjippy')}</p>
+				</div>
+			);
 		}
 
-		else if(isRemindersFormVisible){
-			return (<div { ...blockProps }><RawHTML> { formRemindersForm } </RawHTML></div>);
+		if (isRemindersFormVisible) {
+			return (
+				<div className="tsjippy-form-secondary-panel">
+					<p>{__('Reminders form is visible.', 'tsjippy')}</p>
+				</div>
+			);
 		}
 
-		return(
-			<fieldset { ...blockProps }>
-    			<legend>
-					{ (attributes.name).charAt(0).toUpperCase() + (attributes.name).slice(1) } Form
-				</legend>
-				<form {...innerBlocksProps} >
-					{ children }
-				</form>
-			</fieldset>
-		);
-	}
+		return null;
+	};
 
 	return (
 		<>
-		<InspectorControls>
-			<PanelBody title={__('Form Settings', 'tsjippy')}>
-				<RadioControl
-					label    = "Form Method"
-					help     = "The type of the form, get adds all form values to the url, post is invisble"
-					selected = { attributes.method }
-					options  = { [
-						{ label: 'Get', value: 'get' },
-						{ label: 'Post', value: 'post' },
-					] }
-					onChange = { ( method ) => setAttributes({ method: method })}
+			<InspectorControls>
+				<PanelBody title={__('Form Settings', 'tsjippy')} initialOpen={true}>
+					<RadioControl
+						label={__('Form Method', 'tsjippy')}
+						help={__(
+							'The type of the form. Get adds values to the URL. Post submits invisibly.',
+							'tsjippy'
+						)}
+						selected={method}
+						options={[
+							{ label: __('Get', 'tsjippy'), value: 'get' },
+							{ label: __('Post', 'tsjippy'), value: 'post' },
+						]}
+						onChange={(nextMethod) => setAttributes({ method: nextMethod })}
+					/>
+				</PanelBody>
+
+				<PanelBody title={__('Roles', 'tsjippy')} initialOpen={false}>
+					{getRoleCheckboxes()}
+				</PanelBody>
+
+				<PanelBody title={__('Actions', 'tsjippy')} initialOpen={false}>
+					{getActionCheckboxes()}
+				</PanelBody>
+
+				<PanelBody title={__('Extra Forms', 'tsjippy')} initialOpen={false}>
+					<Button
+						variant="secondary"
+						onClick={() => setEmailsFormVisibility((prev) => !prev)}
+					>
+						{isEmailsFormVisible
+							? __('Hide Emails Form', 'tsjippy')
+							: __('Show Emails Form', 'tsjippy')}
+					</Button>
+
+					<Button
+						variant="secondary"
+						onClick={() => setRemindersFormVisibility((prev) => !prev)}
+						style={{ marginLeft: '8px' }}
+					>
+						{isRemindersFormVisible
+							? __('Hide Reminders Form', 'tsjippy')
+							: __('Show Reminders Form', 'tsjippy')}
+					</Button>
+				</PanelBody>
+			</InspectorControls>
+
+			<div {...innerBlocksProps}>
+				{resultingForm()}
+
+				<InnerBlocks
+					allowedBlocks={['tsjippy-forms/input', 'tsjippy-forms/label']}
+					template={MY_TEMPLATE}
+					renderAppender={InnerBlocks.ButtonBlockAppender}
 				/>
-
-				<TextControl
-					label    = "Form Name"
-					value    = { attributes.name }
-					onChange = { ( value ) => setAttributes({ name: value })}
-				/>
-
-				<RadioControl
-					label    = "Form Target"
-					help     = "Target location for the form response"
-					selected = { attributes.target }
-					options  = { [
-						{ label: 'New Tab', value: '_blank' },
-						{ label: 'Current page', value: '_self' },
-						{ label: 'Parent Frame', value: '_parent' },
-						{ label: 'In the body', value: '_top' },
-						{ label: 'iframe', value: 'iframe' }
-					] }
-					onChange = { ( target ) => setAttributes({ target: target })}
-				/>
-
-				<ToggleControl
-					label    = {__("Enable autocomplete", "tsjippy")}
-					checked  = {!!attributes.autocomplete}
-					onChange = {() => setAttributes({ autocomplete: !attributes.autocomplete }) }
-				/>
-
-				<TextControl
-					label    = "Submission Message"
-					value    = { attributes.submission_message }
-					onChange = { ( value ) => setAttributes({ submission_message: value })}
-				/>
-
-				<ToggleControl
-					label    = {__("Include submission ID in message", "tsjippy")}
-					checked  = {!!attributes.submission_id}
-					onChange = {() => setAttributes({ submission_id: !attributes.submission_id }) }
-				/>
-
-				<ToggleControl
-					label    = {__("Save submissions in usermeta table", "tsjippy")}
-					checked  = {!!attributes.user_meta}
-					onChange = {() => setAttributes({ user_meta: !attributes.user_meta }) }
-				/>
-				{ getActionCheckboxes() }
-			</PanelBody>
-
-			<PanelBody title={__('Form Permissions', 'tsjippy')} initialOpen={false}>
-				<SelectControl
-					__next40pxDefaultSize = {true}
-					multiple
-					label    = { __("Select roles or users with form edit rights") }
-					value    = { attributes.edit_roles }
-					options  = { availableRoles }
-					onChange = { ( roles ) => setAttributes({ edit_roles: roles })}
-				/>
-
-				<SelectControl
-					__next40pxDefaultSize = {true}
-					multiple
-					label    = { __("Select roles who can submit the form on behalve of somebody else") }
-					value    = { attributes.submission_roles }
-					options  = { availableRoles }
-					onChange = { ( roles ) => setAttributes({ submission_roles: roles })}
-				/>
-			</PanelBody>
-
-			<PanelBody title={__('Form Submission Archive Settings', 'tsjippy')} initialOpen={false}>
-				
-				<SelectControl
-					__next40pxDefaultSize = {true}
-					multiple
-					label    = { __("Auto archive a (sub) entry when field") }
-					value    = { attributes.auto_archive_element }
-					options  = { getFormElements() }
-					onChange = { ( blockName ) => setAttributes({ auto_archive_element: blockName })}
-				/>
-				
-				<TextControl
-					label    = "equals (A fixed value or you can use placeholders like ‘%today%+3days’ for a value)"
-					value    = { attributes.auto_archive_value }
-					onChange = { ( value ) => setAttributes({ auto_archive_value: value })}
-				/>
-			</PanelBody>
-
-			{ getSplitElements() }
-
-			<PanelBody title={__('Form E-mails', 'tsjippy')} initialOpen={false} onToggle={(value) => setEmailsFormVisibility(value)}>
-				<p>Close this to hide the e-mails form again</p>
-			</PanelBody>
-
-			<PanelBody title={__('Form Reminders', 'tsjippy')} initialOpen={false} onToggle={(value) => setRemindersFormVisibility(value)}>
-				<p>Close this to hide the reminders form again</p>
-			</PanelBody>
-
-		</InspectorControls>
-
-		{ resultingForm() }
+			</div>
 		</>
 	);
 }

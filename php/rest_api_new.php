@@ -134,9 +134,58 @@ function restApiInitFormsNew()
     );
 
     // form conditions html
+    /**
+     * [
+     *   [
+     *       {
+     *           "conditional-field": "abc123",
+     *           "equation": "==",
+     *           "conditional-value": "yes",
+     *           "combinator": "and"
+     *       }
+     *   ]
+     *]
+     */
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/get_element_conditions',
+        array(
+            'methods'                 => 'POST',
+            'callback'                => function($wpRest){
+                $formBuilder = new FormBuilderForm();
+
+                $elementId   = (int) $wpRest->get_param('elementId') ?? '';
+                $elementId  = 1940;
+
+                $formBuilder->getForm(182);
+
+                $element    = $formBuilder->getElementById($elementId);
+
+                if(!$element || empty($element->conditions)){
+                    return [];
+                }
+
+                return [
+                    "rules" => [
+                        [
+                            "conditional-field" => "abc123",
+                            "equation" => "==",
+                            "conditional-value" => "yes"
+                        ]
+                    ],
+                    "actions" => []
+                ];
+
+                return $element->conditions;
+            },
+            'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
+        )
+    );
+
+    // form conditions html
+    register_rest_route(
+        TSJIPPY\RESTAPIPREFIX . '/forms',
+        '/save_element_conditions',
         array(
             'methods'                 => 'POST',
             'callback'                => function($wpRest){
