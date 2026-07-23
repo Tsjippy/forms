@@ -9,7 +9,6 @@ import {
 	createPortal,
 } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import ConditionRow from './ConditionRow';
 import { useFormElementOptions } from '../hooks/useFormElementOptions';
 import {
 	plus,
@@ -19,10 +18,15 @@ import {
 	arrowDown
 } from '@wordpress/icons';
 
+
+import RuleRow from './RuleRow';
+
+import {inputSchema} from './../../input/element_attributes.js';
+
 /**
  * Create a blank condition object.
  */
-function createEmptyCondition() {
+function createEmptyRule() {
 	return {
 		'conditional-field': '',
 		'equation': '',
@@ -75,75 +79,102 @@ function isEquationRequiringValue(equation) {
 /**
  * Validate the current conditions object.
  */
-function validateConditions(state) {
+function validateConditions(conditions) {
 	const errors = [];
-	const fieldErrors = {
-		rules: {},
-		actions: {},
-	};
+	const fieldErrors = [{
+		rules: [{}],
+		actions: [{}],
+	}];
 
 	const firstErrorTarget = {
 		section: null,
-		ruleIndex: null,
 		conditionIndex: null,
+		ruleIndex: null,
 		actionIndex: null,
 		fieldKey: null,
 	};
 
-	const rules = Array.isArray(state?.rules) ? state.rules : [];
-	const actions = Array.isArray(state?.actions) ? state.actions : [];
+	conditions    = Array.isArray(conditions) ? conditions : [];
+	const rules   = Array.isArray(conditions[0]?.rules) ? conditions[0].rules : [];
+	const actions = Array.isArray(conditions[0]?.actions) ? conditions[0].actions : [];
 
 	if (rules.length === 0) {
 		errors.push(__('At least one rule group is required.', 'tsjippy'));
 	}
 
-	rules.forEach((rule, ruleIndex) => {
-		if (!Array.isArray(rule) || rule.length === 0) {
+	/**
+	 * Loop over all conditions
+	 */
+	conditions.forEach((condition, conditionIndex) => {
+		if (!Array.isArray(condition.rules) || condition.rules.length === 0) {
 			errors.push(
 				sprintf(
-					__('Rule group %d must contain at least one condition.', 'tsjippy'),
-					ruleIndex + 1
+					__('Condition %d must contain at least one rule.', 'tsjippy'),
+					conditionIndex + 1
 				)
 			);
 
 			if (firstErrorTarget.section === null) {
 				firstErrorTarget.section = 'rules';
-				firstErrorTarget.ruleIndex = ruleIndex;
-				firstErrorTarget.conditionIndex = 0;
+				firstErrorTarget.conditionIndex = conditionIndex;
+				firstErrorTarget.ruleIndex = 0;
 				firstErrorTarget.fieldKey = 'conditionalField';
 			}
 
 			return;
 		}
 
-		fieldErrors.rules[ruleIndex] = fieldErrors.rules[ruleIndex] || {};
+		if (!Array.isArray(condition.actions) || condition.actions.length === 0) {
+			errors.push(
+				sprintf(
+					__('Condition %d must contain at least one action.', 'tsjippy'),
+					conditionIndex + 1
+				)
+			);
 
-		rule.forEach((condition, conditionIndex) => {
-			const conditionErrors = {};
+			if (firstErrorTarget.section === null) {
+				firstErrorTarget.section = 'actions';
+				firstErrorTarget.conditionIndex = conditionIndex;
+				firstErrorTarget.ruleIndex = 0;
+				firstErrorTarget.fieldKey = 'conditionalField';
+			}
 
-			if (!condition?.['conditional-field']) {
-				conditionErrors.conditionalField = __('Select an element.', 'tsjippy');
+			return;
+		}
+
+		/**
+		 * Loop over all rules of this condition
+		 * And check validity
+		 */
+		condition.rules.forEach((rule, ruleIndex) => {
+
+			((fieldErrors[conditionIndex] ||= {}).rules ||= [])[ruleIndex] ||= {};
+
+			const ruleErrors = {};
+
+			if (!rule?.['conditional-field']) {
+				ruleErrors.conditionalField = __('Select an element.', 'tsjippy');
 
 				if (firstErrorTarget.section === null) {
 					firstErrorTarget.section = 'rules';
-					firstErrorTarget.ruleIndex = ruleIndex;
 					firstErrorTarget.conditionIndex = conditionIndex;
+					firstErrorTarget.ruleIndex = ruleIndex;
 					firstErrorTarget.fieldKey = 'conditionalField';
 				}
 			}
 
-			if (!condition?.equation) {
-				conditionErrors.equation = __('Select an equation.', 'tsjippy');
+			if (!rule?.equation) {
+				ruleErrors.equation = __('Select an equation.', 'tsjippy');
 
 				if (firstErrorTarget.section === null) {
 					firstErrorTarget.section = 'rules';
-					firstErrorTarget.ruleIndex = ruleIndex;
 					firstErrorTarget.conditionIndex = conditionIndex;
+					firstErrorTarget.ruleIndex = ruleIndex;
 					firstErrorTarget.fieldKey = 'equation';
 				}
 			}
 
-			if (isEquationRequiringValue(condition?.equation)) {
+			if (isEquationRequiringValue(rule?.equation)) {
 				const value = condition?.['conditional-value'];
 
 				if (
@@ -151,102 +182,108 @@ function validateConditions(state) {
 					value === null ||
 					String(value).trim() === ''
 				) {
-					conditionErrors.conditionalValue = __('Enter a value.', 'tsjippy');
+					ruleErrors.conditionalValue = __('Enter a value.', 'tsjippy');
 
 					if (firstErrorTarget.section === null) {
 						firstErrorTarget.section = 'rules';
-						firstErrorTarget.ruleIndex = ruleIndex;
 						firstErrorTarget.conditionIndex = conditionIndex;
+						firstErrorTarget.ruleIndex = ruleIndex;
 						firstErrorTarget.fieldKey = 'conditionalValue';
 					}
 				}
 			}
 
-			if (condition?.equation === '+' || condition?.equation === '-') {
+			if (rule?.equation === '+' || rule?.equation === '-') {
 				if (!condition?.['conditional-field-2']) {
-					conditionErrors.conditionalField2 = __(
+					ruleErrors.conditionalField2 = __(
 						'Select a second element.',
 						'tsjippy'
 					);
 
 					if (firstErrorTarget.section === null) {
 						firstErrorTarget.section = 'rules';
-						firstErrorTarget.ruleIndex = ruleIndex;
 						firstErrorTarget.conditionIndex = conditionIndex;
+						firstErrorTarget.ruleIndex = ruleIndex;
 						firstErrorTarget.fieldKey = 'conditionalField2';
 					}
 				}
 
-				if (!condition?.['equation-2']) {
-					conditionErrors.equation2 = __(
+				if (!rule?.['equation-2']) {
+					ruleErrors.equation2 = __(
 						'Select a second equation.',
 						'tsjippy'
 					);
 
 					if (firstErrorTarget.section === null) {
 						firstErrorTarget.section = 'rules';
-						firstErrorTarget.ruleIndex = ruleIndex;
 						firstErrorTarget.conditionIndex = conditionIndex;
+						firstErrorTarget.ruleIndex = ruleIndex;
 						firstErrorTarget.fieldKey = 'equation2';
 					}
 				}
 			}
 
-			if (Object.keys(conditionErrors).length > 0) {
-				fieldErrors.rules[ruleIndex][conditionIndex] = conditionErrors;
+			if (Object.keys(ruleErrors).length > 0) {
+				fieldErrors[conditionIndex].rules[ruleIndex] = ruleErrors;
 				errors.push(
 					sprintf(
-						__('Rule %1$d, condition %2$d has validation errors.', 'tsjippy'),
-						ruleIndex + 1,
-						conditionIndex + 1
+						__('Condition %1$d, rule %2$d has validation errors.', 'tsjippy'),
+						conditionIndex + 1,
+						ruleIndex + 1
 					)
 				);
 			}
 		});
-	});
 
-	actions.forEach((actionItem, actionIndex) => {
-		const actionErrors = {};
+		/**
+		 * Loop over all actions of this condition
+		 * And check validity
+		 */
+		condition.actions.forEach((actionItem, actionIndex) => {
+			const actionErrors = {};
 
-		if (!actionItem?.action) {
-			actionErrors.action = __('Select an action.', 'tsjippy');
+			if (!actionItem?.action) {
+				actionErrors.action = __('Select an action.', 'tsjippy');
 
-			if (firstErrorTarget.section === null) {
-				firstErrorTarget.section = 'actions';
-				firstErrorTarget.actionIndex = actionIndex;
-				firstErrorTarget.fieldKey = 'action';
+				if (firstErrorTarget.section === null) {
+					firstErrorTarget.section = 'actions';
+					firstErrorTarget.actionIndex = actionIndex;
+					firstErrorTarget.fieldKey = 'action';
+				}
 			}
-		}
 
-		if (!actionItem?.['property-name']) {
-			actionErrors.propertyName = __('Enter a property name.', 'tsjippy');
+			if (!actionItem?.['property-name']) {
+				actionErrors.propertyName = __('Enter a property name.', 'tsjippy');
 
-			if (firstErrorTarget.section === null) {
-				firstErrorTarget.section = 'actions';
-				firstErrorTarget.actionIndex = actionIndex;
-				firstErrorTarget.fieldKey = 'propertyName';
+				if (firstErrorTarget.section === null) {
+					firstErrorTarget.section = 'actions';
+					firstErrorTarget.actionIndex = actionIndex;
+					firstErrorTarget.fieldKey = 'propertyName';
+				}
 			}
-		}
 
-		if (!actionItem?.['property-value']) {
-			actionErrors.propertyValue = __('Enter a property value.', 'tsjippy');
+			if (!actionItem?.['property-value']) {
+				actionErrors.propertyValue = __('Enter a property value.', 'tsjippy');
 
-			if (firstErrorTarget.section === null) {
-				firstErrorTarget.section = 'actions';
-				firstErrorTarget.actionIndex = actionIndex;
-				firstErrorTarget.fieldKey = 'propertyValue';
+				if (firstErrorTarget.section === null) {
+					firstErrorTarget.section = 'actions';
+					firstErrorTarget.actionIndex = actionIndex;
+					firstErrorTarget.fieldKey = 'propertyValue';
+				}
 			}
-		}
 
-		if (Object.keys(actionErrors).length > 0) {
-			fieldErrors.actions[actionIndex] = actionErrors;
-			errors.push(
-				sprintf(
-					__('Action %d has validation errors.', 'tsjippy'),
-					actionIndex + 1
-				)
-			);
-		}
+			if (Object.keys(actionErrors).length > 0) {
+				((fieldErrors[conditionIndex] ||= {}).actions ||= [])[actionIndex] ||= {};
+				fieldErrors[conditionIndex].actions[actionIndex] = actionErrors;
+				errors.push(
+					sprintf(
+						__('Condition %1$d, action %d has validation errors.', 'tsjippy'),
+						conditionIndex + 1,
+						actionIndex + 1
+					)
+				);
+			}
+		});
 	});
 
 	return {
@@ -264,6 +301,7 @@ export default function ConditionsModal({
 	onClose,
 	elementId,
 	allNestedBlocks,
+	blockProps
 }) {
 	const { saveConditions, setError } = useDispatch(
 		'tsjippy-forms/conditions-store'
@@ -295,10 +333,19 @@ export default function ConditionsModal({
 		[elementId]
 	);
 
-	const [draftConditions, setDraftConditions] = useState({
-		rules: [],
-		actions: [],
-	});
+	/**
+	 * A conditions is an array of condition arrays
+	 * Each condition has one or more rules
+	 * And one or more actions
+	 */
+	const [draftConditions, setDraftConditions] = useState(
+		[
+			{
+				rules:   [ createEmptyRule() ],
+				actions: [ createEmptyAction() ],
+			}
+		]
+	);
 	const [successMessage, setSuccessMessage] = useState('');
 	const [validationErrors, setValidationErrors] = useState([]);
 	const [fieldErrors, setFieldErrors] = useState({});
@@ -311,6 +358,7 @@ export default function ConditionsModal({
 
 	useEffect(() => {
 		if (isVisible && conditions) {
+
 			setDraftConditions(deepClone(conditions));
 		}
 	}, [isVisible, conditions]);
@@ -388,15 +436,14 @@ export default function ConditionsModal({
 			return;
 		}
 
-		const { section, ruleIndex, conditionIndex, actionIndex, fieldKey } =
-			focusTarget;
+		const { section, conditionIndex, ruleIndex, actionIndex, fieldKey } = focusTarget;
 
 		let selector = '';
 
 		if (section === 'rules') {
-			selector = `[data-rule-index="${ruleIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] input,
-				[data-rule-index="${ruleIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] select,
-				[data-rule-index="${ruleIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] textarea`;
+			selector = `[data-rule-index="${conditionIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] input,
+				[data-rule-index="${conditionIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] select,
+				[data-rule-index="${conditionIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] textarea`;
 		}
 
 		if (section === 'actions') {
@@ -460,118 +507,99 @@ export default function ConditionsModal({
 		[createErrorNotice]
 	);
 
-	/**
-	 * Update one field on one condition.
-	 * IMPORTANT: use value so dynamic fields like "combinator"
-	 * are written correctly.
-	 */
-	const updateRuleCondition = useCallback(
-		(ruleIndex, subRuleIndex, key, value) => {
-			clearSuccessMessage();
-
-			console.log(ruleIndex)
-			console.log(subRuleIndex)
-			console.log(key)
-			console.log(value)
-
-			setDraftConditions((prev) => {
-				const next = deepClone(prev);
-				next.rules = Array.isArray(next.rules) ? next.rules : [];
-
-				if (!next.rules[ruleIndex]) {
-					next.rules[ruleIndex] = [];
-				}
-
-				if (!next.rules[ruleIndex][subRuleIndex]) {
-					next.rules[ruleIndex][subRuleIndex] = createEmptyCondition();
-				}
-
-				next.rules[ruleIndex][subRuleIndex][key] = value;
-
-				// Add a new sub-rule
-				if(key == 'combinator'){
-					next.rules[ruleIndex][subRuleIndex + 1] = createEmptyCondition();
-				}
-
-				return next;
-			});
-
-			setValidationErrors([]);
-			setFieldErrors({});
-		},
-		[clearSuccessMessage]
-	);
-
-	const addRule = useCallback(() => {
+	const addCondition = useCallback(() => {
 		clearSuccessMessage();
 		setValidationErrors([]);
 		setFieldErrors({});
 
 		setDraftConditions((prev) => {
 			const next = deepClone(prev);
-			next.rules = Array.isArray(next.rules) ? next.rules : [];
-			next.rules.push([createEmptyCondition()]);
+			next.push({
+				rules: [createEmptyRule()],
+				actions: [createEmptyAction()]
+			});
 			return next;
 		});
 	}, [clearSuccessMessage]);
 
-	const addConditionToExistingRule = useCallback(
-		(ruleIndex) => {
+	/**
+	 * Update one rule on one condition.
+	 */
+	const updateRuleCondition = useCallback(
+		(conditionIndex, ruleIndex, key, value) => {
 			clearSuccessMessage();
-			setValidationErrors([]);
-			setFieldErrors({});
 
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-				next.rules = Array.isArray(next.rules) ? next.rules : [];
 
-				if (!next.rules[ruleIndex]) {
-					next.rules[ruleIndex] = [];
+				/**
+				 * Create base structure if it does not exist yet
+				 */
+				if (!next[conditionIndex]) {
+					next[conditionIndex] = [];
 				}
 
-				next.rules[ruleIndex].push(createEmptyCondition());
+				if (!next[conditionIndex].rules) {
+					next[conditionIndex].rules = [];
+				}
+
+				if (!next[conditionIndex].actions) {
+					next[conditionIndex].actions = [];
+				}
+
+				if (!next[conditionIndex].rules[ruleIndex]) {
+					next[conditionIndex].rules[ruleIndex] = createEmptyRule();
+				}
+
+				next[conditionIndex].rules[ruleIndex][key] = value;
+
+				// Add a new sub-rule
+				if(key == 'combinator'){
+					next[conditionIndex].rules[ruleIndex + 1] = createEmptyRule();
+				}
 
 				return next;
 			});
+
+			setValidationErrors([]);
+			setFieldErrors({});
 		},
 		[clearSuccessMessage]
 	);
 
+	const addRule = useCallback((conditionIndex) => {
+		clearSuccessMessage();
+		setValidationErrors([]);
+		setFieldErrors({});
+
+		setDraftConditions((prev) => {
+			const next = deepClone(prev);
+			next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
+			next[conditionIndex].rules.push(createEmptyRule());
+			return next;
+		});
+	}, [clearSuccessMessage]);
+
 	const duplicateRule = useCallback(
-		(ruleIndex) => {
+		(conditionIndex) => {
 			clearSuccessMessage();
 			setValidationErrors([]);
 			setFieldErrors({});
 
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-				next.rules = Array.isArray(next.rules) ? next.rules : [];
 
-				const ruleToDuplicate = next.rules[ruleIndex];
+				next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
+
+				const ruleToDuplicate = next[conditionIndex].rules;
 
 				if (!ruleToDuplicate) {
 					return next;
 				}
 
 				const clonedRule = deepClone(ruleToDuplicate);
-				next.rules.splice(ruleIndex + 1, 0, clonedRule);
+				next[conditionIndex].rules.splice(conditionIndex + 1, 0, clonedRule);
 
-				return next;
-			});
-		},
-		[clearSuccessMessage]
-	);
-
-	const deleteRule = useCallback(
-		(ruleIndex) => {
-			clearSuccessMessage();
-			setValidationErrors([]);
-			setFieldErrors({});
-
-			setDraftConditions((prev) => {
-				const next = deepClone(prev);
-				next.rules = Array.isArray(next.rules) ? next.rules : [];
-				next.rules.splice(ruleIndex, 1);
 				return next;
 			});
 		},
@@ -579,24 +607,38 @@ export default function ConditionsModal({
 	);
 
 	const deleteCondition = useCallback(
-		(ruleIndex, subRuleIndex) => {
+		(conditionIndex) => {
 			clearSuccessMessage();
 			setValidationErrors([]);
 			setFieldErrors({});
 
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-				next.rules = Array.isArray(next.rules) ? next.rules : [];
 
-				if (!next.rules[ruleIndex]) {
+				next.splice(conditionIndex, 1);
+				return next;
+			});
+		},
+		[clearSuccessMessage]
+	);
+
+	const deleteRule = useCallback(
+		(conditionIndex, ruleIndex) => {
+			clearSuccessMessage();
+			setValidationErrors([]);
+			setFieldErrors({});
+
+
+			setDraftConditions((prev) => {
+				const next = deepClone(prev);
+
+
+				if (!next[conditionIndex].rules) {
 					return next;
 				}
 
-				next.rules[ruleIndex].splice(subRuleIndex, 1);
-
-				if (next.rules[ruleIndex].length === 0) {
-					next.rules.splice(ruleIndex, 1);
-				}
+				// Remove the rule
+				next[conditionIndex].rules.splice(ruleIndex, 1);
 
 				return next;
 			});
@@ -605,24 +647,32 @@ export default function ConditionsModal({
 	);
 
 	const moveRule = useCallback(
-		(ruleIndex, direction) => {
+		(conditionIndex, ruleIndex, direction) => {
 			clearSuccessMessage();
 			setValidationErrors([]);
 			setFieldErrors({});
 
+
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-				next.rules = Array.isArray(next.rules) ? next.rules : [];
+
+
+				next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
 
 				const targetIndex = ruleIndex + direction;
 
-				if (targetIndex < 0 || targetIndex >= next.rules.length) {
+				if (targetIndex < 0 || targetIndex >= next[conditionIndex].rules.length) {
 					return next;
 				}
 
-				const temp = next.rules[ruleIndex];
-				next.rules[ruleIndex] = next.rules[targetIndex];
-				next.rules[targetIndex] = temp;
+				// Store the sub rule we are moving
+				const temp = next[conditionIndex].rules[ruleIndex];
+
+				// Store the rule that is currently in the desired location in the index of the rule we are moving
+				next[conditionIndex].rules[ruleIndex] = next[conditionIndex].rules[targetIndex];
+
+				// Store the rule in the new index
+				next[conditionIndex].rules[targetIndex] = temp;
 
 				return next;
 			});
@@ -630,62 +680,36 @@ export default function ConditionsModal({
 		[clearSuccessMessage]
 	);
 
-	const moveCondition = useCallback(
-		(ruleIndex, subRuleIndex, direction) => {
-			clearSuccessMessage();
-			setValidationErrors([]);
-			setFieldErrors({});
-
-			setDraftConditions((prev) => {
-				const next = deepClone(prev);
-				next.rules = Array.isArray(next.rules) ? next.rules : [];
-
-				if (!next.rules[ruleIndex]) {
-					return next;
-				}
-
-				const targetIndex = subRuleIndex + direction;
-
-				if (targetIndex < 0 || targetIndex >= next.rules[ruleIndex].length) {
-					return next;
-				}
-
-				const temp = next.rules[ruleIndex][subRuleIndex];
-				next.rules[ruleIndex][subRuleIndex] = next.rules[ruleIndex][targetIndex];
-				next.rules[ruleIndex][targetIndex] = temp;
-
-				return next;
-			});
-		},
-		[clearSuccessMessage]
-	);
-
-	const addAction = useCallback(() => {
+	const addAction = useCallback((conditionIndex) => {
 		clearSuccessMessage();
 		setValidationErrors([]);
 		setFieldErrors({});
 
 		setDraftConditions((prev) => {
 			const next = deepClone(prev);
-			next.actions = Array.isArray(next.actions) ? next.actions : [];
-			next.actions.push(createEmptyAction());
+
+			next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
+			next[conditionIndex].actions.push(createEmptyAction());
 			return next;
 		});
 	}, [clearSuccessMessage]);
 
 	const updateAction = useCallback(
-		(actionIndex, key, value) => {
+		(conditionIndex, actionIndex, key, value) => {
 			clearSuccessMessage();
+
 
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-				next.actions = Array.isArray(next.actions) ? next.actions : [];
 
-				if (!next.actions[actionIndex]) {
-					next.actions[actionIndex] = createEmptyAction();
+
+				next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
+
+				if (!next[conditionIndex].actions[actionIndex]) {
+					next[conditionIndex].actions[actionIndex] = createEmptyAction();
 				}
 
-				next.actions[actionIndex][key] = value;
+				next[conditionIndex].actions[actionIndex][key] = value;
 				return next;
 			});
 
@@ -701,8 +725,11 @@ export default function ConditionsModal({
 			setValidationErrors([]);
 			setFieldErrors({});
 
+
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
+
+
 				next.actions = Array.isArray(next.actions) ? next.actions : [];
 
 				const actionToDuplicate = next.actions[actionIndex];
@@ -724,36 +751,13 @@ export default function ConditionsModal({
 			setValidationErrors([]);
 			setFieldErrors({});
 
+
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
+
+
 				next.actions = Array.isArray(next.actions) ? next.actions : [];
 				next.actions.splice(actionIndex, 1);
-				return next;
-			});
-		},
-		[clearSuccessMessage]
-	);
-
-	const moveAction = useCallback(
-		(actionIndex, direction) => {
-			clearSuccessMessage();
-			setValidationErrors([]);
-			setFieldErrors({});
-
-			setDraftConditions((prev) => {
-				const next = deepClone(prev);
-				next.actions = Array.isArray(next.actions) ? next.actions : [];
-
-				const targetIndex = actionIndex + direction;
-
-				if (targetIndex < 0 || targetIndex >= next.actions.length) {
-					return next;
-				}
-
-				const temp = next.actions[actionIndex];
-				next.actions[actionIndex] = next.actions[targetIndex];
-				next.actions[targetIndex] = temp;
-
 				return next;
 			});
 		},
@@ -800,6 +804,7 @@ export default function ConditionsModal({
 	]);
 
 	const handleReset = useCallback(() => {
+
 		setDraftConditions(deepClone(conditions));
 		clearSuccessMessage();
 		setValidationErrors([]);
@@ -807,17 +812,56 @@ export default function ConditionsModal({
 		showToastSuccess(__('Changes reset.', 'tsjippy'));
 	}, [conditions, clearSuccessMessage, showToastSuccess]);
 
-	const renderActionRow = (actionItem, actionIndex) => {
-		const actionErrors = fieldErrors?.actions?.[actionIndex] || {};
+	const renderRuleRow	  = (rule, ruleIndex, conditionIndex) => {
+		const ruleErrors = fieldErrors?.rules?.[ruleIndex] || {};
+		const isPulsed =
+			pulseTarget &&
+			pulseTarget.section === 'rules' &&
+			pulseTarget.ruleIndex === ruleIndex;
+						
+		return (
+			<div
+				key={ruleIndex}
+				className={`condition-row__item ${
+					ruleErrors ? 'condition-row__item--invalid' : ''
+				} ${isPulsed ? 'condition-row__item--pulse' : ''}`}
+				data-condition-index={ruleIndex}
+			>
+				
+				<RuleRow
+					conditionIndex={conditionIndex}
+					rule={rule}
+					ruleIndex={ruleIndex}
+					formElementOptions={formElementOptions}
+					onUpdate={updateRuleCondition}
+					onDeleteRule={ () => deleteRule(conditionIndex, ruleIndex) }
+					onMoveRuleUp={ () =>  moveRule(conditionIndex, ruleIndex, -1) }
+					onMoveRuleDown={ () => moveRule(conditionIndex, ruleIndex, 1) }
+					canMoveRuleUp={ ruleIndex > 0}
+					canMoveRuleDown={ ruleIndex < draftConditions[conditionIndex].rules.length - 1}
+					fieldErrors={ fieldErrors[conditionIndex]?.rules?.[ruleIndex] || {}}
+				/>
+				
+			</div>
+		);
+	};
+
+	const renderActionRow = (actionItem, actionIndex, conditionIndex, blockProps) => {
+		const actionErrors = fieldErrors[conditionIndex]?.actions?.[actionIndex] || {};
 		const isPulsed =
 			pulseTarget &&
 			pulseTarget.section === 'actions' &&
 			pulseTarget.actionIndex === actionIndex;
 
+		const datalistOptions	= [];
+		inputSchema.sharedAttributes.concat(inputSchema.types[blockProps.attributes.type]).forEach(data => datalistOptions.push(data.attribute));
+		inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-'+data.attribute));
+		
 		return (
+			<>
 			<div
 				key={actionIndex}
-				className={`condition-row__item ${
+				className={`condition-row item ${
 					Object.keys(actionErrors).length > 0 ? 'condition-row__item--invalid' : ''
 				} ${isPulsed ? 'condition-row__item--pulse' : ''}`}
 				data-action-index={actionIndex}
@@ -827,102 +871,166 @@ export default function ConditionsModal({
 					value={actionItem?.action || ''}
 					options={[
 						{ label: __('Select action', 'tsjippy'), value: '' },
+						{ label: __('Show this block', 'tsjippy'), value: 'show' },
+						{ label: __('Hide this block', 'tsjippy'), value: 'hide' },
+						{ label: __('Toggle the visibility of this block', 'tsjippy'), value: 'toggle' },
 						{ label: __('Set property', 'tsjippy'), value: 'set-property' },
-						{ label: __('Add value', 'tsjippy'), value: 'add-value' },
-						{ label: __('Subtract value', 'tsjippy'), value: 'subtract-value' },
-						{ label: __('Toggle', 'tsjippy'), value: 'toggle' },
 					]}
-					onChange={(value) => updateAction(actionIndex, 'action', value)}
+					onChange={(value) => updateAction(conditionIndex, actionIndex, 'action', value)}
 					help={actionErrors.action || ''}
 					data-field-key="action"
 				/>
 
-				<TextControl
-					label={__('Property name', 'tsjippy')}
-					value={actionItem?.['property-name'] || ''}
-					onChange={(value) => updateAction(actionIndex, 'property-name', value)}
-					help={actionErrors.propertyName || ''}
-					data-field-key="propertyName"
-				/>
+				{(actionItem?.action || '') == 'set-property' && blockProps.name == 'tsjippy-forms/input' ?
+					<>
+					<TextControl
+						label={__('Property name', 'tsjippy')}
+						value={actionItem?.['property-name'] || ''}
+						onChange={(value) => updateAction(conditionIndex, actionIndex, 'property-name', value)}
+						help={actionErrors.propertyName || ''}
+						data-field-key="propertyName"
+						list='element-properties'
+					/>
 
-				<TextControl
-					label={__('Property value', 'tsjippy')}
-					value={actionItem?.['property-value'] || ''}
-					onChange={(value) => updateAction(actionIndex, 'property-value', value)}
-					help={actionErrors.propertyValue || ''}
-					data-field-key="propertyValue"
-				/>
+					<datalist id="element-properties">
+						{datalistOptions.map((attribute) => <option value={attribute}></option>)}
+					</datalist>
 
-				<TextControl
-					label={__('Property name 1', 'tsjippy')}
-					value={actionItem?.['property-name1'] || ''}
-					onChange={(value) => updateAction(actionIndex, 'property-name1', value)}
-					data-field-key="propertyName1"
-				/>
+					To
 
-				<TextControl
-					label={__('Action value', 'tsjippy')}
-					value={actionItem?.['action-value'] || ''}
-					onChange={(value) => updateAction(actionIndex, 'action-value', value)}
-					data-field-key="actionValue"
-				/>
+					<TextControl
+						label={__('Property value', 'tsjippy')}
+						value={actionItem?.['property-value'] || ''}
+						onChange={(value) => updateAction(conditionIndex, actionIndex, 'property-value', value)}
+						help={actionErrors.propertyValue || ''}
+						data-field-key="propertyValue"
+						list="possible-elements"
+					/>
 
-				<TextControl
-					label={__('Addition', 'tsjippy')}
-					value={actionItem?.addition || ''}
-					onChange={(value) => updateAction(actionIndex, 'addition', value)}
-					data-field-key="addition"
-				/>
+					<datalist id="possible-elements">
+						{formElementOptions.map((data) => <option value={"the-value-of-"+data.value}></option>)}
+					</datalist>
 
-				<div className="condition-row__actions">
-					<Button variant="secondary" onClick={addAction} icon={plus}>
-						{__('Add another action', 'tsjippy')}
+					</>
+					: ''
+
+				}
+			</div>
+			
+			<div className="condition-row__actions">
+				<Button variant="secondary" onClick={() => addAction(conditionIndex)} icon={plus}>
+					{__('Add another action', 'tsjippy')}
+				</Button>
+
+				<Button
+					variant="secondary"
+					onClick={() => duplicateAction(actionIndex)}
+					icon={copy}
+				>
+					{__('Duplicate action', 'tsjippy')}
+				</Button>
+
+				<Button
+					variant="secondary"
+					isDestructive
+					onClick={() => deleteAction(actionIndex)}
+					icon={trash}
+				>
+					{__('Delete action', 'tsjippy')}
+				</Button>
+			</div>
+			</>
+		);
+	};
+
+	const displayConditions = (blockProps) => {
+		if(draftConditions.length === 0){
+			return (
+				<>
+					<p>{__('No conditions defined yet.', 'tsjippy')}</p>
+					<Button variant="primary" onClick={addCondition}>
+						{__('Add first condition', 'tsjippy')}
 					</Button>
+				</>
+			);
+		}
 
+		/**
+		 * Loop over all conditons
+		 */
+		return draftConditions.map((condition, conditionIndex) => (
+			<>
+			<div
+				key       = {conditionIndex}
+				className = {`condition-row ${
+					Array.isArray(condition) && condition.length === 0
+						? 'condition-row--empty'
+						: ''
+				}`}
+				data-condition-index={conditionIndex}
+			>
+				<span className="condition-if">If</span>
+
+				{((condition.rules || []).length === 0 ) ? (
+					<>
+						<p>{__('No rules defined yet.', 'tsjippy')}</p>
+						<Button variant="primary" onClick={ () => addRule(conditionIndex) }>
+							{__('Add rule', 'tsjippy')}
+						</Button>
+					</>
+				) : (
+					condition.rules.map((rule, ruleIndex) => renderRuleRow(rule, ruleIndex, conditionIndex))
+				)}
+
+				<br></br> 
+
+				<span className="condition-if">Then</span>
+
+				{((condition.actions || []).length === 0 ) ? (
+					<>
+						<p>{__('No actions defined yet.', 'tsjippy')}</p>
+						<Button variant="primary" onClick={ () => addAction(conditionIndex) }>
+							{__('Add action', 'tsjippy')}
+						</Button>
+					</>
+				) : (
+					condition.actions.map((action, actionIndex) => renderActionRow(action, actionIndex, conditionIndex, blockProps))
+				)}
+
+				{/* Action buttons for managing the current condition and rule. */}
+				<div className="condition-row__actions">
 					<Button
 						variant="secondary"
-						onClick={() => duplicateAction(actionIndex)}
+						onClick={() => duplicateRule(conditionIndex)}
 						icon={copy}
 					>
-						{__('Duplicate action', 'tsjippy')}
+						{__('Duplicate condition', 'tsjippy')}
 					</Button>
-
-					{actionIndex > 0 && (
-						<Button
-							variant="secondary"
-							onClick={() => moveAction(actionIndex, -1)}
-							icon={arrowUp}
-						>
-							{__('Move action up', 'tsjippy')}
-						</Button>
-					)}
-
-					{actionIndex < (draftConditions.actions || []).length - 1 && (
-						<Button
-							variant="secondary"
-							onClick={() => moveAction(actionIndex, 1)}
-							icon={arrowDown}
-						>
-							{__('Move action down', 'tsjippy')}
-						</Button>
-					)}
 
 					<Button
 						variant="secondary"
 						isDestructive
-						onClick={() => deleteAction(actionIndex)}
+						onClick={() =>
+							deleteCondition(conditionIndex, ruleIndex)
+						}
 						icon={trash}
 					>
-						{__('Delete action', 'tsjippy')}
+						{__('Delete condition', 'tsjippy')}
 					</Button>
 				</div>
 			</div>
-		);
-	};
+			</>
+		))
+	}
 
-	const renderContent = useCallback(() => {
+	const renderContent = useCallback((blockProps) => {
 		if (isLoading && !hasLoaded) {
-			return <Spinner />;
+			return (
+				<>
+				Fetching Condition Data... 
+				<Spinner /> 
+				</>
+			);
 		}
 
 		if (error) {
@@ -961,128 +1069,14 @@ export default function ConditionsModal({
 				)}
 
 				<div ref={modalRef}>
-					<h3>{__('Rules', 'tsjippy')}</h3>
+					<h3>{__('Conditions', 'tsjippy')}</h3>
 
-					{(draftConditions.rules || []).length === 0 ? (
-						<>
-							<p>{__('No rules defined yet.', 'tsjippy')}</p>
-							<Button variant="primary" onClick={addRule}>
-								{__('Add first rule', 'tsjippy')}
-							</Button>
-						</>
-					) : (
-						(draftConditions.rules || []).map((rule, ruleIndex) => (
-							<div
-								key={ruleIndex}
-								className={`condition-row ${
-									Array.isArray(rule) && rule.length === 0
-										? 'condition-row--empty'
-										: ''
-								}`}
-								data-rule-index={ruleIndex}
-							>
-								<span className="condition-if">If</span>
-
-								{(Array.isArray(rule) ? rule : []).map((condition, subRuleIndex) => {
-									const hasErrors =
-										fieldErrors?.rules?.[ruleIndex]?.[subRuleIndex] &&
-										Object.keys(fieldErrors.rules[ruleIndex][subRuleIndex]).length > 0;
-
-									const isPulsed =
-										pulseTarget &&
-										pulseTarget.section === 'rules' &&
-										pulseTarget.ruleIndex === ruleIndex &&
-										pulseTarget.conditionIndex === subRuleIndex;
-
-									return (
-										<div
-											key={subRuleIndex}
-											className={`condition-row__item ${
-												hasErrors ? 'condition-row__item--invalid' : ''
-											} ${isPulsed ? 'condition-row__item--pulse' : ''}`}
-											data-condition-index={subRuleIndex}
-										>
-											<ConditionRow
-												condition={condition}
-												ruleIndex={ruleIndex}
-												subRuleIndex={subRuleIndex}
-												formElementOptions={formElementOptions}
-												onUpdate={updateRuleCondition}
-												onDeleteRule={() => deleteRule(ruleIndex)}
-												onMoveRuleUp={() => moveRule(ruleIndex, -1)}
-												onMoveRuleDown={() => moveRule(ruleIndex, 1)}
-												canMoveRuleUp={ruleIndex > 0}
-												canMoveRuleDown={ruleIndex < draftConditions.rules.length - 1}
-												fieldErrors={fieldErrors?.rules?.[ruleIndex]?.[subRuleIndex] || {}}
-											/>
-										</div>
-									);
-								})}
-
-								{/* Action buttons for managing the current condition and rule. */}
-								<div className="condition-row__actions">
-									<Button
-										variant="secondary"
-										onClick={() =>
-											addConditionToExistingRule(ruleIndex)
-										}
-										icon={plus}
-									>
-										{__('Add another condition', 'tsjippy')}
-									</Button>
-
-									<Button
-										variant="secondary"
-										onClick={() => duplicateRule(ruleIndex)}
-										icon={copy}
-									>
-										{__('Duplicate condition', 'tsjippy')}
-									</Button>
-
-									<Button
-										variant="secondary"
-										isDestructive
-										onClick={() =>
-											deleteCondition(ruleIndex, subRuleIndex)
-										}
-										icon={trash}
-									>
-										{__('Delete condition', 'tsjippy')}
-									</Button>
-								</div>
-							</div>
-						))
-					)}
-
-					<div style={{ marginTop: '16px' }}>
-						<Button variant="primary" onClick={addRule}>
-							{__('Add new rule', 'tsjippy')}
-						</Button>
-					</div>
-
-					<h3 style={{ marginTop: '32px' }}>{__('Actions', 'tsjippy')}</h3>
-
-					{(draftConditions.actions || []).length === 0 ? (
-						<>
-							<p>{__('No actions defined yet.', 'tsjippy')}</p>
-							<Button variant="primary" onClick={addAction}>
-								{__('Add first action', 'tsjippy')}
-							</Button>
-						</>
-					) : (
-						(draftConditions.actions || []).map((actionItem, actionIndex) =>
-							renderActionRow(actionItem, actionIndex)
-						)
-					)}
+					{ displayConditions(blockProps) }
 				</div>
 
 				<div style={{ marginTop: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-					<Button variant="primary" onClick={addRule}>
-						{__('Add new rule', 'tsjippy')}
-					</Button>
-
-					<Button variant="primary" onClick={addAction}>
-						{__('Add new action', 'tsjippy')}
+					<Button variant="primary" onClick={addCondition}>
+						{__('Add New Condition', 'tsjippy')}
 					</Button>
 
 					<Button
@@ -1115,8 +1109,8 @@ export default function ConditionsModal({
 		);
 	}, [
 		addAction,
-		addConditionToExistingRule,
 		addRule,
+		addCondition,
 		clearSuccessMessage,
 		conditions,
 		deleteCondition,
@@ -1132,8 +1126,6 @@ export default function ConditionsModal({
 		isDirty,
 		isLoading,
 		isSaving,
-		moveAction,
-		moveCondition,
 		moveRule,
 		pulseTarget,
 		successMessage,
@@ -1172,7 +1164,7 @@ export default function ConditionsModal({
 					</svg>
 				</span>
 
-				{renderContent()}
+				{renderContent(blockProps)}
 			</div>
 		</div>,
 		document.body

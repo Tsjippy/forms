@@ -244,29 +244,21 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					{getActionCheckboxes()}
 				</PanelBody>
 
-				<PanelBody title={__('Extra Forms', 'tsjippy')} initialOpen={false}>
-					<Button
-						variant="secondary"
-						onClick={() => setEmailsFormVisibility((prev) => !prev)}
-					>
+				<PanelBody title={__('E-mail Settings', 'tsjippy')} initialOpen={false} onToggle={() => setEmailsFormVisibility((prev) => !prev)}>
 						{isEmailsFormVisible
 							? __('Hide Emails Form', 'tsjippy')
 							: __('Show Emails Form', 'tsjippy')}
-					</Button>
+				</PanelBody>
 
-					<Button
-						variant="secondary"
-						onClick={() => setRemindersFormVisibility((prev) => !prev)}
-						style={{ marginLeft: '8px' }}
-					>
+				<PanelBody title={__('Form Reminders', 'tsjippy')} initialOpen={false} onToggle={ () => setRemindersFormVisibility((prev) => !prev)}>
 						{isRemindersFormVisible
 							? __('Hide Reminders Form', 'tsjippy')
 							: __('Show Reminders Form', 'tsjippy')}
-					</Button>
 				</PanelBody>
 			</InspectorControls>
 
-			<div {...innerBlocksProps}>
+			<fieldset { ...innerBlocksProps }>
+				<legend>{ attributes.name } Form</legend>
 				{resultingForm()}
 
 				<InnerBlocks
@@ -274,7 +266,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					template={MY_TEMPLATE}
 					renderAppender={InnerBlocks.ButtonBlockAppender}
 				/>
-			</div>
+			</fieldset>
 		</>
 	);
 }

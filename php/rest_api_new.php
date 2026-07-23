@@ -166,14 +166,16 @@ function restApiInitFormsNew()
                 }
 
                 return [
-                    "rules" => [
-                        [
-                            "conditional-field" => "abc123",
-                            "equation" => "==",
-                            "conditional-value" => "yes"
-                        ]
-                    ],
-                    "actions" => []
+                    [
+                        "rules" => [
+                            [
+                                "conditional-field" => "abc123",
+                                "equation" => "==",
+                                "conditional-value" => "yes"
+                            ]
+                        ],
+                        "actions" => []
+                    ]
                 ];
 
                 return $element->conditions;

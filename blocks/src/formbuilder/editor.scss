@@ -6,6 +6,8 @@
 @use "./../../../../tsjippy-shared-functionality/css/scss/global" as *;
 @use "./../../../../tsjippy-shared-functionality/css/scss/main";
 
+@use './styles/conditions';
+
 form.wp-block-tsjippy-forms-formbuilder{
     > .components-flex:nth-child(even){
         background-color: aliceblue;

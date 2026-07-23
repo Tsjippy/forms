@@ -23,7 +23,6 @@ import metadata from './block.json';
 
 import './store/conditions-store';
 import './filters/addButtonToInnerBlocks';
-import './styles/conditions.css';
 
 /**
  * Every block starts by registering a new block type definition.

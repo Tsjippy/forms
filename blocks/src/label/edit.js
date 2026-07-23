@@ -34,7 +34,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 	if ( ! hasInnerBlocks ) {
         return (
-            <div { ...blockProps }>
+            <fieldset { ...innerBlocksProps }>
+				<legend>Label Element</legend>
                 <Placeholder
                     icon			= "layout"
                     label			= { __("Add an input to this label", 'tsjippy') }
@@ -48,7 +49,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
                 <div style={ { display: 'none' } }>
                     <InnerBlocks />
                 </div>
-            </div>
+            </fieldset>
         );
     }
 

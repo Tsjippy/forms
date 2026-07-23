@@ -49,7 +49,7 @@ function isInsideFormBuilder(clientId) {
 	return parentForm;
 }
 
-const addButtonToInnerBlocks = createHigherOrderComponent((BlockEdit) => {
+const addConditionsForm = createHigherOrderComponent((BlockEdit) => {
 	return (props) => {
 		if (!props.isSelected) {
 			return <BlockEdit {...props} />;
@@ -89,6 +89,7 @@ const addButtonToInnerBlocks = createHigherOrderComponent((BlockEdit) => {
 					onClose={toggleConditionsForm}
 					elementId={props.clientId}
 					allNestedBlocks={allNestedBlocks}
+					blockProps={props}
 				/>
 
 				<BlockEdit {...props} />
@@ -106,10 +107,10 @@ const addButtonToInnerBlocks = createHigherOrderComponent((BlockEdit) => {
 			</>
 		);
 	};
-}, 'addButtonToInnerBlocks');
+}, 'addConditionsForm');
 
 addFilter(
 	'editor.BlockEdit',
 	'tsjippy-forms/add-conditions-button',
-	addButtonToInnerBlocks
+	addConditionsForm
 );

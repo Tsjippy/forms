@@ -9,17 +9,18 @@ import {
 	trash,
 	copy,
 	arrowUp,
-	arrowDown
+	arrowDown,
+	row
 } from '@wordpress/icons';
 
 /**
- * Render one condition row inside a rule group.
+ * Render one rule row inside a rule group.
  * This component is presentational and sends all updates upward.
  */
-export default function ConditionRow({
-	condition,
+export default function RuleRow({
+	conditionIndex,
+	rule,
 	ruleIndex,
-	subRuleIndex,
 	formElementOptions,
 	onUpdate,
 	onDeleteRule,
@@ -29,6 +30,7 @@ export default function ConditionRow({
 	canMoveRuleDown,
 	fieldErrors = {},
 }) {
+	console.log("rendering row")
 	/* Available equation choices for the main equation dropdown. */
 	const equationOptions = [
 		{ label: __('Equals', 'tsjippy'), value: '==' },
@@ -45,22 +47,22 @@ export default function ConditionRow({
 
 	/* Render additional fields for arithmetic-style equations. */
 	const renderExtraOptions = () => {
-		if (!condition?.equation) {
+		if (!rule?.equation) {
 			return null;
 		}
 
-		if (condition.equation === '+' || condition.equation === '-') {
+		if (rule.equation === '+' || rule.equation === '-') {
 			return (
 				<>
 					<SelectControl
 						label={__('Second element', 'tsjippy')}
-						value={condition['conditional-field-2'] || ''}
+						value={rule['conditional-field-2'] || ''}
 						options={[
 							{ label: __('Select second element', 'tsjippy'), value: '' },
 							...(formElementOptions || []),
 						]}
 						onChange={(element) =>
-							onUpdate(ruleIndex, subRuleIndex, 'conditional-field-2', element)
+							onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', element)
 						}
 						help={fieldErrors.conditionalField2 || ''}
 						data-field-key="conditionalField2"
@@ -68,7 +70,7 @@ export default function ConditionRow({
 
 					<SelectControl
 						label={__('Second equation', 'tsjippy')}
-						value={condition['equation-2'] || ''}
+						value={rule['equation-2'] || ''}
 						options={[
 							{ label: __('Select second equation', 'tsjippy'), value: '' },
 							{ label: __('Equals', 'tsjippy'), value: '==' },
@@ -77,7 +79,7 @@ export default function ConditionRow({
 							{ label: __('Less than', 'tsjippy'), value: '<' },
 						]}
 						onChange={(equation2) =>
-							onUpdate(ruleIndex, subRuleIndex, 'equation-2', equation2)
+							onUpdate(conditionIndex, ruleIndex, 'equation-2', equation2)
 						}
 						help={fieldErrors.equation2 || ''}
 						data-field-key="equation2"
@@ -89,29 +91,18 @@ export default function ConditionRow({
 		return null;
 	};
 
-	/* Render the editable UI for one condition entry. */
+	/* Render the editable UI for one rule entry. */
 	return (
-		<div className="condition-row__inner">
+		<div className="rule-row __inner">			
 			<SelectControl
-				label="Size"
-				value= '50%'
-				options={ [
-					{ label: 'Big', value: '100%' },
-					{ label: 'Medium', value: '50%' },
-					{ label: 'Small', value: '25%' },
-				] }
-				onChange={ ( newSize ) => setSize( newSize ) }
-			/>
-			
-			<SelectControl
-				label={__('Conditional field', 'tsjippy')}
-				value={condition?.['conditional-field'] || ''}
+				label={__('Conditional Field', 'tsjippy')}
+				value={rule?.['conditional-field'] || ''}
 				options={[
 					{ label: __('Select element', 'tsjippy'), value: '' },
 					...(formElementOptions || []),
 				]}
 				onChange={(element) =>
-					onUpdate(ruleIndex, subRuleIndex, 'conditional-field', element)
+					onUpdate(conditionIndex, ruleIndex, 'conditional-field', element)
 				}
 				help={fieldErrors.conditionalField || ''}
 				data-field-key="conditionalField"
@@ -119,13 +110,13 @@ export default function ConditionRow({
 
 			<SelectControl
 				label={__('Equation', 'tsjippy')}
-				value={condition?.equation || ''}
+				value={rule?.equation || ''}
 				options={[
 					{ label: __('Select equation', 'tsjippy'), value: '' },
 					...equationOptions,
 				]}
 				onChange={(equation) =>
-					onUpdate(ruleIndex, subRuleIndex, 'equation', equation)
+					onUpdate(conditionIndex, ruleIndex, 'equation', equation)
 				}
 				help={fieldErrors.equation || ''}
 				data-field-key="equation"
@@ -133,36 +124,35 @@ export default function ConditionRow({
 
 			{renderExtraOptions()}
 
-			{condition?.equation &&
-				condition.equation !== '+' &&
-				condition.equation !== '-' && (
-					<TextControl
-						label={__('Value', 'tsjippy')}
-						value={condition?.['conditional-value'] || ''}
-						onChange={(value) =>
-							onUpdate(ruleIndex, subRuleIndex, 'conditional-value', value)
-						}
-						help={fieldErrors.conditionalValue || ''}
-						data-field-key="conditionalValue"
-					/>
-				)}
+			<TextControl
+				label={__('Value', 'tsjippy')}
+				value={rule?.['conditional-value'] || ''}
+				onChange={(value) =>
+					onUpdate(conditionIndex, ruleIndex, 'conditional-value', value)
+				}
+				help={fieldErrors.conditionalValue || ''}
+				data-field-key="conditionalValue"
+			/>
 
 			{/* AND / OR combinator controls. */}
-			<div className="condition-row__combinator">
+			<div className="rule-row__combinator">
 				<Button
-					variant={condition?.combinator === 'and' ? 'primary' : 'secondary'}
-					isPressed={condition?.combinator === 'and'}
-					aria-pressed={condition?.combinator === 'and'}
-					onClick={() => onUpdate(ruleIndex, subRuleIndex, 'combinator', 'and')}
+					variant={rule?.combinator === 'and' ? 'primary' : 'secondary'}
+					isPressed={rule?.combinator === 'and'}
+					aria-pressed={rule?.combinator === 'and'}
+					onClick={() => onUpdate(conditionIndex, ruleIndex, 'combinator', 'and')}
+					icon={row}
 				>
 					{__('AND', 'tsjippy')}
+
 				</Button>
 
 				<Button
-					variant={condition?.combinator === 'or' ? 'primary' : 'secondary'}
-					isPressed={condition?.combinator === 'or'}
-					aria-pressed={condition?.combinator === 'or'}
-					onClick={() => onUpdate(ruleIndex, subRuleIndex, 'combinator', 'or')}
+					variant={rule?.combinator === 'or' ? 'primary' : 'secondary'}
+					isPressed={rule?.combinator === 'or'}
+					aria-pressed={rule?.combinator === 'or'}
+					onClick={() => onUpdate(conditionIndex, ruleIndex, 'combinator', 'or')}
+					icon={row}
 				>
 					{__('OR', 'tsjippy')}
 				</Button>
@@ -172,6 +162,7 @@ export default function ConditionRow({
 						variant="secondary"
 						onClick={onMoveRuleUp}
 						icon={arrowUp}
+						style= {{width: '140px'}}
 					>
 						{__('Move rule up', 'tsjippy')}
 					</Button>
