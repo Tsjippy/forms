@@ -623,7 +623,7 @@ function ConditionsModal({
     _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_9__.inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-' + data.attribute));
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
-        className: `condition-row__item ${Object.keys(actionErrors).length > 0 ? 'condition-row__item--invalid' : ''} ${isPulsed ? 'condition-row__item--pulse' : ''}`,
+        className: `condition-row item ${Object.keys(actionErrors).length > 0 ? 'condition-row__item--invalid' : ''} ${isPulsed ? 'condition-row__item--pulse' : ''}`,
         "data-action-index": actionIndex,
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Action', 'tsjippy'),
