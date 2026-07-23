@@ -10,6 +10,7 @@
 - added data store for element conditions
 
 ### Fixed
+- conditions form bugs
 
 ### Updated
 
