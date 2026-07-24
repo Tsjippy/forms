@@ -1705,17 +1705,28 @@ class Forms
      * @param   string  $blockId
      */
     public function saveBlockConditions($conditions, $blockId){
-        TSJIPPY\updateDbValue(
-            $this->blockConditionsTableName,
-            $conditions,
-            [
-                'target' => $blockId
-            ],
-            $this->tableFormats[$this->blockConditionsTableName],
-            [
-                '%s'
-            ],
-            'forms'
-        );
+        $rowsUpdated    = 0;
+        foreach(TSJIPPY\cleanUpNestedArray($conditions) as $condition){
+            $result = TSJIPPY\updateDbValue(
+                $this->blockConditionsTableName,
+                $condition,
+                [
+                    'target' => $blockId
+                ],
+                $this->tableFormats[$this->blockConditionsTableName],
+                [
+                    '%s'
+                ],
+                'forms'
+            );
+
+            if(is_numeric($result)){
+                $rowsUpdated += $result;
+            }else{
+                TSJIPPy\printArray($result);
+            }
+        }
+
+        return $rowsUpdated;
     }
 }

@@ -87,7 +87,7 @@ const addConditionsForm = createHigherOrderComponent((BlockEdit) => {
 				<ConditionsModal
 					isVisible={isConditionsFormVisible}
 					onClose={toggleConditionsForm}
-					elementId={props.clientId}
+					blockId={props.attributes.blockId}
 					allNestedBlocks={allNestedBlocks}
 					blockProps={props}
 				/>

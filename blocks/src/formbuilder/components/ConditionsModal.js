@@ -9,7 +9,7 @@ import {
 	createPortal,
 } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useFormElementOptions } from '../hooks/useFormElementOptions';
+import { getBlocksAsSelectOptions } from '../hooks/getBlocksAsSelectOptions.js';
 import {
 	plus,
 	trash,
@@ -94,49 +94,55 @@ function validateConditions(conditions) {
 		fieldKey: null,
 	};
 
+	if(!Array.isArray(conditions) || conditions.length === 0){
+		return {
+			errors,
+			fieldErrors,
+			firstErrorTarget,
+		};
+	}
+
 	conditions    = Array.isArray(conditions) ? conditions : [];
 	const rules   = Array.isArray(conditions[0]?.rules) ? conditions[0].rules : [];
 	const actions = Array.isArray(conditions[0]?.actions) ? conditions[0].actions : [];
-
-	if (rules.length === 0) {
-		errors.push(__('At least one rule group is required.', 'tsjippy'));
-	}
 
 	/**
 	 * Loop over all conditions
 	 */
 	conditions.forEach((condition, conditionIndex) => {
-		if (!Array.isArray(condition.rules) || condition.rules.length === 0) {
-			errors.push(
-				sprintf(
-					__('Condition %d must contain at least one rule.', 'tsjippy'),
-					conditionIndex + 1
-				)
-			);
+		if(condition.rules.length > 0) {
+			if (!Array.isArray(condition.rules)) {
+				errors.push(
+					sprintf(
+						__('Condition %d must contain at least one rule.', 'tsjippy'),
+						conditionIndex + 1
+					)
+				);
 
-			if (firstErrorTarget.section === null) {
-				firstErrorTarget.section = 'rules';
-				firstErrorTarget.conditionIndex = conditionIndex;
-				firstErrorTarget.ruleIndex = 0;
-				firstErrorTarget.fieldKey = 'conditionalField';
+				if (firstErrorTarget.section === null) {
+					firstErrorTarget.section = 'rules';
+					firstErrorTarget.conditionIndex = conditionIndex;
+					firstErrorTarget.ruleIndex = 0;
+					firstErrorTarget.fieldKey = 'conditionalField';
+				}
+
+				return;
 			}
 
-			return;
-		}
+			if (!Array.isArray(condition.actions) || condition.actions.length === 0) {
+				errors.push(
+					sprintf(
+						__('Condition %d must contain at least one action.', 'tsjippy'),
+						conditionIndex + 1
+					)
+				);
 
-		if (!Array.isArray(condition.actions) || condition.actions.length === 0) {
-			errors.push(
-				sprintf(
-					__('Condition %d must contain at least one action.', 'tsjippy'),
-					conditionIndex + 1
-				)
-			);
-
-			if (firstErrorTarget.section === null) {
-				firstErrorTarget.section = 'actions';
-				firstErrorTarget.conditionIndex = conditionIndex;
-				firstErrorTarget.ruleIndex = 0;
-				firstErrorTarget.fieldKey = 'conditionalField';
+				if (firstErrorTarget.section === null) {
+					firstErrorTarget.section = 'actions';
+					firstErrorTarget.conditionIndex = conditionIndex;
+					firstErrorTarget.ruleIndex = 0;
+					firstErrorTarget.fieldKey = 'conditionalField';
+				}
 			}
 		}
 
@@ -299,7 +305,7 @@ function validateConditions(conditions) {
 export default function ConditionsModal({
 	isVisible,
 	onClose,
-	elementId,
+	blockId,
 	allNestedBlocks,
 	blockProps
 }) {
@@ -309,28 +315,28 @@ export default function ConditionsModal({
 	const { createSuccessNotice, createErrorNotice } = useDispatch('core/notices');
 
 	const conditions = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').getConditions(elementId),
-		[elementId]
+		(select) => select('tsjippy-forms/conditions-store').getConditions(blockId),
+		[blockId]
 	);
 
 	const isLoading = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').isLoading(elementId),
-		[elementId]
+		(select) => select('tsjippy-forms/conditions-store').isLoading(blockId),
+		[blockId]
 	);
 
 	const isSaving = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').isSaving(elementId),
-		[elementId]
+		(select) => select('tsjippy-forms/conditions-store').isSaving(blockId),
+		[blockId]
 	);
 
 	const error = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').getError(elementId),
-		[elementId]
+		(select) => select('tsjippy-forms/conditions-store').getError(blockId),
+		[blockId]
 	);
 
 	const hasLoaded = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').hasLoaded(elementId),
-		[elementId]
+		(select) => select('tsjippy-forms/conditions-store').hasLoaded(blockId),
+		[blockId]
 	);
 
 	/**
@@ -338,20 +344,13 @@ export default function ConditionsModal({
 	 * Each condition has one or more rules
 	 * And one or more actions
 	 */
-	const [draftConditions, setDraftConditions] = useState(
-		[
-			{
-				rules:   [ createEmptyRule() ],
-				actions: [ createEmptyAction() ],
-			}
-		]
-	);
+	const [draftConditions, setDraftConditions] = useState([]);
 	const [successMessage, setSuccessMessage] = useState('');
 	const [validationErrors, setValidationErrors] = useState([]);
 	const [fieldErrors, setFieldErrors] = useState({});
 	const [focusTarget, setFocusTarget] = useState(null);
 	const [pulseTarget, setPulseTarget] = useState(null);
-	const formElementOptions = useFormElementOptions(allNestedBlocks);
+	const formBlockOptions = getBlocksAsSelectOptions(allNestedBlocks);
 	const modalRef = useRef(null);
 	const previousBodyOverflow = useRef('');
 
@@ -431,7 +430,7 @@ export default function ConditionsModal({
 	}, [isVisible, handleClose]);
 
 	useEffect(() => {
-		if (!focusTarget || !modalRef.current) {
+		if (!focusTarget || !modalRef.current || !focusTarget.section) {
 			return;
 		}
 
@@ -721,7 +720,25 @@ export default function ConditionsModal({
 		[clearSuccessMessage]
 	);
 
-	const handleSave = useCallback(async () => {
+	/**
+	 * Internal API helper for saving conditions.
+	 * This is used by the store-owned save action and is not exported.
+	 */
+	async function saveConditionsRequest(blockId, conditions) {
+		const savedConditions = await apiFetch({
+			path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
+			method: 'POST',
+			data: {
+				blockId: blockId,
+				conditions: conditions,
+			},
+		});
+
+		return conditions;
+	}
+
+	const handleSave = useCallback(async (blockId) => {
+
 		const result = validateConditions(draftConditions);
 
 		if (result.errors.length > 0) {
@@ -736,7 +753,7 @@ export default function ConditionsModal({
 		}
 
 		try {
-			await saveConditions(elementId, draftConditions);
+			await saveConditions(blockId, draftConditions);
 			
 			resetErrors();
 
@@ -746,12 +763,12 @@ export default function ConditionsModal({
 			const message =
 				saveError?.message || __('Saving failed. Please try again.', 'tsjippy');
 
-			setError(elementId, message);
+			setError(blockId, message);
 			showToastError(message);
 		}
 	}, [
 		draftConditions,
-		elementId,
+		blockId,
 		saveConditions,
 		setError,
 		showToastError,
@@ -788,7 +805,7 @@ export default function ConditionsModal({
 					conditionIndex={conditionIndex}
 					rule={rule}
 					ruleIndex={ruleIndex}
-					formElementOptions={formElementOptions}
+					formBlockOptions={formBlockOptions}
 					onUpdate={updateRuleCondition}
 					onDeleteRule={ () => deleteRule(conditionIndex, ruleIndex) }
 					onMoveRuleUp={ () =>  moveRule(conditionIndex, ruleIndex, -1) }
@@ -863,7 +880,7 @@ export default function ConditionsModal({
 					/>
 
 					<datalist id="possible-elements">
-						{formElementOptions.map((data) => <option value={"the-value-of-"+data.value}></option>)}
+						{formBlockOptions.map((data) => <option value={"the-value-of-"+data.value}></option>)}
 					</datalist>
 
 					</>
@@ -1028,7 +1045,7 @@ export default function ConditionsModal({
 
 					<Button
 						variant="primary"
-						onClick={handleSave}
+						onClick={() => handleSave(blockProps.attributes.blockId)}
 						disabled={!isDirty || !isValid || isSaving}
 						accessibleWhenDisabled={true}
 					>
@@ -1066,7 +1083,7 @@ export default function ConditionsModal({
 		draftConditions,
 		error,
 		fieldErrors,
-		formElementOptions,
+		formBlockOptions,
 		handleClose,
 		handleReset,
 		handleSave,

@@ -20,7 +20,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _hooks_useFormElementOptions__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../hooks/useFormElementOptions */ "./src/formbuilder/hooks/useFormElementOptions.js");
+/* harmony import */ var _hooks_getBlocksAsSelectOptions_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../hooks/getBlocksAsSelectOptions.js */ "./src/formbuilder/hooks/getBlocksAsSelectOptions.js");
 /* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/copy.mjs");
 /* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/plus.mjs");
 /* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/trash.mjs");
@@ -96,34 +96,40 @@ function validateConditions(conditions) {
     actionIndex: null,
     fieldKey: null
   };
+  if (!Array.isArray(conditions) || conditions.length === 0) {
+    return {
+      errors,
+      fieldErrors,
+      firstErrorTarget
+    };
+  }
   conditions = Array.isArray(conditions) ? conditions : [];
   const rules = Array.isArray(conditions[0]?.rules) ? conditions[0].rules : [];
   const actions = Array.isArray(conditions[0]?.actions) ? conditions[0].actions : [];
-  if (rules.length === 0) {
-    errors.push((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('At least one rule group is required.', 'tsjippy'));
-  }
 
   /**
    * Loop over all conditions
    */
   conditions.forEach((condition, conditionIndex) => {
-    if (!Array.isArray(condition.rules) || condition.rules.length === 0) {
-      errors.push((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.sprintf)((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Condition %d must contain at least one rule.', 'tsjippy'), conditionIndex + 1));
-      if (firstErrorTarget.section === null) {
-        firstErrorTarget.section = 'rules';
-        firstErrorTarget.conditionIndex = conditionIndex;
-        firstErrorTarget.ruleIndex = 0;
-        firstErrorTarget.fieldKey = 'conditionalField';
+    if (condition.rules.length > 0) {
+      if (!Array.isArray(condition.rules)) {
+        errors.push((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.sprintf)((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Condition %d must contain at least one rule.', 'tsjippy'), conditionIndex + 1));
+        if (firstErrorTarget.section === null) {
+          firstErrorTarget.section = 'rules';
+          firstErrorTarget.conditionIndex = conditionIndex;
+          firstErrorTarget.ruleIndex = 0;
+          firstErrorTarget.fieldKey = 'conditionalField';
+        }
+        return;
       }
-      return;
-    }
-    if (!Array.isArray(condition.actions) || condition.actions.length === 0) {
-      errors.push((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.sprintf)((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Condition %d must contain at least one action.', 'tsjippy'), conditionIndex + 1));
-      if (firstErrorTarget.section === null) {
-        firstErrorTarget.section = 'actions';
-        firstErrorTarget.conditionIndex = conditionIndex;
-        firstErrorTarget.ruleIndex = 0;
-        firstErrorTarget.fieldKey = 'conditionalField';
+      if (!Array.isArray(condition.actions) || condition.actions.length === 0) {
+        errors.push((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.sprintf)((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Condition %d must contain at least one action.', 'tsjippy'), conditionIndex + 1));
+        if (firstErrorTarget.section === null) {
+          firstErrorTarget.section = 'actions';
+          firstErrorTarget.conditionIndex = conditionIndex;
+          firstErrorTarget.ruleIndex = 0;
+          firstErrorTarget.fieldKey = 'conditionalField';
+        }
       }
     }
 
@@ -242,7 +248,7 @@ function validateConditions(conditions) {
 function ConditionsModal({
   isVisible,
   onClose,
-  elementId,
+  blockId,
   allNestedBlocks,
   blockProps
 }) {
@@ -254,27 +260,24 @@ function ConditionsModal({
     createSuccessNotice,
     createErrorNotice
   } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useDispatch)('core/notices');
-  const conditions = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').getConditions(elementId), [elementId]);
-  const isLoading = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').isLoading(elementId), [elementId]);
-  const isSaving = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').isSaving(elementId), [elementId]);
-  const error = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').getError(elementId), [elementId]);
-  const hasLoaded = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').hasLoaded(elementId), [elementId]);
+  const conditions = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').getConditions(blockId), [blockId]);
+  const isLoading = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').isLoading(blockId), [blockId]);
+  const isSaving = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').isSaving(blockId), [blockId]);
+  const error = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').getError(blockId), [blockId]);
+  const hasLoaded = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('tsjippy-forms/conditions-store').hasLoaded(blockId), [blockId]);
 
   /**
    * A conditions is an array of condition arrays
    * Each condition has one or more rules
    * And one or more actions
    */
-  const [draftConditions, setDraftConditions] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)([{
-    rules: [createEmptyRule()],
-    actions: [createEmptyAction()]
-  }]);
+  const [draftConditions, setDraftConditions] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)([]);
   const [successMessage, setSuccessMessage] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)('');
   const [validationErrors, setValidationErrors] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)([]);
   const [fieldErrors, setFieldErrors] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)({});
   const [focusTarget, setFocusTarget] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(null);
   const [pulseTarget, setPulseTarget] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(null);
-  const formElementOptions = (0,_hooks_useFormElementOptions__WEBPACK_IMPORTED_MODULE_4__.useFormElementOptions)(allNestedBlocks);
+  const formBlockOptions = (0,_hooks_getBlocksAsSelectOptions_js__WEBPACK_IMPORTED_MODULE_4__.getBlocksAsSelectOptions)(allNestedBlocks);
   const modalRef = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useRef)(null);
   const previousBodyOverflow = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useRef)('');
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useEffect)(() => {
@@ -332,7 +335,7 @@ function ConditionsModal({
     };
   }, [isVisible, handleClose]);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useEffect)(() => {
-    if (!focusTarget || !modalRef.current) {
+    if (!focusTarget || !modalRef.current || !focusTarget.section) {
       return;
     }
     const {
@@ -537,7 +540,23 @@ function ConditionsModal({
       return next;
     });
   }, [clearSuccessMessage]);
-  const handleSave = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)(async () => {
+
+  /**
+   * Internal API helper for saving conditions.
+   * This is used by the store-owned save action and is not exported.
+   */
+  async function saveConditionsRequest(blockId, conditions) {
+    const savedConditions = await apiFetch({
+      path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
+      method: 'POST',
+      data: {
+        blockId: blockId,
+        conditions: conditions
+      }
+    });
+    return conditions;
+  }
+  const handleSave = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)(async blockId => {
     const result = validateConditions(draftConditions);
     if (result.errors.length > 0) {
       setValidationErrors(result.errors);
@@ -548,16 +567,16 @@ function ConditionsModal({
       return;
     }
     try {
-      await saveConditions(elementId, draftConditions);
+      await saveConditions(blockId, draftConditions);
       resetErrors();
       setSuccessMessage((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditions saved successfully.', 'tsjippy'));
       showToastSuccess((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditions saved successfully.', 'tsjippy'));
     } catch (saveError) {
       const message = saveError?.message || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Saving failed. Please try again.', 'tsjippy');
-      setError(elementId, message);
+      setError(blockId, message);
       showToastError(message);
     }
-  }, [draftConditions, elementId, saveConditions, setError, showToastError, showToastSuccess]);
+  }, [draftConditions, blockId, saveConditions, setError, showToastError, showToastSuccess]);
   const resetErrors = () => {
     clearSuccessMessage();
     setValidationErrors([]);
@@ -579,7 +598,7 @@ function ConditionsModal({
         conditionIndex: conditionIndex,
         rule: rule,
         ruleIndex: ruleIndex,
-        formElementOptions: formElementOptions,
+        formBlockOptions: formBlockOptions,
         onUpdate: updateRuleCondition,
         onDeleteRule: () => deleteRule(conditionIndex, ruleIndex),
         onMoveRuleUp: () => moveRule(conditionIndex, ruleIndex, -1),
@@ -649,7 +668,7 @@ function ConditionsModal({
           list: "possible-elements"
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("datalist", {
           id: "possible-elements",
-          children: formElementOptions.map(data => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("option", {
+          children: formBlockOptions.map(data => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("option", {
             value: "the-value-of-" + data.value
           }))
         })]
@@ -786,7 +805,7 @@ function ConditionsModal({
           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add New Condition', 'tsjippy')
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
           variant: "primary",
-          onClick: handleSave,
+          onClick: () => handleSave(blockProps.attributes.blockId),
           disabled: !isDirty || !isValid || isSaving,
           accessibleWhenDisabled: true,
           children: isSaving ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Saving...', 'tsjippy') : isDirty ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Save conditions', 'tsjippy') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Saved', 'tsjippy')
@@ -808,7 +827,7 @@ function ConditionsModal({
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('You have unsaved changes.', 'tsjippy')
       })]
     });
-  }, [addAction, addRule, addCondition, clearSuccessMessage, conditions, deleteCondition, deleteRule, draftConditions, error, fieldErrors, formElementOptions, handleClose, handleReset, handleSave, hasLoaded, isDirty, isLoading, isSaving, moveRule, pulseTarget, successMessage, updateAction, updateRuleCondition, validationErrors]);
+  }, [addAction, addRule, addCondition, clearSuccessMessage, conditions, deleteCondition, deleteRule, draftConditions, error, fieldErrors, formBlockOptions, handleClose, handleReset, handleSave, hasLoaded, isDirty, isLoading, isSaving, moveRule, pulseTarget, successMessage, updateAction, updateRuleCondition, validationErrors]);
   if (!isVisible || typeof document === 'undefined') {
     return null;
   }
@@ -885,7 +904,7 @@ function RuleRow({
   conditionIndex,
   rule,
   ruleIndex,
-  formElementOptions,
+  formBlockOptions,
   onUpdate,
   onDeleteRule,
   onMoveRuleUp,
@@ -940,7 +959,7 @@ function RuleRow({
           options: [{
             label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select second element', 'tsjippy'),
             value: ''
-          }, ...(formElementOptions || [])],
+          }, ...(formBlockOptions || [])],
           onChange: element => onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', element),
           help: ruleErrors.conditionalField2 || '',
           "data-field-key": "conditionalField2"
@@ -979,9 +998,9 @@ function RuleRow({
       label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditional Field', 'tsjippy'),
       value: rule?.['conditional-field'] || '',
       options: [{
-        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select element', 'tsjippy'),
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select block', 'tsjippy'),
         value: ''
-      }, ...(formElementOptions || [])],
+      }, ...(formBlockOptions || [])],
       onChange: element => onUpdate(conditionIndex, ruleIndex, 'conditional-field', element),
       help: ruleErrors.conditionalField || '',
       "data-field-key": "conditionalField"
@@ -1405,7 +1424,7 @@ const addConditionsForm = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_4__.cre
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_components_ConditionsModal__WEBPACK_IMPORTED_MODULE_7__["default"], {
         isVisible: isConditionsFormVisible,
         onClose: toggleConditionsForm,
-        elementId: props.clientId,
+        blockId: props.attributes.blockId,
         allNestedBlocks: allNestedBlocks,
         blockProps: props
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(BlockEdit, {
@@ -1499,20 +1518,20 @@ const addBlockId = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.createHigh
 
 /***/ },
 
-/***/ "./src/formbuilder/hooks/useFormElementOptions.js"
-/*!********************************************************!*\
-  !*** ./src/formbuilder/hooks/useFormElementOptions.js ***!
-  \********************************************************/
+/***/ "./src/formbuilder/hooks/getBlocksAsSelectOptions.js"
+/*!***********************************************************!*\
+  !*** ./src/formbuilder/hooks/getBlocksAsSelectOptions.js ***!
+  \***********************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   useFormElementOptions: () => (/* binding */ useFormElementOptions)
+/* harmony export */   getBlocksAsSelectOptions: () => (/* binding */ getBlocksAsSelectOptions)
 /* harmony export */ });
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
 
-function useFormElementOptions(allNestedBlocks) {
+function getBlocksAsSelectOptions(allNestedBlocks) {
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useMemo)(() => {
     return (allNestedBlocks || []).map(block => {
       let name = block.attributes?.name ?? block.attributes?.text ?? '';
@@ -1522,7 +1541,7 @@ function useFormElementOptions(allNestedBlocks) {
       }
       return {
         label,
-        value: block.clientId
+        value: block.attributes.blockId
       };
     });
   }, [allNestedBlocks]);
@@ -1682,22 +1701,6 @@ async function fetchConditions(blockId) {
 }
 
 /**
- * Internal API helper for saving conditions.
- * This is used by the store-owned save action and is not exported.
- */
-async function saveConditionsRequest(blockId, conditions) {
-  const savedConditions = await _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1___default()({
-    path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
-    method: 'POST',
-    data: {
-      blockId: blockId,
-      conditions: conditions
-    }
-  });
-  return conditions;
-}
-
-/**
  * Store action creators.
  * Most actions are plain actions, while saveConditions is a generator
  * that performs the async save flow.
@@ -1757,22 +1760,20 @@ const actions = {
    * Save conditions through the API and update store state.
    * This is the store-owned mutation path.
    */
-  *saveConditions(blockId, conditions) {
+  async saveConditions(blockId, conditions) {
     if (blockId === undefined || blockId === null || blockId === '') {
       return;
     }
-    yield actions.setSaving(blockId, true);
-    yield actions.setError(blockId, null);
     try {
-      const savedConditions = yield saveConditionsRequest(blockId, conditions);
-      yield actions.setConditions(blockId, savedConditions);
-      yield actions.setLoaded(blockId, true);
-      return savedConditions;
+      await saveConditionsRequest(blockId, conditions);
+      actions.setConditions(blockId, conditions);
+      actions.setLoaded(blockId, true);
+      return conditions;
     } catch (error) {
-      yield actions.setError(blockId, error?.message || 'Failed to save element conditions.');
+      actions.setError(blockId, error?.message || 'Failed to save element conditions.');
       throw error;
     } finally {
-      yield actions.setSaving(blockId, false);
+      //actions.setSaving(blockId, false);
     }
   }
 };

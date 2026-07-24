@@ -35,23 +35,6 @@ async function fetchConditions(blockId) {
 }
 
 /**
- * Internal API helper for saving conditions.
- * This is used by the store-owned save action and is not exported.
- */
-async function saveConditionsRequest(blockId, conditions) {
-	const savedConditions = await apiFetch({
-		path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
-		method: 'POST',
-		data: {
-			blockId: blockId,
-			conditions: conditions,
-		},
-	});
-
-	return conditions;
-}
-
-/**
  * Store action creators.
  * Most actions are plain actions, while saveConditions is a generator
  * that performs the async save flow.
@@ -116,33 +99,30 @@ const actions = {
 	 * Save conditions through the API and update store state.
 	 * This is the store-owned mutation path.
 	 */
-	*saveConditions(blockId, conditions) {
+	async saveConditions(blockId, conditions) {
 		if (blockId === undefined || blockId === null || blockId === '') {
 			return;
 		}
 
-		yield actions.setSaving(blockId, true);
-		yield actions.setError(blockId, null);
-
 		try {
-			const savedConditions = yield saveConditionsRequest(
+			await saveConditionsRequest(
 				blockId,
 				conditions
 			);
 
-			yield actions.setConditions(blockId, savedConditions);
-			yield actions.setLoaded(blockId, true);
+			actions.setConditions(blockId, conditions);
+			actions.setLoaded(blockId, true);
 
-			return savedConditions;
+			return conditions;
 		} catch (error) {
-			yield actions.setError(
+			actions.setError(
 				blockId,
 				error?.message || 'Failed to save element conditions.'
 			);
 
 			throw error;
 		} finally {
-			yield actions.setSaving(blockId, false);
+			//actions.setSaving(blockId, false);
 		}
 	},
 };

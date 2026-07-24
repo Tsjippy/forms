@@ -21,7 +21,7 @@ export default function RuleRow({
 	conditionIndex,
 	rule,
 	ruleIndex,
-	formElementOptions,
+	formBlockOptions,
 	onUpdate,
 	onDeleteRule,
 	onMoveRuleUp,
@@ -58,7 +58,7 @@ export default function RuleRow({
 						value={rule['conditional-field-2'] || ''}
 						options={[
 							{ label: __('Select second element', 'tsjippy'), value: '' },
-							...(formElementOptions || []),
+							...(formBlockOptions || []),
 						]}
 						onChange={(element) =>
 							onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', element)
@@ -99,8 +99,8 @@ export default function RuleRow({
 				label={__('Conditional Field', 'tsjippy')}
 				value={rule?.['conditional-field'] || ''}
 				options={[
-					{ label: __('Select element', 'tsjippy'), value: '' },
-					...(formElementOptions || []),
+					{ label: __('Select block', 'tsjippy'), value: '' },
+					...(formBlockOptions || []),
 				]}
 				onChange={(element) =>
 					onUpdate(conditionIndex, ruleIndex, 'conditional-field', element)
