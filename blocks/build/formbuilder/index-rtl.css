@@ -1142,16 +1142,30 @@ button.expand {
   transform: scale(1.03);
 }
 
+.condition-row {
+  background-color: #f1efef;
+  border-radius: 10px;
+  padding: 10px 20px;
+}
+.condition-row .item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.condition-row .components-input-control__suffix {
+  display: none;
+}
+
 /* Outer wrapper for each rule group. */
 .rule-row {
-  margin-bottom: 20px;
   padding: 16px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   background: #fafafa;
   /* Individual condition card inside a rule group. */
 }
-.rule-row__item {
+.rule-row.item {
   margin-bottom: 16px;
   padding: 16px;
   border: 1px solid #e5e7eb;
@@ -1159,73 +1173,55 @@ button.expand {
   background: #fff;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
-.rule-row__item:last-child {
+.rule-row.item:last-child {
   margin-bottom: 0;
 }
-.rule-row__item {
+.rule-row.item {
   /* Highlight invalid rows. */
 }
-.rule-row__item--invalid {
+.rule-row.item.invalid {
   border-color: #d63638;
   background: #fff5f5;
   box-shadow: 0 0 0 1px rgba(214, 54, 56, 0.08);
 }
-.rule-row__item {
+.rule-row.item {
   /* Pulse animation for the first invalid field. */
 }
-.rule-row__item--pulse {
+.rule-row.item.pulse {
   animation: tsjippyPulse 1.6s ease-in-out;
   border-radius: 10px;
 }
 .rule-row {
   /* Spacing for controls inside a condition row. */
 }
-.rule-row__inner {
+.rule-row.inner {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 16px;
 }
-.rule-row__inner .components-base-control,
-.rule-row__inner .components-select-control,
-.rule-row__inner .components-text-control {
+.rule-row.inner .components-base-control,
+.rule-row.inner .components-select-control,
+.rule-row.inner .components-text-control {
   margin-bottom: 14px;
 }
-.rule-row__inner .components-input-control__suffix {
+.rule-row.inner .components-input-control__suffix {
   display: none;
-}
-.rule-row {
-  /* AND / OR button group. */
-}
-.rule-row__combinator {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 22px;
-  margin-bottom: 12px;
 }
 .rule-row {
   /* Action button group inside each condition row. */
 }
-.rule-row__actions {
+.rule-row .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
 }
-.rule-row .rule-row__combinator {
-  margin-top: 10px;
-}
-
-.condition-row__item {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
+.rule-row .combinator {
+  margin-top: 22px;
 }
 
 /* Label for the "If" heading. */
-.condition-if {
+.condition-label {
   display: inline-block;
   font-weight: 600;
   font-size: 14px;
@@ -1249,7 +1245,7 @@ button.expand {
   background: #fff;
   /* Highlight invalid action rows. */
 }
-.action-row--invalid {
+.action-row.invalid {
   border-color: #d63638;
   background: #fff5f5;
   box-shadow: 0 0 0 1px rgba(214, 54, 56, 0.08);
@@ -1257,7 +1253,7 @@ button.expand {
 .action-row {
   /* Action row buttons area. */
 }
-.action-row__actions {
+.action-row.actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -1295,7 +1291,7 @@ button.expand {
     border-radius: 10px;
   }
   .condition-row,
-  .condition-row__item,
+  .condition-row.item,
   .action-row {
     padding: 14px;
   }
@@ -1303,6 +1299,10 @@ button.expand {
     top: 0;
   }
 }
+.delete-action {
+  margin-top: 20px;
+}
+
 form.wp-block-tsjippy-forms-formbuilder > .components-flex:nth-child(even) {
   background-color: aliceblue;
 }

@@ -39,28 +39,27 @@ export default function Edit({ attributes, setAttributes, clientId }) {
      * And add a formstep control block if needed
      */
 
-    // Get the parent block ids
-    const parentIds = wp.data.select( 'core/block-editor' ).getBlockParents(clientId); 
-    // Get the blocks
-    const parents 	= wp.data.select('core/block-editor').getBlocksByClientId(parentIds);
+    // Get the parent form
+    const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(
+        clientId, 
+        'tsjippy-forms/formbuilder'
+    );
 
     // Loop over all the parents to find the formbuilder block
     parents.forEach(parent => {
-        if(parent.name == "tsjippy-forms/formbuilder"){
-            // Check if it is not already there
-            if(parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep-controls').length > 0){
-                return '';
-            }
-
-            let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
-
-            // Create a formstep controls block
-            const newBlock = createBlock( "tsjippy-forms/formstep-controls", { amount: formsteps.length});
-
-            // Insert the new block into the parent's inner blocks
-            const { insertBlock } = useDispatch( 'core/block-editor' );
-            insertBlock( newBlock, undefined, parent.clientId );
+        // Check if it is not already there
+        if(parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep-controls').length > 0){
+            return '';
         }
+
+        let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
+
+        // Create a formstep controls block
+        const newBlock = createBlock( "tsjippy-forms/formstep-controls", { amount: formsteps.length});
+
+        // Insert the new block into the parent's inner blocks
+        const { insertBlock } = useDispatch( 'core/block-editor' );
+        insertBlock( newBlock, undefined, parent.clientId );
     });
 
 	if ( ! hasInnerBlocks ) {

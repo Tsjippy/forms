@@ -62,16 +62,32 @@
 	}
 }
 
+.condition-row{
+	background-color: #f1efef;
+    border-radius: 10px;
+    padding: 10px 20px;
+
+	.item{
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-top: 16px;
+	}
+
+	.components-input-control__suffix{
+		display: none;
+	}
+}
+
 /* Outer wrapper for each rule group. */
 .rule-row {
-	margin-bottom: 20px;
 	padding: 16px;
 	border: 1px solid #e5e7eb;
 	border-radius: 10px;
 	background: #fafafa;
 
 	/* Individual condition card inside a rule group. */
-	&__item {
+	&.item {
 		margin-bottom: 16px;
 		padding: 16px;
 		border: 1px solid #e5e7eb;
@@ -87,25 +103,24 @@
 		}
 
 		/* Highlight invalid rows. */
-		&--invalid {
+		&.invalid {
 			border-color: #d63638;
 			background: #fff5f5;
 			box-shadow: 0 0 0 1px rgba(214, 54, 56, 0.08);
 		}
 
 		/* Pulse animation for the first invalid field. */
-		&--pulse {
+		&.pulse {
 			animation: tsjippyPulse 1.6s ease-in-out;
 			border-radius: 10px;
 		}
 	}
 
 	/* Spacing for controls inside a condition row. */
-	&__inner {
+	&.inner {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px;
-		margin-top: 16px;
 
 		.components-base-control,
 		.components-select-control,
@@ -118,37 +133,21 @@
 		}
 	}
 
-	/* AND / OR button group. */
-	&__combinator {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		margin-top: 22px;
-		margin-bottom: 12px;
-	}
-
 	/* Action button group inside each condition row. */
-	&__actions {
+	.actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px;
 		margin-top: 16px;
 	}
 
-	.rule-row__combinator{
-		margin-top: 10px;
+	.combinator{
+		margin-top: 22px;
 	}
 }
 
-.condition-row__item{
-	display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-}
-
 /* Label for the "If" heading. */
-.condition-if {
+.condition-label {
 	display: inline-block;
 	font-weight: 600;
 	font-size: 14px;
@@ -172,14 +171,14 @@
 	background: #fff;
 
 	/* Highlight invalid action rows. */
-	&--invalid {
+	&.invalid {
 		border-color: #d63638;
 		background: #fff5f5;
 		box-shadow: 0 0 0 1px rgba(214, 54, 56, 0.08);
 	}
 
 	/* Action row buttons area. */
-	&__actions {
+	&.actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px;
@@ -224,7 +223,7 @@
 	}
 
 	.condition-row,
-	.condition-row__item,
+	.condition-row.item,
 	.action-row {
 		padding: 14px;
 	}
@@ -232,4 +231,8 @@
 	.close.mobile-sticky {
 		top: 0;
 	}
+}
+
+.delete-action{
+	margin-top: 20px;
 }

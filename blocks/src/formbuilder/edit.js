@@ -19,6 +19,7 @@ import { plus } from '@wordpress/icons';
 
 import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';
+import './filters/storeClientIdInAttributes.js';
 
 /* Default inner block template for the form. */
 const MY_TEMPLATE = [

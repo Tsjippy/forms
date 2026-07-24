@@ -71,31 +71,27 @@ function Edit({
    * And add a formstep control block if needed
    */
 
-  // Get the parent block ids
-  const parentIds = wp.data.select('core/block-editor').getBlockParents(clientId);
-  // Get the blocks
-  const parents = wp.data.select('core/block-editor').getBlocksByClientId(parentIds);
+  // Get the parent form
+  const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/formbuilder');
 
   // Loop over all the parents to find the formbuilder block
   parents.forEach(parent => {
-    if (parent.name == "tsjippy-forms/formbuilder") {
-      // Check if it is not already there
-      if (parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep-controls').length > 0) {
-        return '';
-      }
-      let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
-
-      // Create a formstep controls block
-      const newBlock = (0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_4__.createBlock)("tsjippy-forms/formstep-controls", {
-        amount: formsteps.length
-      });
-
-      // Insert the new block into the parent's inner blocks
-      const {
-        insertBlock
-      } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useDispatch)('core/block-editor');
-      insertBlock(newBlock, undefined, parent.clientId);
+    // Check if it is not already there
+    if (parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep-controls').length > 0) {
+      return '';
     }
+    let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
+
+    // Create a formstep controls block
+    const newBlock = (0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_4__.createBlock)("tsjippy-forms/formstep-controls", {
+      amount: formsteps.length
+    });
+
+    // Insert the new block into the parent's inner blocks
+    const {
+      insertBlock
+    } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useDispatch)('core/block-editor');
+    insertBlock(newBlock, undefined, parent.clientId);
   });
   if (!hasInnerBlocks) {
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {

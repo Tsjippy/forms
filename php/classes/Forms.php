@@ -46,6 +46,7 @@ class Forms
     public array       $submissions;
     public string      $submissionTableName;
     public string      $submissionValuesTableName;
+    public string      $blockConditionsTableName;
     public array       $submitRoles;
     protected array    $tableFormats;
     public string      $tableName;
@@ -150,6 +151,7 @@ class Forms
         $this->submissions                  = [];
         $this->submissionTableName          = $wpdb->prefix . 'tsjippy_form_submissions';
         $this->submissionValuesTableName    = $wpdb->prefix . 'tsjippy_form_submission_values';
+        $this->blockConditionsTableName     = $wpdb->prefix . 'tsjippy_form_block_conditions';
         $this->submitRoles                  = [];
         $this->tableFormats                 = [];
         $this->tableName                    = $wpdb->prefix . 'tsjippy_forms';
@@ -379,6 +381,17 @@ class Forms
        ) $charsetCollate;";
 
         maybe_create_table($this->submissionValuesTableName, $sql);
+
+        // Block conditions table
+        $sql = "CREATE TABLE {$this->blockConditionsTableName} (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            `condition` longtext,
+            `action` longtext,
+            `target` text,
+            PRIMARY KEY  (id)
+       ) $charsetCollate;";
+
+        maybe_create_table($this->blockConditionsTableName, $sql);
     }
 
     /**
@@ -532,6 +545,15 @@ class Forms
         ];
 
         $this->tableFormats[$this->shortcodeColumnSettingsTable] = apply_filters('tsjippy-forms-shortcode-settings-table-formats', $formats, $this);
+
+        // Column Settings
+        $formats    = [
+            'condition'       => '%s',
+            'action'          => '%s',
+            'target'          => '%s',
+        ];
+
+        $this->tableFormats[$this->blockConditionsTableName] = apply_filters('tsjippy-forms-condition-table-formats', $formats, $this);
 
         // Sort formats by key to make sure they are in the same order as the data
         foreach ($this->tableFormats as &$format) {
@@ -1659,5 +1681,41 @@ class Forms
         }
 
         return $string;
+    }
+
+    /**
+     * Gets the conditions for a block
+     * 
+     * @param string  $blockId  block id
+     */
+    public function getBlockConditions($blockId){
+        return TSJIPPY\getFromDb(
+            "element-conditions-$blockId", 
+            'forms',
+            "select * from %i where target=%s",
+            $this->blockConditionsTableName,
+            $blockId
+        );
+    }
+
+    /**
+     * Save block conditions
+     * 
+     * @param   array   $conditions     Array containing conditions
+     * @param   string  $blockId
+     */
+    public function saveBlockConditions($conditions, $blockId){
+        TSJIPPY\updateDbValue(
+            $this->blockConditionsTableName,
+            $conditions,
+            [
+                'target' => $blockId
+            ],
+            $this->tableFormats[$this->blockConditionsTableName],
+            [
+                '%s'
+            ],
+            'forms'
+        );
     }
 }

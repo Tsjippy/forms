@@ -31,25 +31,6 @@ function initBlocks()
         )
     );
 
-    register_block_type(
-        'tsjippy-forms/form-builder',
-        array(
-            'title'           => __( 'Insert A Form', '%TEXTDOMAIN%' ),
-            'attributes'      => array(
-                'formname'   => array(
-                    'label'   => __( 'Form Name', '%TEXTDOMAIN%' ),
-                    'type'    => 'string',
-                    'default' => '',
-                )
-            ),
-            'render_callback' => __NAMESPACE__.'\showFormBuilder',
-            'supports'        => array(
-                'autoRegister' => true,
-            ),
-            'icon'  => 'forms'
-        )
-    );
-
     $forms      = new Forms();
     $forms->getForms();
     $formNames  = [];
@@ -116,8 +97,8 @@ function initBlocks()
     );
 }
 
-add_action('enqueue_block_editor_assets', __NAMESPACE__ . '\loadAssets');
-add_action('enqueue_block_assets', __NAMESPACE__ . '\loadAssets');
+//add_action('enqueue_block_editor_assets', __NAMESPACE__ . '\loadAssets');
+//add_action('enqueue_block_assets', __NAMESPACE__ . '\loadAssets');
 function loadAssets()
 {
     TSJIPPY\enqueueScripts();
@@ -132,58 +113,6 @@ function loadAssets()
 
     wp_enqueue_style('tsjippy_forms_style');
     wp_enqueue_style('tsjippy_formtable_style');
-}
-
-function showFormBuilder($attributes){
-    if(empty($attributes['formname'])){
-        if(!empty($attributes['slug'])){
-            $attributes['formname'] = $attributes['slug'];
-        }else{
-            return "<p>Please enter a formname</p>";
-        }
-    }
-
-    $formName   = $attributes['formname'];
-
-    if(!empty($_POST['export-form'])){
-        $forms   = new FormExport($attributes);
-
-        $formId = (int) $_POST['export-form'];
-
-        if(!TSJIPPY\verifyNonce('nonce', 'form-export-'.$formId)){
-            return "<div class='error'>Invalid nonce</div>";
-        }
-
-        return $forms->exportForm($formId);
-    }
-
-    if(!empty($_POST['delete-form'])){
-        $forms   = new Forms($attributes);
-
-        $formId = (int) $_POST['export-form'];
-
-        if(!TSJIPPY\verifyNonce('nonce', 'form-delete-'.$formId)){
-            return "<div class='error'>Invalid nonce</div>";
-        }
-        
-        return $forms->deleteForm($formId);
-    }
-
-        // If requesting for another user
-    if(is_numeric($_REQUEST['user-id'] ?? '')){
-        $attributes['user-id'] = $_REQUEST['user-id'];
-    }
-
-    $formSlug   = checkFormExistence($formName, $found);
-
-    $attributes['slug'] = $formSlug;
-
-    if($found && !isset($_REQUEST['formbuilder'])){
-        $forms  = new DisplayForm( $attributes );
-    }else{
-        $forms  = new FormBuilderForm( $attributes );
-    }
-    return $forms->showForm();
 }
 
 /**
@@ -235,4 +164,24 @@ function addFormsCategory( $categories, $block_editor_context ) {
             ),
         )
     );
+}
+
+// Hook into the rendering of ALL blocks
+add_filter( 'render_block', __NAMESPACE__.'\addBlockIdAttribute', 10, 2 );
+
+/**
+ * Adds the block id as data attribute on the frontend to be used in js
+ * 
+ * @param   string  $blockContent
+ * @param   array   $block
+ */
+function addBlockIdAttribute( $blockContent, $block ) {
+    // Check if our filtered attribute exists in the block data
+    if ( ! empty( $block['attrs']['blockId'] ) ) {
+        $id = esc_attr( $block['attrs']['blockId'] );
+
+        $blockContent = str_replace( '/>', " data-block-id='$id' />", $blockContent );
+    }
+
+    return $blockContent;
 }

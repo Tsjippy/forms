@@ -20,19 +20,17 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 		 * And add a formstep control block if needed
 		 */
 
-		// Get the parent block ids
-		const parentIds = wp.data.select( 'core/block-editor' ).getBlockParents(clientId); 
-		// Get the blocks
-		const parents 	= wp.data.select('core/block-editor').getBlocksByClientId(parentIds);
+		// Get the parent form
+        const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(
+            clientId, 
+            'tsjippy-forms/formbuilder'
+        );
 
 		// Loop over all the parents to find the formbuilder block
 		parents.forEach(parent => {
-			if(parent.name == "tsjippy-forms/formbuilder"){
+			let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
 
-				let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
-
-				setAttributes({ amount: formsteps.length })
-			}
+			setAttributes({ amount: formsteps.length })
 		});
 
 		let indicators	= [];

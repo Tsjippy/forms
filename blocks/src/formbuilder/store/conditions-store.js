@@ -22,12 +22,12 @@ const DEFAULT_STATE = {
  * Internal API helper for loading conditions.
  * This is used by the resolver and is not exported.
  */
-async function fetchConditions(elementId) {
+async function fetchConditions(blockId) {
 	const response = await apiFetch({
 		path: `${tsjippy.restApiPrefix}/forms/get_element_conditions`,
 		method: 'POST',
 		data: {
-			elementId,
+			blockId: blockId,
 		},
 	});
 
@@ -38,13 +38,13 @@ async function fetchConditions(elementId) {
  * Internal API helper for saving conditions.
  * This is used by the store-owned save action and is not exported.
  */
-async function saveConditionsRequest(elementId, conditions) {
+async function saveConditionsRequest(blockId, conditions) {
 	const savedConditions = await apiFetch({
 		path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
 		method: 'POST',
 		data: {
-			elementId,
-			conditions,
+			blockId: blockId,
+			conditions: conditions,
 		},
 	});
 
@@ -60,10 +60,10 @@ const actions = {
 	/**
 	 * Set normalized conditions for one element.
 	 */
-	setConditions(elementId, conditions) {
+	setConditions(blockId, conditions) {
 		return {
 			type: 'SET_CONDITIONS',
-			elementId,
+			blockId,
 			conditions: conditions,
 		};
 	},
@@ -71,10 +71,10 @@ const actions = {
 	/**
 	 * Set the loading state for one element.
 	 */
-	setLoading(elementId, isLoading) {
+	setLoading(blockId, isLoading) {
 		return {
 			type: 'SET_LOADING',
-			elementId,
+			blockId,
 			isLoading: !!isLoading,
 		};
 	},
@@ -82,10 +82,10 @@ const actions = {
 	/**
 	 * Set the saving state for one element.
 	 */
-	setSaving(elementId, isSaving) {
+	setSaving(blockId, isSaving) {
 		return {
 			type: 'SET_SAVING',
-			elementId,
+			blockId,
 			isSaving: !!isSaving,
 		};
 	},
@@ -93,10 +93,10 @@ const actions = {
 	/**
 	 * Store an error message for one element.
 	 */
-	setError(elementId, error) {
+	setError(blockId, error) {
 		return {
 			type: 'SET_ERROR',
-			elementId,
+			blockId,
 			error: error || null,
 		};
 	},
@@ -104,10 +104,10 @@ const actions = {
 	/**
 	 * Store the loaded flag for one element.
 	 */
-	setLoaded(elementId, loaded) {
+	setLoaded(blockId, loaded) {
 		return {
 			type: 'SET_LOADED',
-			elementId,
+			blockId,
 			loaded: !!loaded,
 		};
 	},
@@ -116,33 +116,33 @@ const actions = {
 	 * Save conditions through the API and update store state.
 	 * This is the store-owned mutation path.
 	 */
-	*saveConditions(elementId, conditions) {
-		if (elementId === undefined || elementId === null || elementId === '') {
+	*saveConditions(blockId, conditions) {
+		if (blockId === undefined || blockId === null || blockId === '') {
 			return;
 		}
 
-		yield actions.setSaving(elementId, true);
-		yield actions.setError(elementId, null);
+		yield actions.setSaving(blockId, true);
+		yield actions.setError(blockId, null);
 
 		try {
 			const savedConditions = yield saveConditionsRequest(
-				elementId,
+				blockId,
 				conditions
 			);
 
-			yield actions.setConditions(elementId, savedConditions);
-			yield actions.setLoaded(elementId, true);
+			yield actions.setConditions(blockId, savedConditions);
+			yield actions.setLoaded(blockId, true);
 
 			return savedConditions;
 		} catch (error) {
 			yield actions.setError(
-				elementId,
+				blockId,
 				error?.message || 'Failed to save element conditions.'
 			);
 
 			throw error;
 		} finally {
-			yield actions.setSaving(elementId, false);
+			yield actions.setSaving(blockId, false);
 		}
 	},
 };
@@ -158,7 +158,7 @@ const reducer = (state = DEFAULT_STATE, action) => {
 				...state,
 				conditionsByElement: {
 					...state.conditionsByElement,
-					[action.elementId]: action.conditions,
+					[action.blockId]: action.conditions,
 				},
 			};
 
@@ -167,7 +167,7 @@ const reducer = (state = DEFAULT_STATE, action) => {
 				...state,
 				loadingByElement: {
 					...state.loadingByElement,
-					[action.elementId]: action.isLoading,
+					[action.blockId]: action.isLoading,
 				},
 			};
 
@@ -176,7 +176,7 @@ const reducer = (state = DEFAULT_STATE, action) => {
 				...state,
 				savingByElement: {
 					...state.savingByElement,
-					[action.elementId]: action.isSaving,
+					[action.blockId]: action.isSaving,
 				},
 			};
 
@@ -185,7 +185,7 @@ const reducer = (state = DEFAULT_STATE, action) => {
 				...state,
 				errorByElement: {
 					...state.errorByElement,
-					[action.elementId]: action.error,
+					[action.blockId]: action.error,
 				},
 			};
 
@@ -194,7 +194,7 @@ const reducer = (state = DEFAULT_STATE, action) => {
 				...state,
 				loadedByElement: {
 					...state.loadedByElement,
-					[action.elementId]: action.loaded,
+					[action.blockId]: action.loaded,
 				},
 			};
 
@@ -211,9 +211,9 @@ const selectors = {
 	/**
 	 * Get the normalized conditions object for one element.
 	 */
-	getConditions(state, elementId) {
+	getConditions(state, blockId) {
 		return (
-			state.conditionsByElement[elementId] || [{
+			state.conditionsByElement[blockId] || [{
 				rules: [],
 				actions: [],
 			}]
@@ -223,29 +223,29 @@ const selectors = {
 	/**
 	 * Check whether one element is currently loading.
 	 */
-	isLoading(state, elementId) {
-		return !!state.loadingByElement[elementId];
+	isLoading(state, blockId) {
+		return !!state.loadingByElement[blockId];
 	},
 
 	/**
 	 * Check whether one element is currently saving.
 	 */
-	isSaving(state, elementId) {
-		return !!state.savingByElement[elementId];
+	isSaving(state, blockId) {
+		return !!state.savingByElement[blockId];
 	},
 
 	/**
 	 * Get the error message for one element.
 	 */
-	getError(state, elementId) {
-		return state.errorByElement[elementId] ?? null;
+	getError(state, blockId) {
+		return state.errorByElement[blockId] ?? null;
 	},
 
 	/**
 	 * Check whether one element has already loaded.
 	 */
-	hasLoaded(state, elementId) {
-		return !!state.loadedByElement[elementId];
+	hasLoaded(state, blockId) {
+		return !!state.loadedByElement[blockId];
 	},
 };
 
@@ -254,25 +254,25 @@ const selectors = {
  * The first read of the selector will load data from the server.
  */
 const resolvers = {
-	getConditions: (elementId) => async ({ dispatch }) => {
-		if (elementId === undefined || elementId === null || elementId === '') {
+	getConditions: (blockId) => async ({ dispatch }) => {
+		if (blockId === undefined || blockId === null || blockId === '') {
 			return;
 		}
 
-		dispatch.setLoading(elementId, true);
-		dispatch.setError(elementId, null);
+		dispatch.setLoading(blockId, true);
+		dispatch.setError(blockId, null);
 
 		try {
-			const conditions = await fetchConditions(elementId);
-			dispatch.setConditions(elementId, conditions);
-			dispatch.setLoaded(elementId, true);
+			const conditions = await fetchConditions(blockId);
+			dispatch.setConditions(blockId, conditions);
+			dispatch.setLoaded(blockId, true);
 		} catch (error) {
 			dispatch.setError(
-				elementId,
+				blockId,
 				error?.message || 'Failed to load element conditions.'
 			);
 		} finally {
-			dispatch.setLoading(elementId, false);
+			dispatch.setLoading(blockId, false);
 		}
 	},
 };

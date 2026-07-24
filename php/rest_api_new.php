@@ -152,33 +152,10 @@ function restApiInitFormsNew()
         array(
             'methods'                 => 'POST',
             'callback'                => function($wpRest){
-                $formBuilder = new FormBuilderForm();
+                $forms = new Forms();
 
-                $elementId   = (int) $wpRest->get_param('elementId') ?? '';
-                $elementId  = 1940;
-
-                $formBuilder->getForm(182);
-
-                $element    = $formBuilder->getElementById($elementId);
-
-                if(!$element || empty($element->conditions)){
-                    return [];
-                }
-
-                return [
-                    [
-                        "rules" => [
-                            [
-                                "conditional-field" => "abc123",
-                                "equation" => "==",
-                                "conditional-value" => "yes"
-                            ]
-                        ],
-                        "actions" => []
-                    ]
-                ];
-
-                return $element->conditions;
+                $blockId   = TSJIPPY\sanitize($wpRest->get_param('blockId') ?? '');
+                return $forms->getBlockConditions($blockId);
             },
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
         )
@@ -191,20 +168,12 @@ function restApiInitFormsNew()
         array(
             'methods'                 => 'POST',
             'callback'                => function($wpRest){
-                $formBuilder = new FormBuilderForm();
+                $forms = new Forms();
 
-                $elementId   = (int) $wpRest->get_param('elementId') ?? '';
-                $elementId  = 1940;
+                $blockId    = TSJIPPY\sanitize($wpRest->get_param('blockId') ?? '');
+                $conditions = TSJIPPY\sanitize($wpRest->get_param('conditions') ?? []);
 
-                $formBuilder->getForm(182);
-
-                $element    = $formBuilder->getElementById($elementId);
-
-                if(!$element || empty($element->conditions)){
-                    return [];
-                }
-
-                return $element->conditions;
+                return $forms->saveBlockConditions($conditions, $blockId);
             },
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
         )

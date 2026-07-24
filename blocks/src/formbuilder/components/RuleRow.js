@@ -28,9 +28,8 @@ export default function RuleRow({
 	onMoveRuleDown,
 	canMoveRuleUp,
 	canMoveRuleDown,
-	fieldErrors = {},
+	ruleErrors = {},
 }) {
-	console.log("rendering row")
 	/* Available equation choices for the main equation dropdown. */
 	const equationOptions = [
 		{ label: __('Equals', 'tsjippy'), value: '==' },
@@ -64,7 +63,7 @@ export default function RuleRow({
 						onChange={(element) =>
 							onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', element)
 						}
-						help={fieldErrors.conditionalField2 || ''}
+						help={ruleErrors.conditionalField2 || ''}
 						data-field-key="conditionalField2"
 					/>
 
@@ -81,7 +80,7 @@ export default function RuleRow({
 						onChange={(equation2) =>
 							onUpdate(conditionIndex, ruleIndex, 'equation-2', equation2)
 						}
-						help={fieldErrors.equation2 || ''}
+						help={ruleErrors.equation2 || ''}
 						data-field-key="equation2"
 					/>
 				</>
@@ -93,7 +92,9 @@ export default function RuleRow({
 
 	/* Render the editable UI for one rule entry. */
 	return (
-		<div className="rule-row __inner">			
+		<div className={`rule-row inner ${
+			Object.keys(ruleErrors).length > 0  ? 'invalid' : ''
+		}`}>			
 			<SelectControl
 				label={__('Conditional Field', 'tsjippy')}
 				value={rule?.['conditional-field'] || ''}
@@ -104,7 +105,7 @@ export default function RuleRow({
 				onChange={(element) =>
 					onUpdate(conditionIndex, ruleIndex, 'conditional-field', element)
 				}
-				help={fieldErrors.conditionalField || ''}
+				help={ruleErrors.conditionalField || ''}
 				data-field-key="conditionalField"
 			/>
 
@@ -118,7 +119,7 @@ export default function RuleRow({
 				onChange={(equation) =>
 					onUpdate(conditionIndex, ruleIndex, 'equation', equation)
 				}
-				help={fieldErrors.equation || ''}
+				help={ruleErrors.equation || ''}
 				data-field-key="equation"
 			/>
 
@@ -130,12 +131,12 @@ export default function RuleRow({
 				onChange={(value) =>
 					onUpdate(conditionIndex, ruleIndex, 'conditional-value', value)
 				}
-				help={fieldErrors.conditionalValue || ''}
+				help={ruleErrors.conditionalValue || ''}
 				data-field-key="conditionalValue"
 			/>
 
 			{/* AND / OR combinator controls. */}
-			<div className="rule-row__combinator">
+			<div className="combinator">
 				<Button
 					variant={rule?.combinator === 'and' ? 'primary' : 'secondary'}
 					isPressed={rule?.combinator === 'and'}

@@ -1,7 +1,7 @@
 {
-	"name": "my-block",
+	"name": "forms-blocks",
 	"version": "0.1.0",
-	"description": "Example block scaffolded with Create Block tool.",
+	"description": "All blocks for the formbuilder",
 	"author": "The WordPress Contributors",
 	"license": "GPL-2.0-or-later",
 	"main": "build/index.js",
