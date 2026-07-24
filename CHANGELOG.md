@@ -3,6 +3,7 @@
 
 ### Added
 - very first version of block builder form
+- block conditions table
 
 ### Changed
 - added input element attributes form
