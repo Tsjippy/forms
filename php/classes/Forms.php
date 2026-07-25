@@ -385,6 +385,7 @@ class Forms
         // Block conditions table
         $sql = "CREATE TABLE {$this->blockConditionsTableName} (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
+            post_id mediumint(9),
             `condition` longtext,
             `action` longtext,
             `target` text,
@@ -548,9 +549,10 @@ class Forms
 
         // Column Settings
         $formats    = [
-            'condition'       => '%s',
-            'action'          => '%s',
-            'target'          => '%s',
+            'rules'     => '%s',
+            'actions'   => '%s',
+            'target'    => '%s',
+            'post_id'   => '%d'     
         ];
 
         $this->tableFormats[$this->blockConditionsTableName] = apply_filters('tsjippy-forms-condition-table-formats', $formats, $this);
@@ -1684,13 +1686,28 @@ class Forms
     }
 
     /**
+     * Get all conditions for a post
+     * 
+     * @param string  $postId  post id
+     */
+    public function getAllBlockConditions($postId){
+        return TSJIPPY\getFromDb(
+            "block-conditions-post-$postId", 
+            'forms',
+            "select * from %i where post_id=%s",
+            $this->blockConditionsTableName,
+            $postId
+        );
+    }
+
+    /**
      * Gets the conditions for a block
      * 
      * @param string  $blockId  block id
      */
     public function getBlockConditions($blockId){
         return TSJIPPY\getFromDb(
-            "element-conditions-$blockId", 
+            "block-conditions-block-$blockId", 
             'forms',
             "select * from %i where target=%s",
             $this->blockConditionsTableName,
@@ -1703,10 +1720,13 @@ class Forms
      * 
      * @param   array   $conditions     Array containing conditions
      * @param   string  $blockId
+     * @param   int     $postId
      */
-    public function saveBlockConditions($conditions, $blockId){
+    public function saveBlockConditions($conditions, $blockId, $postId){
         $rowsUpdated    = 0;
         foreach(TSJIPPY\cleanUpNestedArray($conditions) as $condition){
+            $condition['post_id']   = $postId;
+
             $result = TSJIPPY\updateDbValue(
                 $this->blockConditionsTableName,
                 $condition,

@@ -19,7 +19,7 @@
 	"attributes": {
 		"type": {
 			"type": "string",
-			"default": "text"
+			"default": ""
 		},
 		"name": {
 			"type": "string",
@@ -36,6 +36,27 @@
 		"ariaAttributes": {
 			"type": "boolean",
 			"default": false
+		},
+		"selectable_options": {
+			"type": "string",
+			"default": ""
+		},
+		"add_button_content": {
+			"type": "string",
+			"default": "+"
+		},
+		"remove_button_content": {
+			"type": "string",
+			"default": "-"
+		},
+		"multiple": {
+			"type": "boolean",
+			"default": false
+		},
+		"required": {
+			"type": "boolean",
+			"default": false
 		}
+
 	}
 }

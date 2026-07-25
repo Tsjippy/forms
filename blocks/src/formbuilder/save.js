@@ -20,6 +20,6 @@ export default function save({ attributes }) {
     const innerBlocksProps = useInnerBlocksProps.save( blockProps );
 
 	return (
-		<form method={ attributes.method} target={ attributes.target} autocomplete={ attributes.autocomplete} { ...innerBlocksProps } />
+		<form method={ attributes.method} target={ attributes.target} autocomplete={ attributes.autocomplete} data-formName={ attributes.name } { ...innerBlocksProps } />
 	)
 }

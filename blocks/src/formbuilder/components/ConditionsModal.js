@@ -1,5 +1,5 @@
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Spinner, Notice, SelectControl, TextControl } from '@wordpress/components';
+import { Button, Spinner, Notice, SelectControl, TextControl, __experimentalNumberControl as NumberControl } from '@wordpress/components';
 import {
 	useEffect,
 	useMemo,
@@ -17,10 +17,9 @@ import {
 	arrowUp,
 	arrowDown
 } from '@wordpress/icons';
-
+import apiFetch from '@wordpress/api-fetch';
 
 import RuleRow from './RuleRow';
-
 import {inputSchema} from './../../input/element_attributes.js';
 
 /**
@@ -309,7 +308,7 @@ export default function ConditionsModal({
 	allNestedBlocks,
 	blockProps
 }) {
-	const { saveConditions, setError } = useDispatch(
+	const { saveConditions, setError, setSaving, setConditions } = useDispatch(
 		'tsjippy-forms/conditions-store'
 	);
 	const { createSuccessNotice, createErrorNotice } = useDispatch('core/notices');
@@ -705,15 +704,14 @@ export default function ConditionsModal({
 	);
 
 	const deleteAction = useCallback(
-		(actionIndex) => {
+		(conditionIndex, actionIndex) => {
 			resetErrors();
 
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
 
-
-				next.actions = Array.isArray(next.actions) ? next.actions : [];
-				next.actions.splice(actionIndex, 1);
+				next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
+				next[conditionIndex].actions.splice(actionIndex, 1);
 				return next;
 			});
 		},
@@ -725,10 +723,12 @@ export default function ConditionsModal({
 	 * This is used by the store-owned save action and is not exported.
 	 */
 	async function saveConditionsRequest(blockId, conditions) {
+		const postId = wp.data.select("core/editor").getCurrentPostId();
 		const savedConditions = await apiFetch({
 			path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
 			method: 'POST',
 			data: {
+				postId: postId,
 				blockId: blockId,
 				conditions: conditions,
 			},
@@ -738,6 +738,7 @@ export default function ConditionsModal({
 	}
 
 	const handleSave = useCallback(async (blockId) => {
+		setSaving(blockId, true);
 
 		const result = validateConditions(draftConditions);
 
@@ -753,26 +754,39 @@ export default function ConditionsModal({
 		}
 
 		try {
-			await saveConditions(blockId, draftConditions);
-			
+			await saveConditionsRequest(
+				blockId,
+				draftConditions
+			);
+
+			setConditions(
+				blockId,
+				deepClone(draftConditions)
+			);
+
 			resetErrors();
 
 			setSuccessMessage(__('Conditions saved successfully.', 'tsjippy'));
-			showToastSuccess(__('Conditions saved successfully.', 'tsjippy'));
-		} catch (saveError) {
-			const message =
-				saveError?.message || __('Saving failed. Please try again.', 'tsjippy');
 
-			setError(blockId, message);
-			showToastError(message);
+			showToastSuccess(__('Conditions saved.', 'tsjippy'));
+		} catch (error) {
+			setError(
+				blockId,
+				error?.message || 'Failed to save conditions.'
+			);
+
+			showToastError(
+				error?.message || 'Failed to save conditions.'
+			);
 		}
+
+		setSaving(blockId, false);
 	}, [
-		draftConditions,
 		blockId,
-		saveConditions,
+		draftConditions,
 		setError,
-		showToastError,
 		showToastSuccess,
+		showToastError,
 	]);
 
 	const resetErrors = () => {
@@ -871,28 +885,40 @@ export default function ConditionsModal({
 					<span class='condition-label' style={{marginTop: ' 25px'}}>To</span>
 
 					<TextControl
-						label={__('Property value', 'tsjippy')}
-						value={actionItem?.['property-value'] || ''}
-						onChange={(value) => updateAction(conditionIndex, actionIndex, 'property-value', value)}
-						help={actionErrors.propertyValue || ''}
-						data-field-key="propertyValue"
-						list="possible-elements"
+						label          = {__('Property value', 'tsjippy')}
+						value          = {actionItem?.['property-value'] || ''}
+						onChange       = {(value) => updateAction(conditionIndex, actionIndex, 'property-value', value)}
+						help           = {actionErrors.propertyValue || ''}
+						data-field-key = "propertyValue"
+						list           = "possible-elements"
 					/>
 
 					<datalist id="possible-elements">
 						{formBlockOptions.map((data) => <option value={"the-value-of-"+data.value}></option>)}
 					</datalist>
 
+					{ 
+						// If we selected another element to be the value of this property we should allow to add extra to the value
+						['date', 'number', 'range', 'week', 'month'].includes(blockProps.attributes.type) && (actionItem?.['property-value'] || '').includes("the-value-of-") ?
+							<NumberControl
+							    label              = { __( 'Amount to add to the element value', 'tsjippy') }
+								isShiftStepEnabled = { true }
+								onChange           = {(value) => updateAction(conditionIndex, actionIndex, 'addition', value)}
+								shiftStep          = { 1 }
+								value              = {actionItem?.['addition'] || ''}
+								spinControls       = 'custom'
+							/>
+							: ''
+					}
 					</>
 					: ''
-
 				}
 
 				<Button
 					style= {{marginTop: '20px'}}
 					variant="secondary"
 					isDestructive
-					onClick={() => deleteAction(actionIndex)}
+					onClick={() => deleteAction(conditionIndex, actionIndex)}
 					icon={trash}
 				>
 					{__('Delete action', 'tsjippy')}

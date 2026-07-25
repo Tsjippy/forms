@@ -36,7 +36,7 @@ const addBlockId = createHigherOrderComponent( ( BlockEdit ) => {
         useEffect( () => {
             const isChildOfFormBuilder = parents.length > 0;
 
-            if ( isChildOfFormBuilder && blockId !== clientId ) {
+            if ( isChildOfFormBuilder && blockId == undefined) {
                 setAttributes( { blockId: clientId } );
             } else if ( ! isChildOfFormBuilder && blockId ) {
                 setAttributes( { blockId: undefined } );

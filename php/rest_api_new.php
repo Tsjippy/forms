@@ -172,8 +172,15 @@ function restApiInitFormsNew()
 
                 $blockId    = TSJIPPY\sanitize($wpRest->get_param('blockId') ?? '');
                 $conditions = TSJIPPY\sanitize($wpRest->get_param('conditions') ?? []);
+                $postId     = $wpRest->get_param('postId');
 
-                return $forms->saveBlockConditions($conditions, $blockId);
+                // Save conditions
+                $forms->saveBlockConditions($conditions, $blockId, $postId);
+
+                // Build new dynamic js
+                processFormBlocks($postId);
+
+                return true;
             },
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
         )

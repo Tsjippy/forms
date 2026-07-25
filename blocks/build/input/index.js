@@ -149,8 +149,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./editor.scss */ "./src/input/editor.scss");
 /* harmony import */ var _element_attributes_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./element_attributes.js */ "./src/input/element_attributes.js");
 /* harmony import */ var _dynamic_inputs_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./dynamic_inputs.js */ "./src/input/dynamic_inputs.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _shared_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./shared.js */ "./src/input/shared.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__);
+
 
 
 
@@ -174,7 +176,10 @@ function Edit({
 }) {
   const blockProps = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps)();
   const getTypeOptions = () => {
-    let typeOptions = [];
+    let typeOptions = [{
+      label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select an input type', 'tsjippy'),
+      value: ''
+    }];
     _element_attributes_js__WEBPACK_IMPORTED_MODULE_4__.inputTypes.forEach(type => {
       typeOptions.push({
         label: type,
@@ -187,7 +192,7 @@ function Edit({
     if (attributes.type != 'submit') {
       return '';
     }
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
       label: "Input Content",
       value: attributes.value,
       onChange: value => setAttributes({
@@ -213,7 +218,7 @@ function Edit({
    * The input type selector
    */
   const inputTypeSelector = () => {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
       label: "Input Type",
       value: attributes.type,
       options: getTypeOptions(),
@@ -227,7 +232,7 @@ function Edit({
    * The input name component
    */
   const inputName = () => {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
       label: "Input Name",
       value: attributes.name,
       onChange: name => setAttributes({
@@ -243,7 +248,7 @@ function Edit({
    */
   const propertiesForm = () => {
     if (!isSelected) {
-      return '';
+      return (0,_shared_js__WEBPACK_IMPORTED_MODULE_6__.getInputHtml)(attributes, blockProps);
     }
 
     // First set an input type
@@ -253,7 +258,7 @@ function Edit({
 
     // Then set a name
     if (attributes.name == '') {
-      return inputName();
+      return [inputTypeSelector(), inputName()];
     }
     let attributeControls = (0,_dynamic_inputs_js__WEBPACK_IMPORTED_MODULE_5__.dynamicInputs)(_element_attributes_js__WEBPACK_IMPORTED_MODULE_4__.inputSchema.sharedAttributes, attributes.inputAttributes, storeAttributeAttributes);
     let ariaControls = [];
@@ -264,12 +269,28 @@ function Edit({
     if (attributes.ariaAttributes) {
       ariaControls = (0,_dynamic_inputs_js__WEBPACK_IMPORTED_MODULE_5__.dynamicInputs)(_element_attributes_js__WEBPACK_IMPORTED_MODULE_4__.inputSchema.ariaAttributes, attributes.inputAttributes, storeAttributeAttributes);
     }
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-      children: [inputTypeSelector(), inputName(), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
+
+    /**
+     * Input type specific options
+     */
+    const inputTypeSpecificOptions = () => {
+      if (['radio', 'checkbox', 'select'].includes(attributes.type)) {
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextareaControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Selectable Options", 'tsjippy'),
+          help: "One option per line. If the value and label differ seperate them with a |  i.e. car|auto",
+          value: attributes.selectable_options,
+          onChange: value => setAttributes({
+            selectable_options: value
+          })
+        });
+      }
+    };
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
+      children: [(0,_shared_js__WEBPACK_IMPORTED_MODULE_6__.getInputHtml)(attributes, blockProps), inputTypeSelector(), inputName(), inputTypeSpecificOptions(), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
         class: "attributes-form",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("h3", {
           children: "Input properties"
-        }), attributeControls, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+        }), attributeControls, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add aria attributes', 'tsjippy'),
           checked: !!attributes.ariaAttributes,
           onChange: checked => setAttributes({
@@ -279,18 +300,18 @@ function Edit({
       })]
     });
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Input Settings', 'tsjippy'),
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
           label: "Input Type",
           value: attributes.type,
           options: getTypeOptions(),
           onChange: type => setAttributes({
             type: type
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
           label: "Input Name",
           value: attributes.name,
           onChange: name => setAttributes({
@@ -298,16 +319,11 @@ function Edit({
           })
         }), inputValue()]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
       ...blockProps,
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("fieldset", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("legend", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("fieldset", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("legend", {
           children: [attributes.type.charAt(0).toUpperCase() + attributes.type.slice(1), " input"]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("input", {
-          type: attributes.type,
-          name: attributes.name,
-          value: attributes.value,
-          class: "formbuilder"
         }), propertiesForm()]
       })
     })]
@@ -1337,14 +1353,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _shared_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./shared.js */ "./src/input/shared.js");
 /**
  * React hook that is used to mark the block wrapper element.
  * It provides all the necessary props like the class name.
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
+
 
 
 /**
@@ -1356,19 +1372,84 @@ __webpack_require__.r(__webpack_exports__);
  *
  * @return {Element} Element to render.
  */
-
 function save({
   attributes
 }) {
   const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save();
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
-    type: attributes.type,
-    ...blockProps,
-    name: attributes.name,
-    ...attributes.inputAttributes,
-    ...attributes.ariaAttributes
-  });
+  return (0,_shared_js__WEBPACK_IMPORTED_MODULE_1__.getInputHtml)(attributes, blockProps);
 }
+
+/***/ },
+
+/***/ "./src/input/shared.js"
+/*!*****************************!*\
+  !*** ./src/input/shared.js ***!
+  \*****************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getInputHtml: () => (/* binding */ getInputHtml)
+/* harmony export */ });
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
+
+
+const getInputHtml = (attributes, blockProps) => {
+  if (['radio', 'checkbox'].includes(attributes.type)) {
+    return attributes.selectable_options.split("\n").map(option => {
+      const [value, label] = option.split("|");
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("label", {
+        ...blockProps,
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+          type: attributes.type,
+          name: attributes.name,
+          value: value,
+          class: "formbuilder",
+          "data-blockid": attributes.blockId
+        }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(label, 'tsjippy')]
+      });
+    });
+  } else if (attributes.type == 'select') {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("select", {
+      name: attributes.name,
+      className: "formbuilder",
+      multiple: attributes.multiple,
+      "data-blockid": attributes.blockId,
+      ...blockProps,
+      children: attributes.selectable_options.split("\n").map(option => {
+        const [value, label] = option.split("|");
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("option", {
+          value: value,
+          children: [" ", (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(label, 'tsjippy'), " "]
+        });
+      })
+    });
+  } else if (attributes.type == 'datalist') {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("datalist", {
+      id: attributes.name,
+      "data-blockid": attributes.blockId,
+      ...blockProps,
+      children: attributes.selectable_options.split("\n").map(option => {
+        const [value, label] = option.split("|");
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("option", {
+          "data-value": value,
+          value: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(label, 'tsjippy')
+        });
+      })
+    });
+  }
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("input", {
+    ...blockProps,
+    type: attributes.type,
+    name: attributes.name,
+    value: attributes.value,
+    class: "formbuilder",
+    "data-blockid": attributes.blockId
+  });
+};
 
 /***/ },
 
@@ -1452,7 +1533,7 @@ module.exports = window["wp"]["i18n"];
   \******************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input Element","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"type":{"type":"string","default":"text"},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"ariaAttributes":{"type":"boolean","default":false}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input Element","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"type":{"type":"string","default":""},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"ariaAttributes":{"type":"boolean","default":false},"selectable_options":{"type":"string","default":""},"add_button_content":{"type":"string","default":"+"},"remove_button_content":{"type":"string","default":"-"},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false}}}');
 
 /***/ }
 

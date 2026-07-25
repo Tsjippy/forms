@@ -94,37 +94,6 @@ const actions = {
 			loaded: !!loaded,
 		};
 	},
-
-	/**
-	 * Save conditions through the API and update store state.
-	 * This is the store-owned mutation path.
-	 */
-	async saveConditions(blockId, conditions) {
-		if (blockId === undefined || blockId === null || blockId === '') {
-			return;
-		}
-
-		try {
-			await saveConditionsRequest(
-				blockId,
-				conditions
-			);
-
-			actions.setConditions(blockId, conditions);
-			actions.setLoaded(blockId, true);
-
-			return conditions;
-		} catch (error) {
-			actions.setError(
-				blockId,
-				error?.message || 'Failed to save element conditions.'
-			);
-
-			throw error;
-		} finally {
-			//actions.setSaving(blockId, false);
-		}
-	},
 };
 
 /**

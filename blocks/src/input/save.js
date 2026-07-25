@@ -6,6 +6,8 @@
  */
 import { useBlockProps  } from '@wordpress/block-editor';
 
+import { getInputHtml } from './shared.js';
+
 /**
  * The save function defines the way in which the different attributes should
  * be combined into the final markup, which is then serialized by the block
@@ -19,6 +21,6 @@ export default function save({ attributes }) {
 	const blockProps = useBlockProps.save();
 
 	return (
-		<input type={ attributes.type } {...blockProps} name={ attributes.name} {...attributes.inputAttributes} {...attributes.ariaAttributes} />
+		getInputHtml(attributes, blockProps)
 	);
 }

@@ -1,9 +1,10 @@
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
-import { Button, Dropdown, SelectControl, PanelBody, TextControl, Disabled, ToggleControl, __experimentalNumberControl as NumberControl, CheckboxControl, RadioControl  } from '@wordpress/components';
+import { Button, Dropdown, SelectControl, PanelBody, TextControl, Disabled, ToggleControl, __experimentalNumberControl as NumberControl, CheckboxControl, RadioControl, TextareaControl  } from '@wordpress/components';
 import './editor.scss';
 import * as elementAttributes from './element_attributes.js';
 import { dynamicInputs } from './dynamic_inputs.js';
+import { getInputHtml } from './shared.js';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -17,7 +18,10 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 	const blockProps = useBlockProps();
 
 	const getTypeOptions = () => {
-		let typeOptions	= [];
+		let typeOptions	= [
+			{label: __('Select an input type', 'tsjippy'), value: '' }
+		];
+
 		elementAttributes.inputTypes.forEach( type => { 
 			typeOptions.push( {label: type, value: type });
 		}); 
@@ -85,7 +89,7 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 	 */
 	const propertiesForm = () => {
 		if(!isSelected){
-			return '';
+			return getInputHtml(attributes, blockProps);
 		}
 
 		// First set an input type
@@ -98,7 +102,10 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 		// Then set a name
 		if(attributes.name == ''){
 			return (
-				inputName()
+				[
+					inputTypeSelector(),
+					inputName()
+				]
 			);
 		}
 		
@@ -111,12 +118,30 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 		 */
 		if(attributes.ariaAttributes){
 			ariaControls	= dynamicInputs(elementAttributes.inputSchema.ariaAttributes, attributes.inputAttributes, storeAttributeAttributes);
-		}		
+		}
+
+		/**
+		 * Input type specific options
+		 */
+		const inputTypeSpecificOptions = () => {
+			if(['radio', 'checkbox', 'select'].includes(attributes.type)){
+				return (
+					<TextareaControl
+						label    = { __("Selectable Options", 'tsjippy')}
+						help     = "One option per line. If the value and label differ seperate them with a |  i.e. car|auto"
+						value    = { attributes.selectable_options }
+						onChange = { ( value ) => setAttributes({ selectable_options: value }) }
+					/>
+				);
+			}
+		}
 
 		return ( 
 			<>
+			{ getInputHtml(attributes, blockProps) }
 			{ inputTypeSelector() }
 			{ inputName() }
+			{ inputTypeSpecificOptions() }
 			<div class="attributes-form">
 				<h3>Input properties</h3>
 				{ attributeControls }
@@ -156,7 +181,6 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
     			<legend>
 					{ (attributes.type).charAt(0).toUpperCase() + (attributes.type).slice(1) } input
 				</legend>
-				<input type={ attributes.type } name={ attributes.name } value={ attributes.value } class='formbuilder'/>
 				{ propertiesForm() }
 			</fieldset>
 		</div>

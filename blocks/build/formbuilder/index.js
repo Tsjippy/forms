@@ -24,10 +24,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/copy.mjs");
 /* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/plus.mjs");
 /* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/trash.mjs");
-/* harmony import */ var _RuleRow__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./RuleRow */ "./src/formbuilder/components/RuleRow.js");
-/* harmony import */ var _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./../../input/element_attributes.js */ "./src/input/element_attributes.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var _RuleRow__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./RuleRow */ "./src/formbuilder/components/RuleRow.js");
+/* harmony import */ var _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./../../input/element_attributes.js */ "./src/input/element_attributes.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__);
+
 
 
 
@@ -254,7 +257,9 @@ function ConditionsModal({
 }) {
   const {
     saveConditions,
-    setError
+    setError,
+    setSaving,
+    setConditions
   } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useDispatch)('tsjippy-forms/conditions-store');
   const {
     createSuccessNotice,
@@ -531,12 +536,12 @@ function ConditionsModal({
     });
     resetErrors();
   }, [clearSuccessMessage]);
-  const deleteAction = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)(actionIndex => {
+  const deleteAction = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)((conditionIndex, actionIndex) => {
     resetErrors();
     setDraftConditions(prev => {
       const next = deepClone(prev);
-      next.actions = Array.isArray(next.actions) ? next.actions : [];
-      next.actions.splice(actionIndex, 1);
+      next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
+      next[conditionIndex].actions.splice(actionIndex, 1);
       return next;
     });
   }, [clearSuccessMessage]);
@@ -546,10 +551,12 @@ function ConditionsModal({
    * This is used by the store-owned save action and is not exported.
    */
   async function saveConditionsRequest(blockId, conditions) {
-    const savedConditions = await apiFetch({
+    const postId = wp.data.select("core/editor").getCurrentPostId();
+    const savedConditions = await _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8___default()({
       path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
       method: 'POST',
       data: {
+        postId: postId,
         blockId: blockId,
         conditions: conditions
       }
@@ -557,6 +564,7 @@ function ConditionsModal({
     return conditions;
   }
   const handleSave = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)(async blockId => {
+    setSaving(blockId, true);
     const result = validateConditions(draftConditions);
     if (result.errors.length > 0) {
       setValidationErrors(result.errors);
@@ -567,16 +575,17 @@ function ConditionsModal({
       return;
     }
     try {
-      await saveConditions(blockId, draftConditions);
+      await saveConditionsRequest(blockId, draftConditions);
+      setConditions(blockId, deepClone(draftConditions));
       resetErrors();
       setSuccessMessage((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditions saved successfully.', 'tsjippy'));
-      showToastSuccess((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditions saved successfully.', 'tsjippy'));
-    } catch (saveError) {
-      const message = saveError?.message || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Saving failed. Please try again.', 'tsjippy');
-      setError(blockId, message);
-      showToastError(message);
+      showToastSuccess((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditions saved.', 'tsjippy'));
+    } catch (error) {
+      setError(blockId, error?.message || 'Failed to save conditions.');
+      showToastError(error?.message || 'Failed to save conditions.');
     }
-  }, [draftConditions, blockId, saveConditions, setError, showToastError, showToastSuccess]);
+    setSaving(blockId, false);
+  }, [blockId, draftConditions, setError, showToastSuccess, showToastError]);
   const resetErrors = () => {
     clearSuccessMessage();
     setValidationErrors([]);
@@ -591,10 +600,10 @@ function ConditionsModal({
   }, [conditions, clearSuccessMessage, showToastSuccess]);
   const renderRuleRow = (rule, ruleIndex, conditionIndex) => {
     const isPulsed = pulseTarget && pulseTarget.section === 'rules' && pulseTarget.ruleIndex === ruleIndex;
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
       className: `item ${isPulsed ? 'pulse' : ''}`,
       "data-condition-index": ruleIndex,
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_RuleRow__WEBPACK_IMPORTED_MODULE_8__["default"], {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_RuleRow__WEBPACK_IMPORTED_MODULE_9__["default"], {
         conditionIndex: conditionIndex,
         rule: rule,
         ruleIndex: ruleIndex,
@@ -613,12 +622,12 @@ function ConditionsModal({
     const actionErrors = fieldErrors[conditionIndex]?.actions?.[actionIndex] || {};
     const isPulsed = pulseTarget && pulseTarget.section === 'actions' && pulseTarget.actionIndex === actionIndex;
     const datalistOptions = [];
-    _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_9__.inputSchema.sharedAttributes.concat(_input_element_attributes_js__WEBPACK_IMPORTED_MODULE_9__.inputSchema.types[blockProps.attributes.type]).forEach(data => datalistOptions.push(data.attribute));
-    _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_9__.inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-' + data.attribute));
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+    _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.sharedAttributes.concat(_input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.types[blockProps.attributes.type]).forEach(data => datalistOptions.push(data.attribute));
+    _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-' + data.attribute));
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
       className: `rule-row inner item ${Object.keys(actionErrors).length > 0 ? 'invalid' : ''} ${isPulsed ? 'pulse' : ''}`,
       "data-action-index": actionIndex,
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
         label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Action', 'tsjippy'),
         value: actionItem?.action || '',
         options: [{
@@ -640,45 +649,54 @@ function ConditionsModal({
         onChange: value => updateAction(conditionIndex, actionIndex, 'action', value),
         help: actionErrors.action || '',
         "data-field-key": "action"
-      }), (actionItem?.action || '') == 'set-property' && blockProps.name == 'tsjippy-forms/input' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+      }), (actionItem?.action || '') == 'set-property' && blockProps.name == 'tsjippy-forms/input' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Property name', 'tsjippy'),
           value: actionItem?.['property-name'] || '',
           onChange: value => updateAction(conditionIndex, actionIndex, 'property-name', value),
           help: actionErrors.propertyName || '',
           "data-field-key": "propertyName",
           list: "element-properties"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("datalist", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("datalist", {
           id: "element-properties",
-          children: datalistOptions.map(attribute => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("option", {
+          children: datalistOptions.map(attribute => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("option", {
             value: attribute
           }))
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("span", {
           class: "condition-label",
           style: {
             marginTop: ' 25px'
           },
           children: "To"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Property value', 'tsjippy'),
           value: actionItem?.['property-value'] || '',
           onChange: value => updateAction(conditionIndex, actionIndex, 'property-value', value),
           help: actionErrors.propertyValue || '',
           "data-field-key": "propertyValue",
           list: "possible-elements"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("datalist", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("datalist", {
           id: "possible-elements",
-          children: formBlockOptions.map(data => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("option", {
+          children: formBlockOptions.map(data => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("option", {
             value: "the-value-of-" + data.value
           }))
-        })]
-      }) : '', /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        }),
+        // If we selected another element to be the value of this property we should allow to add extra to the value
+        ['date', 'number', 'range', 'week', 'month'].includes(blockProps.attributes.type) && (actionItem?.['property-value'] || '').includes("the-value-of-") ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalNumberControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Amount to add to the element value', 'tsjippy'),
+          isShiftStepEnabled: true,
+          onChange: value => updateAction(conditionIndex, actionIndex, 'addition', value),
+          shiftStep: 1,
+          value: actionItem?.['addition'] || '',
+          spinControls: "custom"
+        }) : '']
+      }) : '', /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
         style: {
           marginTop: '20px'
         },
         variant: "secondary",
         isDestructive: true,
-        onClick: () => deleteAction(actionIndex),
+        onClick: () => deleteAction(conditionIndex, actionIndex),
         icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_7__["default"],
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Delete action', 'tsjippy')
       })]
@@ -686,10 +704,10 @@ function ConditionsModal({
   };
   const displayConditions = blockProps => {
     if (!Array.isArray(draftConditions) || draftConditions.length === 0) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("p", {
           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No conditions defined yet.', 'tsjippy')
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
           variant: "primary",
           onClick: addCondition,
           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add first condition', 'tsjippy')
@@ -700,48 +718,48 @@ function ConditionsModal({
     /**
      * Loop over all conditons
      */
-    return draftConditions.map((condition, conditionIndex) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+    return draftConditions.map((condition, conditionIndex) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
         className: `condition-row ${Array.isArray(condition) && condition.length === 0 ? 'condition-row--empty' : ''}`,
         "data-condition-index": conditionIndex,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("span", {
           className: "condition-label",
           children: "If"
-        }), (condition.rules || []).length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
+        }), (condition.rules || []).length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("p", {
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No rules defined yet.', 'tsjippy')
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
             variant: "primary",
             onClick: () => addRule(conditionIndex),
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add rule', 'tsjippy')
           })]
-        }) : condition.rules.map((rule, ruleIndex) => renderRuleRow(rule, ruleIndex, conditionIndex)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+        }) : condition.rules.map((rule, ruleIndex) => renderRuleRow(rule, ruleIndex, conditionIndex)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("span", {
           className: "condition-label",
           children: "Then"
-        }), (condition.actions || []).length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
+        }), (condition.actions || []).length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("p", {
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No actions defined yet.', 'tsjippy')
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
             variant: "primary",
             onClick: () => addAction(conditionIndex),
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add action', 'tsjippy')
           })]
-        }) : condition.actions.map((action, actionIndex) => renderActionRow(action, actionIndex, conditionIndex, blockProps)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
+        }) : condition.actions.map((action, actionIndex) => renderActionRow(action, actionIndex, conditionIndex, blockProps)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
           className: "actions",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
             variant: "secondary",
             onClick: () => addAction(conditionIndex),
             icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add another action', 'tsjippy')
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
           className: "actions",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
             variant: "secondary",
             onClick: () => duplicateRule(conditionIndex),
             icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_5__["default"],
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Duplicate condition', 'tsjippy')
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
             variant: "secondary",
             isDestructive: true,
             onClick: () => deleteCondition(conditionIndex, ruleIndex),
@@ -754,72 +772,72 @@ function ConditionsModal({
   };
   const renderContent = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)(blockProps => {
     if (isLoading && !hasLoaded) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
-        children: ["Fetching Condition Data...", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, {})]
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+        children: ["Fetching Condition Data...", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, {})]
       });
     }
     if (error) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
         status: "error",
         isDismissible: false,
         children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Error:', 'tsjippy'), " ", error]
       });
     }
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
-      children: [successMessage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+      children: [successMessage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
         status: "success",
         isDismissible: true,
         onRemove: clearSuccessMessage,
         children: successMessage
-      }), validationErrors.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
+      }), validationErrors.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
         status: "error",
         isDismissible: true,
         onRemove: () => setValidationErrors([]),
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("strong", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("strong", {
           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Please fix the following issues:', 'tsjippy')
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("ul", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("ul", {
           style: {
             marginTop: '8px',
             marginBottom: 0,
             paddingLeft: '18px'
           },
-          children: validationErrors.map((item, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("li", {
+          children: validationErrors.map((item, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("li", {
             children: item
           }, index))
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
         ref: modalRef,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h3", {
           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditions', 'tsjippy')
         }), displayConditions(blockProps)]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
         style: {
           marginTop: '16px',
           display: 'flex',
           gap: '8px',
           flexWrap: 'wrap'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
           variant: "primary",
           onClick: addCondition,
           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add New Condition', 'tsjippy')
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
           variant: "primary",
           onClick: () => handleSave(blockProps.attributes.blockId),
           disabled: !isDirty || !isValid || isSaving,
           accessibleWhenDisabled: true,
           children: isSaving ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Saving...', 'tsjippy') : isDirty ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Save conditions', 'tsjippy') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Saved', 'tsjippy')
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
           variant: "secondary",
           onClick: handleReset,
           disabled: !isDirty,
           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Reset changes', 'tsjippy')
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
           variant: "secondary",
           onClick: handleClose,
           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Close', 'tsjippy')
         })]
-      }), isDirty && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
+      }), isDirty && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("p", {
         style: {
           marginTop: '12px',
           color: '#b45309'
@@ -831,33 +849,33 @@ function ConditionsModal({
   if (!isVisible || typeof document === 'undefined') {
     return null;
   }
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.createPortal)(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.createPortal)(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
     id: "element-conditions-modal",
     className: "modal",
     onClick: handleOverlayClick,
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
       className: "modal-content",
       onClick: stopPropagation,
       onKeyDown: stopPropagation,
       style: {
         maxWidth: '90vw'
       },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("span", {
         className: "close mobile-sticky",
         onClick: handleClose,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("svg", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("svg", {
           width: "24",
           height: "24",
           viewBox: "0 0 24 24",
           fill: "none",
           stroke: "currentColor",
           strokeWidth: "2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("line", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("line", {
             x1: "18",
             y1: "6",
             x2: "6",
             y2: "18"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("line", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("line", {
             x1: "6",
             y1: "6",
             x2: "18",
@@ -1499,7 +1517,7 @@ const addBlockId = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.createHigh
     const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/formbuilder');
     (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useEffect)(() => {
       const isChildOfFormBuilder = parents.length > 0;
-      if (isChildOfFormBuilder && blockId !== clientId) {
+      if (isChildOfFormBuilder && blockId == undefined) {
         setAttributes({
           blockId: clientId
         });
@@ -1648,6 +1666,7 @@ function save({
     method: attributes.method,
     target: attributes.target,
     autocomplete: attributes.autocomplete,
+    "data-formName": attributes.name,
     ...innerBlocksProps
   });
 }
@@ -1755,26 +1774,6 @@ const actions = {
       blockId,
       loaded: !!loaded
     };
-  },
-  /**
-   * Save conditions through the API and update store state.
-   * This is the store-owned mutation path.
-   */
-  async saveConditions(blockId, conditions) {
-    if (blockId === undefined || blockId === null || blockId === '') {
-      return;
-    }
-    try {
-      await saveConditionsRequest(blockId, conditions);
-      actions.setConditions(blockId, conditions);
-      actions.setLoaded(blockId, true);
-      return conditions;
-    } catch (error) {
-      actions.setError(blockId, error?.message || 'Failed to save element conditions.');
-      throw error;
-    } finally {
-      //actions.setSaving(blockId, false);
-    }
   }
 };
 

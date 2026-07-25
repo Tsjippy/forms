@@ -166,7 +166,7 @@ return array(
 		'attributes' => array(
 			'type' => array(
 				'type' => 'string',
-				'default' => 'text'
+				'default' => ''
 			),
 			'name' => array(
 				'type' => 'string',
@@ -183,6 +183,26 @@ return array(
 				)
 			),
 			'ariaAttributes' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'selectable_options' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'add_button_content' => array(
+				'type' => 'string',
+				'default' => '+'
+			),
+			'remove_button_content' => array(
+				'type' => 'string',
+				'default' => '-'
+			),
+			'multiple' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'required' => array(
 				'type' => 'boolean',
 				'default' => false
 			)

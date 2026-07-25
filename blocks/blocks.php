@@ -151,9 +151,14 @@ function formResults($atts)
 }
 
 
-add_filter( 'block_categories_all', __NAMESPACE__.'\addFormsCategory', 10, 2 );
+add_filter( 'block_categories_all', __NAMESPACE__.'\addFormsCategory' );
 
-function addFormsCategory( $categories, $block_editor_context ) {
+/**
+ * Adds the form-elements block category
+ * 
+ * @param   array   $categories
+ */
+function addFormsCategory( $categories) {
     return array_merge(
         $categories,
         array(
