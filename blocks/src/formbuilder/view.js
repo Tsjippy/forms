@@ -20,6 +20,9 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/#view-script
  */
 
+import * as forms from './../../../js/forms.js';
+
 /* eslint-disable no-console */
 console.log( 'Hello World! (from formbuilder-my-block block)' );
 /* eslint-enable no-console */
+

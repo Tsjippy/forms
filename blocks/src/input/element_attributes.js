@@ -27,6 +27,7 @@ export const inputSchema = {
   sharedAttributes: [
     { attribute: "id", expectedType: "string" },
     { attribute: "class", expectedType: "string" },
+    { attribute: "data-*", expectedType: "string" },
     { attribute: "style", expectedType: "string" },
     { attribute: "title", expectedType: "string" },
     { attribute: "hidden", expectedType: "boolean" },
@@ -38,7 +39,6 @@ export const inputSchema = {
     { attribute: "contenteditable", expectedType: "boolean" },
     { attribute: "draggable", expectedType: "boolean" },
     { attribute: "translate", expectedType: "boolean" },
-    { attribute: "data-*", expectedType: "string" }
   ],
 
   types: {

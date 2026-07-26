@@ -1,10 +1,13 @@
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
 import { Button, Dropdown, SelectControl, PanelBody, TextControl, Disabled, ToggleControl, __experimentalNumberControl as NumberControl, CheckboxControl, RadioControl, TextareaControl  } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+
 import './editor.scss';
 import * as elementAttributes from './element_attributes.js';
 import { dynamicInputs } from './dynamic_inputs.js';
-import { getInputHtml } from './shared.js';
+import { InputHtml } from './shared.js';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -14,7 +17,7 @@ import { getInputHtml } from './shared.js';
  *
  * @return {Element} Element to render.
  */
-export default function Edit({ attributes, setAttributes, isSelected }) {
+export default function Edit({ attributes, setAttributes, isSelected, clientId }) {
 	const blockProps = useBlockProps();
 
 	const getTypeOptions = () => {
@@ -29,6 +32,9 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 		return typeOptions;
 	}
 
+	/**
+	 * For a submit type the value is what is shown in the button
+	 */
 	const inputValue = () => {
 		if(attributes.type != 'submit'){
 			return '';
@@ -70,17 +76,40 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 	}
 
 	/**
+	 * Set a debounce for the label text input so it disappears when we stop typing, not straight after the first character
+	 */
+	const [inputName, setInputName] = useState(attributes.name);
+
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			setAttributes({ name: inputName })
+		}, 800);
+
+		return () => clearTimeout(timeoutId);
+	}, [inputName, 800]);
+
+	/**
 	 * The input name component
 	 */
-	const inputName = () => {
+	const inputNameComponent = () => {
 		return (
 			<TextControl
 				label    = "Input Name"
-				value    = { attributes.name }
-				onChange = { ( name ) => setAttributes({ name: name })}
+				value    = { inputName }
+				onChange = { ( name ) => setInputName( name )}
 			/>
 		)
 	}
+
+    const hasLabelParent = useSelect(
+        (select) =>
+            select('core/block-editor')
+                .getBlockParentsByBlockName(clientId, 'tsjippy-forms/label')
+                .length > 0,
+        [clientId]
+    );
+
+	setAttributes({ hasLabelParent });
 
 	/**
 	 * Shows the input attributes form if this is an selected input
@@ -89,7 +118,13 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 	 */
 	const propertiesForm = () => {
 		if(!isSelected){
-			return getInputHtml(attributes, blockProps);
+			return(
+				<InputHtml
+					attributes={attributes}
+					blockProps={blockProps}
+					hasLabelParent={hasLabelParent}
+				/>
+			)
 		}
 
 		// First set an input type
@@ -104,7 +139,7 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 			return (
 				[
 					inputTypeSelector(),
-					inputName()
+					inputNameComponent()
 				]
 			);
 		}
@@ -138,9 +173,14 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 
 		return ( 
 			<>
-			{ getInputHtml(attributes, blockProps) }
+			<InputHtml
+				attributes={attributes}
+				blockProps={blockProps}
+				hasLabelParent={hasLabelParent}
+			/>
+
 			{ inputTypeSelector() }
-			{ inputName() }
+			{ inputNameComponent() }
 			{ inputTypeSpecificOptions() }
 			<div className="attributes-form">
 				<h3>Input properties</h3>
@@ -167,12 +207,45 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 					options  = { getTypeOptions() }
 					onChange = { ( type ) => setAttributes({ type: type })}
 				/>
-				<TextControl
-					label    = "Input Name"
-					value    = { attributes.name }
-					onChange = { ( name ) => setAttributes({ name: name })}
-				/>
+				{ inputNameComponent() }
 				{ inputValue() }
+
+				<ToggleControl
+					label    = { __('Allow multiple answers', 'tsjippy') }
+					checked  = {!!attributes.multiple}
+					onChange = { ( checked ) => setAttributes({ multiple: checked })}
+				/>
+
+				<ToggleControl
+					label    = { __('This is a required input', 'tsjippy') }
+					checked  = {!!attributes.required}
+					onChange = { ( checked ) => setAttributes({ required: checked })}
+				/>
+
+				{
+					/**
+					 * If we allow multiple answer we have a + and - button
+					 * This allows to customize that
+					 */
+					attributes.multiple ?
+						<>
+							<TextControl
+								label    = "Add Button Text"
+								value    = { attributes.add_button_content }
+								onChange = { ( value ) => setAttributes({ add_button_content: value })}
+							/>
+
+							<TextControl
+								label    = "Remove Button Text"
+								value    = { attributes.remove_button_content }
+								onChange = { ( value ) => setAttributes({ remove_button_content: value })}
+							/>
+						</>
+					: ''
+
+				
+				
+}
 			</PanelBody>
 		</InspectorControls>
 

@@ -22,10 +22,6 @@ return array(
 		'style' => 'file:./style-index.css',
 		'viewScript' => 'file:./view.js',
 		'attributes' => array(
-			'id' => array(
-				'type' => 'integer',
-				'default' => -1
-			),
 			'method' => array(
 				'type' => 'string',
 				'default' => ''
@@ -148,7 +144,7 @@ return array(
 		'apiVersion' => 3,
 		'name' => 'tsjippy-forms/input',
 		'version' => '0.1.0',
-		'title' => 'Form Input Element',
+		'title' => 'Form Input',
 		'category' => 'form-elements',
 		'icon' => 'forms',
 		'description' => 'Input element for a form',
@@ -205,6 +201,10 @@ return array(
 			'required' => array(
 				'type' => 'boolean',
 				'default' => false
+			),
+			'hasLabelParent' => array(
+				'type' => 'boolean',
+				'default' => false
 			)
 		)
 	),
@@ -232,6 +232,10 @@ return array(
 			'text' => array(
 				'type' => 'string',
 				'default' => ''
+			),
+			'isMultiple' => array(
+				'type' => 'boolean',
+				'default' => false
 			)
 		)
 	)

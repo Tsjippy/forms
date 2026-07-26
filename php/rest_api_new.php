@@ -96,24 +96,6 @@ function restApiInitFormsNew()
     // Register a new form
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
-        '/register_form',
-        array(
-            'methods'  => 'POST',
-            'callback' => function ($wpRestRequest) {
-                $forms  = new Forms();
-                $forms->insertForm($wpRestRequest->get_param('slug'));
-
-                return $forms->formData->id;
-            },
-            'permission_callback' => function(){
-                return current_user_can('edit_users');
-            }
-        )
-    );
-
-    // Register a new form
-    register_rest_route(
-        TSJIPPY\RESTAPIPREFIX . '/forms',
         '/get_prefil',
         array(
             'methods'  => 'POST',

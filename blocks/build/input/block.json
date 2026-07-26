@@ -3,7 +3,7 @@
   "apiVersion": 3,
   "name": "tsjippy-forms/input",
   "version": "0.1.0",
-  "title": "Form Input Element",
+  "title": "Form Input",
   "category": "form-elements",
   "icon": "forms",
   "description": "Input element for a form",
@@ -54,6 +54,10 @@
       "default": false
     },
     "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "hasLabelParent": {
       "type": "boolean",
       "default": false
     }

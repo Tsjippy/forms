@@ -6,7 +6,7 @@
  */
 import { useBlockProps  } from '@wordpress/block-editor';
 
-import { getInputHtml } from './shared.js';
+import { InputHtml } from './shared.js';
 
 /**
  * The save function defines the way in which the different attributes should
@@ -17,10 +17,14 @@ import { getInputHtml } from './shared.js';
  *
  * @return {Element} Element to render.
  */
-export default function save({ attributes }) {
+export default function save({ attributes, clientId }) {
 	const blockProps = useBlockProps.save();
 
 	return (
-		getInputHtml(attributes, blockProps)
+		<InputHtml
+			attributes={attributes}
+			blockProps={blockProps}
+			hasLabelParent={attributes.hasLabelParent}
+		/>
 	);
 }

@@ -15,11 +15,7 @@ import './editor.scss';
  */
 export default function Edit({ attributes, setAttributes, clientId }) {
 	const blockProps = useBlockProps();
-    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps,
-		{
-			orientation: 'vertical', // Enables drag & drop functionality
-		}
-	);
+    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps );
 
 	/**
 	 * Check for child blocks
@@ -45,6 +41,27 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 		return () => clearTimeout(timeoutId);
 	}, [labelText, 800]);
+
+	/**
+	 * Check if input in this label can have multiple answers
+	 */
+	const innerBlocks = useSelect(
+		(select) =>
+			select('core/block-editor').getBlocks(clientId),
+		[clientId]
+	);
+
+	const isMultiple = innerBlocks.some(
+		(block) => block.attributes.multiple
+	);
+	setAttributes({ isMultiple });
+
+	const labelComponent	= (
+		<label >
+			{ attributes.text }
+			{ children }
+		</label>
+	);
 
 	return (
 		<>
@@ -75,13 +92,27 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 							instructions	= "Click to add a block"
 						>
 							{ /* Add the add button */ }
-							<InnerBlocks.ButtonBlockAppender />
+							<InnerBlocks
+								orientation="vertical"
+								renderAppender={InnerBlocks.ButtonBlockAppender}
+							/>
 						</Placeholder>
 					: 
-						<label >
-							{ attributes.text }
-							{ children }
-						</label>
+						isMultiple ?
+							<div className="input-wrapper required flex" style= {{width: "85%"}}>
+								<div className="clone-divs-wrapper">
+									<div className="clone-div" data-div-id="0">
+										<div className="button-wrapper" style={{ margin: 'auto', display:'flex'}}>
+											{labelComponent}
+											<button type="button" className="add button" style={{ flex: 1, maxWidth: 'max-content'}}>
+												+
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						:
+							labelComponent
 			}
 		</fieldset>
 		</>

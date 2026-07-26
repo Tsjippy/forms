@@ -17,10 +17,6 @@
 	"style": "file:./style-index.css",
 	"viewScript": "file:./view.js",
 	"attributes": {
-		"id": {
-			"type": "integer",
-			"default": -1
-		},
 		"method": {
 			"type": "string",
 			"default": ""

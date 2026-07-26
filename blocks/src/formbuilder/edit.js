@@ -25,6 +25,7 @@ import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';
 import './filters/storeClientIdInAttributes.js';
 import { useFormSubmitter } from './hooks/useFormSubmitter.js';
+import * as forms from './../../../js/forms.js';
 
 /* Default inner block template for the form. */
 const MY_TEMPLATE = [
@@ -72,27 +73,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	const [availableActions, setAvailableActions] = useState([]);
 	const [isEmailsFormVisible, setEmailsFormVisibility] = useState(false);
 	const [isRemindersFormVisible, setRemindersFormVisibility] = useState(false);
-
-	/* Register the form if it has a name but has not been saved yet. */
-	useEffect(() => {
-		if (!name || id !== -1) {
-			return;
-		}
-
-		apiFetch({
-			path: `${tsjippy.restApiPrefix}/forms/register_form`,
-			method: 'POST',
-			data: {
-				name,
-			},
-		}).then((res) => {
-			if (res?.id) {
-				setAttributes({
-					id: res.id,
-				});
-			}
-		});
-	}, [name, id, setAttributes]);
 
 	/* Load available roles from the server for the inspector panel. */
 	useEffect(() => {
