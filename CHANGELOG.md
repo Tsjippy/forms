@@ -11,6 +11,7 @@
 - prefixed cache group
 - added data store for element conditions
 - vaious fixes
+- show formstep in editor
 
 ### Fixed
 - conditions form bugs
