@@ -13,6 +13,7 @@
 - added data store for element conditions
 - vaious fixes
 - show formstep in editor
+- only allow inputs in label
 
 ### Fixed
 - conditions form bugs
