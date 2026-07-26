@@ -1106,7 +1106,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./editor.scss */ "./src/formbuilder/editor.scss");
 /* harmony import */ var _filters_addButtonToInnerBlocks_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./filters/addButtonToInnerBlocks.js */ "./src/formbuilder/filters/addButtonToInnerBlocks.js");
 /* harmony import */ var _filters_storeClientIdInAttributes_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./filters/storeClientIdInAttributes.js */ "./src/formbuilder/filters/storeClientIdInAttributes.js");
-/* harmony import */ var _hooks_useFormStepControls_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./hooks/useFormStepControls.js */ "./src/formbuilder/hooks/useFormStepControls.js");
+/* harmony import */ var _hooks_useFormSubmitter_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./hooks/useFormSubmitter.js */ "./src/formbuilder/hooks/useFormSubmitter.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! react */ "react");
@@ -1219,7 +1219,7 @@ function Edit({
     const block = select('core/block-editor').getBlock(clientId);
     return block?.innerBlocks || [];
   }, [clientId]);
-  (0,_hooks_useFormStepControls_js__WEBPACK_IMPORTED_MODULE_10__.useFormstepControls)(innerBlocks, clientId);
+  (0,_hooks_useFormSubmitter_js__WEBPACK_IMPORTED_MODULE_10__.useFormSubmitter)(innerBlocks, clientId);
 
   /* Block wrapper props. */
   const blockProps = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps)();
@@ -1660,15 +1660,15 @@ function getBlocksAsSelectOptions(allNestedBlocks) {
 
 /***/ },
 
-/***/ "./src/formbuilder/hooks/useFormStepControls.js"
-/*!******************************************************!*\
-  !*** ./src/formbuilder/hooks/useFormStepControls.js ***!
-  \******************************************************/
+/***/ "./src/formbuilder/hooks/useFormSubmitter.js"
+/*!***************************************************!*\
+  !*** ./src/formbuilder/hooks/useFormSubmitter.js ***!
+  \***************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   useFormstepControls: () => (/* binding */ useFormstepControls)
+/* harmony export */   useFormSubmitter: () => (/* binding */ useFormSubmitter)
 /* harmony export */ });
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
@@ -1679,61 +1679,62 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const useFormstepControls = (innerBlocks, clientId) => {
+const useFormSubmitter = (innerBlocks, clientId) => {
   const {
-    insertBlock,
-    removeBlock
+    replaceBlocks
+  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_1__.useDispatch)('core/block-editor');
+  const {
+    moveBlocksToPosition
   } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_1__.useDispatch)('core/block-editor');
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    const formsteps = (innerBlocks || []).filter(block => block.name === 'tsjippy-forms/formstep');
-    const controls = (innerBlocks || []).filter(block => block.name === 'tsjippy-forms/formstep-controls');
-    console.log(controls);
-    const formSubmitter = (innerBlocks || []).filter(block => {
-      return block.name === 'tsjippy-forms/input' && block.attributes.type == 'submit';
+    const blocks = innerBlocks || [];
+    const formsteps = blocks.filter(block => block.name === 'tsjippy-forms/formstep');
+    const controls = blocks.filter(block => block.name === 'tsjippy-forms/formstep-controls');
+    const formSubmitter = blocks.filter(block => {
+      return block.name === 'tsjippy-forms/input' && block.attributes.type === 'submit';
     });
 
     /**
      * Remove the form submitter and add formstep controls
      */
-    if (formsteps.length > 0 && controls.length === 0) {
+    if (formsteps.length > 0 && controls.length === 0 && formSubmitter.length > 0) {
       // Remove any existing form submit blocks
       console.log(formSubmitter);
-      formSubmitter.forEach(block => {
-        removeBlock(block.clientId);
-      });
-
-      // Insert the formstep button block
-      insertBlock((0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__.createBlock)('tsjippy-forms/formstep-controls', {
+      replaceBlocks(formSubmitter.map(block => block.clientId), (0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__.createBlock)('tsjippy-forms/formstep-controls', {
         amount: formsteps.length
-      }), undefined,
-      // index    
-      clientId // rootClientId
-      );
+      }));
     }
 
     /**
      * Remove the formstep control and add form submitter
      */
     if (formSubmitter.length === 0 && formsteps.length === 0 && controls.length > 0) {
-      controls.forEach(block => {
-        removeBlock(block.clientId);
-      });
-
-      // Insert the submitter
-      insertBlock((0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__.createBlock)('tsjippy-forms/input', {
+      replaceBlocks(controls[0].clientId, (0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__.createBlock)('tsjippy-forms/input', {
         type: 'submit',
         name: 'submit',
         value: 'Submit the form'
-      }), undefined,
-      // index    
-      clientId // rootClientId
-      );
+      }));
     }
 
     /**
-     * Remove formstep controls and add submitter
+     * Keep the controls at the bottom
      */
-  }, [innerBlocks, insertBlock, clientId]);
+    const controlsBlock = innerBlocks.find(block => {
+      return block.name === 'tsjippy-forms/formstep-controls' || block.name === 'tsjippy-forms/input' && block.attributes.type === 'submit';
+    });
+    if (!controlsBlock) {
+      return;
+    }
+    const lastIndex = innerBlocks.length - 1;
+    const currentIndex = innerBlocks.findIndex(block => block.clientId === controlsBlock.clientId);
+    if (currentIndex !== lastIndex) {
+      moveBlocksToPosition([controlsBlock.clientId], clientId,
+      // from root
+      clientId,
+      // to root
+      lastIndex);
+    }
+  }, [innerBlocks, replaceBlocks, clientId, moveBlocksToPosition]);
 };
 
 /***/ },

@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
 import { Button, Dropdown, SelectControl, PanelBody, TextControl, Placeholder } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import { useState, useEffect } from '@wordpress/element';
 import './editor.scss';
 
 /**
@@ -32,26 +33,18 @@ export default function Edit({ attributes, setAttributes, clientId }) {
         [ clientId ]
     );
 
-	if ( ! hasInnerBlocks ) {
-        return (
-            <fieldset { ...innerBlocksProps }>
-				<legend>Label Element</legend>
-                <Placeholder
-                    icon			= "layout"
-                    label			= { __("Add an input to this label", 'tsjippy') }
-                    instructions	= "Click to add a block"
-                >
-                    { /* Add the add button */ }
-                    <InnerBlocks.ButtonBlockAppender />
-                </Placeholder>
-                
-                { /* Keep context/API active */ }
-                <div style={ { display: 'none' } }>
-                    <InnerBlocks />
-                </div>
-            </fieldset>
-        );
-    }
+	/**
+	 * Set a debounce for the label text input so it disappears when we stop typing, not straight after the first character
+	 */
+	const [labelText, setLabelText] = useState(attributes.text);
+
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			setAttributes({ text: labelText })
+		}, 800);
+
+		return () => clearTimeout(timeoutId);
+	}, [labelText, 800]);
 
 	return (
 		<>
@@ -59,19 +52,37 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 			<PanelBody title={__('Label Settings', 'tsjippy')}>
 				<TextControl
 					label    = "Label Text"
-					value    = { attributes.text }
-					onChange = { ( text ) => setAttributes({ text: text })}
+					value    = { labelText }
+					onChange = { ( text ) => setLabelText( text )}
 				/>
 			</PanelBody>
 		</InspectorControls>
     			
 		<fieldset { ...innerBlocksProps }>
-			<legend>Label Element</legend>
-			<label >
-				{ attributes.text }
-				{ children }
-				<InnerBlocks.ButtonBlockAppender />
-			</label>
+			<legend>Label</legend>
+			{
+				attributes.text == '' ?
+					<TextControl
+						label    = "Label Text"
+						value    = { labelText }
+						onChange = { ( text ) => setLabelText( text )}
+					/> 
+				:
+					!hasInnerBlocks ?
+						<Placeholder
+							icon			= "layout"
+							label			= { __("Add an input to this label", 'tsjippy') }
+							instructions	= "Click to add a block"
+						>
+							{ /* Add the add button */ }
+							<InnerBlocks.ButtonBlockAppender />
+						</Placeholder>
+					: 
+						<label >
+							{ attributes.text }
+							{ children }
+						</label>
+			}
 		</fieldset>
 		</>
 	);

@@ -24,7 +24,7 @@ import { blockDefault } from '@wordpress/icons';
 import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';
 import './filters/storeClientIdInAttributes.js';
-import { useFormstepControls } from './hooks/useFormStepControls.js';
+import { useFormSubmitter } from './hooks/useFormSubmitter.js';
 
 /* Default inner block template for the form. */
 const MY_TEMPLATE = [
@@ -123,7 +123,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		[clientId]
 	);
 
-	useFormstepControls(innerBlocks, clientId);
+	useFormSubmitter(innerBlocks, clientId);
 
 	/* Block wrapper props. */
 	const blockProps = useBlockProps();

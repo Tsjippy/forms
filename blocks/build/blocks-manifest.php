@@ -213,7 +213,7 @@ return array(
 		'apiVersion' => 3,
 		'name' => 'tsjippy-forms/label',
 		'version' => '0.1.0',
-		'title' => 'Form Input Element Label',
+		'title' => 'Form Input Label Wrapper',
 		'category' => 'form-elements',
 		'icon' => 'forms',
 		'description' => 'Input element label for a form',

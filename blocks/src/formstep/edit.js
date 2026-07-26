@@ -56,14 +56,13 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     }
 
 	return (
-		<>
-		<div { ...innerBlocksProps } className="formstep" style = {{padding: '20px'}}>
+        <fieldset { ...innerBlocksProps } className="formstep" style = {{padding: '20px'}} key="formstep">
+			<legend>Formstep</legend>
 			<label >
 				{ attributes.text }
 				{ children }
 			</label>
-		</div>
-		</>
+		</fieldset>
 	);
 }
 
