@@ -5,6 +5,7 @@
 - very first version of block builder form
 - block conditions table
 - dynamic js generator for block forms
+- wrap input in label
 
 ### Changed
 - added input element attributes form
