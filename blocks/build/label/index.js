@@ -50,7 +50,9 @@ function Edit({
   const {
     children,
     ...innerBlocksProps
-  } = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useInnerBlocksProps)(blockProps);
+  } = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useInnerBlocksProps)(blockProps, {
+    allowedBlocks: ['tsjippy-forms/input']
+  });
 
   /**
    * Check for child blocks

@@ -15,7 +15,7 @@ import './editor.scss';
  */
 export default function Edit({ attributes, setAttributes, clientId }) {
 	const blockProps = useBlockProps();
-    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps );
+    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps, {allowedBlocks: ['tsjippy-forms/input'],} );
 
 	/**
 	 * Check for child blocks
