@@ -10,6 +10,7 @@
 - added input element attributes form
 - prefixed cache group
 - added data store for element conditions
+- vaious fixes
 
 ### Fixed
 - conditions form bugs
