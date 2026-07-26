@@ -4,6 +4,7 @@
 ### Added
 - very first version of block builder form
 - block conditions table
+- dynamic js generator for block forms
 
 ### Changed
 - added input element attributes form
