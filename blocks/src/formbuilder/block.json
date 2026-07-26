@@ -23,7 +23,7 @@
 		},
 		"method": {
 			"type": "string",
-			"default": "post"
+			"default": ""
 		},
 		"target": {
 			"type": "string",

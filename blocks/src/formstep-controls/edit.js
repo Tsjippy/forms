@@ -1,6 +1,9 @@
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
 import { Flex, FlexItem } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
+
 import './editor.scss';
 
 /**
@@ -14,47 +17,52 @@ import './editor.scss';
 export default function Edit({ attributes, setAttributes, isSelected, clientId }) {
 	const blockProps = useBlockProps();
 
-	const getStepIndicators	= () => {
+	const amount	= useSelect( ( select ) => {
 		/**
 		 * Find the parent form builder block
 		 * And add a formstep control block if needed
 		 */
+		const { getBlockParentsByBlockName, getBlocksByClientId } = select( 'core/block-editor' );
 
 		// Get the parent form
-        const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(
+        const parentIds = getBlockParentsByBlockName(
             clientId, 
             'tsjippy-forms/formbuilder'
         );
 
-		// Loop over all the parents to find the formbuilder block
-		parents.forEach(parent => {
-			let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
-
-			setAttributes({ amount: formsteps.length })
-		});
-
-		let indicators	= [];
-		for (let i = 0; i < attributes.amount; i++) {
-			if(i === 0){
-				indicators.push(
-					<span class="step active"></span>
-				);
-			}else{
-				indicators.push(
-					<span class="step"></span>
-				);
-			}
+		if (!parentIds?.length) {
+			return 0;
 		}
 
-		return indicators;
-	}
+		const parents	= getBlocksByClientId( parentIds );
+
+		const parent = parents?.[0];
+		
+		return parent?.innerBlocks?.filter(
+			block => block.name === 'tsjippy-forms/formstep'
+		).length || 0;
+	}, [ clientId ] );
+
+	useEffect(() => {
+		if (attributes.amount !== amount) {
+			setAttributes({ amount });
+		}
+	}, [amount, attributes.amount, setAttributes]);
+
+	const indicators = Array.from({ length: amount }, (_, i) => (
+		<span
+			key={i}
+			className={i === 0 ? 'step active' : 'step'}
+		/>
+	));
 
 	return (
-		<div { ...blockProps } class="multi-step-controls">
-			<div class="multi-step-controls-wrapper">
-				<Flex class="form-element-wrapper">
+		<fieldset { ...blockProps } className="multi-step-controls">
+			<legend> Formstep Controls</legend>
+			<div className="multi-step-controls-wrapper">
+				<Flex className="form-element-wrapper">
 					<FlexItem>
-						<button type="button" class="button" name="previous-button">
+						<button type="button" className="button" name="previous-button">
 							Previous
 						</button>
 					</FlexItem>
@@ -62,26 +70,26 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 
 				<Flex>
 					<FlexItem>
-						{ getStepIndicators() }
+						{ indicators }
 					</FlexItem>
 				</Flex>
 				
 				<Flex>
 					<FlexItem>
-						<button type="button" class="button next-button" name="next-button">
+						<button type="button" className="button next-button" name="next-button">
 							Next
 						</button>
 					</FlexItem>
 
 					<FlexItem>
-						<div class="submit-wrapper">
-							<button type="button" class="button form-submit hidden" name="submit-form">
+						<div className="submit-wrapper">
+							<button type="button" className="button form-submit hidden" name="submit-form">
 								Submit travel request
 							</button>
 						</div>
 					</FlexItem>
 				</Flex>
 			</div>
-		</div>
+		</fieldset>
 	);
 }

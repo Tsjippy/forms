@@ -11,15 +11,20 @@ import {
 	RadioControl,
 	CheckboxControl,
 	Button,
+	ToggleControl,
+	TextControl,
+	Placeholder
 } from '@wordpress/components';
-import { useState, useEffect, useCallback } from '@wordpress/element';
+import { useState, useEffect, useCallback, RawHTML  } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useSelect } from '@wordpress/data';
 import { plus } from '@wordpress/icons';
+import { blockDefault } from '@wordpress/icons';
 
 import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';
 import './filters/storeClientIdInAttributes.js';
+import { useFormstepControls } from './hooks/useFormStepControls.js';
 
 /* Default inner block template for the form. */
 const MY_TEMPLATE = [
@@ -28,6 +33,26 @@ const MY_TEMPLATE = [
 		{ type: 'submit', name: 'submit', value: 'Submit the form' },
 	],
 ];
+
+var formRemindersForm = '';
+document.addEventListener("DOMContentLoaded", () => {
+	apiFetch({
+		path: tsjippy.restApiPrefix + `/forms/get_form_reminder_form`,
+		method: "POST",
+	}).then((res) => {
+		formRemindersForm = res;
+	});
+});
+
+var emailsForm = '';
+document.addEventListener("DOMContentLoaded", () => {
+	apiFetch({
+		path: tsjippy.restApiPrefix + `/forms/get_emails_form`,
+		method: "POST",
+	}).then((res) => {
+		emailsForm = res;
+	});
+});
 
 /**
  * Gutenberg block edit component.
@@ -90,10 +115,15 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	}, []);
 
 	/* Read inner blocks so the editor can inspect nested form elements if needed. */
-	useSelect(
-		(select) => select('core/block-editor').getBlocks(clientId),
+	const innerBlocks = useSelect(
+		(select) => {
+			const block = select('core/block-editor').getBlock(clientId);
+			return block?.innerBlocks || [];
+		},
 		[clientId]
 	);
+
+	useFormstepControls(innerBlocks, clientId);
 
 	/* Block wrapper props. */
 	const blockProps = useBlockProps();
@@ -156,7 +186,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	);
 
 	/* Build role checkboxes for the inspector panel. */
-	const getRoleCheckboxes = () => {
+	const RoleCheckboxes = () => {
 		if (!availableRoles.length) {
 			return <p>{__('No roles available.', 'tsjippy')}</p>;
 		}
@@ -177,7 +207,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	};
 
 	/* Build action checkboxes for the inspector panel. */
-	const getActionCheckboxes = () => {
+	const ActionCheckboxes = () => {
 		if (!availableActions.length) {
 			return <p>{__('No actions available.', 'tsjippy')}</p>;
 		}
@@ -197,76 +227,139 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		});
 	};
 
-	/* Toggleable placeholder panels for additional form-related UI. */
-	const resultingForm = () => {
-		if (isEmailsFormVisible) {
-			return (
-				<div className="tsjippy-form-secondary-panel">
-					<p>{__('Emails form is visible.', 'tsjippy')}</p>
-				</div>
-			);
-		}
+	const FormMethodComponent = (props) => {
+		return (
+			<RadioControl
+				label={__('Form Method', 'tsjippy')}
+				help={__(
+					'The type of the form. Get adds values to the URL. Post submits invisibly.',
+					'tsjippy'
+				)}
+				selected = { method }
+				options={[
+					{ label: __('Get', 'tsjippy'), value: 'get' },
+					{ label: __('Post', 'tsjippy'), value: 'post' },
+				]}
+				onChange={(nextMethod) => setAttributes({ method: nextMethod })}
+			/>
+		)
+	}
 
-		if (isRemindersFormVisible) {
-			return (
-				<div className="tsjippy-form-secondary-panel">
-					<p>{__('Reminders form is visible.', 'tsjippy')}</p>
-				</div>
-			);
-		}
+	/**
+	 * Set a debounce for the formname input so it disappears when we stop typing, not straight after the first character
+	 */
+	const [formName, setFormName] = useState(attributes.name);
 
-		return null;
-	};
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			setAttributes({ name: formName })
+		}, 800);
 
+		return () => clearTimeout(timeoutId);
+	}, [formName, 800]);
+
+	/**
+	 * Return HTML
+	 */
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody title={__('Form Settings', 'tsjippy')} initialOpen={true}>
+					<FormMethodComponent />
+
+					<TextControl
+						label    = "Form Name"
+						value    = { formName }
+						onChange = { ( value ) => setFormName(value) }
+					/>
+
 					<RadioControl
-						label={__('Form Method', 'tsjippy')}
-						help={__(
-							'The type of the form. Get adds values to the URL. Post submits invisibly.',
-							'tsjippy'
-						)}
-						selected={method}
-						options={[
-							{ label: __('Get', 'tsjippy'), value: 'get' },
-							{ label: __('Post', 'tsjippy'), value: 'post' },
-						]}
-						onChange={(nextMethod) => setAttributes({ method: nextMethod })}
+						label    = "Form Target"
+						help     = "Target location for the form response"
+						selected = { attributes.target }
+						options  = { [
+							{ label: 'New Tab', value: '_blank' },
+							{ label: 'Current page', value: '_self' },
+							{ label: 'Parent Frame', value: '_parent' },
+							{ label: 'In the body', value: '_top' },
+							{ label: 'iframe', value: 'iframe' }
+						] }
+						onChange = { ( target ) => setAttributes({ target: target })}
+					/>
+
+					<ToggleControl
+						label    = {__("Enable autocomplete", "tsjippy")}
+						checked  = {!!attributes.autocomplete}
+						onChange = {() => setAttributes({ autocomplete: !attributes.autocomplete }) }
+					/>
+
+					<TextControl
+						label    = "Submission Message"
+						value    = { attributes.submission_message }
+						onChange = { ( value ) => setAttributes({ submission_message: value })}
+					/>
+
+					<ToggleControl
+						label    = {__("Include submission ID in message", "tsjippy")}
+						checked  = {!!attributes.submission_id}
+						onChange = {() => setAttributes({ submission_id: !attributes.submission_id }) }
+					/>
+
+					<ToggleControl
+						label    = {__("Save submissions in usermeta table", "tsjippy")}
+						checked  = {!!attributes.user_meta}
+						onChange = {() => setAttributes({ user_meta: !attributes.user_meta }) }
 					/>
 				</PanelBody>
 
 				<PanelBody title={__('Roles', 'tsjippy')} initialOpen={false}>
-					{getRoleCheckboxes()}
+					<RoleCheckboxes />
 				</PanelBody>
 
 				<PanelBody title={__('Actions', 'tsjippy')} initialOpen={false}>
-					{getActionCheckboxes()}
+					<ActionCheckboxes />
 				</PanelBody>
 
 				<PanelBody title={__('E-mail Settings', 'tsjippy')} initialOpen={false} onToggle={() => setEmailsFormVisibility((prev) => !prev)}>
-						{isEmailsFormVisible
-							? __('Hide Emails Form', 'tsjippy')
-							: __('Show Emails Form', 'tsjippy')}
+					{isEmailsFormVisible
+						? __('Hide Emails Form', 'tsjippy')
+						: __('Show Emails Form', 'tsjippy')}
 				</PanelBody>
 
 				<PanelBody title={__('Form Reminders', 'tsjippy')} initialOpen={false} onToggle={ () => setRemindersFormVisibility((prev) => !prev)}>
-						{isRemindersFormVisible
-							? __('Hide Reminders Form', 'tsjippy')
-							: __('Show Reminders Form', 'tsjippy')}
+					{isRemindersFormVisible
+						? __('Hide Reminders Form', 'tsjippy')
+						: __('Show Reminders Form', 'tsjippy')}
 				</PanelBody>
 			</InspectorControls>
 
-			<fieldset { ...innerBlocksProps }>
+			<fieldset { ...innerBlocksProps }  key="main_form_fieldset">
 				<legend>{ attributes.name } Form</legend>
-				{resultingForm()}
 
-				<InnerBlocks
-					allowedBlocks={['tsjippy-forms/input', 'tsjippy-forms/label']}
-					template={MY_TEMPLATE}
-					renderAppender={InnerBlocks.ButtonBlockAppender}
-				/>
+				{ 
+					method == '' ? 
+					<>
+					<FormMethodComponent /> 
+					<br></br>
+					</>:
+
+						attributes.name == '' ?
+							<TextControl
+								label    = "Form Name"
+								value    = { formName }
+								onChange = { ( value ) => setFormName(value) }
+							/>
+						: 
+						
+						isEmailsFormVisible ? <div { ...blockProps }><RawHTML> { emailsForm } </RawHTML></div> :
+		
+							isRemindersFormVisible ? <div { ...blockProps }><RawHTML> { formRemindersForm } </RawHTML></div> :
+
+								<InnerBlocks
+									template={MY_TEMPLATE}
+									renderAppender={InnerBlocks.ButtonBlockAppender}
+								/>
+				}
 			</fieldset>
 		</>
 	);

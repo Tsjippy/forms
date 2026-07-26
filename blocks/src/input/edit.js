@@ -142,7 +142,7 @@ export default function Edit({ attributes, setAttributes, isSelected }) {
 			{ inputTypeSelector() }
 			{ inputName() }
 			{ inputTypeSpecificOptions() }
-			<div class="attributes-form">
+			<div className="attributes-form">
 				<h3>Input properties</h3>
 				{ attributeControls }
 

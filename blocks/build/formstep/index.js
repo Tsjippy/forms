@@ -20,12 +20,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/blocks */ "@wordpress/blocks");
-/* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_blocks__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./editor.scss */ "./src/formstep/editor.scss");
+/* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./editor.scss */ "./src/formstep/editor.scss");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_5__);
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__);
-
 
 
 
@@ -54,6 +53,9 @@ function Edit({
   } = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useInnerBlocksProps)(blockProps, {
     orientation: 'vertical' // Enables drag & drop functionality
   });
+  const {
+    insertBlock
+  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useDispatch)('core/block-editor');
 
   /**
    * Check for child blocks
@@ -65,34 +67,6 @@ function Edit({
     const block = getBlock(clientId);
     return !!(block && block.innerBlocks.length > 0);
   }, [clientId]);
-
-  /**
-   * Find the parent form builder block
-   * And add a formstep control block if needed
-   */
-
-  // Get the parent form
-  const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/formbuilder');
-
-  // Loop over all the parents to find the formbuilder block
-  parents.forEach(parent => {
-    // Check if it is not already there
-    if (parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep-controls').length > 0) {
-      return '';
-    }
-    let formsteps = parent.innerBlocks.filter(block => block.name == 'tsjippy-forms/formstep');
-
-    // Create a formstep controls block
-    const newBlock = (0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_4__.createBlock)("tsjippy-forms/formstep-controls", {
-      amount: formsteps.length
-    });
-
-    // Insert the new block into the parent's inner blocks
-    const {
-      insertBlock
-    } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useDispatch)('core/block-editor');
-    insertBlock(newBlock, undefined, parent.clientId);
-  });
   if (!hasInnerBlocks) {
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
       ...blockProps,
@@ -112,7 +86,7 @@ function Edit({
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
       ...innerBlocksProps,
-      class: "formstep",
+      className: "formstep",
       style: {
         padding: '20px'
       },
@@ -292,6 +266,16 @@ module.exports = window["wp"]["components"];
 (module) {
 
 module.exports = window["wp"]["data"];
+
+/***/ },
+
+/***/ "@wordpress/element"
+/*!*********************************!*\
+  !*** external ["wp","element"] ***!
+  \*********************************/
+(module) {
+
+module.exports = window["wp"]["element"];
 
 /***/ },
 
@@ -487,7 +471,7 @@ module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/tru
 /******/ 			return __webpack_require__.O(result);
 /******/ 		}
 /******/ 		
-/******/ 		const chunkLoadingGlobal = globalThis["webpackChunkmy_block"] ||= [];
+/******/ 		const chunkLoadingGlobal = globalThis["webpackChunkforms_blocks"] ||= [];
 /******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
 /******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 /******/ 	})();

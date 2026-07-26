@@ -50,14 +50,14 @@ function processFormBlocks($postId){
 
 function getInputType($block){
     if($block['name'] == "tsjippy-forms/input"){
-        return ($block['attr']['type'] ?? '');
+        return ($block['attrs']['type'] ?? '');
     }else{
         return explode('/', $block['name'])[1];
     }
 }
 
 function getBlockId($block){
-    return ($block['attr']['blockId'] ?? '');
+    return ($block['attrs']['blockId'] ?? '');
 }
 
 
@@ -143,7 +143,7 @@ function hasFormStep($innerBlocks){
 }
 
 function buildJs($block, $post){
-    $formName   = $block['attr']['name'] ?? '';
+    $formName   = $block['attrs']['name'] ?? '';
     if(empty( $formName )){
         return;
     }
@@ -196,7 +196,7 @@ function buildJs($block, $post){
             $shouldIncludeValue     = false;
 
             // checkboxes have all the same block id, so to select a specofic one we should query the id
-            if (in_array($innerBlocks[$conditionalBlockId]['attr']['type'], ['radio', 'checkbox'])) {
+            if (in_array($innerBlocks[$conditionalBlockId]['attrs']['type'], ['radio', 'checkbox'])) {
                 $shouldIncludeValue = true;
             }
 

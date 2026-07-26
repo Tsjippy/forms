@@ -28,7 +28,7 @@ return array(
 			),
 			'method' => array(
 				'type' => 'string',
-				'default' => 'post'
+				'default' => ''
 			),
 			'target' => array(
 				'type' => 'string',

@@ -1106,8 +1106,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./editor.scss */ "./src/formbuilder/editor.scss");
 /* harmony import */ var _filters_addButtonToInnerBlocks_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./filters/addButtonToInnerBlocks.js */ "./src/formbuilder/filters/addButtonToInnerBlocks.js");
 /* harmony import */ var _filters_storeClientIdInAttributes_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./filters/storeClientIdInAttributes.js */ "./src/formbuilder/filters/storeClientIdInAttributes.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var _hooks_useFormStepControls_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./hooks/useFormStepControls.js */ "./src/formbuilder/hooks/useFormStepControls.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_12__);
+
+
 
 
 
@@ -1121,11 +1126,30 @@ __webpack_require__.r(__webpack_exports__);
 
 /* Default inner block template for the form. */
 
+
 const MY_TEMPLATE = [['tsjippy-forms/input', {
   type: 'submit',
   name: 'submit',
   value: 'Submit the form'
 }]];
+var formRemindersForm = '';
+document.addEventListener("DOMContentLoaded", () => {
+  _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default()({
+    path: tsjippy.restApiPrefix + `/forms/get_form_reminder_form`,
+    method: "POST"
+  }).then(res => {
+    formRemindersForm = res;
+  });
+});
+var emailsForm = '';
+document.addEventListener("DOMContentLoaded", () => {
+  _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default()({
+    path: tsjippy.restApiPrefix + `/forms/get_emails_form`,
+    method: "POST"
+  }).then(res => {
+    emailsForm = res;
+  });
+});
 
 /**
  * Gutenberg block edit component.
@@ -1191,7 +1215,11 @@ function Edit({
   }, []);
 
   /* Read inner blocks so the editor can inspect nested form elements if needed. */
-  (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.useSelect)(select => select('core/block-editor').getBlocks(clientId), [clientId]);
+  const innerBlocks = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.useSelect)(select => {
+    const block = select('core/block-editor').getBlock(clientId);
+    return block?.innerBlocks || [];
+  }, [clientId]);
+  (0,_hooks_useFormStepControls_js__WEBPACK_IMPORTED_MODULE_10__.useFormstepControls)(innerBlocks, clientId);
 
   /* Block wrapper props. */
   const blockProps = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps)();
@@ -1203,12 +1231,12 @@ function Edit({
   } = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useInnerBlocksProps)(blockProps, {
     orientation: 'vertical',
     template: MY_TEMPLATE,
-    renderAppender: () => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.Inserter, {
+    renderAppender: () => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.Inserter, {
       rootClientId: clientId,
       isAppender: true,
       renderToggle: ({
         onToggle
-      }) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
+      }) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
         variant: "primary",
         onClick: onToggle,
         icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
@@ -1248,16 +1276,16 @@ function Edit({
   }, [actions, setAttributes]);
 
   /* Build role checkboxes for the inspector panel. */
-  const getRoleCheckboxes = () => {
+  const RoleCheckboxes = () => {
     if (!availableRoles.length) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("p", {
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No roles available.', 'tsjippy')
       });
     }
     return availableRoles.map(role => {
       const roleSlug = role.slug || role.value || role;
       const roleLabel = role.label || role.name || roleSlug;
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
         label: roleLabel,
         checked: (roles || []).includes(roleSlug),
         onChange: checked => onRoleSelected(checked, roleSlug)
@@ -1266,92 +1294,157 @@ function Edit({
   };
 
   /* Build action checkboxes for the inspector panel. */
-  const getActionCheckboxes = () => {
+  const ActionCheckboxes = () => {
     if (!availableActions.length) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("p", {
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No actions available.', 'tsjippy')
       });
     }
     return availableActions.map(action => {
       const actionSlug = action.slug || action.value || action;
       const actionLabel = action.label || action.name || actionSlug;
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
         label: actionLabel,
         checked: (actions || []).includes(actionSlug),
         onChange: checked => actionSelected(checked, actionSlug)
       }, actionSlug);
     });
   };
-
-  /* Toggleable placeholder panels for additional form-related UI. */
-  const resultingForm = () => {
-    if (isEmailsFormVisible) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
-        className: "tsjippy-form-secondary-panel",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
-          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Emails form is visible.', 'tsjippy')
-        })
-      });
-    }
-    if (isRemindersFormVisible) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
-        className: "tsjippy-form-secondary-panel",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
-          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Reminders form is visible.', 'tsjippy')
-        })
-      });
-    }
-    return null;
+  const FormMethodComponent = props => {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RadioControl, {
+      label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Method', 'tsjippy'),
+      help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('The type of the form. Get adds values to the URL. Post submits invisibly.', 'tsjippy'),
+      selected: method,
+      options: [{
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Get', 'tsjippy'),
+        value: 'get'
+      }, {
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Post', 'tsjippy'),
+        value: 'post'
+      }],
+      onChange: nextMethod => setAttributes({
+        method: nextMethod
+      })
+    });
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+
+  /**
+   * Set a debounce for the formname input so it disappears when we stop typing, not straight after the first character
+   */
+  const [formName, setFormName] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(attributes.name);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+    const timeoutId = setTimeout(() => {
+      setAttributes({
+        name: formName
+      });
+    }, 800);
+    return () => clearTimeout(timeoutId);
+  }, [formName, 800]);
+
+  /**
+   * Return HTML
+   */
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Settings', 'tsjippy'),
         initialOpen: true,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RadioControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Method', 'tsjippy'),
-          help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('The type of the form. Get adds values to the URL. Post submits invisibly.', 'tsjippy'),
-          selected: method,
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(FormMethodComponent, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+          label: "Form Name",
+          value: formName,
+          onChange: value => setFormName(value)
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RadioControl, {
+          label: "Form Target",
+          help: "Target location for the form response",
+          selected: attributes.target,
           options: [{
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Get', 'tsjippy'),
-            value: 'get'
+            label: 'New Tab',
+            value: '_blank'
           }, {
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Post', 'tsjippy'),
-            value: 'post'
+            label: 'Current page',
+            value: '_self'
+          }, {
+            label: 'Parent Frame',
+            value: '_parent'
+          }, {
+            label: 'In the body',
+            value: '_top'
+          }, {
+            label: 'iframe',
+            value: 'iframe'
           }],
-          onChange: nextMethod => setAttributes({
-            method: nextMethod
+          onChange: target => setAttributes({
+            target: target
           })
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Enable autocomplete", "tsjippy"),
+          checked: !!attributes.autocomplete,
+          onChange: () => setAttributes({
+            autocomplete: !attributes.autocomplete
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+          label: "Submission Message",
+          value: attributes.submission_message,
+          onChange: value => setAttributes({
+            submission_message: value
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Include submission ID in message", "tsjippy"),
+          checked: !!attributes.submission_id,
+          onChange: () => setAttributes({
+            submission_id: !attributes.submission_id
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Save submissions in usermeta table", "tsjippy"),
+          checked: !!attributes.user_meta,
+          onChange: () => setAttributes({
+            user_meta: !attributes.user_meta
+          })
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Roles', 'tsjippy'),
         initialOpen: false,
-        children: getRoleCheckboxes()
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(RoleCheckboxes, {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Actions', 'tsjippy'),
         initialOpen: false,
-        children: getActionCheckboxes()
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(ActionCheckboxes, {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('E-mail Settings', 'tsjippy'),
         initialOpen: false,
         onToggle: () => setEmailsFormVisibility(prev => !prev),
         children: isEmailsFormVisible ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Hide Emails Form', 'tsjippy') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Show Emails Form', 'tsjippy')
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Reminders', 'tsjippy'),
         initialOpen: false,
         onToggle: () => setRemindersFormVisibility(prev => !prev),
         children: isRemindersFormVisible ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Hide Reminders Form', 'tsjippy') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Show Reminders Form', 'tsjippy')
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("fieldset", {
+    }), /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_12__.createElement)("fieldset", {
       ...innerBlocksProps,
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("legend", {
-        children: [attributes.name, " Form"]
-      }), resultingForm(), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
-        allowedBlocks: ['tsjippy-forms/input', 'tsjippy-forms/label'],
-        template: MY_TEMPLATE,
-        renderAppender: _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks.ButtonBlockAppender
-      })]
-    })]
+      key: "main_form_fieldset"
+    }, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("legend", {
+      children: [attributes.name, " Form"]
+    }), method == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(FormMethodComponent, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("br", {})]
+    }) : attributes.name == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+      label: "Form Name",
+      value: formName,
+      onChange: value => setFormName(value)
+    }) : isEmailsFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+      ...blockProps,
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.RawHTML, {
+        children: [" ", emailsForm, " "]
+      })
+    }) : isRemindersFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+      ...blockProps,
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.RawHTML, {
+        children: [" ", formRemindersForm, " "]
+      })
+    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
+      template: MY_TEMPLATE,
+      renderAppender: _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks.ButtonBlockAppender
+    }))]
   });
 }
 
@@ -1564,6 +1657,84 @@ function getBlocksAsSelectOptions(allNestedBlocks) {
     });
   }, [allNestedBlocks]);
 }
+
+/***/ },
+
+/***/ "./src/formbuilder/hooks/useFormStepControls.js"
+/*!******************************************************!*\
+  !*** ./src/formbuilder/hooks/useFormStepControls.js ***!
+  \******************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useFormstepControls: () => (/* binding */ useFormstepControls)
+/* harmony export */ });
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/blocks */ "@wordpress/blocks");
+/* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+const useFormstepControls = (innerBlocks, clientId) => {
+  const {
+    insertBlock,
+    removeBlock
+  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_1__.useDispatch)('core/block-editor');
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    const formsteps = (innerBlocks || []).filter(block => block.name === 'tsjippy-forms/formstep');
+    const controls = (innerBlocks || []).filter(block => block.name === 'tsjippy-forms/formstep-controls');
+    console.log(controls);
+    const formSubmitter = (innerBlocks || []).filter(block => {
+      return block.name === 'tsjippy-forms/input' && block.attributes.type == 'submit';
+    });
+
+    /**
+     * Remove the form submitter and add formstep controls
+     */
+    if (formsteps.length > 0 && controls.length === 0) {
+      // Remove any existing form submit blocks
+      console.log(formSubmitter);
+      formSubmitter.forEach(block => {
+        removeBlock(block.clientId);
+      });
+
+      // Insert the formstep button block
+      insertBlock((0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__.createBlock)('tsjippy-forms/formstep-controls', {
+        amount: formsteps.length
+      }), undefined,
+      // index    
+      clientId // rootClientId
+      );
+    }
+
+    /**
+     * Remove the formstep control and add form submitter
+     */
+    if (formSubmitter.length === 0 && formsteps.length === 0 && controls.length > 0) {
+      controls.forEach(block => {
+        removeBlock(block.clientId);
+      });
+
+      // Insert the submitter
+      insertBlock((0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__.createBlock)('tsjippy-forms/input', {
+        type: 'submit',
+        name: 'submit',
+        value: 'Submit the form'
+      }), undefined,
+      // index    
+      clientId // rootClientId
+      );
+    }
+
+    /**
+     * Remove formstep controls and add submitter
+     */
+  }, [innerBlocks, insertBlock, clientId]);
+};
 
 /***/ },
 
@@ -2885,6 +3056,16 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ },
 
+/***/ "react"
+/*!************************!*\
+  !*** external "React" ***!
+  \************************/
+(module) {
+
+module.exports = window["React"];
+
+/***/ },
+
 /***/ "react/jsx-runtime"
 /*!**********************************!*\
   !*** external "ReactJSXRuntime" ***!
@@ -3155,7 +3336,7 @@ var trash_default = /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODUL
   \************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder Test","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"id":{"type":"integer","default":-1},"method":{"type":"string","default":"post"},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":true},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder Test","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"id":{"type":"integer","default":-1},"method":{"type":"string","default":""},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":true},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]}}}');
 
 /***/ }
 
@@ -3331,7 +3512,7 @@ module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/tru
 /******/ 			return __webpack_require__.O(result);
 /******/ 		}
 /******/ 		
-/******/ 		const chunkLoadingGlobal = globalThis["webpackChunkmy_block"] ||= [];
+/******/ 		const chunkLoadingGlobal = globalThis["webpackChunkforms_blocks"] ||= [];
 /******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
 /******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 /******/ 	})();

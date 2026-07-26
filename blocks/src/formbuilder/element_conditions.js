@@ -21,18 +21,18 @@ export const conditionsFormParser = () => {
         return (
             <>
             <div class='modal-content'>
-                <span class="close mobile-sticky">
+                <span className="close mobile-sticky">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </span>
 
-                <div class="condition-row" data-condition-index="0">
+                <div className="condition-row" data-condition-index="0">
                     <span class='condition-if'>If</span>
                     <br></br>
-                    <div class="rule-row" data-rule-index="0">
-                        <input type="hidden" class="combinator" name="element-conditions[0][rules][0][combinator]" value="" />
+                    <div className="rule-row" data-rule-index="0">
+                        <input type="hidden" className="combinator" name="element-conditions[0][rules][0][combinator]" value="" />
 
                         <SelectControl
                             label   = "Element"
