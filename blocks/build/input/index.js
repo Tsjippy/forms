@@ -263,9 +263,13 @@ function Edit({
     });
   };
   const hasLabelParent = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/label').length > 0, [clientId]);
-  setAttributes({
-    hasLabelParent
-  });
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+    if (attributes.hasLabelParent !== hasLabelParent) {
+      setAttributes({
+        hasLabelParent
+      });
+    }
+  }, [hasLabelParent]);
 
   /**
    * Shows the input attributes form if this is an selected input

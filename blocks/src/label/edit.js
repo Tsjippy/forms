@@ -15,7 +15,6 @@ import './editor.scss';
  */
 export default function Edit({ attributes, setAttributes, clientId }) {
 	const blockProps = useBlockProps();
-    const { children, ...innerBlocksProps }  = useInnerBlocksProps( blockProps, {allowedBlocks: ['tsjippy-forms/input'],} );
 
 	/**
 	 * Check for child blocks
@@ -54,12 +53,21 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	const isMultiple = innerBlocks.some(
 		(block) => block.attributes.multiple
 	);
-	setAttributes({ isMultiple });
+
+	useEffect(() => {
+		if (attributes.isMultiple !== isMultiple) {
+			setAttributes({ isMultiple });
+		}
+	}, [isMultiple]);
 
 	const labelComponent	= (
 		<label >
 			{ attributes.text }
-			{ children }
+			<InnerBlocks
+				allowedBlocks={['tsjippy-forms/input']}
+				orientation="vertical"
+				renderAppender={false}
+			/>
 		</label>
 	);
 
@@ -75,7 +83,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 			</PanelBody>
 		</InspectorControls>
     			
-		<fieldset { ...innerBlocksProps }>
+		<fieldset { ...blockProps }>
 			<legend>Label</legend>
 			{
 				attributes.text == '' ?
@@ -93,6 +101,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						>
 							{ /* Add the add button */ }
 							<InnerBlocks
+								allowedBlocks={['tsjippy-forms/input']}
 								orientation="vertical"
 								renderAppender={InnerBlocks.ButtonBlockAppender}
 							/>

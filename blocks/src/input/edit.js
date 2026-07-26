@@ -109,7 +109,11 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
         [clientId]
     );
 
-	setAttributes({ hasLabelParent });
+	useEffect(() => {
+		if (attributes.hasLabelParent !== hasLabelParent) {
+			setAttributes({ hasLabelParent });
+		}
+	}, [hasLabelParent]);
 
 	/**
 	 * Shows the input attributes form if this is an selected input

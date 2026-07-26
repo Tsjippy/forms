@@ -47,12 +47,6 @@ function Edit({
   clientId
 }) {
   const blockProps = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps)();
-  const {
-    children,
-    ...innerBlocksProps
-  } = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useInnerBlocksProps)(blockProps, {
-    allowedBlocks: ['tsjippy-forms/input']
-  });
 
   /**
    * Check for child blocks
@@ -83,11 +77,19 @@ function Edit({
    */
   const innerBlocks = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('core/block-editor').getBlocks(clientId), [clientId]);
   const isMultiple = innerBlocks.some(block => block.attributes.multiple);
-  setAttributes({
-    isMultiple
-  });
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useEffect)(() => {
+    if (attributes.isMultiple !== isMultiple) {
+      setAttributes({
+        isMultiple
+      });
+    }
+  }, [isMultiple]);
   const labelComponent = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("label", {
-    children: [attributes.text, children]
+    children: [attributes.text, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
+      allowedBlocks: ['tsjippy-forms/input'],
+      orientation: "vertical",
+      renderAppender: false
+    })]
   });
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
@@ -100,7 +102,7 @@ function Edit({
         })
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("fieldset", {
-      ...innerBlocksProps,
+      ...blockProps,
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("legend", {
         children: "Label"
       }), attributes.text == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
@@ -112,6 +114,7 @@ function Edit({
         label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Add an input to this label", 'tsjippy'),
         instructions: "Click to add a block",
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
+          allowedBlocks: ['tsjippy-forms/input'],
           orientation: "vertical",
           renderAppender: _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks.ButtonBlockAppender
         })
