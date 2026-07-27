@@ -6,6 +6,7 @@
 - block conditions table
 - dynamic js generator for block forms
 - wrap input in label
+- text multi input
 
 ### Changed
 - added input element attributes form
