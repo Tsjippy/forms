@@ -6,7 +6,7 @@
  */
 import { useBlockProps  } from '@wordpress/block-editor';
 
-import { InputHtml } from './shared.js';
+import { InputHtml } from './components/InputHtml.js';
 
 /**
  * The save function defines the way in which the different attributes should

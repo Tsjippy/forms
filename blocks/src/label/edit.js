@@ -4,7 +4,7 @@ import { Button, Dropdown, SelectControl, PanelBody, TextControl, Placeholder } 
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import './editor.scss';
-
+import { Multiple } from './../input/components/Multiple.js';
 /**
  * The edit function describes the structure of your block in the context of the
  * editor. This represents what the editor will render when the block is used.
@@ -108,18 +108,10 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						</Placeholder>
 					: 
 						isMultiple ?
-							<div className="input-wrapper required flex" style= {{width: "85%"}}>
-								<div className="clone-divs-wrapper">
-									<div className="clone-div" data-div-id="0">
-										<div className="button-wrapper" style={{ margin: 'auto', display:'flex'}}>
-											{labelComponent}
-											<button type="button" className="add button" style={{ flex: 1, maxWidth: 'max-content'}}>
-												+
-											</button>
-										</div>
-									</div>
-								</div>
-							</div>
+							<Multiple
+								inner      = { labelComponent }
+								attributes = { innerBlocks[0].attributes }
+							/>
 						:
 							labelComponent
 			}

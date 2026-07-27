@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { Multiple } from './Multiple.js';
 
 export function InputHtml({
     attributes,
@@ -79,18 +80,10 @@ export function InputHtml({
 
     return (
         attributes.multiple && !hasLabelParent ? 
-            <div className="input-wrapper required flex" style= {{width: "85%"}}>
-                <div className="clone-divs-wrapper">
-                    <div className="clone-div" data-div-id="0">
-                        <div className="button-wrapper" style={{ margin: 'auto', display:'flex'}}>
-                            { html }
-                            <button type="button" className="add button" style={{ flex: 1, maxWidth: 'max-content'}}>
-                                +
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <Multiple
+                inner      = { html }
+                attributes = { attributes }
+            />
         :
             html
     );

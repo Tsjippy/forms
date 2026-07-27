@@ -7,7 +7,7 @@ import { useSelect } from '@wordpress/data';
 import './editor.scss';
 import * as elementAttributes from './element_attributes.js';
 import { dynamicInputs } from './dynamic_inputs.js';
-import { InputHtml } from './shared.js';
+import { InputHtml } from './components/InputHtml.js';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -246,9 +246,6 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 							/>
 						</>
 					: ''
-
-				
-				
 }
 			</PanelBody>
 		</InspectorControls>
