@@ -42,23 +42,28 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	}, [labelText, 800]);
 
 	/**
-	 * Check if input in this label can have multiple answers
+	 * Store some child attributes in our own attributes
 	 */
+	// Get the inner block
 	const innerBlocks = useSelect(
 		(select) =>
 			select('core/block-editor').getBlocks(clientId),
 		[clientId]
 	);
 
-	const isMultiple = innerBlocks.some(
-		(block) => block.attributes.multiple
-	);
-
+	// store in the childAttr attribute
 	useEffect(() => {
-		if (attributes.isMultiple !== isMultiple) {
-			setAttributes({ isMultiple });
+		const childAttr = {
+			multiple: innerBlocks[0].attributes.multiple ?? false,
+			add_button_content: innerBlocks[0].attributes.add_button_content ?? '+',
+			remove_button_content: innerBlocks[0].attributes.remove_button_content ?? '-',
+			type: innerBlocks[0].attributes.type ?? '',
 		}
-	}, [isMultiple]);
+
+		if (attributes.childAttr !== childAttr) {
+			setAttributes({ childAttr });
+		}
+	}, [innerBlocks]);
 
 	const labelComponent	= (
 		<label >
@@ -94,23 +99,26 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					/> 
 				:
 					!hasInnerBlocks ?
-						<Placeholder
-							icon			= "layout"
-							label			= { __("Add an input to this label", 'tsjippy') }
-							instructions	= "Click to add a block"
-						>
-							{ /* Add the add button */ }
-							<InnerBlocks
-								allowedBlocks={['tsjippy-forms/input']}
-								orientation="vertical"
-								renderAppender={InnerBlocks.ButtonBlockAppender}
-							/>
-						</Placeholder>
+						<>
+							{ attributes.text }
+							<Placeholder
+								icon			= "layout"
+								label			= { __("Add an input to this label", 'tsjippy') }
+								instructions	= "Click to add a block"
+							>
+								{ /* Add the add button */ }
+								<InnerBlocks
+									allowedBlocks={['tsjippy-forms/input']}
+									orientation="vertical"
+									renderAppender={InnerBlocks.ButtonBlockAppender}
+								/>
+							</Placeholder>
+						</>
 					: 
-						isMultiple ?
+						attributes.childAttr.multiple ?
 							<Multiple
 								inner      = { labelComponent }
-								attributes = { innerBlocks[0].attributes }
+								attributes = { attributes.childAttr }
 							/>
 						:
 							labelComponent

@@ -21,9 +21,9 @@
 			"type": "string",
 			"default": ""
 		},
-		"isMultiple": {
-			"type": "boolean",
-			"default": false
+		"childAttr": {
+			"type": "object",
+			"default": {}
 		}
 	}
 }

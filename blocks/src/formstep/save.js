@@ -15,11 +15,14 @@ import { useBlockProps, useInnerBlocksProps  } from '@wordpress/block-editor';
  *
  * @return {Element} Element to render.
  */
-export default function save() {
-	const blockProps 		= useBlockProps.save();
+export default function save({attributes}) {
+	const blockProps 		= useBlockProps.save({
+		className: 'step-hidden'
+	});
+
     const innerBlocksProps 	= useInnerBlocksProps.save( blockProps );
 
 	return (
-		<div {...innerBlocksProps} />
+		<div {...innerBlocksProps} data-blockid={attributes.blockId}/>
 	);
 }

@@ -6,9 +6,6 @@ import {
   fixNumbering,
   removeNode,
   tidyMultiInputs,
-  updateMultiStepControls,
-  showFormStep,
-  nextPrev,
   changeFieldValue,
   changeVisibility,
   changeFieldProperty,
@@ -22,9 +19,6 @@ export {
   fixNumbering,
   removeNode,
   tidyMultiInputs,
-  updateMultiStepControls,
-  showFormStep,
-  nextPrev,
   changeFieldValue,
   changeVisibility,
   changeFieldProperty,
@@ -258,7 +252,7 @@ document.addEventListener("click", function (event) {
     removeNode(target);
   }
 
-  if (target.matches('.tsjippy-form-wrapper [name="submit-form"]')) {
+  if (target.matches('.tsjippy-form-wrapper button.form-submit')) {
     event.stopPropagation();
 
     saveFormInput(target);

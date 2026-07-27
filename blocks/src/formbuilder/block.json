@@ -60,7 +60,6 @@
 			"type": "string",
 			"default": ""
 		},
-		
 		"auto_archive_value": {
 			"type": "string",
 			"default": ""
@@ -72,8 +71,10 @@
 		"split_elements": {
 			"type": "array",
 			"default": []
+		},
+		"step_amount": {
+			"type": "integer",
+			"default": 0
 		}
-		
-		
 	}
 }

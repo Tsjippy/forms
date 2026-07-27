@@ -2,7 +2,6 @@ import { __ } from '@wordpress/i18n';
 import {
 	InnerBlocks,
 	useBlockProps,
-	useInnerBlocksProps,
 	InspectorControls,
 	Inserter,
 } from '@wordpress/block-editor';
@@ -24,16 +23,8 @@ import { blockDefault } from '@wordpress/icons';
 import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';
 import './filters/storeClientIdInAttributes.js';
-import { useFormSubmitter } from './hooks/useFormSubmitter.js';
+import { FormSubmitter } from './components/Submitter.js';
 import * as forms from './../../../js/forms.js';
-
-/* Default inner block template for the form. */
-const MY_TEMPLATE = [
-	[
-		'tsjippy-forms/input',
-		{ type: 'submit', name: 'submit', value: 'Submit the form' },
-	],
-];
 
 var formRemindersForm = '';
 document.addEventListener("DOMContentLoaded", () => {
@@ -103,31 +94,19 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		[clientId]
 	);
 
-	useFormSubmitter(innerBlocks, clientId);
+    const stepAmount	= innerBlocks?.filter(
+        block => block.name === 'tsjippy-forms/formstep'
+    ).length || 0;
+
+	useEffect(() => {
+		if (attributes.step_amount !== stepAmount) {
+			setAttributes({ step_amount: stepAmount });
+		}
+	}, [stepAmount, attributes.step_amount, setAttributes]);
+
 
 	/* Block wrapper props. */
 	const blockProps = useBlockProps();
-
-	/* Configure inner blocks and custom appender. */
-	const { children, ...innerBlocksProps } = useInnerBlocksProps(blockProps, {
-		orientation: 'vertical',
-		template: MY_TEMPLATE,
-		renderAppender: () => (
-			<Inserter
-				rootClientId={clientId}
-				isAppender
-				renderToggle={({ onToggle }) => (
-					<Button
-						variant="primary"
-						onClick={onToggle}
-						icon={plus}
-					>
-						{__('Add More Form Blocks', 'tsjippy')}
-					</Button>
-				)}
-			/>
-		),
-	});
 
 	/* Add or remove a role from the stored attributes. */
 	const onRoleSelected = useCallback(
@@ -313,7 +292,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				</PanelBody>
 			</InspectorControls>
 
-			<fieldset { ...innerBlocksProps }  key="main_form_fieldset">
+			<fieldset { ...blockProps }  key="main_form_fieldset">
 				<legend>{ attributes.name } Form</legend>
 
 				{ 
@@ -331,14 +310,35 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 							/>
 						: 
 						
-						isEmailsFormVisible ? <div { ...blockProps }><RawHTML> { emailsForm } </RawHTML></div> :
-		
-							isRemindersFormVisible ? <div { ...blockProps }><RawHTML> { formRemindersForm } </RawHTML></div> :
+						isEmailsFormVisible ? 
+							<div { ...blockProps }><RawHTML> { emailsForm } </RawHTML></div> 
+						:
+							isRemindersFormVisible ? 
+								<div { ...blockProps }><RawHTML> { formRemindersForm } </RawHTML></div> 
+							:
+								<>
+									<InnerBlocks
+										renderAppender={false}
+									/>
 
-								<InnerBlocks
-									template={MY_TEMPLATE}
-									renderAppender={InnerBlocks.ButtonBlockAppender}
-								/>
+									<FormSubmitter
+										attributes={attributes}
+									/>
+									
+									<Inserter
+										rootClientId={clientId}
+										isAppender
+										renderToggle={({ onToggle }) => (
+											<Button
+												variant="primary"
+												onClick={onToggle}
+												icon={plus}
+											>
+												{__('Add Form Blocks', 'tsjippy')}
+											</Button>
+										)}
+									/>
+								</>
 				}
 			</fieldset>
 		</>

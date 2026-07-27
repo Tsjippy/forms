@@ -127,21 +127,6 @@ function getSelector($block, $value='')
     }
 }
 
-/**
- * Checks if the form has form steps
- * 
- * @param   array   $innerBlocks
- */
-function hasFormStep($innerBlocks){
-    foreach($innerBlocks as $block){
-        if(getInputType($block) == 'formstep'){
-            return true;
-        }
-    }
-
-    return false;
-}
-
 function buildJs($block, $post){
     $formName   = $block['attrs']['name'] ?? '';
     if(empty( $formName )){
@@ -519,12 +504,6 @@ function buildJs($block, $post){
     $newJs  .= "\n\n\t\t//clear event prevenion after 100 ms";
     $newJs  .= "\n\t\tsetTimeout(() => { this.prevEl = ''; }, 50);";
 
-    $newJs  .= "\n\n\t\tif (elName == 'next-button') {";
-    $newJs  .= "\n\t\t\tFormFunctions.nextPrev(1, form);";
-    $newJs  .= "\n\t\t}else if (elName == 'previous-button') {";
-    $newJs  .= "\n\t\t\tFormFunctions.nextPrev(-1, form);";
-    $newJs  .= "\n\t\t}";
-
     $newJs  .= "\n\n\t\tthis.processFields(el);";
     $newJs  .= "\n\t};";
 
@@ -534,27 +513,6 @@ function buildJs($block, $post){
     /*
     ** Initial actions JS
     */
-    $tabJs  = '';
-
-    // Show the first tab
-    if (hasFormStep($innerBlocks)) {
-        $tabJs .= "\n\t\t\t//show first tab";
-        $tabJs .= "\n\t\t\t// Display the current tab// Current tab is set to be the first tab (0)";
-        $tabJs .= "\n\t\t\tlet currentTab = 0; ";
-        $tabJs .= "\n\t\t\t// Display the current tab";
-        $tabJs .= "\n\t\t\tFormFunctions.showFormStep(currentTab, form); ";
-    }
-
-    // Prefill form with meta data
-    $tabJs .= "\n\t\t\tform.querySelectorAll(`select, input, textarea`).forEach (";
-    $tabJs .= "\n\t\t\t\tel=>this.processFields(el)";
-    $tabJs .= "\n\t\t\t);";
-
-    if (!empty($tabJs)) {
-        $tabJs  = "\n\n\t\tthis.forms.forEach (form => {\n\t\t\t$tabJs\n\t\t});";
-    }
-
-    // Process get variables in the url
     $newJs    = "\n
 init = () => {
     console.log('Dynamic {$objectName} forms js loaded');
@@ -563,7 +521,14 @@ init = () => {
     document.addEventListener('input', this.listener);
 
     FormFunctions.tidyMultiInputs();
-    $tabJs
+
+    // Prefill the form
+    this.forms.forEach (form => {
+        form.querySelectorAll(`select, input, textarea`).forEach (
+            el => this.processFields(el)
+        );
+    });
+
     // Loop over the elements who's value is given in the url and set the value;
     if (typeof(urlSearchParams) == 'undefined') {
         window.urlSearchParams = new URLSearchParams(window.location.search.replaceAll('&amp;', '&'));

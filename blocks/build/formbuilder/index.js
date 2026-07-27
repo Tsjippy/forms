@@ -260,12 +260,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   cloneNode: () => (/* binding */ cloneNode),
 /* harmony export */   copyFormInput: () => (/* binding */ copyFormInput),
 /* harmony export */   fixNumbering: () => (/* binding */ fixNumbering),
-/* harmony export */   nextPrev: () => (/* binding */ nextPrev),
 /* harmony export */   removeDefaultSelect: () => (/* binding */ removeDefaultSelect),
 /* harmony export */   removeNode: () => (/* binding */ removeNode),
-/* harmony export */   showFormStep: () => (/* binding */ showFormStep),
-/* harmony export */   tidyMultiInputs: () => (/* binding */ tidyMultiInputs),
-/* harmony export */   updateMultiStepControls: () => (/* binding */ updateMultiStepControls)
+/* harmony export */   tidyMultiInputs: () => (/* binding */ tidyMultiInputs)
 /* harmony export */ });
 /* harmony import */ var _tsjippy_shared_functionality_js_partials_field_value_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tsjippy-shared-functionality/js/partials/field_value.js */ "../../tsjippy-shared-functionality/js/partials/field_value.js");
 
@@ -518,37 +515,11 @@ function removeNode(target) {
     }
   }
 
-  // Check if this is a formstep
-  if (node.matches(".formstep")) {
-    let newFormstep = null;
-
-    // if there is a next clonable formstep, show that one
-    let nextFormstep = parentNode.querySelector(`.formstep[data-div-id='${parseInt(node.dataset.divId) + 1}']`);
-    if (nextFormstep != null) {
-      newFormstep = nextFormstep;
-    } else {
-      //try the previous one
-      let prevFormstep = parentNode.querySelector(`.formstep[data-div-id='${parseInt(node.dataset.divId) - 1}']`);
-      if (prevFormstep != null) {
-        newFormstep = prevFormstep;
-      }
-    }
-    if (newFormstep != null) {
-      //check if we need to update the multi step controls
-      let form = node.closest("form");
-      if (form != null && form.querySelector(".multi-step-controls-wrapper") != null) {
-        updateMultiStepControls(form);
-
-        // find the next visible formstep index
-        form.querySelectorAll(".formstep").forEach((formstep, index) => {
-          if (formstep == newFormstep) {
-            //show the next visible formstep
-            showFormStep(index, form);
-          }
-        });
-      }
-    }
-  }
+  // dispatch an event
+  let event = new Event("nodeRemoved", {
+    bubbles: true
+  });
+  node.dispatchEvent(event);
 
   //Remove the node
   node.remove();
@@ -582,172 +553,6 @@ function tidyMultiInputs() {
       }
     });
   });
-}
-function updateMultiStepControls(form) {
-  // get active formsteps amount
-  let formsteps = form.querySelectorAll(".formstep");
-  let visibleFormsteps = form.querySelectorAll(".formstep:not(.hidden)");
-  let stepIndicators = form.querySelectorAll(".multi-step-controls-wrapper .step");
-
-  // show all step circles
-  stepIndicators.forEach(el => el.classList.remove("hidden"));
-
-  // hide some step circles if needed
-  for (let x = visibleFormsteps.length; x < formsteps.length; x++) {
-    stepIndicators[x].classList.add("hidden");
-  }
-
-  // Add some step circles if needed
-  for (let x = stepIndicators.length; x < formsteps.length; x++) {
-    let step = document.createElement("span");
-    step.classList.add("step");
-    form.querySelectorAll(`.step-wrapper`).forEach(el => el.appendChild(step));
-  }
-
-  // check if this is the last visible
-  let currentFormstep = form.querySelector(".formstep:not(.step-hidden)");
-  if (visibleFormsteps[visibleFormsteps.length - 1] == currentFormstep) {
-    // make the submit button visible
-    form.querySelector(".next-button").classList.add("hidden");
-    form.querySelector(".form-submit ").classList.remove("hidden");
-  } else {
-    form.querySelector(".next-button").classList.remove("hidden");
-    form.querySelector(".form-submit ").classList.add("hidden");
-  }
-}
-
-/**
- * show a next form step
- * @param {number} n - the form step index to show
- * @param {Element} form - the form contaning the form steps
- */
-function showFormStep(n, form) {
-  if (typeof form != "undefined") {
-    if (n == 0) {
-      // Hide any loaders
-      form.querySelectorAll(".loader-wrapper:not(.hidden), .loader-image-trigger").forEach(loader => loader.remove());
-
-      //show form controls
-      form.querySelectorAll(".multi-step-controls.hidden").forEach(el => el.classList.remove("hidden"));
-    }
-
-    //hide all formsteps
-    form.querySelectorAll(".formstep:not(.step-hidden)").forEach(step => step.classList.add("step-hidden"));
-
-    // Show the specified formstep of the form ...
-    let x = form.getElementsByClassName("formstep");
-    if (x.length == 0) {
-      return;
-    }
-
-    //scroll back to top
-    let y = x[n].offsetTop - document.querySelector("#masthead").offsetHeight;
-    window.scrollTo({
-      top: y,
-      behavior: "auto"
-    });
-
-    //show
-    x[n].classList.remove("step-hidden");
-
-    // This function removes the "active" class of all steps...
-    form.querySelectorAll(".step.active").forEach(el => {
-      el.classList.remove("active");
-    });
-
-    //... and adds the "active" class to the current step:
-    x = form.getElementsByClassName("step");
-    try {
-      x[n].classList.add("active");
-    } catch (err) {
-      console.log(x);
-      console.log(n);
-      console.error(err.message);
-    }
-
-    // ... and fix the Previous/Next buttons:
-    if (n == 0) {
-      form.querySelector('[name="previous-button"]').classList.add("hidden");
-    } else {
-      form.querySelector('[name="previous-button"]').classList.remove("hidden");
-    }
-    if (n == x.length - 1) {
-      form.querySelector('[name="next-button"]').classList.add("hidden");
-      form.querySelector(".form-submit").classList.remove("hidden");
-    } else {
-      form.querySelector('[name="next-button"]').classList.remove("hidden");
-      form.querySelector(".form-submit").classList.add("hidden");
-    }
-  } else {
-    console.log("no form defined");
-  }
-}
-
-//next form step clicked
-function nextPrev(n, form) {
-  // This function will figure out which tab to display
-  let x = form.querySelectorAll(".formstep");
-  let stepIndicators = form.querySelectorAll(".step");
-  let currentTab = 0;
-  let valid = true;
-
-  // Find the current active tab
-  x.forEach((el, index) => {
-    if (!el.matches(".step-hidden")) {
-      currentTab = index;
-    }
-  });
-
-  //Check validity of this step if going forward
-  if (n > 0) {
-    // Prepare the elements on this tab
-    FormSubmit.prepareForValidation(x[currentTab]);
-
-    // Report validity of each required field
-    let elements = x[currentTab].querySelectorAll("input[required], textarea[required], select[required]");
-    for (const element of elements) {
-      element.required = true;
-      valid = element.reportValidity();
-      if (!valid) {
-        break;
-      }
-    }
-    if (!valid) return;
-
-    //mark the last step as finished
-    stepIndicators[currentTab].classList.add("finish");
-  } else {
-    //mark the last step as unfinished
-    stepIndicators[currentTab].classList.remove("finish");
-  }
-
-  //loop over all the formsteps to hide stepindicators of them if needed
-  Array.from(x).forEach((formstep, index) => {
-    if (formstep.classList.contains("hidden")) {
-      //hide the corresponding circle
-      stepIndicators[index].classList.add("hidden");
-    }
-  });
-
-  // Increase or decrease the current tab by 1:
-  currentTab = currentTab + n;
-
-  //check if the next tab is hidden
-  while (x[currentTab].classList.contains("hidden")) {
-    //go to the next tab
-    currentTab = currentTab + n;
-    if (currentTab >= x.length) {
-      break;
-    }
-  }
-
-  // if you have reached the end of the form... :
-  if (currentTab >= x.length) {
-    return false;
-  }
-  // Otherwise, display the correct tab:
-  showFormStep(currentTab, form);
-  return true;
 }
 function changeFieldValue(selector, value, functionRef, form, addition = "", forceValue = false) {
   if (value == undefined) {
@@ -979,12 +784,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   copyFormInput: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.copyFormInput),
 /* harmony export */   fixNumbering: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.fixNumbering),
 /* harmony export */   getFieldValue: () => (/* reexport safe */ _tsjippy_shared_functionality_js_partials_field_value_js__WEBPACK_IMPORTED_MODULE_2__.getFieldValue),
-/* harmony export */   nextPrev: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.nextPrev),
 /* harmony export */   removeDefaultSelect: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.removeDefaultSelect),
 /* harmony export */   removeNode: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.removeNode),
-/* harmony export */   showFormStep: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.showFormStep),
-/* harmony export */   tidyMultiInputs: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.tidyMultiInputs),
-/* harmony export */   updateMultiStepControls: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.updateMultiStepControls)
+/* harmony export */   tidyMultiInputs: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.tidyMultiInputs)
 /* harmony export */ });
 /* harmony import */ var _tsjippy_shared_functionality_js_partials_load_assets_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../tsjippy-shared-functionality/js/partials/load_assets.js */ "../../tsjippy-shared-functionality/js/partials/load_assets.js");
 /* harmony import */ var _form_exports_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./form_exports.js */ "../js/form_exports.js");
@@ -1166,7 +968,7 @@ document.addEventListener("click", function (event) {
     //Remove node clicked
     (0,_form_exports_js__WEBPACK_IMPORTED_MODULE_1__.removeNode)(target);
   }
-  if (target.matches('.tsjippy-form-wrapper [name="submit-form"]')) {
+  if (target.matches('.tsjippy-form-wrapper button.form-submit')) {
     event.stopPropagation();
     saveFormInput(target);
   }
@@ -2276,6 +2078,81 @@ function RuleRow({
 
 /***/ },
 
+/***/ "./src/formbuilder/components/Submitter.js"
+/*!*************************************************!*\
+  !*** ./src/formbuilder/components/Submitter.js ***!
+  \*************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   FormSubmitter: () => (/* binding */ FormSubmitter)
+/* harmony export */ });
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
+
+
+const FormSubmitter = ({
+  attributes
+}) => {
+  const indicators = Array.from({
+    length: attributes.step_amount
+  }, (_, i) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("span", {
+    className: i === 0 ? 'step active' : 'step'
+  }, i));
+  return attributes.step_amount === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+    class: "submit-wrapper",
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+      type: "button",
+      className: "button form-submit",
+      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Submit', 'tsjippy') + ' ' + attributes.name
+    })
+  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+    className: "multi-step-controls",
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+      className: "multi-step-controls-wrapper",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+        style: {
+          flex: 1
+        },
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+          type: "button",
+          className: "button hidden previous-button",
+          children: "Previous"
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+        className: "step-wrapper",
+        style: {
+          flex: 1,
+          textAlign: 'center',
+          margin: 'auto'
+        },
+        children: indicators
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        style: {
+          flex: 1
+        },
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+          type: "button",
+          className: "button next-button",
+          children: "Next"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+          className: "submit-wrapper",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+            type: "button",
+            className: "button form-submit hidden",
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Submit', 'tsjippy') + ' ' + attributes.name
+          })
+        })]
+      })]
+    })
+  });
+};
+
+/***/ },
+
 /***/ "./src/formbuilder/edit.js"
 /*!*********************************!*\
   !*** ./src/formbuilder/edit.js ***!
@@ -2302,7 +2179,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./editor.scss */ "./src/formbuilder/editor.scss");
 /* harmony import */ var _filters_addButtonToInnerBlocks_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./filters/addButtonToInnerBlocks.js */ "./src/formbuilder/filters/addButtonToInnerBlocks.js");
 /* harmony import */ var _filters_storeClientIdInAttributes_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./filters/storeClientIdInAttributes.js */ "./src/formbuilder/filters/storeClientIdInAttributes.js");
-/* harmony import */ var _hooks_useFormSubmitter_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./hooks/useFormSubmitter.js */ "./src/formbuilder/hooks/useFormSubmitter.js");
+/* harmony import */ var _components_Submitter_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/Submitter.js */ "./src/formbuilder/components/Submitter.js");
 /* harmony import */ var _js_forms_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./../../../js/forms.js */ "../js/forms.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__);
@@ -2322,14 +2199,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* Default inner block template for the form. */
 
-
-const MY_TEMPLATE = [['tsjippy-forms/input', {
-  type: 'submit',
-  name: 'submit',
-  value: 'Submit the form'
-}]];
 var formRemindersForm = '';
 document.addEventListener("DOMContentLoaded", () => {
   _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default()({
@@ -2397,31 +2267,17 @@ function Edit({
     const block = select('core/block-editor').getBlock(clientId);
     return block?.innerBlocks || [];
   }, [clientId]);
-  (0,_hooks_useFormSubmitter_js__WEBPACK_IMPORTED_MODULE_10__.useFormSubmitter)(innerBlocks, clientId);
+  const stepAmount = innerBlocks?.filter(block => block.name === 'tsjippy-forms/formstep').length || 0;
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+    if (attributes.step_amount !== stepAmount) {
+      setAttributes({
+        step_amount: stepAmount
+      });
+    }
+  }, [stepAmount, attributes.step_amount, setAttributes]);
 
   /* Block wrapper props. */
   const blockProps = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useBlockProps)();
-
-  /* Configure inner blocks and custom appender. */
-  const {
-    children,
-    ...innerBlocksProps
-  } = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.useInnerBlocksProps)(blockProps, {
-    orientation: 'vertical',
-    template: MY_TEMPLATE,
-    renderAppender: () => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.Inserter, {
-      rootClientId: clientId,
-      isAppender: true,
-      renderToggle: ({
-        onToggle
-      }) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
-        variant: "primary",
-        onClick: onToggle,
-        icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
-        children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add More Form Blocks', 'tsjippy')
-      })
-    })
-  });
 
   /* Add or remove a role from the stored attributes. */
   const onRoleSelected = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useCallback)((checked, roleSlug) => {
@@ -2599,7 +2455,7 @@ function Edit({
         children: isRemindersFormVisible ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Hide Reminders Form', 'tsjippy') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Show Reminders Form', 'tsjippy')
       })]
     }), /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_13__.createElement)("fieldset", {
-      ...innerBlocksProps,
+      ...blockProps,
       key: "main_form_fieldset"
     }, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("legend", {
       children: [attributes.name, " Form"]
@@ -2619,9 +2475,23 @@ function Edit({
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.RawHTML, {
         children: [" ", formRemindersForm, " "]
       })
-    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
-      template: MY_TEMPLATE,
-      renderAppender: _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks.ButtonBlockAppender
+    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
+        renderAppender: false
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_Submitter_js__WEBPACK_IMPORTED_MODULE_10__.FormSubmitter, {
+        attributes: attributes
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.Inserter, {
+        rootClientId: clientId,
+        isAppender: true,
+        renderToggle: ({
+          onToggle
+        }) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
+          variant: "primary",
+          onClick: onToggle,
+          icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
+          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add Form Blocks', 'tsjippy')
+        })
+      })]
     }))]
   });
 }
@@ -2838,85 +2708,6 @@ function getBlocksAsSelectOptions(allNestedBlocks) {
 
 /***/ },
 
-/***/ "./src/formbuilder/hooks/useFormSubmitter.js"
-/*!***************************************************!*\
-  !*** ./src/formbuilder/hooks/useFormSubmitter.js ***!
-  \***************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   useFormSubmitter: () => (/* binding */ useFormSubmitter)
-/* harmony export */ });
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/blocks */ "@wordpress/blocks");
-/* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__);
-
-
-
-const useFormSubmitter = (innerBlocks, clientId) => {
-  const {
-    replaceBlocks
-  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_1__.useDispatch)('core/block-editor');
-  const {
-    moveBlocksToPosition
-  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_1__.useDispatch)('core/block-editor');
-  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    const blocks = innerBlocks || [];
-    const formsteps = blocks.filter(block => block.name === 'tsjippy-forms/formstep');
-    const controls = blocks.filter(block => block.name === 'tsjippy-forms/formstep-controls');
-    const formSubmitter = blocks.filter(block => {
-      return block.name === 'tsjippy-forms/input' && block.attributes.type === 'submit';
-    });
-
-    /**
-     * Remove the form submitter and add formstep controls
-     */
-    if (formsteps.length > 0 && controls.length === 0 && formSubmitter.length > 0) {
-      // Remove any existing form submit blocks
-      console.log(formSubmitter);
-      replaceBlocks(formSubmitter.map(block => block.clientId), (0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__.createBlock)('tsjippy-forms/formstep-controls', {
-        amount: formsteps.length
-      }));
-    }
-
-    /**
-     * Remove the formstep control and add form submitter
-     */
-    if (formSubmitter.length === 0 && formsteps.length === 0 && controls.length > 0) {
-      replaceBlocks(controls[0].clientId, (0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_2__.createBlock)('tsjippy-forms/input', {
-        type: 'submit',
-        name: 'submit',
-        value: 'Submit the form'
-      }));
-    }
-
-    /**
-     * Keep the controls at the bottom
-     */
-    const controlsBlock = innerBlocks.find(block => {
-      return block.name === 'tsjippy-forms/formstep-controls' || block.name === 'tsjippy-forms/input' && block.attributes.type === 'submit';
-    });
-    if (!controlsBlock) {
-      return;
-    }
-    const lastIndex = innerBlocks.length - 1;
-    const currentIndex = innerBlocks.findIndex(block => block.clientId === controlsBlock.clientId);
-    if (currentIndex !== lastIndex) {
-      moveBlocksToPosition([controlsBlock.clientId], clientId,
-      // from root
-      clientId,
-      // to root
-      lastIndex);
-    }
-  }, [innerBlocks, replaceBlocks, clientId, moveBlocksToPosition]);
-};
-
-/***/ },
-
 /***/ "./src/formbuilder/index.js"
 /*!**********************************!*\
   !*** ./src/formbuilder/index.js ***!
@@ -2987,14 +2778,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _components_Submitter_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/Submitter.js */ "./src/formbuilder/components/Submitter.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__);
 /**
  * React hook that is used to mark the block wrapper element.
  * It provides all the necessary props like the class name.
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
+
 
 
 /**
@@ -3011,13 +2804,15 @@ function save({
   attributes
 }) {
   const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save();
-  const innerBlocksProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useInnerBlocksProps.save(blockProps);
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("form", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("form", {
     method: attributes.method,
     target: attributes.target,
     autocomplete: attributes.autocomplete,
     "data-formName": attributes.name,
-    ...innerBlocksProps
+    ...blockProps,
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InnerBlocks.Content, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_components_Submitter_js__WEBPACK_IMPORTED_MODULE_1__.FormSubmitter, {
+      attributes: attributes
+    })]
   });
 }
 
@@ -4515,7 +4310,7 @@ var trash_default = /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODUL
   \************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder Test","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"method":{"type":"string","default":""},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":true},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder Test","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"method":{"type":"string","default":""},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":true},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]},"step_amount":{"type":"integer","default":0}}}');
 
 /***/ }
 

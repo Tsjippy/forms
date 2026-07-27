@@ -5,6 +5,7 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
 import { useBlockProps, InnerBlocks  } from '@wordpress/block-editor';
+import { Multiple } from './../input/components/Multiple.js';
 
 /**
  * The save function defines the way in which the different attributes should
@@ -18,29 +19,25 @@ import { useBlockProps, InnerBlocks  } from '@wordpress/block-editor';
 export default function save({ attributes }) {
 	const blockProps 		= useBlockProps.save();
 
-	const labelComponent	= (
-		<label { ...blockProps }>
-			{attributes.text}
-			<br></br>
-			<InnerBlocks.Content />
-		</label>
-	);
+	const labelComponent	= (addBlockId) => {
+		return (
+			<label 
+				data-blockid={addBlockId ? attributes.blockId : undefined}
+			>
+				{attributes.text}
+				<br></br>
+				<InnerBlocks.Content />
+			</label>
+		);
+	};
 
 	return (
-		attributes.isMultiple ?
-			<div className="input-wrapper required flex" style= {{width: "85%"}}>
-				<div className="clone-divs-wrapper">
-					<div className="clone-div" data-div-id="0">
-						<div className="button-wrapper" style={{ margin: 'auto', display:'flex'}}>
-							{labelComponent}
-							<button type="button" className="add button" style={{ flex: 1, maxWidth: 'max-content'}}>
-								+
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
+		attributes.childAttr.multiple ?
+			<Multiple
+				inner      = { labelComponent(false) }
+				attributes = { attributes.childAttr }
+			/>
 		:
-			labelComponent
+			labelComponent(true)
 	);
 }

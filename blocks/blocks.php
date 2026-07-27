@@ -182,10 +182,10 @@ add_filter( 'render_block', __NAMESPACE__.'\addBlockIdAttribute', 10, 2 );
  */
 function addBlockIdAttribute( $blockContent, $block ) {
     // Check if our filtered attribute exists in the block data
-    if ( ! empty( $block['attrs']['blockId'] ) ) {
+    if ( ! empty( $block['attrs']['blockId'] ) && !str_contains($blockContent, 'data-blockid')) {
         $id = esc_attr( $block['attrs']['blockId'] );
 
-        $blockContent = str_replace( '/>', " data-block-id='$id' />", $blockContent );
+        $blockContent = str_replace( '/>', " data-blockid='$id' />", $blockContent );
     }
 
     return $blockContent;

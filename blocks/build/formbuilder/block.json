@@ -71,6 +71,10 @@
     "split_elements": {
       "type": "array",
       "default": []
+    },
+    "step_amount": {
+      "type": "integer",
+      "default": 0
     }
   }
 }

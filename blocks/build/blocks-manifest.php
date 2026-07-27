@@ -82,6 +82,10 @@ return array(
 				'default' => array(
 					
 				)
+			),
+			'step_amount' => array(
+				'type' => 'integer',
+				'default' => 0
 			)
 		)
 	),
@@ -109,33 +113,6 @@ return array(
 			'text' => array(
 				'type' => 'string',
 				'default' => ''
-			)
-		)
-	),
-	'formstep-controls' => array(
-		'$schema' => 'https://schemas.wp.org/trunk/block.json',
-		'apiVersion' => 3,
-		'name' => 'tsjippy-forms/formstep-controls',
-		'version' => '0.1.0',
-		'title' => 'Formstep Controls Element',
-		'category' => 'form-elements',
-		'icon' => 'forms',
-		'description' => 'Shows the formstep controls and a previous and next button',
-		'example' => array(
-			
-		),
-		'supports' => array(
-			'html' => false
-		),
-		'textdomain' => 'tsjippy',
-		'editorScript' => 'file:./index.js',
-		'editorStyle' => 'file:./index.css',
-		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js',
-		'attributes' => array(
-			'amount' => array(
-				'type' => 'integer',
-				'default' => 0
 			)
 		)
 	),
@@ -233,9 +210,11 @@ return array(
 				'type' => 'string',
 				'default' => ''
 			),
-			'isMultiple' => array(
-				'type' => 'boolean',
-				'default' => false
+			'childAttr' => array(
+				'type' => 'object',
+				'default' => array(
+					
+				)
 			)
 		)
 	)
