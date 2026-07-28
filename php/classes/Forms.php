@@ -1727,18 +1727,29 @@ class Forms
         foreach(TSJIPPY\cleanUpNestedArray($conditions) as $condition){
             $condition['post_id']   = $postId;
 
-            $result = TSJIPPY\updateDbValue(
-                $this->blockConditionsTableName,
-                $condition,
-                [
-                    'target' => $blockId
-                ],
-                $this->tableFormats[$this->blockConditionsTableName],
-                [
-                    '%s'
-                ],
-                'forms'
-            );
+            ksort($condition);
+
+            if(empty($condition['id'])){
+                $result = TSJIPPY\insertInDb(
+                    $this->blockConditionsTableName,
+                    $condition,
+                    $this->tableFormats[$this->blockConditionsTableName],
+                    'forms'
+                );
+            }else{
+                $result = TSJIPPY\updateDbValue(
+                    $this->blockConditionsTableName,
+                    $condition,
+                    [
+                        'id' => $condition['id']
+                    ],
+                    $this->tableFormats[$this->blockConditionsTableName],
+                    [
+                        '%s'
+                    ],
+                    'forms'
+                );
+            }
 
             if(is_numeric($result)){
                 $rowsUpdated += $result;

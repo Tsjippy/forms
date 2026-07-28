@@ -157,28 +157,11 @@ export function copyFormInput(originalNode) {
   //Insert the clone
   originalNode.parentNode.insertBefore(newNode, originalNode.nextSibling);
 
-  // Process formsteps
-  if (originalNode.matches(".formstep")) {
-    // hide the new clone
-    newNode.classList.add("step-hidden");
-
-    // Update the formstep controls
-    let form = originalNode.closest("form");
-    if (
-      form != null &&
-      form.querySelector(".multi-step-controls-wrapper") != null
-    ) {
-      updateMultiStepControls(form);
-    }
-
-    let text = originalNode
-      .querySelector(".add.button")
-      .textContent.replace("Add ", "");
-
-    Main.displayMessage(
-      `Succesfully added an extra ${text}<br>Its added as the next page.`,
-    );
-  }
+  // dispatch an event
+  let event = new Event("nodeAdded", {
+    bubbles: true,
+  });
+  newNode.dispatchEvent(event);
 
   return newNode;
 }
@@ -344,7 +327,6 @@ export function tidyMultiInputs() {
 export function changeFieldValue(
   selector,
   value,
-  functionRef,
   form,
   addition = "",
   forceValue = false,
@@ -358,7 +340,7 @@ export function changeFieldValue(
 
   if (selector instanceof Element) {
     target = selector;
-    name = target.name;
+    name   = target.name;
     if (target.id == "") {
       selector = `[name^="${target.name}" i]`;
     } else {
@@ -526,52 +508,57 @@ export function changeFieldValue(
   let evt = new Event("input");
   //attach the target
   target.dispatchEvent(evt);
-
-  //run the originating function with this event
-  if (typeof functionRef == "function") {
-    functionRef(target);
-  }
 }
 
-export function changeVisibility(action, el, functionRef) {
+export function changeVisibility(action, el) {
   let wrapper = el.closest(".input-wrapper");
   if (wrapper == null) {
     wrapper = el;
   }
 
-  if (action == "add") {
+  if (action == "hide") {
     if (wrapper.matches(".hidden")) {
       return;
     }
     wrapper.classList.add("hidden");
-  } else {
+  } else if (action == "show"){
     if (!wrapper.matches(".hidden")) {
       return;
     }
     wrapper.classList.remove("hidden");
+  }else{
+    wrapper.classList.toggle("hidden");
   }
 
   //create a new event
   let evt = new Event("input");
   //attach the target
   wrapper.dispatchEvent(evt);
-
-  //run the originating function with this event
-  if (typeof functionRef == "function") {
-    functionRef(el);
-  }
 }
 
 export function changeFieldProperty(
   selector,
   att,
   value,
-  functionRef,
   form,
   addition = "",
 ) {
-  //first change the value
-  let target = form.querySelector(selector);
+  if(att == 'value'){
+    return changeFieldValue(
+      selector,
+      value,
+      form,
+      addition
+    );
+  }
+  
+  // Get the element
+  let target;
+  if (selector instanceof Element) {
+    target  = selector;
+  }else{
+    target = form.querySelector(selector);
+  }
 
   // calculate the new value
   if (addition != "") {
@@ -592,7 +579,4 @@ export function changeFieldProperty(
 
   //attach the target
   target.dispatchEvent(evt);
-
-  //run the originating function with this event
-  functionRef(target);
 }

@@ -215,6 +215,12 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 				{ inputValue() }
 
 				<ToggleControl
+					label    = { __('Hide', 'tsjippy') }
+					checked  = {!!attributes.hidden}
+					onChange = { ( checked ) => setAttributes({ hidden: checked })}
+				/>
+
+				<ToggleControl
 					label    = { __('Allow multiple answers', 'tsjippy') }
 					checked  = {!!attributes.multiple}
 					onChange = { ( checked ) => setAttributes({ multiple: checked })}

@@ -172,7 +172,7 @@ function addFormsCategory( $categories) {
 }
 
 // Hook into the rendering of ALL blocks
-add_filter( 'render_block', __NAMESPACE__.'\addBlockIdAttribute', 10, 2 );
+add_filter( 'render_block', __NAMESPACE__.'\addBlockIdAttribute', 10, 3 );
 
 /**
  * Adds the block id as data attribute on the frontend to be used in js
@@ -180,7 +180,19 @@ add_filter( 'render_block', __NAMESPACE__.'\addBlockIdAttribute', 10, 2 );
  * @param   string  $blockContent
  * @param   array   $block
  */
-function addBlockIdAttribute( $blockContent, $block ) {
+function addBlockIdAttribute( $blockContent, $block, $instance ) {
+    /**
+     * Load dynamic forms script
+     */
+    if($block['blockName'] == "tsjippy-forms/formbuilder"){
+        $formName   = $block['attrs']['name'];
+        $jsPath     = plugin_dir_path(__DIR__) . "js/dynamic/{$formName}.js";
+        
+        if (file_exists($jsPath) && filesize($jsPath) > 0) {
+            wp_enqueue_script("tsjippy_forms_dynamic_{$formName}_js", TSJIPPY\pathToUrl($jsPath), array('tsjippy_forms_script'), PLUGINVERSION, true);
+        }
+    }
+
     // Check if our filtered attribute exists in the block data
     if ( ! empty( $block['attrs']['blockId'] ) && !str_contains($blockContent, 'data-blockid')) {
         $id = esc_attr( $block['attrs']['blockId'] );

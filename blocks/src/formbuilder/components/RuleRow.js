@@ -32,16 +32,22 @@ export default function RuleRow({
 }) {
 	/* Available equation choices for the main equation dropdown. */
 	const equationOptions = [
+		{ label: __('has changed', 'tsjippy'), value: 'changed' },
+		{ label: __('is clicked', 'tsjippy'), value: 'clicked' },
 		{ label: __('Equals', 'tsjippy'), value: '==' },
 		{ label: __('Does not equal', 'tsjippy'), value: '!=' },
 		{ label: __('Greater than', 'tsjippy'), value: '>' },
 		{ label: __('Less than', 'tsjippy'), value: '<' },
-		{ label: __('Equals value', 'tsjippy'), value: '== value' },
-		{ label: __('Does not equal value', 'tsjippy'), value: '!= value' },
-		{ label: __('Greater than value', 'tsjippy'), value: '> value' },
-		{ label: __('Less than value', 'tsjippy'), value: '< value' },
-		{ label: __('Add', 'tsjippy'), value: '+' },
-		{ label: __('Subtract', 'tsjippy'), value: '-' },
+		{ label: __('Is checked', 'tsjippy'), value: 'checked' },
+		{ label: __('Is not checked', 'tsjippy'), value: '!checked' },
+		{ label: __('Equals the value of', 'tsjippy'), value: '== value' },
+		{ label: __('Does not equal the value of', 'tsjippy'), value: '!= value' },
+		{ label: __('Greater than the value of', 'tsjippy'), value: '> value' },
+		{ label: __('Less than the value of', 'tsjippy'), value: '< value' },
+		{ label: __('Plus the value of', 'tsjippy'), value: '+' },
+		{ label: __('Minus the value of', 'tsjippy'), value: '-' },
+		{ label: __('Is visible', 'tsjippy'), value: 'visible' },
+		{ label: __('Is not visible', 'tsjippy'), value: 'invisible' },
 	];
 
 	/* Render additional fields for arithmetic-style equations. */
@@ -123,17 +129,56 @@ export default function RuleRow({
 				data-field-key="equation"
 			/>
 
-			{renderExtraOptions()}
+			{(rule?.equation ?? '') !== '' && (
+				<>
+					{['== value', '!= value', '> value', '< value', '+', '-'].includes(rule.equation) && (
+						<SelectControl
+							label={__('Second element', 'tsjippy')}
+							value={rule?.['conditional-field-2'] || ''}
+							options={[
+								{ label: __('Select second element', 'tsjippy'), value: '' },
+								...(formBlockOptions || []),
+							]}
+							onChange={(element) =>
+								onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', element)
+							}
+							help={ruleErrors.conditionalField2 || ''}
+							data-field-key="conditionalField2"
+						/>
+					)}
 
-			<TextControl
-				label={__('Value', 'tsjippy')}
-				value={rule?.['conditional-value'] || ''}
-				onChange={(value) =>
-					onUpdate(conditionIndex, ruleIndex, 'conditional-value', value)
-				}
-				help={ruleErrors.conditionalValue || ''}
-				data-field-key="conditionalValue"
-			/>
+					{['+', '-'].includes(rule.equation) && (
+						<SelectControl
+							label={__('Second equation', 'tsjippy')}
+							value={rule?.['equation-2'] || ''}
+							options={[
+								{ label: __('Select second equation', 'tsjippy'), value: '' },
+								{ label: __('Equals', 'tsjippy'), value: '==' },
+								{ label: __('Does not equal', 'tsjippy'), value: '!=' },
+								{ label: __('Greater than', 'tsjippy'), value: '>' },
+								{ label: __('Less than', 'tsjippy'), value: '<' },
+							]}
+							onChange={(equation2) =>
+								onUpdate(conditionIndex, ruleIndex, 'equation-2', equation2)
+							}
+							help={ruleErrors.equation2 || ''}
+							data-field-key="equation2"
+						/>
+					)}
+
+					{['==', '!=', '>','<', '+', '-'].includes(rule.equation) && (
+						<TextControl
+							label={__('Value', 'tsjippy')}
+							value={rule?.['conditional-value'] || ''}
+							onChange={(value) =>
+								onUpdate(conditionIndex, ruleIndex, 'conditional-value', value)
+							}
+							help={ruleErrors.conditionalValue || ''}
+							data-field-key="conditionalValue"
+						/>
+					)}
+				</>
+			)}
 
 			{/* AND / OR combinator controls. */}
 			<div className="combinator">
@@ -141,7 +186,7 @@ export default function RuleRow({
 					variant={rule?.combinator === 'and' ? 'primary' : 'secondary'}
 					isPressed={rule?.combinator === 'and'}
 					aria-pressed={rule?.combinator === 'and'}
-					onClick={() => onUpdate(conditionIndex, ruleIndex, 'combinator', 'and')}
+					onClick={() => onUpdate(conditionIndex, ruleIndex, 'combinator', '&&')}
 					icon={row}
 				>
 					{__('AND', 'tsjippy')}
@@ -152,7 +197,7 @@ export default function RuleRow({
 					variant={rule?.combinator === 'or' ? 'primary' : 'secondary'}
 					isPressed={rule?.combinator === 'or'}
 					aria-pressed={rule?.combinator === 'or'}
-					onClick={() => onUpdate(conditionIndex, ruleIndex, 'combinator', 'or')}
+					onClick={() => onUpdate(conditionIndex, ruleIndex, 'combinator', '||')}
 					icon={row}
 				>
 					{__('OR', 'tsjippy')}

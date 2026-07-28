@@ -30,18 +30,22 @@ function InputHtml({
 }) {
   let html;
   if (['radio', 'checkbox'].includes(attributes.type)) {
-    html = attributes.selectable_options.split("\n").map((option, index) => {
-      const [value, label] = option.split("|");
-      return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_3__.createElement)("label", {
-        ...blockProps,
-        key: index
-      }, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
-        type: attributes.type,
-        name: attributes.name,
-        value: value,
-        className: "formbuilder",
-        "data-blockid": attributes.blockId
-      }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(label, 'tsjippy'));
+    html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      className: "checkbox-wrapper",
+      "data-blockid": attributes.blockId,
+      children: attributes.selectable_options.split("\n").map((option, index) => {
+        const [value, label = value] = option.split("|");
+        return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_3__.createElement)("label", {
+          ...blockProps,
+          key: index
+        }, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
+          type: attributes.type,
+          name: attributes.name,
+          value: value,
+          className: "formbuilder",
+          autocomplete: "on"
+        }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(label, 'tsjippy'));
+      })
     });
   } else if (attributes.type === 'select') {
     html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("select", {
@@ -49,6 +53,7 @@ function InputHtml({
       className: "formbuilder",
       multiple: attributes.multiple,
       "data-blockid": attributes.blockId,
+      autocomplete: "on",
       ...blockProps,
       children: attributes.selectable_options.split("\n").map((option, index) => {
         const [value, label] = option.split("|");
@@ -78,7 +83,8 @@ function InputHtml({
       name: attributes.name,
       value: attributes.value,
       className: "formbuilder",
-      "data-blockid": attributes.blockId
+      "data-blockid": attributes.blockId,
+      autocomplete: "on"
     });
   }
   return attributes.multiple && !hasLabelParent ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {
@@ -507,6 +513,12 @@ function Edit({
             type: type
           })
         }), inputNameComponent(), inputValue(), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Hide', 'tsjippy'),
+          checked: !!attributes.hidden,
+          onChange: checked => setAttributes({
+            hidden: checked
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Allow multiple answers', 'tsjippy'),
           checked: !!attributes.multiple,
           onChange: checked => setAttributes({
@@ -1599,7 +1611,9 @@ function save({
   attributes,
   clientId
 }) {
-  const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save();
+  const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save({
+    className: attributes.hidden && !attributes.hasLabelParent ? 'hidden' : undefined
+  });
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_1__.InputHtml, {
     attributes: attributes,
     blockProps: blockProps,
@@ -1719,7 +1733,7 @@ module.exports = window["wp"]["i18n"];
   \******************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"type":{"type":"string","default":""},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"ariaAttributes":{"type":"boolean","default":false},"selectable_options":{"type":"string","default":""},"add_button_content":{"type":"string","default":"+"},"remove_button_content":{"type":"string","default":"-"},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"hasLabelParent":{"type":"boolean","default":false}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"type":{"type":"string","default":""},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"ariaAttributes":{"type":"boolean","default":false},"selectable_options":{"type":"string","default":""},"add_button_content":{"type":"string","default":"+"},"remove_button_content":{"type":"string","default":"-"},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"hasLabelParent":{"type":"boolean","default":false},"hide":{"type":"boolean","default":false}}}');
 
 /***/ }
 

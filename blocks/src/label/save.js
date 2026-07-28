@@ -23,8 +23,12 @@ export default function save({ attributes }) {
 		return (
 			<label 
 				data-blockid={addBlockId ? attributes.blockId : undefined}
+				className= {attributes.childAttr.hidden ? 'hidden' : undefined}
 			>
-				{attributes.text}
+				<h4 class="label-text">
+					{attributes.text}
+				</h4>
+				
 				<br></br>
 				<InnerBlocks.Content />
 			</label>

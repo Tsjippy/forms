@@ -18,7 +18,7 @@ import { InputHtml } from './components/InputHtml.js';
  * @return {Element} Element to render.
  */
 export default function save({ attributes, clientId }) {
-	const blockProps = useBlockProps.save();
+	const blockProps = useBlockProps.save({className: attributes.hidden && !attributes.hasLabelParent ? 'hidden' : undefined});
 
 	return (
 		<InputHtml

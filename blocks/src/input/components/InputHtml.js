@@ -9,22 +9,24 @@ export function InputHtml({
     let html;
 
     if (['radio', 'checkbox'].includes(attributes.type)) {
-        html = attributes.selectable_options.split("\n").map((option, index) => {
-            const [value, label] = option.split("|");
+        html = <div className="checkbox-wrapper" data-blockid={attributes.blockId}>
+            {attributes.selectable_options.split("\n").map((option, index) => {
+                const [value, label = value] = option.split("|");
 
-            return (
-                <label {...blockProps} key={index}>
-                    <input
-                        type={attributes.type}
-                        name={attributes.name}
-                        value={value}
-                        className="formbuilder"
-                        data-blockid={attributes.blockId}
-                    />
-                    {__(label, 'tsjippy')}
-                </label>
-            );
-        });
+                return (
+                    <label {...blockProps} key={index}>
+                        <input
+                            type={attributes.type}
+                            name={attributes.name}
+                            value={value}
+                            className="formbuilder"
+                            autocomplete='on'
+                        />
+                        {__(label, 'tsjippy')}
+                    </label>
+                );
+            })}
+        </div>
     } else if (attributes.type === 'select') {
         html = (
             <select
@@ -32,6 +34,7 @@ export function InputHtml({
                 className="formbuilder"
                 multiple={attributes.multiple}
                 data-blockid={attributes.blockId}
+                autocomplete='on'
                 {...blockProps}
             >
                 {attributes.selectable_options.split("\n").map((option, index) => {
@@ -74,6 +77,7 @@ export function InputHtml({
                 value={attributes.value}
                 className="formbuilder"
                 data-blockid={attributes.blockId}
+                autocomplete='on'
             />
         );
     }

@@ -182,6 +182,10 @@ return array(
 			'hasLabelParent' => array(
 				'type' => 'boolean',
 				'default' => false
+			),
+			'hide' => array(
+				'type' => 'boolean',
+				'default' => false
 			)
 		)
 	),

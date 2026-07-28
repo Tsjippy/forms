@@ -154,6 +154,41 @@ function restApiInitFormsNew()
 
                 $blockId    = TSJIPPY\sanitize($wpRest->get_param('blockId') ?? '');
                 $conditions = TSJIPPY\sanitize($wpRest->get_param('conditions') ?? []);
+
+                /**
+                 * Makes sure we do not store unnecesary data
+                 */
+                foreach($conditions as &$condition){
+                    foreach($condition['rules'] as &$rule){
+                        // conditional-field-2
+                        if(
+                            !isset(['== value' => 1, '!= value' => 1, '> value' => 1, '< value' => 1, '+' => 1, '-' => 1][$rule['equation']]) && // Not one of these 
+                            !empty($rule['conditional-field-2'])    // should be empty but is not
+                        ){
+                            unset($rule['conditional-field-2']);
+                        }
+
+                        // equation-2
+                        if(
+                            !isset(['+' => 1, '-' => 1,][$rule['equation']]) && // Not one of these 
+                            !empty($rule['equation-2'])    // should be empty but is not
+                        ){
+                            unset($rule['equation-2']);
+                        }
+
+                        // conditional-value
+                        if(
+                            !isset(['==' => 1, '!=' => 1, '>' => 1, '<' => 1, '+' => 1, '-' => 1,][$rule['equation']]) && // Not one of these 
+                            !empty($rule['conditional-value'])    // should be empty but is not
+                        ){
+                            unset($rule['conditional-value']);
+                        }
+
+                    }
+                    unset($rule);
+                }
+                unset($condition);
+
                 $postId     = $wpRest->get_param('postId');
 
                 // Save conditions

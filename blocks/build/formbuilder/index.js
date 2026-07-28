@@ -398,19 +398,11 @@ function copyFormInput(originalNode) {
   //Insert the clone
   originalNode.parentNode.insertBefore(newNode, originalNode.nextSibling);
 
-  // Process formsteps
-  if (originalNode.matches(".formstep")) {
-    // hide the new clone
-    newNode.classList.add("step-hidden");
-
-    // Update the formstep controls
-    let form = originalNode.closest("form");
-    if (form != null && form.querySelector(".multi-step-controls-wrapper") != null) {
-      updateMultiStepControls(form);
-    }
-    let text = originalNode.querySelector(".add.button").textContent.replace("Add ", "");
-    Main.displayMessage(`Succesfully added an extra ${text}<br>Its added as the next page.`);
-  }
+  // dispatch an event
+  let event = new Event("nodeAdded", {
+    bubbles: true
+  });
+  newNode.dispatchEvent(event);
   return newNode;
 }
 function fixNumbering(wrapper) {
@@ -554,7 +546,7 @@ function tidyMultiInputs() {
     });
   });
 }
-function changeFieldValue(selector, value, functionRef, form, addition = "", forceValue = false) {
+function changeFieldValue(selector, value, form, addition = "", forceValue = false) {
   if (value == undefined) {
     return;
   }
@@ -707,42 +699,43 @@ function changeFieldValue(selector, value, functionRef, form, addition = "", for
   let evt = new Event("input");
   //attach the target
   target.dispatchEvent(evt);
-
-  //run the originating function with this event
-  if (typeof functionRef == "function") {
-    functionRef(target);
-  }
 }
-function changeVisibility(action, el, functionRef) {
+function changeVisibility(action, el) {
   let wrapper = el.closest(".input-wrapper");
   if (wrapper == null) {
     wrapper = el;
   }
-  if (action == "add") {
+  if (action == "hide") {
     if (wrapper.matches(".hidden")) {
       return;
     }
     wrapper.classList.add("hidden");
-  } else {
+  } else if (action == "show") {
     if (!wrapper.matches(".hidden")) {
       return;
     }
     wrapper.classList.remove("hidden");
+  } else {
+    wrapper.classList.toggle("hidden");
   }
 
   //create a new event
   let evt = new Event("input");
   //attach the target
   wrapper.dispatchEvent(evt);
-
-  //run the originating function with this event
-  if (typeof functionRef == "function") {
-    functionRef(el);
-  }
 }
-function changeFieldProperty(selector, att, value, functionRef, form, addition = "") {
-  //first change the value
-  let target = form.querySelector(selector);
+function changeFieldProperty(selector, att, value, form, addition = "") {
+  if (att == 'value') {
+    return changeFieldValue(selector, value, form, addition);
+  }
+
+  // Get the element
+  let target;
+  if (selector instanceof Element) {
+    target = selector;
+  } else {
+    target = form.querySelector(selector);
+  }
 
   // calculate the new value
   if (addition != "") {
@@ -762,9 +755,6 @@ function changeFieldProperty(selector, att, value, functionRef, form, addition =
 
   //attach the target
   target.dispatchEvent(evt);
-
-  //run the originating function with this event
-  functionRef(target);
 }
 
 /***/ },
@@ -1019,9 +1009,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _hooks_getBlocksAsSelectOptions_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../hooks/getBlocksAsSelectOptions.js */ "./src/formbuilder/hooks/getBlocksAsSelectOptions.js");
-/* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/copy.mjs");
-/* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/plus.mjs");
-/* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/trash.mjs");
+/* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/plus.mjs");
+/* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/trash.mjs");
+/* harmony import */ var _wordpress_icons__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @wordpress/icons */ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/undo.mjs");
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8__);
 /* harmony import */ var _RuleRow__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./RuleRow */ "./src/formbuilder/components/RuleRow.js");
@@ -1105,13 +1095,13 @@ function validateConditions(conditions) {
     };
   }
   conditions = Array.isArray(conditions) ? conditions : [];
-  const rules = Array.isArray(conditions[0]?.rules) ? conditions[0].rules : [];
-  const actions = Array.isArray(conditions[0]?.actions) ? conditions[0].actions : [];
 
   /**
    * Loop over all conditions
    */
   conditions.forEach((condition, conditionIndex) => {
+    const rules = Array.isArray(conditions[0]?.rules) ? conditions[0].rules : [];
+    const actions = Array.isArray(conditions[0]?.actions) ? conditions[0].actions : [];
     if (condition.rules.length > 0) {
       if (!Array.isArray(condition.rules)) {
         errors.push((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.sprintf)((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Condition %d must contain at least one rule.', 'tsjippy'), conditionIndex + 1));
@@ -1457,17 +1447,55 @@ function ConditionsModal({
       return next;
     });
   }, [clearSuccessMessage]);
-  const duplicateRule = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)(conditionIndex => {
+  const addReverseCondition = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)(conditionIndex => {
     resetErrors();
     setDraftConditions(prev => {
       const next = deepClone(prev);
+
+      /**
+       * Make sure rules and actions are arrays
+       */
       next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
-      const ruleToDuplicate = next[conditionIndex].rules;
-      if (!ruleToDuplicate) {
-        return next;
-      }
-      const clonedRule = deepClone(ruleToDuplicate);
-      next[conditionIndex].rules.splice(conditionIndex + 1, 0, clonedRule);
+      next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
+
+      /**
+       * Clone the data
+       */
+      let clone = deepClone(next[conditionIndex]);
+
+      // Unset the condition id as this is a new one
+      clone.id = undefined;
+
+      /**
+       * Inverse the rules
+       */
+      const reverseOperators = {
+        '==': '!=',
+        '!=': '==',
+        '>': '<',
+        '<': '>',
+        'checked': '!checked',
+        '!checked': 'checked',
+        '== value': '!= value',
+        '!= value': '== value',
+        '> value': '< value',
+        '< value': '> value',
+        'visible': 'invisible',
+        'invisible': 'visible',
+        '+': '-',
+        '-': '+'
+      };
+      clone.rules.forEach(rule => {
+        rule['equation'] = reverseOperators[rule['equation']];
+      });
+      clone.actions.forEach(action => {
+        action['action'] = action['action'] == 'show' ? 'hide' : 'show';
+      });
+
+      /**
+       * Insert the condition
+       */
+      next.splice(conditionIndex + 1, 0, clone);
       return next;
     });
   }, [clearSuccessMessage]);
@@ -1695,7 +1723,7 @@ function ConditionsModal({
         variant: "secondary",
         isDestructive: true,
         onClick: () => deleteAction(conditionIndex, actionIndex),
-        icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_7__["default"],
+        icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Delete action', 'tsjippy')
       })]
     }, actionIndex);
@@ -1747,21 +1775,23 @@ function ConditionsModal({
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
             variant: "secondary",
             onClick: () => addAction(conditionIndex),
-            icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
+            icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_5__["default"],
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add another action', 'tsjippy')
           })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
           className: "actions",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          children: [
+          // Add a reverse button only for show/hide actions and simple conditions
+          condition.actions.length == 1 && ['show', 'hide'].includes(condition.actions[0]['action']) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
             variant: "secondary",
-            onClick: () => duplicateRule(conditionIndex),
-            icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_5__["default"],
-            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Duplicate condition', 'tsjippy')
+            onClick: () => addReverseCondition(conditionIndex),
+            icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_7__["default"],
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add Opposite Condition', 'tsjippy')
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
             variant: "secondary",
             isDestructive: true,
-            onClick: () => deleteCondition(conditionIndex, ruleIndex),
-            icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_7__["default"],
+            onClick: () => deleteCondition(conditionIndex),
+            icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Delete condition', 'tsjippy')
           })]
         })]
@@ -1787,22 +1817,6 @@ function ConditionsModal({
         isDismissible: true,
         onRemove: clearSuccessMessage,
         children: successMessage
-      }), validationErrors.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
-        status: "error",
-        isDismissible: true,
-        onRemove: () => setValidationErrors([]),
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("strong", {
-          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Please fix the following issues:', 'tsjippy')
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("ul", {
-          style: {
-            marginTop: '8px',
-            marginBottom: 0,
-            paddingLeft: '18px'
-          },
-          children: validationErrors.map((item, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("li", {
-            children: item
-          }, index))
-        })]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
         ref: modalRef,
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h3", {
@@ -1931,6 +1945,12 @@ function RuleRow({
 }) {
   /* Available equation choices for the main equation dropdown. */
   const equationOptions = [{
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('has changed', 'tsjippy'),
+    value: 'changed'
+  }, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('is clicked', 'tsjippy'),
+    value: 'clicked'
+  }, {
     label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Equals', 'tsjippy'),
     value: '=='
   }, {
@@ -1943,23 +1963,35 @@ function RuleRow({
     label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Less than', 'tsjippy'),
     value: '<'
   }, {
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Equals value', 'tsjippy'),
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Is checked', 'tsjippy'),
+    value: 'checked'
+  }, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Is not checked', 'tsjippy'),
+    value: '!checked'
+  }, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Equals the value of', 'tsjippy'),
     value: '== value'
   }, {
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Does not equal value', 'tsjippy'),
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Does not equal the value of', 'tsjippy'),
     value: '!= value'
   }, {
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Greater than value', 'tsjippy'),
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Greater than the value of', 'tsjippy'),
     value: '> value'
   }, {
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Less than value', 'tsjippy'),
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Less than the value of', 'tsjippy'),
     value: '< value'
   }, {
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add', 'tsjippy'),
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Plus the value of', 'tsjippy'),
     value: '+'
   }, {
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Subtract', 'tsjippy'),
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Minus the value of', 'tsjippy'),
     value: '-'
+  }, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Is visible', 'tsjippy'),
+    value: 'visible'
+  }, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Is not visible', 'tsjippy'),
+    value: 'invisible'
   }];
 
   /* Render additional fields for arithmetic-style equations. */
@@ -2030,26 +2062,60 @@ function RuleRow({
       onChange: equation => onUpdate(conditionIndex, ruleIndex, 'equation', equation),
       help: ruleErrors.equation || '',
       "data-field-key": "equation"
-    }), renderExtraOptions(), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
-      label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Value', 'tsjippy'),
-      value: rule?.['conditional-value'] || '',
-      onChange: value => onUpdate(conditionIndex, ruleIndex, 'conditional-value', value),
-      help: ruleErrors.conditionalValue || '',
-      "data-field-key": "conditionalValue"
+    }), (rule?.equation ?? '') !== '' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
+      children: [['== value', '!= value', '> value', '< value', '+', '-'].includes(rule.equation) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Second element', 'tsjippy'),
+        value: rule?.['conditional-field-2'] || '',
+        options: [{
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select second element', 'tsjippy'),
+          value: ''
+        }, ...(formBlockOptions || [])],
+        onChange: element => onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', element),
+        help: ruleErrors.conditionalField2 || '',
+        "data-field-key": "conditionalField2"
+      }), ['+', '-'].includes(rule.equation) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Second equation', 'tsjippy'),
+        value: rule?.['equation-2'] || '',
+        options: [{
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select second equation', 'tsjippy'),
+          value: ''
+        }, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Equals', 'tsjippy'),
+          value: '=='
+        }, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Does not equal', 'tsjippy'),
+          value: '!='
+        }, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Greater than', 'tsjippy'),
+          value: '>'
+        }, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Less than', 'tsjippy'),
+          value: '<'
+        }],
+        onChange: equation2 => onUpdate(conditionIndex, ruleIndex, 'equation-2', equation2),
+        help: ruleErrors.equation2 || '',
+        "data-field-key": "equation2"
+      }), ['==', '!=', '>', '<', '+', '-'].includes(rule.equation) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Value', 'tsjippy'),
+        value: rule?.['conditional-value'] || '',
+        onChange: value => onUpdate(conditionIndex, ruleIndex, 'conditional-value', value),
+        help: ruleErrors.conditionalValue || '',
+        "data-field-key": "conditionalValue"
+      })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
       className: "combinator",
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
         variant: rule?.combinator === 'and' ? 'primary' : 'secondary',
         isPressed: rule?.combinator === 'and',
         "aria-pressed": rule?.combinator === 'and',
-        onClick: () => onUpdate(conditionIndex, ruleIndex, 'combinator', 'and'),
+        onClick: () => onUpdate(conditionIndex, ruleIndex, 'combinator', '&&'),
         icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_4__["default"],
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('AND', 'tsjippy')
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
         variant: rule?.combinator === 'or' ? 'primary' : 'secondary',
         isPressed: rule?.combinator === 'or',
         "aria-pressed": rule?.combinator === 'or',
-        onClick: () => onUpdate(conditionIndex, ruleIndex, 'combinator', 'or'),
+        onClick: () => onUpdate(conditionIndex, ruleIndex, 'combinator', '||'),
         icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_4__["default"],
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('OR', 'tsjippy')
       }), canMoveRuleUp && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
@@ -4194,28 +4260,6 @@ var arrow_up_default = /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MO
 
 /***/ },
 
-/***/ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/copy.mjs"
-/*!**************************************************************************************************************************************************!*\
-  !*** ./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/copy.mjs ***!
-  \**************************************************************************************************************************************************/
-(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ copy_default)
-/* harmony export */ });
-/* harmony import */ var _wordpress_primitives__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/primitives */ "@wordpress/primitives");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-// packages/icons/src/library/copy.tsx
-
-
-var copy_default = /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_primitives__WEBPACK_IMPORTED_MODULE_0__.SVG, { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", fill: "currentColor", children: /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_primitives__WEBPACK_IMPORTED_MODULE_0__.Path, { fillRule: "evenodd", clipRule: "evenodd", d: "M5 4.5h11a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5ZM3 5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Zm17 3v10.75c0 .69-.56 1.25-1.25 1.25H6v1.5h12.75a2.75 2.75 0 0 0 2.75-2.75V8H20Z" }) });
-
-//# sourceMappingURL=copy.mjs.map
-
-
-/***/ },
-
 /***/ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/plus.mjs"
 /*!**************************************************************************************************************************************************!*\
   !*** ./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/plus.mjs ***!
@@ -4300,6 +4344,28 @@ __webpack_require__.r(__webpack_exports__);
 var trash_default = /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_primitives__WEBPACK_IMPORTED_MODULE_0__.SVG, { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", fill: "currentColor", children: /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_primitives__WEBPACK_IMPORTED_MODULE_0__.Path, { fillRule: "evenodd", clipRule: "evenodd", d: "M12 5.5A2.25 2.25 0 0 0 9.878 7h4.244A2.251 2.251 0 0 0 12 5.5ZM12 4a3.751 3.751 0 0 0-3.675 3H5v1.5h1.27l.818 8.997a2.75 2.75 0 0 0 2.739 2.501h4.347a2.75 2.75 0 0 0 2.738-2.5L17.73 8.5H19V7h-3.325A3.751 3.751 0 0 0 12 4Zm4.224 4.5H7.776l.806 8.861a1.25 1.25 0 0 0 1.245 1.137h4.347a1.25 1.25 0 0 0 1.245-1.137l.805-8.861Z" }) });
 
 //# sourceMappingURL=trash.mjs.map
+
+
+/***/ },
+
+/***/ "./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/undo.mjs"
+/*!**************************************************************************************************************************************************!*\
+  !*** ./node_modules/.pnpm/@wordpress+icons@15.2.0_@types+react@18.3.31_react@18.3.1/node_modules/@wordpress/icons/build-module/library/undo.mjs ***!
+  \**************************************************************************************************************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ undo_default)
+/* harmony export */ });
+/* harmony import */ var _wordpress_primitives__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/primitives */ "@wordpress/primitives");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+// packages/icons/src/library/undo.tsx
+
+
+var undo_default = /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_primitives__WEBPACK_IMPORTED_MODULE_0__.SVG, { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", fill: "currentColor", children: /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_primitives__WEBPACK_IMPORTED_MODULE_0__.Path, { d: "M18.3 11.7c-.6-.6-1.4-.9-2.3-.9H6.7l2.9-3.3-1.1-1-4.5 5L8.5 16l1-1-2.7-2.7H16c.5 0 .9.2 1.3.5 1 1 1 3.4 1 4.5v.3h1.5v-.2c0-1.5 0-4.3-1.5-5.7z" }) });
+
+//# sourceMappingURL=undo.mjs.map
 
 
 /***/ },

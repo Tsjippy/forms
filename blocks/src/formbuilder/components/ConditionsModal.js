@@ -15,7 +15,8 @@ import {
 	trash,
 	copy,
 	arrowUp,
-	arrowDown
+	arrowDown,
+	undo
 } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -102,13 +103,14 @@ function validateConditions(conditions) {
 	}
 
 	conditions    = Array.isArray(conditions) ? conditions : [];
-	const rules   = Array.isArray(conditions[0]?.rules) ? conditions[0].rules : [];
-	const actions = Array.isArray(conditions[0]?.actions) ? conditions[0].actions : [];
 
 	/**
 	 * Loop over all conditions
 	 */
 	conditions.forEach((condition, conditionIndex) => {
+		const rules   = Array.isArray(conditions[0]?.rules) ? conditions[0].rules : [];
+		const actions = Array.isArray(conditions[0]?.actions) ? conditions[0].actions : [];
+
 		if(condition.rules.length > 0) {
 			if (!Array.isArray(condition.rules)) {
 				errors.push(
@@ -579,23 +581,59 @@ export default function ConditionsModal({
 		});
 	}, [clearSuccessMessage]);
 
-	const duplicateRule = useCallback(
+	const addReverseCondition = useCallback(
 		(conditionIndex) => {
 			resetErrors();
 
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
 
+				/**
+				 * Make sure rules and actions are arrays
+				 */
 				next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
+				next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
 
-				const ruleToDuplicate = next[conditionIndex].rules;
+				/**
+				 * Clone the data
+				 */
+				let clone = deepClone(next[conditionIndex]);
 
-				if (!ruleToDuplicate) {
-					return next;
-				}
+				// Unset the condition id as this is a new one
+				clone.id = undefined;
 
-				const clonedRule = deepClone(ruleToDuplicate);
-				next[conditionIndex].rules.splice(conditionIndex + 1, 0, clonedRule);
+				/**
+				 * Inverse the rules
+				 */
+				const reverseOperators = {
+					'==': '!=',
+					'!=': '==',
+					'>': '<',
+					'<': '>',
+					'checked': '!checked',
+					'!checked': 'checked',
+					'== value': '!= value',
+					'!= value': '== value',
+					'> value': '< value',
+					'< value': '> value',
+					'visible': 'invisible',
+					'invisible': 'visible',
+					'+': '-',
+					'-': '+'
+				};
+
+				clone.rules.forEach(rule => {
+					rule['equation']	= reverseOperators[rule['equation']];
+				});
+
+				clone.actions.forEach(action => {
+					action['action']	= (action['action'] == 'show' ? 'hide' : 'show');
+				});
+
+				/**
+				 * Insert the condition
+				 */
+				next.splice(conditionIndex + 1, 0, clone);
 
 				return next;
 			});
@@ -989,19 +1027,23 @@ export default function ConditionsModal({
 
 				{/* Action buttons for managing the current condition and rule. */}
 				<div className="actions">
-					<Button
-						variant="secondary"
-						onClick={() => duplicateRule(conditionIndex)}
-						icon={copy}
-					>
-						{__('Duplicate condition', 'tsjippy')}
-					</Button>
+					{
+						// Add a reverse button only for show/hide actions and simple conditions
+						condition.actions.length == 1 && ['show', 'hide'].includes(condition.actions[0]['action']) &&
+						<Button
+							variant="secondary"
+							onClick={() => addReverseCondition(conditionIndex)}
+							icon={undo}
+						>
+							{__('Add Opposite Condition', 'tsjippy')}
+						</Button>
+					}
 
 					<Button
 						variant="secondary"
 						isDestructive
 						onClick={() =>
-							deleteCondition(conditionIndex, ruleIndex)
+							deleteCondition(conditionIndex)
 						}
 						icon={trash}
 					>
@@ -1043,7 +1085,7 @@ export default function ConditionsModal({
 					</Notice>
 				)}
 
-				{validationErrors.length > 0 && (
+				{/* {validationErrors.length > 0 && (
 					<Notice
 						status="error"
 						isDismissible
@@ -1056,7 +1098,7 @@ export default function ConditionsModal({
 							))}
 						</ul>
 					</Notice>
-				)}
+				)} */}
 
 				<div ref={modalRef}>
 					<h3>{__('Conditions', 'tsjippy')}</h3>

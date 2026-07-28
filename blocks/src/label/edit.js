@@ -34,12 +34,16 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	const [labelText, setLabelText] = useState(attributes.text);
 
 	useEffect(() => {
+		setLabelText(attributes.text);
+	}, [attributes.text]);
+
+	useEffect(() => {
 		const timeoutId = setTimeout(() => {
 			setAttributes({ text: labelText })
 		}, 800);
 
 		return () => clearTimeout(timeoutId);
-	}, [labelText, 800]);
+	}, [ labelText ]);
 
 	/**
 	 * Store some child attributes in our own attributes
@@ -52,18 +56,31 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	);
 
 	// store in the childAttr attribute
+	const childBlockAttrs = innerBlocks[0]?.attributes;
+
 	useEffect(() => {
-		const childAttr = {
-			multiple: innerBlocks[0].attributes.multiple ?? false,
-			add_button_content: innerBlocks[0].attributes.add_button_content ?? '+',
-			remove_button_content: innerBlocks[0].attributes.remove_button_content ?? '-',
-			type: innerBlocks[0].attributes.type ?? '',
+		if (!childBlockAttrs) {
+			return;
 		}
 
-		if (attributes.childAttr !== childAttr) {
-			setAttributes({ childAttr });
-		}
-	}, [innerBlocks]);
+		setAttributes({
+			childAttr: {
+				multiple: childBlockAttrs.multiple ?? false,
+				add_button_content:
+					childBlockAttrs.add_button_content ?? '+',
+				remove_button_content:
+					childBlockAttrs.remove_button_content ?? '-',
+				type: childBlockAttrs.type ?? '',
+				hidden: childBlockAttrs.hidden ?? '',
+			},
+		});
+	}, [
+		childBlockAttrs?.multiple,
+		childBlockAttrs?.add_button_content,
+		childBlockAttrs?.remove_button_content,
+		childBlockAttrs?.type,
+		childBlockAttrs?.hidden
+	]);
 
 	const labelComponent	= (
 		<label >

@@ -135,13 +135,16 @@ function Edit({
    */
   const [labelText, setLabelText] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useState)(attributes.text);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useEffect)(() => {
+    setLabelText(attributes.text);
+  }, [attributes.text]);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useEffect)(() => {
     const timeoutId = setTimeout(() => {
       setAttributes({
         text: labelText
       });
     }, 800);
     return () => clearTimeout(timeoutId);
-  }, [labelText, 800]);
+  }, [labelText]);
 
   /**
    * Store some child attributes in our own attributes
@@ -150,19 +153,21 @@ function Edit({
   const innerBlocks = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => select('core/block-editor').getBlocks(clientId), [clientId]);
 
   // store in the childAttr attribute
+  const childBlockAttrs = innerBlocks[0]?.attributes;
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useEffect)(() => {
-    const childAttr = {
-      multiple: innerBlocks[0].attributes.multiple ?? false,
-      add_button_content: innerBlocks[0].attributes.add_button_content ?? '+',
-      remove_button_content: innerBlocks[0].attributes.remove_button_content ?? '-',
-      type: innerBlocks[0].attributes.type ?? ''
-    };
-    if (attributes.childAttr !== childAttr) {
-      setAttributes({
-        childAttr
-      });
+    if (!childBlockAttrs) {
+      return;
     }
-  }, [innerBlocks]);
+    setAttributes({
+      childAttr: {
+        multiple: childBlockAttrs.multiple ?? false,
+        add_button_content: childBlockAttrs.add_button_content ?? '+',
+        remove_button_content: childBlockAttrs.remove_button_content ?? '-',
+        type: childBlockAttrs.type ?? '',
+        hidden: childBlockAttrs.hidden ?? ''
+      }
+    });
+  }, [childBlockAttrs?.multiple, childBlockAttrs?.add_button_content, childBlockAttrs?.remove_button_content, childBlockAttrs?.type, childBlockAttrs?.hidden]);
   const labelComponent = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("label", {
     children: [attributes.text, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
       allowedBlocks: ['tsjippy-forms/input'],
@@ -304,7 +309,11 @@ function save({
   const labelComponent = addBlockId => {
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("label", {
       "data-blockid": addBlockId ? attributes.blockId : undefined,
-      children: [attributes.text, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InnerBlocks.Content, {})]
+      className: attributes.childAttr.hidden ? 'hidden' : undefined,
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h4", {
+        class: "label-text",
+        children: attributes.text
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InnerBlocks.Content, {})]
     });
   };
   return attributes.childAttr.multiple ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_input_components_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {

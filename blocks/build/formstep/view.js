@@ -220,11 +220,37 @@ document.querySelectorAll(`.wp-block-tsjippy-forms-formstep`).forEach(formstep =
   onClassChange(formstep);
 });
 
-// Check if this is a formstep
+// Run on node creation
+document.addEventListener("nodeAdded", function (event) {
+  let newNode = event.target;
+
+  // Only run for formsteps
+  if (!newNode.matches(".formstep")) {
+    return;
+  }
+
+  // hide the new clone
+  newNode.classList.add("step-hidden");
+
+  // Update the formstep controls
+  let form = newNode.closest("form");
+  if (form != null && form.querySelector(".multi-step-controls-wrapper") != null) {
+    updateMultiStepControls(form);
+  }
+  let text = newNode.querySelector(".add.button").textContent.replace("Add ", "");
+  Main.displayMessage(`Succesfully added an extra ${text}<br>Its added as the next page.`);
+});
+
+// Run on node deletion
 document.addEventListener("nodeRemoved", function (event) {
   let node = event.target;
   let newFormstep = null;
   let parentNode = node.closest(".clone-divs-wrapper");
+
+  // Only run for formsteps
+  if (!node.matches(".formstep")) {
+    return;
+  }
 
   // if there is a next clonable formstep, show that one
   let nextFormstep = parentNode.querySelector(`.formstep[data-div-id='${parseInt(node.dataset.divId) + 1}']`);

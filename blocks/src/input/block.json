@@ -60,6 +60,10 @@
 		"hasLabelParent": {
 			"type": "boolean",
 			"default": false
+		},
+		"hide": {
+			"type": "boolean",
+			"default": false
 		}
 
 	}
