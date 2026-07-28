@@ -7,6 +7,7 @@
 - dynamic js generator for block forms
 - wrap input in label
 - text multi input
+- create dynamic js
 
 ### Changed
 - added input element attributes form
