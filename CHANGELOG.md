@@ -18,6 +18,7 @@
 
 ### Fixed
 - conditions form bugs
+- formstep controls
 
 ### Updated
 
