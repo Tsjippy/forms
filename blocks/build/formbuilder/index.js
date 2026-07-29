@@ -256,7 +256,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   changeFieldProperty: () => (/* binding */ changeFieldProperty),
 /* harmony export */   changeFieldValue: () => (/* binding */ changeFieldValue),
-/* harmony export */   changeVisibility: () => (/* binding */ changeVisibility),
 /* harmony export */   cloneNode: () => (/* binding */ cloneNode),
 /* harmony export */   copyFormInput: () => (/* binding */ copyFormInput),
 /* harmony export */   fixNumbering: () => (/* binding */ fixNumbering),
@@ -700,30 +699,6 @@ function changeFieldValue(selector, value, form, addition = "", forceValue = fal
   //attach the target
   target.dispatchEvent(evt);
 }
-function changeVisibility(action, el) {
-  let wrapper = el.closest(".input-wrapper");
-  if (wrapper == null) {
-    wrapper = el;
-  }
-  if (action == "hide") {
-    if (wrapper.matches(".hidden")) {
-      return;
-    }
-    wrapper.classList.add("hidden");
-  } else if (action == "show") {
-    if (!wrapper.matches(".hidden")) {
-      return;
-    }
-    wrapper.classList.remove("hidden");
-  } else {
-    wrapper.classList.toggle("hidden");
-  }
-
-  //create a new event
-  let evt = new Event("input");
-  //attach the target
-  wrapper.dispatchEvent(evt);
-}
 function changeFieldProperty(selector, att, value, form, addition = "") {
   if (att == 'value') {
     return changeFieldValue(selector, value, form, addition);
@@ -769,7 +744,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   changeFieldProperty: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.changeFieldProperty),
 /* harmony export */   changeFieldValue: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.changeFieldValue),
-/* harmony export */   changeVisibility: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.changeVisibility),
 /* harmony export */   cloneNode: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.cloneNode),
 /* harmony export */   copyFormInput: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.copyFormInput),
 /* harmony export */   fixNumbering: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.fixNumbering),
@@ -1398,10 +1372,15 @@ function ConditionsModal({
     resetErrors();
     setDraftConditions(prev => {
       const next = deepClone(prev);
-      next.push({
-        rules: [createEmptyRule()],
-        actions: [createEmptyAction()]
-      });
+
+      // Create the new condition
+      const newCondition = deepClone(next[0]);
+      newCondition.rules = [createEmptyRule()];
+      newCondition.actions = [createEmptyAction()];
+      newCondition.id = undefined;
+
+      // Add to the array
+      next.push(newCondition);
       return next;
     });
   }, [clearSuccessMessage]);
@@ -1587,7 +1566,7 @@ function ConditionsModal({
         conditions: conditions
       }
     });
-    return conditions;
+    return savedConditions;
   }
   const handleSave = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)(async blockId => {
     setSaving(blockId, true);
@@ -1601,8 +1580,7 @@ function ConditionsModal({
       return;
     }
     try {
-      await saveConditionsRequest(blockId, draftConditions);
-      setConditions(blockId, deepClone(draftConditions));
+      setConditions(blockId, await saveConditionsRequest(blockId, draftConditions));
       resetErrors();
       setSuccessMessage((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditions saved successfully.', 'tsjippy'));
       showToastSuccess((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditions saved.', 'tsjippy'));
@@ -1650,6 +1628,7 @@ function ConditionsModal({
     const datalistOptions = [];
     _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.sharedAttributes.concat(_input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.types[blockProps.attributes.type]).forEach(data => datalistOptions.push(data.attribute));
     _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-' + data.attribute));
+    datalistOptions.sort();
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
       className: `rule-row inner item ${Object.keys(actionErrors).length > 0 ? 'invalid' : ''} ${isPulsed ? 'pulse' : ''}`,
       "data-action-index": actionIndex,
@@ -1704,7 +1683,8 @@ function ConditionsModal({
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("datalist", {
           id: "possible-elements",
           children: formBlockOptions.map(data => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("option", {
-            value: "the-value-of-" + data.value
+            value: "the-value-of-" + data.value,
+            children: data.label
           }))
         }),
         // If we selected another element to be the value of this property we should allow to add extra to the value

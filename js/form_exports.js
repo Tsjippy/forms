@@ -510,32 +510,6 @@ export function changeFieldValue(
   target.dispatchEvent(evt);
 }
 
-export function changeVisibility(action, el) {
-  let wrapper = el.closest(".input-wrapper");
-  if (wrapper == null) {
-    wrapper = el;
-  }
-
-  if (action == "hide") {
-    if (wrapper.matches(".hidden")) {
-      return;
-    }
-    wrapper.classList.add("hidden");
-  } else if (action == "show"){
-    if (!wrapper.matches(".hidden")) {
-      return;
-    }
-    wrapper.classList.remove("hidden");
-  }else{
-    wrapper.classList.toggle("hidden");
-  }
-
-  //create a new event
-  let evt = new Event("input");
-  //attach the target
-  wrapper.dispatchEvent(evt);
-}
-
 export function changeFieldProperty(
   selector,
   att,

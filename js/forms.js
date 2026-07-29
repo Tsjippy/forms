@@ -7,7 +7,6 @@ import {
   removeNode,
   tidyMultiInputs,
   changeFieldValue,
-  changeVisibility,
   changeFieldProperty,
 } from "./form_exports.js";
 import { getFieldValue } from "../../tsjippy-shared-functionality/js/partials/field_value.js";
@@ -20,7 +19,6 @@ export {
   removeNode,
   tidyMultiInputs,
   changeFieldValue,
-  changeVisibility,
   changeFieldProperty,
 };
 

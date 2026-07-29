@@ -192,12 +192,12 @@ function restApiInitFormsNew()
                 $postId     = $wpRest->get_param('postId');
 
                 // Save conditions
-                $forms->saveBlockConditions($conditions, $blockId, $postId);
+                $newConditions  = $forms->saveBlockConditions($conditions, $blockId, $postId);
 
                 // Build new dynamic js
                 processFormBlocks($postId);
 
-                return true;
+                return $newConditions;
             },
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
         )

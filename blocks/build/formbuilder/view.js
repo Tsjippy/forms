@@ -256,7 +256,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   changeFieldProperty: () => (/* binding */ changeFieldProperty),
 /* harmony export */   changeFieldValue: () => (/* binding */ changeFieldValue),
-/* harmony export */   changeVisibility: () => (/* binding */ changeVisibility),
 /* harmony export */   cloneNode: () => (/* binding */ cloneNode),
 /* harmony export */   copyFormInput: () => (/* binding */ copyFormInput),
 /* harmony export */   fixNumbering: () => (/* binding */ fixNumbering),
@@ -700,30 +699,6 @@ function changeFieldValue(selector, value, form, addition = "", forceValue = fal
   //attach the target
   target.dispatchEvent(evt);
 }
-function changeVisibility(action, el) {
-  let wrapper = el.closest(".input-wrapper");
-  if (wrapper == null) {
-    wrapper = el;
-  }
-  if (action == "hide") {
-    if (wrapper.matches(".hidden")) {
-      return;
-    }
-    wrapper.classList.add("hidden");
-  } else if (action == "show") {
-    if (!wrapper.matches(".hidden")) {
-      return;
-    }
-    wrapper.classList.remove("hidden");
-  } else {
-    wrapper.classList.toggle("hidden");
-  }
-
-  //create a new event
-  let evt = new Event("input");
-  //attach the target
-  wrapper.dispatchEvent(evt);
-}
 function changeFieldProperty(selector, att, value, form, addition = "") {
   if (att == 'value') {
     return changeFieldValue(selector, value, form, addition);
@@ -769,7 +744,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   changeFieldProperty: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.changeFieldProperty),
 /* harmony export */   changeFieldValue: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.changeFieldValue),
-/* harmony export */   changeVisibility: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.changeVisibility),
 /* harmony export */   cloneNode: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.cloneNode),
 /* harmony export */   copyFormInput: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.copyFormInput),
 /* harmony export */   fixNumbering: () => (/* reexport safe */ _form_exports_js__WEBPACK_IMPORTED_MODULE_1__.fixNumbering),

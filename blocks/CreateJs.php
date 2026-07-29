@@ -73,7 +73,7 @@ function getSelector($block, $value='')
 {
     $selector   = "[data-blockId='"  . getBlockId($block) . "']";
 
-    if(isset(['radio', 'checkbox'][getInputType($block)])){
+    if(isset(['radio' => 1, 'checkbox' => 1][getInputType($block)])){
         if(empty($value)){
             $selector   .= ":checked";
         }else{
@@ -86,6 +86,7 @@ function getSelector($block, $value='')
  * Builds the js based on block conditions
  * 
  * @param   array   $conditions     All conditions for a certain post
+ * @param   array   $innerBlocks
  */
 function dynamicJs($conditions, $innerBlocks){
     /**
@@ -122,7 +123,7 @@ function dynamicJs($conditions, $innerBlocks){
         }
 
         // One trigger can have multiple conditions
-        if(!isset($triggerString)){
+        if(!isset($triggers[$triggerString])){
             $triggers[$triggerString] = [];
         }
 
@@ -131,7 +132,7 @@ function dynamicJs($conditions, $innerBlocks){
 
     foreach($triggers as $triggerString => $triggeredConditions){
         // Open if statement
-        echo wp_kses_post($triggerString);
+        echo "\n\n\t\t" . wp_kses_post($triggerString);
 
         $comparing    = true;
         
@@ -139,7 +140,7 @@ function dynamicJs($conditions, $innerBlocks){
         if(
             count($triggeredConditions) == 1 &&
             count($triggeredConditions[0]->rules) == 1 &&
-            isset(['changed', 'clicked'][$triggeredConditions[0]->rules[0]['equation']])
+            isset(['changed' => 1, 'clicked' => 1][$triggeredConditions[0]->rules[0]['equation']])
         ){
             $comparing = false;
         }
@@ -153,23 +154,22 @@ function dynamicJs($conditions, $innerBlocks){
 
         // Loop over all conditions of this trigger
         foreach($triggeredConditions as $conditionIndex => $condition){
-
-            $comparators[$conditionIndex] = [];
-
             if($comparing){
+                $comparators[$conditionIndex] = [];
+
                 // Loop over all the rules of this condition 
                 foreach($condition->rules as $ruleIndex => $rule){
                     /**
                      * Determine variables
                      */
                     // Clicked and changed do not need variables
-                    if(isset(['changed', 'clicked'][$rule['equation']])){
+                    if(isset(['changed' => 1, 'clicked' => 1][$rule['equation']])){
                         // Clicked or changed the element
                         $comparators[$conditionIndex][] = "el.dataset.blockid == '{$rule['conditional-field']}'";
                     }
                     
                     // Check if visible
-                    elseif(isset(['visible', 'invisible'][$rule['equation']])){
+                    elseif(isset(['visible' => 1, 'invisible' => 1][$rule['equation']])){
                         $compare =  "el.dataset.blockid == '{$rule['conditional-field']}' &&";
                         if($rule['equation'] == 'visible'){
                             $compare .= "!";
@@ -204,7 +204,7 @@ function dynamicJs($conditions, $innerBlocks){
                         $comparator = $rule['equation'];
 
                         // When adding or subsrtracting we first need to calculate the compare value
-                        if(isset(['+', '-'][$comparator])){
+                        if(isset(['+' => 1, '-' => 1][$comparator])){
                             $compareFrom  = esc_attr($varName) . ' ' . esc_attr($comparator) . ' ' . $varName . "_2";
 
                             $comparator   = $rule['equation2'];
@@ -230,14 +230,24 @@ function dynamicJs($conditions, $innerBlocks){
                 if($action['action'] == 'set-property'){
                     $addition   = $action['addition'] ?? '';
 
+                    $newValue   = $action['property-value'];
+
+                    // We should replace with a dynamic value
+                    if(str_contains($newValue, 'the-value-of-')){
+                        $blockId    = str_replace('the-value-of-', '', $newValue);
+                        $newValue   = "this.getValue('$blockId', form)";
+                    }else{
+                        $newValue   = "'$newValue'";
+                    }
+
                     $actions[$conditionIndex]['action'] = "
-                        FormFunctions.changeFieldProperty(
-                            target,
-                            {$action['property-name']},
-                            {$action['property-value']},
-                            form,
-                            {$addition},
-                        );
+                this.change_field_property(
+                    target,
+                    '{$action['property-name']}',
+                    $newValue,
+                    form,
+                    '{$addition}'
+                );
                     ";   
                 }else{
                     // Add, remove or toggle the hidden class
@@ -261,6 +271,27 @@ function dynamicJs($conditions, $innerBlocks){
             echo "\n\t\t\t" . wp_kses_post($var) ."\n";
         }
 
+        $actionStrings   = [];
+
+        foreach($actions as $conditionIndex => $actionData){
+            // The element to perform the action on
+            $targetQuery = "let target  = form.querySelector(`[data-blockid='{$actionData['target']}']`)";
+                    
+            // Show/hide/toggle the label in stead of the element
+            if(str_contains($actionData['action'], 'target.classList') && $innerBlocks[$actionData['target']]['attrs']['hasLabelParent'] ?? false){
+                $targetQuery .= ".closest('label')";
+            }
+                    
+            $actionStrings[$conditionIndex] = "\n\t\t\t\t" . wp_kses_post($targetQuery) . ";\n";
+            $actionStrings[$conditionIndex] .= "\n\t\t\t\t" . wp_kses_post($actionData['action']);
+        }
+
+        if(empty($comparators )){
+            foreach($actionStrings as $actionString){
+                echo wp_kses_post($actionString);
+            }
+        }
+
         foreach($comparators as $conditionIndex => $ifs){
             echo "\n\t\t\tif(";
 
@@ -269,18 +300,11 @@ function dynamicJs($conditions, $innerBlocks){
                 }
             
             echo "\n\t\t\t){";
-                $targetQuery = "let target  = form.querySelector(`[data-blockid='{$actions[$conditionIndex]['target']}']`)";
-                
-                if($innerBlocks[$actions[$conditionIndex]['target']]['attrs']['hasLabelParent'] ?? false){
-                    $targetQuery .= ".closest('label')";
-                }
-                
-                echo "\n\t\t\t\t" . wp_kses_post($targetQuery) . ";\n";
-                echo "\n\t\t\t\t" . wp_kses_post($actions[$conditionIndex]['action']);
+                echo wp_kses_post($actionStrings[$conditionIndex]);
             echo "\n\t\t\t}";
         }
 
-        // CLose if statment
+        // CLose if triggerString
         echo "\n\t\t}";
     }
 }
@@ -290,6 +314,7 @@ function dynamicJs($conditions, $innerBlocks){
  * 
  * @param   string  $formName
  * @param   array   $conditions
+ * @param   array   $innerBlocks
  * 
  * @return  string              The js code
  */
@@ -306,6 +331,8 @@ class <?php echo esc_attr($className);?> {
     // We could have multiple instances of the same form on one page
     forms = document.querySelectorAll(`form[data-formname="<?php echo esc_attr($formName);?>"]`);
 
+    change_field_property   = FormFunctions.changeFieldProperty;
+
     // Callback function to execute when mutations are observed
     onMutation = (mutationList, observer) => {
         for (const mutation of mutationList) {
@@ -317,7 +344,7 @@ class <?php echo esc_attr($className);?> {
                 console.log(mutation);
             }
 
-            this.handleConditions(mutation.target)
+            this.handleConditions(mutation.target);
         }
     };
 
@@ -371,7 +398,7 @@ class <?php echo esc_attr($className);?> {
 
     getValue    = (blockid, form) => {
         return FormFunctions.getFieldValue(form.querySelector(`[data-blockid='${blockid}']`), form);
-    }
+    };
 
     handleConditions = (node) => {
         let el            = event.target;
@@ -404,7 +431,7 @@ class <?php echo esc_attr($className);?> {
         setTimeout(() => { this.prevEl = ''; }, 50);
 
         this.processFields(el);
-    }
+    };
 
     processFields = (el) => {
         // Ge the name of the input that just got changed
@@ -412,12 +439,10 @@ class <?php echo esc_attr($className);?> {
 
         // Get the form this input belongs to
         let form    = el.closest('form');
-
         <?php 
         dynamicJs($conditions, $innerBlocks);
         ?>
-    
-    }
+    };
 }
 
 let <?php echo esc_attr($objectName);?> = new <?php echo esc_attr($className);?>();
@@ -485,9 +510,6 @@ function buildJs($block, $post){
             'value_',
             'elName',
             "\n",
-            "get_field_value",
-            "change_field_value",
-            "change_visibility",
             "change_field_property",
             "init"
         ],
@@ -497,9 +519,6 @@ function buildJs($block, $post){
             'v_',
             'n',
             '',
-            'gF',
-            'cF',
-            'cV',
             'cP',
             'i'
         ],

@@ -520,10 +520,16 @@ export default function ConditionsModal({
 
 		setDraftConditions((prev) => {
 			const next = deepClone(prev);
-			next.push({
-				rules: [createEmptyRule()],
-				actions: [createEmptyAction()]
-			});
+
+			// Create the new condition
+			const newCondition	 = deepClone(next[0]);
+			newCondition.rules	 = [createEmptyRule()];
+			newCondition.actions = [createEmptyAction()];
+			newCondition.id 	 = undefined;
+
+			// Add to the array
+			next.push(newCondition);
+
 			return next;
 		});
 	}, [clearSuccessMessage]);
@@ -772,7 +778,7 @@ export default function ConditionsModal({
 			},
 		});
 
-		return conditions;
+		return savedConditions;
 	}
 
 	const handleSave = useCallback(async (blockId) => {
@@ -792,14 +798,12 @@ export default function ConditionsModal({
 		}
 
 		try {
-			await saveConditionsRequest(
-				blockId,
-				draftConditions
-			);
-
 			setConditions(
 				blockId,
-				deepClone(draftConditions)
+				await saveConditionsRequest(
+					blockId,
+					draftConditions
+				)
 			);
 
 			resetErrors();
@@ -881,6 +885,7 @@ export default function ConditionsModal({
 		const datalistOptions	= [];
 		inputSchema.sharedAttributes.concat(inputSchema.types[blockProps.attributes.type]).forEach(data => datalistOptions.push(data.attribute));
 		inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-'+data.attribute));
+		datalistOptions.sort();
 		
 		return (
 			<div
@@ -932,7 +937,7 @@ export default function ConditionsModal({
 					/>
 
 					<datalist id="possible-elements">
-						{formBlockOptions.map((data) => <option value={"the-value-of-"+data.value}></option>)}
+						{formBlockOptions.map((data) => <option value={"the-value-of-"+data.value}>{data.label}</option>)}
 					</datalist>
 
 					{ 

@@ -1716,6 +1716,24 @@ class Forms
     }
 
     /**
+     * Removes a block condition
+     * 
+     * @param   string  $conditionId
+     */
+    public function deleteBlockCondition($conditionId){
+        TSJIPPY\removeFromDb(
+            $this->blockConditionsTableName, 
+            [
+                'id'    => $conditionId
+            ], 
+            [
+                '%d'
+            ], 
+            'forms'
+        );
+    }
+
+    /**
      * Save block conditions
      * 
      * @param   array   $conditions     Array containing conditions
@@ -1723,19 +1741,40 @@ class Forms
      * @param   int     $postId
      */
     public function saveBlockConditions($conditions, $blockId, $postId){
-        $rowsUpdated    = 0;
-        foreach(TSJIPPY\cleanUpNestedArray($conditions) as $condition){
+        $currentConditions  = $this->getBlockConditions($blockId);
+    
+        $conditions         = TSJIPPY\cleanUpNestedArray($conditions);
+
+        /**
+         * Remove any removed conditions
+         */
+        $toBeRemoved = array_diff(array_column($currentConditions, 'id'), array_column($conditions, 'id'));
+        foreach($toBeRemoved as $conditionId){
+            $this->deleteBlockCondition($conditionId);
+        }
+
+        /**
+         * Add or update the remaining conditions
+         */
+        foreach($conditions as &$condition){
             $condition['post_id']   = $postId;
 
             ksort($condition);
 
             if(empty($condition['id'])){
-                $result = TSJIPPY\insertInDb(
+                // Insert returns the new id
+                $condition['id'] = TSJIPPY\insertInDb(
                     $this->blockConditionsTableName,
                     $condition,
                     $this->tableFormats[$this->blockConditionsTableName],
                     'forms'
                 );
+
+                if(is_wp_error($condition['id'])){
+                    TSJIPPY\printArray($condition['id']);
+
+                    unset($condition['id']);
+                }
             }else{
                 $result = TSJIPPY\updateDbValue(
                     $this->blockConditionsTableName,
@@ -1749,15 +1788,14 @@ class Forms
                     ],
                     'forms'
                 );
-            }
 
-            if(is_numeric($result)){
-                $rowsUpdated += $result;
-            }else{
-                TSJIPPy\printArray($result);
+                if(is_wp_error($result)){
+                    TSJIPPY\printArray($result);
+                }
             }
         }
+        unset($condition);
 
-        return $rowsUpdated;
+        return $conditions;
     }
 }
