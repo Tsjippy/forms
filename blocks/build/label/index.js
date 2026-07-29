@@ -144,7 +144,7 @@ function Edit({
       });
     }, 800);
     return () => clearTimeout(timeoutId);
-  }, [labelText]);
+  }, [labelText, setAttributes]);
 
   /**
    * Store some child attributes in our own attributes
@@ -158,16 +158,19 @@ function Edit({
     if (!childBlockAttrs) {
       return;
     }
-    setAttributes({
-      childAttr: {
-        multiple: childBlockAttrs.multiple ?? false,
-        add_button_content: childBlockAttrs.add_button_content ?? '+',
-        remove_button_content: childBlockAttrs.remove_button_content ?? '-',
-        type: childBlockAttrs.type ?? '',
-        hidden: childBlockAttrs.hidden ?? ''
-      }
-    });
-  }, [childBlockAttrs?.multiple, childBlockAttrs?.add_button_content, childBlockAttrs?.remove_button_content, childBlockAttrs?.type, childBlockAttrs?.hidden]);
+    const nextChildAttr = {
+      multiple: childBlockAttrs.multiple ?? false,
+      add_button_content: childBlockAttrs.add_button_content ?? '+',
+      remove_button_content: childBlockAttrs.remove_button_content ?? '-',
+      type: childBlockAttrs.type ?? '',
+      hidden: childBlockAttrs.hidden ?? ''
+    };
+    if (JSON.stringify(nextChildAttr) !== JSON.stringify(attributes.childAttr)) {
+      setAttributes({
+        childAttr: nextChildAttr
+      });
+    }
+  }, [childBlockAttrs]);
   const labelComponent = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("label", {
     children: [attributes.text, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
       allowedBlocks: ['tsjippy-forms/input'],
@@ -189,7 +192,7 @@ function Edit({
       ...blockProps,
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("legend", {
         children: "Label"
-      }), attributes.text == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+      }), attributes.text === '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
         label: "Label Text",
         value: labelText,
         onChange: text => setLabelText(text)
@@ -204,7 +207,7 @@ function Edit({
             renderAppender: _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks.ButtonBlockAppender
           })
         })]
-      }) : attributes.childAttr.multiple ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_input_components_Multiple_js__WEBPACK_IMPORTED_MODULE_6__.Multiple, {
+      }) : attributes.childAttr?.multiple ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_input_components_Multiple_js__WEBPACK_IMPORTED_MODULE_6__.Multiple, {
         inner: labelComponent,
         attributes: attributes.childAttr
       }) : labelComponent]

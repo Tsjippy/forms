@@ -18,6 +18,7 @@ export const inputTypes = [
     "submit",
     "tel",
     "text",
+    "textarea",
     "time",
     "url",
     "week",
@@ -27,8 +28,8 @@ export const inputSchema = {
   sharedAttributes: [
     { attribute: "id", expectedType: "string" },
     { attribute: "class", expectedType: "string" },
-    { attribute: "data-*", expectedType: "string" },
     { attribute: "style", expectedType: "string" },
+    { attribute: "disabled", expectedType: "boolean" },
     { attribute: "title", expectedType: "string" },
     { attribute: "hidden", expectedType: "boolean" },
     { attribute: "lang", expectedType: "string" },
@@ -39,28 +40,23 @@ export const inputSchema = {
     { attribute: "contenteditable", expectedType: "boolean" },
     { attribute: "draggable", expectedType: "boolean" },
     { attribute: "translate", expectedType: "boolean" },
+    { attribute: "data-*", expectedType: "string" },
   ],
 
   types: {
     button: [
       { attribute: "value", expectedType: "string" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "formaction", expectedType: "string" },
       { attribute: "formenctype", expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain" },
       { attribute: "formmethod", expectedType: "get|post|dialog" },
       { attribute: "formnovalidate", expectedType: "boolean" },
       { attribute: "formtarget", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "popovertarget", expectedType: "string" },
       { attribute: "popovertargetaction", expectedType: "hide|show|toggle" }
     ],
 
     checkbox: [
       { attribute: "checked", expectedType: "boolean" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "required", expectedType: "boolean" },
       { attribute: "value", expectedType: "string" },
       { attribute: "label", expectedType: "string" }
@@ -68,20 +64,14 @@ export const inputSchema = {
 
     color: [
       { attribute: "value", expectedType: "string" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "alpha", expectedType: "boolean" },
       { attribute: "colorspace", expectedType: "limited-srgb|display-p3" }
     ],
 
     date: [
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "max", expectedType: "string" },
       { attribute: "min", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
       { attribute: "step", expectedType: "number|any" },
@@ -89,12 +79,9 @@ export const inputSchema = {
     ],
 
     "datetime-local": [
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "max", expectedType: "string" },
       { attribute: "min", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
       { attribute: "step", expectedType: "number|any" },
@@ -102,15 +89,11 @@ export const inputSchema = {
     ],
 
     email: [
-      { attribute: "autocomplete", expectedType: "string" },
       { attribute: "autofocus", expectedType: "boolean" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "maxlength", expectedType: "number" },
       { attribute: "minlength", expectedType: "number" },
       { attribute: "multiple", expectedType: "boolean" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "pattern", expectedType: "string" },
       { attribute: "placeholder", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
@@ -122,46 +105,33 @@ export const inputSchema = {
 
     file: [
       { attribute: "accept", expectedType: "string" },
-      { attribute: "autocomplete", expectedType: "string" },
       { attribute: "autofocus", expectedType: "boolean" },
       { attribute: "capture", expectedType: "user|environment|boolean" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "multiple", expectedType: "boolean" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "required", expectedType: "boolean" }
     ],
 
     hidden: [
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "value", expectedType: "string" },
       { attribute: "dirname", expectedType: "string" }
     ],
 
     image: [
       { attribute: "alt", expectedType: "string" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "formaction", expectedType: "string" },
       { attribute: "formenctype", expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain" },
       { attribute: "formmethod", expectedType: "get|post|dialog" },
       { attribute: "formnovalidate", expectedType: "boolean" },
       { attribute: "formtarget", expectedType: "string" },
       { attribute: "height", expectedType: "number" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "src", expectedType: "string" },
       { attribute: "width", expectedType: "number" }
     ],
 
     month: [
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "max", expectedType: "string" },
       { attribute: "min", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
       { attribute: "step", expectedType: "number|any" },
@@ -169,14 +139,10 @@ export const inputSchema = {
     ],
 
     number: [
-      { attribute: "autocomplete", expectedType: "string" },
       { attribute: "autofocus", expectedType: "boolean" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "max", expectedType: "string|number" },
       { attribute: "min", expectedType: "string|number" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "placeholder", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
@@ -185,14 +151,10 @@ export const inputSchema = {
     ],
 
     password: [
-      { attribute: "autocomplete", expectedType: "string" },
       { attribute: "autofocus", expectedType: "boolean" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "maxlength", expectedType: "number" },
       { attribute: "minlength", expectedType: "number" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "pattern", expectedType: "string" },
       { attribute: "placeholder", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
@@ -204,47 +166,34 @@ export const inputSchema = {
 
     radio: [
       { attribute: "checked", expectedType: "boolean" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "required", expectedType: "boolean" },
       { attribute: "value", expectedType: "string" },
       { attribute: "label", expectedType: "string" }
     ],
 
     range: [
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "max", expectedType: "string|number" },
       { attribute: "min", expectedType: "string|number" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "step", expectedType: "number|any" },
       { attribute: "value", expectedType: "string|number" }
     ],
 
     reset: [
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "formaction", expectedType: "string" },
       { attribute: "formenctype", expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain" },
       { attribute: "formmethod", expectedType: "get|post|dialog" },
       { attribute: "formnovalidate", expectedType: "boolean" },
       { attribute: "formtarget", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "value", expectedType: "string" }
     ],
 
     search: [
-      { attribute: "autocomplete", expectedType: "string" },
       { attribute: "autofocus", expectedType: "boolean" },
       { attribute: "dirname", expectedType: "string" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "maxlength", expectedType: "number" },
       { attribute: "minlength", expectedType: "number" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "pattern", expectedType: "string" },
       { attribute: "placeholder", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
@@ -254,27 +203,20 @@ export const inputSchema = {
     ],
 
     submit: [
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "formaction", expectedType: "string" },
       { attribute: "formenctype", expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain" },
       { attribute: "formmethod", expectedType: "get|post|dialog" },
       { attribute: "formnovalidate", expectedType: "boolean" },
       { attribute: "formtarget", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "value", expectedType: "string" }
     ],
 
     tel: [
-      { attribute: "autocomplete", expectedType: "string" },
       { attribute: "autofocus", expectedType: "boolean" },
       { attribute: "dirname", expectedType: "string" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "maxlength", expectedType: "number" },
       { attribute: "minlength", expectedType: "number" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "pattern", expectedType: "string" },
       { attribute: "placeholder", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
@@ -284,15 +226,11 @@ export const inputSchema = {
     ],
 
     text: [
-      { attribute: "autocomplete", expectedType: "string" },
       { attribute: "autofocus", expectedType: "boolean" },
       { attribute: "dirname", expectedType: "string" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "maxlength", expectedType: "number" },
       { attribute: "minlength", expectedType: "number" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "pattern", expectedType: "string" },
       { attribute: "placeholder", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
@@ -301,13 +239,21 @@ export const inputSchema = {
       { attribute: "value", expectedType: "string" }
     ],
 
+    textarea: [
+      { attribute: "autofocus", expectedType: "boolean" },
+      { attribute: "cols", expectedType: "integer" },
+      { attribute: "maxlength", expectedType: "number" },
+      { attribute: "placeholder", expectedType: "string" },
+      { attribute: "readonly", expectedType: "boolean" },
+      { attribute: "required", expectedType: "boolean" },
+      { attribute: "rows", expectedType: "number" },
+      { attribute: "wrap", expectedType: "hard|soft" }
+    ],
+
     time: [
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "max", expectedType: "string" },
       { attribute: "min", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
       { attribute: "step", expectedType: "number|any" },
@@ -315,15 +261,11 @@ export const inputSchema = {
     ],
 
     url: [
-      { attribute: "autocomplete", expectedType: "string" },
       { attribute: "autofocus", expectedType: "boolean" },
       { attribute: "dirname", expectedType: "string" },
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "maxlength", expectedType: "number" },
       { attribute: "minlength", expectedType: "number" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "pattern", expectedType: "string" },
       { attribute: "placeholder", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
@@ -333,12 +275,9 @@ export const inputSchema = {
     ],
 
     week: [
-      { attribute: "disabled", expectedType: "boolean" },
-      { attribute: "form", expectedType: "string" },
       { attribute: "list", expectedType: "string" },
       { attribute: "max", expectedType: "string" },
       { attribute: "min", expectedType: "string" },
-      { attribute: "name", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
       { attribute: "step", expectedType: "number|any" },

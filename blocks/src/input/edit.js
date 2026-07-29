@@ -5,8 +5,8 @@ import { useState, useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 import './editor.scss';
-import * as elementAttributes from './element_attributes.js';
-import { dynamicInputs } from './dynamic_inputs.js';
+import * as elementAttributes from './components/element_attributes.js';
+import { dynamicInputs } from './components/dynamic_inputs.js';
 import { InputHtml } from './components/InputHtml.js';
 
 /**
@@ -148,7 +148,8 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 			);
 		}
 		
-		let attributeControls	= dynamicInputs(elementAttributes.inputSchema.sharedAttributes, attributes.inputAttributes, storeAttributeAttributes);
+		// Attributes 
+		let attributeControls	= dynamicInputs(attributes, 'default', storeAttributeAttributes);
 
 		let ariaControls 		= [];
 
@@ -156,7 +157,7 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 		 * Add aria attributes if we need them
 		 */
 		if(attributes.ariaAttributes){
-			ariaControls	= dynamicInputs(elementAttributes.inputSchema.ariaAttributes, attributes.inputAttributes, storeAttributeAttributes);
+			ariaControls	= dynamicInputs(attributes, 'aria', storeAttributeAttributes);
 		}
 
 		/**

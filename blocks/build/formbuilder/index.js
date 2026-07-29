@@ -989,7 +989,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_8__);
 /* harmony import */ var _RuleRow__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./RuleRow */ "./src/formbuilder/components/RuleRow.js");
-/* harmony import */ var _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./../../input/element_attributes.js */ "./src/input/element_attributes.js");
+/* harmony import */ var _input_components_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./../../input/components/element_attributes.js */ "./src/input/components/element_attributes.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__);
 
@@ -1626,8 +1626,8 @@ function ConditionsModal({
     const actionErrors = fieldErrors[conditionIndex]?.actions?.[actionIndex] || {};
     const isPulsed = pulseTarget && pulseTarget.section === 'actions' && pulseTarget.actionIndex === actionIndex;
     const datalistOptions = [];
-    _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.sharedAttributes.concat(_input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.types[blockProps.attributes.type]).forEach(data => datalistOptions.push(data.attribute));
-    _input_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-' + data.attribute));
+    _input_components_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.sharedAttributes.concat(_input_components_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.types[blockProps.attributes.type]).forEach(data => datalistOptions.push(data.attribute));
+    _input_components_element_attributes_js__WEBPACK_IMPORTED_MODULE_10__.inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-' + data.attribute));
     datalistOptions.sort();
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
       className: `rule-row inner item ${Object.keys(actionErrors).length > 0 ? 'invalid' : ''} ${isPulsed ? 'pulse' : ''}`,
@@ -3097,10 +3097,10 @@ const store = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_0__.createReduxStore)(
 
 /***/ },
 
-/***/ "./src/input/element_attributes.js"
-/*!*****************************************!*\
-  !*** ./src/input/element_attributes.js ***!
-  \*****************************************/
+/***/ "./src/input/components/element_attributes.js"
+/*!****************************************************!*\
+  !*** ./src/input/components/element_attributes.js ***!
+  \****************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
@@ -3108,7 +3108,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   inputSchema: () => (/* binding */ inputSchema),
 /* harmony export */   inputTypes: () => (/* binding */ inputTypes)
 /* harmony export */ });
-const inputTypes = ["button", "checkbox", "color", "date", "datetime-local", "email", "file", "hidden", "image", "month", "number", "password", "radio", "range", "reset", "search", "submit", "tel", "text", "time", "url", "week"];
+const inputTypes = ["button", "checkbox", "color", "date", "datetime-local", "email", "file", "hidden", "image", "month", "number", "password", "radio", "range", "reset", "search", "submit", "tel", "text", "textarea", "time", "url", "week"];
 const inputSchema = {
   sharedAttributes: [{
     attribute: "id",
@@ -3117,11 +3117,11 @@ const inputSchema = {
     attribute: "class",
     expectedType: "string"
   }, {
-    attribute: "data-*",
-    expectedType: "string"
-  }, {
     attribute: "style",
     expectedType: "string"
+  }, {
+    attribute: "disabled",
+    expectedType: "boolean"
   }, {
     attribute: "title",
     expectedType: "string"
@@ -3152,16 +3152,13 @@ const inputSchema = {
   }, {
     attribute: "translate",
     expectedType: "boolean"
+  }, {
+    attribute: "data-*",
+    expectedType: "string"
   }],
   types: {
     button: [{
       attribute: "value",
-      expectedType: "string"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
       expectedType: "string"
     }, {
       attribute: "formaction",
@@ -3179,9 +3176,6 @@ const inputSchema = {
       attribute: "formtarget",
       expectedType: "string"
     }, {
-      attribute: "name",
-      expectedType: "string"
-    }, {
       attribute: "popovertarget",
       expectedType: "string"
     }, {
@@ -3191,15 +3185,6 @@ const inputSchema = {
     checkbox: [{
       attribute: "checked",
       expectedType: "boolean"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
-      attribute: "name",
-      expectedType: "string"
     }, {
       attribute: "required",
       expectedType: "boolean"
@@ -3214,15 +3199,6 @@ const inputSchema = {
       attribute: "value",
       expectedType: "string"
     }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
-      attribute: "name",
-      expectedType: "string"
-    }, {
       attribute: "alpha",
       expectedType: "boolean"
     }, {
@@ -3230,12 +3206,6 @@ const inputSchema = {
       expectedType: "limited-srgb|display-p3"
     }],
     date: [{
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
       attribute: "list",
       expectedType: "string"
     }, {
@@ -3243,9 +3213,6 @@ const inputSchema = {
       expectedType: "string"
     }, {
       attribute: "min",
-      expectedType: "string"
-    }, {
-      attribute: "name",
       expectedType: "string"
     }, {
       attribute: "readonly",
@@ -3261,12 +3228,6 @@ const inputSchema = {
       expectedType: "string"
     }],
     "datetime-local": [{
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
       attribute: "list",
       expectedType: "string"
     }, {
@@ -3274,9 +3235,6 @@ const inputSchema = {
       expectedType: "string"
     }, {
       attribute: "min",
-      expectedType: "string"
-    }, {
-      attribute: "name",
       expectedType: "string"
     }, {
       attribute: "readonly",
@@ -3292,17 +3250,8 @@ const inputSchema = {
       expectedType: "string"
     }],
     email: [{
-      attribute: "autocomplete",
-      expectedType: "string"
-    }, {
       attribute: "autofocus",
       expectedType: "boolean"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
     }, {
       attribute: "list",
       expectedType: "string"
@@ -3315,9 +3264,6 @@ const inputSchema = {
     }, {
       attribute: "multiple",
       expectedType: "boolean"
-    }, {
-      attribute: "name",
-      expectedType: "string"
     }, {
       attribute: "pattern",
       expectedType: "string"
@@ -3344,40 +3290,19 @@ const inputSchema = {
       attribute: "accept",
       expectedType: "string"
     }, {
-      attribute: "autocomplete",
-      expectedType: "string"
-    }, {
       attribute: "autofocus",
       expectedType: "boolean"
     }, {
       attribute: "capture",
       expectedType: "user|environment|boolean"
     }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
       attribute: "multiple",
       expectedType: "boolean"
-    }, {
-      attribute: "name",
-      expectedType: "string"
     }, {
       attribute: "required",
       expectedType: "boolean"
     }],
     hidden: [{
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
-      attribute: "name",
-      expectedType: "string"
-    }, {
       attribute: "value",
       expectedType: "string"
     }, {
@@ -3386,12 +3311,6 @@ const inputSchema = {
     }],
     image: [{
       attribute: "alt",
-      expectedType: "string"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
       expectedType: "string"
     }, {
       attribute: "formaction",
@@ -3412,9 +3331,6 @@ const inputSchema = {
       attribute: "height",
       expectedType: "number"
     }, {
-      attribute: "name",
-      expectedType: "string"
-    }, {
       attribute: "src",
       expectedType: "string"
     }, {
@@ -3422,12 +3338,6 @@ const inputSchema = {
       expectedType: "number"
     }],
     month: [{
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
       attribute: "list",
       expectedType: "string"
     }, {
@@ -3435,9 +3345,6 @@ const inputSchema = {
       expectedType: "string"
     }, {
       attribute: "min",
-      expectedType: "string"
-    }, {
-      attribute: "name",
       expectedType: "string"
     }, {
       attribute: "readonly",
@@ -3453,17 +3360,8 @@ const inputSchema = {
       expectedType: "string"
     }],
     number: [{
-      attribute: "autocomplete",
-      expectedType: "string"
-    }, {
       attribute: "autofocus",
       expectedType: "boolean"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
     }, {
       attribute: "list",
       expectedType: "string"
@@ -3473,9 +3371,6 @@ const inputSchema = {
     }, {
       attribute: "min",
       expectedType: "string|number"
-    }, {
-      attribute: "name",
-      expectedType: "string"
     }, {
       attribute: "placeholder",
       expectedType: "string"
@@ -3493,17 +3388,8 @@ const inputSchema = {
       expectedType: "string|number"
     }],
     password: [{
-      attribute: "autocomplete",
-      expectedType: "string"
-    }, {
       attribute: "autofocus",
       expectedType: "boolean"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
     }, {
       attribute: "list",
       expectedType: "string"
@@ -3513,9 +3399,6 @@ const inputSchema = {
     }, {
       attribute: "minlength",
       expectedType: "number"
-    }, {
-      attribute: "name",
-      expectedType: "string"
     }, {
       attribute: "pattern",
       expectedType: "string"
@@ -3542,15 +3425,6 @@ const inputSchema = {
       attribute: "checked",
       expectedType: "boolean"
     }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
-      attribute: "name",
-      expectedType: "string"
-    }, {
       attribute: "required",
       expectedType: "boolean"
     }, {
@@ -3561,12 +3435,6 @@ const inputSchema = {
       expectedType: "string"
     }],
     range: [{
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
       attribute: "list",
       expectedType: "string"
     }, {
@@ -3576,9 +3444,6 @@ const inputSchema = {
       attribute: "min",
       expectedType: "string|number"
     }, {
-      attribute: "name",
-      expectedType: "string"
-    }, {
       attribute: "step",
       expectedType: "number|any"
     }, {
@@ -3586,12 +3451,6 @@ const inputSchema = {
       expectedType: "string|number"
     }],
     reset: [{
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
       attribute: "formaction",
       expectedType: "string"
     }, {
@@ -3607,26 +3466,14 @@ const inputSchema = {
       attribute: "formtarget",
       expectedType: "string"
     }, {
-      attribute: "name",
-      expectedType: "string"
-    }, {
       attribute: "value",
       expectedType: "string"
     }],
     search: [{
-      attribute: "autocomplete",
-      expectedType: "string"
-    }, {
       attribute: "autofocus",
       expectedType: "boolean"
     }, {
       attribute: "dirname",
-      expectedType: "string"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
       expectedType: "string"
     }, {
       attribute: "list",
@@ -3637,9 +3484,6 @@ const inputSchema = {
     }, {
       attribute: "minlength",
       expectedType: "number"
-    }, {
-      attribute: "name",
-      expectedType: "string"
     }, {
       attribute: "pattern",
       expectedType: "string"
@@ -3660,12 +3504,6 @@ const inputSchema = {
       expectedType: "string"
     }],
     submit: [{
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
       attribute: "formaction",
       expectedType: "string"
     }, {
@@ -3681,26 +3519,14 @@ const inputSchema = {
       attribute: "formtarget",
       expectedType: "string"
     }, {
-      attribute: "name",
-      expectedType: "string"
-    }, {
       attribute: "value",
       expectedType: "string"
     }],
     tel: [{
-      attribute: "autocomplete",
-      expectedType: "string"
-    }, {
       attribute: "autofocus",
       expectedType: "boolean"
     }, {
       attribute: "dirname",
-      expectedType: "string"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
       expectedType: "string"
     }, {
       attribute: "list",
@@ -3711,9 +3537,6 @@ const inputSchema = {
     }, {
       attribute: "minlength",
       expectedType: "number"
-    }, {
-      attribute: "name",
-      expectedType: "string"
     }, {
       attribute: "pattern",
       expectedType: "string"
@@ -3734,19 +3557,10 @@ const inputSchema = {
       expectedType: "string"
     }],
     text: [{
-      attribute: "autocomplete",
-      expectedType: "string"
-    }, {
       attribute: "autofocus",
       expectedType: "boolean"
     }, {
       attribute: "dirname",
-      expectedType: "string"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
       expectedType: "string"
     }, {
       attribute: "list",
@@ -3757,9 +3571,6 @@ const inputSchema = {
     }, {
       attribute: "minlength",
       expectedType: "number"
-    }, {
-      attribute: "name",
-      expectedType: "string"
     }, {
       attribute: "pattern",
       expectedType: "string"
@@ -3779,13 +3590,32 @@ const inputSchema = {
       attribute: "value",
       expectedType: "string"
     }],
-    time: [{
-      attribute: "disabled",
+    textarea: [{
+      attribute: "autofocus",
       expectedType: "boolean"
     }, {
-      attribute: "form",
+      attribute: "cols",
+      expectedType: "integer"
+    }, {
+      attribute: "maxlength",
+      expectedType: "number"
+    }, {
+      attribute: "placeholder",
       expectedType: "string"
     }, {
+      attribute: "readonly",
+      expectedType: "boolean"
+    }, {
+      attribute: "required",
+      expectedType: "boolean"
+    }, {
+      attribute: "rows",
+      expectedType: "number"
+    }, {
+      attribute: "wrap",
+      expectedType: "hard|soft"
+    }],
+    time: [{
       attribute: "list",
       expectedType: "string"
     }, {
@@ -3793,9 +3623,6 @@ const inputSchema = {
       expectedType: "string"
     }, {
       attribute: "min",
-      expectedType: "string"
-    }, {
-      attribute: "name",
       expectedType: "string"
     }, {
       attribute: "readonly",
@@ -3811,19 +3638,10 @@ const inputSchema = {
       expectedType: "string"
     }],
     url: [{
-      attribute: "autocomplete",
-      expectedType: "string"
-    }, {
       attribute: "autofocus",
       expectedType: "boolean"
     }, {
       attribute: "dirname",
-      expectedType: "string"
-    }, {
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
       expectedType: "string"
     }, {
       attribute: "list",
@@ -3834,9 +3652,6 @@ const inputSchema = {
     }, {
       attribute: "minlength",
       expectedType: "number"
-    }, {
-      attribute: "name",
-      expectedType: "string"
     }, {
       attribute: "pattern",
       expectedType: "string"
@@ -3857,12 +3672,6 @@ const inputSchema = {
       expectedType: "string"
     }],
     week: [{
-      attribute: "disabled",
-      expectedType: "boolean"
-    }, {
-      attribute: "form",
-      expectedType: "string"
-    }, {
       attribute: "list",
       expectedType: "string"
     }, {
@@ -3870,9 +3679,6 @@ const inputSchema = {
       expectedType: "string"
     }, {
       attribute: "min",
-      expectedType: "string"
-    }, {
-      attribute: "name",
       expectedType: "string"
     }, {
       attribute: "readonly",
@@ -4356,7 +4162,7 @@ var undo_default = /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE
   \************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder Test","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"method":{"type":"string","default":""},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":true},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]},"step_amount":{"type":"integer","default":0}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder Test","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"method":{"type":"string","default":"post"},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":true},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]},"step_amount":{"type":"integer","default":0}}}');
 
 /***/ }
 

@@ -21,7 +21,7 @@ import {
 import apiFetch from '@wordpress/api-fetch';
 
 import RuleRow from './RuleRow';
-import {inputSchema} from './../../input/element_attributes.js';
+import {inputSchema} from './../../input/components/element_attributes.js';
 
 /**
  * Create a blank condition object.

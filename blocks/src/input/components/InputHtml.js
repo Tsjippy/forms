@@ -21,63 +21,23 @@ export function InputHtml({
                             value={value}
                             className="formbuilder"
                             autocomplete='on'
+                            {...attributes.inputAttributes}
                         />
                         {__(label, 'tsjippy')}
                     </label>
                 );
             })}
         </div>
-    } else if (attributes.type === 'select') {
-        html = (
-            <select
-                name={attributes.name}
-                className="formbuilder"
-                multiple={attributes.multiple}
-                data-blockid={attributes.blockId}
-                autocomplete='on'
-                {...blockProps}
-            >
-                {attributes.selectable_options.split("\n").map((option, index) => {
-                    const [value, label] = option.split("|");
-
-                    return (
-                        <option key={index} value={value}>
-                            {__(label, 'tsjippy')}
-                        </option>
-                    );
-                })}
-            </select>
-        );
-    } else if (attributes.type === 'datalist') {
-        html = (
-            <datalist
-                id={attributes.name}
-                data-blockid={attributes.blockId}
-                {...blockProps}
-            >
-                {attributes.selectable_options.split("\n").map((option, index) => {
-                    const [value, label] = option.split("|");
-
-                    return (
-                        <option
-                            key={index}
-                            data-value={value}
-                            value={__(label, 'tsjippy')}
-                        />
-                    );
-                })}
-            </datalist>
-        );
+    }else if (attributes.type == 'textarea') {
     } else {
         html = (
-            <input
+            <textarea
                 {...blockProps}
-                type={attributes.type}
                 name={attributes.name}
-                value={attributes.value}
                 className="formbuilder"
                 data-blockid={attributes.blockId}
                 autocomplete='on'
+                {...attributes.inputAttributes}
             />
         );
     }

@@ -1,4 +1,5 @@
 import { Button, Dropdown, SelectControl, PanelBody, TextControl, Disabled, ToggleControl, __experimentalNumberControl as NumberControl, CheckboxControl, RadioControl  } from '@wordpress/components';
+import * as elementAttributes from './element_attributes.js';
 
 /**
  * Stores data- attributes
@@ -24,7 +25,17 @@ const storeDataAtributes   = (type, newValue, name, saveFunction, all) => {
 /**
  * Creates inputs based on an array
  */
-export const dynamicInputs = (inputData, values, saveFunction) => {
+export const dynamicInputs = (attributes, type, saveFunction) => {
+    let inputData;
+
+    if(type == 'area'){
+        inputData = elementAttributes.inputSchema.ariaAttributes;
+    }else{
+        inputData = elementAttributes.inputSchema.types[attributes.type].concat(elementAttributes.inputSchema.sharedAttributes);
+    }
+
+    const values    = attributes.inputAttributes;
+
     let controls	= [];
     
     inputData.forEach( data => {

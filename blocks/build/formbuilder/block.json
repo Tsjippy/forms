@@ -19,7 +19,7 @@
   "attributes": {
     "method": {
       "type": "string",
-      "default": ""
+      "default": "post"
     },
     "target": {
       "type": "string",
