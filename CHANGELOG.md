@@ -8,6 +8,7 @@
 - wrap input in label
 - text multi input
 - create dynamic js
+- datalist and select blocks
 
 ### Changed
 - added input element attributes form
