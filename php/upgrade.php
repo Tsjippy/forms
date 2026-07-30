@@ -53,16 +53,13 @@ function insertNewForms(){
     $inputAttributes = [
         'type' => 'type',
         'name' => 'name',
-        'value' => 'add',
-        'inputAttributes' => 'add',
-        'ariaAttributes' => 'add',
-        'selectable_options' => 'add',
+        'inputAttributes' => 'options',
+        'selectable_options' => 'value_list',
         'add_button_content' => 'add',
         'remove_button_content' => 'remove',
         'multiple' => 'add',
         'required' => 'required',
-        'hasLabelParent' => 'add',
-        'hide' => 'add',
+        'hide' => 'hidden',
     ];
 
     $blocks = [
@@ -73,8 +70,10 @@ function insertNewForms(){
         "textarea"  => "tsjippy-forms/input",
         "select"    => "tsjippy-forms/select",
         "p"         => "paragraph",
-        "div-start" => "group"
-
+        "div-start" => "group",
+        "multi-start" => "tsjippy-forms/multiwrap",
+        "info"      => "tsjippy-forms/info",
+        "booking-selector" => "tsjippy-bookings/selector",
     ];
 
     $forms = $wpdb->get_results("SELECT * FROM `wp_tsjippy_forms`");
@@ -192,6 +191,46 @@ function insertNewForms(){
             elseif($element->type == 'div-end'){
                 $content .= '<!-- /wp:group /-->';
 
+                continue;
+            }
+
+            // multi container
+            elseif($element->type == 'multi-start'){
+                $attributes = [
+                    'add_button_content' => $element->add,
+                    "remove_button_content" => $element->remove
+                ];
+            }
+
+            // multi container end
+            elseif($element->type == 'multi-end'){
+                $content .= sprintf(
+                    '<!-- /wp:%s /-->',
+                    $blocks['multi-start']
+                );
+
+                continue;
+            }
+
+            // info
+            elseif($element->type == 'info'){
+                $attributes = [
+                    'text' => $element->text
+                ];
+            }
+
+            // booking selector
+            elseif($element->type == 'booking-selector'){
+                $content .= sprintf(
+                    '<!-- /wp:%s /-->',
+                    $blocks['booking-selector']
+                );
+
+                continue;
+            }
+
+            // php
+            elseif($element->type == 'php'){
                 continue;
             }
 

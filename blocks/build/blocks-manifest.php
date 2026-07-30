@@ -147,6 +147,33 @@ return array(
 			)
 		)
 	),
+	'info' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'tsjippy-forms/info',
+		'version' => '0.1.0',
+		'title' => 'Info element',
+		'category' => 'form-elements',
+		'icon' => 'forms',
+		'description' => 'Shows an info icon and a message on hover',
+		'example' => array(
+			
+		),
+		'supports' => array(
+			'html' => false
+		),
+		'textdomain' => 'tsjippy',
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'viewScript' => 'file:./view.js',
+		'attributes' => array(
+			'text' => array(
+				'type' => 'string',
+				'default' => ''
+			)
+		)
+	),
 	'input' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
 		'apiVersion' => 3,
@@ -250,6 +277,37 @@ return array(
 				'default' => array(
 					
 				)
+			)
+		)
+	),
+	'multiwrap' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'tsjippy-forms/multi-wrap',
+		'version' => '0.1.0',
+		'title' => 'Form Multi Input Wrapper',
+		'category' => 'form-elements',
+		'icon' => 'forms',
+		'description' => 'Allows the submission of multiple elements which are grouped together. Children details for example where you can add multiple children.',
+		'example' => array(
+			
+		),
+		'supports' => array(
+			'html' => false
+		),
+		'textdomain' => 'tsjippy',
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'viewScript' => 'file:./view.js',
+		'attributes' => array(
+			'add_button_content' => array(
+				'type' => 'string',
+				'default' => '+'
+			),
+			'remove_button_content' => array(
+				'type' => 'string',
+				'default' => '-'
 			)
 		)
 	),
