@@ -7,7 +7,11 @@
  *
  * Replace them with your own styles or remove the file completely.
  */
-.wp-block-tsjippy-forms-formbuilder label {
-  display: block;
-  margin-top: 5px;
+.clone-div .button-wrapper {
+  margin: auto;
+  display: flex;
+}
+.clone-div .button-wrapper .button {
+  flex: 1;
+  max-width: max-content;
 }

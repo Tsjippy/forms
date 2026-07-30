@@ -4,7 +4,7 @@ import { PanelBody, TextControl, Placeholder } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import './editor.scss';
-import { Multiple } from './../input/components/Multiple.js';
+import { Wrapper } from './components/Wrapper.js';
 /**
  * The edit function describes the structure of your block in the context of the
  * editor. This represents what the editor will render when the block is used.
@@ -27,16 +27,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
         },
         [ clientId ]
     );
-
-	/**
-	 * Store some child attributes in our own attributes
-	 */
-	// Get the inner block
-	const innerBlocks = useSelect(
-		(select) =>
-			select('core/block-editor').getBlocks(clientId),
-		[clientId]
-	);
 
 	return (
 		<>
@@ -74,29 +64,11 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						</Placeholder>
 					</>
 				: 
-					<div class="clone-divs-wrapper">
-						<div class="clone-div formstep step-hidden" data-div-id="0">
-							<div class="button-wrapper" style="margin: auto; display:flex;">
-								<button
-									type="button"
-									className="remove button hidden"
-									style={{ flex: 1, maxWidth: 'max-content' }}
-								>
-									{ attributes.remove_button_content }
-								</button>
-
-								<button
-									type="button"
-									className="add button"
-									style={{ flex: 1, maxWidth: 'max-content' }}
-								>
-									{ attributes.add_button_content }
-								</button>
-
-								<InnerBlocks.Content />
-							</div>
-						</div>
-					</div>
+					<Wrapper
+						attributes= { attributes }
+					>
+						<InnerBlocks />
+					</Wrapper>
 			}
 		</fieldset>
 		</>
