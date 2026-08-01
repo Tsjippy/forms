@@ -30,7 +30,6 @@ export const RenderedSelect = ({ attributes, blockProps, dynamicOptions = {}}) =
 			data-blockid={attributes.blockId}
 		>
 			{options.map((option, index) => {
-				console.log(option);
 				return (
 					<option
 						key={index}

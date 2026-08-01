@@ -1,26 +1,41 @@
-import { Button, Dropdown, SelectControl, PanelBody, TextControl, Disabled, ToggleControl, __experimentalNumberControl as NumberControl, CheckboxControl, RadioControl  } from '@wordpress/components';
+import {
+    Button,
+    Dropdown,
+    SelectControl,
+    PanelBody,
+    TextControl,
+    Disabled,
+    ToggleControl,
+    __experimentalNumberControl as NumberControl,
+    CheckboxControl,
+    RadioControl
+} from '@wordpress/components';
+
 import * as elementAttributes from './element_attributes.js';
 
 /**
- * Stores data- attributes
- * @param {*} type 
- * @param {*} newValue 
- * @param {*} name 
- * @param {*} saveFunction 
- * @param {*} all 
+ * Stores data-* attributes
  */
-const storeDataAtributes   = (type, newValue, name, saveFunction, all) => {
-    // Remove old entry if it is a name update
-    if(type == 'name'){
-        all[newValue]   = all[name] ?? '';
+const storeDataAttributes = (
+    type,
+    newValue,
+    name,
+    saveFunction,
+    all
+) => {
+    const updated = { ...all };
 
-        delete all[name];
-    }else{
-        all[name] = newValue;
+    if (type === 'name') {
+        if (newValue !== name) {
+            updated[newValue] = updated[name] ?? '';
+            delete updated[name];
+        }
+    } else {
+        updated[name] = newValue;
     }
 
-    saveFunction({...all}, 'data-*');
-}
+    saveFunction(updated, 'data-*');
+};
 
 /**
  * Creates inputs based on an array
@@ -28,104 +43,145 @@ const storeDataAtributes   = (type, newValue, name, saveFunction, all) => {
 export const dynamicInputs = (attributes, type, saveFunction) => {
     let inputData;
 
-    if(type == 'area'){
+    if (type === 'area') {
         inputData = elementAttributes.inputSchema.ariaAttributes;
-    }else{
-        inputData = elementAttributes.inputSchema.types[attributes.type].concat(elementAttributes.inputSchema.sharedAttributes);
+    } else {
+        inputData = (
+            elementAttributes.inputSchema.types?.[attributes.type] || []
+        ).concat(elementAttributes.inputSchema.sharedAttributes);
     }
 
-    const values    = attributes.inputAttributes;
+    const values = attributes.inputAttributes || [];
 
-    let controls	= [];
-    
-    inputData.forEach( data => {
-        let attributeName	= data.attribute
-        let attributeValue	= values[data.attribute] ?? '';
+    const controls = [];
+
+    inputData.forEach((data, index) => {
+        const attributeName = data.attribute;
+        let attributeValue = values[data.attribute] ?? '';
 
         /**
-         * Multiple entries possible
+         * Multiple data-* entries possible
          */
-        if(attributeName == 'data-*'){
-            // The name
-            controls.push(<h4 style={{marginTop: '20px'}}>Data- Attributes</h4>);
+        if (attributeName === 'data-*') {
+            controls.push(
+                <h4
+                    key="data-attributes-heading"
+                    style={{ marginTop: '20px' }}
+                >
+                    Data Attributes
+                </h4>
+            );
 
-            /**
-             * attributeValue should be an array
-             * of name values
-             */
-            if(attributeValue == ''){
-                attributeValue  = {};
-            }
+            const dataAttributes =
+                typeof attributeValue === 'object' && attributeValue !== null
+                    ? attributeValue
+                    : {};
 
-            // Add an empty one to allow new data- attributes
-            attributeValue[''] = '';
+            const entries =
+                dataAttributes[''] === undefined
+                    ? { ...dataAttributes, '': '' }
+                    : dataAttributes;
 
-            // Loop over all existing data- attributes
-            for (const [key, value] of Object.entries(attributeValue)) {
+            Object.entries(entries).forEach(([key, value], entryIndex) => {
                 controls.push(
                     <TextControl
-                        label    = { `data-name` }
-                        value    = { key }
-                        onChange = { ( name ) => storeDataAtributes('name', name, key, saveFunction, attributeValue) }
+                        key={`data-name-${entryIndex}-${key}`}
+                        label="data-name"
+                        value={key}
+                        onChange={(name) =>
+                            storeDataAttributes(
+                                'name',
+                                name,
+                                key,
+                                saveFunction,
+                                dataAttributes
+                            )
+                        }
                     />
                 );
 
                 controls.push(
                     <TextControl
-                        label    = { `data-${key} value` }
-                        value    = { value }
-                        onChange = { ( value ) => storeDataAtributes('value', value, key, saveFunction, attributeValue) }
+                        key={`data-value-${entryIndex}-${key}`}
+                        label={`data-${key} value`}
+                        value={value}
+                        onChange={(newValue) =>
+                            storeDataAttributes(
+                                'value',
+                                newValue,
+                                key,
+                                saveFunction,
+                                dataAttributes
+                            )
+                        }
                     />
                 );
-            }
-        }
-
-        else if(data.expectedType == 'string'){
+            });
+        } else if (data.expectedType === 'string') {
             controls.push(
                 <TextControl
-                    label    = { attributeName }
-                    value    = { attributeValue }
-                    onChange = { ( value ) => saveFunction(value, attributeName) }
+                    key={`string-${attributeName}-${index}`}
+                    label={attributeName}
+                    value={attributeValue}
+                    onChange={(value) =>
+                        saveFunction(value, attributeName)
+                    }
                 />
-            )
-        } else if(data.expectedType == 'boolean'){
+            );
+        } else if (data.expectedType === 'boolean') {
             controls.push(
                 <ToggleControl
-                    label    = { attributeName }
-                    checked  = {!!attributeValue}
-                    onChange = { ( checked ) => saveFunction(checked, attributeName) }
+                    key={`boolean-${attributeName}-${index}`}
+                    label={attributeName}
+                    checked={!!attributeValue}
+                    onChange={(checked) =>
+                        saveFunction(checked, attributeName)
+                    }
                 />
-            )
-        } else if(data.expectedType == 'number'){
+            );
+        } else if (data.expectedType === 'number') {
             controls.push(
                 <NumberControl
-                    label    		   = { attributeName }
-                    isShiftStepEnabled = { true }
-                    onChange           = { ( value ) => saveFunction(value, attributeName) }
-                    shiftStep          = { 1 }
-                    value              = { attributeValue }
+                    key={`number-${attributeName}-${index}`}
+                    label={attributeName}
+                    isShiftStepEnabled={true}
+                    onChange={(value) =>
+                        saveFunction(value, attributeName)
+                    }
+                    shiftStep={1}
+                    value={attributeValue}
                 />
-            )
-        } else if(data.expectedType.includes('|')){
-            let options = [];
-            data.expectedType.split('|').forEach(value => {
-                options.push({ label: value, value: value });
-            });
+            );
+        } else if (
+            typeof data.expectedType === 'string' &&
+            data.expectedType.includes('|')
+        ) {
+            const options = data.expectedType
+                .split('|')
+                .map((value) => ({
+                    label: value,
+                    value
+                }));
 
             controls.push(
                 <RadioControl
-                    label    = { attributeName }
-                    selected = { attributeValue }
-                    options  = { options }
-                    onChange = { ( checked ) => saveFunction(checked, attributeName) }
+                    key={`radio-${attributeName}-${index}`}
+                    label={attributeName}
+                    selected={attributeValue}
+                    options={options}
+                    onChange={(selected) =>
+                        saveFunction(selected, attributeName)
+                    }
                 />
-            )
-        }else{
+            );
+        } else {
             controls.push(
-                <div>Not sure how to render this {data.expectedType}</div>
-            )
+                <div key={`unknown-${attributeName}-${index}`}>
+                    Not sure how to render this {data.expectedType}
+                </div>
+            );
         }
     });
 
     return controls;
-}
+};

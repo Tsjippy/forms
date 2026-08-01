@@ -4,27 +4,36 @@
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import { useBlockProps  } from '@wordpress/block-editor';
+
+import { useBlockProps } from '@wordpress/block-editor';
 
 import { InputHtml } from './components/InputHtml.js';
 
 /**
  * The save function defines the way in which the different attributes should
  * be combined into the final markup, which is then serialized by the block
- * editor into `post_content`.
+ * editor into post_content.
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#save
  *
- * @return {Element} Element to render.
+ * @return {Element}
  */
-export default function save({ attributes, clientId }) {
-	const blockProps = useBlockProps.save({className: attributes.hidden && !attributes.hasLabelParent ? 'hidden' : undefined});
+export default function save({ attributes }) {
+    const className =
+        attributes.hidden && !attributes.hasLabelParent
+            ? 'hidden'
+            : undefined;
 
-	return (
-		<InputHtml
-			attributes={attributes}
-			blockProps={blockProps}
-			hasLabelParent={attributes.hasLabelParent}
-		/>
-	);
+    const blockProps = useBlockProps.save({
+        className,
+    });
+
+    return (
+        <InputHtml
+            attributes={attributes}
+            blockProps={blockProps}
+            hasLabelParent={attributes.hasLabelParent}
+			isSaving={true}
+        />
+    );
 }

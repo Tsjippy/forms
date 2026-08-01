@@ -135,7 +135,6 @@ const RenderedSelect = ({
     required: attributes.required,
     "data-blockid": attributes.blockId,
     children: options.map((option, index) => {
-      console.log(option);
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("option", {
         value: option.value,
         children: option.label

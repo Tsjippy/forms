@@ -1,292 +1,347 @@
 import { __ } from '@wordpress/i18n';
-import {  useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { SelectControl, PanelBody, TextControl,  ToggleControl, TextareaControl  } from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
+import {
+    useBlockProps,
+    InspectorControls,
+} from '@wordpress/block-editor';
+import {
+    SelectControl,
+    PanelBody,
+    TextControl,
+    ToggleControl,
+    TextareaControl,
+} from '@wordpress/components';
+import {
+    useState,
+    useEffect,
+    useMemo,
+} from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 import './editor.scss';
+
 import * as elementAttributes from './components/element_attributes.js';
 import { dynamicInputs } from './components/dynamic_inputs.js';
 import { InputHtml } from './components/InputHtml.js';
-import { PrefillOptionsSelector, PrefillValueSelector } from '../../shared/usePrefill.js';
+import {
+    PrefillOptionsSelector,
+    PrefillValueSelector,
+} from '../../shared/usePrefill.js';
 
-/**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- *
- * @return {Element} Element to render.
- */
-export default function Edit({ attributes, setAttributes, isSelected, clientId }) {
-	const blockProps = useBlockProps();
+export default function Edit({
+    attributes,
+    setAttributes,
+    isSelected,
+    clientId,
+}) {
+    const blockProps = useBlockProps();
 
-	const getTypeOptions = () => {
-		let typeOptions	= [
-			{label: __('Select an input type', 'tsjippy'), value: '' }
-		];
+    const typeOptions = useMemo(
+        () => [
+            {
+                label: __('Select an input type', 'tsjippy'),
+                value: '',
+            },
+            ...elementAttributes.inputTypes.map((type) => ({
+                label: type,
+                value: type,
+            })),
+        ],
+        []
+    );
 
-		elementAttributes.inputTypes.forEach( type => { 
-			typeOptions.push( {label: type, value: type });
-		}); 
-	
-		return typeOptions;
-	}
+    const storeAttributeAttributes = (value, name) => {
+        setAttributes({
+            inputAttributes: {
+                ...(attributes.inputAttributes || {}),
+                value,
+            },
+        });
+    };
 
-	/**
-	 * For a submit type the value is what is shown in the button
-	 */
-	const inputValue = () => {
-		if(attributes.type != 'submit'){
-			return '';
-		}
+    const [inputName, setInputName] = useState(
+        attributes.name || ''
+    );
 
-		return (
-			<TextControl
-				label    = "Input Content"
-				value    = { attributes.value }
-				onChange = { ( value ) => setAttributes({ value: value })}
-			/>
-		);
-	}
+    useEffect(() => {
+        setInputName(attributes.name || '');
+    }, [attributes.name]);
 
-	/**
-	 * Stores the input attribute value
-	 */
-	const storeAttributeAttributes = (value, name) => {
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (inputName !== attributes.name) {
+                setAttributes({ name: inputName });
+            }
+        }, 800);
 
-		let inputAttributes	= {... attributes.inputAttributes};
-
-		inputAttributes[name]	= value;
-
-		setAttributes({ inputAttributes: inputAttributes })
-	}
-
-	/**
-	 * The input type selector
-	 */
-	const inputTypeSelector = () => {
-		return (
-			<SelectControl
-				label    = "Input Type"
-				value    = { attributes.type }
-				options  = { getTypeOptions() }
-				onChange = { ( type ) => setAttributes({ type: type })}
-			/>
-		)
-	}
-
-	/**
-	 * Set a debounce for the label text input so it disappears when we stop typing, not straight after the first character
-	 */
-	const [inputName, setInputName] = useState(attributes.name);
-
-	useEffect(() => {
-		setInputName(attributes.name);
-	}, [attributes.name]);
-
-	useEffect(() => {
-		const timeoutId = setTimeout(() => {
-			setAttributes({ name: inputName })
-		}, 800);
-
-		return () => clearTimeout(timeoutId);
-	}, [inputName]);
-
-	/**
-	 * The input name component
-	 */
-	const inputNameComponent = () => {
-		return (
-			<TextControl
-				label    = "Input Name"
-				value    = { inputName }
-				onChange = { ( name ) => setInputName( name )}
-			/>
-		)
-	}
+        return () => clearTimeout(timeoutId);
+    }, [inputName, attributes.name, setAttributes]);
 
     const hasLabelParent = useSelect(
         (select) =>
             select('core/block-editor')
-                .getBlockParentsByBlockName(clientId, 'tsjippy-forms/label')
-                .length > 0,
+                .getBlockParentsByBlockName(
+                    clientId,
+                    'tsjippy-forms/label'
+                ).length > 0,
         [clientId]
     );
 
-	useEffect(() => {
-		if (attributes.hasLabelParent !== hasLabelParent) {
-			setAttributes({ hasLabelParent });
-		}
-	}, [hasLabelParent, attributes.hasLabelParent, setAttributes]);
+    useEffect(() => {
+        if (attributes.hasLabelParent !== hasLabelParent) {
+            setAttributes({ hasLabelParent });
+        }
+    }, [
+        hasLabelParent,
+        attributes.hasLabelParent,
+        setAttributes,
+    ]);
 
-	/**
-	 * Shows the input attributes form if this is an selected input
-	 * 
-	 * @returns 
-	 */
-	const propertiesForm = () => {
-		// Show the input html if this is not a selected input
-		if(!isSelected){
-			return(
-				<InputHtml
-					attributes={attributes}
-					blockProps={blockProps}
-					hasLabelParent={hasLabelParent}
-				/>
-			)
-		}
+    const inputNameComponent = (
+        <TextControl
+            label="Input Name"
+            value={inputName}
+            onChange={setInputName}
+        />
+    );
 
-		// First set an input type
-		if(attributes.type == ''){
-			return (
-				inputTypeSelector()
-			);
-		}
+    const inputTypeSelector = (
+        <SelectControl
+            label="Input Type"
+            value={attributes.type}
+            options={typeOptions}
+            onChange={(type) => setAttributes({ type })}
+        />
+    );
 
-		// Then set a name
-		if(attributes.name == ''){
-			return (
-				<>
-					{inputTypeSelector()}
-					{inputNameComponent()}
-				</>
-			);
-		}
-		
-		// Attributes 
-		let attributeControls	= dynamicInputs(attributes, 'default', storeAttributeAttributes);
+    const inputValue =
+        attributes.type === 'submit' ? (
+            <TextControl
+                label="Input Content"
+                value={attributes.value}
+                onChange={(value) =>
+                    setAttributes({ value })
+                }
+            />
+        ) : null;
 
-		let ariaControls 		= [];
+    const selectableOptions =
+        ['radio', 'checkbox', 'select'].includes(
+            attributes.type
+        ) ? (
+            <>
+                <TextareaControl
+                    label={__(
+                        'Selectable Options',
+                        'tsjippy'
+                    )}
+                    help="One option per line. Separate value and label with |, e.g. car|auto"
+                    value={attributes.selectable_options}
+                    onChange={(value) =>
+                        setAttributes({
+                            selectable_options: value,
+                        })
+                    }
+                />
 
-		/**
-		 * Add aria attributes if we need them
-		 */
-		if(attributes.ariaAttributes){
-			ariaControls	= dynamicInputs(attributes, 'aria', storeAttributeAttributes);
-		}
+                <h4>Dynamic Options (prefill)</h4>
 
-		/**
-		 * Input type specific options
-		 */
-		const selectableOptions = () => {
-			if(['radio', 'checkbox', 'select'].includes(attributes.type)){
-				return (
-					<>
-						<TextareaControl
-							label    = { __("Selectable Options", 'tsjippy')}
-							help     = "One option per line. If the value and label differ seperate them with a |  i.e. car|auto"
-							value    = { attributes.selectable_options }
-							onChange = { ( value ) => setAttributes({ selectable_options: value }) }
-						/>
-						<h4>Dynamic Options (prefill)</h4>
-						<PrefillOptionsSelector
-							value={ attributes.selectable_options_dynamic }
-							onChange={ (value) => setAttributes({ selectable_options_dynamic: value }) }
-						/>
-					</>
-				);
-			}
-		}
+                <PrefillOptionsSelector
+                    value={
+                        attributes.selectable_options_dynamic
+                    }
+                    onChange={(value) =>
+                        setAttributes({
+                            selectable_options_dynamic: value,
+                        })
+                    }
+                />
+            </>
+        ) : null;
 
-		return ( 
-			<>
-			<InputHtml
-				attributes={attributes}
-				blockProps={blockProps}
-				hasLabelParent={hasLabelParent}
-			/>
+    const renderPropertiesForm = () => {
+        if (!isSelected) {
+            return (
+                <InputHtml
+                    attributes={attributes}
+                    blockProps={blockProps}
+                    hasLabelParent={hasLabelParent}
+                />
+            );
+        }
 
-			{ inputTypeSelector() }
-			{ inputNameComponent() }
-			{ selectableOptions() }
+        if (attributes.type === '') {
+            return inputTypeSelector;
+        }
 
-			<PrefillValueSelector
-				value={ attributes.dynamic_value }
-				onChange={ (value) => setAttributes({ dynamic_value: value }) }
-			/>
+        if (!attributes.name) {
+            return (
+                <>
+                    {inputTypeSelector}
+                    {inputNameComponent}
+                </>
+            );
+        }
 
-			<div className="attributes-form">
-				<h3>Input properties</h3>
-				{ attributeControls }
+        const attributeControls = dynamicInputs(
+            attributes,
+            'default',
+            storeAttributeAttributes
+        );
 
-				<ToggleControl
-					label    = { __('Add aria attributes', 'tsjippy') }
-					checked  = {!!attributes.ariaAttributes}
-					onChange = { ( checked ) => setAttributes({ ariaAttributes: checked })}
-				/>
-				{ariaControls}
-			</div> 
-			</>
-		);
-	}
+        const ariaControls = attributes.ariaAttributes
+            ? dynamicInputs(
+                  attributes,
+                  'aria',
+                  storeAttributeAttributes
+              )
+            : [];
 
-	return (
-		<>
-		<InspectorControls>
-			<PanelBody title={__('Input Settings', 'tsjippy')}>
-				<SelectControl
-					label    = "Input Type"
-					value    = { attributes.type }
-					options  = { getTypeOptions() }
-					onChange = { ( type ) => setAttributes({ type: type })}
-				/>
-				{ inputNameComponent() }
-				{ inputValue() }
+        return (
+            <>
+                <InputHtml
+                    attributes={attributes}
+                    blockProps={blockProps}
+                    hasLabelParent={hasLabelParent}
+                />
 
-				<ToggleControl
-					label    = { __('Hide', 'tsjippy') }
-					checked  = {!!attributes.hidden}
-					onChange = { ( checked ) => setAttributes({ hidden: checked })}
-				/>
+                {inputTypeSelector}
+                {inputNameComponent}
+                {selectableOptions}
 
-				<ToggleControl
-					label    = { __('Allow multiple answers', 'tsjippy') }
-					checked  = {!!attributes.multiple}
-					onChange = { ( checked ) => setAttributes({ multiple: checked })}
-				/>
+				<h4>Dynamic Value (prefill)</h4>
+                <PrefillValueSelector
+                    value={attributes.dynamic_value}
+                    onChange={(value) =>
+                        setAttributes({
+                            dynamic_value: value,
+                        })
+                    }
+                />
 
-				<ToggleControl
-					label    = { __('This is a required input', 'tsjippy') }
-					checked  = {!!attributes.required}
-					onChange = { ( checked ) => setAttributes({ required: checked })}
-				/>
+                <div className="attributes-form">
+                    <h3>Input properties</h3>
 
-				{
-					/**
-					 * If we allow multiple answer we have a + and - button
-					 * This allows to customize that
-					 */
-					attributes.multiple ?
-						<>
-							<TextControl
-								label    = "Add Button Text"
-								value    = { attributes.add_button_content }
-								onChange = { ( value ) => setAttributes({ add_button_content: value })}
-							/>
+                    {attributeControls}
 
-							<TextControl
-								label    = "Remove Button Text"
-								value    = { attributes.remove_button_content }
-								onChange = { ( value ) => setAttributes({ remove_button_content: value })}
-							/>
-						</>
-					: ''
-}
-			</PanelBody>
-		</InspectorControls>
+                    <ToggleControl
+                        label={__(
+                            'Add aria attributes',
+                            'tsjippy'
+                        )}
+                        checked={
+                            !!attributes.ariaAttributes
+                        }
+                        onChange={(ariaAttributes) =>
+                            setAttributes({
+                                ariaAttributes,
+                            })
+                        }
+                    />
 
-		<div { ...blockProps } >
-			<fieldset>
-    			<legend>
-					{ (attributes.type || '')
-						.charAt(0)
-						.toUpperCase() + (attributes.type || '').slice(1) 
-					} input
-				</legend>
-				{ propertiesForm() }
-			</fieldset>
-		</div>
-		</>
-	);
+                    {ariaControls}
+                </div>
+            </>
+        );
+    };
+
+    return (
+        <>
+            <InspectorControls>
+                <PanelBody
+                    title={__(
+                        'Input Settings',
+                        'tsjippy'
+                    )}
+                >
+                    <SelectControl
+                        label="Input Type"
+                        value={attributes.type}
+                        options={typeOptions}
+                        onChange={(type) =>
+                            setAttributes({ type })
+                        }
+                    />
+
+                    {inputNameComponent}
+                    {inputValue}
+
+                    <ToggleControl
+                        label={__('Hide', 'tsjippy')}
+                        checked={!!attributes.hidden}
+                        onChange={(hidden) =>
+                            setAttributes({ hidden })
+                        }
+                    />
+
+                    <ToggleControl
+                        label={__(
+                            'Allow multiple answers',
+                            'tsjippy'
+                        )}
+                        checked={!!attributes.multiple}
+                        onChange={(multiple) =>
+                            setAttributes({ multiple })
+                        }
+                    />
+
+                    <ToggleControl
+                        label={__(
+                            'This is a required input',
+                            'tsjippy'
+                        )}
+                        checked={!!attributes.required}
+                        onChange={(required) =>
+                            setAttributes({ required })
+                        }
+                    />
+
+                    {attributes.multiple && (
+                        <>
+                            <TextControl
+                                label="Add Button Text"
+                                value={
+                                    attributes.add_button_content
+                                }
+                                onChange={(
+                                    add_button_content
+                                ) =>
+                                    setAttributes({
+                                        add_button_content,
+                                    })
+                                }
+                            />
+
+                            <TextControl
+                                label="Remove Button Text"
+                                value={
+                                    attributes.remove_button_content
+                                }
+                                onChange={(
+                                    remove_button_content
+                                ) =>
+                                    setAttributes({
+                                        remove_button_content,
+                                    })
+                                }
+                            />
+                        </>
+                    )}
+                </PanelBody>
+            </InspectorControls>
+
+            <div {...blockProps}>
+                <fieldset>
+                    <legend>
+                        {(attributes.type || '')
+                            .charAt(0)
+                            .toUpperCase() +
+                            (attributes.type || '').slice(1)}{' '}
+                        input
+                    </legend>
+
+                    {renderPropertiesForm()}
+                </fieldset>
+            </div>
+        </>
+    );
 }
