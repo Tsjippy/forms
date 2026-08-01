@@ -8,10 +8,62 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+function printJs($blockData, $postId){
+    ?>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            sendBlockContent(<?php echo wp_json_encode($blockData); ?>, <?php echo $postId;?>);
+        });
+    </script>
+    <?php
+}
+
+add_action('wp_ajax_save_generated_blocks', function () {
+    $content = wp_unslash($_POST['content'] ?? '');
+
+    wp_update_post(
+        [
+            'ID'    => (int)$_POST['postId'],
+            'post_content'  => $content
+        ]
+    );
+
+    wp_send_json_success();
+});
+
 function insertNewForms(){
     global $wpdb;
 
-    
+    ?>
+<script>
+function buildBlock(block) {
+    return wp.blocks.createBlock(
+        block.blockName,
+        block.attrs || {},
+        (block.innerBlocks || []).map(buildBlock)
+    );
+}
+
+function sendBlockContent(block, postId){
+    console.log(block);
+    const content = wp.blocks.serialize(
+        buildBlock(block)
+    );
+
+    fetch(ajaxurl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            action: 'save_generated_blocks',
+            content,
+            postId
+        }),
+    });
+}
+</script>
+<?php   
     $formAttributes = [
         'submission_message' => 'succes_message',
         'submission_id'      => 'include_id',
@@ -26,7 +78,6 @@ function insertNewForms(){
     ];
 
     $inputTypes = [
-        "button",
         "checkbox",
         "color",
         "date",
@@ -53,13 +104,14 @@ function insertNewForms(){
     $inputAttributes = [
         'type' => 'type',
         'name' => 'name',
-        'inputAttributes' => 'options',
         'selectable_options' => 'value_list',
         'add_button_content' => 'add',
         'remove_button_content' => 'remove',
-        'multiple' => 'add',
+        'multiple' => 'multiple',
         'required' => 'required',
         'hide' => 'hidden',
+        'selectable_options_dynamic' => 'default_array_value',
+        'dynamic_value' => 'default_value',
     ];
 
     $blocks = [
@@ -73,12 +125,20 @@ function insertNewForms(){
         "div-start" => "group",
         "multi-start" => "tsjippy-forms/multiwrap",
         "info"      => "tsjippy-forms/info",
-        "booking-selector" => "tsjippy-bookings/selector",
+        "booking-selector" => "tsjippy-bookings/accomodation",
+        "button"    => "buttons",
     ];
 
-    $forms = $wpdb->get_results("SELECT * FROM `wp_tsjippy_forms`");
+    $forms = new Forms();
+    $forms->createDbTables();
 
-    foreach($forms as $form){
+    $forms->getForms();
+
+    foreach($forms->forms as $form){
+
+        if($form->id != 12){
+            continue;
+        }
 
         // Insert the post into the database
         $postId = wp_insert_post( [
@@ -88,48 +148,55 @@ function insertNewForms(){
             'post_type'     => 'page'
         ] );
 
+        echo "Created post <a href='" . get_permalink($postId) ."'>$form->name</a><br>";
+        
         /**
          * Build the form
          */
 
-        $blockAttributes = [];
+        $attributes = [];
 
-        foreach ($formAttributes as $blockKey => $oldKey) {
+        foreach ($formAttributes as $blockKey => $oldKey) {     
             if (isset($form->$oldKey)) {
-                $blockAttributes[$blockKey] = $form->$oldKey;
+                
+                if(in_array($blockKey, ['submission_id', 'user_meta'])){
+                    $attributes[$blockKey] = boolval($form->$oldKey);
+                }else{
+                    $attributes[$blockKey] = $form->$oldKey;
+                }
             }
         }
 
-        $content = sprintf(
-            '<!-- wp:tsjippy-forms/formbuilder %s /-->',
-            wp_json_encode($blockAttributes)
-        );
+        $formBlock  = [
+            'blockName'    => 'tsjippy-forms/formbuilder',
+            'attrs'        => $attributes,
+            'innerBlocks'  => [],
+            'innerHTML'    => '',
+            'innerContent' => []
+        ];
+
+        $stack = [&$formBlock];
 
         /**
          * Form Elements
          */
         $elements   = $wpdb->get_results("select * from wp_tsjippy_form_elements where form_id = $form->id ORDER BY `priority` ");
 
-        $closeLabel     = false;
-        $closeFormstep  = false;
+        $shouldCLoseFormstep    = false;
+        $shouldCloseLabel       = false;
         foreach($elements as $element){
-            /* div-start
-            div-end */
-
-            $attributes = [];
+            $attributes     = [];
+            $innerBlocks    = [];
 
             // Formstep
             if($element->type == 'formstep'){
-                if($closeFormstep){
-                    $content .= sprintf(
-                        '<!-- /wp:%s /-->',
-                        $blocks[$element->type]
-                    );
-                }
-
                 $attributes = ['text' => $element->text];
 
-                $closeFormstep  = true;
+                // Store innerblock index
+                if($shouldCLoseFormstep){
+                    array_pop($stack);
+                }
+                $shouldCLoseFormstep = true;
             }
 
             // Input
@@ -143,26 +210,35 @@ function insertNewForms(){
                 foreach ($inputAttributes as $blockKey => $oldKey) {
                     if (isset($element->$oldKey)) {
                         $attributes[$blockKey] = $element->$oldKey;
+
+                        if(in_array($blockKey, ['multiple','required', 'hide'])){
+                            $attributes[$blockKey] = boolval($element->$oldKey);
+                        }
                     }
                 }
 
-                $element->type  = 'input';
-
-                if($closeLabel){
-                    $content .= sprintf(
-                        '<!-- /wp:%s /-->',
-                        $blocks['label']
-                    );
-                    
-                    $closeLabel     = false;
+                $attributes['inputAttributes'] = [];
+                if(!empty($element->text)){
+                    $attributes['inputAttributes']["value"] = $element->text;
                 }
+
+                 if(!empty($element->options)){
+                    $options = explode("\n",  $element->options);
+
+                    foreach($options as $option){
+                        $exp    = explode("=", $option);
+                        $attributes['inputAttributes'][$exp[0]] = $exp[1];
+                    }
+                 }
+
+                $element->type  = 'input';
             }
 
             // Label
             elseif($element->type == 'label'){
                 $attributes = ['text' => $element->text];
 
-                $closeLabel     = true;
+                $shouldCloseLabel = true;
             }
 
             // datalist
@@ -189,7 +265,7 @@ function insertNewForms(){
 
             // Container end
             elseif($element->type == 'div-end'){
-                $content .= '<!-- /wp:group /-->';
+                array_pop($stack);
 
                 continue;
             }
@@ -204,10 +280,7 @@ function insertNewForms(){
 
             // multi container end
             elseif($element->type == 'multi-end'){
-                $content .= sprintf(
-                    '<!-- /wp:%s /-->',
-                    $blocks['multi-start']
-                );
+                array_pop($stack);
 
                 continue;
             }
@@ -221,12 +294,15 @@ function insertNewForms(){
 
             // booking selector
             elseif($element->type == 'booking-selector'){
-                $content .= sprintf(
-                    '<!-- /wp:%s /-->',
-                    $blocks['booking-selector']
-                );
-
-                continue;
+                $attributes = [
+                    'bookingSubjects' => [
+                        24522,
+                        24523,
+                        24524,
+                        24530
+                    ],
+                    "required" => true
+                ];
             }
 
             // php
@@ -234,56 +310,133 @@ function insertNewForms(){
                 continue;
             }
 
-            $content .= sprintf(
-                '<!-- wp:%s %s /-->',
-                $blocks[$element->type],
-                wp_json_encode($attributes)
-            );
+            elseif($element->type == 'p'){
+                $attributes = [
+                    "text"  => $element->text
+                ]; 
+            }
+
+            elseif($element->type == 'button'){
+                $attributes = [
+                    "text"  => $element->text
+                ]; 
+
+                $innerBlocks = [
+                    [
+                        'blockName'    => 'button',
+                        'attrs'        => ["onlyOnInherited" => true],
+                        'innerBlocks'  => [],
+                        'innerHTML'    => '',
+                        'innerContent' => []
+                    ]
+                ];
+            }
+
+            else{
+                TSJIPPY\printArray("Unknown element type $element->type ");
+            }
+
+            /**
+             * Add to the current parent
+             */
+            $attributes['blockId']  = $element->id;
+
+            $current = &$stack[count($stack) - 1];
+
+            $current['innerBlocks'][] = [
+                'blockName'    => $blocks[$element->type],
+                'attrs'        => $attributes,
+                'innerBlocks'  => $innerBlocks,
+                'innerHTML'    => '',
+                'innerContent' => []
+            ];
+
+            if($shouldCloseLabel && $element->type != 'label'){
+                array_pop($stack);
+                $shouldCloseLabel   = false;
+            }
+
+            if(in_array($element->type, ['formstep', 'label', 'div-start', 'multi-start'])){
+                $index = count($current['innerBlocks']) - 1;
+                $stack[] = &$current['innerBlocks'][$index];
+            }
+
+            /**
+             * Block Conditions
+             */
+            $rules   = [];
+            $actions = [];
+            if(!empty($element->conditions)){
+                $element->conditions = maybe_unserialize($element->conditions);
+                foreach($element->conditions as $condition){
+                    foreach($condition['rules'] as $index => $rule){
+                        if(empty($rule['conditional-field'])){
+                            unset($condition['rules'][$index]);
+                        }
+                    }
+                    $newRules   = TSJIPPY\cleanUpNestedArray($condition['rules']);
+
+                    if(!empty($newRules)){
+                        $rules[] = $newRules;
+                    }
+
+                    unset($condition['rules']);
+
+                    if(!empty($condition['property-name1'])){
+                        $condition['property-name']    = $condition['property-name1'];
+                    }
+                    unset($condition['property-name1']);
+                }
+
+                $actions[]  = TSJIPPY\cleanUpNestedArray($condition);
+            }
+
+            if(!empty($rules) && !empty($actions)){
+                $wpdb->insert(
+                    $wpdb->prefix."tsjippy_form_block_conditions",
+                    [
+                        "rules" => maybe_serialize($rules),
+                        "actions" => maybe_serialize($actions),
+                        "block_id" => $element->id,
+                        "post_id" => $postId
+                    ],
+                    [
+                        '%s',
+                        '%s',
+                        '%s',
+                        '%d',
+                    ]
+                );
+            }
+
+            /**
+             * Warning conditons
+             */
+            if(!empty($element->warning_conditions)){
+                $element->warning_conditions = maybe_unserialize($element->warning_conditions);
+
+                if(!empty($element->warning_conditions)){
+                    $wpdb->insert(
+                        $wpdb->prefix."tsjippy_form_block_reminders",
+                        [
+                            "rules" => maybe_serialize(TSJIPPY\cleanUpNestedArray($element->warning_conditions)),
+                            "block_id" => $element->id,
+                            "post_id" => $postId
+                        ],
+                        [
+                            '%s',
+                            '%s',
+                            '%d',
+                        ]
+                    );
+                }
+            }
         }
+
+        printJs($formBlock, $postId);
     }
 }
 
-
-
-// Example output:
-// <!-- wp:tsjippy-forms/formbuilder {"method":"post","name":"test"} /-->
-
-
-/* <!-- wp:tsjippy-forms/formbuilder {"method":"post","name":"test"} -->
-    <!-- wp:tsjippy-forms/input {"type":"radio","name":"gender","selectable_options":"male\nfemale","className":"wp-block-tsjippy-forms-input","blockId":"a1f3213b-f7c0-458c-9549-df181f8e9b22"} -->
-
-    <!-- /wp:tsjippy-forms/input -->
-
-
-    <!-- wp:tsjippy-forms/input {"type":"checkbox","name":"cartype","selectable_options":"toyota\ncitroen\nrenault\npegaut\ndaf","className":"wp-block-tsjippy-forms-input","blockId":"8734ab95-a3d0-4d18-9d15-4c88a81eb805"} -->
-
-    <!-- /wp:tsjippy-forms/input -->
-
-
-    <!-- wp:tsjippy-forms/label {"text":"Your Name","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text","hidden":""},"blockId":"66643432-c143-4277-bfa5-18e83ab08cd0"} -->
-
-    <!-- wp:tsjippy-forms/input {"type":"text","name":"firstname","hasLabelParent":true,"blockId":"650a87a0-1f4b-4979-8328-98f37e27f057"} -->
-
-    <!-- /wp:tsjippy-forms/input --></label>
-
-    <!-- /wp:tsjippy-forms/label -->
-
-
-    <!-- wp:tsjippy-forms/label {"text":"Your Last Name","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text","hidden":""},"blockId":"1bb8d061-1200-4c12-9bc3-791604385142"} -->
-
-    <!-- wp:tsjippy-forms/input {"type":"text","name":"lastname","inputAttributes":{"dir":"ltr"},"hasLabelParent":true,"blockId":"bf115303-e843-41b7-b11d-427b49069d88"} -->
-
-    <!-- /wp:tsjippy-forms/input --></label>
-
-    <!-- /wp:tsjippy-forms/label -->
-
-
-    <!-- wp:tsjippy-forms/label {"text":"Phone Number","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"tel","hidden":""},"blockId":"134be812-48b8-4e9a-86da-6d338e6cf476"} -->
-
-    <!-- wp:tsjippy-forms/input {"type":"tel","name":"phone","hasLabelParent":true,"blockId":"5d58a748-9109-48cb-bc4c-ad5f55a31511"} -->
-
-    <!-- /wp:tsjippy-forms/input -->
-
-    <!-- /wp:tsjippy-forms/label -->
-
-<!-- /wp:tsjippy-forms/formbuilder --> */
+add_action('admin_footer-post.php', function(){
+    //insertNewForms();
+});

@@ -6,6 +6,8 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 
+import { RenderedSelect } from './components/RenderedSelect.js';
+
 /**
  * The save function defines the way in which the different attributes should
  * be combined into the final markup, which is then serialized by the block
@@ -19,33 +21,9 @@ export default function save({ attributes }) {
 	const blockProps 		= useBlockProps.save();
 
 	return (
-		<select
-			{...blockProps}
-			name={attributes.name}
-			autoFocus={attributes.autofocus}
-			disabled={attributes.disabled}
-			multiple={attributes.multiple}
-			required={attributes.required}
-			data-blockid={attributes.blockId}
-		>
-			{(attributes.options || '')
-				.split('\n')
-				.filter(option => option.trim()
-			).map((option, index) => {
-				const [rawValue, rawLabel] = option.split('|');
-
-				const value = rawValue?.trim();
-				const label = rawLabel?.trim() || value;
-
-				return (
-					<option
-						key={index}
-						value={value}
-					>
-						{label}
-					</option>
-				);
-			})}
-		</select>
+		<RenderedSelect
+			attributes={ attributes }
+			blockProps={ blockProps }
+		/>
 	);
 }

@@ -46,11 +46,6 @@ export const inputSchema = {
   types: {
     button: [
       { attribute: "value", expectedType: "string" },
-      { attribute: "formaction", expectedType: "string" },
-      { attribute: "formenctype", expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain" },
-      { attribute: "formmethod", expectedType: "get|post|dialog" },
-      { attribute: "formnovalidate", expectedType: "boolean" },
-      { attribute: "formtarget", expectedType: "string" },
       { attribute: "popovertarget", expectedType: "string" },
       { attribute: "popovertargetaction", expectedType: "hide|show|toggle" }
     ],

@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
-import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
-import { Button, Dropdown, SelectControl, PanelBody, TextControl, Disabled, ToggleControl, __experimentalNumberControl as NumberControl, CheckboxControl, RadioControl, TextareaControl  } from '@wordpress/components';
+import {  useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { SelectControl, PanelBody, TextControl,  ToggleControl, TextareaControl  } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
@@ -8,6 +8,7 @@ import './editor.scss';
 import * as elementAttributes from './components/element_attributes.js';
 import { dynamicInputs } from './components/dynamic_inputs.js';
 import { InputHtml } from './components/InputHtml.js';
+import { PrefillOptionsSelector, PrefillValueSelector } from '../../shared/usePrefill.js';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -81,12 +82,16 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 	const [inputName, setInputName] = useState(attributes.name);
 
 	useEffect(() => {
+		setInputName(attributes.name);
+	}, [attributes.name]);
+
+	useEffect(() => {
 		const timeoutId = setTimeout(() => {
 			setAttributes({ name: inputName })
 		}, 800);
 
 		return () => clearTimeout(timeoutId);
-	}, [inputName, 800]);
+	}, [inputName]);
 
 	/**
 	 * The input name component
@@ -113,7 +118,7 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 		if (attributes.hasLabelParent !== hasLabelParent) {
 			setAttributes({ hasLabelParent });
 		}
-	}, [hasLabelParent]);
+	}, [hasLabelParent, attributes.hasLabelParent, setAttributes]);
 
 	/**
 	 * Shows the input attributes form if this is an selected input
@@ -121,6 +126,7 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 	 * @returns 
 	 */
 	const propertiesForm = () => {
+		// Show the input html if this is not a selected input
 		if(!isSelected){
 			return(
 				<InputHtml
@@ -141,10 +147,10 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 		// Then set a name
 		if(attributes.name == ''){
 			return (
-				[
-					inputTypeSelector(),
-					inputNameComponent()
-				]
+				<>
+					{inputTypeSelector()}
+					{inputNameComponent()}
+				</>
 			);
 		}
 		
@@ -163,15 +169,22 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 		/**
 		 * Input type specific options
 		 */
-		const inputTypeSpecificOptions = () => {
+		const selectableOptions = () => {
 			if(['radio', 'checkbox', 'select'].includes(attributes.type)){
 				return (
-					<TextareaControl
-						label    = { __("Selectable Options", 'tsjippy')}
-						help     = "One option per line. If the value and label differ seperate them with a |  i.e. car|auto"
-						value    = { attributes.selectable_options }
-						onChange = { ( value ) => setAttributes({ selectable_options: value }) }
-					/>
+					<>
+						<TextareaControl
+							label    = { __("Selectable Options", 'tsjippy')}
+							help     = "One option per line. If the value and label differ seperate them with a |  i.e. car|auto"
+							value    = { attributes.selectable_options }
+							onChange = { ( value ) => setAttributes({ selectable_options: value }) }
+						/>
+						<h4>Dynamic Options (prefill)</h4>
+						<PrefillOptionsSelector
+							value={ attributes.selectable_options_dynamic }
+							onChange={ (value) => setAttributes({ selectable_options_dynamic: value }) }
+						/>
+					</>
 				);
 			}
 		}
@@ -186,7 +199,13 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 
 			{ inputTypeSelector() }
 			{ inputNameComponent() }
-			{ inputTypeSpecificOptions() }
+			{ selectableOptions() }
+
+			<PrefillValueSelector
+				value={ attributes.dynamic_value }
+				onChange={ (value) => setAttributes({ dynamic_value: value }) }
+			/>
+
 			<div className="attributes-form">
 				<h3>Input properties</h3>
 				{ attributeControls }
@@ -260,7 +279,10 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
 		<div { ...blockProps } >
 			<fieldset>
     			<legend>
-					{ (attributes.type).charAt(0).toUpperCase() + (attributes.type).slice(1) } input
+					{ (attributes.type || '')
+						.charAt(0)
+						.toUpperCase() + (attributes.type || '').slice(1) 
+					} input
 				</legend>
 				{ propertiesForm() }
 			</fieldset>

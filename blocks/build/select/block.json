@@ -25,6 +25,10 @@
       "type": "string",
       "default": ""
     },
+    "options_dynamic": {
+      "type": "string",
+      "default": ""
+    },
     "autofocus": {
       "type": "boolean",
       "default": false
@@ -40,6 +44,10 @@
     "required": {
       "type": "boolean",
       "default": false
+    },
+    "dynamic_selected_value": {
+      "type": "string",
+      "default": ""
     }
   }
 }

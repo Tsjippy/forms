@@ -41,6 +41,14 @@
 			"type": "string",
 			"default": ""
 		},
+		"selectable_options_dynamic": {
+			"type": "string",
+			"default": ""
+		},
+		"dynamic_value": {
+			"type": "string",
+			"default": ""
+		},
 		"add_button_content": {
 			"type": "string",
 			"default": "+"
@@ -64,7 +72,10 @@
 		"hide": {
 			"type": "boolean",
 			"default": false
+		},
+		"reminders": {
+			"type": "array",
+			"default": []
 		}
-
 	}
 }

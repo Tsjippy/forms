@@ -10,7 +10,7 @@ export function InputHtml({
 
     if (['radio', 'checkbox'].includes(attributes.type)) {
         html = <div className="checkbox-wrapper" data-blockid={attributes.blockId}>
-            {attributes.selectable_options.split("\n").map((option, index) => {
+            {attributes.selectable_options.split("\n").concat(prefill.multi[attributes.selectable_options_dynamic] || []).map((option, index) => {
                 const [value, label = value] = option.split("|");
 
                 return (
@@ -21,6 +21,8 @@ export function InputHtml({
                             value={value}
                             className="formbuilder"
                             autocomplete='on'
+                            checked={attributes.inputAttributes?.checked === value}
+                            data-blockid={attributes.blockId}
                             {...attributes.inputAttributes}
                         />
                         {__(label, 'tsjippy')}
@@ -28,11 +30,11 @@ export function InputHtml({
                 );
             })}
         </div>
-    }else if (attributes.type == 'textarea') {
-    } else {
+    }else {
         html = (
-            <textarea
+            <input
                 {...blockProps}
+                type={attributes.type}
                 name={attributes.name}
                 className="formbuilder"
                 data-blockid={attributes.blockId}

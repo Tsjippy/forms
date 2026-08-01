@@ -96,7 +96,7 @@ function restApiInitFormsNew()
     // Register a new form
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
-        '/get_prefil',
+        '/get_prefill',
         array(
             'methods'  => 'POST',
             'callback' => function ($wpRestRequest) {

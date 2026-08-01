@@ -1,7 +1,10 @@
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, TextControl, TextareaControl, ToggleControl } from '@wordpress/components';
+import { PanelBody, TextControl, TextareaControl, ToggleControl, Spinner } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+
+import { PrefillOptionsSelector, PrefillValueSelector, usePrefill } from '../../shared/usePrefill.js';
+import { RenderedSelect } from './components/RenderedSelect.js';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -13,6 +16,8 @@ import { __ } from '@wordpress/i18n';
  */
 export default function Edit({ attributes, setAttributes, clientId }) {
 	const blockProps = useBlockProps();
+
+	const prefillData = usePrefill();
 
 	/**
 	 * Set a debounce for the id input so it disappears when we stop typing, not straight after the first character
@@ -48,6 +53,18 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					onChange = { ( value ) => setAttributes({ options: value }) }
 				/>
 
+				<h4>Dynamic Options</h4>
+				<PrefillOptionsSelector
+					value    = { attributes.options_dynamic }
+					onChange = { (value) => setAttributes({ options_dynamic: value }) }
+				/>
+
+				<h4>Dynamic Value</h4>
+				<PrefillValueSelector
+					value    = { attributes.dynamic_selected_value }
+					onChange = { (value) => setAttributes({ dynamic_selected_value: value }) }
+				/>
+
 				<ToggleControl
 					label    = { __('Autofocus', 'tsjippy') }
 					checked  = {!!attributes.autofocus}
@@ -76,18 +93,24 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     			
 		<fieldset { ...blockProps }>
 			<legend>Dropdown Select</legend>
-				<TextControl
-					label    = { __("Name", 'tsjippy')}
-					value    = { name }
-					onChange = { ( value ) => setName( value )}
-				/> 
-
-				<TextareaControl
-					label    = { __("Selectable Options", 'tsjippy')}
-					help     = { __("One option per line. If the value and label differ separate them with a |  i.e. car|auto", 'tsjippy')}
-					value    = { attributes.options }
-					onChange = { ( value ) => setAttributes({ options: value }) }
-				/>
+				{
+					attributes.name == '' ?
+						<TextControl
+							label    = { __("Name", 'tsjippy')}
+							value    = { name }
+							onChange = { ( value ) => setName( value )}
+						/> 
+					:
+						Object.keys(prefillData.multi).length === 0 && Object.keys(prefillData.single).length === 0
+						? 	<Spinner />
+						:
+						<RenderedSelect
+							attributes     = { attributes }
+							blockProps 	   = { blockProps }
+							dynamicOptions = { prefillData.multi }
+							defaultValue   = { attributes.dynamic_selected_value || '' }
+						/>
+				}
 		</fieldset>
 		</>
 	);

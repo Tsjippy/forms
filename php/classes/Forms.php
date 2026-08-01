@@ -47,6 +47,7 @@ class Forms
     public string      $submissionTableName;
     public string      $submissionValuesTableName;
     public string      $blockConditionsTableName;
+    public string      $blockRemindersTableName;
     public array       $submitRoles;
     protected array    $tableFormats;
     public string      $tableName;
@@ -152,6 +153,7 @@ class Forms
         $this->submissionTableName          = $wpdb->prefix . 'tsjippy_form_submissions';
         $this->submissionValuesTableName    = $wpdb->prefix . 'tsjippy_form_submission_values';
         $this->blockConditionsTableName     = $wpdb->prefix . 'tsjippy_form_block_conditions';
+        $this->blockRemindersTableName      = $wpdb->prefix . 'tsjippy_form_block_reminders';
         $this->submitRoles                  = [];
         $this->tableFormats                 = [];
         $this->tableName                    = $wpdb->prefix . 'tsjippy_forms';
@@ -386,13 +388,24 @@ class Forms
         $sql = "CREATE TABLE {$this->blockConditionsTableName} (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             post_id mediumint(9),
-            `condition` longtext,
-            `action` longtext,
-            `target` text,
+            `rules` longtext,
+            `actions` longtext,
+            `block_id` text,
             PRIMARY KEY  (id)
        ) $charsetCollate;";
 
         maybe_create_table($this->blockConditionsTableName, $sql);
+
+        // Block reminders table
+        $sql = "CREATE TABLE {$this->blockRemindersTableName} (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            post_id mediumint(9),
+            `block_id` text,
+            `rules` longtext,
+            PRIMARY KEY  (id)
+       ) $charsetCollate;";
+
+        maybe_create_table($this->blockRemindersTableName, $sql);
     }
 
     /**
@@ -547,17 +560,25 @@ class Forms
 
         $this->tableFormats[$this->shortcodeColumnSettingsTable] = apply_filters('tsjippy-forms-shortcode-settings-table-formats', $formats, $this);
 
-        // Column Settings
+        // Condition Settings
         $formats    = [
             'rules'     => '%s',
             'actions'   => '%s',
-            'target'    => '%s',
+            'block_id'    => '%s',
             'post_id'   => '%d'     
         ];
 
-        $this->tableFormats[$this->blockConditionsTableName] = apply_filters('tsjippy-forms-condition-table-formats', $formats, $this);
+        $this->tableFormats[$this->blockConditionsTableName] = apply_filters('tsjippy-forms-condition-formats', $formats, $this);
 
-        // Sort formats by key to make sure they are in the same order as the data
+        // Block Reminder Settings
+        $formats    = [
+            'rules'   => '%s',
+            'post_id'   => '%d',
+            'block_id'     => '%s', 
+        ];
+
+        $this->tableFormats[$this->blockConditionsTableName] = apply_filters('tsjippy-forms-block-reminder-formats', $formats, $this);
+
         foreach ($this->tableFormats as &$format) {
             ksort($format);
         }
@@ -1709,7 +1730,7 @@ class Forms
         return TSJIPPY\getFromDb(
             "block-conditions-block-$blockId", 
             'forms',
-            "select * from %i where target=%s",
+            "select * from %i where block_id=%s",
             $this->blockConditionsTableName,
             $blockId
         );

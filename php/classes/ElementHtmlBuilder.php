@@ -219,6 +219,22 @@ class ElementHtmlBuilder extends SubmitForm
             }
         }
 
+        $this->defaultValues      = array_filter(
+            $this->defaultValues, 
+            function($value, $key){
+                return (
+                    !str_contains($key, 'closedpostboxes_') && 
+                    !str_contains($key, '_per_page') &&
+                    !str_contains($key, 'meta') &&
+                    !str_contains($key, 'polq') &&
+                    !str_contains($key, '_position') &&
+                    !str_contains($key, '_event_id') &&
+                    !str_contains($key, 'hidden_columns_')
+                );
+            },
+            ARRAY_FILTER_USE_BOTH 
+        );
+
         // Filter the default values
         $this->defaultValues      = apply_filters('tsjippy-forms-add-form-defaults', $this->defaultValues, $this->userId, $this->formData->slug);
 
@@ -299,10 +315,9 @@ class ElementHtmlBuilder extends SubmitForm
          * Filters the default array values array
          * 
          * @param   array   $defaultArrayValues Array defaults
-         * @param   int     $userID             User Id
-         * @param   string  $formSlug           The form slug
+         * @param   int     $userId             User Id
          */
-        $this->defaultArrayValues    = apply_filters('tsjippy-forms-add-form-multi-defaults', $this->defaultArrayValues, $this->userId, $this->formData->slug);
+        $this->defaultArrayValues    = apply_filters('tsjippy-forms-add-form-multi-defaults', $this->defaultArrayValues, $this->userId);
 
         ksort($this->defaultArrayValues);
 

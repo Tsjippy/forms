@@ -82,27 +82,6 @@ export const conditionsFormParser = () => {
     }
 
     /**
-     * Load the conditions form on first render to prevent waiting
-     */
-    /* useEffect( () => {
-        if(elementName != undefined){
-
-            apiFetch({
-                path: tsjippy.restApiPrefix + `/forms/request_form_conditions_modal`,
-                method: "POST",
-                data: {
-                    formid: parentId,
-                    elementid: elementName
-                },
-            }).then((res) => {
-                setConditionsForm(res);
-            });
-        }
-    },
-    []
-    ) */
-
-    /**
      * Get the conditions form for this element
      * 
      * @param {boolean} toggled 

@@ -29,6 +29,10 @@ return array(
 			'options' => array(
 				'type' => 'string',
 				'default' => ''
+			),
+			'options_dynamic' => array(
+				'type' => 'string',
+				'default' => ''
 			)
 		)
 	),
@@ -86,7 +90,7 @@ return array(
 			),
 			'user_meta' => array(
 				'type' => 'boolean',
-				'default' => true
+				'default' => false
 			),
 			'edit_roles' => array(
 				'type' => 'array',
@@ -221,6 +225,14 @@ return array(
 				'type' => 'string',
 				'default' => ''
 			),
+			'selectable_options_dynamic' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'dynamic_value' => array(
+				'type' => 'string',
+				'default' => ''
+			),
 			'add_button_content' => array(
 				'type' => 'string',
 				'default' => '+'
@@ -244,6 +256,12 @@ return array(
 			'hide' => array(
 				'type' => 'boolean',
 				'default' => false
+			),
+			'reminders' => array(
+				'type' => 'array',
+				'default' => array(
+					
+				)
 			)
 		)
 	),
@@ -340,6 +358,10 @@ return array(
 				'type' => 'string',
 				'default' => ''
 			),
+			'options_dynamic' => array(
+				'type' => 'string',
+				'default' => ''
+			),
 			'autofocus' => array(
 				'type' => 'boolean',
 				'default' => false
@@ -355,6 +377,10 @@ return array(
 			'required' => array(
 				'type' => 'boolean',
 				'default' => false
+			),
+			'dynamic_selected_value' => array(
+				'type' => 'string',
+				'default' => ''
 			)
 		)
 	)
