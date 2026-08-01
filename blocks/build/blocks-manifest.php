@@ -55,7 +55,7 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js',
+		'viewScript' => 'tsjippy_forms_script',
 		'attributes' => array(
 			'method' => array(
 				'type' => 'string',
