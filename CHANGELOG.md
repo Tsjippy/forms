@@ -24,6 +24,7 @@
 - conditions form bugs
 - formstep controls
 - dynamic minified js
+- bug
 
 ### Updated
 
