@@ -17,6 +17,7 @@
 - vaious fixes
 - show formstep in editor
 - only allow inputs in label
+- Wrapper component for multi block block
 
 ### Fixed
 - conditions form bugs
