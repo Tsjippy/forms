@@ -10,6 +10,7 @@
 - create dynamic js
 - datalist and select blocks
 - select block with preview
+- select checkbox based on dynamic value
 
 ### Changed
 - added input element attributes form
