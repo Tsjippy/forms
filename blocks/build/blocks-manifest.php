@@ -41,7 +41,7 @@ return array(
 		'apiVersion' => 3,
 		'name' => 'tsjippy-forms/formbuilder',
 		'version' => '0.1.0',
-		'title' => 'Form Builder Test',
+		'title' => 'Form Builder',
 		'category' => 'form-elements',
 		'icon' => 'forms',
 		'description' => 'Form builder using blocks',

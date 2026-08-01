@@ -122,7 +122,7 @@ const RenderedSelect = ({
       label: (value || key).trim()
     }];
   });
-  const options = [...staticOptions, ...Object.entries(dynamicOptions?.[attributes.options_dynamic] || {})?.map(([key, value]) => ({
+  const options = [...staticOptions, ...Object.entries(dynamicOptions?.[attributes.options_dynamic ?? ''] || {})?.map(([key, value]) => ({
     value: String(key).trim(),
     label: String(value || key).trim()
   }))];

@@ -110,14 +110,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Multiple_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Multiple.js */ "./src/input/components/Multiple.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../shared/usePrefill.js */ "./shared/usePrefill.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_4__);
 
 
 
 
+
+const prefillData = (0,_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_2__.usePrefill)();
 function InputHtml({
   attributes,
   blockProps,
@@ -125,28 +128,38 @@ function InputHtml({
 }) {
   let html;
   if (['radio', 'checkbox'].includes(attributes.type)) {
-    html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+    const staticOptions = (attributes.selectable_options || '').split('\n').filter(Boolean).map(option => {
+      const [key, value] = option.split('|');
+      return [{
+        value: key.trim(),
+        label: (value || key).trim()
+      }];
+    });
+    const options = [...staticOptions, ...Object.entries(prefill.multi[attributes.selectable_options_dynamic ?? ''] || {})?.map(([key, value]) => ({
+      value: String(key).trim(),
+      label: String(value || key).trim()
+    }))];
+    html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
       className: "checkbox-wrapper",
       "data-blockid": attributes.blockId,
-      children: attributes.selectable_options.split("\n").concat(prefill.multi[attributes.selectable_options_dynamic] || []).map((option, index) => {
-        const [value, label = value] = option.split("|");
-        return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_3__.createElement)("label", {
+      children: options.map((option, index) => {
+        return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_4__.createElement)("label", {
           ...blockProps,
           key: index
-        }, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
+        }, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
           type: attributes.type,
           name: attributes.name,
-          value: value,
+          value: option.value,
           className: "formbuilder",
           autocomplete: "on",
-          checked: attributes.inputAttributes?.checked === value,
+          checked: attributes.inputAttributes?.checked === option.value,
           "data-blockid": attributes.blockId,
           ...attributes.inputAttributes
-        }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(label, 'tsjippy'));
+        }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(option.label, 'tsjippy'));
       })
     });
   } else {
-    html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
+    html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
       ...blockProps,
       type: attributes.type,
       name: attributes.name,
@@ -156,7 +169,7 @@ function InputHtml({
       ...attributes.inputAttributes
     });
   }
-  return attributes.multiple && !hasLabelParent ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {
+  return attributes.multiple && !hasLabelParent ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {
     inner: html,
     attributes: attributes
   }) : html;

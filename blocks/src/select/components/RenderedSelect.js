@@ -12,7 +12,7 @@ export const RenderedSelect = ({ attributes, blockProps, dynamicOptions = {}}) =
 
 	const options = [
 		...staticOptions,
-		...Object.entries(dynamicOptions?.[attributes.options_dynamic] || {})?.map(
+		...Object.entries(dynamicOptions?.[attributes.options_dynamic ?? ''] || {})?.map(
 			([key, value]) => ({
 				value: String(key).trim(),
 				label: String(value || key).trim(),
