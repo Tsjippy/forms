@@ -3,7 +3,6 @@ import { Multiple } from './Multiple.js';
 
 import { usePrefill } from '../../../shared/usePrefill.js';
 
-
 export function InputHtml({
     attributes,
     blockProps,
@@ -29,6 +28,7 @@ export function InputHtml({
             });
 
         let options;
+        let selectedValue = '';
 
         if(isSaving){
             options = staticOptions;
@@ -48,6 +48,10 @@ export function InputHtml({
                 ...staticOptions,
                 ...dynamicOptions,
             ];
+
+            selectedValue = prefill?.single?.[attributes.dynamic_value ?? ''];
+            
+            console.log(prefill?.single?.[attributes.dynamic_value ?? '']);
         }
 
         html = (
@@ -66,10 +70,7 @@ export function InputHtml({
                             value={option.value}
                             className="formbuilder"
                             autoComplete="on"
-                            checked={
-                                attributes.inputAttributes?.checked ===
-                                option.value
-                            }
+                            checked={ selectedValue === option.value }
                             data-blockid={attributes.blockId}
                             {...attributes.inputAttributes}
                         />

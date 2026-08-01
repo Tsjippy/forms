@@ -137,6 +137,7 @@ function InputHtml({
       };
     });
     let options;
+    let selectedValue = '';
     if (isSaving) {
       options = staticOptions;
     } else {
@@ -146,6 +147,8 @@ function InputHtml({
         label: String(value || key).trim()
       }));
       options = [...staticOptions, ...dynamicOptions];
+      selectedValue = prefill?.single?.[attributes.dynamic_value ?? ''];
+      console.log(prefill?.single?.[attributes.dynamic_value ?? '']);
     }
     html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
       className: "checkbox-wrapper",
@@ -159,7 +162,7 @@ function InputHtml({
         value: option.value,
         className: "formbuilder",
         autoComplete: "on",
-        checked: attributes.inputAttributes?.checked === option.value,
+        checked: selectedValue === option.value,
         "data-blockid": attributes.blockId,
         ...attributes.inputAttributes
       }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(option.label, 'tsjippy')))
