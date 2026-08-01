@@ -9,6 +9,7 @@
 - text multi input
 - create dynamic js
 - datalist and select blocks
+- select block with preview
 
 ### Changed
 - added input element attributes form
