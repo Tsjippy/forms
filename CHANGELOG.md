@@ -11,6 +11,7 @@
 - datalist and select blocks
 - select block with preview
 - select checkbox based on dynamic value
+- forms.js dependency
 
 ### Changed
 - added input element attributes form
