@@ -27,6 +27,7 @@
 - formstep controls
 - dynamic minified js
 - bug
+- forms upgrade to block content
 
 ### Updated
 
