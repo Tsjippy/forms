@@ -582,6 +582,73 @@ const hideColumn = async (target) => {
   }
 };
 
+async function requestNewFormResults(target) {
+  let wrapper = target.closest(".form.table-wrapper");
+  let button = target.outerHTML;
+
+  let formData = new FormData();
+  let formId = wrapper.querySelector(".tsjippy.table.form-data.table").dataset
+    .formId;
+  let shortcodeId = wrapper.querySelector(".tsjippy.table.form-data.table")
+    .dataset.shortcodeId;
+
+  formData.append("form-id", formId);
+  formData.append("shortcode-id", shortcodeId);
+
+  const url = new URL(window.location);
+  if (url.searchParams.get("only-own")) {
+    formData.append("only-own", true);
+  }
+
+  if (url.searchParams.get("all")) {
+    formData.append("all", true);
+  }
+
+  if (url.searchParams.get("archived")) {
+    formData.append("archived", true);
+  }
+
+  let loader = Main.showLoader(target, false, 50, "Requesting form results...");
+  wrapper.innerHTML = loader.outerHTML;
+
+  let response = await FormSubmit.fetchRestApi(
+    "forms/show_form_results",
+    formData,
+  );
+
+  if (response) {
+    wrapper.innerHTML = response;
+  } else {
+    loader.outerHTML = button;
+  }
+}
+
+async function archivedEntriesSwitch(target) {
+  const url = new URL(window.location);
+  if (target.matches(".archive-switch-show")) {
+    url.searchParams.set("archived", true);
+  } else {
+    url.searchParams.delete("archived");
+  }
+  window.history.pushState({}, "", url);
+
+  requestNewFormResults(target);
+}
+
+async function onlyOwnSwitch(target) {
+  const url = new URL(window.location);
+  if (target.matches(".only-own-switch-on")) {
+    url.searchParams.set("only-own", true);
+    url.searchParams.delete("all", true);
+  } else {
+    url.searchParams.set("all", true);
+    url.searchParams.delete("only-own");
+  }
+  window.history.pushState({}, "", url);
+
+  requestNewFormResults(target);
+}
+
 document.addEventListener("click", (event) => {
   let target = event.target;
 
@@ -643,6 +710,26 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+  let html = Main.showLoader("", false, 100, "Please wait...", true);
+
+  document.querySelectorAll(`.formdata-load-trigger`).forEach(async (el) => {
+    el.innerHTML = html;
+    let shortcodeId = el.dataset.shortcodeId;
+
+    let formData = new FormData();
+    let response = false;
+
+    formData.append("shortcode-id", shortcodeId);
+    response = await FormSubmit.fetchRestApi(
+      "forms/load_form_results",
+      formData,
+    );
+
+    if (response) {
+      el.innerHTML = response;
+    }
+  });
+
   //Make the sortable-column-settings-rows div sortable
   let options = {
     handle: ".movecontrol",

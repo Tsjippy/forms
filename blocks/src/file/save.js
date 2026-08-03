@@ -5,7 +5,8 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import { __ } from '@wordpress/i18n';
+
+import { Rendered } from './components/Rendered.js';
 
 /**
  * The save function defines the way in which the different attributes should
@@ -20,29 +21,10 @@ export default function save({ attributes }) {
 	const blockProps 		= useBlockProps.save();
 
 	return (
-		<datalist
-			{...blockProps}
-			id={attributes.id}
-			data-blockid={attributes.blockId}
-			data-dynamicOptions={attributes.options_dynamic}
-		>
-			{(attributes.options || '')
-				.split('\n')
-				.filter(option => option.trim()
-			).map((option, index) => {
-				const [rawValue, rawLabel] = option.split('|');
-
-				const value = rawValue?.trim();
-				const label = rawLabel?.trim() || value;
-
-				return (
-					<option
-						key={index}
-						value={value}
-						label={label}
-					/>
-				);
-			})}
-		</datalist>
+		<div { ...blockProps }>
+			<Rendered
+				attributes={ attributes }
+			/>
+		</div>
 	);
 }

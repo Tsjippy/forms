@@ -11,7 +11,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-class DisplayFormResults extends DisplayForm
+class DisplayFormResults extends SubmitForm
 {
     use ExportFormResults;
 
@@ -160,6 +160,78 @@ class DisplayFormResults extends DisplayForm
         }
 
         return $elements;
+    }
+
+    /**
+     * Finds all elements that should be splitted
+     * Two options:
+     *    1 - case of a BASENAME[index]SUBNAME name
+     *    2 - case of a BASENAME[index] name
+     */
+    public function findSplitElementIds()
+    {
+        $baseNames    = $elementIds = [];
+
+        // Check if this is an splitted element
+        if (empty($this->formData->split)) {
+            return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
+        }
+
+        /**
+         * loop over all element ids that data should be splitted on
+         */
+        foreach ($this->formData->split as $splitElementId) {
+            // Get the element slug
+            $slug    = $this->getElementById($splitElementId, 'slug');
+
+            // Find the base slug keyword followed by one or more numbers between [] followed by a keyword between []
+            $pattern    = "/(.*?)\[[0-9]+\]\[([^\]]+)\]/i";
+
+            // This slug matches the pattern
+            if (preg_match($pattern, $slug, $matches)) {
+                $baseNames[$matches[1]]      = $matches[1];
+            } else {
+                // Splitted element with just normal multiple values slug[index]
+                $elementIds[$splitElementId] = $splitElementId;
+            }
+        }
+
+        if (empty($baseNames)) {
+            return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
+        }
+
+        /**
+         * Loop over all elements to find splitted ones
+         */
+        foreach ($this->formElements as $element) {
+            // Check if this is an indexed splitted element basename[index][keyname]
+            if (str_contains($element->slug, '[')) {
+                // loop over all base names that data should be splitted on
+                foreach ($baseNames as $baseName) {
+                    // Check if this name belongs to this splitted element
+                    $pattern        = "/$baseName\[[0-9]+\]\[([^\]]+)\]/i";
+
+                    if (preg_match($pattern, $element->slug, $matches)) {
+                        $name            = $matches[1];
+
+                        // store found element ids by basename
+                        if (empty($elementIds[$baseName])) {
+                            $elementIds[$baseName]    = [];
+                        }
+
+                        if (empty($elementIds[$baseName][$name])) {
+                            $elementIds[$baseName][$name]    = [];
+                        }
+
+                        // Add the current element id
+                        $elementIds[$baseName][$name][$element->slug]    = $element->id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
     }
 
     /**
@@ -1895,10 +1967,6 @@ class DisplayFormResults extends DisplayForm
                             </select>
                             <label style="margin:0 10px;">equals</label>
                             <input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo esc_attr($this->formData->autoarchive_value ?? ''); ?>" style='max-width:200px;'>
-
-                            <?php
-                            $this->infoBoxHtml("You can use placeholders like '%today%+3days' for a value");
-                            ?>
                         </div>
                     </div>
                 </div>

@@ -24,6 +24,8 @@ import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';
 import './filters/storeClientIdInAttributes.js';
 import { FormSubmitter } from './components/Submitter.js';
+import { EmailSettings } from './emails';
+
 import * as forms from './../../../js/forms.js';
 
 var formRemindersForm = '';
@@ -311,7 +313,13 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						: 
 						
 						isEmailsFormVisible ? 
-							<div { ...blockProps }><RawHTML> { emailsForm } </RawHTML></div> 
+							<EmailSettings
+								emails={emails}
+								formElements={formElements}
+								onChange={(emails) =>
+								setAttributes({ emails })
+								}
+							/>
 						:
 							isRemindersFormVisible ? 
 								<div { ...blockProps }><RawHTML> { formRemindersForm } </RawHTML></div> 

@@ -145,7 +145,7 @@ function registerScripts()
 
     wp_register_script('tsjippy_formbuilderjs', TSJIPPY\pathToUrl(PLUGINPATH . 'js/formbuilder.min.js'), array('tsjippy_forms_script'), PLUGINVERSION, true);
 
-    wp_register_script('tsjippy_forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH . 'js/forms_table.min.js'), array('tsjippy_forms_script', 'tsjippy_table_script'), PLUGINVERSION, true);
+    wp_register_script('tsjippy_forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH . 'js/forms_table.min.js'), array('tsjippy_forms_script', 'tsjippy_table_script', 'wp-blocks', 'wp-element', 'wp-dom-ready'), PLUGINVERSION, true);
 
     if (is_numeric(get_the_ID())) {
         $pages  = SETTINGS['formbuilder-pages'] ?? [];

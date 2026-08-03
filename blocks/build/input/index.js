@@ -153,6 +153,8 @@ function InputHtml({
     html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
       className: "checkbox-wrapper",
       "data-blockid": attributes.blockId,
+      "data-dynamicOptions": attributes.selectable_options_dynamic,
+      "data-dynamicValue": attributes.dynamic_value,
       children: options.map((option, index) => /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_4__.createElement)("label", {
         ...blockProps,
         key: `${option.value}-${index}`

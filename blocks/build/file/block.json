@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "tsjippy-forms/file",
+  "version": "0.1.0",
+  "title": "File Upload Input",
+  "category": "form-elements",
+  "icon": "forms",
+  "description": "File upload input. Supports single and multiple file uploads. Can also be used to upload images.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "textdomain": "tsjippy",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "tsjippy_fileupload_script",
+  "attributes": {
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "multiple": {
+      "type": "boolean",
+      "default": false
+    },
+    "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "targetDir": {
+      "type": "string",
+      "default": ""
+    },
+    "userId": {
+      "type": "boolean",
+      "default": false
+    },
+    "library": {
+      "type": "boolean",
+      "default": false
+    },
+    "options": {
+      "type": "object",
+      "default": {}
+    },
+    "edit": {
+      "type": "boolean",
+      "default": false
+    },
+    "metaKey": {
+      "type": "string",
+      "default": ""
+    }
+  }
+}

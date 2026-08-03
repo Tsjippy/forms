@@ -36,6 +36,71 @@ return array(
 			)
 		)
 	),
+	'file' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'tsjippy-forms/file',
+		'version' => '0.1.0',
+		'title' => 'File Upload Input',
+		'category' => 'form-elements',
+		'icon' => 'forms',
+		'description' => 'File upload input. Supports single and multiple file uploads. Can also be used to upload images.',
+		'example' => array(
+			
+		),
+		'supports' => array(
+			'html' => false
+		),
+		'textdomain' => 'tsjippy',
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'viewScript' => 'tsjippy_fileupload_script',
+		'attributes' => array(
+			'name' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'disabled' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'multiple' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'required' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'targetDir' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'userId' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'library' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'options' => array(
+				'type' => 'object',
+				'default' => array(
+					
+				)
+			),
+			'edit' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'metaKey' => array(
+				'type' => 'string',
+				'default' => ''
+			)
+		)
+	),
 	'formbuilder' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
 		'apiVersion' => 3,

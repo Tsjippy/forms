@@ -302,9 +302,10 @@ function save({
 }) {
   const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save();
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("datalist", {
+    ...blockProps,
     id: attributes.id,
     "data-blockid": attributes.blockId,
-    ...blockProps,
+    "data-dynamicOptions": attributes.options_dynamic,
     children: (attributes.options || '').split('\n').filter(option => option.trim()).map((option, index) => {
       const [rawValue, rawLabel] = option.split('|');
       const value = rawValue?.trim();

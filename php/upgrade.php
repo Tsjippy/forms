@@ -121,12 +121,15 @@ function sendBlockContent(block, postId){
         "datalist"  => "tsjippy-forms/datalist",
         "textarea"  => "tsjippy-forms/input",
         "select"    => "tsjippy-forms/select",
-        "p"         => "paragraph",
-        "div-start" => "group",
+        "p"         => "core/paragraph",
+        "div-start" => "core/group",
         "multi-start" => "tsjippy-forms/multiwrap",
         "info"      => "tsjippy-forms/info",
         "booking-selector" => "tsjippy-bookings/accomodation",
-        "button"    => "buttons",
+        "button"    => "core/button",
+        "heading"    => "core/heading",
+        "file"    => "tsjippy-forms/file",
+        "image"    => "tsjippy-forms/file",
     ];
 
     $forms = new Forms();
@@ -184,7 +187,7 @@ function sendBlockContent(block, postId){
 
         $shouldCLoseFormstep    = false;
         $shouldCloseLabel       = false;
-        foreach($elements as $element){
+        foreach($elements as $index => $element){
             $attributes     = [];
             $innerBlocks    = [];
 
@@ -199,6 +202,19 @@ function sendBlockContent(block, postId){
                 $shouldCLoseFormstep = true;
             }
 
+            // file upload
+            elseif($element->type == 'file' || $element->type == 'image'){
+                $attributes = [
+                    'name' => $element->name,
+                    'multiple' => boolval($element->multiple),
+                    'required' => boolval($element->required),
+                    'targetDir' => $element->folder_name ?? '',
+                    'library' => boolval($element->library),
+                    'edit' => boolval($element->edit_image),
+                    'metaKey' => $element->slug ?? ''
+                ];
+            }
+
             // Input
             elseif(in_array($element->type, $inputTypes)){
                 /**
@@ -208,13 +224,38 @@ function sendBlockContent(block, postId){
                 $attributes = [];
 
                 foreach ($inputAttributes as $blockKey => $oldKey) {
-                    if (isset($element->$oldKey)) {
+                    if (isset($element->$oldKey) && $element->$oldKey != '') {
                         $attributes[$blockKey] = $element->$oldKey;
 
                         if(in_array($blockKey, ['multiple','required', 'hide'])){
                             $attributes[$blockKey] = boolval($element->$oldKey);
                         }
                     }
+                }
+
+                $element->type  = 'input';
+            }
+
+            // Input
+            elseif(in_array($element->type, $inputTypes)){
+                /**
+                 * Build the form
+                 */
+
+                $attributes = [];
+
+                foreach ($inputAttributes as $blockKey => $oldKey) {
+                    if (isset($element->$oldKey) && $element->$oldKey != '') {
+                        $attributes[$blockKey] = $element->$oldKey;
+
+                        if(in_array($blockKey, ['multiple','required', 'hide'])){
+                            $attributes[$blockKey] = boolval($element->$oldKey);
+                        }
+                    }
+                }
+
+                if(isset($attributes['dynamic_value']) && empty($attributes['dynamic_value'])){
+                    $attributes['dynamic_value'] = $attributes['id'] ?? '';
                 }
 
                 $attributes['inputAttributes'] = [];
@@ -236,21 +277,40 @@ function sendBlockContent(block, postId){
 
             // Label
             elseif($element->type == 'label'){
-                $attributes = ['text' => $element->text];
+                if(isset($elements[$index + 1]) && in_array($elements[$index + 1]->type, $inputTypes)){
+                    $attributes = [
+                        'text' => $element->text
+                    ];
 
-                $shouldCloseLabel = true;
+                    $shouldCloseLabel = true;
+                } else {
+                    $element->type = 'heading';
+                    $attributes = [
+                        'content' => $element->text,
+                        'level' => 4,
+                    ];
+                }
             }
 
             // datalist
             elseif($element->type == 'datalist'){
-                $attributes = ['id' => $element->slug];
-                $attributes = ['options' => $element->options];
+                $attributes = [
+                    'id' => $element->slug,
+                    'options' => $element->options,
+                    'options_dynamic' => $element->default_array_value
+                ];
             }
 
             // select
             elseif($element->type == 'select'){
-                $attributes = ['id' => $element->slug];
-                $attributes = ['options' => $element->options];
+                if($element->default_value == ''){
+                    $element->default_value = $element->slug;
+                }
+                $attributes = [
+                    'name' => $element->slug,
+                    'options_dynamic' => $element->default_array_value,
+                    'dynamic_selected_value' => $element->default_value
+                ];
             }
 
             // container
@@ -323,7 +383,7 @@ function sendBlockContent(block, postId){
 
                 $innerBlocks = [
                     [
-                        'blockName'    => 'button',
+                        'blockName'    => 'core/button',
                         'attrs'        => ["onlyOnInherited" => true],
                         'innerBlocks'  => [],
                         'innerHTML'    => '',
@@ -351,7 +411,7 @@ function sendBlockContent(block, postId){
                 'innerContent' => []
             ];
 
-            if($shouldCloseLabel && $element->type != 'label'){
+            if($shouldCloseLabel && $element->type == 'input'){
                 array_pop($stack);
                 $shouldCloseLabel   = false;
             }

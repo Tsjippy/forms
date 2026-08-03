@@ -11,6 +11,10 @@ export const RenderedSelect = ({ attributes, blockProps, dynamicOptions = {}}) =
 		});
 
 	const options = [
+		{
+				value: '',
+				label: 'Select an option',
+		},
 		...staticOptions,
 		...Object.entries(dynamicOptions?.[attributes.options_dynamic ?? ''] || {})?.map(
 			([key, value]) => ({
@@ -28,6 +32,8 @@ export const RenderedSelect = ({ attributes, blockProps, dynamicOptions = {}}) =
 			multiple={attributes.multiple}
 			required={attributes.required}
 			data-blockid={attributes.blockId}
+			data-dynamicOptions={attributes.options_dynamic}
+			data-dynamicValue={attributes.dynamic_selected_value}
 		>
 			{options.map((option, index) => {
 				return (

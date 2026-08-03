@@ -58,6 +58,8 @@ export function InputHtml({
             <div
                 className="checkbox-wrapper"
                 data-blockid={attributes.blockId}
+                data-dynamicOptions={attributes.selectable_options_dynamic}
+                data-dynamicValue={attributes.dynamic_value}
             >
                 {options.map((option, index) => (
                     <label

@@ -56,90 +56,6 @@ async function saveFormInput(target) {
   }
 }
 
-async function formbuilderSwitch(target) {
-  let wrapper  = target.closest(".tsjippy-form-wrapper");
-  let button   = target.outerHTML;
-
-  const url = new URL(window.location);
-
-  let searchParams = new URLSearchParams(window.location.search);
-
-  if (target.matches(".formbuilder-switch")) {
-    searchParams.set("formbuilder", true);
-  } else {
-    searchParams.delete("formbuilder");
-  }
-
-  window.location.search = searchParams.toString();
-}
-
-async function requestNewFormResults(target) {
-  let wrapper = target.closest(".form.table-wrapper");
-  let button = target.outerHTML;
-
-  let formData = new FormData();
-  let formId = wrapper.querySelector(".tsjippy.table.form-data.table").dataset
-    .formId;
-  let shortcodeId = wrapper.querySelector(".tsjippy.table.form-data.table")
-    .dataset.shortcodeId;
-
-  formData.append("form-id", formId);
-  formData.append("shortcode-id", shortcodeId);
-
-  const url = new URL(window.location);
-  if (url.searchParams.get("only-own")) {
-    formData.append("only-own", true);
-  }
-
-  if (url.searchParams.get("all")) {
-    formData.append("all", true);
-  }
-
-  if (url.searchParams.get("archived")) {
-    formData.append("archived", true);
-  }
-
-  let loader = Main.showLoader(target, false, 50, "Requesting form results...");
-  wrapper.innerHTML = loader.outerHTML;
-
-  let response = await FormSubmit.fetchRestApi(
-    "forms/show_form_results",
-    formData,
-  );
-
-  if (response) {
-    wrapper.innerHTML = response;
-  } else {
-    loader.outerHTML = button;
-  }
-}
-
-async function archivedEntriesSwitch(target) {
-  const url = new URL(window.location);
-  if (target.matches(".archive-switch-show")) {
-    url.searchParams.set("archived", true);
-  } else {
-    url.searchParams.delete("archived");
-  }
-  window.history.pushState({}, "", url);
-
-  requestNewFormResults(target);
-}
-
-async function onlyOwnSwitch(target) {
-  const url = new URL(window.location);
-  if (target.matches(".only-own-switch-on")) {
-    url.searchParams.set("only-own", true);
-    url.searchParams.delete("all", true);
-  } else {
-    url.searchParams.set("all", true);
-    url.searchParams.delete("only-own");
-  }
-  window.history.pushState({}, "", url);
-
-  requestNewFormResults(target);
-}
-
 function addNode(target){
   let wrapper = target.closest(".clone-divs-wrapper");
   let orgNode = target.closest(".clone-div");
@@ -188,33 +104,47 @@ function addNode(target){
   //target.remove();
 }
 
-//Load after page load
-document.addEventListener("DOMContentLoaded", () => {
-  let html = Main.showLoader("", false, 100, "Please wait...", true);
-
-  document.querySelectorAll(`.form-load-trigger`).forEach(async (el) => {
-    el.innerHTML = html;
-    let formId = el.dataset.formId;
-    let shortcodeId = el.dataset.shortcodeId;
-
-    let formData = new FormData();
-    let response = false;
-
-    if (formId != null) {
-      formData.append("form-id", formId);
-      response = await FormSubmit.fetchRestApi("forms/load_form", formData);
-    } else {
-      formData.append("shortcode-id", shortcodeId);
-      response = await FormSubmit.fetchRestApi(
-        "forms/load_form_results",
-        formData,
+/**
+   * Prefill form inputs with meta data
+   */
+const prefill = async () => {
+  // Get the prefill data from the server
+  let prefillData = await FormSubmit.fetchRestApi("forms/get_prefill");
+  
+  // Loop through each form input and add options if needed
+  document.querySelectorAll(`[data-dynamicoptions]`).forEach( input => {
+    Object.entries(prefillData.multi[input.dataset.dynamicoptions] || {})?.forEach(([key, value]) => {
+      // Check if the option already exists in the select input
+      let optionExists = Array.from(input.options).some(
+        (opt) => opt.value === key
       );
-    }
 
-    if (response) {
-      el.innerHTML = response;
+      if (!optionExists) {
+        let option = document.createElement("option");
+        option.value = key;
+        option.textContent = value;
+        input.appendChild(option);
+      }
+
+      // Update the nice select
+      if(input.type == "select-one" || input.type == "select-multiple"){
+        input._niceSelect.update();
+      }
+    });
+  });
+
+  // Set the value of each form input if needed
+  document.querySelectorAll(`[data-dynamicvalue]`).forEach( input => {
+    let value = prefillData.single[input.dataset.dynamicvalue];
+    if(value != undefined){
+      changeFieldValue(input, value, "", input.closest("form"));
     }
   });
+}
+
+//Load after page load
+document.addEventListener("DOMContentLoaded", () => {
+  prefill();
 });
 
 //we are online again
@@ -245,36 +175,15 @@ document.addEventListener("click", function (event) {
   }
 
   //remove element
-  if (target.matches(".remove")) {
+  else if (target.matches(".remove")) {
     //Remove node clicked
     removeNode(target);
   }
 
-  if (target.matches('.tsjippy-form-wrapper button.form-submit')) {
+  else if (target.matches('.tsjippy-form-wrapper button.form-submit')) {
     event.stopPropagation();
 
     saveFormInput(target);
-  }
-
-  if (
-    target.matches(".formbuilder-switch") ||
-    target.matches(".formbuilder-switch-back")
-  ) {
-    formbuilderSwitch(target);
-  }
-
-  if (
-    target.matches(".archive-switch-hide") ||
-    target.matches(".archive-switch-show")
-  ) {
-    archivedEntriesSwitch(target);
-  }
-
-  if (
-    target.matches(".only-own-switch-all") ||
-    target.matches(".only-own-switch-on")
-  ) {
-    onlyOwnSwitch(target);
   }
 });
 

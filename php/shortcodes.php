@@ -163,7 +163,7 @@ function showFormSelector($atts = [])
                 </div>
 
 
-                <div id='<?php echo esc_attr($id);?>-results' class='form-results-wrapper <?php echo esc_attr($resultVis);?> form-load-trigger' data-shortcode-id=<?php echo esc_attr($shortcodeId);?>>
+                <div id='<?php echo esc_attr($id);?>-results' class='form-results-wrapper <?php echo esc_attr($resultVis);?> formdata-load-trigger' data-shortcode-id=<?php echo esc_attr($shortcodeId);?>>
                 </div>
             </div>
             <?php
