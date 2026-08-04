@@ -12,6 +12,7 @@
 - select block with preview
 - select checkbox based on dynamic value
 - forms.js dependency
+- e-mail settings form
 
 ### Changed
 - added input element attributes form
