@@ -267,7 +267,7 @@ export default function Edit({
 
                     <ToggleControl
                         label={__('Hide', 'tsjippy')}
-                        checked={!!attributes.hidden}
+                        checked={!!attributes.hidden }
                         onChange={(hidden) =>
                             setAttributes({ hidden })
                         }

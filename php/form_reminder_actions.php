@@ -16,7 +16,7 @@ add_action('tsjippy-forms-after-form-reminder-save', __NAMESPACE__ . '\updateRem
  */
 function updateReminders()
 {
-    $forms  = new FormReminders();
+    //$forms  = new FormReminders();
 
-    $forms->updateCache();
+    //$forms->updateCache();
 }

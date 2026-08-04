@@ -322,11 +322,17 @@ return array(
 				'type' => 'boolean',
 				'default' => false
 			),
-			'hide' => array(
+			'hidden' => array(
 				'type' => 'boolean',
 				'default' => false
 			),
-			'reminders' => array(
+			'reminderConditions' => array(
+				'type' => 'array',
+				'default' => array(
+					
+				)
+			),
+			'roles' => array(
 				'type' => 'array',
 				'default' => array(
 					

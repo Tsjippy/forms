@@ -96,19 +96,6 @@ class FormReminders extends Forms
     }
 
     /**
-     * Updates the cache for a specific form
-     *
-     * @param   int     $formId    The form id to update the cache for
-     * @param   int     $userId    The user id to update the cache for
-     *
-     * @return  void
-     */
-    public function updateFormCache($formId, $userId = '')
-    {
-        $this->getForm($formId);
-    }
-
-    /**
      * Gets the reminders for a given user id
      *
      * @param   int $userId    The user id to get the reminders for
@@ -152,9 +139,9 @@ class FormReminders extends Forms
         );
 
         foreach ($results as $formReminder) {
-            $formReminder->conditions    = maybe_unserialize($formReminder->conditions);
-
-            $form    = $this->getForm($formReminder->form_id);
+            continue;
+            
+            $form    = $this->getForm($formReminder->post_id, $formReminder->block_id);
 
             $form    = $this->formData;
 
@@ -309,7 +296,7 @@ class FormReminders extends Forms
             "manadatory_elements",
             "forms",
             "SELECT * FROM %i WHERE mandatory=1 OR recommended=1",
-            $this->elTableName
+            //$this->elTableName
         );
         $this->mandatoryElements    = apply_filters("tsjippy-forms-elements-filter", $this->mandatoryElements, $this);
     }
@@ -451,7 +438,7 @@ class FormReminders extends Forms
         // Loop over all mandatory and required elements
         foreach ($this->mandatoryElements as $element) {
             // Load the form data for this element to save db queries in the getElementById function
-            $this->getForm($element->form_id);
+            //$this->getForm($element->form_id);
 
             // Unserialize the warning conditions
             $warningCondition = maybe_unserialize($element->warning_conditions);
@@ -519,7 +506,7 @@ class FormReminders extends Forms
 
             foreach ($this->reminders['metaforms'][$formId] as $elementId => $userIds) {
 
-                $this->getForm($formId);
+                //$this->getForm($formId);
 
                 foreach ($userIds as $userId) {
                     $child                = $family->isChild($userId);
@@ -696,7 +683,7 @@ class FormReminders extends Forms
      */
     protected function getFormReminderHtml($formId, $childName)
     {
-        $this->getForm($formId);
+        //$this->getForm($formId);
 
         $formUrl    = $this->formData->url;
 
@@ -738,7 +725,7 @@ class FormReminders extends Forms
         if (!empty($this->userReminders[$userId]['metaforms'])) {
             foreach ($this->userReminders[$userId]['metaforms'] as $formId => $elements) {
                 // Load the form data
-                $this->getForm($formId);
+                //$this->getForm($formId);
 
                 foreach ($elements as $elementId) {
                     $result = $this->getElementReminderHtml($elementId, $type, $childName);

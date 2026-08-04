@@ -69,13 +69,13 @@
 			"type": "boolean",
 			"default": false
 		},
-		"hide": {
+		"hidden": {
 			"type": "boolean",
 			"default": false
 		},
 		"reminderConditions": {
 			"type": "array",
-			"default": [],
+			"default": []
 		},
 		"roles": {
 			"type": "array",

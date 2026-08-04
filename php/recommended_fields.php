@@ -34,7 +34,7 @@ function addChildFields($html, $userId, $object)
     return $html;
 }
 
-add_action('tsjippy-user-management-dashboard-warnings', __NAMESPACE__ . '\dashboardWarnings');
+//add_action('tsjippy-user-management-dashboard-warnings', __NAMESPACE__ . '\dashboardWarnings');
 /**
  * Displays the dashboard warnings for the user
  *

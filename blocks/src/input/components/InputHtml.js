@@ -49,21 +49,21 @@ export function InputHtml({
                 ...dynamicOptions,
             ];
 
-            selectedValue = prefill?.single?.[attributes.dynamic_value ?? ''];
+            selectedValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
             
-            console.log(prefill?.single?.[attributes.dynamic_value ?? '']);
+            console.log(prefill?.single?.[attributes.dynamic_value ?? ''] ?? '');
         }
 
         html = (
             <div
-                className="checkbox-wrapper"
+                {...blockProps}
+                className={`${blockProps.className} checkbox-wrapper`}
                 data-blockid={attributes.blockId}
                 data-dynamicOptions={attributes.selectable_options_dynamic}
                 data-dynamicValue={attributes.dynamic_value}
             >
                 {options.map((option, index) => (
                     <label
-                        {...blockProps}
                         key={`${option.value}-${index}`}
                     >
                         <input

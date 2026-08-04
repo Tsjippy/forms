@@ -17,7 +17,6 @@ class Forms
     protected bool     $clonableFormStep;
     public bool        $editRights;
     public array       $elementMapping;
-    public string      $elTableName;
     public array       $emailSettings;
     public object      $formData;
     public array       $formElements;
@@ -50,7 +49,6 @@ class Forms
     public string      $blockRemindersTableName;
     public array       $submitRoles;
     protected array    $tableFormats;
-    public string      $tableName;
     public \WP_User    $user;
     public int         $userId;
     protected string   $userIdElementName;
@@ -75,7 +73,6 @@ class Forms
         $this->all                          = $all;
         $this->clonableFormStep             = false;
         $this->elementMapping               = [];
-        $this->elTableName                  = $wpdb->prefix . 'tsjippy_form_elements';
         $this->emailSettings                = [];
         $this->formData                     = new stdClass();
         $this->formEmailTable               = $wpdb->prefix . 'tsjippy_form_emails';
@@ -156,7 +153,6 @@ class Forms
         $this->blockRemindersTableName      = $wpdb->prefix . 'tsjippy_form_block_reminders';
         $this->submitRoles                  = [];
         $this->tableFormats                 = [];
-        $this->tableName                    = $wpdb->prefix . 'tsjippy_forms';
         $this->user                         = wp_get_current_user();
         $this->userId                       = $this->user->ID;  // The user id for who we retrieve a form (results)
         $this->userIdElementName            = '';
@@ -220,34 +216,11 @@ class Forms
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
 
-        //Main table
-        $sql = "CREATE TABLE {$this->tableName} (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            slug tinytext NOT NULL,
-            name text,
-            version text NOT NULL,
-            button_text text,
-            succes_message text,
-            include_id boolean,
-            save_in_meta boolean,
-            url text,
-            actions text,
-            autoarchive boolean,
-            autoarchive_el integer,
-            autoarchive_value text,
-            split text,
-            full_right_roles LONGTEXT,
-            submit_others_form LONGTEXT,
-            upload_path LONGTEXT,
-            PRIMARY KEY  (id)
-       ) $charsetCollate;";
-
-        maybe_create_table($this->tableName, $sql);
-
         // Form Reminders Table
         $sql = "CREATE TABLE {$this->formReminderTable} (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
-            form_id int,
+            post_id int,
+            block_id tinytext,
             frequency int,
             period text,
             reminder_start_date date,
@@ -262,61 +235,18 @@ class Forms
 
         maybe_create_table($this->formReminderTable, $sql);
 
-        // Form element table
-        $sql = "CREATE TABLE {$this->elTableName} (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            form_id int NOT NULL,
-            type text NOT NULL,
-            priority int,
-            width int default 100,
-            function_name text,
-            folder_name text,
-            slug text NOT NULL,
-            nametext,
-            text text,
-            html text,
-            value_list text,
-            default_value text,
-            default_array_value text,
-            options text,
-            required boolean default False,
-            mandatory boolean default False,
-            recommended boolean default False,
-            wrap boolean default False,
-            hidden boolean default False,
-            multiple boolean default False,
-            library boolean default False,
-            edit_image boolean default False,
-              conditions longtext,
-            warning_conditions longtext,
-            `add` longtext,
-            `remove` longtext,
-            PRIMARY KEY  (id)
-         ) $charsetCollate;";
-
-        maybe_create_table($this->elTableName, $sql);
-
         // form e-mails table
         $sql = "CREATE TABLE {$this->formEmailTable} (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
-            form_id int NOT NULL,
-            email_trigger tinytext,
-            submitted_trigger tinytext,
-            conditional_field tinytext,
-            conditional_fields longtext,
-            conditional_value tinytext,
-            from_email tinytext,
-            `from` tinytext,
-            conditional_from_email longtext,
-            else_from tinytext,
-            email_to tinytext,
-            `to` tinytext,
-            conditional_email_to longtext,
-            else_to tinytext,
-            subject longtext,
-            message longtext,
+            post_id int,
+            block_id tinytext NOT NULL,
+            `trigger` longtext,
+            sender longtext,
+            recipient longtext,
+            `subject` longtext,
+            `message` longtext,
             headers longtext,
-            files longtext,
+            attachments longtext,
             PRIMARY KEY  (id)
        ) $charsetCollate;";
 
@@ -325,7 +255,8 @@ class Forms
         // shortcodeTableSettings table
         $sql = "CREATE TABLE {$this->shortcodeTable} (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
-            form_id int NOT NULL,
+            post_id int,
+            block_id tinytext NOT NULL,
             title tinytext,
             default_sort tinytext,
             sort_direction tinytext,
@@ -361,7 +292,8 @@ class Forms
         // submission table
         $sql = "CREATE TABLE {$this->submissionTableName} (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
-            form_id    int NOT NULL,
+            post_id int,
+            block_id    tinytext NOT NULL,
             time_created datetime DEFAULT NULL,
             time_last_edited datetime DEFAULT NULL,
             user_id mediumint(9),
@@ -388,9 +320,9 @@ class Forms
         $sql = "CREATE TABLE {$this->blockConditionsTableName} (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             post_id mediumint(9),
+            `block_id` tinytext,
             `rules` longtext,
             `actions` longtext,
-            `block_id` text,
             PRIMARY KEY  (id)
        ) $charsetCollate;";
 
@@ -400,7 +332,7 @@ class Forms
         $sql = "CREATE TABLE {$this->blockRemindersTableName} (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             post_id mediumint(9),
-            `block_id` text,
+            `block_id` tinytext,
             `rules` longtext,
             PRIMARY KEY  (id)
        ) $charsetCollate;";
@@ -413,31 +345,10 @@ class Forms
      */
     private function tableFormats()
     {
-        // Form Settings
-        $formats            = [
-            'slug'               => '%s',
-            'version'            => '%s',
-            'button_text'        => '%s',
-            'succes_message'     => '%s',
-            'include_id'         => '%d',
-            'name'               => '%s',
-            'save_in_meta'       => '%d',
-            'url'                => '%s',
-            'actions'            => '%s',
-            'autoarchive'        => '%d',
-            'autoarchive_el'     => '%d',
-            'autoarchive_value'  => '%s',
-            'split'              => '%s',
-            'full_right_roles'   => '%s',
-            'submit_others_form' => '%s',
-            'upload_path'        => '%s'
-        ];
-
-        $this->tableFormats[$this->tableName]         = apply_filters('tsjippy-forms-form-table-formats', $formats, $this);
-
         // From Reminder Settings
         $formats            = [
-            'form_id'             => '%d',
+            'post_id'             => '%d',
+            'block_id'            => '%s',
             'frequency'           => '%d',
             'period'              => '%s',
             'reminder_start_date' => '%s',
@@ -450,64 +361,25 @@ class Forms
 
         $this->tableFormats[$this->formReminderTable] = apply_filters('tsjippy-forms-form-reminder-formats', $formats, $this);
 
-        // Form Elements
-        $formats        = [
-            'form_id'             => '%d',
-            'type'                => '%s',
-            'priority'            => '%d',
-            'width'               => '%d',
-            'function_name'       => '%s',
-            'folder_name'         => '%s',
-            'slug'                => '%s',
-            'name'                => '%s',
-            'text'                => '%s',
-            'html'                => '%s',
-            'value_list'          => '%s',
-            'default_value'       => '%s',
-            'default_array_value' => '%s',
-            'options'             => '%s',
-            'required'            => '%d',
-            'mandatory'           => '%d',
-            'recommended'         => '%d',
-            'wrap'                => '%d',
-            'hidden'              => '%d',
-            'multiple'            => '%d',
-            'library'             => '%d',
-            'edit_image'          => '%d',
-            'conditions'          => '%s',
-            'remove'              => '%s',
-            'add'                 => '%s',
-        ];
-
-        $this->tableFormats[$this->elTableName]       = apply_filters('tsjippy-forms-element-table-formats', $formats, $this);
-
         // Form Emails
         $formats    = [
-            'form_id'                => '%d',
-            'email_trigger'          => '%s',
-            'submitted_trigger'      => '%s',
-            'conditional_field'      => '%s',
-            'conditional_fields'     => '%s',
-            'conditional_value'      => '%s',
-            'from_email'             => '%s',
-            'from'                   => '%s',
-            'conditional_from_email' => '%s',
-            'else_from'              => '%s',
-            'email_to'               => '%s',
-            'to'                     => '%s',
-            'conditional_email_to'   => '%s',
-            'else_to'                => '%s',
-            'subject'                => '%s',
-            'message'                => '%s',
-            'headers'                => '%s',
-            'files'                  => '%s'
+            'post_id'     => '%d',
+            'block_id'    => '%s',
+            'trigger'     => '%s',
+            'sender'      => '%s',
+            'recipient'   => '%s',
+            'subject'     => '%s',
+            'message'     => '%s',
+            'headers'     => '%s',
+            'attachments' => '%s'
         ];
 
         $this->tableFormats[$this->formEmailTable]    = apply_filters('tsjippy-forms-email-table-formats', $formats, $this);
 
         // Form Submissions
         $formats    = [
-            'form_id'          => '%d',
+            'post_id'          => '%d',
+            'block_id'         => '%s',
             'time_created'     => '%s',
             'time_last_edited' => '%s',
             'user_id'          => '%d',
@@ -529,7 +401,8 @@ class Forms
 
         // Table Settings
         $formats    = [
-            'form_id'          => '%d',
+            'post_id'          => '%d',
+            'block_id'         => '%s',
             'title'            => '%s',
             'default_sort'     => '%s',
             'sort_direction'   => '%s',
@@ -562,19 +435,19 @@ class Forms
 
         // Condition Settings
         $formats    = [
-            'rules'     => '%s',
-            'actions'   => '%s',
-            'block_id'    => '%s',
-            'post_id'   => '%d'     
+            'rules'    => '%s',
+            'actions'  => '%s',
+            'block_id' => '%s',
+            'post_id'  => '%d'     
         ];
 
         $this->tableFormats[$this->blockConditionsTableName] = apply_filters('tsjippy-forms-condition-formats', $formats, $this);
 
         // Block Reminder Settings
         $formats    = [
-            'rules'   => '%s',
-            'post_id'   => '%d',
-            'block_id'     => '%s', 
+            'rules'    => '%s',
+            'post_id'  => '%d',
+            'block_id' => '%s', 
         ];
 
         $this->tableFormats[$this->blockConditionsTableName] = apply_filters('tsjippy-forms-block-reminder-formats', $formats, $this);
@@ -582,310 +455,6 @@ class Forms
         foreach ($this->tableFormats as &$format) {
             ksort($format);
         }
-    }
-
-    /**
-     * Inserts a new form in the db
-     *
-     * @param    string    $slug    The form slug
-     *
-     * @return    int|WP_Error    The form id or error ion failure
-     */
-    public function insertForm($slug = '')
-    {
-        if (empty($this->formData)) {
-            $this->formData     =  new \stdClass();
-        }
-
-        if (empty($slug)){
-            if(!empty($this->formData->slug)) {
-                $slug = $this->formData->slug;
-            } else {
-                return new WP_Error('forms', 'No form slug given');
-            }
-        }
-
-        $slug    = str_replace([' ', '/'], '-', strtolower($slug));
-
-        // Check if name already exists
-        $newName = $slug;
-        $i       = 1;
-        while (true) {
-            $result    = TSJIPPY\getFromDb(
-                "get_form_with_slug_$newName",
-                "forms",
-                "SELECT * FROM %i WHERE slug = %s",
-                $this->tableName,
-                $newName
-            );
-
-            if (empty($result)) {
-                break;
-            }
-
-            $newName    = "$slug$i";
-            $i++;
-        }
-
-        $this->formData->slug    = $newName;
-
-        $result = TSJIPPY\insertInDb(
-            $this->tableName,
-            array(
-                'slug'            => $this->formData->slug,
-                'version'         => 1
-            ),
-            [
-                '%s',
-                '%d'
-            ],
-            'forms'
-        );
-
-        if (is_wp_error($result)) {
-            return $result;
-        }
-
-        $this->formData->id = $result;
-
-        /**
-         * insert default elements
-         */
-
-        // First create the name element as we need its id for the user id element conditions
-        $result = TSJIPPY\insertInDb(
-            $this->elTableName,
-            array(
-                'form_id'       => $this->formData->id,
-                'type'          => 'text',
-                'slug'          => 'name',
-                'options'       => 'list=users',
-                'default_value' => 'display_name',
-                'priority'      => 3
-            ),
-            [
-                '%d',
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-                '%d'
-            ],
-            'forms'
-        );
-
-        if (is_wp_error($result)) {
-            return $result;
-        }
-
-        $elementId    = $result;
-
-        $elements = [
-            array(
-                'type'          => 'number',
-                'slug'          => 'user_id',
-                'default_value' => 'user_id',
-                'hidden'        => true,
-                'conditions'    => serialize([
-                    [
-                        'rules' => [
-                            [
-                                'conditional-field'    => $elementId,
-                                'equation'            => 'changed',
-                            ]
-                        ],
-                        'action'            => 'property',
-                        'property-name'        => 'value',
-                        'property-value'    => $elementId
-                    ]
-                ]),
-                'priority'      => 1
-            ),
-            array(
-                'type'     => 'label',
-                'slug'     => 'name-label',
-                'text'     => 'Your Name',
-                'wrap'     => true,
-                'priority' => 2
-            ),
-            array(
-                'type'                    => 'datalist',
-                'slug'                    => 'users',
-                'default_array_value'     => 'all_users',
-                'priority'                => 4
-            )
-        ];
-
-        foreach ($elements as $element) {
-            $element['form_id'] = $this->formData->id;
-
-            TSJIPPY\insertInDb(
-                $this->elTableName,
-                $element,
-                [],
-                'forms'
-            );
-        }
-    }
-
-    /**
-     * Checks if the current form exists in the db. If not, inserts it
-     */
-    public function maybeInsertForm($formId = '')
-    {
-        global $wpdb;
-
-        if (!isset($this->formData->slug)) {
-            return new WP_ERROR('forms', 'No form slug given');
-        }
-
-        $query   = "SELECT slug FROM %i WHERE `slug` = %s";
-        $values  = [
-            $this->tableName,
-            $this->formData->slug
-        ];
-
-        if (is_numeric($formId)) {
-            $query    .= " OR id=%d";
-            $values[]   = $formId;
-        }
-        //check if form row already exists
-        // phpcs:disable
-        if (!$wpdb->get_var(
-            $wpdb->prepare($query, $values)
-        )) {
-            //Create a new form row
-            $this->insertForm();
-        }
-        // phpcs:enable
-    }
-
-    /**
-     * Deletes a form
-     *
-     * @param    int        $formId    The id of the form to be deleted
-     *
-     * @return    string            The deletion result
-     */
-    public  function deleteForm($formId)
-    {
-        global $wpdb;
-
-        // Remove the form
-        TSJIPPY\removeFromDb(
-            $this->tableName,
-            ['id' => $formId],
-            ['%d'],
-            'forms'
-        );
-
-        // remove the form elements
-        TSJIPPY\removeFromDb(
-            $this->elTableName,
-            ['form_id' => $formId],
-            ['%d'],
-            'forms'
-        );
-
-        // emails
-        TSJIPPY\removeFromDb(
-            $this->formEmailTable,
-            ['form_id' => $formId],
-            ['%d'],
-            'forms'
-        );
-
-        // reminders
-        TSJIPPY\removeFromDb(
-            $this->formReminderTable,
-            ['form_id' => $formId],
-            ['%d'],
-            'forms'
-        );
-
-        //shortcodes
-        TSJIPPY\removeFromDb(
-            $this->shortcodeTable,
-            ['form_id' => $formId],
-            ['%d'],
-            'forms'
-        );
-
-        // shortcode setttings
-        TSJIPPY\removeFromDb(
-            $this->shortcodeColumnSettingsTable,
-            ['form_id' => $formId],
-            ['%d'],
-            'forms'
-        );
-
-        // submission values
-        TSJIPPY\removeFromDb(
-            $this->submissionValuesTableName,
-            [
-                "DELETE sv FROM %i sv JOIN %i s ON sv.submission_id = s.id WHERE s.form_id = %d",
-                $this->submissionValuesTableName,
-                $this->submissionTableName,
-                $formId
-            ],
-            [],
-            'forms'
-        );
-
-        // remove the form submissions
-        TSJIPPY\removeFromDb(
-            $this->submissionTableName,
-            ['form_id' => $formId],
-            ['%d'],
-            'forms'
-        );
-
-        // update or delete posts with this form
-        $results    = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT ID FROM %i WHERE post_content LIKE %s",
-                $wpdb->posts,
-                "%" . $wpdb->esc_like('[tsjippy_formbuilder slug={$this->formData->slug}]') . "%"
-            )
-        );
-
-        // remove the shortcode from the page
-        foreach ($results as $postId) {
-            $post    = get_post($postId);
-
-            $post->post_content    = str_replace('[tsjippy_formbuilder slug={$this->formData->slug}]', '', $post->post_content);
-
-            // delete post
-            if (empty($post->post_content)) {
-                wp_delete_post($post->ID);
-            } else {
-                wp_update_post($post);
-            }
-        }
-
-        /**
-         * Flush db cache
-         */
-        if (wp_cache_supports('flush_group')) {
-            wp_cache_flush_group('tsjippy_forms');
-        } else {
-            wp_cache_flush();
-        }
-
-        return "<div class='success'>Deletion of the form with id '$formId' finished successfully.</div>";
-    }
-
-    /**
-     * Gets all forms from the db
-     */
-    public function getForms()
-    {
-        $this->forms =  TSJIPPY\getFromDb(
-            "get_all_forms",
-            "forms",
-            "SELECT * FROM %i",
-            $this->tableName
-        );
     }
 
     /**
@@ -907,115 +476,7 @@ class Forms
             return new WP_Error('forms', "No form found for submission id $submisisonId");
         }
 
-        return $this->getForm($formId);
-    }
-
-    /**
-     * Load a specific form or creates it if it does not exist
-     *
-     * @param    int        $formId    the form id to load. Default empty
-     */
-    public function getForm($formId = '')
-    {
-        // first check if needed
-        if (
-            !isset($this->formData->version) ||
-            (
-                !empty($this->formData->id)        &&
-                !empty($formId) &&
-                $this->formData->id != $formId
-            )
-        ) {
-            // Get the form data
-            $query      = "SELECT * FROM %i WHERE ";
-            $values     = [$this->tableName];
-            $cacheKey   = "get-form-";
-
-            if (is_numeric($formId)) {
-                $query    .= "id= %d";
-                $values[] = $formId;
-                $cacheKey .= $formId;
-            } elseif (is_numeric($this->formData->id ?? '') && $this->formData->id > -1) {
-                $query    .= "id= %d";
-                $values[] = $this->formData->id;
-                $cacheKey .= $this->formData->id;
-            } elseif (!empty($this->formData->slug)) {
-                $query    .= "slug= %s";
-                $values[] = $this->formData->slug;
-                $cacheKey .= $this->formData->slug;
-            } else {
-                return new \WP_Error('forms', 'No form name or id given');
-            }
-
-            $query  .= ' limit 1';
-
-            $result = TSJIPPY\getFromDb(
-                $cacheKey,
-                'forms',
-                $query, 
-                $values
-            );
-
-            // Form does not exist yet
-            if (empty($result)) {
-                global $post;
-
-                $url = get_page_link($post);
-
-                TSJIPPY\printArray("Form requested on {$post->post_type} on $url does not exist. Query used is '$query'");
-                $this->insertForm();
-            } else {
-                $result                      = map_deep($result, 'maybe_unserialize');
-
-                // Make sure these are arrays
-                foreach( [ 'full_right_roles', 'submit_others_form', 'split'] as $key){
-                    if(!is_array($result->$key)){
-                        $result->$key   = [];
-                    }
-                }
-
-                $this->formData              = $result;
-
-                /**
-                 * Filters the elements the submission data should be splitted on
-                 *
-                 * @param    array    $splitElements    The current element id's
-                 * @param    object    $object            Form instance
-                 */
-                $this->formData->split              = apply_filters('tsjippy-forms-split-elements', $this->formData->split, $this);
-            }
-        }
-
-        $this->elementMapper(true);
-
-        if (!$this->editRights) {
-            $editRoles    = ['administrator', 'editor'];
-            if (!empty($this->formData->full_right_roles)) {
-                $editRoles    = (array)$this->formData->full_right_roles;
-            }
-
-            //calculate full form rights
-            $object    = get_queried_object();
-
-            if (array_intersect_key($editRoles, $this->userRoles) || (!empty($object) && $object->post_author == $this->user->ID)) {
-                $this->editRights        = true;
-            } else {
-                $this->editRights        = false;
-            }
-        }
-
-        if (!empty($this->formData->submit_others_form)) {
-            $this->submitRoles    = $this->formData->submit_others_form;
-
-            // $this->userId is the user id for whom the form is submitted
-            if ( !array_intersect_key($this->userRoles, $this->submitRoles) && !isset($this->submitRoles[$this->user->ID])) {
-                $this->userId    = $this->user->ID;
-            }
-        }
-
-        $this->jsFileName    = plugin_dir_path(__DIR__) . "../js/dynamic/{$this->formData->slug}forms";
-
-        return true;
+        return $formId;
     }
 
     /**
@@ -1106,6 +567,34 @@ class Forms
     }
 
     /**
+     * Get the elements of a form
+     * 
+     * @param string $blockId The forms block id
+     * @param int    $postId  The forms post id    
+     */
+    public function getForm($postId, $blockId){
+        $post   = get_post($postId);
+
+        $blocks = parse_blocks($post->post_content);
+
+        return $blocks;
+    }
+
+    /**
+     * Finds all blocks and post ids who are of the formbuilder type
+     */
+    public function getForms(){
+        global $wpdb;
+
+        return TSJIPPY\getFromDb(
+            'all_forms',
+            'forms',
+            "SELECT distinct block_id, post_id from %i",
+            $this->submissionTableName
+        );
+    }
+
+    /**
      * Creates a dropdown with all the forms
      *
      * @return    string    the select html
@@ -1150,7 +639,7 @@ class Forms
 
         //load if needed
         if (empty($this->elementMapping)) {
-            $this->getForm();
+            $this->getForm(2, 3);
         }
 
         if (!isset($this->elementMapping['id'][$id])) {
@@ -1199,7 +688,7 @@ class Forms
 
         //load if needed
         if (empty($this->elementMapping)) {
-            $result    = $this->getForm();
+            $result    = $this->getForm(2,3);
 
             if (is_wp_error($result)) {
                 return $result;
@@ -1276,7 +765,7 @@ class Forms
 
         //load if needed
         if (empty($this->elementMapping['type']) && $load) {
-            $result    = $this->getForm();
+            $result    = $this->getForm(2, 3);
 
             if (is_wp_error($result)) {
                 return $result;
@@ -1390,21 +879,7 @@ class Forms
         }
 
         // Get all form elements
-        $query                        = "SELECT * FROM %i WHERE form_id= %d";
-        $values                        = [
-            $this->elTableName,
-            $formId
-        ];
-        $cacheKey   = "form_elements_$formId";
 
-        if (!empty($sortCol)) {
-            $query      .= " ORDER BY %s ASC";
-            $values[]    = $sortCol;
-            $cacheKey   .= "_sorted_$sortCol";
-        }
-
-        // phpcs:ignore
-        $elements    =  TSJIPPY\getFromDb($cacheKey, "forms", $query, $values);
 
         /**
          * Filters the elements of this form,
@@ -1412,7 +887,7 @@ class Forms
          * @param    object  $object    The form instance
          * @param    bool    $force     Wheter to force a requery
          */
-        $this->formElements         =  apply_filters('tsjippy-forms-elements', $elements, $this, false);
+        //$this->formElements         =  apply_filters('tsjippy-forms-elements', $elements, $this, false);
     }
 
     /**
@@ -1429,9 +904,6 @@ class Forms
         if (!isset($this->formData->slug)) {
             $atts    = shortcode_atts(
                 array(
-                    'slug'         => '',
-                    'formname'     => '',
-                    'form-name'    => '',
                     'name'         => '',
                     'user_id'      => 0,
                     'user-id'      => 0,
@@ -1439,8 +911,6 @@ class Forms
                     'shortcodeid'  => -1,
                     'shortcode-id' => -1,
                     'id'           => -1,
-                    'formid'       => -1,
-                    'form-id'      => -1,
                     'only-own'     => false,
                     'onlyown'      => false,
                     'archived'     => false,
@@ -1449,30 +919,12 @@ class Forms
                 $atts
             );
 
-            if (empty($atts['form-name'])) {
-                if (!empty($atts['formname'])) {
-                    $atts['form-name'] = $atts['formname'];
-                } elseif (!empty($atts['name'])) {
-                    $atts['form-name'] = $atts['name'];
-                } elseif (!empty($atts['slug'])) {
-                    $atts['form-name'] = ucfirst(str_replace('-', ' ', $atts['slug']));
-                }
-            }
-
-            if (empty($atts['slug'])) {
-                $atts['slug']         = str_replace(' ', '-', strtolower($atts['form-name']));
-            }
-
             if ($atts['user-id'] == 0 && $atts['user_id'] !== 0) {
                 $atts['user-id']      = $atts['user_id'];
             }
 
             if ($atts['shortcode-id'] == -1 && $atts['shortcodeid'] !== -1) {
                 $atts['shortcode-id'] = $atts['shortcodeid'];
-            }
-
-            if ($atts['form-id'] == -1 && $atts['formid'] !== -1) {
-                $atts['form-id']      = $atts['formid'];
             }
 
             if (empty($atts['only-own'])) {
@@ -1493,11 +945,7 @@ class Forms
                 $this->userId    = $atts['user-id'];
             }
 
-            $this->formData->name     = $atts['form-name'];
-            $this->formData->slug     = $atts['slug'];
-            $this->formData->id       = $atts['form-id'];
-
-            $this->getForm();
+            $this->getForm(2, 3);
 
             $this->getAllFormElements();
         }

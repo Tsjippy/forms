@@ -250,6 +250,8 @@ function missingFormFields($atts)
 
     $html    = '';
 
+    return '';
+
     $forms      = new FormReminders();
     $fieldHtml  = $forms->getReminderHtml(get_current_user_id(), $a['type']);
 

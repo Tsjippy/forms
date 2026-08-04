@@ -30,13 +30,13 @@ function loginRedirect($redirect, $requestedRedirect, $user)
     }
 
     // Get mandatory or recommended fields
-    $forms      = new FormReminders();
+    /* $forms      = new FormReminders();
     $fieldList  = $forms->getUserFormReminders($user->ID);
 
     //redirect to account page to fill in required fields
     if (!empty($fieldList)) {
         $redirect   = $url;
-    }
+    } */
 
     return $redirect;
 }

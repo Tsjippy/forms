@@ -21,6 +21,8 @@ function printJs($blockData, $postId){
 add_action('wp_ajax_save_generated_blocks', function () {
     $content = wp_unslash($_POST['content'] ?? '');
 
+    $blocks = parse_blocks($content);
+
     wp_update_post(
         [
             'ID'    => (int)$_POST['postId'],
@@ -110,7 +112,7 @@ function sendBlockContent(block, postId){
         'remove_button_content' => 'remove',
         'multiple' => 'multiple',
         'required' => 'required',
-        'hide' => 'hidden',
+        'hidden' => 'hidden',
         'selectable_options_dynamic' => 'default_array_value',
         'dynamic_value' => 'default_value',
     ];
@@ -136,12 +138,16 @@ function sendBlockContent(block, postId){
     $forms = new Forms();
     $forms->createDbTables();
 
-    $forms->getForms();
+    $oldForms   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}tsjippy_forms");
 
-    foreach($forms->forms as $form){
+    foreach($oldForms as $form){
 
-        if($form->id != 12){
-            //continue;
+        if($form->id != 69){
+            continue;
+        }
+
+        if(empty($form->slug)){
+            continue;
         }
 
         // Insert the post into the database
@@ -153,6 +159,20 @@ function sendBlockContent(block, postId){
         ] );
 
         echo "Created post <a href='" . get_permalink($postId) ."'>$form->name</a><br>";
+
+        /**
+         * Update all references to form_ids
+         */
+        $tables = [
+            $forms->formReminderTable,
+            $forms->submissionTableName,
+            $forms->shortcodeTable,
+            $forms->formEmailTable
+        ];
+
+        foreach($tables as $table){
+            $wpdb->query("UPDATE $table SET post_id = $postId WHERE block_id=$form->id;");
+        }
         
         /**
          * Build the form
@@ -196,6 +216,14 @@ function sendBlockContent(block, postId){
             $attributes     = [];
             $innerBlocks    = [];
 
+            if(str_contains($element->slug, '[]')){
+                $element->slug = str_replace('[]', '', $element->slug);
+            }
+
+            if(empty($element->name)){
+                $element->name  = $element->slug;
+            }
+
             // Formstep
             if($element->type == 'formstep'){
                 $attributes = ['text' => $element->text];
@@ -232,8 +260,12 @@ function sendBlockContent(block, postId){
                     if (isset($element->$oldKey) && $element->$oldKey != '') {
                         $attributes[$blockKey] = $element->$oldKey;
 
-                        if(in_array($blockKey, ['multiple','required', 'hide'])){
+                        if(in_array($blockKey, ['multiple','required', 'hidden'])){
                             $attributes[$blockKey] = boolval($element->$oldKey);
+                        }
+
+                        if($blockKey == 'selectable_options'){
+                            $attributes[$blockKey]  = explode("\n", $attributes[$blockKey]);
                         }
                     }
                 }
@@ -434,9 +466,9 @@ function sendBlockContent(block, postId){
             if(!empty($element->conditions)){
                 $element->conditions = maybe_unserialize($element->conditions);
                 foreach($element->conditions as $condition){
-                    foreach($condition['rules'] as $index => $rule){
+                    foreach($condition['rules'] as $i => $rule){
                         if(empty($rule['conditional-field'])){
-                            unset($condition['rules'][$index]);
+                            unset($condition['rules'][$i]);
                         }
                     }
                     $newRules   = TSJIPPY\cleanUpNestedArray($condition['rules']);
@@ -500,12 +532,17 @@ function sendBlockContent(block, postId){
 
         printJs($formBlock, $postId);
     }
+
+    // Drop the table, everything is migrated
+    //$wpdb->query("DROP TABLE `{$wpdb->prefix}tsjippy_form_elements`, `{$wpdb->prefix}tsjippy_forms`;");
 }
 
 add_action('admin_footer-post.php', function(){
+
+    //upgradeDatabase();
+
     //insertNewForms();
 
-    upgradeDatabase();
 });
 
 function upgradeDatabase(){
@@ -513,18 +550,26 @@ function upgradeDatabase(){
 
     $forms = new Forms();
 
+    // Change form_id to block_id
+    $tables = [
+        $forms->formReminderTable,
+        $forms->submissionTableName,
+        $forms->shortcodeTable,
+        $forms->formEmailTable
+    ];
+
+    // Change tables
+    foreach($tables as $table){
+        $wpdb->query("ALTER TABLE $table CHANGE `form_id` `block_id` tinytext NOT NULL AFTER `id`, ADD `post_id` int NOT NULL AFTER `block_id`;");
+    }
+
     // Get the e-mails
     $emails = $wpdb->get_results("select * from $forms->formEmailTable");
 
-    // Change the table structure
-    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `form_id` `block_id` VARCHAR(255) NOT NULL DEFAULT '-1'");
-    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `email_trigger` `trigger` VARCHAR(255) NOT NULL DEFAULT 'on_submission'");
-    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `from` `sender` VARCHAR(255) NOT NULL DEFAULT ''");
-    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `to` `recipient` VARCHAR(255) NOT NULL DEFAULT ''");
-    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `subject` `subject` VARCHAR(255) NOT NULL DEFAULT ''");
-    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `message` `message` TEXT NOT NULL");
-    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `headers` `headers` TEXT NOT NULL");
-    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `files` `attachments` TEXT NOT NULL"); 
+    // Drop the old table
+    $wpdb->query("DROP TABLE `$forms->formEmailTable`;");
+
+    $forms->createDbTables();
  
     foreach($emails as $email){
         $email= map_deep($email, 'maybe_unserialize');
@@ -555,20 +600,17 @@ function upgradeDatabase(){
             'elseEmail' => $email->else_to,
         ]);
 
-        $wpdb->update(
+        $wpdb->insert(
             $forms->formEmailTable,
             [
-                'block_id' => $email->form_id,
-                'trigger' => $trigger,
-                'sender' => $sender,
-                'recipient' => $recipient,
+                'block_id' => $email->block_id,
+                'trigger' => maybe_serialize($trigger),
+                'sender' => maybe_serialize($sender),
+                'recipient' => maybe_serialize($recipient),
                 'subject' => trim($email->subject),
                 'message' => trim($email->message),
                 'headers' => trim($email->headers),
                 'attachments' => trim($email->attachments)
-            ],
-            [
-                'id' => $email->id
             ],
             [
                 '%s',
@@ -579,9 +621,6 @@ function upgradeDatabase(){
                 '%s',
                 '%s',
                 '%s'
-            ],
-            [
-                '%d'
             ]
         );
     }
