@@ -353,30 +353,6 @@ function restApiInitForms()
             )
         )
     );
-
-    // save_form_emails
-    register_rest_route(
-        TSJIPPY\RESTAPIPREFIX . '/forms',
-        '/save_form_emails',
-        array(
-            'methods'                 => 'POST',
-            'callback'                 =>     __NAMESPACE__ . '\saveFormEmails',
-            'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
-            'args'                    => array(
-                'form-id'        => array(
-                    'required'    => true,
-                    'validate_callback' => function ($formId) {
-                        return is_numeric($formId);
-                    }
-                ),
-                'emails'        => array(
-                    'required'    => true
-                ),
-
-            )
-        )
-    );
-
 }
 
 /**
@@ -763,27 +739,6 @@ function saveFormReminder()
         return $result;
     }
     return "Succesfully saved your form reminder settings";
-}
-
-/**
- * Save the email settings for a form
- *
- * @return string    A success message indicating that the email settings were saved successfully
- */
-function saveFormEmails()
-{
-    $formBuilder    = new SaveFormSettings();
-    $formBuilder->getForm((int) $_POST['form-id']);
-
-    $formEmails     = TSJIPPY\sanitize($_POST['emails']);
-
-    $result         = $formBuilder->saveFormEmails($formEmails, (int) $_POST['form-id']);
-
-    if (is_wp_error($result)) {
-        return $result;
-    }
-
-    return "Succesfully saved your form e-mail configuration";
 }
 
 /**

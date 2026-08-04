@@ -1,154 +1,232 @@
-import { Button } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { Button, Spinner } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
 
 import EmailEditor from './EmailEditor';
 import EmailTriggerPanel from './EmailTriggerPanel';
 import EmailAddressPanel from './EmailAddressPanel';
 
-export default function EmailSettings({
-    emails = [],
-    formElements = [],
-    onChange,
+export function EmailSettings({
+	blockId = false,
+	formElements = [],
 }) {
-    const [activeTab, setActiveTab] = useState(0);
+	const [emails, setEmails] = useState([]);
+	const [activeTab, setActiveTab] = useState(0);
+	const [loading, setLoading] = useState(true);
+	const [saving, setSaving] = useState(false);
 
-    const updateEmail = (index, changes) => {
-        const updated = [...emails];
+	useEffect(() => {
+		if (!blockId) {
+			return;
+		}
 
-        updated[index] = {
-            ...updated[index],
-            ...changes,
-        };
+		setLoading(true);
 
-        onChange(updated);
-    };
+        apiFetch({
+			path: `${tsjippy.restApiPrefix}/forms/get_form_emails`,
+			method: 'POST',
+			data: {
+				blockId: blockId
+			},
+		})
+			.then((response) => {
+				setEmails(response || []);
+			})
+			.catch((error) => {
+				console.error(error);
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}, [blockId]);
 
-    const addEmail = () => {
-        const updated = [
-            ...emails,
-            {
-                trigger: {
-                    type: 'submitted',
-                },
-                sender: {
-                    type: 'fixed',
-                    email: '',
-                    rules: [],
-                },
-                recipient: {
-                    type: 'fixed',
-                    email: '%email%',
-                    rules: [],
-                },
-                subject: '',
-                message: '',
-                headers: '',
-                attachments: '',
-            },
-        ];
+	const saveEmails = () => {
+		setSaving(true);
 
-        onChange(updated);
-        setActiveTab(updated.length - 1);
-    };
+		apiFetch({
+			path: `${tsjippy.restApiPrefix}/forms/save_form_emails`,
+			method: 'POST',
+			data: {
+				blockId: blockId,
+				emails,
+			},
+		})
+			.catch((error) => {
+				console.error(error);
+			})
+			.finally(() => {
+				setSaving(false);
+			});
+	};
 
-    const removeEmail = index => {
-        const updated = emails.filter(
-            (_, i) => i !== index
-        );
+	const updateEmail = (index, changes) => {
+		const updated = [...emails];
 
-        onChange(updated);
+		updated[index] = {
+			...updated[index],
+			...changes,
+		};
 
-        setActiveTab(
-            Math.max(0, activeTab - 1)
-        );
-    };
+		setEmails(updated);
+	};
 
-    const email = emails[activeTab];
+	const addEmail = () => {
+		const updated = [
+			...emails,
+			{
+				trigger: {
+					type: 'submitted',
+					element: '',
+					operator: '==',
+					compare: '',
+					conditionalField: '',
+					conditionalValue: '',
+					conditionalFields: [],
+					daysBefore: 0,
+					daysAfter: 0,
+				},
+				sender: {
+					type: 'fixed',
+					email: '',
+					rules: [],
+					elseEmail: '',
+				},
+				recipient: {
+					type: 'fixed',
+					email: '%email%',
+					rules: [],
+					elseEmail: '',
+				},
+				subject: '',
+				message: '',
+				headers: '',
+				attachments: '',
+			},
+		];
 
-    return (
-        <div className="tsjippy-emails">
-            <div className="tsjippy-email-tabs">
-                {emails.map((item, index) => (
-                    <Button
-                        key={index}
-                        variant={
-                            activeTab === index
-                                ? 'primary'
-                                : 'secondary'
-                        }
-                        onClick={() =>
-                            setActiveTab(index)
-                        }
-                    >
-                        Email {index + 1}
-                    </Button>
-                ))}
+		setEmails(updated);
+		setActiveTab(updated.length - 1);
+	};
 
-                <Button
-                    variant="primary"
-                    onClick={addEmail}
-                >
-                    +
-                </Button>
-            </div>
+	const removeEmail = (index) => {
+		const updated = emails.filter(
+			(_, i) => i !== index
+		);
 
-            {email && (
-                <>
-                    <EmailTriggerPanel
-                        value={email.trigger}
-                        formElements={formElements}
-                        onChange={trigger =>
-                            updateEmail(
-                                activeTab,
-                                { trigger }
-                            )
-                        }
-                    />
+		setEmails(updated);
 
-                    <EmailAddressPanel
-                        title="Sender"
-                        value={email.sender}
-                        formElements={formElements}
-                        onChange={sender =>
-                            updateEmail(
-                                activeTab,
-                                { sender }
-                            )
-                        }
-                    />
+		if (activeTab >= updated.length) {
+			setActiveTab(
+				Math.max(0, updated.length - 1)
+			);
+		}
+	};
 
-                    <EmailAddressPanel
-                        title="Recipient"
-                        value={email.recipient}
-                        formElements={formElements}
-                        onChange={recipient =>
-                            updateEmail(
-                                activeTab,
-                                { recipient }
-                            )
-                        }
-                    />
+	if (loading) {
+		return <Spinner />;
+	}
 
-                    <EmailEditor
-                        email={email}
-                        onChange={changes =>
-                            updateEmail(
-                                activeTab,
-                                changes
-                            )
-                        }
-                    />
+	const email = emails[activeTab];
 
-                    <Button
-                        isDestructive
-                        onClick={() =>
-                            removeEmail(activeTab)
-                        }
-                    >
-                        Remove Email
-                    </Button>
-                </>
-            )}
-        </div>
-    );
+	return (
+		<div className="tsjippy-email-settings">
+			<div
+				className="tsjippy-email-tabs"
+				style={{
+					display: 'flex',
+					gap: '8px',
+					marginBottom: '20px',
+				}}
+			>
+				{emails.map((item, index) => (
+					<Button
+						key={index}
+						variant={
+							activeTab === index
+								? 'primary'
+								: 'secondary'
+						}
+						onClick={() =>
+							setActiveTab(index)
+						}
+					>
+						E-mail {index + 1}
+					</Button>
+				))}
+
+				<Button
+					variant="secondary"
+					onClick={addEmail}
+				>
+					+
+				</Button>
+			</div>
+
+			{email && (
+				<>
+					<EmailTriggerPanel
+						value={email.trigger}
+						formElements={formElements}
+						onChange={(trigger) =>
+							updateEmail(activeTab, {
+								trigger,
+							})
+						}
+					/>
+
+					<EmailAddressPanel
+						title="Sender Address"
+						value={email.sender}
+						formElements={formElements}
+						onChange={(sender) =>
+							updateEmail(activeTab, {
+								sender,
+							})
+						}
+					/>
+
+					<EmailAddressPanel
+						title="Recipient Address"
+						value={email.recipient}
+						formElements={formElements}
+						onChange={(recipient) =>
+							updateEmail(activeTab, {
+								recipient,
+							})
+						}
+					/>
+
+					<EmailEditor
+						email={email}
+						formElements={formElements}
+						onChange={(changes) =>
+							updateEmail(
+								activeTab,
+								changes
+							)
+						}
+					/>
+
+					<Button
+						isDestructive
+						onClick={() =>
+							removeEmail(activeTab)
+						}
+					>
+						Remove E-mail
+					</Button>
+				</>
+			)}
+
+			<div style={{ marginTop: '20px' }}>
+				<Button
+					variant="primary"
+					isBusy={saving}
+					onClick={saveEmails}
+				>
+					Save Email Configuration
+				</Button>
+			</div>
+		</div>
+	);
 }

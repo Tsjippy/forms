@@ -24,7 +24,7 @@ import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';
 import './filters/storeClientIdInAttributes.js';
 import { FormSubmitter } from './components/Submitter.js';
-import { EmailSettings } from './emails';
+import { EmailSettings } from './emails/EmailSettings.js';
 
 import * as forms from './../../../js/forms.js';
 
@@ -35,16 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		method: "POST",
 	}).then((res) => {
 		formRemindersForm = res;
-	});
-});
-
-var emailsForm = '';
-document.addEventListener("DOMContentLoaded", () => {
-	apiFetch({
-		path: tsjippy.restApiPrefix + `/forms/get_emails_form`,
-		method: "POST",
-	}).then((res) => {
-		emailsForm = res;
 	});
 });
 
@@ -60,6 +50,10 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		roles = [],
 		method = 'post',
 	} = attributes;
+
+	if (id === -1) {
+		setAttributes({ id: clientId });
+	}
 
 	/* Local state for available roles and actions fetched from the API. */
 	const [availableRoles, setAvailableRoles] = useState([]);
@@ -314,16 +308,16 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						
 						isEmailsFormVisible ? 
 							<EmailSettings
-								emails={emails}
-								formElements={formElements}
-								onChange={(emails) =>
-								setAttributes({ emails })
-								}
+								blockId={attributes.id}
+								formElements={[]}
 							/>
 						:
 							isRemindersFormVisible ? 
-								<div { ...blockProps }><RawHTML> { formRemindersForm } </RawHTML></div> 
-							:
+								<FormReminderPanel
+    								blockId= { attributes.id }
+    								saveInMeta = { attributes.user_meta }
+								/>			
+								:
 								<>
 									<InnerBlocks
 										renderAppender={false}

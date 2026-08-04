@@ -13,11 +13,11 @@ export default function PlaceholderPicker({
         '%time_last_edited%',
         '%viewhash%',
         ...formElements.map(
-            field => `%${field.slug}%`
+            (field) => `%${field.slug}%`
         ),
     ];
 
-    const copyToClipboard = value => {
+    const copyToClipboard = (value) => {
         navigator.clipboard.writeText(value);
     };
 
@@ -27,9 +27,10 @@ export default function PlaceholderPicker({
                 display: 'flex',
                 flexWrap: 'wrap',
                 gap: '4px',
+                marginBottom: '10px',
             }}
         >
-            {placeholders.map(token => (
+            {placeholders.map((token) => (
                 <Button
                     key={token}
                     variant="secondary"

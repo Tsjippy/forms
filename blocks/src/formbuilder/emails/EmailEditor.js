@@ -4,12 +4,14 @@ import {
     TextareaControl,
 } from '@wordpress/components';
 
+import { RichText } from '@wordpress/block-editor';
+
 import PlaceholderPicker from './PlaceholderPicker';
 
 export default function EmailEditor({
     email,
-    onChange,
     formElements = [],
+    onChange,
 }) {
     return (
         <PanelBody
@@ -22,34 +24,55 @@ export default function EmailEditor({
 
             <TextControl
                 label="Subject"
-                value={email.subject}
-                onChange={subject =>
+                value={email.subject || ''}
+                onChange={(subject) =>
                     onChange({ subject })
                 }
             />
 
-            <TextareaControl
-                label="Message"
-                rows={12}
-                value={email.message}
-                onChange={message =>
-                    onChange({ message })
-                }
-            />
+            <div className="tsjippy-email-message">
+                <label
+                    style={{
+                        display: 'block',
+                        marginBottom: '8px',
+                        fontWeight: 600,
+                    }}
+                >
+                    Message
+                </label>
+
+                <RichText
+                    tagName="div"
+                    className="tsjippy-email-editor"
+                    value={email.message || ''}
+                    allowedFormats={[
+                        'core/bold',
+                        'core/italic',
+                        'core/link',
+                        'core/strikethrough',
+                    ]}
+                    placeholder="Write your e-mail template..."
+                    onChange={(message) =>
+                        onChange({ message })
+                    }
+                />
+            </div>
 
             <TextareaControl
-                label="Headers"
-                value={email.headers}
-                onChange={headers =>
+                label="Additional Headers"
+                value={email.headers || ''}
+                onChange={(headers) =>
                     onChange({ headers })
                 }
             />
 
             <TextareaControl
                 label="Attachments"
-                value={email.attachments}
-                onChange={attachments =>
-                    onChange({ attachments })
+                value={email.attachments || ''}
+                onChange={(attachments) =>
+                    onChange({
+                        attachments,
+                    })
                 }
             />
         </PanelBody>

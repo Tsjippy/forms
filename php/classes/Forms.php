@@ -1020,22 +1020,18 @@ class Forms
 
     /**
      * Gets the form reminders from the db
-     * @param    int    $formId        the form id for which to get the reminders
+     * @param    int    $blockId        the block id for which to get the reminders
      */
-    public function getFormReminder($formId = '')
+    public function getFormReminder($blockId = '')
     {
-
-        if (empty($formId)) {
-            $formId    = $this->formData->id;
-        }
         $this->formReminder    = new stdClass();
 
         $results    =  TSJIPPY\getFromDb(
-            "get_form_reminders_$formId",
+            "get_form_reminders_$blockId",
             "forms",
-            "SELECT * FROM %i WHERE form_id = %d",
+            "SELECT * FROM %i WHERE block_id = %d",
             $this->formReminderTable,
-            $formId
+            $blockId
         );
 
         if (empty($results)) {
@@ -1818,5 +1814,21 @@ class Forms
         unset($condition);
 
         return $conditions;
+    }
+
+    /**
+     * Gets the form e-mail settings for a specific form
+     * 
+     * @param   int     $blockId    The formbuilder block id
+     * @return  array               The form e-mail settings
+     */
+    public function getFormEmailSettings($blockId){
+        return TSJIPPY\getFromDb(
+            "form-email-settings-$blockId", 
+            'forms',
+            "select * from %i where post_id=%s",
+            $this->formEmailTable,
+            $blockId
+        );
     }
 }

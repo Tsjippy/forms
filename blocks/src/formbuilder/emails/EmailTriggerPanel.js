@@ -10,7 +10,7 @@ export default function EmailTriggerPanel({
     formElements,
     onChange,
 }) {
-    const update = changes => {
+    const update = (changes) => {
         onChange({
             ...value,
             ...changes,
@@ -37,7 +37,7 @@ export default function EmailTriggerPanel({
                     },
                     {
                         label:
-                            'Submitted with condition',
+                            'Submitted and meets condition',
                         value: 'submittedcond',
                     },
                     {
@@ -51,8 +51,16 @@ export default function EmailTriggerPanel({
                         value: 'fieldschanged',
                     },
                     {
+                        label: 'Days before booking starts',
+                        value: 'before-stay',
+                    },
+                    {
+                        label: 'Days after booking finished',
+                        value: 'after-stay',
+                    },
+                    {
                         label:
-                            'Submission deleted',
+                            'Submission removed',
                         value: 'removed',
                     },
                     {
@@ -60,7 +68,7 @@ export default function EmailTriggerPanel({
                         value: 'disabled',
                     },
                 ]}
-                onChange={type =>
+                onChange={(type) =>
                     update({ type })
                 }
             />
@@ -74,12 +82,12 @@ export default function EmailTriggerPanel({
                         options={[
                             {
                                 label:
-                                    'Select field',
+                                    'Select Field',
                                 value: '',
                             },
                             ...formElements,
                         ]}
-                        onChange={element =>
+                        onChange={(element) =>
                             update({ element })
                         }
                     />
@@ -87,7 +95,8 @@ export default function EmailTriggerPanel({
                     <SelectControl
                         label="Operator"
                         value={
-                            value.operator || '=='
+                            value.operator ||
+                            '=='
                         }
                         options={[
                             {
@@ -110,19 +119,91 @@ export default function EmailTriggerPanel({
                                 value: '<',
                             },
                         ]}
-                        onChange={operator =>
+                        onChange={(operator) =>
                             update({ operator })
                         }
                     />
 
                     <TextControl
                         label="Value"
-                        value={value.compare || ''}
-                        onChange={compare =>
+                        value={
+                            value.compare || ''
+                        }
+                        onChange={(compare) =>
                             update({ compare })
                         }
                     />
                 </>
+            )}
+
+            {value.type === 'fieldchanged' && (
+                <>
+                    <SelectControl
+                        label="Field"
+                        value={
+                            value.conditionalField || ''
+                        }
+                        options={value.fieldOptions}
+                        onChange={(conditionalField) =>
+                            update({
+                                conditionalField,
+                            })
+                        }
+                    />
+
+                    <TextControl
+                        label="Value"
+                        value={
+                            value.conditionalValue || ''
+                        }
+                        onChange={(conditionalValue) =>
+                            update({
+                                conditionalValue,
+                            })
+                        }
+                    />
+                </>
+            )}
+
+            {value.type === 'fieldschanged' && (
+                <SelectControl
+                    multiple
+                    label="Fields"
+                    value={value.conditionalFields || []}
+                    options={fieldOptions}
+                    onChange={(conditionalFields) =>
+                        update({
+                            conditionalFields,
+                        })
+                    }
+                />
+            )}
+
+            {value.type === 'before-stay' && (
+                <TextControl
+                    type="number"
+                    label="Days Before Booking Starts"
+                    value={value.daysBefore || ''}
+                    onChange={(daysBefore) =>
+                        update({
+                            daysBefore: parseInt(daysBefore, 10) || 0,
+                        })
+                    }
+                />
+            )}
+
+            {value.type === 'after-stay' && (
+                <TextControl
+                    type="number"
+                    label="Days After Booking Finished"
+                    help="0 means on the end date."
+                    value={value.daysAfter || ''}
+                    onChange={(daysAfter) =>
+                        update({
+                            daysAfter: parseInt(daysAfter, 10) || 0,
+                        })
+                    }
+                />
             )}
         </PanelBody>
     );

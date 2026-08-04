@@ -1522,4 +1522,17 @@ form.wp-block-tsjippy-forms-formbuilder .block-list-appender .add-form-element-b
   font-weight: 600;
 }
 
+.tsjippy-email-editor {
+  min-height: 250px;
+  border: 1px solid #ddd;
+  padding: 12px;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.tsjippy-email-editor:focus {
+  outline: none;
+  border-color: #2271b1;
+}
+
 /*# sourceMappingURL=index.css.map*/

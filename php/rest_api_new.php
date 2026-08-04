@@ -16,35 +16,85 @@ add_action('rest_api_init', __NAMESPACE__ . '\restApiInitFormsNew');
  */
 function restApiInitFormsNew()
 {
-    // Retrieve the form reminder form
+    // Get form e-mails
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
-        '/get_form_reminder_form',
+        '/get_form_emails',
         array(
             'methods'             => 'POST',
-            'callback'            => function(){
-                $forms  = new FormBuilderForm();
-                ob_start();
-                $forms->formReminderForm();
-                return ob_get_clean();
+            'callback'            => function($wpRestRequest){
+                $forms  = new Forms();
+
+                return $forms->getFormEmailSettings((int) $wpRestRequest->get_param('blockId'));
             },
-            'permission_callback' => __NAMESPACE__ . '\checkPermissions'
+            'permission_callback' => __NAMESPACE__ . '\checkPermissions',
+            'args'                    => array(
+                'blockId'        => array(
+                    'required'    => true
+                ),
+
+            )
         )
     );
 
-    // Retrieve the form emails form
+    // save_form_emails
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
-        '/get_emails_form',
+        '/save_form_emails',
+        array(
+            'methods'                 => 'POST',
+            'callback'                =>     __NAMESPACE__ . '\saveFormEmails',
+            'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
+            'args'                    => array(
+                'blockId'        => array(
+                    'required'    => true
+                ),
+                'emails'        => array(
+                    'required'    => true
+                ),
+
+            )
+        )
+    );
+
+    // Get form reminders
+    register_rest_route(
+        TSJIPPY\RESTAPIPREFIX . '/forms',
+        '/get_form_reminders',
         array(
             'methods'             => 'POST',
-            'callback'            => function(){
-                $forms  = new FormBuilderForm();
-                ob_start();
-                $forms->formEmailsForm();
-                return ob_get_clean();
+            'callback'            => function($wpRestRequest){
+                $forms  = new Forms();
+
+                return $forms->getFormReminder((int) $wpRestRequest->get_param('blockId'));
             },
-            'permission_callback' => __NAMESPACE__ . '\checkPermissions'
+            'permission_callback' => __NAMESPACE__ . '\checkPermissions',
+            'args'                    => array(
+                'blockId'        => array(
+                    'required'    => true
+                ),
+
+            )
+        )
+    );
+
+    // save form reminders
+    register_rest_route(
+        TSJIPPY\RESTAPIPREFIX . '/forms',
+        '/save_form_reminders',
+        array(
+            'methods'                 => 'POST',
+            'callback'                =>     __NAMESPACE__ . '\updateFormReminder',
+            'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
+            'args'                    => array(
+                'blockId'        => array(
+                    'required'    => true
+                ),
+                'emails'        => array(
+                    'required'    => true
+                ),
+
+            )
         )
     );
 
@@ -93,7 +143,7 @@ function restApiInitFormsNew()
         )
     );
 
-    // Register a new form
+    // Get dynamic form data
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/get_prefill',
@@ -115,7 +165,7 @@ function restApiInitFormsNew()
         )
     );
 
-    // form conditions html
+    // Get Element Conditions
     /**
      * [
      *   [
@@ -143,7 +193,7 @@ function restApiInitFormsNew()
         )
     );
 
-    // form conditions html
+    // Save Element Conditions
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_element_conditions',
@@ -202,4 +252,48 @@ function restApiInitFormsNew()
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
         )
     );
+}
+
+/**
+ * Save the email settings for a form
+ *
+ * @param \WP_REST_Request $wpRestRequest The REST API request object
+ * 
+ * @return string    A success message indicating that the email settings were saved successfully
+ */
+function saveFormEmails($wpRestRequest)
+{
+    $saver    = new SaveFormSettings();
+
+    $formEmails     = TSJIPPY\sanitize($wpRestRequest->get_param('emails') ?? []);
+
+    $result         = $saver->saveFormEmails($formEmails, (int) $wpRestRequest->get_param('blockId'));
+
+    if (is_wp_error($result)) {
+        return $result;
+    }
+
+    return "Succesfully saved your form e-mail configuration";
+}
+
+/**
+ * Save the email settings for a form
+ *
+ * @param \WP_REST_Request $wpRestRequest The REST API request object
+ * 
+ * @return string    A success message indicating that the email settings were saved successfully
+ */
+function saveFormReminders($wpRestRequest)
+{
+    $saver    = new SaveFormSettings();
+
+    $reminder = TSJIPPY\sanitize($wpRestRequest->get_param('reminder') ?? []);
+
+    $result   = $saver->updateFormReminder((int) $wpRestRequest->get_param('blockId'), $reminder);
+
+    if (is_wp_error($result)) {
+        return $result;
+    }
+
+    return "Succesfully saved the reminder";
 }

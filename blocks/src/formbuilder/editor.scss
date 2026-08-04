@@ -33,3 +33,16 @@ form.wp-block-tsjippy-forms-formbuilder{
 .condition-if{
     font-weight: 600;
 }
+
+.tsjippy-email-editor {
+    min-height: 250px;
+    border: 1px solid #ddd;
+    padding: 12px;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.tsjippy-email-editor:focus {
+    outline: none;
+    border-color: #2271b1;
+}

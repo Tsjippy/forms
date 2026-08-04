@@ -402,19 +402,15 @@ class SaveFormSettings extends Forms
     /**
      * Stores the form reminder settings in the db
      *
-     * @param    int|string    $formId    The id of the form to update the reminder settings for
+     * @param    int|string   $blockId    The id of the form to update the reminder settings for
      * @param    array        $settings    The reminder settings to update, this should be an
      *
      * return    true|WP_Error                The result or error on failure
      */
-    public function updateFormReminder($formId, $settings)
+    public function updateFormReminder($blockId, $settings)
     {
-        if (empty($formId)) {
-            if (!empty($this->formData->id)) {
-                $formId    = $this->formData->id;
-            } else {
-                return new \WP_Error('Error', 'Please supply a form id');
-            }
+        if (empty($blockId)) {
+            return new \WP_Error('Error', 'Please supply a formbuilder block id');
         }
 
         if (empty($settings)) {
@@ -424,7 +420,7 @@ class SaveFormSettings extends Forms
         // Store roles inversed for use in isset
         $settings['conditions']['roles']    = array_flip($settings['conditions']['roles'] ?? []);
 
-        $result    = $this->insertOrUpdateData($this->formReminderTable, $settings, ['form_id' => $formId]);
+        $result    = $this->insertOrUpdateData($this->formReminderTable, $settings, ['block_id' => $blockId]);
         if (is_wp_error($result)) {
             return $result;
         }

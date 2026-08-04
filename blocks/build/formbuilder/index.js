@@ -2173,7 +2173,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _filters_addButtonToInnerBlocks_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./filters/addButtonToInnerBlocks.js */ "./src/formbuilder/filters/addButtonToInnerBlocks.js");
 /* harmony import */ var _filters_storeClientIdInAttributes_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./filters/storeClientIdInAttributes.js */ "./src/formbuilder/filters/storeClientIdInAttributes.js");
 /* harmony import */ var _components_Submitter_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/Submitter.js */ "./src/formbuilder/components/Submitter.js");
-/* harmony import */ var _emails__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./emails */ "./src/formbuilder/emails/index.js");
+/* harmony import */ var _emails_EmailSettings_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./emails/EmailSettings.js */ "./src/formbuilder/emails/EmailSettings.js");
 /* harmony import */ var _js_forms_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./../../../js/forms.js */ "../js/forms.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__);
@@ -2204,15 +2204,6 @@ document.addEventListener("DOMContentLoaded", () => {
     formRemindersForm = res;
   });
 });
-var emailsForm = '';
-document.addEventListener("DOMContentLoaded", () => {
-  _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default()({
-    path: tsjippy.restApiPrefix + `/forms/get_emails_form`,
-    method: "POST"
-  }).then(res => {
-    emailsForm = res;
-  });
-});
 
 /**
  * Gutenberg block edit component.
@@ -2230,6 +2221,11 @@ function Edit({
     roles = [],
     method = 'post'
   } = attributes;
+  if (id === -1) {
+    setAttributes({
+      id: clientId
+    });
+  }
 
   /* Local state for available roles and actions fetched from the API. */
   const [availableRoles, setAvailableRoles] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
@@ -2460,17 +2456,12 @@ function Edit({
       label: "Form Name",
       value: formName,
       onChange: value => setFormName(value)
-    }) : isEmailsFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_emails__WEBPACK_IMPORTED_MODULE_11__.EmailSettings, {
-      emails: emails,
-      formElements: formElements,
-      onChange: emails => setAttributes({
-        emails
-      })
-    }) : isRemindersFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-      ...blockProps,
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.RawHTML, {
-        children: [" ", formRemindersForm, " "]
-      })
+    }) : isEmailsFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_emails_EmailSettings_js__WEBPACK_IMPORTED_MODULE_11__.EmailSettings, {
+      blockId: attributes.id,
+      formElements: []
+    }) : isRemindersFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(FormReminderPanel, {
+      blockId: attributes.id,
+      saveInMeta: attributes.user_meta
     }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
         renderAppender: false
@@ -2494,6 +2485,97 @@ function Edit({
 
 /***/ },
 
+/***/ "./src/formbuilder/emails/ConditionalRules.js"
+/*!****************************************************!*\
+  !*** ./src/formbuilder/emails/ConditionalRules.js ***!
+  \****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ConditionalRules)
+/* harmony export */ });
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
+
+
+function ConditionalRules({
+  rules = [],
+  formElements = [],
+  onChange
+}) {
+  const fieldOptions = [{
+    label: 'Select field',
+    value: ''
+  }, ...formElements.map(field => ({
+    label: field.label,
+    value: field.id
+  }))];
+  const addRule = () => {
+    onChange([...rules, {
+      field: '',
+      value: '',
+      email: ''
+    }]);
+  };
+  const updateRule = (index, changes) => {
+    const updated = [...rules];
+    updated[index] = {
+      ...updated[index],
+      ...changes
+    };
+    onChange(updated);
+  };
+  const removeRule = index => {
+    onChange(rules.filter((_, i) => i !== index));
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+    className: "conditional-rules",
+    children: [rules.map((rule, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+      className: "conditional-rule",
+      style: {
+        border: '1px solid #ddd',
+        padding: '12px',
+        marginBottom: '10px'
+      },
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("h4", {
+        children: ["Condition ", index + 1]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.SelectControl, {
+        label: "Field",
+        value: rule.field,
+        options: fieldOptions,
+        onChange: field => updateRule(index, {
+          field
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+        label: "Equals",
+        value: rule.value,
+        onChange: value => updateRule(index, {
+          value
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+        label: "Email Address",
+        value: rule.email,
+        onChange: email => updateRule(index, {
+          email
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.Button, {
+        isDestructive: true,
+        onClick: () => removeRule(index),
+        children: "Remove Condition"
+      })]
+    }, index)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.Button, {
+      variant: "secondary",
+      onClick: addRule,
+      children: "Add Condition"
+    })]
+  });
+}
+
+/***/ },
+
 /***/ "./src/formbuilder/emails/EmailAddressPanel.js"
 /*!*****************************************************!*\
   !*** ./src/formbuilder/emails/EmailAddressPanel.js ***!
@@ -2506,13 +2588,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ConditionalRules__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ConditionalRules */ "./src/formbuilder/emails/ConditionalRules.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__);
+
 
 
 function EmailAddressPanel({
   title,
   value,
+  formElements,
   onChange
 }) {
   const update = changes => {
@@ -2521,27 +2606,41 @@ function EmailAddressPanel({
       ...changes
     });
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.PanelBody, {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.PanelBody, {
     title: title,
     initialOpen: false,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.RadioControl, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.RadioControl, {
       selected: value.type,
       options: [{
-        label: 'Fixed address',
+        label: 'Fixed email address',
         value: 'fixed'
       }, {
-        label: 'Conditional address',
+        label: 'Conditional email address',
         value: 'conditional'
       }],
       onChange: type => update({
         type
       })
-    }), value.type === 'fixed' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+    }), value.type === 'fixed' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
       label: "Email Address",
       value: value.email || '',
       onChange: email => update({
         email
       })
+    }), value.type === 'conditional' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_ConditionalRules__WEBPACK_IMPORTED_MODULE_1__["default"], {
+        rules: value.rules || [],
+        formElements: formElements,
+        onChange: rules => update({
+          rules
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+        label: "Else Email Address",
+        value: value.elseEmail || '',
+        onChange: elseEmail => update({
+          elseEmail
+        })
+      })]
     })]
   });
 }
@@ -2560,44 +2659,59 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _PlaceholderPicker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PlaceholderPicker */ "./src/formbuilder/emails/PlaceholderPicker.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _PlaceholderPicker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PlaceholderPicker */ "./src/formbuilder/emails/PlaceholderPicker.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__);
+
 
 
 
 function EmailEditor({
   email,
-  onChange,
-  formElements = []
+  formElements = [],
+  onChange
 }) {
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.PanelBody, {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.PanelBody, {
     title: "Message",
     initialOpen: false,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_PlaceholderPicker__WEBPACK_IMPORTED_MODULE_1__["default"], {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_PlaceholderPicker__WEBPACK_IMPORTED_MODULE_2__["default"], {
       formElements: formElements
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
       label: "Subject",
-      value: email.subject,
+      value: email.subject || '',
       onChange: subject => onChange({
         subject
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextareaControl, {
-      label: "Message",
-      rows: 12,
-      value: email.message,
-      onChange: message => onChange({
-        message
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextareaControl, {
-      label: "Headers",
-      value: email.headers,
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+      className: "tsjippy-email-message",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("label", {
+        style: {
+          display: 'block',
+          marginBottom: '8px',
+          fontWeight: 600
+        },
+        children: "Message"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.RichText, {
+        tagName: "div",
+        className: "tsjippy-email-editor",
+        value: email.message || '',
+        allowedFormats: ['core/bold', 'core/italic', 'core/link', 'core/strikethrough'],
+        placeholder: "Write your e-mail template...",
+        onChange: message => onChange({
+          message
+        })
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextareaControl, {
+      label: "Additional Headers",
+      value: email.headers || '',
       onChange: headers => onChange({
         headers
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextareaControl, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextareaControl, {
       label: "Attachments",
-      value: email.attachments,
+      value: email.attachments || '',
       onChange: attachments => onChange({
         attachments
       })
@@ -2615,17 +2729,20 @@ function EmailEditor({
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ EmailSettings)
+/* harmony export */   EmailSettings: () => (/* binding */ EmailSettings)
 /* harmony export */ });
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _EmailEditor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./EmailEditor */ "./src/formbuilder/emails/EmailEditor.js");
-/* harmony import */ var _EmailTriggerPanel__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./EmailTriggerPanel */ "./src/formbuilder/emails/EmailTriggerPanel.js");
-/* harmony import */ var _EmailAddressPanel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./EmailAddressPanel */ "./src/formbuilder/emails/EmailAddressPanel.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _EmailEditor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./EmailEditor */ "./src/formbuilder/emails/EmailEditor.js");
+/* harmony import */ var _EmailTriggerPanel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./EmailTriggerPanel */ "./src/formbuilder/emails/EmailTriggerPanel.js");
+/* harmony import */ var _EmailAddressPanel__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./EmailAddressPanel */ "./src/formbuilder/emails/EmailAddressPanel.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__);
+
 
 
 
@@ -2633,90 +2750,157 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function EmailSettings({
-  emails = [],
-  formElements = [],
-  onChange
+  blockId = false,
+  formElements = []
 }) {
-  const [activeTab, setActiveTab] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(0);
+  const [emails, setEmails] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)([]);
+  const [activeTab, setActiveTab] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(0);
+  const [loading, setLoading] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(true);
+  const [saving, setSaving] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)(false);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useEffect)(() => {
+    if (!blockId) {
+      return;
+    }
+    setLoading(true);
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()({
+      path: `${tsjippy.restApiPrefix}/forms/get_form_emails`,
+      method: 'POST',
+      data: {
+        blockId: blockId
+      }
+    }).then(response => {
+      setEmails(response || []);
+    }).catch(error => {
+      console.error(error);
+    }).finally(() => {
+      setLoading(false);
+    });
+  }, [blockId]);
+  const saveEmails = () => {
+    setSaving(true);
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()({
+      path: `${tsjippy.restApiPrefix}/forms/save_form_emails`,
+      method: 'POST',
+      data: {
+        blockId: blockId,
+        emails
+      }
+    }).catch(error => {
+      console.error(error);
+    }).finally(() => {
+      setSaving(false);
+    });
+  };
   const updateEmail = (index, changes) => {
     const updated = [...emails];
     updated[index] = {
       ...updated[index],
       ...changes
     };
-    onChange(updated);
+    setEmails(updated);
   };
   const addEmail = () => {
     const updated = [...emails, {
       trigger: {
-        type: 'submitted'
+        type: 'submitted',
+        element: '',
+        operator: '==',
+        compare: '',
+        conditionalField: '',
+        conditionalValue: '',
+        conditionalFields: [],
+        daysBefore: 0,
+        daysAfter: 0
       },
       sender: {
         type: 'fixed',
         email: '',
-        rules: []
+        rules: [],
+        elseEmail: ''
       },
       recipient: {
         type: 'fixed',
         email: '%email%',
-        rules: []
+        rules: [],
+        elseEmail: ''
       },
       subject: '',
       message: '',
       headers: '',
       attachments: ''
     }];
-    onChange(updated);
+    setEmails(updated);
     setActiveTab(updated.length - 1);
   };
   const removeEmail = index => {
     const updated = emails.filter((_, i) => i !== index);
-    onChange(updated);
-    setActiveTab(Math.max(0, activeTab - 1));
+    setEmails(updated);
+    if (activeTab >= updated.length) {
+      setActiveTab(Math.max(0, updated.length - 1));
+    }
   };
+  if (loading) {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, {});
+  }
   const email = emails[activeTab];
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-    className: "tsjippy-emails",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
+    className: "tsjippy-email-settings",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
       className: "tsjippy-email-tabs",
-      children: [emails.map((item, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.Button, {
+      style: {
+        display: 'flex',
+        gap: '8px',
+        marginBottom: '20px'
+      },
+      children: [emails.map((item, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
         variant: activeTab === index ? 'primary' : 'secondary',
         onClick: () => setActiveTab(index),
-        children: ["Email ", index + 1]
-      }, index)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.Button, {
-        variant: "primary",
+        children: ["E-mail ", index + 1]
+      }, index)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        variant: "secondary",
         onClick: addEmail,
         children: "+"
       })]
-    }), email && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_EmailTriggerPanel__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    }), email && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_EmailTriggerPanel__WEBPACK_IMPORTED_MODULE_4__["default"], {
         value: email.trigger,
         formElements: formElements,
         onChange: trigger => updateEmail(activeTab, {
           trigger
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_EmailAddressPanel__WEBPACK_IMPORTED_MODULE_4__["default"], {
-        title: "Sender",
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_EmailAddressPanel__WEBPACK_IMPORTED_MODULE_5__["default"], {
+        title: "Sender Address",
         value: email.sender,
         formElements: formElements,
         onChange: sender => updateEmail(activeTab, {
           sender
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_EmailAddressPanel__WEBPACK_IMPORTED_MODULE_4__["default"], {
-        title: "Recipient",
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_EmailAddressPanel__WEBPACK_IMPORTED_MODULE_5__["default"], {
+        title: "Recipient Address",
         value: email.recipient,
         formElements: formElements,
         onChange: recipient => updateEmail(activeTab, {
           recipient
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_EmailEditor__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_EmailEditor__WEBPACK_IMPORTED_MODULE_3__["default"], {
         email: email,
+        formElements: formElements,
         onChange: changes => updateEmail(activeTab, changes)
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.Button, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
         isDestructive: true,
         onClick: () => removeEmail(activeTab),
-        children: "Remove Email"
+        children: "Remove E-mail"
       })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("div", {
+      style: {
+        marginTop: '20px'
+      },
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        variant: "primary",
+        isBusy: saving,
+        onClick: saveEmails,
+        children: "Save Email Configuration"
+      })
     })]
   });
 }
@@ -2762,7 +2946,7 @@ function EmailTriggerPanel({
         label: 'The form is due for submission',
         value: 'shouldsubmit'
       }, {
-        label: 'Submitted with condition',
+        label: 'Submitted and meets condition',
         value: 'submittedcond'
       }, {
         label: 'Field changed to value',
@@ -2771,7 +2955,13 @@ function EmailTriggerPanel({
         label: 'One or more fields changed',
         value: 'fieldschanged'
       }, {
-        label: 'Submission deleted',
+        label: 'Days before booking starts',
+        value: 'before-stay'
+      }, {
+        label: 'Days after booking finished',
+        value: 'after-stay'
+      }, {
+        label: 'Submission removed',
         value: 'removed'
       }, {
         label: 'Disabled',
@@ -2785,7 +2975,7 @@ function EmailTriggerPanel({
         label: "Field",
         value: value.element || '',
         options: [{
-          label: 'Select field',
+          label: 'Select Field',
           value: ''
         }, ...formElements],
         onChange: element => update({
@@ -2817,6 +3007,44 @@ function EmailTriggerPanel({
           compare
         })
       })]
+    }), value.type === 'fieldchanged' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.SelectControl, {
+        label: "Field",
+        value: value.conditionalField || '',
+        options: value.fieldOptions,
+        onChange: conditionalField => update({
+          conditionalField
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+        label: "Value",
+        value: value.conditionalValue || '',
+        onChange: conditionalValue => update({
+          conditionalValue
+        })
+      })]
+    }), value.type === 'fieldschanged' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.SelectControl, {
+      multiple: true,
+      label: "Fields",
+      value: value.conditionalFields || [],
+      options: fieldOptions,
+      onChange: conditionalFields => update({
+        conditionalFields
+      })
+    }), value.type === 'before-stay' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+      type: "number",
+      label: "Days Before Booking Starts",
+      value: value.daysBefore || '',
+      onChange: daysBefore => update({
+        daysBefore: parseInt(daysBefore, 10) || 0
+      })
+    }), value.type === 'after-stay' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+      type: "number",
+      label: "Days After Booking Finished",
+      help: "0 means on the end date.",
+      value: value.daysAfter || '',
+      onChange: daysAfter => update({
+        daysAfter: parseInt(daysAfter, 10) || 0
+      })
     })]
   });
 }
@@ -2850,7 +3078,8 @@ function PlaceholderPicker({
     style: {
       display: 'flex',
       flexWrap: 'wrap',
-      gap: '4px'
+      gap: '4px',
+      marginBottom: '10px'
     },
     children: placeholders.map(token => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.Button, {
       variant: "secondary",
@@ -2859,21 +3088,6 @@ function PlaceholderPicker({
     }, token))
   });
 }
-
-/***/ },
-
-/***/ "./src/formbuilder/emails/index.js"
-/*!*****************************************!*\
-  !*** ./src/formbuilder/emails/index.js ***!
-  \*****************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EmailSettings: () => (/* reexport safe */ _EmailSettings__WEBPACK_IMPORTED_MODULE_0__["default"])
-/* harmony export */ });
-/* harmony import */ var _EmailSettings__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EmailSettings */ "./src/formbuilder/emails/EmailSettings.js");
-
 
 /***/ },
 
@@ -4480,7 +4694,7 @@ var undo_default = /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE
   \************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"tsjippy_forms_script","attributes":{"method":{"type":"string","default":"post"},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":false},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]},"step_amount":{"type":"integer","default":0}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"tsjippy_forms_script","attributes":{"id":{"type":"integer","default":-1},"method":{"type":"string","default":"post"},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":false},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]},"step_amount":{"type":"integer","default":0}}}');
 
 /***/ }
 

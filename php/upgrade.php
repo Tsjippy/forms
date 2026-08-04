@@ -96,6 +96,7 @@ function sendBlockContent(block, postId){
         "submit",
         "tel",
         "text",
+        "textarea",
         "time",
         "url",
         "week",
@@ -140,7 +141,7 @@ function sendBlockContent(block, postId){
     foreach($forms->forms as $form){
 
         if($form->id != 12){
-            continue;
+            //continue;
         }
 
         // Insert the post into the database
@@ -188,6 +189,10 @@ function sendBlockContent(block, postId){
         $shouldCLoseFormstep    = false;
         $shouldCloseLabel       = false;
         foreach($elements as $index => $element){
+            if(empty($element->type)){
+                continue;
+            }
+
             $attributes     = [];
             $innerBlocks    = [];
 
@@ -499,4 +504,85 @@ function sendBlockContent(block, postId){
 
 add_action('admin_footer-post.php', function(){
     //insertNewForms();
+
+    upgradeDatabase();
 });
+
+function upgradeDatabase(){
+    global $wpdb;
+
+    $forms = new Forms();
+
+    // Get the e-mails
+    $emails = $wpdb->get_results("select * from $forms->formEmailTable");
+
+    // Change the table structure
+    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `form_id` `block_id` VARCHAR(255) NOT NULL DEFAULT '-1'");
+    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `email_trigger` `trigger` VARCHAR(255) NOT NULL DEFAULT 'on_submission'");
+    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `from` `sender` VARCHAR(255) NOT NULL DEFAULT ''");
+    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `to` `recipient` VARCHAR(255) NOT NULL DEFAULT ''");
+    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `subject` `subject` VARCHAR(255) NOT NULL DEFAULT ''");
+    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `message` `message` TEXT NOT NULL");
+    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `headers` `headers` TEXT NOT NULL");
+    $wpdb->query("ALTER TABLE $forms->formEmailTable CHANGE COLUMN `files` `attachments` TEXT NOT NULL"); 
+ 
+    foreach($emails as $email){
+        $email= map_deep($email, 'maybe_unserialize');
+
+        $trigger = TSJIPPY\cleanUpNestedArray([
+            'type' => $email->email_trigger,
+            'element'   => $email->submitted_trigger['element'] ?? '',
+            'operator' => $email->submitted_trigger['equation'] ?? '',
+            'compare' => $email->submitted_trigger['value'] ?? '',
+            'conditionalField' => $email->conditional_field,
+            'conditionalValue' => $email->conditional_value,
+            'conditionalFields' => $email->conditional_fields,
+            'daysBefore' => $email->days_before,
+            "daysAfter" => $email->days_after,
+        ]);
+
+        $sender = TSJIPPY\cleanUpNestedArray([
+            'type' => $email->from_email,
+            'email' => $email->from,
+            'rules' => $email->conditional_from_email,
+            'elseEmail' => $email->else_from,
+        ]);
+
+        $recipient = TSJIPPY\cleanUpNestedArray([
+            'type' => $email->email_to,
+            'email' => $email->to,
+            'rules' => $email->conditional_email_to,
+            'elseEmail' => $email->else_to,
+        ]);
+
+        $wpdb->update(
+            $forms->formEmailTable,
+            [
+                'block_id' => $email->form_id,
+                'trigger' => $trigger,
+                'sender' => $sender,
+                'recipient' => $recipient,
+                'subject' => trim($email->subject),
+                'message' => trim($email->message),
+                'headers' => trim($email->headers),
+                'attachments' => trim($email->attachments)
+            ],
+            [
+                'id' => $email->id
+            ],
+            [
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s'
+            ],
+            [
+                '%d'
+            ]
+        );
+    }
+}

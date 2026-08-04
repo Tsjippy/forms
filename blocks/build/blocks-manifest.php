@@ -122,6 +122,10 @@ return array(
 		'style' => 'file:./style-index.css',
 		'viewScript' => 'tsjippy_forms_script',
 		'attributes' => array(
+			'id' => array(
+				'type' => 'integer',
+				'default' => -1
+			),
 			'method' => array(
 				'type' => 'string',
 				'default' => 'post'

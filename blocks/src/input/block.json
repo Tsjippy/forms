@@ -73,7 +73,11 @@
 			"type": "boolean",
 			"default": false
 		},
-		"reminders": {
+		"reminderConditions": {
+			"type": "array",
+			"default": [],
+		},
+		"roles": {
 			"type": "array",
 			"default": []
 		}

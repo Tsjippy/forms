@@ -17,6 +17,10 @@
 	"style": "file:./style-index.css",
 	"viewScript": "tsjippy_forms_script",
 	"attributes": {
+		"id": {
+			"type": "integer",
+			"default": -1
+		},
 		"method": {
 			"type": "string",
 			"default": "post"
