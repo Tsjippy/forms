@@ -22,8 +22,8 @@
 			"default": ""
 		},
 		"options": {
-			"type": "string",
-			"default": ""
+			"type": "array",
+			"default": [""]
 		},
 		"options_dynamic": {
 			"type": "string",

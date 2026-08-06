@@ -26,20 +26,12 @@ export default function save({ attributes }) {
 			data-blockid={attributes.blockId}
 			data-dynamicOptions={attributes.options_dynamic}
 		>
-			{(attributes.options || '')
-				.split('\n')
-				.filter(option => option.trim()
-			).map((option, index) => {
-				const [rawValue, rawLabel] = option.split('|');
-
-				const value = rawValue?.trim();
-				const label = rawLabel?.trim() || value;
-
+			{(attributes.options || []).map((option, index) => {
 				return (
 					<option
 						key={index}
-						value={value}
-						label={label}
+						value={option.value}
+						label={option.label}
 					/>
 				);
 			})}

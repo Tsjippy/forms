@@ -142,7 +142,7 @@ function sendBlockContent(block, postId){
 
     foreach($oldForms as $form){
 
-        if($form->id != 69){
+        if($form->id != 11){
             continue;
         }
 
@@ -265,28 +265,27 @@ function sendBlockContent(block, postId){
                         }
 
                         if($blockKey == 'selectable_options'){
-                            $attributes[$blockKey]  = explode("\n", $attributes[$blockKey]);
-                        }
-                    }
-                }
+                            $options  = explode("\n", $attributes[$blockKey]);
 
-                $element->type  = 'input';
-            }
+                            $newOptions = [];
 
-            // Input
-            elseif(in_array($element->type, $inputTypes)){
-                /**
-                 * Build the form
-                 */
+                            foreach($options as $option){
+                                $exp    = explode('|', $option);
+                                $value  = $exp[0];
 
-                $attributes = [];
+                                if(!empty($exp[1])){
+                                    $label  = $exp[1];
+                                }else{
+                                    $label  = ucfirst(str_replace('_', ' ', $exp[0]));
+                                }
 
-                foreach ($inputAttributes as $blockKey => $oldKey) {
-                    if (isset($element->$oldKey) && $element->$oldKey != '') {
-                        $attributes[$blockKey] = $element->$oldKey;
+                                $newOptions[]   = [
+                                    'value' => $value,
+                                    'label' => $label
+                                ];
+                            }
 
-                        if(in_array($blockKey, ['multiple','required', 'hide'])){
-                            $attributes[$blockKey] = boolval($element->$oldKey);
+                            $attributes[$blockKey] = $newOptions;
                         }
                     }
                 }
@@ -300,14 +299,14 @@ function sendBlockContent(block, postId){
                     $attributes['inputAttributes']["value"] = $element->text;
                 }
 
-                 if(!empty($element->options)){
-                    $options = explode("\n",  $element->options);
+                if(!empty($element->options)){
+                $options = explode("\n",  $element->options);
 
-                    foreach($options as $option){
-                        $exp    = explode("=", $option);
-                        $attributes['inputAttributes'][$exp[0]] = $exp[1];
-                    }
-                 }
+                foreach($options as $option){
+                    $exp    = explode("=", $option);
+                    $attributes['inputAttributes'][$exp[0]] = $exp[1];
+                }
+                }
 
                 $element->type  = 'input';
             }
@@ -333,9 +332,32 @@ function sendBlockContent(block, postId){
             elseif($element->type == 'datalist'){
                 $attributes = [
                     'id' => $element->slug,
-                    'options' => $element->options,
                     'options_dynamic' => $element->default_array_value
                 ];
+
+                if(!empty($element->value_list)){
+                    $options  = explode("\n", $element->value_list);
+
+                    $newOptions = [];
+
+                    foreach($options as $option){
+                        $exp    = explode('|', $option);
+                        $value  = $exp[0];
+
+                        if(!empty($exp[1])){
+                            $label  = $exp[1];
+                        }else{
+                            $label  = ucfirst(str_replace('_', ' ', $exp[0]));
+                        }
+
+                        $newOptions[]   = [
+                            'value' => $value,
+                            'label' => $label
+                        ];
+                    }
+
+                    $attributes['options'] = $newOptions;
+                }
             }
 
             // select
@@ -348,6 +370,30 @@ function sendBlockContent(block, postId){
                     'options_dynamic' => $element->default_array_value,
                     'dynamic_selected_value' => $element->default_value
                 ];
+
+                if(!empty($element->value_list)){
+                    $options  = explode("\n", $element->value_list);
+
+                    $newOptions = [];
+
+                    foreach($options as $option){
+                        $exp    = explode('|', $option);
+                        $value  = $exp[0];
+
+                        if(!empty($exp[1])){
+                            $label  = $exp[1];
+                        }else{
+                            $label  = ucfirst(str_replace('_', ' ', $exp[0]));
+                        }
+
+                        $newOptions[]   = [
+                            'value' => $value,
+                            'label' => $label
+                        ];
+                    }
+
+                    $attributes['options'] = $newOptions;
+                }
             }
 
             // container

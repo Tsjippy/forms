@@ -38,8 +38,8 @@
       "default": false
     },
     "selectable_options": {
-      "type": "string",
-      "default": ""
+      "type": "array",
+      "default": []
     },
     "selectable_options_dynamic": {
       "type": "string",

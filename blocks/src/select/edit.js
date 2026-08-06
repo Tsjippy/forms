@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 
 import { PrefillOptionsSelector, PrefillValueSelector, usePrefill } from '../../shared/usePrefill.js';
 import { RenderedSelect } from './components/RenderedSelect.js';
+import AddOptions from '../../shared/AddOptions';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -24,10 +25,12 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	 */
 	const [name, setName] = useState(attributes.name);
 
+	// Update the name when the attribute changes
 	useEffect(() => {
 		setName(attributes.name);
 	}, [attributes.name]);
 
+	// Update the attribute with a delay
 	useEffect(() => {
 		const timeoutId = setTimeout(() => {
 			setAttributes({ name: name })
@@ -35,6 +38,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 		return () => clearTimeout(timeoutId);
 	}, [ name, attributes.name, setAttributes]);
+
+	
 
 	return (
 		<>
@@ -45,13 +50,11 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					value    = { name }
 					onChange = { ( value ) => setName( value )}
 				/>
-
-				<TextareaControl
-					label    = { __("Datalist Options", 'tsjippy')}
-					help     = { __("One option per line. If the value and label differ separate them with a |  i.e. car|auto", 'tsjippy')}
-					value    = { attributes.options }
-					onChange = { ( value ) => setAttributes({ options: value }) }
-				/>
+				<h4>Selectable Options</h4>
+				<AddOptions
+					attributes={attributes}
+					setAttributes={setAttributes}
+					/>
 
 				<h4>Dynamic Options</h4>
 				<PrefillOptionsSelector

@@ -27,8 +27,10 @@ return array(
 				'default' => ''
 			),
 			'options' => array(
-				'type' => 'string',
-				'default' => ''
+				'type' => 'array',
+				'default' => array(
+					
+				)
 			),
 			'options_dynamic' => array(
 				'type' => 'string',
@@ -291,8 +293,10 @@ return array(
 				'default' => false
 			),
 			'selectable_options' => array(
-				'type' => 'string',
-				'default' => ''
+				'type' => 'array',
+				'default' => array(
+					
+				)
 			),
 			'selectable_options_dynamic' => array(
 				'type' => 'string',
@@ -430,8 +434,10 @@ return array(
 				'default' => ''
 			),
 			'options' => array(
-				'type' => 'string',
-				'default' => ''
+				'type' => 'array',
+				'default' => array(
+					''
+				)
 			),
 			'options_dynamic' => array(
 				'type' => 'string',

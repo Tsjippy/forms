@@ -26,6 +26,7 @@ import {
     PrefillOptionsSelector,
     PrefillValueSelector,
 } from '../../shared/usePrefill.js';
+import AddOptions from '../../shared/AddOptions';
 
 export default function Edit({
     attributes,
@@ -129,19 +130,11 @@ export default function Edit({
             attributes.type
         ) ? (
             <>
-                <TextareaControl
-                    label={__(
-                        'Selectable Options',
-                        'tsjippy'
-                    )}
-                    help="One option per line. Separate value and label with |, e.g. car|auto"
-                    value={attributes.selectable_options}
-                    onChange={(value) =>
-                        setAttributes({
-                            selectable_options: value,
-                        })
-                    }
-                />
+                <h4>Static Options</h4>
+				<AddOptions
+					attributes={attributes}
+					setAttributes={setAttributes}
+					/>
 
                 <h4>Dynamic Options (prefill)</h4>
 

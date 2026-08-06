@@ -4,6 +4,7 @@ import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { PrefillOptionsSelector } from '../../shared/usePrefill.js';
+import AddOptions from '../../shared/AddOptions';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -43,13 +44,12 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					onChange = { ( value ) => setListId( value )}
 				/>
 
-				<TextareaControl
-					label    = { __("Datalist Options", 'tsjippy')}
-					help     = { __("One option per line. If the value and label differ separate them with a |  i.e. car|auto", 'tsjippy')}
-					value    = { attributes.options }
-					onChange = { ( value ) => setAttributes({ options: value }) }
-				/>
-
+				<h4>Static Options</h4>
+				<AddOptions
+					attributes={attributes}
+					setAttributes={setAttributes}
+					/>
+				
 				<h4>Dynamic Options (prefill)</h4>
 				<PrefillOptionsSelector
 					value={ attributes.options_dynamic }
@@ -69,8 +69,24 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				<TextareaControl
 					label    = { __("Datalist Options", 'tsjippy')}
 					help     = { __("One option per line. If the value and label differ separate them with a |  i.e. car|auto", 'tsjippy')}
-					value    = { attributes.options }
-					onChange = { ( value ) => setAttributes({ options: value }) }
+					value={(attributes.options || [])
+						.map((option) => `${option.value}|${option.label}`)
+						.join('\n')}
+					onChange={(value) =>
+						setAttributes({
+							selectable_options: value
+								.split('\n')
+								.map((line) => {
+									const [optionValue, optionLabel] = line.split('|');
+
+									return {
+										value: optionValue?.trim() || '',
+										label: optionLabel?.trim() || optionValue?.trim() || '',
+									};
+								})
+								.filter((item) => item.value),
+						})
+					}
 				/>
 
 				<h4>Dynamic Options (prefill)</h4>

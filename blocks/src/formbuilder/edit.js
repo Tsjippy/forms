@@ -211,7 +211,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		}, 800);
 
 		return () => clearTimeout(timeoutId);
-	}, [formName, 800]);
+	}, [ formName, setAttributes, attributes.name ]);
 
 	/**
 	 * Return HTML

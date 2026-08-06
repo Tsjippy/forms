@@ -1,21 +1,11 @@
 export const RenderedSelect = ({ attributes, blockProps, dynamicOptions = {}}) => {
-	const staticOptions = (attributes.options || '')
-		.split('\n')
-		.filter(Boolean)
-		.map((option) => {
-			const [key, value] = option.split('|');
-			return [{
-				value: key.trim(),
-				label: (value || key).trim(),
-			}];
-		});
 
 	const options = [
 		{
-				value: '',
-				label: 'Select an option',
+			value: '',
+			label: 'Select an option',
 		},
-		...staticOptions,
+		...attributes.options,
 		...Object.entries(dynamicOptions?.[attributes.options_dynamic ?? ''] || {})?.map(
 			([key, value]) => ({
 				value: String(key).trim(),

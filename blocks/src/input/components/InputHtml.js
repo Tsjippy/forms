@@ -13,25 +13,11 @@ export function InputHtml({
     let html;
 
     if (['radio', 'checkbox'].includes(attributes.type)) {
-        const staticOptions = (attributes.selectable_options || '')
-            .split('\n')
-            .filter(Boolean)
-            .map((option) => {
-                const [key, value] = option.split('|');
-
-                const trimmedKey = String(key || '').trim();
-
-                return {
-                    value: trimmedKey,
-                    label: String(value || trimmedKey).trim(),
-                };
-            });
-
         let options;
         let selectedValue = '';
 
         if(isSaving){
-            options = staticOptions;
+            options = attributes.selectable_options;
         }else{
             const prefill = usePrefill();
             
@@ -45,7 +31,7 @@ export function InputHtml({
             }));
 
             options = [
-                ...staticOptions,
+                ...attributes.selectable_options,
                 ...dynamicOptions,
             ];
 

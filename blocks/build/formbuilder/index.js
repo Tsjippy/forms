@@ -2364,7 +2364,7 @@ function Edit({
       });
     }, 800);
     return () => clearTimeout(timeoutId);
-  }, [formName, 800]);
+  }, [formName, setAttributes, attributes.name]);
 
   /**
    * Return HTML
