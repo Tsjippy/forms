@@ -13,17 +13,17 @@ export function InputHtml({
     let html;
 
     if (['radio', 'checkbox'].includes(attributes.type)) {
-        let options;
+        let options = [];
         let selectedValue = '';
 
         if(isSaving){
-            options = attributes.selectable_options;
+            options = attributes.options;
         }else{
             const prefill = usePrefill();
             
             const dynamicOptions = Object.entries(
                 prefill?.multi?.[
-                    attributes.selectable_options_dynamic ?? ''
+                    attributes.options_dynamic ?? ''
                 ] || {}
             ).map(([key, value]) => ({
                 value: String(key).trim(),
@@ -31,7 +31,7 @@ export function InputHtml({
             }));
 
             options = [
-                ...attributes.selectable_options,
+                ...attributes.options,
                 ...dynamicOptions,
             ];
 
@@ -45,7 +45,7 @@ export function InputHtml({
                 {...blockProps}
                 className={`${blockProps.className} checkbox-wrapper`}
                 data-blockid={attributes.blockId}
-                data-dynamicOptions={attributes.selectable_options_dynamic}
+                data-dynamicOptions={attributes.options_dynamic}
                 data-dynamicValue={attributes.dynamic_value}
             >
                 {options.map((option, index) => (
@@ -66,6 +66,18 @@ export function InputHtml({
                     </label>
                 ))}
             </div>
+        );
+    } else if (attributes.type == 'textarea') {
+        html = (
+            <textarea
+                {...blockProps}
+                type={attributes.type}
+                name={attributes.name}
+                className="formbuilder"
+                data-blockid={attributes.blockId}
+                autoComplete="on"
+                {...attributes.inputAttributes}
+            />
         );
     } else {
         html = (

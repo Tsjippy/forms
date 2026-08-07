@@ -28,16 +28,6 @@ import { EmailSettings } from './emails/EmailSettings.js';
 
 import * as forms from './../../../js/forms.js';
 
-var formRemindersForm = '';
-document.addEventListener("DOMContentLoaded", () => {
-	apiFetch({
-		path: tsjippy.restApiPrefix + `/forms/get_form_reminder_form`,
-		method: "POST",
-	}).then((res) => {
-		formRemindersForm = res;
-	});
-});
-
 /**
  * Gutenberg block edit component.
  * This is the editor-side UI for the form block.

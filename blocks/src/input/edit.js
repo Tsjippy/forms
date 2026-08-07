@@ -140,11 +140,11 @@ export default function Edit({
 
                 <PrefillOptionsSelector
                     value={
-                        attributes.selectable_options_dynamic
+                        attributes.options_dynamic
                     }
                     onChange={(value) =>
                         setAttributes({
-                            selectable_options_dynamic: value,
+                            options_dynamic: value,
                         })
                     }
                 />

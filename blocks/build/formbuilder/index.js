@@ -2194,21 +2194,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-var formRemindersForm = '';
-document.addEventListener("DOMContentLoaded", () => {
-  _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_4___default()({
-    path: tsjippy.restApiPrefix + `/forms/get_form_reminder_form`,
-    method: "POST"
-  }).then(res => {
-    formRemindersForm = res;
-  });
-});
-
 /**
  * Gutenberg block edit component.
  * This is the editor-side UI for the form block.
  */
+
+
 function Edit({
   attributes,
   setAttributes,
@@ -3314,8 +3305,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _edit__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./edit */ "./src/formbuilder/edit.js");
 /* harmony import */ var _save__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./save */ "./src/formbuilder/save.js");
 /* harmony import */ var _block_json__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./block.json */ "./src/formbuilder/block.json");
-/* harmony import */ var _store_conditions_store__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./store/conditions-store */ "./src/formbuilder/store/conditions-store.js");
-/* harmony import */ var _filters_addButtonToInnerBlocks__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./filters/addButtonToInnerBlocks */ "./src/formbuilder/filters/addButtonToInnerBlocks.js");
+/* harmony import */ var _store_conditionsStore__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./store/conditionsStore */ "./src/formbuilder/store/conditionsStore.js");
+/* harmony import */ var _store_dynamicValuesStore__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./store/dynamicValuesStore */ "./src/formbuilder/store/dynamicValuesStore.js");
+/* harmony import */ var _filters_addButtonToInnerBlocks__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./filters/addButtonToInnerBlocks */ "./src/formbuilder/filters/addButtonToInnerBlocks.js");
 /**
  * Registers a new block provided a unique name and an object defining its behavior.
  *
@@ -3335,6 +3327,7 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * Internal dependencies
  */
+
 
 
 
@@ -3411,10 +3404,10 @@ function save({
 
 /***/ },
 
-/***/ "./src/formbuilder/store/conditions-store.js"
-/*!***************************************************!*\
-  !*** ./src/formbuilder/store/conditions-store.js ***!
-  \***************************************************/
+/***/ "./src/formbuilder/store/conditionsStore.js"
+/*!**************************************************!*\
+  !*** ./src/formbuilder/store/conditionsStore.js ***!
+  \**************************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
@@ -3641,6 +3634,79 @@ const store = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_0__.createReduxStore)(
   resolvers
 });
 (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_0__.register)(store);
+
+/***/ },
+
+/***/ "./src/formbuilder/store/dynamicValuesStore.js"
+/*!*****************************************************!*\
+  !*** ./src/formbuilder/store/dynamicValuesStore.js ***!
+  \*****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1__);
+
+
+const DEFAULT_STATE = {
+  data: null,
+  isLoading: false
+};
+const store = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_0__.createReduxStore)('tsjippy/prefill', {
+  reducer(state = DEFAULT_STATE, action) {
+    switch (action.type) {
+      case 'SET_LOADING':
+        return {
+          ...state,
+          isLoading: true
+        };
+      case 'SET_DATA':
+        return {
+          data: action.data,
+          isLoading: false
+        };
+    }
+    return state;
+  },
+  actions: {
+    async fetchPrefill() {
+      return async ({
+        dispatch,
+        select
+      }) => {
+        if (select.getData() || select.isLoading()) {
+          return;
+        }
+        dispatch({
+          type: 'SET_LOADING'
+        });
+        const data = await _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1___default()({
+          path: `${tsjippy.restApiPrefix}/forms/get_prefill`,
+          method: 'POST'
+        });
+        dispatch({
+          type: 'SET_DATA',
+          data
+        });
+      };
+    }
+  },
+  selectors: {
+    getData(state) {
+      return state.data;
+    },
+    isLoading(state) {
+      return state.isLoading;
+    }
+  }
+});
+try {
+  dispatch(STORE_NAME);
+} catch {
+  (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_0__.register)(store);
+}
 
 /***/ },
 

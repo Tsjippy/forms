@@ -292,13 +292,13 @@ return array(
 				'type' => 'boolean',
 				'default' => false
 			),
-			'selectable_options' => array(
+			'options' => array(
 				'type' => 'array',
 				'default' => array(
 					
 				)
 			),
-			'selectable_options_dynamic' => array(
+			'options_dynamic' => array(
 				'type' => 'string',
 				'default' => ''
 			),

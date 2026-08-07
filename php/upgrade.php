@@ -107,13 +107,13 @@ function sendBlockContent(block, postId){
     $inputAttributes = [
         'type' => 'type',
         'name' => 'name',
-        'selectable_options' => 'value_list',
+        'options' => 'value_list',
         'add_button_content' => 'add',
         'remove_button_content' => 'remove',
         'multiple' => 'multiple',
         'required' => 'required',
         'hidden' => 'hidden',
-        'selectable_options_dynamic' => 'default_array_value',
+        'options_dynamic' => 'default_array_value',
         'dynamic_value' => 'default_value',
     ];
 
@@ -143,11 +143,15 @@ function sendBlockContent(block, postId){
     foreach($oldForms as $form){
 
         if($form->id != 11){
+            //continue;
+        }
+
+        if(empty($form->slug) || empty($form->name)){
             continue;
         }
 
-        if(empty($form->slug)){
-            continue;
+        if(empty($form->name)){
+           $form->name  = $form->slug;
         }
 
         // Insert the post into the database
@@ -264,7 +268,7 @@ function sendBlockContent(block, postId){
                             $attributes[$blockKey] = boolval($element->$oldKey);
                         }
 
-                        if($blockKey == 'selectable_options'){
+                        if($blockKey == 'options'){
                             $options  = explode("\n", $attributes[$blockKey]);
 
                             $newOptions = [];

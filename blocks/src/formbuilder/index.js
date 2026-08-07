@@ -21,7 +21,8 @@ import Edit from './edit';
 import save from './save';
 import metadata from './block.json';
 
-import './store/conditions-store';
+import './store/conditionsStore';
+import './store/dynamicValuesStore';
 import './filters/addButtonToInnerBlocks';
 
 /**

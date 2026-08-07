@@ -102,53 +102,55 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__);
 
 
 
 
 
-let cachedPrefillData = null;
-let prefillPromise = null;
+
 const usePrefill = () => {
-  const [prefillData, setPrefillData] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(cachedPrefillData || {
-    single: {},
-    multi: {}
-  });
+  const {
+    data,
+    isLoading
+  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => ({
+    data: select('tsjippy/prefill').getData(),
+    isLoading: select('tsjippy/prefill').isLoading()
+  }), []);
+  const {
+    fetchPrefill
+  } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useDispatch)('tsjippy/prefill');
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    if (cachedPrefillData) {
-      return;
+    if (!data && !isLoading) {
+      fetchPrefill();
     }
-    if (!prefillPromise) {
-      prefillPromise = _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_1___default()({
-        path: `${tsjippy.restApiPrefix}/forms/get_prefill`,
-        method: 'POST'
-      }).then(res => {
-        cachedPrefillData = res;
-        return res;
-      });
-    }
-    prefillPromise.then(res => {
-      setPrefillData(res);
-    }).catch(error => {
-      console.error('Failed to load prefill options', error);
-    });
-  }, []);
-  return cachedPrefillData || prefillData;
+  }, [data, isLoading]);
+  return {
+    data,
+    isLoading
+  };
 };
 const PrefillOptionsSelector = ({
   value,
   onChange
 }) => {
-  const prefillData = usePrefill();
-  return Object.values(prefillData.single).length === 0 && Object.values(prefillData.multi).length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, {}) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+  const {
+    data: prefillData,
+    isLoading
+  } = usePrefill();
+  if (isLoading || !prefillData) {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, {});
+  }
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
     label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Key for dynamically filled options', 'tsjippy'),
     value: value,
     options: [{
       label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Select an option', 'tsjippy'),
       value: ''
-    }, ...Object.keys(prefillData?.multi || {}).map(key => ({
+    }, ...Object.keys(prefillData.multi || {}).map(key => ({
       label: key,
       value: key
     }))],
@@ -159,15 +161,21 @@ const PrefillValueSelector = ({
   value,
   onChange
 }) => {
-  const prefillData = usePrefill();
-  return Object.values(prefillData.single).length === 0 && Object.values(prefillData.multi).length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, {}) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
-    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Key for dynamically set value", 'tsjippy'),
+  const {
+    data: prefillData,
+    isLoading
+  } = usePrefill();
+  if (isLoading || !prefillData) {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Spinner, {});
+  }
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Key for dynamically set value', 'tsjippy'),
     value: value,
-    help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Select a key for the dynamically set value. This is used to pre-fill the input field based on the current logged-in user.", 'tsjippy'),
+    help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Select a key for the dynamically set value. This is used to pre-fill the input field based on the current logged-in user.', 'tsjippy'),
     options: [{
       label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)('Select an option', 'tsjippy'),
       value: ''
-    }, ...Object.keys(prefillData?.single || {}).map(key => ({
+    }, ...Object.keys(prefillData.single || {}).map(key => ({
       label: key,
       value: key
     }))],
@@ -205,17 +213,17 @@ function InputHtml({
 }) {
   let html;
   if (['radio', 'checkbox'].includes(attributes.type)) {
-    let options;
+    let options = [];
     let selectedValue = '';
     if (isSaving) {
-      options = attributes.selectable_options;
+      options = attributes.options;
     } else {
       const prefill = (0,_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_2__.usePrefill)();
-      const dynamicOptions = Object.entries(prefill?.multi?.[attributes.selectable_options_dynamic ?? ''] || {}).map(([key, value]) => ({
+      const dynamicOptions = Object.entries(prefill?.multi?.[attributes.options_dynamic ?? ''] || {}).map(([key, value]) => ({
         value: String(key).trim(),
         label: String(value || key).trim()
       }));
-      options = [...attributes.selectable_options, ...dynamicOptions];
+      options = [...attributes.options, ...dynamicOptions];
       selectedValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
       console.log(prefill?.single?.[attributes.dynamic_value ?? ''] ?? '');
     }
@@ -223,7 +231,7 @@ function InputHtml({
       ...blockProps,
       className: `${blockProps.className} checkbox-wrapper`,
       "data-blockid": attributes.blockId,
-      "data-dynamicOptions": attributes.selectable_options_dynamic,
+      "data-dynamicOptions": attributes.options_dynamic,
       "data-dynamicValue": attributes.dynamic_value,
       children: options.map((option, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("label", {
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
@@ -237,6 +245,16 @@ function InputHtml({
           ...attributes.inputAttributes
         }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(option.label, 'tsjippy')]
       }, `${option.value}-${index}`))
+    });
+  } else if (attributes.type == 'textarea') {
+    html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("textarea", {
+      ...blockProps,
+      type: attributes.type,
+      name: attributes.name,
+      className: "formbuilder",
+      "data-blockid": attributes.blockId,
+      autoComplete: "on",
+      ...attributes.inputAttributes
     });
   } else {
     html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
@@ -1308,9 +1326,9 @@ function Edit({
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h4", {
       children: "Dynamic Options (prefill)"
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_9__.PrefillOptionsSelector, {
-      value: attributes.selectable_options_dynamic,
+      value: attributes.options_dynamic,
       onChange: value => setAttributes({
-        selectable_options_dynamic: value
+        options_dynamic: value
       })
     })]
   }) : null;
@@ -1632,7 +1650,7 @@ module.exports = window["wp"]["i18n"];
   \******************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"type":{"type":"string","default":""},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"ariaAttributes":{"type":"boolean","default":false},"selectable_options":{"type":"array","default":[]},"selectable_options_dynamic":{"type":"string","default":""},"dynamic_value":{"type":"string","default":""},"add_button_content":{"type":"string","default":"+"},"remove_button_content":{"type":"string","default":"-"},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"hasLabelParent":{"type":"boolean","default":false},"hidden":{"type":"boolean","default":false},"reminderConditions":{"type":"array","default":[]},"roles":{"type":"array","default":[]}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"type":{"type":"string","default":""},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"ariaAttributes":{"type":"boolean","default":false},"options":{"type":"array","default":[]},"options_dynamic":{"type":"string","default":""},"dynamic_value":{"type":"string","default":""},"add_button_content":{"type":"string","default":"+"},"remove_button_content":{"type":"string","default":"-"},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"hasLabelParent":{"type":"boolean","default":false},"hidden":{"type":"boolean","default":false},"reminderConditions":{"type":"array","default":[]},"roles":{"type":"array","default":[]}}}');
 
 /***/ }
 

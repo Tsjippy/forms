@@ -18,7 +18,10 @@ import AddOptions from '../../shared/AddOptions';
 export default function Edit({ attributes, setAttributes, clientId }) {
 	const blockProps = useBlockProps();
 
-	const prefillData = usePrefill();
+	const {
+		data: prefillData,
+		isLoading,
+	} = usePrefill();
 
 	/**
 	 * Set a debounce for the id input so it disappears when we stop typing, not straight after the first character
@@ -38,8 +41,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 		return () => clearTimeout(timeoutId);
 	}, [ name, attributes.name, setAttributes]);
-
-	
 
 	return (
 		<>
@@ -104,7 +105,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 							onChange = { ( value ) => setName( value )}
 						/> 
 					:
-						Object.keys(prefillData.multi).length === 0 && Object.keys(prefillData.single).length === 0
+						isLoading || !prefillData
 						? 	<Spinner />
 						:
 						<RenderedSelect

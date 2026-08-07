@@ -37,11 +37,11 @@
 			"type": "boolean",
 			"default": false
 		},
-		"selectable_options": {
+		"options": {
 			"type": "array",
 			"default": []
 		},
-		"selectable_options_dynamic": {
+		"options_dynamic": {
 			"type": "string",
 			"default": ""
 		},
