@@ -23,6 +23,7 @@
 - show formstep in editor
 - only allow inputs in label
 - Wrapper component for multi block block
+- prefil forms server side
 
 ### Fixed
 - conditions form bugs
