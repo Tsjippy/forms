@@ -28,6 +28,16 @@ import { EmailSettings } from './emails/EmailSettings.js';
 
 import * as forms from './../../../js/forms.js';
 
+const TEMPLATE = [
+    [
+        'tsjippy-forms/input',
+        {
+            name: 'user-id',
+            dynamicValue: 'user_id',
+        },
+    ],
+];
+
 /**
  * Gutenberg block edit component.
  * This is the editor-side UI for the form block.
@@ -310,6 +320,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 								:
 								<>
 									<InnerBlocks
+										template={TEMPLATE}
 										renderAppender={false}
 									/>
 

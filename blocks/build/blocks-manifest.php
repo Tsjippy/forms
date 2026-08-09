@@ -20,7 +20,6 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js',
 		'attributes' => array(
 			'id' => array(
 				'type' => 'string',
@@ -268,7 +267,6 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js',
 		'attributes' => array(
 			'type' => array(
 				'type' => 'string',
@@ -396,7 +394,6 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js',
 		'attributes' => array(
 			'add_button_content' => array(
 				'type' => 'string',
@@ -427,7 +424,6 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js',
 		'attributes' => array(
 			'name' => array(
 				'type' => 'string',

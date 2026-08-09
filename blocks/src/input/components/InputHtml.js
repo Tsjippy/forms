@@ -12,15 +12,20 @@ export function InputHtml({
 
     let html;
 
+    let prefillValue = '';
+
+    if(!isSaving){
+        var prefill = usePrefill();
+
+        prefillValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
+    }
+
     if (['radio', 'checkbox'].includes(attributes.type)) {
         let options = [];
-        let selectedValue = '';
 
         if(isSaving){
             options = attributes.options;
-        }else{
-            const prefill = usePrefill();
-            
+        }else{            
             const dynamicOptions = Object.entries(
                 prefill?.multi?.[
                     attributes.options_dynamic ?? ''
@@ -34,10 +39,6 @@ export function InputHtml({
                 ...attributes.options,
                 ...dynamicOptions,
             ];
-
-            selectedValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
-            
-            console.log(prefill?.single?.[attributes.dynamic_value ?? ''] ?? '');
         }
 
         html = (
@@ -45,8 +46,6 @@ export function InputHtml({
                 {...blockProps}
                 className={`${blockProps.className} checkbox-wrapper`}
                 data-blockid={attributes.blockId}
-                data-dynamicOptions={attributes.options_dynamic}
-                data-dynamicValue={attributes.dynamic_value}
             >
                 {options.map((option, index) => (
                     <label
@@ -58,13 +57,14 @@ export function InputHtml({
                             value={option.value}
                             className="formbuilder"
                             autoComplete="on"
-                            checked={ selectedValue === option.value }
+                            checked={ prefillValue === option.value }
                             data-blockid={attributes.blockId}
                             {...attributes.inputAttributes}
                         />
                         {__(option.label, 'tsjippy')}
                     </label>
                 ))}
+                %options-placeholder%
             </div>
         );
     } else if (attributes.type == 'textarea') {
@@ -73,11 +73,12 @@ export function InputHtml({
                 {...blockProps}
                 type={attributes.type}
                 name={attributes.name}
-                className="formbuilder"
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
-            />
+            >
+                { isSaving ? "%value-placeholder%" : prefillValue }
+            </textarea>
         );
     } else {
         html = (
@@ -85,10 +86,10 @@ export function InputHtml({
                 {...blockProps}
                 type={attributes.type}
                 name={attributes.name}
-                className="formbuilder"
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
+                value = { isSaving ? "%value-placeholder%" :  prefillValue }
             />
         );
     }

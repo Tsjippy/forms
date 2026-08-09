@@ -8,11 +8,19 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+add_action('admin_footer-post.php', function(){
+
+    //upgradeDatabase();
+
+    insertNewForms();
+
+});
+
 function printJs($blockData, $postId){
     ?>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            sendBlockContent(<?php echo wp_json_encode($blockData); ?>, <?php echo $postId;?>);
+            sendBlockContent(<?php echo wp_json_encode($blockData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); ?>, <?php echo $postId;?>);
         });
     </script>
     <?php
@@ -22,6 +30,8 @@ add_action('wp_ajax_save_generated_blocks', function () {
     $content = wp_unslash($_POST['content'] ?? '');
 
     $blocks = parse_blocks($content);
+
+    //$content = str_replace('u005c', "\\", $content);
 
     wp_update_post(
         [
@@ -106,7 +116,6 @@ function sendBlockContent(block, postId){
     
     $inputAttributes = [
         'type' => 'type',
-        'name' => 'name',
         'options' => 'value_list',
         'add_button_content' => 'add',
         'remove_button_content' => 'remove',
@@ -142,12 +151,12 @@ function sendBlockContent(block, postId){
 
     foreach($oldForms as $form){
 
-        if($form->id != 11){
-            //continue;
+        if($form->id != 52){
+            continue;
         }
 
-        if(empty($form->slug) || empty($form->name)){
-            continue;
+        if(empty($form->slug)){
+            $form->slug = strtolower($form->name);
         }
 
         if(empty($form->name)){
@@ -217,7 +226,6 @@ function sendBlockContent(block, postId){
                 continue;
             }
 
-            $attributes     = [];
             $innerBlocks    = [];
 
             if(str_contains($element->slug, '[]')){
@@ -228,9 +236,13 @@ function sendBlockContent(block, postId){
                 $element->name  = $element->slug;
             }
 
+            $attributes     = [
+                'name' => $element->slug
+            ];
+
             // Formstep
             if($element->type == 'formstep'){
-                $attributes = ['text' => $element->text];
+                $attributes['text'] = $element->text;
 
                 // Store innerblock index
                 if($shouldCLoseFormstep){
@@ -241,15 +253,12 @@ function sendBlockContent(block, postId){
 
             // file upload
             elseif($element->type == 'file' || $element->type == 'image'){
-                $attributes = [
-                    'name' => $element->name,
-                    'multiple' => boolval($element->multiple),
-                    'required' => boolval($element->required),
-                    'targetDir' => $element->folder_name ?? '',
-                    'library' => boolval($element->library),
-                    'edit' => boolval($element->edit_image),
-                    'metaKey' => $element->slug ?? ''
-                ];
+                $attributes['multiple'] = boolval($element->multiple);
+                $attributes['required'] = boolval($element->required);
+                $attributes['targetDir'] = $element->folder_name ?? '';
+                $attributes['library'] = boolval($element->library);
+                $attributes['edit'] = boolval($element->edit_image);
+                $attributes['metaKey'] = $element->slug ?? '';
             }
 
             // Input
@@ -257,9 +266,6 @@ function sendBlockContent(block, postId){
                 /**
                  * Build the form
                  */
-
-                $attributes = [];
-
                 foreach ($inputAttributes as $blockKey => $oldKey) {
                     if (isset($element->$oldKey) && $element->$oldKey != '') {
                         $attributes[$blockKey] = $element->$oldKey;
@@ -284,8 +290,8 @@ function sendBlockContent(block, postId){
                                 }
 
                                 $newOptions[]   = [
-                                    'value' => $value,
-                                    'label' => $label
+                                    'value' => trim($value),
+                                    'label' => trim($label)
                                 ];
                             }
 
@@ -308,7 +314,7 @@ function sendBlockContent(block, postId){
 
                 foreach($options as $option){
                     $exp    = explode("=", $option);
-                    $attributes['inputAttributes'][$exp[0]] = $exp[1];
+                    $attributes['inputAttributes'][$exp[0]] = trim($exp[1]);
                 }
                 }
 
@@ -318,26 +324,20 @@ function sendBlockContent(block, postId){
             // Label
             elseif($element->type == 'label'){
                 if(isset($elements[$index + 1]) && in_array($elements[$index + 1]->type, $inputTypes)){
-                    $attributes = [
-                        'text' => $element->text
-                    ];
+                    $attributes['text'] = $element->text;
 
                     $shouldCloseLabel = true;
                 } else {
                     $element->type = 'heading';
-                    $attributes = [
-                        'content' => $element->text,
-                        'level' => 4,
-                    ];
+                    $attributes['content'] = $element->text;
+                    $attributes['level'] = 4;
                 }
             }
 
             // datalist
             elseif($element->type == 'datalist'){
-                $attributes = [
-                    'id' => $element->slug,
-                    'options_dynamic' => $element->default_array_value
-                ];
+                $attributes['id'] = $element->slug;
+                $attributes['options_dynamic'] = $element->default_array_value;
 
                 if(!empty($element->value_list)){
                     $options  = explode("\n", $element->value_list);
@@ -355,8 +355,8 @@ function sendBlockContent(block, postId){
                         }
 
                         $newOptions[]   = [
-                            'value' => $value,
-                            'label' => $label
+                            'value' => trim($value),
+                            'label' => trim($label)
                         ];
                     }
 
@@ -369,11 +369,8 @@ function sendBlockContent(block, postId){
                 if($element->default_value == ''){
                     $element->default_value = $element->slug;
                 }
-                $attributes = [
-                    'name' => $element->slug,
-                    'options_dynamic' => $element->default_array_value,
-                    'dynamic_selected_value' => $element->default_value
-                ];
+                $attributes['options_dynamic'] = $element->default_array_value;
+                $attributes['dynamic_selected_value'] = $element->default_value;
 
                 if(!empty($element->value_list)){
                     $options  = explode("\n", $element->value_list);
@@ -391,8 +388,8 @@ function sendBlockContent(block, postId){
                         }
 
                         $newOptions[]   = [
-                            'value' => $value,
-                            'label' => $label
+                            'value' => trim($value),
+                            'label' => trim($label)
                         ];
                     }
 
@@ -402,11 +399,9 @@ function sendBlockContent(block, postId){
 
             // container
             elseif($element->type == 'div-start'){
-                $attributes = [
-                    'layout' => [
-                        "type"        => "flex",
-                        "orientation" => "vertical"
-                    ]
+                $attributes['layout'] = [
+                    "type"        => "flex",
+                    "orientation" => "vertical"
                 ];
             }
 
@@ -419,10 +414,8 @@ function sendBlockContent(block, postId){
 
             // multi container
             elseif($element->type == 'multi-start'){
-                $attributes = [
-                    'add_button_content' => $element->add,
-                    "remove_button_content" => $element->remove
-                ];
+                $attributes['add_button_content'] = $element->add;
+                $attributes["remove_button_content"] = $element->remove;
             }
 
             // multi container end
@@ -434,22 +427,18 @@ function sendBlockContent(block, postId){
 
             // info
             elseif($element->type == 'info'){
-                $attributes = [
-                    'text' => $element->text
-                ];
+                $attributes['text'] = $element->text;
             }
 
             // booking selector
             elseif($element->type == 'booking-selector'){
-                $attributes = [
-                    'bookingSubjects' => [
-                        24522,
-                        24523,
-                        24524,
-                        24530
-                    ],
-                    "required" => true
+                $attributes['bookingSubjects'] = [
+                    24522,
+                    24523,
+                    24524,
+                    24530
                 ];
+                $attributes["required"] = true;
             }
 
             // php
@@ -586,14 +575,6 @@ function sendBlockContent(block, postId){
     // Drop the table, everything is migrated
     //$wpdb->query("DROP TABLE `{$wpdb->prefix}tsjippy_form_elements`, `{$wpdb->prefix}tsjippy_forms`;");
 }
-
-add_action('admin_footer-post.php', function(){
-
-    //upgradeDatabase();
-
-    //insertNewForms();
-
-});
 
 function upgradeDatabase(){
     global $wpdb;

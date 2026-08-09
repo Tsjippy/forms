@@ -375,7 +375,7 @@ export function changeFieldValue(
 
       targets.forEach((el, index) => {
         if (index == 0) {
-          changeFieldValue(el, "", "", form);
+          changeFieldValue(el, "", form);
         } else {
           removeNode(el);
         }
@@ -476,7 +476,6 @@ export function changeFieldValue(
           changeFieldValue(
             clone.querySelector(target.tagName),
             val,
-            "",
             form,
             "",
             true,

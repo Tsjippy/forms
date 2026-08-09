@@ -97,24 +97,6 @@ function initBlocks()
     );
 }
 
-//add_action('enqueue_block_editor_assets', __NAMESPACE__ . '\loadAssets');
-//add_action('enqueue_block_assets', __NAMESPACE__ . '\loadAssets');
-function loadAssets()
-{
-    TSJIPPY\enqueueScripts();
-
-    TSJIPPY\FILEUPLOAD\registerUploadScripts();
-
-    registerScripts();
-
-    wp_enqueue_script('tsjippy_formbuilderjs');
-
-    wp_enqueue_script('tsjippy_forms_table_script');
-
-    wp_enqueue_style('tsjippy_forms_style');
-    wp_enqueue_style('tsjippy_formtable_style');
-}
-
 /**
  * Displays form results based on the provided attributes
  *
@@ -182,6 +164,64 @@ add_filter( 'render_block', __NAMESPACE__.'\addBlockIdAttribute', 10, 3 );
  */
 function addBlockIdAttribute( $blockContent, $block, $instance ) {
     /**
+     * Fill with dynamic data
+     */
+    $forms  = new ElementHtmlBuilder();
+
+    $forms->buildDefaultsArray();
+
+    $multi  = $forms->defaultArrayValues;
+    $single = $forms->defaultValues;
+
+    /**
+     * Set default value
+     */
+    $defaultValue = $single[$block['attrs']['dynamic_value']] ?? '';
+    $blockContent = str_replace('%value-placeholder%', $defaultValue, $blockContent);
+    
+    /**
+     * Add the options
+     */
+    $options    = [];
+    $optionData = $multi[$block['attrs']['options_dynamic']] ?? [];
+
+    if(!empty($optionData)){
+        foreach($optionData as $key => $value){
+            // Data list
+            if($block['blockName'] == "tsjippy-forms/datalist"){
+                $option = "<option dataset-value='$key' ";
+                if(is_array($value)){
+                    $option .= "value='{$value['value']}'>{$value['display']}</option>";
+                }else{
+                    $option .= "value='$value'></option>";
+                }
+            }else{
+                $selected   = '';
+
+                /**
+                 * Determine the selected option
+                 */
+                if(
+                    $defaultValue   == $key &&  
+                    (
+                        $block['blockName'] == "tsjippy-forms/select" ||
+                        (
+                            $block['blockName'] == "tsjippy-forms/input" &&
+                            in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])
+                        )
+                    ) 
+                ){
+                    $selected = 'selected="selected"';
+                }
+                $option = "<option value='$key' $selected>$value</option>";
+            }
+
+            $options[] = $option;
+        }
+    }
+    $blockContent = str_replace('%options-placeholder%', implode("\n", $options), $blockContent);
+
+    /**
      * Load dynamic forms script
      */
     if($block['blockName'] == "tsjippy-forms/formbuilder"){
@@ -193,7 +233,9 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
         }
     }
 
-    // Check if our filtered attribute exists in the block data
+    /**
+     * Check if our filtered attribute exists in the block data
+     */
     if ( ! empty( $block['attrs']['blockId'] ) && !str_contains($blockContent, 'data-blockid')) {
         $id = esc_attr( $block['attrs']['blockId'] );
 

@@ -104,49 +104,6 @@ function addNode(target){
   //target.remove();
 }
 
-/**
-   * Prefill form inputs with meta data
-   */
-const prefill = async () => {
-  // Get the prefill data from the server
-  let prefillData = await FormSubmit.fetchRestApi("forms/get_prefill");
-  
-  // Loop through each form input and add options if needed
-  document.querySelectorAll(`[data-dynamicoptions]`).forEach( input => {
-    Object.entries(prefillData.multi[input.dataset.dynamicoptions] || {})?.forEach(([key, value]) => {
-      // Check if the option already exists in the select input
-      let optionExists = Array.from(input.options).some(
-        (opt) => opt.value === key
-      );
-
-      if (!optionExists) {
-        let option = document.createElement("option");
-        option.value = key;
-        option.textContent = value;
-        input.appendChild(option);
-      }
-
-      // Update the nice select
-      if(input.type == "select-one" || input.type == "select-multiple"){
-        input._niceSelect.update();
-      }
-    });
-  });
-
-  // Set the value of each form input if needed
-  document.querySelectorAll(`[data-dynamicvalue]`).forEach( input => {
-    let value = prefillData.single[input.dataset.dynamicvalue];
-    if(value != undefined){
-      changeFieldValue(input, value, "", input.closest("form"));
-    }
-  });
-}
-
-//Load after page load
-document.addEventListener("DOMContentLoaded", () => {
-  prefill();
-});
-
 //we are online again
 window.addEventListener("online", function () {
   document.querySelectorAll(".form-submit").forEach((btn) => {
@@ -180,7 +137,7 @@ document.addEventListener("click", function (event) {
     removeNode(target);
   }
 
-  else if (target.matches('.tsjippy-form-wrapper button.form-submit')) {
+  else if (target.matches('.wp-block-tsjippy-forms-formbuilder .button.form-submit')) {
     event.stopPropagation();
 
     saveFormInput(target);
@@ -200,7 +157,7 @@ document.addEventListener("change", (ev) => {
 
       if (value != undefined) {
         // change the value to create extra inputs if necessary
-        changeFieldValue(ev.target, value, "", ev.target.closest("form"));
+        changeFieldValue(ev.target, value, ev.target.closest("form"));
       }
     }
   }

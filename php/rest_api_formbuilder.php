@@ -330,13 +330,10 @@ function restApiInitForms()
                 $formBuilder->userId = get_current_user_id();
 
                 // The user id for whom the form is submitted
-                $userId    = '';
-                foreach (['user-id', 'userid', 'user_id'] as $key) {
-                    // phpcs:ignore
-                    if (isset($_POST[$key])) {
-                        $userId    = (int) $_POST[$key];
-                        break;
-                    }
+                $userId = 0;
+                // phpcs:ignore
+                if (isset($_POST['user-id'])) {
+                    $userId    = (int) $_POST['user-id'];
                 }
 
                 // phpcs:ignore
@@ -344,11 +341,8 @@ function restApiInitForms()
             },
             'permission_callback'     => '__return_true',
             'args'                    => array(
-                'form-id'        => array(
-                    'required'    => true,
-                    'validate_callback' => function ($formId) {
-                        return is_numeric($formId);
-                    }
+                'block-id'        => array(
+                    'required'    => true
                 )
             )
         )

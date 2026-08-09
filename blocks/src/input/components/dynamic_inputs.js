@@ -57,7 +57,7 @@ export const dynamicInputs = (attributes, type, saveFunction) => {
 
     inputData.forEach((data, index) => {
         const attributeName = data.attribute;
-        let attributeValue = values[data.attribute] ?? '';
+        let attributeValue  = values[data.attribute] ?? '';
 
         /**
          * Multiple data-* entries possible

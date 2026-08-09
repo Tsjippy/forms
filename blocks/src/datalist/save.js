@@ -24,7 +24,6 @@ export default function save({ attributes }) {
 			{...blockProps}
 			id={attributes.id}
 			data-blockid={attributes.blockId}
-			data-dynamicOptions={attributes.options_dynamic}
 		>
 			{(attributes.options || []).map((option, index) => {
 				return (
@@ -35,6 +34,7 @@ export default function save({ attributes }) {
 					/>
 				);
 			})}
+			%options-placeholder%
 		</datalist>
 	);
 }

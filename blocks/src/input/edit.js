@@ -51,11 +51,12 @@ export default function Edit({
     );
 
     const storeAttributeAttributes = (value, name) => {
+        let newAttributes   = { ...(attributes.inputAttributes || {})};
+
+        newAttributes[name] = value;
+
         setAttributes({
-            inputAttributes: {
-                ...(attributes.inputAttributes || {}),
-                value,
-            },
+            inputAttributes:  newAttributes
         });
     };
 
@@ -323,17 +324,19 @@ export default function Edit({
             </InspectorControls>
 
             <div {...blockProps}>
-                <fieldset>
-                    <legend>
-                        {(attributes.type || '')
-                            .charAt(0)
-                            .toUpperCase() +
-                            (attributes.type || '').slice(1)}{' '}
-                        input
-                    </legend>
+                {attributes.multiple ? (renderPropertiesForm()) :
+                    <fieldset>
+                        <legend>
+                            {(attributes.type || '')
+                                .charAt(0)
+                                .toUpperCase() +
+                                (attributes.type || '').slice(1)}{' '}
+                            input
+                        </legend>
 
-                    {renderPropertiesForm()}
-                </fieldset>
+                        {renderPropertiesForm()}
+                    </fieldset>
+                }
             </div>
         </>
     );

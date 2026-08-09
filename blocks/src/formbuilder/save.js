@@ -4,9 +4,8 @@
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import { useBlockProps, InnerBlocks  } from '@wordpress/block-editor';
-import { FormSubmitter } from './components/Submitter.js';
-
+import { useBlockProps, InnerBlocks } from "@wordpress/block-editor";
+import { FormSubmitter } from "./components/Submitter.js";
 
 /**
  * The save function defines the way in which the different attributes should
@@ -18,14 +17,21 @@ import { FormSubmitter } from './components/Submitter.js';
  * @return {Element} Element to render.
  */
 export default function save({ attributes }) {
-	const blockProps = useBlockProps.save();
+  const blockProps = useBlockProps.save();
 
-	return (
-		<form method={ attributes.method} target={ attributes.target} autocomplete={ attributes.autocomplete} data-formName={ attributes.name } { ...blockProps }>
-			<InnerBlocks.Content />
-			<FormSubmitter
-				attributes={attributes}
-			/>
-		</form>
-	)
+  return (
+    <form
+      method={attributes.method}
+      target={attributes.target}
+      autocomplete={attributes.autocomplete}
+      data-formName={attributes.name}
+      data-blockId={attributes.id}
+      {...blockProps}
+    >
+      <input type="hidden" name="block-id" value={attributes.id} />
+      <input type="hidden" name="post-id" value={attributes.id} />
+      <InnerBlocks.Content />
+      <FormSubmitter attributes={attributes} />
+    </form>
+  );
 }

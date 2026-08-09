@@ -210,7 +210,7 @@ const RenderedSelect = ({
     value: String(key).trim(),
     label: String(value || key).trim()
   }))];
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("select", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("select", {
     ...blockProps,
     name: attributes.name,
     autoFocus: attributes.autofocus,
@@ -218,14 +218,12 @@ const RenderedSelect = ({
     multiple: attributes.multiple,
     required: attributes.required,
     "data-blockid": attributes.blockId,
-    "data-dynamicOptions": attributes.options_dynamic,
-    "data-dynamicValue": attributes.dynamic_selected_value,
-    children: options.map((option, index) => {
+    children: [options.map((option, index) => {
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("option", {
         value: option.value,
         children: option.label
       }, index);
-    })
+    }), "%options-placeholder%"]
   });
 };
 
@@ -572,7 +570,7 @@ module.exports = window["wp"]["i18n"];
   \*******************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/select","version":"0.1.0","title":"Select","category":"form-elements","icon":"forms","description":"Selector dropdown","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"name":{"type":"string","default":""},"options":{"type":"array","default":[""]},"options_dynamic":{"type":"string","default":""},"autofocus":{"type":"boolean","default":false},"disabled":{"type":"boolean","default":false},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"dynamic_selected_value":{"type":"string","default":""}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/select","version":"0.1.0","title":"Select","category":"form-elements","icon":"forms","description":"Selector dropdown","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"name":{"type":"string","default":""},"options":{"type":"array","default":[""]},"options_dynamic":{"type":"string","default":""},"autofocus":{"type":"boolean","default":false},"disabled":{"type":"boolean","default":false},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"dynamic_selected_value":{"type":"string","default":""}}}');
 
 /***/ }
 

@@ -4,13 +4,13 @@
   \******************************/
 /**
  * Show the next or previous formstep
- * @param {int} formstep index 
- * @param {*}   The parent form element 
- * @returns 
+ * @param {int} formstep index
+ * @param {*}   The parent form element
+ * @returns
  */
 function nextPrev(n, target) {
   let form = target.closest(`form`);
-  let x = form.querySelectorAll(".formstep");
+  let x = form.querySelectorAll(".wp-block-tsjippy-forms-formstep");
   let stepIndicators = form.querySelectorAll(".step");
   let currentTab = 0;
   let valid = true;
@@ -90,10 +90,10 @@ function showFormStep(n, form) {
     }
 
     //hide all formsteps
-    form.querySelectorAll(".formstep:not(.step-hidden)").forEach(step => step.classList.add("step-hidden"));
+    form.querySelectorAll(".wp-block-tsjippy-forms-formstep:not(.step-hidden)").forEach(step => step.classList.add("step-hidden"));
 
     // Show the specified formstep of the form ...
-    let x = form.getElementsByClassName("formstep");
+    let x = form.getElementsByClassName("wp-block-tsjippy-forms-formstep");
     if (x.length == 0) {
       return;
     }
@@ -125,15 +125,15 @@ function showFormStep(n, form) {
 
     // ... and fix the Previous/Next buttons:
     if (n == 0) {
-      form.querySelector('button.previous-button').classList.add("hidden");
+      form.querySelector("button.previous-button").classList.add("hidden");
     } else {
-      form.querySelector('button.previous-button').classList.remove("hidden");
+      form.querySelector("button.previous-button").classList.remove("hidden");
     }
     if (n == x.length - 1) {
-      form.querySelector('button.next-button').classList.add("hidden");
+      form.querySelector("button.next-button").classList.add("hidden");
       form.querySelector(".form-submit").classList.remove("hidden");
     } else {
-      form.querySelector('button.next-button').classList.remove("hidden");
+      form.querySelector("button.next-button").classList.remove("hidden");
       form.querySelector(".form-submit").classList.add("hidden");
     }
   } else {
@@ -144,13 +144,13 @@ function showFormStep(n, form) {
 /**
  * Updates the amount of step circles
  * Updates the visibility of the prev and next buttons if needed
- * 
- * @param {*} form 
+ *
+ * @param {*} form
  */
 function updateMultiStepControls(form) {
   // get active formsteps amount
-  let formsteps = form.querySelectorAll(".formstep");
-  let visibleFormsteps = form.querySelectorAll(".formstep:not(.hidden)");
+  let formsteps = form.querySelectorAll(".wp-block-tsjippy-forms-formstep");
+  let visibleFormsteps = form.querySelectorAll(".wp-block-tsjippy-forms-formstep:not(.hidden)");
   let stepIndicators = form.querySelectorAll(".multi-step-controls-wrapper .step");
 
   // show all step circles
@@ -169,7 +169,7 @@ function updateMultiStepControls(form) {
   }
 
   // check if this is the last visible
-  let currentFormstep = form.querySelector(".formstep:not(.step-hidden)");
+  let currentFormstep = form.querySelector(".wp-block-tsjippy-forms-formstep:not(.step-hidden)");
   if (visibleFormsteps[visibleFormsteps.length - 1] == currentFormstep) {
     // make the submit button visible
     form.querySelector(".next-button").classList.add("hidden");
@@ -193,8 +193,8 @@ function onClassChange(formstep) {
         const changed = lastClassList.symmetricDifference(classList);
 
         // Only do a re-render of the contols we if we added or removed the hidden class
-        if (changed.has('hidden')) {
-          updateMultiStepControls(formstep.closest('form'));
+        if (changed.has("hidden")) {
+          updateMultiStepControls(formstep.closest("form"));
           lastClassList = classList;
           break;
         }
@@ -208,7 +208,7 @@ function onClassChange(formstep) {
 }
 
 // Show the first tab
-console.log('Formstep js loaded');
+console.log("Formstep js loaded");
 
 // Display the first tab
 document.querySelectorAll(`form[data-formname]`).forEach(form => {
@@ -225,7 +225,7 @@ document.addEventListener("nodeAdded", function (event) {
   let newNode = event.target;
 
   // Only run for formsteps
-  if (!newNode.matches(".formstep")) {
+  if (!newNode.matches(".wp-block-tsjippy-forms-formstep")) {
     return;
   }
 
@@ -248,17 +248,17 @@ document.addEventListener("nodeRemoved", function (event) {
   let parentNode = node.closest(".clone-divs-wrapper");
 
   // Only run for formsteps
-  if (!node.matches(".formstep")) {
+  if (!node.matches(".wp-block-tsjippy-forms-formstep")) {
     return;
   }
 
   // if there is a next clonable formstep, show that one
-  let nextFormstep = parentNode.querySelector(`.formstep[data-div-id='${parseInt(node.dataset.divId) + 1}']`);
+  let nextFormstep = parentNode.querySelector(`.wp-block-tsjippy-forms-formstep[data-div-id='${parseInt(node.dataset.divId) + 1}']`);
   if (nextFormstep != null) {
     newFormstep = nextFormstep;
   } else {
     //try the previous one
-    let prevFormstep = parentNode.querySelector(`.formstep[data-div-id='${parseInt(node.dataset.divId) - 1}']`);
+    let prevFormstep = parentNode.querySelector(`.wp-block-tsjippy-forms-formstep[data-div-id='${parseInt(node.dataset.divId) - 1}']`);
     if (prevFormstep != null) {
       newFormstep = prevFormstep;
     }
@@ -270,7 +270,7 @@ document.addEventListener("nodeRemoved", function (event) {
       updateMultiStepControls(form);
 
       // find the next visible formstep index
-      form.querySelectorAll(".formstep").forEach((formstep, index) => {
+      form.querySelectorAll(".wp-block-tsjippy-forms-formstep").forEach((formstep, index) => {
         if (formstep == newFormstep) {
           //show the next visible formstep
           showFormStep(index, form);
@@ -279,7 +279,7 @@ document.addEventListener("nodeRemoved", function (event) {
     }
   }
 });
-document.addEventListener('click', ev => {
+document.addEventListener("click", ev => {
   let target = ev.target;
   if (target.matches(`.button.next-button`)) {
     nextPrev(1, target);

@@ -1,21 +1,53 @@
+import { Children, isValidElement } from '@wordpress/element';
+import { cloneElement } from '@wordpress/element';
+
 export const Multiple = ( props ) => {
-    const addText    = props.attributes.add_button_content ?? '+';
-    const removeText = props.attributes.remove_button_content ?? '-';
-    const inputType  = props.attributes.type ?? '';
+    const addText     = props.attributes.add_button_content ?? '+';
+    const removeText  = props.attributes.remove_button_content ?? '-';
+    const inputType   = props.attributes.type ?? '';
+    
+    const children = Children.toArray(props.inner?.props?.children);
+
+    const labelText = children.find(
+        child => typeof child === 'string'
+    );
+
+    const labelElement = children.find(
+        child =>
+            isValidElement(child) &&
+            (child.type === 'h4' ||
+            child.props?.class === 'label-text')
+    );
+
+    const inputElements = children.filter(
+        child =>
+            isValidElement(child) &&
+            child.type !== 'h4' &&
+            child.type !== 'br'
+    );
 
     return inputType === 'text' ? (
-        <div className="option-wrapper">
-            <ul className="list-selection-list" />
-            <div className="multi-text-input-wrapper">
-                { props.inner }
-                <button
-                    type="button"
-                    className="small add-list-selection hidden"
-                >
-                    add
-                </button>
+        <>
+            {labelText && (
+                <h4 className="label-text">{labelText}</h4>
+            )}
+
+            {labelElement && (labelElement)}
+
+            <div className={`${props.className ?? ''} option-wrapper`}>
+                <ul className="list-selection-list" />
+                <div className="multi-text-input-wrapper">
+                    {inputElements}
+                    {children.length === 0 && (props.inner)}
+                    <button
+                        type="button"
+                        className="small add-list-selection hidden"
+                    >
+                        add
+                    </button>
+                </div>
             </div>
-        </div>
+        </>
     ) : (
         <div
             className="input-wrapper required flex"

@@ -585,7 +585,7 @@ function changeFieldValue(selector, value, form, addition = "", forceValue = fal
       target = targets[0];
       targets.forEach((el, index) => {
         if (index == 0) {
-          changeFieldValue(el, "", "", form);
+          changeFieldValue(el, "", form);
         } else {
           removeNode(el);
         }
@@ -674,7 +674,7 @@ function changeFieldValue(selector, value, form, addition = "", forceValue = fal
         dataListOption.value.split(";").forEach(val => {
           clone = copyFormInput(target.closest(".clone-div"));
           clone.classList.remove("shouldremove");
-          changeFieldValue(clone.querySelector(target.tagName), val, "", form, "", true);
+          changeFieldValue(clone.querySelector(target.tagName), val, form, "", true);
         });
         fixNumbering(target.closest(".clone-divs-wrapper"));
 
@@ -818,46 +818,6 @@ function addNode(target) {
   //target.remove();
 }
 
-/**
-   * Prefill form inputs with meta data
-   */
-const prefill = async () => {
-  // Get the prefill data from the server
-  let prefillData = await FormSubmit.fetchRestApi("forms/get_prefill");
-
-  // Loop through each form input and add options if needed
-  document.querySelectorAll(`[data-dynamicoptions]`).forEach(input => {
-    Object.entries(prefillData.multi[input.dataset.dynamicoptions] || {})?.forEach(([key, value]) => {
-      // Check if the option already exists in the select input
-      let optionExists = Array.from(input.options).some(opt => opt.value === key);
-      if (!optionExists) {
-        let option = document.createElement("option");
-        option.value = key;
-        option.textContent = value;
-        input.appendChild(option);
-      }
-
-      // Update the nice select
-      if (input.type == "select-one" || input.type == "select-multiple") {
-        input._niceSelect.update();
-      }
-    });
-  });
-
-  // Set the value of each form input if needed
-  document.querySelectorAll(`[data-dynamicvalue]`).forEach(input => {
-    let value = prefillData.single[input.dataset.dynamicvalue];
-    if (value != undefined) {
-      (0,_form_exports_js__WEBPACK_IMPORTED_MODULE_1__.changeFieldValue)(input, value, "", input.closest("form"));
-    }
-  });
-};
-
-//Load after page load
-document.addEventListener("DOMContentLoaded", () => {
-  prefill();
-});
-
 //we are online again
 window.addEventListener("online", function () {
   document.querySelectorAll(".form-submit").forEach(btn => {
@@ -888,7 +848,7 @@ document.addEventListener("click", function (event) {
   else if (target.matches(".remove")) {
     //Remove node clicked
     (0,_form_exports_js__WEBPACK_IMPORTED_MODULE_1__.removeNode)(target);
-  } else if (target.matches('.tsjippy-form-wrapper button.form-submit')) {
+  } else if (target.matches('.wp-block-tsjippy-forms-formbuilder .button.form-submit')) {
     event.stopPropagation();
     saveFormInput(target);
   }
@@ -903,7 +863,7 @@ document.addEventListener("change", ev => {
       let value = el.dataset.value;
       if (value != undefined) {
         // change the value to create extra inputs if necessary
-        (0,_form_exports_js__WEBPACK_IMPORTED_MODULE_1__.changeFieldValue)(ev.target, value, "", ev.target.closest("form"));
+        (0,_form_exports_js__WEBPACK_IMPORTED_MODULE_1__.changeFieldValue)(ev.target, value, ev.target.closest("form"));
       }
     }
   }
@@ -2194,12 +2154,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+const TEMPLATE = [['tsjippy-forms/input', {
+  name: 'user-id',
+  dynamicValue: 'current_user_id'
+}]];
+
 /**
  * Gutenberg block edit component.
  * This is the editor-side UI for the form block.
  */
-
-
 function Edit({
   attributes,
   setAttributes,
@@ -2455,6 +2419,7 @@ function Edit({
       saveInMeta: attributes.user_meta
     }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
+        template: TEMPLATE,
         renderAppender: false
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_Submitter_js__WEBPACK_IMPORTED_MODULE_10__.FormSubmitter, {
         attributes: attributes
@@ -3395,8 +3360,13 @@ function save({
     target: attributes.target,
     autocomplete: attributes.autocomplete,
     "data-formName": attributes.name,
+    "data-blockId": attributes.id,
     ...blockProps,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InnerBlocks.Content, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_components_Submitter_js__WEBPACK_IMPORTED_MODULE_1__.FormSubmitter, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
+      type: "hidden",
+      name: "block-id",
+      value: attributes.id
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InnerBlocks.Content, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_components_Submitter_js__WEBPACK_IMPORTED_MODULE_1__.FormSubmitter, {
       attributes: attributes
     })]
   });

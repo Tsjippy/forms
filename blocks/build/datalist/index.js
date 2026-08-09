@@ -395,17 +395,16 @@ function save({
   attributes
 }) {
   const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save();
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("datalist", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("datalist", {
     ...blockProps,
     id: attributes.id,
     "data-blockid": attributes.blockId,
-    "data-dynamicOptions": attributes.options_dynamic,
-    children: (attributes.options || []).map((option, index) => {
+    children: [(attributes.options || []).map((option, index) => {
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("option", {
         value: option.value,
         label: option.label
       }, index);
-    })
+    }), "%options-placeholder%"]
   });
 }
 
@@ -509,7 +508,7 @@ module.exports = window["wp"]["i18n"];
   \*********************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/datalist","version":"0.1.0","title":"Datalist","category":"form-elements","icon":"forms","description":"Datalist to be added to an form input","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"id":{"type":"string","default":""},"options":{"type":"array","default":[]},"options_dynamic":{"type":"string","default":""}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/datalist","version":"0.1.0","title":"Datalist","category":"form-elements","icon":"forms","description":"Datalist to be added to an form input","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"id":{"type":"string","default":""},"options":{"type":"array","default":[]},"options_dynamic":{"type":"string","default":""}}}');
 
 /***/ }
 

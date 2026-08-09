@@ -212,59 +212,58 @@ function InputHtml({
   isSaving = false
 }) {
   let html;
+  let prefillValue = '';
+  if (!isSaving) {
+    var prefill = (0,_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_2__.usePrefill)();
+    prefillValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
+  }
   if (['radio', 'checkbox'].includes(attributes.type)) {
     let options = [];
-    let selectedValue = '';
     if (isSaving) {
       options = attributes.options;
     } else {
-      const prefill = (0,_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_2__.usePrefill)();
       const dynamicOptions = Object.entries(prefill?.multi?.[attributes.options_dynamic ?? ''] || {}).map(([key, value]) => ({
         value: String(key).trim(),
         label: String(value || key).trim()
       }));
       options = [...attributes.options, ...dynamicOptions];
-      selectedValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
-      console.log(prefill?.single?.[attributes.dynamic_value ?? ''] ?? '');
     }
-    html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+    html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
       ...blockProps,
       className: `${blockProps.className} checkbox-wrapper`,
       "data-blockid": attributes.blockId,
-      "data-dynamicOptions": attributes.options_dynamic,
-      "data-dynamicValue": attributes.dynamic_value,
-      children: options.map((option, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("label", {
+      children: [options.map((option, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("label", {
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
           type: attributes.type,
           name: attributes.name,
           value: option.value,
           className: "formbuilder",
           autoComplete: "on",
-          checked: selectedValue === option.value,
+          checked: prefillValue === option.value,
           "data-blockid": attributes.blockId,
           ...attributes.inputAttributes
         }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(option.label, 'tsjippy')]
-      }, `${option.value}-${index}`))
+      }, `${option.value}-${index}`)), "%options-placeholder%"]
     });
   } else if (attributes.type == 'textarea') {
     html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("textarea", {
       ...blockProps,
       type: attributes.type,
       name: attributes.name,
-      className: "formbuilder",
       "data-blockid": attributes.blockId,
       autoComplete: "on",
-      ...attributes.inputAttributes
+      ...attributes.inputAttributes,
+      children: isSaving ? "%value-placeholder%" : prefillValue
     });
   } else {
     html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
       ...blockProps,
       type: attributes.type,
       name: attributes.name,
-      className: "formbuilder",
       "data-blockid": attributes.blockId,
       autoComplete: "on",
-      ...attributes.inputAttributes
+      ...attributes.inputAttributes,
+      value: isSaving ? "%value-placeholder%" : prefillValue
     });
   }
   return attributes.multiple && !hasLabelParent ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {
@@ -285,42 +284,55 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Multiple: () => (/* binding */ Multiple)
 /* harmony export */ });
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
+
+
 
 const Multiple = props => {
   const addText = props.attributes.add_button_content ?? '+';
   const removeText = props.attributes.remove_button_content ?? '-';
   const inputType = props.attributes.type ?? '';
-  return inputType === 'text' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
-    className: "option-wrapper",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("ul", {
-      className: "list-selection-list"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
-      className: "multi-text-input-wrapper",
-      children: [props.inner, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("button", {
-        type: "button",
-        className: "small add-list-selection hidden",
-        children: "add"
+  const children = _wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Children.toArray(props.inner?.props?.children);
+  const labelText = children.find(child => typeof child === 'string');
+  const labelElement = children.find(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && (child.type === 'h4' || child.props?.class === 'label-text'));
+  const inputElements = children.filter(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && child.type !== 'h4' && child.type !== 'br');
+  return inputType === 'text' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
+    children: [labelText && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h4", {
+      className: "label-text",
+      children: labelText
+    }), labelElement && labelElement, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+      className: `${props.className ?? ''} option-wrapper`,
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
+        className: "list-selection-list"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: "multi-text-input-wrapper",
+        children: [inputElements, children.length === 0 && props.inner, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+          type: "button",
+          className: "small add-list-selection hidden",
+          children: "add"
+        })]
       })]
     })]
-  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
     className: "input-wrapper required flex",
     style: {
       width: '85%'
     },
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
       className: "clone-divs-wrapper",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
         className: "clone-div",
         "data-div-id": "0",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
           className: "button-wrapper",
           style: {
             margin: 'auto',
             display: 'flex'
           },
-          children: [props.inner, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("button", {
+          children: [props.inner, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
             type: "button",
             className: "remove button hidden",
             style: {
@@ -328,7 +340,7 @@ const Multiple = props => {
               maxWidth: 'max-content'
             },
             children: removeText
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("button", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
             type: "button",
             className: "add button",
             style: {
@@ -1268,11 +1280,12 @@ function Edit({
     value: type
   }))], []);
   const storeAttributeAttributes = (value, name) => {
+    let newAttributes = {
+      ...(attributes.inputAttributes || {})
+    };
+    newAttributes[name] = value;
     setAttributes({
-      inputAttributes: {
-        ...(attributes.inputAttributes || {}),
-        value
-      }
+      inputAttributes: newAttributes
     });
   };
   const [inputName, setInputName] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(attributes.name || '');
@@ -1423,7 +1436,7 @@ function Edit({
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
       ...blockProps,
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("fieldset", {
+      children: attributes.multiple ? renderPropertiesForm() : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("fieldset", {
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("legend", {
           children: [(attributes.type || '').charAt(0).toUpperCase() + (attributes.type || '').slice(1), ' ', "input"]
         }), renderPropertiesForm()]
@@ -1650,7 +1663,7 @@ module.exports = window["wp"]["i18n"];
   \******************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"type":{"type":"string","default":""},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"ariaAttributes":{"type":"boolean","default":false},"options":{"type":"array","default":[]},"options_dynamic":{"type":"string","default":""},"dynamic_value":{"type":"string","default":""},"add_button_content":{"type":"string","default":"+"},"remove_button_content":{"type":"string","default":"-"},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"hasLabelParent":{"type":"boolean","default":false},"hidden":{"type":"boolean","default":false},"reminderConditions":{"type":"array","default":[]},"roles":{"type":"array","default":[]}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"type":{"type":"string","default":""},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"ariaAttributes":{"type":"boolean","default":false},"options":{"type":"array","default":[]},"options_dynamic":{"type":"string","default":""},"dynamic_value":{"type":"string","default":""},"add_button_content":{"type":"string","default":"+"},"remove_button_content":{"type":"string","default":"-"},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"hasLabelParent":{"type":"boolean","default":false},"hidden":{"type":"boolean","default":false},"reminderConditions":{"type":"array","default":[]},"roles":{"type":"array","default":[]}}}');
 
 /***/ }
 

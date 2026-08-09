@@ -22,8 +22,6 @@ export const RenderedSelect = ({ attributes, blockProps, dynamicOptions = {}}) =
 			multiple={attributes.multiple}
 			required={attributes.required}
 			data-blockid={attributes.blockId}
-			data-dynamicOptions={attributes.options_dynamic}
-			data-dynamicValue={attributes.dynamic_selected_value}
 		>
 			{options.map((option, index) => {
 				return (
@@ -35,6 +33,7 @@ export const RenderedSelect = ({ attributes, blockProps, dynamicOptions = {}}) =
 					</option>
 				);
 			})}
+			%options-placeholder%
 		</select>
     );
 };
