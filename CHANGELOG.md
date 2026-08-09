@@ -13,6 +13,7 @@
 - select checkbox based on dynamic value
 - forms.js dependency
 - e-mail settings form
+- dynamic values store
 
 ### Changed
 - added input element attributes form
