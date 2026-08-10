@@ -32,6 +32,7 @@
 - bug
 - forms upgrade to block content
 - selected block
+- upgrade bugs
 
 ### Updated
 
