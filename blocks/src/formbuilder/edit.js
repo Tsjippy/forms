@@ -61,6 +61,21 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	const [isEmailsFormVisible, setEmailsFormVisibility] = useState(false);
 	const [isRemindersFormVisible, setRemindersFormVisibility] = useState(false);
 
+	/**
+	 * Store post id
+	 */
+	// get the id
+    const currentPostId = useSelect( ( select ) => 
+        select( 'core/editor' ).getCurrentPostId()
+    , [] );
+
+    // store in attributes
+    useEffect( () => {
+        if ( currentPostId && currentPostId !== attributes.postId ) {
+            setAttributes( { postId: currentPostId } );
+        }
+    }, [ currentPostId, attributes.postId, setAttributes ] );
+
 	/* Load available roles from the server for the inspector panel. */
 	useEffect(() => {
 		apiFetch({

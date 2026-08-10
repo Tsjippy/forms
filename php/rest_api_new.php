@@ -84,7 +84,7 @@ function restApiInitFormsNew()
         '/save_form_reminders',
         array(
             'methods'                 => 'POST',
-            'callback'                =>     __NAMESPACE__ . '\updateFormReminder',
+            'callback'                => __NAMESPACE__ . '\saveFormReminders',
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
             'args'                    => array(
                 'blockId'        => array(

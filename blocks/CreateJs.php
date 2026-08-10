@@ -48,6 +48,11 @@ function processFormBlocks($postId){
     }
 }
 
+/**
+ * Returns the type on an input or the type name of a block
+ * 
+ * @param   array   $block
+ */
 function getInputType($block){
     if($block['name'] == "tsjippy-forms/input"){
         return ($block['attrs']['type'] ?? '');
@@ -56,6 +61,11 @@ function getInputType($block){
     }
 }
 
+/**
+ * Returns the block id
+ * 
+ * @param   array   $block
+ */
 function getBlockId($block){
     return ($block['attrs']['blockId'] ?? '');
 }

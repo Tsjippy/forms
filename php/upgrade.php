@@ -12,7 +12,7 @@ add_action('admin_footer-post.php', function(){
 
     //upgradeDatabase();
 
-    insertNewForms();
+    //insertNewForms();
 
 });
 
@@ -77,6 +77,7 @@ function sendBlockContent(block, postId){
 </script>
 <?php   
     $formAttributes = [
+        'version'            => 'version',
         'submission_message' => 'succes_message',
         'submission_id'      => 'include_id',
         'name'               => 'name',
@@ -500,8 +501,6 @@ function sendBlockContent(block, postId){
             /**
              * Block Conditions
              */
-            $rules   = [];
-            $actions = [];
             if(!empty($element->conditions)){
                 $element->conditions = maybe_unserialize($element->conditions);
                 foreach($element->conditions as $condition){
@@ -510,11 +509,8 @@ function sendBlockContent(block, postId){
                             unset($condition['rules'][$i]);
                         }
                     }
-                    $newRules   = TSJIPPY\cleanUpNestedArray($condition['rules']);
 
-                    if(!empty($newRules)){
-                        $rules[] = $newRules;
-                    }
+                    $rules   = TSJIPPY\cleanUpNestedArray($condition['rules']);
 
                     unset($condition['rules']);
 
@@ -522,27 +518,37 @@ function sendBlockContent(block, postId){
                         $condition['property-name']    = $condition['property-name1'];
                     }
                     unset($condition['property-name1']);
+
+                    $actions  = TSJIPPY\cleanUpNestedArray($condition);
+
+                    foreach($actions as $type => &$action){
+                        if($action == 'property'){
+                            $action = 'set-property';
+                        }
+
+                        if($type == 'property-value' && is_numeric($action)){
+                            $action = "the-value-of-$action";
+                        }
+                    }
+
+                    if(!empty($rules) && !empty($actions)){
+                        $wpdb->insert(
+                            $wpdb->prefix."tsjippy_form_block_conditions",
+                            [
+                                "rules" => maybe_serialize($rules),
+                                "actions" => maybe_serialize([$actions]),
+                                "block_id" => $element->id,
+                                "post_id" => $postId
+                            ],
+                            [
+                                '%s',
+                                '%s',
+                                '%s',
+                                '%d',
+                            ]
+                        );
+                    }
                 }
-
-                $actions[]  = TSJIPPY\cleanUpNestedArray($condition);
-            }
-
-            if(!empty($rules) && !empty($actions)){
-                $wpdb->insert(
-                    $wpdb->prefix."tsjippy_form_block_conditions",
-                    [
-                        "rules" => maybe_serialize($rules),
-                        "actions" => maybe_serialize($actions),
-                        "block_id" => $element->id,
-                        "post_id" => $postId
-                    ],
-                    [
-                        '%s',
-                        '%s',
-                        '%s',
-                        '%d',
-                    ]
-                );
             }
 
             /**

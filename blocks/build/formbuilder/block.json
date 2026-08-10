@@ -21,6 +21,14 @@
       "type": "integer",
       "default": -1
     },
+    "postId": {
+      "type": "number",
+      "default": 0
+    },
+    "version": {
+      "type": "number",
+      "default": 0
+    },
     "method": {
       "type": "string",
       "default": "post"

@@ -64,7 +64,7 @@ export function InputHtml({
                         {__(option.label, 'tsjippy')}
                     </label>
                 ))}
-                %options-placeholder%
+                { isSaving && "%options-placeholder%" }
             </div>
         );
     } else if (attributes.type == 'textarea') {

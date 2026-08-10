@@ -766,8 +766,10 @@ export default function ConditionsModal({
 	 * Internal API helper for saving conditions.
 	 * This is used by the store-owned save action and is not exported.
 	 */
-	async function saveConditionsRequest(blockId, conditions) {
+	async function saveConditionsRequest(blockId, conditions, props) {
 		const postId = wp.data.select("core/editor").getCurrentPostId();
+
+		// update the conditions on the server
 		const savedConditions = await apiFetch({
 			path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
 			method: 'POST',
@@ -777,6 +779,9 @@ export default function ConditionsModal({
 				conditions: conditions,
 			},
 		});
+
+		// update the form version to make sure the latest js is downloaded on clients
+		props.setAttributes({version: props.attributes.version++});
 
 		return savedConditions;
 	}
@@ -802,7 +807,8 @@ export default function ConditionsModal({
 				blockId,
 				await saveConditionsRequest(
 					blockId,
-					draftConditions
+					draftConditions,
+					blockProps
 				)
 			);
 

@@ -243,7 +243,7 @@ function InputHtml({
           "data-blockid": attributes.blockId,
           ...attributes.inputAttributes
         }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(option.label, 'tsjippy')]
-      }, `${option.value}-${index}`)), "%options-placeholder%"]
+      }, `${option.value}-${index}`)), isSaving && "%options-placeholder%"]
     });
   } else if (attributes.type == 'textarea') {
     html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("textarea", {

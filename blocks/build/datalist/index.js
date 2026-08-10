@@ -275,19 +275,6 @@ function Edit({
         label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Datalist Id", 'tsjippy'),
         value: listId,
         onChange: value => setListId(value)
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
-        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Datalist Options", 'tsjippy'),
-        help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("One option per line. If the value and label differ separate them with a |  i.e. car|auto", 'tsjippy'),
-        value: (attributes.options || []).map(option => `${option.value}|${option.label}`).join('\n'),
-        onChange: value => setAttributes({
-          selectable_options: value.split('\n').map(line => {
-            const [optionValue, optionLabel] = line.split('|');
-            return {
-              value: optionValue?.trim() || '',
-              label: optionLabel?.trim() || optionValue?.trim() || ''
-            };
-          }).filter(item => item.value)
-        })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h4", {
         children: "Dynamic Options (prefill)"
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_4__.PrefillOptionsSelector, {

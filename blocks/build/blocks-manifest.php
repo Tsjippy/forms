@@ -127,6 +127,14 @@ return array(
 				'type' => 'integer',
 				'default' => -1
 			),
+			'postId' => array(
+				'type' => 'number',
+				'default' => 0
+			),
+			'version' => array(
+				'type' => 'number',
+				'default' => 0
+			),
 			'method' => array(
 				'type' => 'string',
 				'default' => 'post'

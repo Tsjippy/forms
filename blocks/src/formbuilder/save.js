@@ -29,7 +29,7 @@ export default function save({ attributes }) {
       {...blockProps}
     >
       <input type="hidden" name="block-id" value={attributes.id} />
-      <input type="hidden" name="post-id" value={attributes.id} />
+      <input type="hidden" name="post-id" value={attributes.postId} />
       <InnerBlocks.Content />
       <FormSubmitter attributes={attributes} />
     </form>

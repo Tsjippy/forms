@@ -7,6 +7,9 @@ use TSJIPPY;
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_action('init', __NAMESPACE__ . '\initBlocks');
+/**
+ * Register all blocks
+ */
 function initBlocks()
 {
     // Register all js blocks
@@ -131,7 +134,6 @@ function formResults($atts)
 
     return $html;
 }
-
 
 add_filter( 'block_categories_all', __NAMESPACE__.'\addFormsCategory' );
 
