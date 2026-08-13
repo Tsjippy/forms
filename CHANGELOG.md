@@ -33,6 +33,7 @@
 - forms upgrade to block content
 - selected block
 - upgrade bugs
+- conditions
 
 ### Updated
 
