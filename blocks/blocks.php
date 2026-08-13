@@ -30,7 +30,8 @@ function initBlocks()
             'supports'        => array(
                 'autoRegister' => true,
             ),
-            'icon'  => 'forms'
+            'icon'  => 'forms',
+            "category" => "form-elements",
         )
     );
 
@@ -75,7 +76,8 @@ function initBlocks()
             'supports'         => array(
                 'autoRegister' => true,
             ),
-            'icon'  => 'table'
+            'icon'  => 'table',
+            "category" => "form-elements",
         )
     );
 
@@ -95,7 +97,8 @@ function initBlocks()
             'supports'        => array(
                 'autoRegister' => true,
             ),
-            'icon'  => 'ellipsis'
+            'icon'  => 'ellipsis',
+            "category" => "form-elements",
         )
     );
 }
@@ -109,10 +112,13 @@ function initBlocks()
  */
 function formResults($atts)
 {
+    global $wpdb;
+
     if($atts['id'] == -1){
         return "<div class='error'>No valid shortcode id yet</div>";
     }
-    $object                 = new DisplayFormResults($atts);
+
+    $object                 = new DisplayFormResults($atts['id']);
     $object->showArchived   = isset($_GET['archived']);
     $html                   = $object->showFormresultsTable(all: isset($_POST['export-xls']) || isset($_POST['export-pdf']));
 
@@ -168,7 +174,7 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
     /**
      * Fill with dynamic data
      */
-    $forms  = new ElementHtmlBuilder();
+    $forms  = new Forms();
 
     $forms->buildDefaultsArray();
 
@@ -238,11 +244,222 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
     /**
      * Check if our filtered attribute exists in the block data
      */
-    if ( ! empty( $block['attrs']['blockId'] ) && !str_contains($blockContent, 'data-blockid')) {
-        $id = esc_attr( $block['attrs']['blockId'] );
-
-        $blockContent = str_replace( '/>', " data-blockid='$id' />", $blockContent );
+    $id = esc_attr( $block['attrs']['blockId'] );
+    if ( !empty( $block['attrs']['blockId'] ) && !str_contains($blockContent, "data-blockid='$id'")) {
+        $blockContent = strReplaceFirst( 'class=', "data-blockid='$id' class=", $blockContent );
     }
 
     return $blockContent;
+}
+
+/**
+ * Replaces the first occurence of a string
+ * 
+ * 
+ */
+function strReplaceFirst($search, $replace, $subject) {
+    $pos = strpos($subject, $search);
+    if ($pos !== false) {
+        return substr_replace($subject, $replace, $pos, strlen($search));
+    }
+    return $subject;
+}
+
+/**
+ * Displays recommended form fields based on the provided attributes
+ *
+ * @param   array   $atts    The shortcode attributes
+ *
+ * @return  string            The HTML for the recommended form fields
+ */
+function missingFormFields($atts)
+{
+    $a = shortcode_atts(array(
+        'type'   => 'mandatory'
+    ), $atts);
+
+    $html    = '';
+
+    return '';
+
+    $forms      = new FormReminders();
+    $fieldHtml  = $forms->getReminderHtml(get_current_user_id(), $a['type']);
+
+    if (!empty($fieldHtml)) {
+        $html .=  '<div id=recommendations style="margin-top:20px;">';
+        $html .=  '<h3 class="frontpage">Recommendations</h3>';
+        $html .=  '<p>It would be very helpfull if you could fill in the following:</p>';
+        $html .=  $fieldHtml;
+        $html .=  '</div>';
+    }elseif(($_REQUEST['action'] ?? $_REQUEST['context'] ?? '') == 'edit'){
+        $html   = "<div>No actions needed.</div>";
+    }
+
+    return $html;
+}
+
+/**
+ * Displays a form selector based on the provided attributes
+ *
+ * @param   array   $atts    The shortcode attributes
+ *
+ * @return  string           The HTML for the form selector
+ */
+function showFormSelector($atts = [])
+{
+    wp_enqueue_script('tsjippy_forms_script');
+
+    wp_enqueue_script('tsjippy_forms_table_script');
+
+    wp_enqueue_style('tsjippy_forms_style');
+
+    ob_start();
+
+    $a = shortcode_atts(array(
+        'exclude'   => [],
+        'no_meta'   => true
+    ), $atts);
+
+    $formTable    = new DisplayFormResults($atts);
+    $formTable->getForms();
+
+    $forms          = $formTable->forms;
+
+    // Remove any unwanted forms
+    if (!empty($a['exclude']) || $a['no_meta']) {
+        if (is_array($a['exclude'])) {
+            $exclusions = $a['exclude'];
+        } else {
+            $exclusions = explode(',', $a['exclude']);
+        }
+
+        foreach ($forms as $key => $form) {
+            if (in_array($form->slug, $exclusions) || empty($form->slug)) {
+                unset($forms[$key]);
+            }
+
+            // Remove any form that saves its data in the usermeta
+            if ($a['no_meta'] && $form->save_in_meta) {
+                unset($forms[$key]);
+            }
+        }
+    }
+
+    //Sort form names by alphabeth
+    usort($forms, function ($a, $b) {
+        return strcasecmp($a->slug, $b->slug);
+    });
+
+    ?>
+    <div id="forms-wrapper">
+        <?php
+        //only show selector if not queried
+        if (!isset($_REQUEST['form'])) {
+        ?>
+            <div id="form-selector-wrapper">
+                <label>
+                    Select the form you want to submit or view the results of
+                </label>
+                <br>
+                <select id="tsjippy-forms-selector">
+                    <?php
+                    foreach ($forms as $form) {
+                        $name   = $form->slug;
+
+                        if(empty($name)){
+                            $name   = ucfirst(str_replace('_', ' ', $form->slug));
+                        }
+
+                        ?>
+                        <option
+                            value='<?php echo esc_attr($form->slug); ?>'
+                            <?php
+                            // phpcs:ignore
+                            if (($_REQUEST['form'] ?? '') == $form->slug || ($_REQUEST['form'] ?? '') == $form->id) {
+                                echo 'selected=selected';
+                            }
+                            ?>>
+                            <?php echo esc_html($name); ?>
+                        </option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </div>
+        <?php
+        }
+
+        // phpcs:ignore
+        if (($_REQUEST['display'] ?? '') == 'results') {
+            $formVis       = ' hidden';
+            $resultVis     = '';
+            $formActive    = ' active';
+            $resultActive  = '';
+        } else {
+            $formVis       = '';
+            $resultVis     = ' hidden';
+            $formActive    = ' active';
+            $resultActive  = '';
+        }
+
+        /**
+         * Loop over the forms to add both the form and the submission data
+         */
+        foreach ($forms as $form) {
+            $shortcodeData     = TSJIPPY\getFromDb(
+                "get_shortcodes_for_form_$form->id",
+                "forms",
+                "SELECT * FROM %i WHERE block_id = %d",
+                $formTable->shortcodeTable,
+                $form->id
+            );
+
+            //Create shortcode data if not existing
+            if (empty($shortcodeData)) {
+                $shortcodeId   = $formTable->insertInDb($form->id);
+            } else {
+                $shortcodeId   = $shortcodeData[0]->id;
+            }
+
+            //Check if this form should be displayed
+            // phpcs:ignore
+            if (isset($_REQUEST['form']) && ($_REQUEST['form'] == $form->slug || $_REQUEST['form'] == $form->id)) {
+                $hidden = '';
+            } else {
+                $hidden = ' hidden';
+            }
+
+            $id = strtolower(str_replace([' ', '_'], '-', $form->slug));
+
+            ?>
+            <div id='<?php echo esc_attr($id);?>' class='main-form-wrapper<?php echo esc_attr($hidden);?>'>
+                <?php
+                //only show button if not queried
+                // phpcs:ignore
+                if (!isset($_REQUEST['display'])) {
+                    ?>
+                    <button class='button tablink<?php echo esc_attr($formActive);?>' id='show-<?php echo esc_attr($id);?>-form' data-target='<?php echo esc_attr($id);?>-form'>
+                        Show form
+                    </button>
+                    <button class='button formresults tablink<?php echo esc_attr($resultActive);?>' id='show-<?php echo esc_attr($id);?>_results' data-target='<?php echo esc_attr($id);?>-results'>
+                        Show form results
+                    </button>
+                    <?php
+                }
+
+                ?>
+                <div id='<?php echo esc_attr($id);?>-form' class='form-wrapper <?php echo esc_attr($formVis);?> form-load-trigger' data-form-id=<?php echo esc_attr($form->id);?>>
+                </div>
+
+
+                <div id='<?php echo esc_attr($id);?>-results' class='form-results-wrapper <?php echo esc_attr($resultVis);?> formdata-load-trigger' data-shortcode-id=<?php echo esc_attr($shortcodeId);?>>
+                </div>
+            </div>
+            <?php
+        }
+        ?>
+    </div>
+    <?php
+
+    return ob_get_clean();
 }

@@ -1,239 +1,212 @@
 import { createReduxStore, register } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
-/**
- * The unique store name used by Gutenberg data APIs.
- */
 const STORE_NAME = 'tsjippy-forms/conditions-store';
 
-/**
- * Initial state for the store.
- * Each element keeps its own conditions, loading flag, saving flag,
- * error message, and loaded flag.
- */
 const DEFAULT_STATE = {
-	conditionsByElement: {},
-	loadingByElement: {},
-	savingByElement: {},
-	errorByElement: {},
-	loadedByElement: {},
+    conditionsByElement: {},
+    loadingByPost: {},
+    errorByPost: {},
+    loadedByPost: {},
 };
-/**
- * Internal API helper for loading conditions.
- * This is used by the resolver and is not exported.
- */
-async function fetchConditions(blockId) {
-	const response = await apiFetch({
-		path: `${tsjippy.restApiPrefix}/forms/get_element_conditions`,
-		method: 'POST',
-		data: {
-			blockId: blockId,
-		},
-	});
 
-	return response;
+async function fetchConditions(postId) {
+    return apiFetch({
+        path: `${tsjippy.restApiPrefix}/forms/get_element_conditions`,
+        method: 'POST',
+        data: {
+            postId,
+        },
+    });
 }
 
-/**
- * Store action creators.
- * Most actions are plain actions, while saveConditions is a generator
- * that performs the async save flow.
- */
 const actions = {
-	/**
-	 * Set normalized conditions for one element.
-	 */
-	setConditions(blockId, conditions) {
-		return {
-			type: 'SET_CONDITIONS',
-			blockId,
-			conditions: conditions,
-		};
-	},
+    setConditions(conditions) {
+        return {
+            type: 'SET_CONDITIONS',
+            conditions,
+        };
+    },
 
-	/**
-	 * Set the loading state for one element.
-	 */
-	setLoading(blockId, isLoading) {
-		return {
-			type: 'SET_LOADING',
-			blockId,
-			isLoading: !!isLoading,
-		};
-	},
+    setCondition(blockId, conditions) {
+        return {
+            type: 'SET_CONDITION',
+            blockId,
+            conditions,
+        };
+    },
 
-	/**
-	 * Set the saving state for one element.
-	 */
-	setSaving(blockId, isSaving) {
-		return {
-			type: 'SET_SAVING',
-			blockId,
-			isSaving: !!isSaving,
-		};
-	},
+    setLoading(postId, isLoading) {
+        return {
+            type: 'SET_LOADING',
+            postId,
+            isLoading: !!isLoading,
+        };
+    },
 
-	/**
-	 * Store an error message for one element.
-	 */
-	setError(blockId, error) {
-		return {
-			type: 'SET_ERROR',
-			blockId,
-			error: error || null,
-		};
-	},
+    setError(postId, error) {
+        return {
+            type: 'SET_ERROR',
+            postId,
+            error: error || null,
+        };
+    },
 
-	/**
-	 * Store the loaded flag for one element.
-	 */
-	setLoaded(blockId, loaded) {
-		return {
-			type: 'SET_LOADED',
-			blockId,
-			loaded: !!loaded,
-		};
-	},
+    setLoaded(postId, loaded) {
+        return {
+            type: 'SET_LOADED',
+            postId,
+            loaded: !!loaded,
+        };
+    },
+
 };
 
-/**
- * Reducer for the conditions store.
- * This keeps all updates immutable and predictable.
- */
 const reducer = (state = DEFAULT_STATE, action) => {
-	switch (action.type) {
-		case 'SET_CONDITIONS':
-			return {
-				...state,
-				conditionsByElement: {
-					...state.conditionsByElement,
-					[action.blockId]: action.conditions,
-				},
-			};
+    switch (action.type) {
+        case 'SET_CONDITIONS': {
+            const normalized = {};
 
-		case 'SET_LOADING':
-			return {
-				...state,
-				loadingByElement: {
-					...state.loadingByElement,
-					[action.blockId]: action.isLoading,
-				},
-			};
+            action.conditions.forEach((condition) => {
+                if (!condition.block_id) {
+                    return;
+                }
 
-		case 'SET_SAVING':
-			return {
-				...state,
-				savingByElement: {
-					...state.savingByElement,
-					[action.blockId]: action.isSaving,
-				},
-			};
+                if (!normalized[condition.block_id]) {
+                    normalized[condition.block_id] = [];
+                }
 
-		case 'SET_ERROR':
-			return {
-				...state,
-				errorByElement: {
-					...state.errorByElement,
-					[action.blockId]: action.error,
-				},
-			};
+                normalized[condition.block_id].push(condition);
+            });
 
-		case 'SET_LOADED':
-			return {
-				...state,
-				loadedByElement: {
-					...state.loadedByElement,
-					[action.blockId]: action.loaded,
-				},
-			};
+            return {
+                ...state,
+                conditionsByElement: {
+                    ...state.conditionsByElement,
+                    ...normalized,
+                },
+            };
+        }
 
-		default:
-			return state;
+        case 'SET_CONDITION':
+            return {
+                ...state,
+                conditionsByElement: {
+                    ...state.conditionsByElement,
+                    [action.blockId]: action.conditions,
+                },
+            };
+
+        case 'SET_LOADING':
+            return {
+                ...state,
+                loadingByPost: {
+                    ...state.loadingByPost,
+                    [action.postId]: action.isLoading,
+                },
+            };
+
+        case 'SET_ERROR':
+            return {
+                ...state,
+                errorByPost: {
+                    ...state.errorByPost,
+                    [action.postId]: action.error,
+                },
+            };
+
+        case 'SET_LOADED':
+            return {
+                ...state,
+                loadedByPost: {
+                    ...state.loadedByPost,
+                    [action.postId]: action.loaded,
+                },
+            };
+
+        default:
+            return state;
+    }
+};
+
+const selectors = {
+    getFormConditions(state) {
+        return state.conditionsByElement;
+    },
+
+    getConditions(state, blockId) {
+        return (
+            state.conditionsByElement[blockId] || [
+                {
+                    rules: [],
+                    actions: [],
+                },
+            ]
+        );
+    },
+
+    isLoading(state, postId) {
+        return !!state.loadingByPost[postId];
+    },
+
+    getError(state, postId) {
+        return state.errorByPost[postId] ?? null;
+    },
+
+    hasLoaded(state, postId) {
+        return !!state.loadedByPost[postId];
+    },
+
+    hasConditions(state, blockId) {
+		const conditions = state.conditionsByElement[blockId] || [];
+
+		return conditions.some(
+			(condition) =>
+				(condition.rules?.length || 0) > 0 &&
+				(condition.actions?.length || 0) > 0
+		);
 	}
 };
 
-/**
- * Selectors for reading store state.
- * These are what the modal uses through useSelect.
- */
-const selectors = {
-	/**
-	 * Get the normalized conditions object for one element.
-	 */
-	getConditions(state, blockId) {
-		return (
-			state.conditionsByElement[blockId] || [{
-				rules: [],
-				actions: [],
-			}]
-		);
-	},
-
-	/**
-	 * Check whether one element is currently loading.
-	 */
-	isLoading(state, blockId) {
-		return !!state.loadingByElement[blockId];
-	},
-
-	/**
-	 * Check whether one element is currently saving.
-	 */
-	isSaving(state, blockId) {
-		return !!state.savingByElement[blockId];
-	},
-
-	/**
-	 * Get the error message for one element.
-	 */
-	getError(state, blockId) {
-		return state.errorByElement[blockId] ?? null;
-	},
-
-	/**
-	 * Check whether one element has already loaded.
-	 */
-	hasLoaded(state, blockId) {
-		return !!state.loadedByElement[blockId];
-	},
-};
-
-/**
- * Resolver for getConditions.
- * The first read of the selector will load data from the server.
- */
 const resolvers = {
-	getConditions: (blockId) => async ({ dispatch }) => {
-		if (blockId === undefined || blockId === null || blockId === '') {
-			return;
-		}
+    getFormConditions:
+        (postId) =>
+        async ({ dispatch, select }) => {
+            if (!postId) {
+                return;
+            }
 
-		dispatch.setLoading(blockId, true);
-		dispatch.setError(blockId, null);
+            if (select.hasLoaded(postId)) {
+                return;
+            }
 
-		try {
-			const conditions = await fetchConditions(blockId);
-			dispatch.setConditions(blockId, conditions);
-			dispatch.setLoaded(blockId, true);
-		} catch (error) {
-			dispatch.setError(
-				blockId,
-				error?.message || 'Failed to load element conditions.'
-			);
-		} finally {
-			dispatch.setLoading(blockId, false);
-		}
-	},
+            dispatch.setLoading(postId, true);
+            dispatch.setError(postId, null);
+
+            try {
+                const conditions = await fetchConditions(postId);
+
+                dispatch.setConditions(
+                    Array.isArray(conditions) ? conditions : []
+                );
+
+                dispatch.setLoaded(postId, true);
+            } catch (error) {
+                dispatch.setError(
+                    postId,
+                    error?.message || 'Failed to load conditions.'
+                );
+            } finally {
+                dispatch.setLoading(postId, false);
+            }
+        },
 };
 
-/**
- * Create and register the Gutenberg data store.
- */
-const store = createReduxStore(STORE_NAME, {
-	reducer,
-	actions,
-	selectors,
-	resolvers,
-});
-
-register(store);
+register(
+    createReduxStore(STORE_NAME, {
+        reducer,
+        actions,
+        selectors,
+        resolvers,
+    })
+);

@@ -9,21 +9,21 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-class FormExport extends FormBuilderForm
+class FormExport extends Forms
 {
     /**
      * FormExport constructor.
      *
-     * @param array    $atts        Shortcode attributes
+     * @param string   $blockId   
      * @param bool     $all        Whether to export all forms or just one
      * @param int      $pageSize    Number of forms to export per page
      * @param string   $postId    Post ID to export forms for
      * @param string   $formUrl    URL of the form to export
      * @param int      $userId    User ID to export forms for
      */
-    public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
+    public function __construct($blockId='', $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
+        parent::__construct(blockId: $blockId, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
     }
 
     /**
@@ -35,8 +35,6 @@ class FormExport extends FormBuilderForm
      */
     public function exportForm($formId)
     {
-        global $wpdb;
-
         $this->getForm($formId);
 
         /**
@@ -107,96 +105,6 @@ class FormExport extends FormBuilderForm
         echo $content;
         
         exit;
-    }
-
-    /**
-     * Inserts form elements, while updating conditions with new element ids
-     *
-     * @param array    $formElements        Array of form elements to insert
-     * @param array    $elementIdMapping     Mapping of old element ids to new element ids
-     *
-     * @return array|\WP_Error            Array of old element ids to new element ids or WP_Error on failure
-     */
-    protected function insertFormElements($formElements, $elementIdMapping = [])
-    {
-        $procesLater        = [];
-
-        // Form elements
-        foreach ($formElements as $element) {
-            /**
-             * Update contidions with new element ids
-             */
-            if (!empty($element->conditions)) {
-                foreach ($element->conditions as $key => &$condition) {
-                    foreach ($condition['rules'] as &$rule) {
-                        if (is_numeric($rule['conditional-field'])) {
-                            if (empty($elementIdMapping[$rule['conditional-field']])) {
-                                $procesLater[]    = $element;
-                                continue 3;
-                            }
-
-                            $rule['conditional-field']    = $elementIdMapping[$rule['conditional-field']];
-                        }
-
-                        if (is_numeric($rule['conditional-field-2'])) {
-                            if (empty($elementIdMapping[$rule['conditional-field-2']])) {
-                                $procesLater[]    = $element;
-                                continue 3;
-                            }
-
-                            $rule['conditional-field-2']    = $elementIdMapping[$rule['conditional-field-2']];
-                        }
-
-                        if (is_numeric($rule['conditional-value'])) {
-                            if (empty($elementIdMapping[$rule['conditional-value']])) {
-                                $procesLater[]    = $element;
-                                continue 3;
-                            }
-
-                            $rule['conditional-value']    = $elementIdMapping[$rule['conditional-value']];
-                        }
-                    }
-
-                    if ($key    === 'copyto') {
-                        foreach ($condition as $k => $copyId) {
-                            // add with new id
-                            $condition[$elementIdMapping[$k]]    = $elementIdMapping[$copyId];
-
-                            // remove the old id
-                            unset($condition[$k]);
-                        }
-                    }
-
-                    if (is_numeric($condition['property-value'])) {
-                        if (empty($elementIdMapping[$condition['property-value']])) {
-                            $procesLater[]    = $element;
-                            continue 2;
-                        }
-
-                        $condition['property-value']    = $elementIdMapping[$condition['property-value']];
-                    }
-                }
-            }
-
-            $oldElementId    = $element->id;
-            unset($element->id);
-
-            $element->form_id    = $this->formData->id;
-            $elementId         = $this->insertOrUpdateData($this->elTableName, $element);
-
-            if (is_wp_error($elementId)) {
-                return $elementId;
-            }
-
-            $elementIdMapping[$oldElementId]    = $elementId;
-        }
-
-        // Now rerun this one for elements which could not be processed before
-        if (!empty($procesLater)) {
-            $this->insertFormElements($procesLater, $elementIdMapping);
-        }
-
-        return $elementIdMapping;
     }
 
     /**
@@ -274,11 +182,11 @@ class FormExport extends FormBuilderForm
                 $email->conditional_email_to    = serialize($conditionalEmailTo);
             }
 
-            $emailId         = $this->insertOrUpdateData($this->elTableName, $email);
+            //$emailId         = $this->insertOrUpdateData($this->elTableName, $email);
 
-            if (is_wp_error($emailId)) {
+            /* if (is_wp_error($emailId)) {
                 return $emailId;
-            }
+            } */
         }
 
         return true;
@@ -289,19 +197,20 @@ class FormExport extends FormBuilderForm
      *
      * @param string    $path        Path to the form file
      *
-     * @return string|\WP_Error        Success message or WP_Error on failure
+     * @return int|\WP_Error         Post id WP_Error on failure
      */
     public function importForm($path)
     {
         if (!file_exists($path)) {
             return new \WP_Error('forms', "$path does not exist");
         }
+
         $wpFileSystem  = TSJIPPY\loadWpFileSystem();
 
         $contents      = $wpFileSystem->get_contents($path);
 
         if (!str_contains($contents, 'form: ') || !str_contains($contents, 'elements: ')) {
-            return "<div class='error'>Invalid sform file!</div>";
+            return new \WP_Error("forms", "Invalid sform file!");
         }
 
         $lines              = explode("\n", $contents);
@@ -309,6 +218,7 @@ class FormExport extends FormBuilderForm
         $autoArchiveEl      = null;
         $elementIdMapping   = [];
         $url                = '';   
+        $postId             = 0;
 
         foreach ($lines as $line) {
             if (empty($line)) {
@@ -336,7 +246,9 @@ class FormExport extends FormBuilderForm
                     'post_status'   => "publish",
                     'post_author'   => '1'
                 );
-                $url    = get_permalink(wp_insert_post($post, true, false));
+
+                $postId = wp_insert_post($post, true, false);
+                $url    = get_permalink($postId);
 
                 // Form data
                 $object->url    = $url;
@@ -345,13 +257,13 @@ class FormExport extends FormBuilderForm
                     $this->formData    = new stdClass();
                 }
 
-                $this->formData->id     = $this->insertOrUpdateData($this->tableName, $object);
+                //$this->formData->id     = $this->insertOrUpdateData($this->tableName, $object);
 
                 if (is_wp_error($this->formData->id)) {
                     return $this->formData->id;
                 }
             } elseif ($type    == 'elements') {
-                $elementIdMapping    = $this->insertFormElements($object);
+                //$elementIdMapping    = $this->insertFormElements($object);
 
                 if (is_wp_error($elementIdMapping)) {
                     return $elementIdMapping;
@@ -368,7 +280,7 @@ class FormExport extends FormBuilderForm
 
                     $reminder->form_id    = $this->formData->id;
 
-                    $this->insertOrUpdateData($this->formReminderTable, $reminder);
+                    //$this->insertOrUpdateData($this->formReminderTable, $reminder);
                 }
             } else {
                 TSJIPPY\printArray("Unknown import type: $type");
@@ -376,24 +288,6 @@ class FormExport extends FormBuilderForm
             }
         }
 
-        // update autoarchive element id
-        if (!empty($autoArchiveEl)) {
-            $result = TSJIPPY\updateDbValue(
-                $this->tableName,
-                array(
-                    'autoarchive_el' => $elementIdMapping[$autoArchiveEl]
-                ),
-                array(
-                    'id'             => $this->formData->id 
-                ),
-                [
-                    '%s'
-                ],
-                ['%d'],
-                'forms'
-            );
-        }
-
-        return "<div class='success'>Import of the form '{$object->formData->slug}' finished successfully.<br>Visit the created form <a href='$url' target='_blank'>here</a></div>";
+        return $postId;
     }
 }

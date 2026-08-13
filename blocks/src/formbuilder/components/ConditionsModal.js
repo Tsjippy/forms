@@ -108,8 +108,6 @@ function validateConditions(conditions) {
 	 * Loop over all conditions
 	 */
 	conditions.forEach((condition, conditionIndex) => {
-		const rules   = Array.isArray(conditions[0]?.rules) ? conditions[0].rules : [];
-		const actions = Array.isArray(conditions[0]?.actions) ? conditions[0].actions : [];
 
 		if(condition.rules.length > 0) {
 			if (!Array.isArray(condition.rules)) {
@@ -310,33 +308,14 @@ export default function ConditionsModal({
 	allNestedBlocks,
 	blockProps
 }) {
-	const { saveConditions, setError, setSaving, setConditions } = useDispatch(
+	const { setCondition } = useDispatch(
 		'tsjippy-forms/conditions-store'
 	);
+
 	const { createSuccessNotice, createErrorNotice } = useDispatch('core/notices');
 
 	const conditions = useSelect(
 		(select) => select('tsjippy-forms/conditions-store').getConditions(blockId),
-		[blockId]
-	);
-
-	const isLoading = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').isLoading(blockId),
-		[blockId]
-	);
-
-	const isSaving = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').isSaving(blockId),
-		[blockId]
-	);
-
-	const error = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').getError(blockId),
-		[blockId]
-	);
-
-	const hasLoaded = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').hasLoaded(blockId),
 		[blockId]
 	);
 
@@ -347,7 +326,7 @@ export default function ConditionsModal({
 	 */
 	const [draftConditions, setDraftConditions] = useState([]);
 	const [successMessage, setSuccessMessage] = useState('');
-	const [validationErrors, setValidationErrors] = useState([]);
+	const [isSaving, setIsSaving] = useState(false);
 	const [fieldErrors, setFieldErrors] = useState({});
 	const [focusTarget, setFocusTarget] = useState(null);
 	const [pulseTarget, setPulseTarget] = useState(null);
@@ -473,23 +452,14 @@ export default function ConditionsModal({
 	}, [focusTarget]);
 
 	const validation = useMemo(() => {
-		const result = validateConditions(draftConditions);
-
-		if (result.errors.length > 0) {
-			setValidationErrors(result.errors);
-			setFieldErrors(result.fieldErrors);
-			setFocusTarget(result.firstErrorTarget);
-			setPulseTarget(result.firstErrorTarget);
-		}
-
-		return result;
+		return validateConditions(draftConditions);
 	}, [draftConditions]);
+
+	const isValid = validation.errors.length === 0;
 
 	const isDirty = useMemo(() => {
 		return JSON.stringify(draftConditions) !== JSON.stringify(conditions);
 	}, [draftConditions, conditions]);
-
-	const isValid = validation.errors.length === 0;
 
 	const clearSuccessMessage = useCallback(() => {
 		setSuccessMessage('');
@@ -762,13 +732,16 @@ export default function ConditionsModal({
 		[clearSuccessMessage]
 	);
 
+
+	const postId = useSelect( ( select ) => 
+		select( 'core/editor' ).getCurrentPostId()
+	, [] );
+
 	/**
 	 * Internal API helper for saving conditions.
 	 * This is used by the store-owned save action and is not exported.
 	 */
 	async function saveConditionsRequest(blockId, conditions, props) {
-		const postId = wp.data.select("core/editor").getCurrentPostId();
-
 		// update the conditions on the server
 		const savedConditions = await apiFetch({
 			path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
@@ -786,30 +759,53 @@ export default function ConditionsModal({
 		return savedConditions;
 	}
 
+	const isLoading = useSelect(
+		(select) =>
+			select('tsjippy-forms/conditions-store').isLoading(blockProps.attributes.postId),
+		[blockProps.attributes.postId]
+	);
+
+	const error = useSelect(
+		(select) =>
+			select('tsjippy-forms/conditions-store').getError(blockProps.attributes.postId),
+		[blockProps.attributes.postId]
+	);
+
+	const hasLoaded = useSelect(
+		(select) =>
+			select('tsjippy-forms/conditions-store').hasLoaded(blockProps.attributes.postId),
+		[blockProps.attributes.postId]
+	);
+
 	const handleSave = useCallback(async (blockId) => {
-		setSaving(blockId, true);
+		setIsSaving(true);
 
 		const result = validateConditions(draftConditions);
 
 		if (result.errors.length > 0) {
-			setValidationErrors(result.errors);
 			setFieldErrors(result.fieldErrors);
 			setFocusTarget(result.firstErrorTarget);
 			setPulseTarget(result.firstErrorTarget);
 			showToastError(
 				__('Please fix the invalid conditions before saving.', 'tsjippy')
 			);
+
+			setIsSaving(false);
 			return;
 		}
 
 		try {
-			setConditions(
+			const savedConditions = await saveConditionsRequest(
 				blockId,
-				await saveConditionsRequest(
-					blockId,
-					draftConditions,
-					blockProps
-				)
+				draftConditions,
+				blockProps
+			);
+
+			setCondition(
+				blockId,
+				Array.isArray(savedConditions)
+					? savedConditions
+					: draftConditions
 			);
 
 			resetErrors();
@@ -818,28 +814,23 @@ export default function ConditionsModal({
 
 			showToastSuccess(__('Conditions saved.', 'tsjippy'));
 		} catch (error) {
-			setError(
-				blockId,
-				error?.message || 'Failed to save conditions.'
-			);
-
 			showToastError(
 				error?.message || 'Failed to save conditions.'
 			);
 		}
 
-		setSaving(blockId, false);
+		setIsSaving(false);
 	}, [
 		blockId,
 		draftConditions,
-		setError,
+		blockProps,
+		setCondition,
 		showToastSuccess,
 		showToastError,
 	]);
 
 	const resetErrors = () => {
 		clearSuccessMessage();
-		setValidationErrors([]);
 		setFieldErrors({});
 	}
 
@@ -889,8 +880,8 @@ export default function ConditionsModal({
 			pulseTarget.actionIndex === actionIndex;
 
 		const datalistOptions	= [];
-		inputSchema.sharedAttributes.concat(inputSchema.types[blockProps.attributes.type]).forEach(data => datalistOptions.push(data.attribute));
-		inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-'+data.attribute));
+		inputSchema.sharedAttributes.concat(inputSchema.types[blockProps.attributes.type] || []).forEach(data => datalistOptions.push(data.attribute));
+		inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-' + data.attribute));
 		datalistOptions.sort();
 		
 		return (
@@ -1096,21 +1087,6 @@ export default function ConditionsModal({
 					</Notice>
 				)}
 
-				{/* {validationErrors.length > 0 && (
-					<Notice
-						status="error"
-						isDismissible
-						onRemove={() => setValidationErrors([])}
-					>
-						<strong>{__('Please fix the following issues:', 'tsjippy')}</strong>
-						<ul style={{ marginTop: '8px', marginBottom: 0, paddingLeft: '18px' }}>
-							{validationErrors.map((item, index) => (
-								<li key={index}>{item}</li>
-							))}
-						</ul>
-					</Notice>
-				)} */}
-
 				<div ref={modalRef}>
 					<h3>{__('Conditions', 'tsjippy')}</h3>
 
@@ -1175,7 +1151,6 @@ export default function ConditionsModal({
 		successMessage,
 		updateAction,
 		updateRuleCondition,
-		validationErrors,
 	]);
 
 	if (!isVisible || typeof document === 'undefined') {

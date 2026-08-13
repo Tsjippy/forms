@@ -183,9 +183,9 @@ export default function RuleRow({
 			{/* AND / OR combinator controls. */}
 			<div className="combinator">
 				<Button
-					variant={rule?.combinator === 'and' ? 'primary' : 'secondary'}
-					isPressed={rule?.combinator === 'and'}
-					aria-pressed={rule?.combinator === 'and'}
+					variant={rule?.combinator === '&&' ? 'primary' : 'secondary'}
+					isPressed={rule?.combinator === '&&'}
+					aria-pressed={rule?.combinator === '&&'}
 					onClick={() => onUpdate(conditionIndex, ruleIndex, 'combinator', '&&')}
 					icon={row}
 				>
@@ -194,9 +194,9 @@ export default function RuleRow({
 				</Button>
 
 				<Button
-					variant={rule?.combinator === 'or' ? 'primary' : 'secondary'}
-					isPressed={rule?.combinator === 'or'}
-					aria-pressed={rule?.combinator === 'or'}
+					variant={rule?.combinator === '||' ? 'primary' : 'secondary'}
+					isPressed={rule?.combinator === '||'}
+					aria-pressed={rule?.combinator === '||'}
 					onClick={() => onUpdate(conditionIndex, ruleIndex, 'combinator', '||')}
 					icon={row}
 				>

@@ -18,8 +18,8 @@
   "viewScript": "tsjippy_forms_script",
   "attributes": {
     "id": {
-      "type": "integer",
-      "default": -1
+      "type": "string",
+      "default": ""
     },
     "postId": {
       "type": "number",

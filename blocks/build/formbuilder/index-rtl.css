@@ -1,6 +1,7 @@
 /*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/.pnpm/css-loader@6.11.0_webpack@5.108.4/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/.pnpm/postcss-loader@6.2.1_postcss@8.5.19_webpack@5.108.4/node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/.pnpm/sass-loader@16.0.8_sass@1.101.0_webpack@5.108.4/node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/formbuilder/editor.scss ***!
   \***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+@charset "UTF-8";
 /**
  * The following styles get applied inside the editor only.
  *
@@ -1533,4 +1534,19 @@ form.wp-block-tsjippy-forms-formbuilder .block-list-appender .add-form-element-b
 .tsjippy-email-editor:focus {
   outline: none;
   border-color: #2271b1;
+}
+
+.block-editor-block-list__block.has-conditions {
+  position: relative;
+}
+
+.block-editor-block-list__block.has-conditions::after {
+  content: "★";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  color: #f59e0b;
+  font-size: 30px;
+  z-index: 100;
+  pointer-events: none;
 }

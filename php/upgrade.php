@@ -12,7 +12,7 @@ add_action('admin_footer-post.php', function(){
 
     //upgradeDatabase();
 
-    //insertNewForms();
+    insertNewForms();
 
 });
 
@@ -39,6 +39,8 @@ add_action('wp_ajax_save_generated_blocks', function () {
             'post_content'  => $content
         ]
     );
+
+    processFormBlocks((int)$_POST['postId']);
 
     wp_send_json_success();
 });
@@ -153,7 +155,7 @@ function sendBlockContent(block, postId){
     foreach($oldForms as $form){
 
         if($form->id != 52){
-            continue;
+            //continue;
         }
 
         if(empty($form->slug)){
@@ -508,6 +510,14 @@ function sendBlockContent(block, postId){
                         if(empty($rule['conditional-field'])){
                             unset($condition['rules'][$i]);
                         }
+
+                        if(!empty($rule['combinator'])){
+                            if($rule['combinator'] == 'OR'){
+                                $condition['rules'][$i]['combinator'] = '||';
+                            }else{
+                                $condition['rules'][$i]['combinator'] = '&&';
+                            }
+                        }
                     }
 
                     $rules   = TSJIPPY\cleanUpNestedArray($condition['rules']);
@@ -521,9 +531,19 @@ function sendBlockContent(block, postId){
 
                     $actions  = TSJIPPY\cleanUpNestedArray($condition);
 
+                    if(!empty($actions['action-value'])){
+                        $actions['property-value']  = $actions['action-value'];
+
+                        unset($actions['action-value']);
+                    }
+
                     foreach($actions as $type => &$action){
-                        if($action == 'property'){
+                        if($type == 'action' && ($action == 'property' || $action == 'value')){
                             $action = 'set-property';
+
+                            if(!isset($actions['property-value'])){
+                                $actions['property-value']  = '';
+                            }
                         }
 
                         if($type == 'property-value' && is_numeric($action)){
@@ -662,3 +682,65 @@ function upgradeDatabase(){
         );
     }
 }
+
+
+/**
+     * Parses all WP Shortcode attributes
+     *
+     * @param    array    $atts    The shortcode attributes
+     */
+/*     public function processAtts($atts)
+    {
+        if (empty($this->formData)) {
+            $this->formData    = new stdClass();
+        }
+
+        if (!isset($this->formData->slug)) {
+            $atts    = shortcode_atts(
+                array(
+                    'name'         => '',
+                    'user_id'      => 0,
+                    'user-id'      => 0,
+                    'search'       => '',
+                    'shortcodeid'  => -1,
+                    'shortcode-id' => -1,
+                    'id'           => -1,
+                    'only-own'     => false,
+                    'onlyown'      => false,
+                    'archived'     => false,
+                    'all'          => false,
+                ),
+                $atts
+            );
+
+            if ($atts['user-id'] == 0 && $atts['user_id'] !== 0) {
+                $atts['user-id']      = $atts['user_id'];
+            }
+
+            if ($atts['shortcode-id'] == -1 && $atts['shortcodeid'] !== -1) {
+                $atts['shortcode-id'] = $atts['shortcodeid'];
+            }
+
+            if (empty($atts['only-own'])) {
+                $atts['only-own']     = $atts['onlyown'];
+            }
+
+            $this->shortcodeId        = $atts['shortcode-id'];
+            if ($this->shortcodeId == -1 && $atts['id'] !== -1) {
+                $this->shortcodeId    = $atts['id'];
+            }
+
+            $this->onlyOwn            = $atts['only-own'];
+
+            $this->all                = $atts['all'];
+            $this->showArchived       = $atts['archived'];
+
+            if ( is_numeric($atts['user-id'] ?? '') && $atts['user-id'] > 0) {
+                $this->userId    = $atts['user-id'];
+            }
+
+            $this->getForm(2, 3);
+
+            $this->getAllFormElements();
+        }
+    } */

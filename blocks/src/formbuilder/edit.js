@@ -43,15 +43,8 @@ const TEMPLATE = [
  * This is the editor-side UI for the form block.
  */
 export default function Edit({ attributes, setAttributes, clientId }) {
-	const {
-		name = '',
-		id = -1,
-		actions = [],
-		roles = [],
-		method = 'post',
-	} = attributes;
-
-	if (id === -1) {
+	
+	if (attributes.id === -1) {
 		setAttributes({ id: clientId });
 	}
 
@@ -105,6 +98,15 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		[clientId]
 	);
 
+	// Load all conditions once
+	useSelect(
+		(select) => select('tsjippy-forms/conditions-store').getFormConditions(attributes.postId),
+		[attributes.postId]
+	);
+
+	/**
+	 * THe amount of formsteps in the form
+	 */
     const stepAmount	= innerBlocks?.filter(
         block => block.name === 'tsjippy-forms/formstep'
     ).length || 0;
@@ -122,7 +124,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	/* Add or remove a role from the stored attributes. */
 	const onRoleSelected = useCallback(
 		(checked, roleSlug) => {
-			let nextRoles = Array.isArray(roles) ? [...roles] : [];
+			let nextRoles = Array.isArray(attributes.roles) ? [...attributes.roles] : [];
 
 			if (checked) {
 				if (!nextRoles.includes(roleSlug)) {
@@ -134,13 +136,13 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 			setAttributes({ roles: nextRoles });
 		},
-		[roles, setAttributes]
+		[attributes.roles, setAttributes]
 	);
 
 	/* Add or remove an action from the stored attributes. */
 	const actionSelected = useCallback(
 		(checked, action) => {
-			let nextActions = Array.isArray(actions) ? [...actions] : [];
+			let nextActions = Array.isArray(attributes.actions) ? [...attributes.actions] : [];
 
 			if (checked) {
 				if (!nextActions.includes(action)) {
@@ -152,7 +154,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 			setAttributes({ actions: nextActions });
 		},
-		[actions, setAttributes]
+		[attributes.actions, setAttributes]
 	);
 
 	/* Build role checkboxes for the inspector panel. */
@@ -169,7 +171,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				<CheckboxControl
 					key={roleSlug}
 					label={roleLabel}
-					checked={(roles || []).includes(roleSlug)}
+					checked={(attributes.roles || []).includes(roleSlug)}
 					onChange={(checked) => onRoleSelected(checked, roleSlug)}
 				/>
 			);
@@ -190,7 +192,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				<CheckboxControl
 					key={actionSlug}
 					label={actionLabel}
-					checked={(actions || []).includes(actionSlug)}
+					checked={(attributes.actions || []).includes(actionSlug)}
 					onChange={(checked) => actionSelected(checked, actionSlug)}
 				/>
 			);
@@ -205,7 +207,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					'The type of the form. Get adds values to the URL. Post submits invisibly.',
 					'tsjippy'
 				)}
-				selected = { method }
+				selected = { attributes.method }
 				options={[
 					{ label: __('Get', 'tsjippy'), value: 'get' },
 					{ label: __('Post', 'tsjippy'), value: 'post' },
@@ -307,7 +309,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				<legend>{ attributes.name } Form</legend>
 
 				{ 
-					method == '' ? 
+					attributes.method == '' ? 
 					<>
 					<FormMethodComponent /> 
 					<br></br>

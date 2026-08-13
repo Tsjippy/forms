@@ -127,7 +127,7 @@ function dynamicJs($conditions, $innerBlocks){
         }
 
         if(count($triggerBlocks) > 1){
-            $triggerString  = "if([" . implode(", ", $triggerBlocks) . "].includes(blockId)){";
+            $triggerString  = "if(['" . implode("', '", $triggerBlocks) . "'].includes(blockId)){";
         }else{
             $triggerString  = "if (blockId == '" . $triggerBlocks[0] . "'){";
         }
@@ -180,7 +180,7 @@ function dynamicJs($conditions, $innerBlocks){
                     
                     // Check if visible
                     elseif(isset(['visible' => 1, 'invisible' => 1][$rule['equation']])){
-                        $compare =  "el.dataset.blockid == '{$rule['conditional-field']}' &&";
+                        $compare =  "el.dataset.blockid == '{$rule['conditional-field']}' && ";
                         if($rule['equation'] == 'visible'){
                             $compare .= "!";
                         }
@@ -194,7 +194,7 @@ function dynamicJs($conditions, $innerBlocks){
                         $varName    = "value_{$conditionIndex}_$ruleIndex";
 
                         // Add the var
-                        $vars[]     = "let $varName = this.getValue('{$rule['conditional-field']}', form);";
+                        $vars[$varName]     = "this.getValue('{$rule['conditional-field']}', form);";
 
                         $compareFrom  = $varName;
 
@@ -206,7 +206,7 @@ function dynamicJs($conditions, $innerBlocks){
                         }
 
                         if(!empty($rule['conditional-field-2'])){
-                            $vars[] = "let {$varName}_2 = this.getValue('{$rule['conditional-field-2']}', form);";
+                            $vars["{$varName}_2"] = "this.getValue('{$rule['conditional-field-2']}', form);";
 
                             $compareValue   = "{$varName}_2";
                         }
@@ -220,11 +220,13 @@ function dynamicJs($conditions, $innerBlocks){
                             $comparator   = $rule['equation2'];
                         }
 
+                        // 
+                        $comparator = str_replace(' value', '', $comparator);
                         
                         /**
                          * Actual comparison
                          */
-                        $comparators[$conditionIndex][] = $compareFrom . ' ' . $comparator . ' ' . $compareValue . ($rule['combinator'] ?? '');
+                        $comparators[$conditionIndex][] = $compareFrom . ' ' . $comparator . ' ' . $compareValue . ' '.($rule['combinator'] ?? '');
                     }
                 }
             }
@@ -233,7 +235,7 @@ function dynamicJs($conditions, $innerBlocks){
              * Create the action js
              */
             $actions[$conditionIndex] = [
-                'target'    => $condition->target
+                'target'    => $condition->block_id
             ];
 
             foreach($condition->actions as $action){
@@ -250,15 +252,14 @@ function dynamicJs($conditions, $innerBlocks){
                         $newValue   = "'$newValue'";
                     }
 
-                    $actions[$conditionIndex]['action'] = "
-                this.change_field_property(
+                    $actions[$conditionIndex]['action'] = 
+                "this.change_field_property(
                     target,
                     '{$action['property-name']}',
                     $newValue,
                     form,
                     '{$addition}'
-                );
-                    ";   
+                );";   
                 }else{
                     // Add, remove or toggle the hidden class
                     if($action['action'] == 'show'){
@@ -277,8 +278,20 @@ function dynamicJs($conditions, $innerBlocks){
         /**
          * Print vars and comparisons
          */
-        foreach($vars as $var){
-            echo "\n\t\t\t" . wp_kses_post($var) ."\n";
+        $unique      = [];
+        $removedVars = [];
+
+        foreach($vars as $key => $var){
+            $foundKey   = array_search($var, $unique);
+            if ($foundKey) {
+                // Duplicate
+                $removedVars[$key] = $foundKey;
+            } else {
+                // First time we see this one, print it
+                $unique[$key] = $var;
+        
+                echo "\n\t\t\tlet $key = " . wp_kses_post($var) ."\n";
+            }
         }
 
         $actionStrings   = [];
@@ -288,12 +301,12 @@ function dynamicJs($conditions, $innerBlocks){
             $targetQuery = "let target  = form.querySelector(`[data-blockid='{$actionData['target']}']`)";
                     
             // Show/hide/toggle the label in stead of the element
-            if(str_contains($actionData['action'], 'target.classList') && $innerBlocks[$actionData['target']]['attrs']['hasLabelParent'] ?? false){
+            if(str_contains($actionData['action'], 'target.classList') && ($innerBlocks[$actionData['target']]['attrs']['hasLabelParent'] ?? false)){
                 $targetQuery .= ".closest('label')";
             }
                     
-            $actionStrings[$conditionIndex] = "\n\t\t\t\t" . wp_kses_post($targetQuery) . ";\n";
-            $actionStrings[$conditionIndex] .= "\n\t\t\t\t" . wp_kses_post($actionData['action']);
+            $actionStrings[$conditionIndex] = "\n\t\t\t\t" . $targetQuery . ";\n";
+            $actionStrings[$conditionIndex] .= "\n\t\t\t\t" . $actionData['action'];
         }
 
         if(empty($comparators )){
@@ -305,8 +318,17 @@ function dynamicJs($conditions, $innerBlocks){
         foreach($comparators as $conditionIndex => $ifs){
             echo "\n\t\t\tif(";
 
-                foreach($ifs as $if){
-                    echo "\n\t\t\t\t" . wp_kses_post($if);
+                $lastKey = array_key_last($ifs);
+                foreach($ifs as $key => $if){
+                    // Replace possible removed variables
+                    $if = str_replace(array_keys($removedVars), $removedVars, $if);
+
+                    echo "\n\t\t\t\t" . $if;
+
+                    // This is not the last if and it has no combinator add one
+                    if($key != $lastKey && !str_ends_with($if, '&&') && !str_ends_with($if, '||')){
+                        echo " &&";
+                    }
                 }
             
             echo "\n\t\t\t){";
@@ -410,8 +432,7 @@ class <?php echo esc_attr($className);?> {
         return FormFunctions.getFieldValue(form.querySelector(`[data-blockid='${blockid}']`), form);
     };
 
-    handleConditions = (node) => {
-        let el            = event.target;
+    handleConditions = (el) => {
         let form          = el.closest('form');
         let elName        = el.getAttribute('name');
 
@@ -419,12 +440,11 @@ class <?php echo esc_attr($className);?> {
             //el is a nice select
             if (el.closest('.nice-select-dropdown') != null) {
                 //find the select element connected to the nice-select
-                el.closest('.input-wrapper').querySelectorAll('select').forEach (select=>{
-                    if (el.dataset.value == select.value) {
-                        el    = select;
-                        elName = select.name;
-                    }
-                });
+                let select = el.closest(`.wp-block-tsjippy-forms-select`).previousElementSibling;
+                if (el.dataset.value == select.value) {
+                    el     = select;
+                    elName = select.name;
+                }
             }else{
                 return;
             }
@@ -480,9 +500,6 @@ function buildJs($block, $post){
     $conditions  = $forms->getAllBlockConditions($post->ID);
     $innerBlocks = getBlocks($block);
 
-    $checks      = [];
-    $errors      = [];
-
     /**
      * BUILD THE JS
      */
@@ -500,17 +517,15 @@ function buildJs($block, $post){
      **/
     $extraJs   = apply_filters('tsjippy-forms-extra-js', '', $formName, false);
     if (!empty($extraJs)) {
-        if (empty($checks)) {
-            $js = $extraJs;
-        } else {
-            $js .= "\n\n";
-            $js .= $extraJs;
-        }
+        $js .= "\n\n";
+        $js .= $extraJs;
     }
 
     //Create js file
-    $jsFileName = plugin_dir_path(__DIR__) . "js/dynamic/{$formName}";
-    file_put_contents($jsFileName . '.js', $js);
+    $jsFileName = str_replace(' ', '_', strtolower(trim($formName)));
+
+    $jsFilePath = plugin_dir_path(__DIR__) . "js/dynamic/{$jsFileName}";
+    file_put_contents($jsFilePath . '.js', $js);
 
     //replace long strings for shorter ones
     $minifiedJs = str_replace(
@@ -542,12 +557,6 @@ function buildJs($block, $post){
     }
 
     // Create minified version
-    file_put_contents($jsFileName . '.min.js', $minifiedJs);
-
-    if (!empty($errors)) {
-        TSJIPPY\printArray($errors);
-    }
-
-    return $errors;
+    file_put_contents($jsFilePath . '.min.js', $minifiedJs);
 }
 

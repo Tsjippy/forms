@@ -241,7 +241,8 @@ function InputHtml({
           autoComplete: "on",
           checked: prefillValue === option.value,
           "data-blockid": attributes.blockId,
-          ...attributes.inputAttributes
+          ...attributes.inputAttributes,
+          required: attributes.required
         }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(option.label, 'tsjippy')]
       }, `${option.value}-${index}`)), isSaving && "%options-placeholder%"]
     });
@@ -250,6 +251,7 @@ function InputHtml({
       ...blockProps,
       type: attributes.type,
       name: attributes.name,
+      required: attributes.required,
       "data-blockid": attributes.blockId,
       autoComplete: "on",
       ...attributes.inputAttributes,
@@ -260,6 +262,7 @@ function InputHtml({
       ...blockProps,
       type: attributes.type,
       name: attributes.name,
+      required: attributes.required,
       "data-blockid": attributes.blockId,
       autoComplete: "on",
       ...attributes.inputAttributes,

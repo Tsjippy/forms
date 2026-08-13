@@ -12,26 +12,17 @@ if (! defined('ABSPATH')) {
 
 class Forms
 {
-
     public bool        $all;            // do not page submissions
-    protected bool     $clonableFormStep;
     public bool        $editRights;
     public array       $elementMapping;
     public array       $emailSettings;
     public object      $formData;
     public array       $formElements;
     public string      $formEmailTable;
-    public int         $formId;
     public object|null $formReminder;
     public string      $formReminderTable;
     public array       $forms;
-    public int         $formStepCounter;
-    public bool        $isFormStep;
-    public bool        $isMultiStepForm;
     public string      $jsFileName;
-    public array       $multiInputsHtml;
-    public bool        $multiwrap;
-    public array       $nonInputs;
     public array       $wpMetaKeys;
     public string      $objectName;
     public bool        $onlyOwn;
@@ -53,65 +44,57 @@ class Forms
     public int         $userId;
     protected string   $userIdElementName;
     public array       $userRoles;
-    public array       $inputTags;
-    public array       $checkboxTypes;
+    public array        $defaultArrayValues;
+    public array        $defaultValues;
+    public array        $usermeta;
 
     /**
      * Constructor
      *
-     * @param array    $atts        Shortcode attributes
+     * @param int      $postId      The post id the form is in
+     * @param string   $blockId     THe block id of the form block
      * @param bool     $all         Whether to retrieve all submissions or not
      * @param int      $pageSize    Number of submissions per page
-     * @param int      $postId      Post ID to retrieve form for
      * @param string   $formUrl     Form URL to retrieve form for
      * @param int      $userId      User ID to retrieve form for
      */
-    public function __construct($atts = [], $all = false, $pageSize = 50, $postId = '', $formUrl = '',  $userId = 0)
+    public function __construct($blockId='', $all = false, $pageSize = 50, $postId = -1, $formUrl = '',  $userId = 0)
     {
         global $wpdb;
 
         $this->all                          = $all;
-        $this->clonableFormStep             = false;
         $this->elementMapping               = [];
         $this->emailSettings                = [];
         $this->formData                     = new stdClass();
         $this->formEmailTable               = $wpdb->prefix . 'tsjippy_form_emails';
         $this->formElements                 = [];
-        $this->formId                       = -1;
         $this->formReminder                 = null;
         $this->formReminderTable            = $wpdb->prefix . 'tsjippy_form_reminders';
         $this->forms                        = [];
-        $this->formStepCounter              = 0;
-        $this->isFormStep                   = false;
-        $this->isMultiStepForm              = false;
         $this->jsFileName                   = '';
-        $this->multiInputsHtml              = [];
-        $this->multiwrap                    = false;
-
-        $this->nonInputs                    = [
-            'label'       => 1,
-            'button'      => 1,
-            'datalist'    => 1,
-            'formstep'    => 1,
-            'info'        => 1,
-            'p'           => 1,
-            'php'         => 1,
-            'multi-start' => 1,
-            'multi-end'   => 1,
-            'div-start'   => 1,
-            'div-end'     => 1
-        ];
-
-        $this->inputTags    = [
-            'input' => 1, 
-            'textarea' => 1, 
-            'select' => 1
-        ];
-
-        $this->checkboxTypes    = [
-            'checkbox'  => true,
-            'radio'     => true
-        ];
+        $this->objectName                   = '';
+        $this->onlyOwn                      = false;
+        $this->pageSize                     = $pageSize;
+        $this->shortcodeColumnSettingsTable = $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
+        $this->shortcodeId                  = -1;
+        $this->shortcodeTable               = $wpdb->prefix . 'tsjippy_form_shortcodes';
+        $this->showArchived                 = false;
+        $this->slugs                        = [];
+        $this->submission                   = null;
+        $this->submissions                  = [];
+        $this->submissionTableName          = $wpdb->prefix . 'tsjippy_form_submissions';
+        $this->submissionValuesTableName    = $wpdb->prefix . 'tsjippy_form_submission_values';
+        $this->blockConditionsTableName     = $wpdb->prefix . 'tsjippy_form_block_conditions';
+        $this->blockRemindersTableName      = $wpdb->prefix . 'tsjippy_form_block_reminders';
+        $this->submitRoles                  = [];
+        $this->tableFormats                 = [];
+        $this->user                         = wp_get_current_user();
+        $this->userId                       = $this->user->ID;  // The user id for who we retrieve a form (results)
+        $this->userIdElementName            = '';
+        $this->userRoles                    = array_flip($this->user->roles);
+        $this->formData->id                 = $blockId;
+        $this->formData->postId             = $postId;
+        $this->formData->post               = null;
 
         $this->wpMetaKeys                   = [
             'nickname'                              => 1,
@@ -137,51 +120,17 @@ class Forms
             '2fa_hash'                              => 1
         ];
 
-        $this->objectName                   = '';
-        $this->onlyOwn                      = false;
-        $this->pageSize                     = $pageSize;
-        $this->shortcodeColumnSettingsTable = $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
-        $this->shortcodeId                  = -1;
-        $this->shortcodeTable               = $wpdb->prefix . 'tsjippy_form_shortcodes';
-        $this->showArchived                 = false;
-        $this->slugs                        = [];
-        $this->submission                   = null;
-        $this->submissions                  = [];
-        $this->submissionTableName          = $wpdb->prefix . 'tsjippy_form_submissions';
-        $this->submissionValuesTableName    = $wpdb->prefix . 'tsjippy_form_submission_values';
-        $this->blockConditionsTableName     = $wpdb->prefix . 'tsjippy_form_block_conditions';
-        $this->blockRemindersTableName      = $wpdb->prefix . 'tsjippy_form_block_reminders';
-        $this->submitRoles                  = [];
-        $this->tableFormats                 = [];
-        $this->user                         = wp_get_current_user();
-        $this->userId                       = $this->user->ID;  // The user id for who we retrieve a form (results)
-        $this->userIdElementName            = '';
-        $this->userRoles                    = array_flip($this->user->roles);
-
         if ($all) {
-            $this->pageSize                    = 99999;
+            $this->pageSize                 = 99999;
         }
 
         //calculate full form rights
-        $object        = get_queried_object();
         $postAuthor    = 0;
-        if (!empty($object->post_author)) {
-            $postAuthor    = $object->post_author;
-        }
-
         // phpcs:ignore
-        elseif (is_numeric($postId)) {
-            $post        = get_post($postId);
-            if (!empty($post)) {
-                $postAuthor    = $post->post_author;
-            }
-        }
-        // phpcs:ignore
-        elseif (!empty($formUrl)) {
-            $postId        = url_to_postid($formUrl);
-
-            if ($postId) {
-                $postAuthor    = get_post($postId)->post_author;
+        if ($postId != -1) {
+            $this->formData->post        = get_post($postId);
+            if (!empty($this->post)) {
+                $postAuthor    = $this->formData->post->post_author;
             }
         }
 
@@ -194,11 +143,14 @@ class Forms
         // $this->userId is the user id for whom the form is submitted
         $this->userId    = $userId === 0 ? $this->user->ID : $userId;
 
-        if (!empty($atts)) {
-            $this->processAtts($atts);
-        }
+        $this->getForm();
+
+        $this->getAllFormElements();
 
         $this->tableFormats();
+
+        $this->defaultArrayValues     = [];
+        $this->defaultValues          = [];
     }
 
     /**
@@ -464,19 +416,19 @@ class Forms
      */
     public function getFormBySubmissionId($submisisonId)
     {
-        $formId        = TSJIPPY\getFromDb(
+        $postId        = TSJIPPY\getFromDb(
             "get_form_by_submission_id_$submisisonId",
             "forms",
-            "SELECT form_id FROM %i WHERE id = %d LIMIT 1",
+            "SELECT block_id, post_id FROM %i WHERE id = %d LIMIT 1",
             $this->submissionTableName,
             $submisisonId
         );
 
-        if (empty($formId)) {
+        if (empty($postId)) {
             return new WP_Error('forms', "No form found for submission id $submisisonId");
         }
 
-        return $formId;
+        return $postId;
     }
 
     /**
@@ -499,7 +451,7 @@ class Forms
             return;
         }
 
-        $this->formReminder    = map_deep($results[0], 'maybe_unserialize');
+        $this->formReminder    = $results[0];
     }
 
     /**
@@ -516,7 +468,7 @@ class Forms
         $this->emailSettings =  TSJIPPY\getFromDb(
             "get_email_settings_" . $this->formData->id,
             "forms",
-            "select * from %i where form_id=%d",
+            "select * from %i where block_id=%d",
             $this->formEmailTable,
             $this->formData->id
         );
@@ -567,25 +519,49 @@ class Forms
     }
 
     /**
-     * Get the elements of a form
+     * Finds a formbuilder block on a post and parses it to html
      * 
-     * @param string $blockId The forms block id
-     * @param int    $postId  The forms post id    
+     * @param   object|int  $post   The post or post id to search for the block. Default empty to use the object post
+     * 
+     * @return  string|false   The form html or false if not found
      */
-    public function getForm($postId, $blockId){
-        $post   = get_post($postId);
+    public function getForm($post=''){
+        if(empty($post) && $this->formData->post == null){
+            return [];
+        }
+
+        if(empty($post)){
+            $post   = $this->formData->post;
+        }elseif(is_numeric($post)){
+            $post   = get_post($post);
+        }
 
         $blocks = parse_blocks($post->post_content);
 
-        return $blocks;
+        foreach($blocks as $block){
+            if($block['blockName'] == $this->formData->id){
+                return $this->showForm($block);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Parses a formbuilder block to html
+     * 
+     * @param   array   $block
+     * 
+     * @return string   The html
+     */
+    public function showForm($block){
+        return render_block($block);
     }
 
     /**
      * Finds all blocks and post ids who are of the formbuilder type
      */
     public function getForms(){
-        global $wpdb;
-
         return TSJIPPY\getFromDb(
             'all_forms',
             'forms',
@@ -604,7 +580,7 @@ class Forms
         $this->getForms();
 
         foreach ($this->forms as $form) {
-            $this->slugs[]            = $form->slug;
+            $this->slugs[] = $form->slug;
         }
 
         $html = "<select name='form-selector'>";
@@ -639,7 +615,7 @@ class Forms
 
         //load if needed
         if (empty($this->elementMapping)) {
-            $this->getForm(2, 3);
+            $this->getForm();
         }
 
         if (!isset($this->elementMapping['id'][$id])) {
@@ -688,7 +664,7 @@ class Forms
 
         //load if needed
         if (empty($this->elementMapping)) {
-            $result    = $this->getForm(2,3);
+            $result    = $this->getForm();
 
             if (is_wp_error($result)) {
                 return $result;
@@ -765,7 +741,7 @@ class Forms
 
         //load if needed
         if (empty($this->elementMapping['type']) && $load) {
-            $result    = $this->getForm(2, 3);
+            $result    = $this->getForm();
 
             if (is_wp_error($result)) {
                 return $result;
@@ -860,21 +836,17 @@ class Forms
      * @param    int        $formId         The id of the form to get elements for, default empty
      * @param    bool       $force          Whether to requery, default false
      */
-    public function getAllFormElements($sortCol = '', $formId = '', $force = false)
+    public function getAllFormElements($sortCol = '', $blockId = '', $force = false)
     {
         if (isset($this->formElements) && !$force) {
             return '';
         }
 
-        if (!is_numeric($formId) && $this->formData && is_numeric($this->formData->id)) {
-            $formId    = $this->formData->id;
+        if (empty($blockId) && $this->formData && !empty($this->formData->id)) {
+            $blockId    = $this->formData->id;
         }
 
-        if (!is_numeric($formId) && isset($this->formData->id) && is_numeric($this->formData->id)) {
-            $formId    = $this->formData->id;
-        }
-
-        if (!is_numeric($formId)) {
+        if (empty($blockId)) {
             return new \WP_Error('forms', 'No form id given');
         }
 
@@ -888,67 +860,6 @@ class Forms
          * @param    bool    $force     Wheter to force a requery
          */
         //$this->formElements         =  apply_filters('tsjippy-forms-elements', $elements, $this, false);
-    }
-
-    /**
-     * Parses all WP Shortcode attributes
-     *
-     * @param    array    $atts    The shortcode attributes
-     */
-    public function processAtts($atts)
-    {
-        if (empty($this->formData)) {
-            $this->formData    = new stdClass();
-        }
-
-        if (!isset($this->formData->slug)) {
-            $atts    = shortcode_atts(
-                array(
-                    'name'         => '',
-                    'user_id'      => 0,
-                    'user-id'      => 0,
-                    'search'       => '',
-                    'shortcodeid'  => -1,
-                    'shortcode-id' => -1,
-                    'id'           => -1,
-                    'only-own'     => false,
-                    'onlyown'      => false,
-                    'archived'     => false,
-                    'all'          => false,
-                ),
-                $atts
-            );
-
-            if ($atts['user-id'] == 0 && $atts['user_id'] !== 0) {
-                $atts['user-id']      = $atts['user_id'];
-            }
-
-            if ($atts['shortcode-id'] == -1 && $atts['shortcodeid'] !== -1) {
-                $atts['shortcode-id'] = $atts['shortcodeid'];
-            }
-
-            if (empty($atts['only-own'])) {
-                $atts['only-own']     = $atts['onlyown'];
-            }
-
-            $this->shortcodeId        = $atts['shortcode-id'];
-            if ($this->shortcodeId == -1 && $atts['id'] !== -1) {
-                $this->shortcodeId    = $atts['id'];
-            }
-
-            $this->onlyOwn            = $atts['only-own'];
-
-            $this->all                = $atts['all'];
-            $this->showArchived       = $atts['archived'];
-
-            if ( is_numeric($atts['user-id'] ?? '') && $atts['user-id'] > 0) {
-                $this->userId    = $atts['user-id'];
-            }
-
-            $this->getForm(2, 3);
-
-            $this->getAllFormElements();
-        }
     }
 
     /**
@@ -1166,17 +1077,21 @@ class Forms
     }
 
     /**
-     * Gets the conditions for a block
+     * Gets the conditions for a post
      * 
-     * @param string  $blockId  block id
+     * @param int  $postId  post id
      */
-    public function getBlockConditions($blockId){
+    public function getBlockConditions($postId=''){
+        if(empty($postId)){
+            $postId = $this->formData->postId;
+        }
+        
         return TSJIPPY\getFromDb(
-            "block-conditions-block-$blockId", 
+            "block-conditions-block-$postId", 
             'forms',
-            "select * from %i where block_id=%s",
+            "select * from %i where post_id=%d",
             $this->blockConditionsTableName,
-            $blockId
+            $postId
         );
     }
 
@@ -1278,5 +1193,240 @@ class Forms
             $this->formEmailTable,
             $blockId
         );
+    }
+
+    /**
+     * Gets all unique user meta data keys
+     * 
+     * @return array $allMetaKeys     Array containing all user meta keys
+     */
+    protected function userMetaKeys(){
+        $value = wp_cache_get('user-meta-keys', 'tsjippy_forms', false, $found);
+
+        if ($found) {
+            return $value;
+        }
+
+        global $wpdb;
+
+        $allMetaKeys    = array_flip(TSJIPPY\getFromDb(
+            'all-meta-keys',
+            'forms',
+            "SELECT distinct meta_key FROM %i a where meta_key not like %s ORDER BY `meta_key` ASC",
+            $wpdb->usermeta,
+            $wpdb->esc_like('_').'%'
+        ));
+
+        $familyMetaKeys = TSJIPPY\FAMILY\getFamilyMetaKeys();
+
+        $metaKeys       = array_merge($allMetaKeys, $familyMetaKeys);
+
+        ksort($metaKeys, SORT_STRING | SORT_FLAG_CASE);
+
+        wp_cache_set('user-meta-keys', $metaKeys, 'tsjippy_forms');
+
+        return $metaKeys;
+    }
+
+    /**
+     * Builds an array with all user(meta)data for the current user
+     */
+    public function buildDefaultsArray()
+    {
+        global $wpdb;
+
+        //Only create one time, and only for logged in users
+        if ($this->userId === 0) {
+            return;
+        }
+
+        $value = wp_cache_get("default-meta-values-".$this->userId, 'tsjippy_forms', false, $found1);
+        if($found1){
+            $this->defaultValues    = $value;
+        }
+
+        $value = wp_cache_get("default-array-meta-values-".$this->userId, 'tsjippy_forms', false, $found2);
+        if($found2){
+            $this->defaultArrayValues    = $value;
+        }
+
+        if($found1 && $found2){
+            return;
+        }
+
+        /**
+         * User data
+         */
+        $this->defaultValues      = (array)$this->user->data;
+        $this->defaultArrayValues = [];
+
+        // We are getting the form results not for ourselves
+        if ($this->userId != $this->user->ID) {
+            $this->defaultValues = (array)get_userdata($this->userId)->data;
+        }
+
+        //Change ID to user_id because its a confusing name
+        $this->defaultValues['user_id']    = $this->defaultValues['ID'] ?? 0;
+        unset($this->defaultValues['ID']);
+        
+        // Do not use everything
+        foreach (['user_pass', 'user_activation_key', 'user_status', 'user_level'] as $field) {
+            unset($this->defaultValues[$field]);
+        }
+
+        /**
+         * Check which meta keys can have multiple values for the same user
+         */
+        $multiKeys  = array_flip(TSJIPPY\getFromDb(
+            'multiple-user-meta',
+            'forms',
+            "select distinct meta_key from (SELECT meta_key, user_id, COUNT(*) FROM %i GROUP BY meta_key, user_id HAVING (COUNT(*) > 1)) as multiple;",
+            $wpdb->usermeta
+        ));
+
+        /**
+         * Filters which user metas can have more than one value for the same key
+         * 
+         * @param   array   $multiKeys  Array containing the meta keys as array keys that can have more than one value
+         */
+        $multiKeys  = apply_filters('tsjippy-forms-user-meta-multi-keys', $multiKeys);
+
+        /**
+         * Add usermeta
+         */
+        $userMetas  = get_user_meta($this->userId);
+
+        // add a value for every possible meta key even if the current user doesn't have it
+        foreach($this->userMetaKeys() as $metaKey => $index){
+            $noPrefixKey    = str_replace('tsjippy_', '', $metaKey);
+            // Multi value
+            if(isset($multiKeys[$metaKey])){
+                //Current user has a value for this
+                if(isset($userMetas[$metaKey])){
+                    $this->defaultArrayValues[$noPrefixKey] = $userMetas[$metaKey];
+                }elseif(!isset($this->defaultArrayValues[$noPrefixKey])){
+                    $this->defaultArrayValues[$noPrefixKey] = [];
+                }
+            }
+
+            // Single value
+            else{
+                //Current user has a value for this
+                if(!empty($userMetas[$metaKey])){
+                    if(count($userMetas[$metaKey]) == 1 && isset($userMetas[$metaKey][0])){
+                        $this->defaultValues[$noPrefixKey] = $userMetas[$metaKey][0];
+                    }else{
+                        $this->defaultValues[$noPrefixKey] = $userMetas[$metaKey];
+                    }
+                }elseif(!isset($this->defaultValues[$noPrefixKey])){
+                    $this->defaultValues[$noPrefixKey] = '';
+                }
+            }
+        }
+
+        $this->defaultValues      = array_filter(
+            $this->defaultValues, 
+            function($value, $key){
+                return (
+                    !str_contains($key, 'closedpostboxes_') && 
+                    !str_contains($key, '_per_page') &&
+                    !str_contains($key, 'meta') &&
+                    !str_contains($key, 'polq') &&
+                    !str_contains($key, '_position') &&
+                    !str_contains($key, '_event_id') &&
+                    !str_contains($key, 'hidden_columns_')
+                );
+            },
+            ARRAY_FILTER_USE_BOTH 
+        );
+
+        // Filter the default values
+        $this->defaultValues      = apply_filters('tsjippy-forms-add-form-defaults', $this->defaultValues, $this->userId, $this->formData->slug);
+
+        // Sort on key
+        ksort($this->defaultValues);
+
+        // Make sure all data is unserialized
+        $this->defaultValues      = map_deep($this->defaultValues, 'maybe_unserialize');
+
+        foreach (TSJIPPY\getUserAccounts(false, false, [], [], [], true) as $user) {
+            $this->defaultArrayValues['all_users'][$user->ID] = $user->display_name;
+        }
+
+        /**
+         *  Add family member names
+         */
+        $family = new TSJIPPY\FAMILY\Family();
+        // Our own details
+        $familyNames              = [
+            $this->user->ID => $this->user->display_name
+        ];
+
+        // Partner
+        $partner    = $family->getPartner($this->userId, true);
+        if ($partner) {
+            $familyNames[$partner->ID]       = $partner->display_name;
+        }
+
+        // Siblings
+        $siblings    = $family->getSiblings($this->user->ID);
+        foreach ($siblings as $sibling) {
+            $siblingData                     = get_userdata($sibling);
+
+            if (!$siblingData) {
+                continue;
+            }
+
+            $familyNames[$sibling]           = $siblingData->display_name;
+        }
+
+        $familyNamesWithChildAge             = $familyNames;
+
+        // Children
+        $children                            = $family->getChildren($this->user->ID);
+        $childrenNames                       = [];
+        $childrenAges                        = [];
+        foreach ($children as $child) {
+            $childData                       = get_userdata($child);
+            if (!$childData) {
+                continue;
+            }
+
+            $name                            = $childData->display_name;
+            $birthDateString                 = get_user_meta($child, 'tsjippy_birthday', true);
+            $birthDate                       = new \DateTime($birthDateString);
+            $currentDate                     = new \DateTime('today');
+
+            // Calculate the difference between the two dates
+            $interval                        = $currentDate->diff($birthDate);
+
+            // Extract the number of years from the interval
+            $age                             = $interval->y;
+            $childrenNames[$child]           = $name;
+            $childrenAges[$child]            = $age;
+            $familyNamesWithChildAge[$child] = "$name ($age)";
+        }
+
+        $familyNames                                             = $familyNames + $childrenNames;
+
+        // Add everything to the defaults array
+        $this->defaultArrayValues['children_names']              = $childrenNames;
+        $this->defaultArrayValues['children_ages']               = $childrenAges;
+
+        $this->defaultArrayValues['family_member_names']         = $familyNames;
+        $this->defaultArrayValues['family_member_names_and_age'] = $familyNamesWithChildAge;
+
+        /**
+         * Filters the default array values array
+         * 
+         * @param   array   $defaultArrayValues Array defaults
+         * @param   int     $userId             User Id
+         */
+        $this->defaultArrayValues    = apply_filters('tsjippy-forms-add-form-multi-defaults', $this->defaultArrayValues, $this->userId);
+
+        ksort($this->defaultArrayValues);
+
+        wp_cache_set("default-meta-values-".$this->userId, $this->defaultValues, 'tsjippy_forms');
+        wp_cache_set("default-array-meta-values-".$this->userId, $this->defaultArrayValues, 'tsjippy_forms');
     }
 }

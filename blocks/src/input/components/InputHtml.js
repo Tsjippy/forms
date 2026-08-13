@@ -60,6 +60,7 @@ export function InputHtml({
                             checked={ prefillValue === option.value }
                             data-blockid={attributes.blockId}
                             {...attributes.inputAttributes}
+                            required={attributes.required}
                         />
                         {__(option.label, 'tsjippy')}
                     </label>
@@ -73,6 +74,7 @@ export function InputHtml({
                 {...blockProps}
                 type={attributes.type}
                 name={attributes.name}
+                required={attributes.required}
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
@@ -86,6 +88,7 @@ export function InputHtml({
                 {...blockProps}
                 type={attributes.type}
                 name={attributes.name}
+                required={attributes.required}
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}

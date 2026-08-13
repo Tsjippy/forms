@@ -24,6 +24,7 @@ import metadata from './block.json';
 import './store/conditionsStore';
 import './store/dynamicValuesStore';
 import './filters/addButtonToInnerBlocks';
+import './filters/hasConditionsIndicator';
 
 /**
  * Every block starts by registering a new block type definition.

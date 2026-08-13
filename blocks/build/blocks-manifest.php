@@ -124,8 +124,8 @@ return array(
 		'viewScript' => 'tsjippy_forms_script',
 		'attributes' => array(
 			'id' => array(
-				'type' => 'integer',
-				'default' => -1
+				'type' => 'string',
+				'default' => ''
 			),
 			'postId' => array(
 				'type' => 'number',

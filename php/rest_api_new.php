@@ -150,7 +150,7 @@ function restApiInitFormsNew()
         array(
             'methods'  => 'POST',
             'callback' => function ($wpRestRequest) {
-                $forms  = new ElementHtmlBuilder();
+                $forms  = new Forms();
 
                 $forms->buildDefaultsArray();
 
@@ -165,18 +165,8 @@ function restApiInitFormsNew()
         )
     );
 
-    // Get Element Conditions
     /**
-     * [
-     *   [
-     *       {
-     *           "conditional-field": "abc123",
-     *           "equation": "==",
-     *           "conditional-value": "yes",
-     *           "combinator": "and"
-     *       }
-     *   ]
-     *]
+     * Get Element Conditions
      */
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
@@ -184,10 +174,10 @@ function restApiInitFormsNew()
         array(
             'methods'                 => 'POST',
             'callback'                => function($wpRest){
-                $forms = new Forms();
-
-                $blockId   = TSJIPPY\sanitize($wpRest->get_param('blockId') ?? '');
-                return $forms->getBlockConditions($blockId);
+                $postId   = TSJIPPY\sanitize($wpRest->get_param('postId') ?? '');
+                
+                $forms = new Forms(postId:$postId);
+                return $forms->getBlockConditions();
             },
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
         )

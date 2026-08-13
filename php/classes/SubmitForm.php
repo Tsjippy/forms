@@ -15,52 +15,19 @@ class SubmitForm extends SaveFormSettings
     /**
      * Constructor
      *
-     * @param array    $atts        Shortcode attributes
+     * @param string   $blockId    blockId
      * @param bool     $all         Whether to retrieve all submissions or not
      * @param int      $pageSize    Number of submissions per page
      * @param int      $postId      Post ID to retrieve form for
      * @param string   $formUrl     Form URL to retrieve form for
      * @param int      $userId      User ID to retrieve form for
      */
-    public function __construct($atts=[], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
+    public function __construct($blockId='', $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct(atts: $atts, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
+        parent::__construct(blockId: $blockId, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
     }
 
-        /**
-     * Gets all unique user meta data keys
-     * 
-     * @return array $allMetaKeys     Array containing all user meta keys
-     */
-    protected function userMetaKeys(){
-        $value = wp_cache_get('user-meta-keys', 'tsjippy_forms', false, $found);
-
-        if ($found) {
-            return $value;
-        }
-
-        global $wpdb;
-
-        $allMetaKeys    = array_flip(TSJIPPY\getFromDb(
-            'all-meta-keys',
-            'forms',
-            "SELECT distinct meta_key FROM %i a where meta_key not like %s ORDER BY `meta_key` ASC",
-            $wpdb->usermeta,
-            $wpdb->esc_like('_').'%'
-        ));
-
-        $familyMetaKeys = TSJIPPY\FAMILY\getFamilyMetaKeys();
-
-        $metaKeys       = array_merge($allMetaKeys, $familyMetaKeys);
-
-        ksort($metaKeys, SORT_STRING | SORT_FLAG_CASE);
-
-        wp_cache_set('user-meta-keys', $metaKeys, 'tsjippy_forms');
-
-        return $metaKeys;
-    }
-
-        /**
+    /**
      * Transforms a given string to hyperlinks or other formats
      *
      * @param    string    $string         The string to convert
@@ -113,7 +80,8 @@ class SubmitForm extends SaveFormSettings
                 return $string;
             }
             
-            $path   = $this->uploadDir().'/'.$string;
+            //$path   = $this->uploadDir().'/'.$string;
+            $path = '';
 
             if(!file_exists($path)){
                 return $string;

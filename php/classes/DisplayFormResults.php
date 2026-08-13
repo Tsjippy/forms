@@ -23,7 +23,6 @@ class DisplayFormResults extends SubmitForm
     public bool     $formEditPermissions;
     public array    $hiddenColumns;
     public bool     $ownData;
-    public string   $shortcodeTable;
     public string   $sortColumn;
     public string   $sortDirection;
     public array    $sortElementIds;
@@ -33,17 +32,24 @@ class DisplayFormResults extends SubmitForm
     public object   $tableSettings;
     public bool     $tableViewPermissions;
     public int|null $total;
+    public int      $shortcodeId;
 
     /**
      * Constructor for the DisplayFormResults class
-     * @param array $atts The attributes passed to the shortcode
+     * @param string $blockId
      */
-    public function __construct($atts, $all = false, $pageSize = 50, $postId = '', $formUrl = '', $userId = 0)
+    public function __construct($shortcodeId='', $all = false, $pageSize = 50, $formUrl = '', $userId = 0)
     {
-        // call parent constructor
-        parent::__construct($atts, all: $all, pageSize: $pageSize, postId: $postId, formUrl: $formUrl, userId: $userId);
-
         global $wpdb;
+
+        $this->shortcodeId      = $shortcodeId;
+        $this->shortcodeTable   = $wpdb->prefix . 'tsjippy_form_shortcodes';
+        $this->shortcodeColumnSettingsTable = $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
+
+        $this->loadShortcodeData();
+
+        // call parent constructor
+        parent::__construct($this->tableSettings->block_id, all: $all, pageSize: $pageSize, postId: $this->tableSettings->post_id, formUrl: $formUrl, userId: $userId);
 
         $this->columnSettings       = [];
         $this->currentPage          = 0;
@@ -52,7 +58,6 @@ class DisplayFormResults extends SubmitForm
         $this->extraElements        = [];
         $this->formEditPermissions  = false;
         $this->ownData              = false;
-        $this->shortcodeTable       = $wpdb->prefix . 'tsjippy_form_shortcodes';
         $this->sortColumn           = '';
         $this->sortDirection        = 'ASC';
         $this->sortElementIds       = [];
@@ -374,13 +379,7 @@ class DisplayFormResults extends SubmitForm
                 $filterIndex        = str_replace(']', '', end($exploded));
 
                 $name               = "{$exploded[0]}[%][$filterIndex]";
-                $filterElementIds   = TSJIPPY\getFromDb(
-                    "get_element_where_name_is_$name",
-                    "forms",
-                    "SELECT id FROM %i WHERE `name` LIKE %s",
-                    $this->elTableName,
-                    $name
-                );
+                $filterElementIds   = '';
             } else {
                 $filterElementIds    = [$filter['element']];
             }
@@ -2010,7 +2009,7 @@ class DisplayFormResults extends SubmitForm
         }
 
         ob_start();
-    ?>
+        ?>
         <div class="modal form-shortcode-settings hidden">
             <!-- Modal content -->
             <div class="modal-content" style='max-width:100vw;min-width:90vw;'>
@@ -2132,10 +2131,10 @@ class DisplayFormResults extends SubmitForm
             $wrapperSpan    = addElement('span', $filterWrapper, ['class' => 'filter-option']);
             addElement('h4', $wrapperSpan, [], ucfirst($filterKey));
 
-            $elementNode    = $this->getElementHtml($filterElement, $wrapperSpan, $filterValue);
+            $elementNode    = '';
 
             // make sure the name is not the element name but the filtername
-            $elementNode->setAttribute('name', $filterKey);
+            //$elementNode->setAttribute('name', $filterKey);
         }
 
         if (!$hasFilters) {
@@ -2424,14 +2423,6 @@ class DisplayFormResults extends SubmitForm
                     if (count($exploded) > 1) {
                         $sort = str_replace(']', '', end($exploded));
                         $name = "{$exploded[0]}[%][$sort]";
-
-                        $this->sortElementIds    = TSJIPPY\getFromDb(
-                            "get_element_id_by_name_$name",
-                            "forms",
-                            "SELECT id FROM %i WHERE `name` LIKE %s",
-                            $this->elTableName,
-                            $name
-                        );
                     } else {
                         $this->sortElementIds    = [$defaultSortElement =>  $defaultSortElement];
                     }
@@ -2733,52 +2724,13 @@ class DisplayFormResults extends SubmitForm
         return TSJIPPY\insertInDb(
             $this->shortcodeTable,
             array(
-                'form_id' => $formId,
+                'post_id'   => $formId,
+                'block_id'  => ''
             ),
             [
                 '%d'
             ],
             'forms'
         );
-    }
-
-    /**
-     * check for any formresults shortcode and add an id if needed
-     *
-     * @param    array    $data    The post data
-     *
-     * @return    array            The filtered post data
-     */
-    public function checkForFormShortcode($data)
-    {
-        //find any formresults shortcode
-        $pattern = "/\[tsjippy_formresults([^\]]*[formname,slug]=(.*)[^\]]*)\]/s";
-
-        //if there are matches
-        if (preg_match_all($pattern, $data['post_content'], $matches)) {
-            //loop over all the matches
-            foreach ($matches[1] as $key => $shortcodeAtts) {
-                //this shortcode has no id attribute
-                if (!str_contains($shortcodeAtts, ' id=')) {
-                    $shortcode                = $matches[0][$key];
-
-                    $this->formData->slug     = $matches[2][$key];
-
-                    $this->getForm();
-
-                    $shortcodeId    = $this->insertInDb($this->formData->id);
-
-                    $newShortcode    = str_replace('formresults', "formresults id=$shortcodeId", $shortcode);
-
-                    //replace the old shortcode with the new one
-                    $pos = strpos($data['post_content'], $shortcode);
-                    if ($pos !== false) {
-                        $data['post_content'] = substr_replace($data['post_content'], $newShortcode, $pos, strlen($shortcode));
-                    }
-                }
-            }
-        }
-
-        return $data;
     }
 }
