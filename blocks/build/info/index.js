@@ -125,18 +125,16 @@ function Edit({
           onChange: value => setText(value)
         })
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("fieldset", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
       ...blockProps,
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("legend", {
-        children: "Info"
-      }), attributes.text == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
+      children: attributes.text == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextareaControl, {
         label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Info Messages", 'tsjippy'),
         help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("The text which is visible when hovered over the icon", 'tsjippy'),
         value: text,
         onChange: value => setText(value)
       }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_components_InfoBox_js__WEBPACK_IMPORTED_MODULE_4__.InfoBox, {
         text: attributes.text
-      })]
+      })
     })]
   });
 }
@@ -325,7 +323,7 @@ module.exports = window["wp"]["i18n"];
   \*****************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/info","version":"0.1.0","title":"Info element","category":"form-elements","icon":"forms","description":"Shows an info icon and a message on hover","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"text":{"type":"string","default":""}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/info","version":"0.1.0","title":"Info element","category":"form-elements","icon":"forms","description":"Shows an info icon and a message on hover","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","style":"file:./style-index.css","attributes":{"text":{"type":"string","default":""}}}');
 
 /***/ }
 

@@ -87,21 +87,20 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 			</PanelBody>
 		</InspectorControls>
     			
-		<fieldset { ...blockProps }>
-			<legend>File Uploader</legend>
-				{
-					attributes.name == '' ?
-						<TextControl
-							label    = { __("Name", 'tsjippy')}
-							value    = { name }
-							onChange = { ( value ) => setName( value )}
-						/> 
-					:
-						<Rendered
-							attributes     = { attributes }
-						/>
-				}
-		</fieldset>
+		<div {...blockProps}>
+			{
+				attributes.name == '' ?
+					<TextControl
+						label    = { __("Name", 'tsjippy')}
+						value    = { name }
+						onChange = { ( value ) => setName( value )}
+					/> 
+				:
+					<Rendered
+						attributes     = { attributes }
+					/>
+			}
+		</div>
 		</>
 	);
 }

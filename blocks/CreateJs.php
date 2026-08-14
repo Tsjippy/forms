@@ -368,14 +368,6 @@ class <?php echo esc_attr($className);?> {
     // Callback function to execute when mutations are observed
     onMutation = (mutationList, observer) => {
         for (const mutation of mutationList) {
-            if (mutation.type === "childList") {
-            console.log("A child node has been added or removed.");
-            } else if (mutation.type === "attributes") {
-            console.log(`The ${mutation.attributeName} attribute was modified.`);
-            }else{
-                console.log(mutation);
-            }
-
             this.handleConditions(mutation.target);
         }
     };
@@ -466,6 +458,10 @@ class <?php echo esc_attr($className);?> {
     processFields = (el) => {
         // Ge the name of the input that just got changed
         let blockId = el.dataset.blockid;
+
+        if(blockId == undefined){
+            return;
+        }
 
         // Get the form this input belongs to
         let form    = el.closest('form');

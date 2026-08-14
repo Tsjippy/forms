@@ -10,6 +10,7 @@ import {
     CheckboxControl,
     RadioControl
 } from '@wordpress/components';
+import { useMemo } from '@wordpress/element';
 
 import * as elementAttributes from './element_attributes.js';
 
@@ -55,7 +56,28 @@ export const dynamicInputs = (attributes, type, saveFunction) => {
 
     const controls = [];
 
-    inputData.forEach((data, index) => {
+    const sortedInputData = useMemo(() => {
+        return [...inputData].sort((a, b) => {
+            const aValue = values[a.attribute];
+            const bValue = values[b.attribute];
+
+            const aHasValue =
+                aValue !== '' &&
+                aValue !== null &&
+                aValue !== undefined &&
+                !(typeof aValue === 'object' && Object.keys(aValue).length === 0);
+
+            const bHasValue =
+                bValue !== '' &&
+                bValue !== null &&
+                bValue !== undefined &&
+                !(typeof bValue === 'object' && Object.keys(bValue).length === 0);
+
+            return Number(bHasValue) - Number(aHasValue);
+        });
+    }, []); // only once
+
+    sortedInputData.forEach((data, index) => {
         const attributeName = data.attribute;
         let attributeValue  = values[data.attribute] ?? '';
 

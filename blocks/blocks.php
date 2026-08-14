@@ -246,10 +246,51 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
      */
     $id = esc_attr( $block['attrs']['blockId'] );
     if ( !empty( $block['attrs']['blockId'] ) && !str_contains($blockContent, "data-blockid='$id'")) {
-        $blockContent = strReplaceFirst( 'class=', "data-blockid='$id' class=", $blockContent );
+        $processor = new \WP_HTML_Tag_Processor( $blockContent );
+
+        if ( $processor->next_tag() ) {
+            $processor->set_attribute( 'data-blockid', $id );
+
+            $blockContent = $processor->get_updated_html();
+        }
     }
 
+    /**
+     * Add hidden class if needed
+     */
+
+    // Hidden is enabled.
+    if ( !empty( $block['attrs']['hidden'] )) {
+        $processor = new \WP_HTML_Tag_Processor( $blockContent );
+
+        if ( $processor->next_tag() ) {
+            $processor->add_class( 'hidden' );
+
+            $blockContent = $processor->get_updated_html();
+        }
+    }
+
+
     return $blockContent;
+}
+
+/**
+ * Determine whether a block has a formbuilder ancestor.
+ * 
+ * @param   array   $block
+ */
+function isFormbuilderChild( $block ) {
+	if ( empty( $block['parent'] ) ) {
+		return false;
+	}
+
+	foreach ( $block['parent'] as $parent ) {
+		if ( 'tsjippy-forms/formbuilder' === $parent ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -462,4 +503,31 @@ function showFormSelector($atts = [])
     <?php
 
     return ob_get_clean();
+}
+
+
+add_filter( 'register_block_type_args', __NAMESPACE__.'\addGlobalAttributes' );
+/**
+ * Add filter attributes to all blocks contained in a formbuilder block
+ *
+ * @param array $args Arguments for registering a block type.
+ * 
+ * @return array
+ */
+function addGlobalAttributes( $args ) {
+    if ( ! isset( $args['attributes'] ) || ! is_array( $args['attributes'] ) ) {
+		$args['attributes'] = array();
+	}
+    
+    $args['attributes']['blockId'] = array(
+        'type'    => 'string',
+        'default' => '',
+    );
+
+    $args['attributes']['hidden'] = array(
+        'type'    => 'boolean',
+        'default' => false,
+    );
+
+	return $args;
 }

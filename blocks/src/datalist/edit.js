@@ -57,21 +57,20 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				/>
 			</PanelBody>
 		</InspectorControls>
-    			
-		<fieldset { ...blockProps }>
-			<legend>Datalist</legend>
-				<TextControl
-					label    = { __("Datalist Id", 'tsjippy')}
-					value    = { listId }
-					onChange = { ( value ) => setListId( value )}
-				/> 
+    	
+		<div {...blockProps}>
+			<TextControl
+				label    = { __("Datalist Id", 'tsjippy')}
+				value    = { listId }
+				onChange = { ( value ) => setListId( value )}
+			/> 
 
-				<h4>Dynamic Options (prefill)</h4>
-				<PrefillOptionsSelector
-					value={ attributes.options_dynamic }
-					onChange={ (value) => setAttributes({ options_dynamic: value }) }
-				/>
-		</fieldset>
+			<h4>Dynamic Options (prefill)</h4>
+			<PrefillOptionsSelector
+				value={ attributes.options_dynamic }
+				onChange={ (value) => setAttributes({ options_dynamic: value }) }
+			/>
+		</div>
 		</>
 	);
 }

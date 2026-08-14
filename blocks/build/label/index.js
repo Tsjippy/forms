@@ -201,11 +201,9 @@ function Edit({
           onChange: text => setLabelText(text)
         })
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("fieldset", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
       ...blockProps,
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("legend", {
-        children: "Label"
-      }), attributes.text === '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+      children: attributes.text === '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
         label: "Label Text",
         value: labelText,
         onChange: text => setLabelText(text)
@@ -223,7 +221,7 @@ function Edit({
       }) : attributes.childAttr?.multiple ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_input_components_Multiple_js__WEBPACK_IMPORTED_MODULE_6__.Multiple, {
         inner: labelComponent,
         attributes: attributes.childAttr
-      }) : labelComponent]
+      }) : labelComponent
     })]
   });
 }
@@ -440,7 +438,7 @@ module.exports = window["wp"]["i18n"];
   \******************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/label","version":"0.1.0","title":"Form Input Label Wrapper","category":"form-elements","icon":"forms","description":"Input element label for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"text":{"type":"string","default":""},"childAttr":{"type":"object","default":{}}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/label","version":"0.1.0","title":"Form Input Label Wrapper","category":"form-elements","icon":"forms","description":"Input element label for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"text":{"type":"string","default":""},"childAttr":{"type":"object","default":{}}}}');
 
 /***/ }
 

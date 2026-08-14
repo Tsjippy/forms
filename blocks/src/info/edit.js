@@ -44,23 +44,22 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				/>
 			</PanelBody>
 		</InspectorControls>
-    			
-		<fieldset { ...blockProps }>
-			<legend>Info</legend>
-				{
-					attributes.text == '' ?
-						<TextareaControl
-							label    = { __("Info Messages", 'tsjippy')}
-							help     = { __("The text which is visible when hovered over the icon", 'tsjippy')}
-							value    = { text }
-							onChange = { ( value ) => setText( value ) }
-						/>
-					:
-						<InfoBox
-								text={ attributes.text }
-						/>
-				}
-		</fieldset>
+
+		<div {...blockProps}>
+			{
+				attributes.text == '' ?
+					<TextareaControl
+						label    = { __("Info Messages", 'tsjippy')}
+						help     = { __("The text which is visible when hovered over the icon", 'tsjippy')}
+						value    = { text }
+						onChange = { ( value ) => setText( value ) }
+					/>
+				:
+					<InfoBox
+							text={ attributes.text }
+					/>
+			}
+		</div>	
 		</>
 	);
 }

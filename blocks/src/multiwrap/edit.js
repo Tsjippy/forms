@@ -3,7 +3,7 @@ import { InnerBlocks, useBlockProps, InspectorControls } from '@wordpress/block-
 import { PanelBody, TextControl, Placeholder } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
-import './editor.scss';
+
 import { Wrapper } from './components/Wrapper.js';
 /**
  * The edit function describes the structure of your block in the context of the
@@ -45,9 +45,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				/>
 			</PanelBody>
 		</InspectorControls>
-    			
-		<fieldset { ...blockProps }>
-			<legend>Multi Wrap</legend>
+
+		<div {...blockProps}>
 			{
 				!hasInnerBlocks ?
 					<>
@@ -70,7 +69,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						<InnerBlocks />
 					</Wrapper>
 			}
-		</fieldset>
+		</div>	
 		</>
 	);
 }

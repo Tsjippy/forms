@@ -1550,3 +1550,12 @@ form.wp-block-tsjippy-forms-formbuilder .block-list-appender .add-form-element-b
   z-index: 100;
   pointer-events: none;
 }
+
+.will-be-hidden {
+  background-color: darkgrey;
+}
+
+.formbuilder-child {
+  padding: 5px;
+  border-style: solid;
+}

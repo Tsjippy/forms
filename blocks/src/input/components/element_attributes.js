@@ -69,7 +69,7 @@ export const inputSchema = {
       { attribute: "min", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
-      { attribute: "step", expectedType: "number|any" },
+      { attribute: "step", expectedType: "number" },
       { attribute: "value", expectedType: "string" }
     ],
 
@@ -79,7 +79,7 @@ export const inputSchema = {
       { attribute: "min", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
-      { attribute: "step", expectedType: "number|any" },
+      { attribute: "step", expectedType: "number" },
       { attribute: "value", expectedType: "string" }
     ],
 
@@ -101,7 +101,7 @@ export const inputSchema = {
     file: [
       { attribute: "accept", expectedType: "string" },
       { attribute: "autofocus", expectedType: "boolean" },
-      { attribute: "capture", expectedType: "user|environment|boolean" },
+      { attribute: "capture", expectedType: "boolean" },
       { attribute: "multiple", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" }
     ],
@@ -129,20 +129,20 @@ export const inputSchema = {
       { attribute: "min", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
-      { attribute: "step", expectedType: "number|any" },
+      { attribute: "step", expectedType: "number" },
       { attribute: "value", expectedType: "string" }
     ],
 
     number: [
       { attribute: "autofocus", expectedType: "boolean" },
       { attribute: "list", expectedType: "string" },
-      { attribute: "max", expectedType: "string|number" },
-      { attribute: "min", expectedType: "string|number" },
+      { attribute: "max", expectedType: "string" },
+      { attribute: "min", expectedType: "string" },
       { attribute: "placeholder", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
-      { attribute: "step", expectedType: "number|any" },
-      { attribute: "value", expectedType: "string|number" }
+      { attribute: "step", expectedType: "number" },
+      { attribute: "value", expectedType: "string" }
     ],
 
     password: [
@@ -168,10 +168,10 @@ export const inputSchema = {
 
     range: [
       { attribute: "list", expectedType: "string" },
-      { attribute: "max", expectedType: "string|number" },
-      { attribute: "min", expectedType: "string|number" },
-      { attribute: "step", expectedType: "number|any" },
-      { attribute: "value", expectedType: "string|number" }
+      { attribute: "max", expectedType: "string" },
+      { attribute: "min", expectedType: "string" },
+      { attribute: "step", expectedType: "number" },
+      { attribute: "value", expectedType: "string" }
     ],
 
     reset: [
@@ -251,7 +251,7 @@ export const inputSchema = {
       { attribute: "min", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
-      { attribute: "step", expectedType: "number|any" },
+      { attribute: "step", expectedType: "number" },
       { attribute: "value", expectedType: "string" }
     ],
 
@@ -275,7 +275,7 @@ export const inputSchema = {
       { attribute: "min", expectedType: "string" },
       { attribute: "readonly", expectedType: "boolean" },
       { attribute: "required", expectedType: "boolean" },
-      { attribute: "step", expectedType: "number|any" },
+      { attribute: "step", expectedType: "number" },
       { attribute: "value", expectedType: "string" }
     ]
   },
@@ -287,7 +287,7 @@ export const inputSchema = {
     { attribute: "braillelabel", expectedType: "string" },
     { attribute: "brailleroledescription", expectedType: "string" },
     { attribute: "busy", expectedType: "boolean" },
-    { attribute: "checked", expectedType: "boolean|mixed" },
+    { attribute: "checked", expectedType: "boolean" },
     { attribute: "colcount", expectedType: "number" },
     { attribute: "colindex", expectedType: "number" },
     { attribute: "colindextext", expectedType: "string" },
@@ -303,9 +303,9 @@ export const inputSchema = {
     { attribute: "expanded", expectedType: "boolean" },
     { attribute: "flowto", expectedType: "string" },
     { attribute: "grabbed", expectedType: "boolean" },
-    { attribute: "haspopup", expectedType: "boolean|menu|listbox|tree|grid|dialog" },
+    { attribute: "haspopup", expectedType: "boolean" },
     { attribute: "hidden", expectedType: "boolean" },
-    { attribute: "invalid", expectedType: "boolean|grammar|spelling" },
+    { attribute: "invalid", expectedType: "boolean" },
     { attribute: "keyshortcuts", expectedType: "string" },
     { attribute: "label", expectedType: "string" },
     { attribute: "labelledby", expectedType: "string" },
@@ -318,7 +318,7 @@ export const inputSchema = {
     { attribute: "owns", expectedType: "string" },
     { attribute: "placeholder", expectedType: "string" },
     { attribute: "posinset", expectedType: "number" },
-    { attribute: "pressed", expectedType: "boolean|mixed" },
+    { attribute: "pressed", expectedType: "boolean" },
     { attribute: "readonly", expectedType: "boolean" },
     { attribute: "relevant", expectedType: "additions|removals|text|all|additions text|additions removals|removals text|additions removals text" },
     { attribute: "required", expectedType: "boolean" },

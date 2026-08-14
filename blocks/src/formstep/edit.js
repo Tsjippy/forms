@@ -2,7 +2,6 @@ import { __ } from '@wordpress/i18n';
 import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls } from '@wordpress/block-editor';
 import { Button, Dropdown, SelectControl, PanelBody, TextControl, Placeholder } from '@wordpress/components';
 import { useSelect, useDispatch, } from '@wordpress/data';
-import './editor.scss';
 import { useEffect } from '@wordpress/element';
 
 /**
@@ -56,13 +55,13 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     }
 
 	return (
-        <fieldset { ...innerBlocksProps } className="formstep" style = {{padding: '20px'}} key="formstep">
-			<legend>Formstep</legend>
-			<label >
-				{ attributes.text }
-				{ children }
-			</label>
-		</fieldset>
+        <div {...blockProps}>
+            <h3 >
+                { attributes.text }
+            </h3>
+            
+            { children }
+        </div>
 	);
 }
 

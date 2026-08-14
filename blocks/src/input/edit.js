@@ -238,6 +238,14 @@ export default function Edit({
         );
     };
 
+    
+    const value =
+        attributes.type ||
+        attributes.name ||
+        props.block?.name?.split('/')?.[1] || '';
+
+    const legend = value.charAt(0).toUpperCase() + value.slice(1);
+
     return (
         <>
             <InspectorControls>
@@ -258,14 +266,6 @@ export default function Edit({
 
                     {inputNameComponent}
                     {inputValue}
-
-                    <ToggleControl
-                        label={__('Hide', 'tsjippy')}
-                        checked={!!attributes.hidden }
-                        onChange={(hidden) =>
-                            setAttributes({ hidden })
-                        }
-                    />
 
                     <ToggleControl
                         label={__(
@@ -324,19 +324,9 @@ export default function Edit({
             </InspectorControls>
 
             <div {...blockProps}>
-                {attributes.multiple ? (renderPropertiesForm()) :
-                    <fieldset>
-                        <legend>
-                            {(attributes.type || '')
-                                .charAt(0)
-                                .toUpperCase() +
-                                (attributes.type || '').slice(1)}{' '}
-                            input
-                        </legend>
-
-                        {renderPropertiesForm()}
-                    </fieldset>
-                }
+                { legend } input
+                <br></br>
+                {renderPropertiesForm()}
             </div>
         </>
     );

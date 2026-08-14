@@ -94,28 +94,27 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				/>
 			</PanelBody>
 		</InspectorControls>
-    			
-		<fieldset { ...blockProps }>
-			<legend>Dropdown Select</legend>
-				{
-					attributes.name == '' ?
-						<TextControl
-							label    = { __("Name", 'tsjippy')}
-							value    = { name }
-							onChange = { ( value ) => setName( value )}
-						/> 
+
+		<div {...blockProps}>
+			{
+				attributes.name == '' ?
+					<TextControl
+						label    = { __("Name", 'tsjippy')}
+						value    = { name }
+						onChange = { ( value ) => setName( value )}
+					/> 
+				:
+					isLoading || !prefillData
+					? 	<Spinner />
 					:
-						isLoading || !prefillData
-						? 	<Spinner />
-						:
-						<RenderedSelect
-							attributes     = { attributes }
-							blockProps 	   = { blockProps }
-							dynamicOptions = { prefillData.multi }
-							defaultValue   = { attributes.dynamic_selected_value || '' }
-						/>
-				}
-		</fieldset>
+					<RenderedSelect
+						attributes     = { attributes }
+						blockProps 	   = { blockProps }
+						dynamicOptions = { prefillData.multi }
+						defaultValue   = { attributes.dynamic_selected_value || '' }
+					/>
+			}
+		</div>	
 		</>
 	);
 }

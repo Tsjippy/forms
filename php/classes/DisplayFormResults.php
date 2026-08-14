@@ -262,7 +262,7 @@ class DisplayFormResults extends SubmitForm
             $submission     = new \stdClass();
 
             $submission->id               = $counter;
-            $submission->form_id          = $this->formData->id;
+            $submission->block_id          = $this->formData->id;
 
             // Base submission data
             $submission->time_created     = $user->user_registered;
@@ -492,11 +492,11 @@ class DisplayFormResults extends SubmitForm
          * Build the Common Table Expressions (CTE) needed to make the pivot query
          */
         $splitElements      = $this->formData->split;
-        $existingColumns    = ['id', 'form_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
+        $existingColumns    = ['id', 'block_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
 
         $columns            = $existingColumns;
 
-        $columnsString        = implode(', S. ', $columns);
+        $columnsString      = implode(', S. ', $columns);
 
         $innerJoinString    = '';
 
@@ -631,7 +631,7 @@ class DisplayFormResults extends SubmitForm
          */
         // Form Id
         if (isset($this->formData->id)) {
-            $where[]    = "S.form_id=%d";
+            $where[]    = "S.block_id=%d";
             $values[]   = $this->formData->id;
         }
 
@@ -861,7 +861,7 @@ class DisplayFormResults extends SubmitForm
                 return $result;
             }
 
-            $this->getForm($this->tableSettings->form_id);
+            $this->getForm($this->tableSettings->block_id);
 
             if (empty($this->tableSettings->view_right_roles)) {
                 $this->tableSettings->view_right_roles    = [];

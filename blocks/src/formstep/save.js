@@ -4,7 +4,7 @@
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import { useBlockProps, useInnerBlocksProps  } from '@wordpress/block-editor';
+import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 
 /**
  * The save function defines the way in which the different attributes should
@@ -20,9 +20,10 @@ export default function save({attributes}) {
 		className: 'step-hidden'
 	});
 
-    const innerBlocksProps 	= useInnerBlocksProps.save( blockProps );
-
 	return (
-		<div {...innerBlocksProps} data-blockid={attributes.blockId}/>
+		<div {...blockProps} data-blockid={attributes.blockId}>
+			<h3>{attributes.text}</h3>
+			<InnerBlocks.Content />
+		</div>
 	);
 }

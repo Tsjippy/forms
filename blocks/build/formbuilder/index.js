@@ -2129,9 +2129,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _js_forms_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./../../../js/forms.js */ "../js/forms.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_14__);
-
 
 
 
@@ -2407,42 +2404,40 @@ function Edit({
         onToggle: () => setRemindersFormVisibility(prev => !prev),
         children: isRemindersFormVisible ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Hide Reminders Form', 'tsjippy') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Show Reminders Form', 'tsjippy')
       })]
-    }), /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_14__.createElement)("fieldset", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
       ...blockProps,
-      key: "main_form_fieldset"
-    }, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("legend", {
-      children: [attributes.name, " Form"]
-    }), attributes.method == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(FormMethodComponent, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("br", {})]
-    }) : attributes.name == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
-      label: "Form Name",
-      value: formName,
-      onChange: value => setFormName(value)
-    }) : isEmailsFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_emails_EmailSettings_js__WEBPACK_IMPORTED_MODULE_11__.EmailSettings, {
-      blockId: attributes.id,
-      formElements: []
-    }) : isRemindersFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(FormReminderPanel, {
-      blockId: attributes.id,
-      saveInMeta: attributes.user_meta
-    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
-        template: TEMPLATE,
-        renderAppender: false
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_Submitter_js__WEBPACK_IMPORTED_MODULE_10__.FormSubmitter, {
-        attributes: attributes
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.Inserter, {
-        rootClientId: clientId,
-        isAppender: true,
-        renderToggle: ({
-          onToggle
-        }) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
-          variant: "primary",
-          onClick: onToggle,
-          icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
-          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add Form Blocks', 'tsjippy')
-        })
-      })]
-    }))]
+      children: attributes.method == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(FormMethodComponent, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("br", {})]
+      }) : attributes.name == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+        label: "Form Name",
+        value: formName,
+        onChange: value => setFormName(value)
+      }) : isEmailsFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_emails_EmailSettings_js__WEBPACK_IMPORTED_MODULE_11__.EmailSettings, {
+        blockId: attributes.id,
+        formElements: []
+      }) : isRemindersFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(FormReminderPanel, {
+        blockId: attributes.id,
+        saveInMeta: attributes.user_meta
+      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
+          template: TEMPLATE,
+          renderAppender: false
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_Submitter_js__WEBPACK_IMPORTED_MODULE_10__.FormSubmitter, {
+          attributes: attributes
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.Inserter, {
+          rootClientId: clientId,
+          isAppender: true,
+          renderToggle: ({
+            onToggle
+          }) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
+            variant: "primary",
+            onClick: onToggle,
+            icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add Form Blocks', 'tsjippy')
+          })
+        })]
+      })
+    })]
   });
 }
 
@@ -3160,6 +3155,130 @@ const addConditionsForm = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_4__.cre
 
 /***/ },
 
+/***/ "./src/formbuilder/filters/addHiddenAttribute.js"
+/*!*******************************************************!*\
+  !*** ./src/formbuilder/filters/addHiddenAttribute.js ***!
+  \*******************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_hooks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/hooks */ "@wordpress/hooks");
+/* harmony import */ var _wordpress_hooks__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_hooks__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_compose__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/compose */ "@wordpress/compose");
+/* harmony import */ var _wordpress_compose__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__);
+
+
+
+
+
+
+
+/**
+ * Add the hidden and form builder attribute.
+ */
+
+(0,_wordpress_hooks__WEBPACK_IMPORTED_MODULE_0__.addFilter)('blocks.registerBlockType', 'tsjippy-forms/add-hidden-attribute', settings => {
+  console.log(settings);
+  settings.attributes = {
+    ...settings.attributes,
+    hidden: {
+      type: 'boolean',
+      default: false
+    },
+    formbuilderChild: {
+      type: 'boolean',
+      default: false
+    }
+  };
+  return settings;
+});
+
+/**
+ * Add the toggle control.
+ */
+const withHiddenControl = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.createHigherOrderComponent)(BlockEdit => {
+  return props => {
+    const {
+      attributes,
+      setAttributes,
+      clientId
+    } = props;
+    const isFormBuilderChild = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.useSelect)(select => {
+      const {
+        getBlockParents,
+        getBlock
+      } = select('core/block-editor');
+      return getBlockParents(clientId).some(parentId => getBlock(parentId)?.name === 'tsjippy-forms/formbuilder');
+    }, [clientId]);
+    if (!isFormBuilderChild) {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockEdit, {
+        ...props
+      });
+    }
+    (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useEffect)(() => {
+      setAttributes({
+        formbuilderChild: true
+      });
+    }, [isFormBuilderChild]);
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockEdit, {
+        ...props
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.InspectorControls, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.PanelBody, {
+          title: "Visibility",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.ToggleControl, {
+            label: "Hidden",
+            checked: !!attributes.hidden,
+            onChange: hidden => setAttributes({
+              hidden
+            })
+          })
+        })
+      })]
+    });
+  };
+}, 'withHiddenControl');
+(0,_wordpress_hooks__WEBPACK_IMPORTED_MODULE_0__.addFilter)('editor.BlockEdit', 'tsjippy-forms/hidden-control', withHiddenControl);
+
+/**
+ * Add the hidden class in the editor.
+ */
+const withHiddenClass = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.createHigherOrderComponent)(BlockListBlock => {
+  return props => {
+    const {
+      clientId
+    } = props;
+    const {
+      getBlockParents,
+      getBlockName
+    } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.select)('core/block-editor');
+    const isInsideFormBuilder = getBlockParents(clientId).some(parentId => getBlockName(parentId) === 'tsjippy-forms/formbuilder');
+    if (!isInsideFormBuilder) {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockListBlock, {
+        ...props
+      });
+    }
+    const className = [props.className, props.attributes?.hidden ? 'will-be-hidden' : '', 'formbuilder-child'].filter(Boolean).join(' ');
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockListBlock, {
+      ...props,
+      className: className
+    });
+  };
+}, 'withHiddenClass');
+(0,_wordpress_hooks__WEBPACK_IMPORTED_MODULE_0__.addFilter)('editor.BlockListBlock', 'tsjippy-forms/hidden-class', withHiddenClass);
+
+/***/ },
+
 /***/ "./src/formbuilder/filters/hasConditionsIndicator.js"
 /*!***********************************************************!*\
   !*** ./src/formbuilder/filters/hasConditionsIndicator.js ***!
@@ -3317,6 +3436,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _store_dynamicValuesStore__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./store/dynamicValuesStore */ "./src/formbuilder/store/dynamicValuesStore.js");
 /* harmony import */ var _filters_addButtonToInnerBlocks__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./filters/addButtonToInnerBlocks */ "./src/formbuilder/filters/addButtonToInnerBlocks.js");
 /* harmony import */ var _filters_hasConditionsIndicator__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./filters/hasConditionsIndicator */ "./src/formbuilder/filters/hasConditionsIndicator.js");
+/* harmony import */ var _filters_addHiddenAttribute__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./filters/addHiddenAttribute */ "./src/formbuilder/filters/addHiddenAttribute.js");
 /**
  * Registers a new block provided a unique name and an object defining its behavior.
  *
@@ -3336,6 +3456,7 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * Internal dependencies
  */
+
 
 
 
@@ -3786,7 +3907,7 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "step",
-      expectedType: "number|any"
+      expectedType: "number"
     }, {
       attribute: "value",
       expectedType: "string"
@@ -3808,7 +3929,7 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "step",
-      expectedType: "number|any"
+      expectedType: "number"
     }, {
       attribute: "value",
       expectedType: "string"
@@ -3858,7 +3979,7 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "capture",
-      expectedType: "user|environment|boolean"
+      expectedType: "boolean"
     }, {
       attribute: "multiple",
       expectedType: "boolean"
@@ -3918,7 +4039,7 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "step",
-      expectedType: "number|any"
+      expectedType: "number"
     }, {
       attribute: "value",
       expectedType: "string"
@@ -3931,10 +4052,10 @@ const inputSchema = {
       expectedType: "string"
     }, {
       attribute: "max",
-      expectedType: "string|number"
+      expectedType: "string"
     }, {
       attribute: "min",
-      expectedType: "string|number"
+      expectedType: "string"
     }, {
       attribute: "placeholder",
       expectedType: "string"
@@ -3946,10 +4067,10 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "step",
-      expectedType: "number|any"
+      expectedType: "number"
     }, {
       attribute: "value",
-      expectedType: "string|number"
+      expectedType: "string"
     }],
     password: [{
       attribute: "autofocus",
@@ -4003,16 +4124,16 @@ const inputSchema = {
       expectedType: "string"
     }, {
       attribute: "max",
-      expectedType: "string|number"
+      expectedType: "string"
     }, {
       attribute: "min",
-      expectedType: "string|number"
+      expectedType: "string"
     }, {
       attribute: "step",
-      expectedType: "number|any"
+      expectedType: "number"
     }, {
       attribute: "value",
-      expectedType: "string|number"
+      expectedType: "string"
     }],
     reset: [{
       attribute: "formaction",
@@ -4196,7 +4317,7 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "step",
-      expectedType: "number|any"
+      expectedType: "number"
     }, {
       attribute: "value",
       expectedType: "string"
@@ -4252,7 +4373,7 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "step",
-      expectedType: "number|any"
+      expectedType: "number"
     }, {
       attribute: "value",
       expectedType: "string"
@@ -4278,7 +4399,7 @@ const inputSchema = {
     expectedType: "boolean"
   }, {
     attribute: "checked",
-    expectedType: "boolean|mixed"
+    expectedType: "boolean"
   }, {
     attribute: "colcount",
     expectedType: "number"
@@ -4326,13 +4447,13 @@ const inputSchema = {
     expectedType: "boolean"
   }, {
     attribute: "haspopup",
-    expectedType: "boolean|menu|listbox|tree|grid|dialog"
+    expectedType: "boolean"
   }, {
     attribute: "hidden",
     expectedType: "boolean"
   }, {
     attribute: "invalid",
-    expectedType: "boolean|grammar|spelling"
+    expectedType: "boolean"
   }, {
     attribute: "keyshortcuts",
     expectedType: "string"
@@ -4371,7 +4492,7 @@ const inputSchema = {
     expectedType: "number"
   }, {
     attribute: "pressed",
-    expectedType: "boolean|mixed"
+    expectedType: "boolean"
   }, {
     attribute: "readonly",
     expectedType: "boolean"
@@ -4443,16 +4564,6 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 // extracted by mini-css-extract-plugin
 
-
-/***/ },
-
-/***/ "react"
-/*!************************!*\
-  !*** external "React" ***!
-  \************************/
-(module) {
-
-module.exports = window["React"];
 
 /***/ },
 

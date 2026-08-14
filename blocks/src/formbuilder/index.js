@@ -25,6 +25,7 @@ import './store/conditionsStore';
 import './store/dynamicValuesStore';
 import './filters/addButtonToInnerBlocks';
 import './filters/hasConditionsIndicator';
+import './filters/addHiddenAttribute';
 
 /**
  * Every block starts by registering a new block type definition.

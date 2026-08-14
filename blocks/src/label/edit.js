@@ -102,8 +102,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 			</PanelBody>
 		</InspectorControls>
     			
-		<fieldset { ...blockProps }>
-			<legend>Label</legend>
+		<div {...blockProps}>
 			{
 				attributes.text === '' ?
 					<TextControl
@@ -137,7 +136,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						:
 							labelComponent
 			}
-		</fieldset>
+		</div>
 		</>
 	);
 }

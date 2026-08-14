@@ -305,9 +305,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				</PanelBody>
 			</InspectorControls>
 
-			<fieldset { ...blockProps }  key="main_form_fieldset">
-				<legend>{ attributes.name } Form</legend>
-
+			<div {...blockProps}>
 				{ 
 					attributes.method == '' ? 
 					<>
@@ -331,8 +329,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						:
 							isRemindersFormVisible ? 
 								<FormReminderPanel
-    								blockId= { attributes.id }
-    								saveInMeta = { attributes.user_meta }
+									blockId= { attributes.id }
+									saveInMeta = { attributes.user_meta }
 								/>			
 								:
 								<>
@@ -360,7 +358,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 									/>
 								</>
 				}
-			</fieldset>
+			</div>
 		</>
 	);
 }

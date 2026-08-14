@@ -12,7 +12,7 @@ add_action('admin_footer-post.php', function(){
 
     //upgradeDatabase();
 
-    insertNewForms();
+    //insertNewForms();
 
 });
 
@@ -124,7 +124,6 @@ function sendBlockContent(block, postId){
         'remove_button_content' => 'remove',
         'multiple' => 'multiple',
         'required' => 'required',
-        'hidden' => 'hidden',
         'options_dynamic' => 'default_array_value',
         'dynamic_value' => 'default_value',
     ];
@@ -479,6 +478,10 @@ function sendBlockContent(block, postId){
              * Add to the current parent
              */
             $attributes['blockId']  = $element->id;
+
+            if($element->hidden){
+                $attributes['hidden']   = true;
+            }
 
             $current = &$stack[count($stack) - 1];
 

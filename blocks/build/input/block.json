@@ -14,7 +14,6 @@
   "textdomain": "tsjippy",
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
-  "style": "file:./style-index.css",
   "attributes": {
     "type": {
       "type": "string",
@@ -65,10 +64,6 @@
       "default": false
     },
     "hasLabelParent": {
-      "type": "boolean",
-      "default": false
-    },
-    "hidden": {
       "type": "boolean",
       "default": false
     },

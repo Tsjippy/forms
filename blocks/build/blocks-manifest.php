@@ -18,8 +18,6 @@ return array(
 		),
 		'textdomain' => 'tsjippy',
 		'editorScript' => 'file:./index.js',
-		'editorStyle' => 'file:./index.css',
-		'style' => 'file:./style-index.css',
 		'attributes' => array(
 			'id' => array(
 				'type' => 'string',
@@ -54,8 +52,6 @@ return array(
 		),
 		'textdomain' => 'tsjippy',
 		'editorScript' => 'file:./index.js',
-		'editorStyle' => 'file:./index.css',
-		'style' => 'file:./style-index.css',
 		'viewScript' => 'tsjippy_fileupload_script',
 		'attributes' => array(
 			'name' => array(
@@ -219,8 +215,6 @@ return array(
 		),
 		'textdomain' => 'tsjippy',
 		'editorScript' => 'file:./index.js',
-		'editorStyle' => 'file:./index.css',
-		'style' => 'file:./style-index.css',
 		'viewScript' => 'file:./view.js',
 		'attributes' => array(
 			'text' => array(
@@ -246,9 +240,7 @@ return array(
 		),
 		'textdomain' => 'tsjippy',
 		'editorScript' => 'file:./index.js',
-		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js',
 		'attributes' => array(
 			'text' => array(
 				'type' => 'string',
@@ -274,7 +266,6 @@ return array(
 		'textdomain' => 'tsjippy',
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
-		'style' => 'file:./style-index.css',
 		'attributes' => array(
 			'type' => array(
 				'type' => 'string',
@@ -332,10 +323,6 @@ return array(
 				'type' => 'boolean',
 				'default' => false
 			),
-			'hidden' => array(
-				'type' => 'boolean',
-				'default' => false
-			),
 			'reminderConditions' => array(
 				'type' => 'array',
 				'default' => array(
@@ -369,7 +356,6 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js',
 		'attributes' => array(
 			'text' => array(
 				'type' => 'string',
@@ -400,8 +386,6 @@ return array(
 		),
 		'textdomain' => 'tsjippy',
 		'editorScript' => 'file:./index.js',
-		'editorStyle' => 'file:./index.css',
-		'style' => 'file:./style-index.css',
 		'attributes' => array(
 			'add_button_content' => array(
 				'type' => 'string',
