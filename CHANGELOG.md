@@ -14,6 +14,7 @@
 - forms.js dependency
 - e-mail settings form
 - dynamic values store
+- is formbuilder child attribute
 
 ### Changed
 - added input element attributes form
