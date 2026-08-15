@@ -299,6 +299,7 @@ function Edit({
     }, 800);
     return () => clearTimeout(timeoutId);
   }, [name, attributes.name, setAttributes]);
+  const legend = attributes.name.charAt(0).toUpperCase() + attributes.name.slice(1);
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InspectorControls, {
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.PanelBody, {
@@ -358,11 +359,13 @@ function Edit({
         label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Name", 'tsjippy'),
         value: name,
         onChange: value => setName(value)
-      }) : isLoading || !prefillData ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, {}) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_RenderedSelect_js__WEBPACK_IMPORTED_MODULE_5__.RenderedSelect, {
-        attributes: attributes,
-        blockProps: blockProps,
-        dynamicOptions: prefillData.multi,
-        defaultValue: attributes.dynamic_selected_value || ''
+      }) : isLoading || !prefillData ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, {}) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
+        children: [legend, " Select", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_RenderedSelect_js__WEBPACK_IMPORTED_MODULE_5__.RenderedSelect, {
+          attributes: attributes,
+          blockProps: blockProps,
+          dynamicOptions: prefillData.multi,
+          defaultValue: attributes.dynamic_selected_value || ''
+        })]
       })
     })]
   });

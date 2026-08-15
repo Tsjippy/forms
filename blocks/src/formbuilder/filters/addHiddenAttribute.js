@@ -12,7 +12,6 @@ addFilter(
 	'blocks.registerBlockType',
 	'tsjippy-forms/add-hidden-attribute',
 	( settings ) => {
-		console.log(settings);
 		settings.attributes = {
 			...settings.attributes,
 			hidden: {
@@ -37,27 +36,32 @@ const withHiddenControl = createHigherOrderComponent(
 		return ( props ) => {
 			const { attributes, setAttributes, clientId } = props;
 
-			const isFormBuilderChild = useSelect(
-				( select ) => {
-					const { getBlockParents, getBlock } =
-						select( 'core/block-editor' );
+			const { getBlockParents, getBlockName } =
+                select( 'core/block-editor' );
 
-					return getBlockParents( clientId ).some(
-						( parentId ) =>
-							getBlock( parentId )?.name ===
-							'tsjippy-forms/formbuilder'
-					);
-				},
-				[ clientId ]
-			);
+			const blockParents = getBlockParents( clientId );
 
-			if ( ! isFormBuilderChild ) {
+            const isInsideFormBuilder = blockParents.some(
+                ( parentId ) =>
+                    getBlockName( parentId ) === 'tsjippy-forms/formbuilder'
+            );
+
+			const isInsideLabel = blockParents.some(
+                ( parentId ) =>
+                    getBlockName( parentId ) === 'tsjippy-forms/label'
+            );
+
+			if ( ! isInsideFormBuilder ) {
 				return <BlockEdit { ...props } />;
 			}
 
 			useEffect( () => {
 				setAttributes( { formbuilderChild: true } );
-			}, [ isFormBuilderChild ] );
+			}, [ isInsideFormBuilder ] );
+
+			if ( isInsideLabel ) {
+				return <BlockEdit { ...props } />;
+			}
 
 			return (
 				<Fragment>
@@ -98,12 +102,19 @@ const withHiddenClass = createHigherOrderComponent(
             const { getBlockParents, getBlockName } =
                 select( 'core/block-editor' );
 
-            const isInsideFormBuilder = getBlockParents( clientId ).some(
+			const blockParents = getBlockParents( clientId );
+
+            const isInsideFormBuilder = blockParents.some(
                 ( parentId ) =>
                     getBlockName( parentId ) === 'tsjippy-forms/formbuilder'
             );
 
-            if ( ! isInsideFormBuilder ) {
+			const isInsideLabel = blockParents.some(
+                ( parentId ) =>
+                    getBlockName( parentId ) === 'tsjippy-forms/label'
+            );
+
+            if ( ! isInsideFormBuilder || isInsideLabel ) {
                 return <BlockListBlock { ...props } />;
             }
 

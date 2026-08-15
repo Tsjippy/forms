@@ -2,11 +2,13 @@ import { Children, isValidElement } from '@wordpress/element';
 import { cloneElement } from '@wordpress/element';
 
 export const Multiple = ( props ) => {
-    const addText     = props.attributes.add_button_content ?? '+';
-    const removeText  = props.attributes.remove_button_content ?? '-';
-    const inputType   = props.attributes.type ?? '';
+    console.log(props);
+
+    const addText     = props?.attributes?.add_button_content ?? '+';
+    const removeText  = props?.attributes?.remove_button_content ?? '-';
+    const inputType   = props?.attributes?.type ?? '';
     
-    const children = Children.toArray(props.inner?.props?.children);
+    const children    = Children.toArray(props?.inner?.props?.children);
 
     const labelText = children.find(
         child => typeof child === 'string'
@@ -16,7 +18,7 @@ export const Multiple = ( props ) => {
         child =>
             isValidElement(child) &&
             (child.type === 'h4' ||
-            child.props?.class === 'label-text')
+            child.props?.className === 'label-text')
     );
 
     const inputElements = children.filter(
@@ -26,6 +28,8 @@ export const Multiple = ( props ) => {
             child.type !== 'br'
     );
 
+    console.log(inputElements);
+
     return inputType === 'text' ? (
         <>
             {labelText && (
@@ -34,19 +38,23 @@ export const Multiple = ( props ) => {
 
             {labelElement && (labelElement)}
 
-            <div className={`${props.className ?? ''} option-wrapper`}>
-                <ul className="list-selection-list" />
-                <div className="multi-text-input-wrapper">
-                    {inputElements}
-                    {children.length === 0 && (props.inner)}
-                    <button
-                        type="button"
-                        className="small add-list-selection hidden"
-                    >
-                        add
-                    </button>
+            { props?.isSaving || false ?
+                <div className={`${props.className ?? ''} option-wrapper`}>
+                    <ul className="list-selection-list" />
+                    <div className="multi-text-input-wrapper">
+                        {inputElements}
+                        {children.length === 0 && (props.inner)}
+                        <button
+                            type="button"
+                            className="small add-list-selection hidden"
+                        >
+                            add
+                        </button>
+                    </div>
                 </div>
-            </div>
+                :
+                    inputElements
+            }
         </>
     ) : (
         <div

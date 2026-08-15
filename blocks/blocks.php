@@ -258,9 +258,10 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
     /**
      * Add hidden class if needed
      */
-
-    // Hidden is enabled.
-    if ( !empty( $block['attrs']['hidden'] )) {
+    if ( 
+        !empty( $block['attrs']['hidden'] ) &&  // Hidden is enabled.
+        empty( $block['attrs']['labelChild'])   // And not in a label element
+    ) {
         $processor = new \WP_HTML_Tag_Processor( $blockContent );
 
         if ( $processor->next_tag() ) {
@@ -269,7 +270,6 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
             $blockContent = $processor->get_updated_html();
         }
     }
-
 
     return $blockContent;
 }

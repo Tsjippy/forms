@@ -56,26 +56,26 @@ export const dynamicInputs = (attributes, type, saveFunction) => {
 
     const controls = [];
 
-    const sortedInputData = useMemo(() => {
-        return [...inputData].sort((a, b) => {
-            const aValue = values[a.attribute];
-            const bValue = values[b.attribute];
+    const sortedInputData = [...inputData].sort((a, b) => {
+        const aValue = values[a.attribute];
+        const bValue = values[b.attribute];
 
-            const aHasValue =
-                aValue !== '' &&
-                aValue !== null &&
-                aValue !== undefined &&
-                !(typeof aValue === 'object' && Object.keys(aValue).length === 0);
+        const aHasValue =
+            aValue !== '' &&
+            aValue !== null &&
+            aValue !== undefined &&
+            !(typeof aValue === 'object' &&
+            Object.keys(aValue).length === 0);
 
-            const bHasValue =
-                bValue !== '' &&
-                bValue !== null &&
-                bValue !== undefined &&
-                !(typeof bValue === 'object' && Object.keys(bValue).length === 0);
+        const bHasValue =
+            bValue !== '' &&
+            bValue !== null &&
+            bValue !== undefined &&
+            !(typeof bValue === 'object' &&
+            Object.keys(bValue).length === 0);
 
-            return Number(bHasValue) - Number(aHasValue);
-        });
-    }, []); // only once
+        return Number(bHasValue) - Number(aHasValue);
+    });
 
     sortedInputData.forEach((data, index) => {
         const attributeName = data.attribute;

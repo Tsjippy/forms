@@ -20,18 +20,20 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const Multiple = props => {
-  const addText = props.attributes.add_button_content ?? '+';
-  const removeText = props.attributes.remove_button_content ?? '-';
-  const inputType = props.attributes.type ?? '';
-  const children = _wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Children.toArray(props.inner?.props?.children);
+  console.log(props);
+  const addText = props?.attributes?.add_button_content ?? '+';
+  const removeText = props?.attributes?.remove_button_content ?? '-';
+  const inputType = props?.attributes?.type ?? '';
+  const children = _wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Children.toArray(props?.inner?.props?.children);
   const labelText = children.find(child => typeof child === 'string');
-  const labelElement = children.find(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && (child.type === 'h4' || child.props?.class === 'label-text'));
+  const labelElement = children.find(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && (child.type === 'h4' || child.props?.className === 'label-text'));
   const inputElements = children.filter(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && child.type !== 'h4' && child.type !== 'br');
+  console.log(inputElements);
   return inputType === 'text' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
     children: [labelText && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h4", {
       className: "label-text",
       children: labelText
-    }), labelElement && labelElement, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+    }), labelElement && labelElement, props?.isSaving || false ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
       className: `${props.className ?? ''} option-wrapper`,
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
         className: "list-selection-list"
@@ -43,7 +45,7 @@ const Multiple = props => {
           children: "add"
         })]
       })]
-    })]
+    }) : inputElements]
   }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
     className: "input-wrapper required flex",
     style: {
@@ -220,7 +222,8 @@ function Edit({
         })]
       }) : attributes.childAttr?.multiple ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_input_components_Multiple_js__WEBPACK_IMPORTED_MODULE_6__.Multiple, {
         inner: labelComponent,
-        attributes: attributes.childAttr
+        attributes: attributes.childAttr,
+        isSaving: false
       }) : labelComponent
     })]
   });
@@ -332,7 +335,8 @@ function save({
   };
   return attributes.childAttr.multiple ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_input_components_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {
     inner: labelComponent(false),
-    attributes: attributes.childAttr
+    attributes: attributes.childAttr,
+    isSaving: true
   }) : labelComponent(true);
 }
 

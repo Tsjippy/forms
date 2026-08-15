@@ -145,14 +145,18 @@ function dynamicJs($conditions, $innerBlocks){
         echo "\n\n\t\t" . wp_kses_post($triggerString);
 
         $comparing    = true;
-        
-        // Check if this trigger is only invoked for a changed or clicked action
-        if(
-            count($triggeredConditions) == 1 &&
-            count($triggeredConditions[0]->rules) == 1 &&
-            isset(['changed' => 1, 'clicked' => 1][$triggeredConditions[0]->rules[0]['equation']])
-        ){
-            $comparing = false;
+
+        // Check if this trigger is only invoked for one or more changed or clicked actions
+        foreach($triggeredConditions as $triggeredCondition){
+            foreach($triggeredCondition->rules as $rule){           
+                if(
+                    isset(['changed' => 1, 'clicked' => 1][$rule['equation']])
+                ){
+                    $comparing = false;
+                }else{
+                    $comparing = true;
+                }
+            }
         }
 
         /**
@@ -298,10 +302,10 @@ function dynamicJs($conditions, $innerBlocks){
 
         foreach($actions as $conditionIndex => $actionData){
             // The element to perform the action on
-            $targetQuery = "let target  = form.querySelector(`[data-blockid='{$actionData['target']}']`)";
+            $targetQuery = "target  = form.querySelector(`[data-blockid='{$actionData['target']}']`)";
                     
             // Show/hide/toggle the label in stead of the element
-            if(str_contains($actionData['action'], 'target.classList') && ($innerBlocks[$actionData['target']]['attrs']['hasLabelParent'] ?? false)){
+            if(str_contains($actionData['action'], 'target.classList') && ($innerBlocks[$actionData['target']]['attrs']['labelChild'] ?? false)){
                 $targetQuery .= ".closest('label')";
             }
                     
@@ -397,7 +401,7 @@ class <?php echo esc_attr($className);?> {
 
         Array.from(urlSearchParams).forEach (array => {
             this.forms.forEach(form => {
-                form.querySelectorAll(`[name^='${array[0]}' i]`).forEach (el => this.change_field_value(el, array[1], processFields, form));
+                form.querySelectorAll(`[name^='${array[0]}' i]`).forEach (el => this.change_field_property(el, 'value', array[1], form));
             });
         });
 
@@ -463,6 +467,8 @@ class <?php echo esc_attr($className);?> {
             return;
         }
 
+        let target;
+
         // Get the form this input belongs to
         let form    = el.closest('form');
         <?php 
@@ -520,6 +526,7 @@ function buildJs($block, $post){
     //Create js file
     $jsFileName = str_replace(' ', '_', strtolower(trim($formName)));
 
+    wp_mkdir_p(plugin_dir_path(__DIR__) . "js/dynamic/");
     $jsFilePath = plugin_dir_path(__DIR__) . "js/dynamic/{$jsFileName}";
     file_put_contents($jsFilePath . '.js', $js);
 

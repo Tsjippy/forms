@@ -20,7 +20,7 @@ import { InputHtml } from './components/InputHtml.js';
  */
 export default function save({ attributes }) {
     const className =
-        attributes.hidden && !attributes.hasLabelParent
+        attributes.hidden && !attributes.labelChild
             ? 'hidden'
             : undefined;
 
@@ -32,7 +32,7 @@ export default function save({ attributes }) {
         <InputHtml
             attributes={attributes}
             blockProps={blockProps}
-            hasLabelParent={attributes.hasLabelParent}
+            labelChild={attributes.labelChild}
 			isSaving={true}
         />
     );

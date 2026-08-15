@@ -78,7 +78,7 @@ export default function Edit({
         return () => clearTimeout(timeoutId);
     }, [inputName, attributes.name, setAttributes]);
 
-    const hasLabelParent = useSelect(
+    const labelChild = useSelect(
         (select) =>
             select('core/block-editor')
                 .getBlockParentsByBlockName(
@@ -89,12 +89,12 @@ export default function Edit({
     );
 
     useEffect(() => {
-        if (attributes.hasLabelParent !== hasLabelParent) {
-            setAttributes({ hasLabelParent });
+        if (attributes.labelChild !== labelChild) {
+            setAttributes({ labelChild });
         }
     }, [
-        hasLabelParent,
-        attributes.hasLabelParent,
+        labelChild,
+        attributes.labelChild,
         setAttributes,
     ]);
 
@@ -158,7 +158,7 @@ export default function Edit({
                 <InputHtml
                     attributes={attributes}
                     blockProps={blockProps}
-                    hasLabelParent={hasLabelParent}
+                    labelChild={labelChild}
                 />
             );
         }
@@ -195,7 +195,7 @@ export default function Edit({
                 <InputHtml
                     attributes={attributes}
                     blockProps={blockProps}
-                    hasLabelParent={hasLabelParent}
+                    labelChild={labelChild}
                 />
 
                 {inputTypeSelector}
@@ -238,13 +238,7 @@ export default function Edit({
         );
     };
 
-    
-    const value =
-        attributes.type ||
-        attributes.name ||
-        props.block?.name?.split('/')?.[1] || '';
-
-    const legend = value.charAt(0).toUpperCase() + value.slice(1);
+    const legend = attributes.type.charAt(0).toUpperCase() + attributes.type.slice(1);
 
     return (
         <>

@@ -208,7 +208,7 @@ __webpack_require__.r(__webpack_exports__);
 function InputHtml({
   attributes,
   blockProps,
-  hasLabelParent,
+  labelChild,
   isSaving = false
 }) {
   let html;
@@ -269,9 +269,10 @@ function InputHtml({
       value: isSaving ? "%value-placeholder%" : prefillValue
     });
   }
-  return attributes.multiple && !hasLabelParent ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {
+  return attributes.multiple && !labelChild ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {
     inner: html,
-    attributes: attributes
+    attributes: attributes,
+    isSaving: isSaving
   }) : html;
 }
 
@@ -295,18 +296,20 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const Multiple = props => {
-  const addText = props.attributes.add_button_content ?? '+';
-  const removeText = props.attributes.remove_button_content ?? '-';
-  const inputType = props.attributes.type ?? '';
-  const children = _wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Children.toArray(props.inner?.props?.children);
+  console.log(props);
+  const addText = props?.attributes?.add_button_content ?? '+';
+  const removeText = props?.attributes?.remove_button_content ?? '-';
+  const inputType = props?.attributes?.type ?? '';
+  const children = _wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Children.toArray(props?.inner?.props?.children);
   const labelText = children.find(child => typeof child === 'string');
-  const labelElement = children.find(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && (child.type === 'h4' || child.props?.class === 'label-text'));
+  const labelElement = children.find(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && (child.type === 'h4' || child.props?.className === 'label-text'));
   const inputElements = children.filter(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && child.type !== 'h4' && child.type !== 'br');
+  console.log(inputElements);
   return inputType === 'text' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
     children: [labelText && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h4", {
       className: "label-text",
       children: labelText
-    }), labelElement && labelElement, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+    }), labelElement && labelElement, props?.isSaving || false ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
       className: `${props.className ?? ''} option-wrapper`,
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
         className: "list-selection-list"
@@ -318,7 +321,7 @@ const Multiple = props => {
           children: "add"
         })]
       })]
-    })]
+    }) : inputElements]
   }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
     className: "input-wrapper required flex",
     style: {
@@ -412,16 +415,13 @@ const dynamicInputs = (attributes, type, saveFunction) => {
   }
   const values = attributes.inputAttributes || [];
   const controls = [];
-  const sortedInputData = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useMemo)(() => {
-    return [...inputData].sort((a, b) => {
-      const aValue = values[a.attribute];
-      const bValue = values[b.attribute];
-      const aHasValue = aValue !== '' && aValue !== null && aValue !== undefined && !(typeof aValue === 'object' && Object.keys(aValue).length === 0);
-      const bHasValue = bValue !== '' && bValue !== null && bValue !== undefined && !(typeof bValue === 'object' && Object.keys(bValue).length === 0);
-      return Number(bHasValue) - Number(aHasValue);
-    });
-  }, []); // only once
-
+  const sortedInputData = [...inputData].sort((a, b) => {
+    const aValue = values[a.attribute];
+    const bValue = values[b.attribute];
+    const aHasValue = aValue !== '' && aValue !== null && aValue !== undefined && !(typeof aValue === 'object' && Object.keys(aValue).length === 0);
+    const bHasValue = bValue !== '' && bValue !== null && bValue !== undefined && !(typeof bValue === 'object' && Object.keys(bValue).length === 0);
+    return Number(bHasValue) - Number(aHasValue);
+  });
   sortedInputData.forEach((data, index) => {
     const attributeName = data.attribute;
     let attributeValue = values[data.attribute] ?? '';
@@ -1318,14 +1318,14 @@ function Edit({
     }, 800);
     return () => clearTimeout(timeoutId);
   }, [inputName, attributes.name, setAttributes]);
-  const hasLabelParent = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/label').length > 0, [clientId]);
+  const labelChild = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/label').length > 0, [clientId]);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
-    if (attributes.hasLabelParent !== hasLabelParent) {
+    if (attributes.labelChild !== labelChild) {
       setAttributes({
-        hasLabelParent
+        labelChild
       });
     }
-  }, [hasLabelParent, attributes.hasLabelParent, setAttributes]);
+  }, [labelChild, attributes.labelChild, setAttributes]);
   const inputNameComponent = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
     label: "Input Name",
     value: inputName,
@@ -1366,7 +1366,7 @@ function Edit({
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_8__.InputHtml, {
         attributes: attributes,
         blockProps: blockProps,
-        hasLabelParent: hasLabelParent
+        labelChild: labelChild
       });
     }
     if (attributes.type === '') {
@@ -1383,7 +1383,7 @@ function Edit({
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_8__.InputHtml, {
         attributes: attributes,
         blockProps: blockProps,
-        hasLabelParent: hasLabelParent
+        labelChild: labelChild
       }), inputTypeSelector, inputNameComponent, selectableOptions, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h4", {
         children: "Dynamic Value (prefill)"
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_9__.PrefillValueSelector, {
@@ -1405,8 +1405,7 @@ function Edit({
       })]
     });
   };
-  const value = attributes.type || attributes.name || props.block?.name?.split('/')?.[1] || '';
-  const legend = value.charAt(0).toUpperCase() + value.slice(1);
+  const legend = attributes.type.charAt(0).toUpperCase() + attributes.type.slice(1);
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
@@ -1493,14 +1492,14 @@ __webpack_require__.r(__webpack_exports__);
 function save({
   attributes
 }) {
-  const className = attributes.hidden && !attributes.hasLabelParent ? 'hidden' : undefined;
+  const className = attributes.hidden && !attributes.labelChild ? 'hidden' : undefined;
   const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save({
     className
   });
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_1__.InputHtml, {
     attributes: attributes,
     blockProps: blockProps,
-    hasLabelParent: attributes.hasLabelParent,
+    labelChild: attributes.labelChild,
     isSaving: true
   });
 }

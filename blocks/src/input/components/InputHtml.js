@@ -6,7 +6,7 @@ import { usePrefill } from '../../../shared/usePrefill.js';
 export function InputHtml({
     attributes,
     blockProps,
-    hasLabelParent,
+    labelChild,
     isSaving = false,
 }) {
 
@@ -97,10 +97,11 @@ export function InputHtml({
         );
     }
 
-    return attributes.multiple && !hasLabelParent ? (
+    return attributes.multiple && !labelChild ? (
         <Multiple
             inner={html}
             attributes={attributes}
+            isSaving={isSaving}
         />
     ) : (
         html

@@ -42,6 +42,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		return () => clearTimeout(timeoutId);
 	}, [ name, attributes.name, setAttributes]);
 
+	const legend = attributes.name.charAt(0).toUpperCase() + attributes.name.slice(1);
+
 	return (
 		<>
 		<InspectorControls>
@@ -107,12 +109,15 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					isLoading || !prefillData
 					? 	<Spinner />
 					:
-					<RenderedSelect
-						attributes     = { attributes }
-						blockProps 	   = { blockProps }
-						dynamicOptions = { prefillData.multi }
-						defaultValue   = { attributes.dynamic_selected_value || '' }
-					/>
+						<>
+							{ legend } Select
+							<RenderedSelect
+								attributes     = { attributes }
+								blockProps 	   = { blockProps }
+								dynamicOptions = { prefillData.multi }
+								defaultValue   = { attributes.dynamic_selected_value || '' }
+							/>
+						</>
 			}
 		</div>	
 		</>

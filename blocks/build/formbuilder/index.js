@@ -3188,7 +3188,6 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 (0,_wordpress_hooks__WEBPACK_IMPORTED_MODULE_0__.addFilter)('blocks.registerBlockType', 'tsjippy-forms/add-hidden-attribute', settings => {
-  console.log(settings);
   settings.attributes = {
     ...settings.attributes,
     hidden: {
@@ -3213,14 +3212,14 @@ const withHiddenControl = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.cre
       setAttributes,
       clientId
     } = props;
-    const isFormBuilderChild = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.useSelect)(select => {
-      const {
-        getBlockParents,
-        getBlock
-      } = select('core/block-editor');
-      return getBlockParents(clientId).some(parentId => getBlock(parentId)?.name === 'tsjippy-forms/formbuilder');
-    }, [clientId]);
-    if (!isFormBuilderChild) {
+    const {
+      getBlockParents,
+      getBlockName
+    } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.select)('core/block-editor');
+    const blockParents = getBlockParents(clientId);
+    const isInsideFormBuilder = blockParents.some(parentId => getBlockName(parentId) === 'tsjippy-forms/formbuilder');
+    const isInsideLabel = blockParents.some(parentId => getBlockName(parentId) === 'tsjippy-forms/label');
+    if (!isInsideFormBuilder) {
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockEdit, {
         ...props
       });
@@ -3229,7 +3228,12 @@ const withHiddenControl = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.cre
       setAttributes({
         formbuilderChild: true
       });
-    }, [isFormBuilderChild]);
+    }, [isInsideFormBuilder]);
+    if (isInsideLabel) {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockEdit, {
+        ...props
+      });
+    }
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockEdit, {
         ...props
@@ -3262,8 +3266,10 @@ const withHiddenClass = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.creat
       getBlockParents,
       getBlockName
     } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.select)('core/block-editor');
-    const isInsideFormBuilder = getBlockParents(clientId).some(parentId => getBlockName(parentId) === 'tsjippy-forms/formbuilder');
-    if (!isInsideFormBuilder) {
+    const blockParents = getBlockParents(clientId);
+    const isInsideFormBuilder = blockParents.some(parentId => getBlockName(parentId) === 'tsjippy-forms/formbuilder');
+    const isInsideLabel = blockParents.some(parentId => getBlockName(parentId) === 'tsjippy-forms/label');
+    if (!isInsideFormBuilder || isInsideLabel) {
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockListBlock, {
         ...props
       });

@@ -132,6 +132,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 							<Multiple
 								inner      = { labelComponent }
 								attributes = { attributes.childAttr }
+								isSaving   = { false }
 							/>
 						:
 							labelComponent
