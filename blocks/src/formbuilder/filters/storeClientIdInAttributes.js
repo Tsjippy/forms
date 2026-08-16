@@ -23,6 +23,8 @@ const addBlockId = createHigherOrderComponent( ( BlockEdit ) => {
         const { clientId, attributes, setAttributes, context } = props;
         const { blockId } = attributes;
 
+        //console.log(props);
+
         /**
          * Find the parent form builder block
          */

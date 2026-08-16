@@ -3,7 +3,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { Fragment, useEffect } from '@wordpress/element';
-import { useSelect, select } from '@wordpress/data';
+import { useSelect, select, dispatch } from '@wordpress/data';
 
 /**
  * Add the hidden and form builder attribute.
@@ -34,6 +34,7 @@ addFilter(
 const withHiddenControl = createHigherOrderComponent(
 	( BlockEdit ) => {
 		return ( props ) => {
+			//console.log(props);
 			const { attributes, setAttributes, clientId } = props;
 
 			const { getBlockParents, getBlockName } =
@@ -46,22 +47,54 @@ const withHiddenControl = createHigherOrderComponent(
                     getBlockName( parentId ) === 'tsjippy-forms/formbuilder'
             );
 
-			const isInsideLabel = blockParents.some(
-                ( parentId ) =>
-                    getBlockName( parentId ) === 'tsjippy-forms/label'
-            );
-
 			if ( ! isInsideFormBuilder ) {
 				return <BlockEdit { ...props } />;
 			}
 
+			const labelParentId = useSelect(
+				( select ) => {
+					const parents = select( 'core/block-editor' )
+						.getBlockParentsByBlockName(
+							clientId,
+							'tsjippy-forms/label'
+						);
+
+					return parents[ 0 ] || null;
+				},
+				[ clientId ]
+			);
+
+			const labelParent = useSelect(
+				( select ) =>
+					labelParentId
+						? select( 'core/block-editor' ).getBlock( labelParentId )
+						: null,
+				[ labelParentId ]
+			);
+
+			const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+
+			/**
+			 * If this element has a label perent store in label parent attributes
+			 */
+			const storeHiddenAttribute = ( hidden ) => {
+				if ( labelParent ) {
+					updateBlockAttributes(
+						labelParent.clientId,
+						{ hidden }
+					);
+				} else {
+					setAttributes( { hidden } );
+				}
+			};
+
+			const isHidden = labelParent
+				? !!labelParent.attributes.hidden
+				: !!attributes.hidden;
+
 			useEffect( () => {
 				setAttributes( { formbuilderChild: true } );
 			}, [ isInsideFormBuilder ] );
-
-			if ( isInsideLabel ) {
-				return <BlockEdit { ...props } />;
-			}
 
 			return (
 				<Fragment>
@@ -71,10 +104,8 @@ const withHiddenControl = createHigherOrderComponent(
 						<PanelBody title="Visibility">
 							<ToggleControl
 								label="Hidden"
-								checked={ !! attributes.hidden }
-								onChange={ ( hidden ) =>
-									setAttributes( { hidden } )
-								}
+								checked={ !! isHidden }
+								onChange={ ( hidden ) => storeHiddenAttribute( hidden )								}
 							/>
 						</PanelBody>
 					</InspectorControls>

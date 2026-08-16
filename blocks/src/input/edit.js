@@ -88,9 +88,14 @@ export default function Edit({
         [clientId]
     );
 
+    if(!labelChild){
+        console.log(labelChild)
+        console.log(attributes);
+    }
+
     useEffect(() => {
         if (attributes.labelChild !== labelChild) {
-            setAttributes({ labelChild });
+            setAttributes( {labelChild: labelChild});
         }
     }, [
         labelChild,

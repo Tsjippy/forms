@@ -67,8 +67,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 			multiple: childBlockAttrs.multiple ?? false,
 			add_button_content: childBlockAttrs.add_button_content ?? '+',
 			remove_button_content: childBlockAttrs.remove_button_content ?? '-',
-			type: childBlockAttrs.type ?? '',
-			hidden: childBlockAttrs.hidden ?? '',
+			type: childBlockAttrs.type ?? ''
 		};
 
 		if (

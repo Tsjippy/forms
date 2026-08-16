@@ -76,7 +76,9 @@ class Forms
         $this->onlyOwn                      = false;
         $this->pageSize                     = $pageSize;
         $this->shortcodeColumnSettingsTable = $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
-        $this->shortcodeId                  = -1;
+        if(empty($this->shortcodeId)){
+            $this->shortcodeId                  = -1;
+        }
         $this->shortcodeTable               = $wpdb->prefix . 'tsjippy_form_shortcodes';
         $this->showArchived                 = false;
         $this->slugs                        = [];
@@ -533,7 +535,11 @@ class Forms
         if(empty($post)){
             $post   = $this->formData->post;
         }elseif(is_numeric($post)){
-            $post   = get_post($post);
+            if(!empty($this->formData->post) && $this->formData->post->ID == $post){
+                $post = $this->formData->post;
+            }else{
+                $post   = get_post($post);
+            }
         }
 
         $blocks = parse_blocks($post->post_content);

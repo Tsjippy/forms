@@ -19,21 +19,34 @@ import { InputHtml } from './components/InputHtml.js';
  * @return {Element}
  */
 export default function save({ attributes }) {
-    const className =
-        attributes.hidden && !attributes.labelChild
-            ? 'hidden'
-            : undefined;
 
-    const blockProps = useBlockProps.save({
-        className,
-    });
+    const blockProps = useBlockProps.save();
 
     return (
-        <InputHtml
-            attributes={attributes}
-            blockProps={blockProps}
-            labelChild={attributes.labelChild}
-			isSaving={true}
-        />
+        attributes.type === 'text' && attributes.multiple ?
+            <div className={`${blockProps.className ?? ''} option-wrapper`}>
+                <ul className="list-selection-list" />
+                <div className="multi-text-input-wrapper">
+                    <InputHtml
+                        attributes={attributes}
+                        blockProps={blockProps}
+                        labelChild={false}
+                        isSaving={true}
+                    />
+                    <button
+                        type="button"
+                        className="small add-list-selection hidden"
+                    >
+                        add
+                    </button>
+                </div>
+            </div>
+        :
+            <InputHtml
+                attributes={attributes}
+                blockProps={blockProps}
+                labelChild={attributes.labelChild}
+                isSaving={true}
+            />
     );
 }

@@ -217,6 +217,10 @@ function InputHtml({
     var prefill = (0,_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_2__.usePrefill)();
     prefillValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
   }
+
+  /**
+   * Checkboxes
+   */
   if (['radio', 'checkbox'].includes(attributes.type)) {
     let options = [];
     if (isSaving) {
@@ -246,7 +250,11 @@ function InputHtml({
         }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)(option.label, 'tsjippy')]
       }, `${option.value}-${index}`)), isSaving && "%options-placeholder%"]
     });
-  } else if (attributes.type == 'textarea') {
+  }
+
+  /**
+   * Text area
+   */else if (attributes.type == 'textarea') {
     html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("textarea", {
       ...blockProps,
       type: attributes.type,
@@ -257,7 +265,11 @@ function InputHtml({
       ...attributes.inputAttributes,
       children: isSaving ? "%value-placeholder%" : prefillValue
     });
-  } else {
+  }
+
+  /**
+   * Others
+   */else {
     html = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
       ...blockProps,
       type: attributes.type,
@@ -269,7 +281,11 @@ function InputHtml({
       value: isSaving ? "%value-placeholder%" : prefillValue
     });
   }
-  return attributes.multiple && !labelChild ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {
+
+  /**
+   * Render the the multpiple version if not wrapped in an label and not a text input
+   */
+  return attributes.multiple && !labelChild && attributes.type != 'text' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Multiple_js__WEBPACK_IMPORTED_MODULE_1__.Multiple, {
     inner: html,
     attributes: attributes,
     isSaving: isSaving
@@ -288,57 +304,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Multiple: () => (/* binding */ Multiple)
 /* harmony export */ });
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
-
-
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__);
 
 const Multiple = props => {
-  console.log(props);
   const addText = props?.attributes?.add_button_content ?? '+';
   const removeText = props?.attributes?.remove_button_content ?? '-';
-  const inputType = props?.attributes?.type ?? '';
-  const children = _wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Children.toArray(props?.inner?.props?.children);
-  const labelText = children.find(child => typeof child === 'string');
-  const labelElement = children.find(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && (child.type === 'h4' || child.props?.className === 'label-text'));
-  const inputElements = children.filter(child => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.isValidElement)(child) && child.type !== 'h4' && child.type !== 'br');
-  console.log(inputElements);
-  return inputType === 'text' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
-    children: [labelText && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("h4", {
-      className: "label-text",
-      children: labelText
-    }), labelElement && labelElement, props?.isSaving || false ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-      className: `${props.className ?? ''} option-wrapper`,
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("ul", {
-        className: "list-selection-list"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
-        className: "multi-text-input-wrapper",
-        children: [inputElements, children.length === 0 && props.inner, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
-          type: "button",
-          className: "small add-list-selection hidden",
-          children: "add"
-        })]
-      })]
-    }) : inputElements]
-  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+  /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
     className: "input-wrapper required flex",
     style: {
       width: '85%'
     },
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
       className: "clone-divs-wrapper",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
         className: "clone-div",
         "data-div-id": "0",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
           className: "button-wrapper",
           style: {
             margin: 'auto',
             display: 'flex'
           },
-          children: [props.inner, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+          children: [props.inner, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("button", {
             type: "button",
             className: "remove button hidden",
             style: {
@@ -346,7 +334,7 @@ const Multiple = props => {
               maxWidth: 'max-content'
             },
             children: removeText
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("button", {
             type: "button",
             className: "add button",
             style: {
@@ -1319,10 +1307,14 @@ function Edit({
     return () => clearTimeout(timeoutId);
   }, [inputName, attributes.name, setAttributes]);
   const labelChild = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/label').length > 0, [clientId]);
+  if (!labelChild) {
+    console.log(labelChild);
+    console.log(attributes);
+  }
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
     if (attributes.labelChild !== labelChild) {
       setAttributes({
-        labelChild
+        labelChild: labelChild
       });
     }
   }, [labelChild, attributes.labelChild, setAttributes]);
@@ -1492,11 +1484,25 @@ __webpack_require__.r(__webpack_exports__);
 function save({
   attributes
 }) {
-  const className = attributes.hidden && !attributes.labelChild ? 'hidden' : undefined;
-  const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save({
-    className
-  });
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_1__.InputHtml, {
+  const blockProps = _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps.save();
+  return attributes.type === 'text' && attributes.multiple ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+    className: `${blockProps.className ?? ''} option-wrapper`,
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("ul", {
+      className: "list-selection-list"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+      className: "multi-text-input-wrapper",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_1__.InputHtml, {
+        attributes: attributes,
+        blockProps: blockProps,
+        labelChild: false,
+        isSaving: true
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+        type: "button",
+        className: "small add-list-selection hidden",
+        children: "add"
+      })]
+    })]
+  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_1__.InputHtml, {
     attributes: attributes,
     blockProps: blockProps,
     labelChild: attributes.labelChild,

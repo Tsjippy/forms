@@ -20,6 +20,9 @@ export function InputHtml({
         prefillValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
     }
 
+    /**
+     * Checkboxes
+     */
     if (['radio', 'checkbox'].includes(attributes.type)) {
         let options = [];
 
@@ -68,7 +71,12 @@ export function InputHtml({
                 { isSaving && "%options-placeholder%" }
             </div>
         );
-    } else if (attributes.type == 'textarea') {
+    } 
+    
+    /**
+     * Text area
+     */
+    else if (attributes.type == 'textarea') {
         html = (
             <textarea
                 {...blockProps}
@@ -82,7 +90,12 @@ export function InputHtml({
                 { isSaving ? "%value-placeholder%" : prefillValue }
             </textarea>
         );
-    } else {
+    } 
+    
+    /**
+     * Others
+     */
+    else {
         html = (
             <input
                 {...blockProps}
@@ -97,7 +110,10 @@ export function InputHtml({
         );
     }
 
-    return attributes.multiple && !labelChild ? (
+    /**
+     * Render the the multpiple version if not wrapped in an label and not a text input
+     */
+    return attributes.multiple && !labelChild && attributes.type != 'text' ? (
         <Multiple
             inner={html}
             attributes={attributes}

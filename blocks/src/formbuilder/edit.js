@@ -33,6 +33,7 @@ const TEMPLATE = [
         'tsjippy-forms/input',
         {
             name: 'user-id',
+			type: 'hidden',
             dynamicValue: 'user_id',
         },
     ],

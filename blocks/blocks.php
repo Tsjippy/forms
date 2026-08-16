@@ -112,8 +112,6 @@ function initBlocks()
  */
 function formResults($atts)
 {
-    global $wpdb;
-
     if($atts['id'] == -1){
         return "<div class='error'>No valid shortcode id yet</div>";
     }

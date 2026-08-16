@@ -861,7 +861,7 @@ class DisplayFormResults extends SubmitForm
                 return $result;
             }
 
-            $this->getForm($this->tableSettings->block_id);
+            $this->getForm($this->tableSettings->post_id);
 
             if (empty($this->tableSettings->view_right_roles)) {
                 $this->tableSettings->view_right_roles    = [];
@@ -2048,7 +2048,7 @@ class DisplayFormResults extends SubmitForm
         //check if we have rights on this form
         if (!$this->formEditPermissions ?? false) {
             if (
-                array_intersect_key($this->userRoles,  $this->formData->full_right_roles)    ||
+                array_intersect_key($this->userRoles,  $this->formData->full_right_roles ?? [])    ||
                 (
                     isset($this->tableSettings->full_right_roles) &&                    // we have full rights to the table
                     array_intersect_key($this->userRoles, $this->tableSettings->full_right_roles)

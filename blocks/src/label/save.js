@@ -23,7 +23,6 @@ export default function save({ attributes }) {
 		return (
 			<label 
 				data-blockid={addBlockId ? attributes.blockId : undefined}
-				className= {attributes.childAttr.hidden ? 'hidden' : undefined}
 			>
 				<h4 className="label-text">
 					{attributes.text}
@@ -36,7 +35,10 @@ export default function save({ attributes }) {
 	};
 
 	return (
-		attributes.childAttr.multiple ?
+		/**
+		 * Return the multiple version if this is an input which can be multiplied, but not the text type
+		 */
+		attributes.childAttr.multiple && attributes.childAttr.type != 'text' ?
 			<Multiple
 				inner      = { labelComponent(false) }
 				attributes = { attributes.childAttr }

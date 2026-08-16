@@ -154,7 +154,7 @@ function sendBlockContent(block, postId){
     foreach($oldForms as $form){
 
         if($form->id != 52){
-            //continue;
+            continue;
         }
 
         if(empty($form->slug)){
@@ -479,7 +479,13 @@ function sendBlockContent(block, postId){
              */
             $attributes['blockId']  = $element->id;
 
-            if($element->hidden){
+            if(
+                $element->hidden && 
+                !$shouldCloseLabel ||
+                (
+                    $shouldCloseLabel && $element->type == 'label'
+                )
+            ){
                 $attributes['hidden']   = true;
             }
 

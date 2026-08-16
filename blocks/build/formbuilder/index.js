@@ -2146,6 +2146,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const TEMPLATE = [['tsjippy-forms/input', {
   name: 'user-id',
+  type: 'hidden',
   dynamicValue: 'user_id'
 }]];
 
@@ -3207,6 +3208,7 @@ __webpack_require__.r(__webpack_exports__);
  */
 const withHiddenControl = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.createHigherOrderComponent)(BlockEdit => {
   return props => {
+    //console.log(props);
     const {
       attributes,
       setAttributes,
@@ -3218,22 +3220,40 @@ const withHiddenControl = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.cre
     } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.select)('core/block-editor');
     const blockParents = getBlockParents(clientId);
     const isInsideFormBuilder = blockParents.some(parentId => getBlockName(parentId) === 'tsjippy-forms/formbuilder');
-    const isInsideLabel = blockParents.some(parentId => getBlockName(parentId) === 'tsjippy-forms/label');
     if (!isInsideFormBuilder) {
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockEdit, {
         ...props
       });
     }
+    const labelParentId = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.useSelect)(select => {
+      const parents = select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/label');
+      return parents[0] || null;
+    }, [clientId]);
+    const labelParent = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.useSelect)(select => labelParentId ? select('core/block-editor').getBlock(labelParentId) : null, [labelParentId]);
+    const {
+      updateBlockAttributes
+    } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.dispatch)('core/block-editor');
+
+    /**
+     * If this element has a label perent store in label parent attributes
+     */
+    const storeHiddenAttribute = hidden => {
+      if (labelParent) {
+        updateBlockAttributes(labelParent.clientId, {
+          hidden
+        });
+      } else {
+        setAttributes({
+          hidden
+        });
+      }
+    };
+    const isHidden = labelParent ? !!labelParent.attributes.hidden : !!attributes.hidden;
     (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useEffect)(() => {
       setAttributes({
         formbuilderChild: true
       });
     }, [isInsideFormBuilder]);
-    if (isInsideLabel) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockEdit, {
-        ...props
-      });
-    }
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(BlockEdit, {
         ...props
@@ -3242,10 +3262,8 @@ const withHiddenControl = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.cre
           title: "Visibility",
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.ToggleControl, {
             label: "Hidden",
-            checked: !!attributes.hidden,
-            onChange: hidden => setAttributes({
-              hidden
-            })
+            checked: !!isHidden,
+            onChange: hidden => storeHiddenAttribute(hidden)
           })
         })
       })]
@@ -3366,6 +3384,8 @@ const addBlockId = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.createHigh
     const {
       blockId
     } = attributes;
+
+    //console.log(props);
 
     /**
      * Find the parent form builder block
