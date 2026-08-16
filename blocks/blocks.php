@@ -294,7 +294,11 @@ function isFormbuilderChild( $block ) {
 /**
  * Replaces the first occurence of a string
  * 
+ * @param string    $search
+ * @param string    $replace
+ * @param string    $subject
  * 
+ * @return string               Updated subject
  */
 function strReplaceFirst($search, $replace, $subject) {
     $pos = strpos($subject, $search);

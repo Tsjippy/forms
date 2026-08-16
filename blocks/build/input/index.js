@@ -1307,10 +1307,6 @@ function Edit({
     return () => clearTimeout(timeoutId);
   }, [inputName, attributes.name, setAttributes]);
   const labelChild = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/label').length > 0, [clientId]);
-  if (!labelChild) {
-    console.log(labelChild);
-    console.log(attributes);
-  }
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
     if (attributes.labelChild !== labelChild) {
       setAttributes({
