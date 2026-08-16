@@ -25,6 +25,7 @@
 - only allow inputs in label
 - Wrapper component for multi block block
 - prefil forms server side
+- store hidden atrribute of inoout in paent label if exist
 
 ### Fixed
 - conditions form bugs
