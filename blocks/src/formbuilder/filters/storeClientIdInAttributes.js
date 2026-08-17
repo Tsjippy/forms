@@ -23,28 +23,32 @@ const addBlockId = createHigherOrderComponent( ( BlockEdit ) => {
         const { clientId, attributes, setAttributes, context } = props;
         const { blockId } = attributes;
 
-        //console.log(props);
-
-        /**
-         * Find the parent form builder block
-         */
-
-        // Get the parent form
-        const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(
-            clientId, 
-            'tsjippy-forms/formbuilder'
-        );
-
-        useEffect( () => {
-            const isChildOfFormBuilder = parents.length > 0;
-
-            if ( isChildOfFormBuilder && blockId == undefined) {
+        if(props.name == "tsjippy-forms/formbuilder"){
+            if ( blockId == undefined) {
                 setAttributes( { blockId: clientId } );
-            } else if ( ! isChildOfFormBuilder && blockId ) {
-                setAttributes( { blockId: undefined } );
             }
+        }else{
+            /**
+             * Find the parent form builder block
+             */
 
-        }, [ parents, clientId, blockId, setAttributes ] );
+            // Get the parent form
+            const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(
+                clientId, 
+                'tsjippy-forms/formbuilder'
+            );
+
+            useEffect( () => {
+                const isChildOfFormBuilder = parents.length > 0;
+
+                if ( isChildOfFormBuilder && blockId == undefined) {
+                    setAttributes( { blockId: clientId } );
+                } else if ( ! isChildOfFormBuilder && blockId ) {
+                    setAttributes( { blockId: undefined } );
+                }
+
+            }, [ parents, clientId, blockId, setAttributes ] );
+        }
 
         return <BlockEdit { ...props } />;
     };

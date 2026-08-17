@@ -3414,27 +3414,32 @@ const addBlockId = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.createHigh
     const {
       blockId
     } = attributes;
-
-    //console.log(props);
-
-    /**
-     * Find the parent form builder block
-     */
-
-    // Get the parent form
-    const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/formbuilder');
-    (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useEffect)(() => {
-      const isChildOfFormBuilder = parents.length > 0;
-      if (isChildOfFormBuilder && blockId == undefined) {
+    if (props.name == "tsjippy-forms/formbuilder") {
+      if (blockId == undefined) {
         setAttributes({
           blockId: clientId
         });
-      } else if (!isChildOfFormBuilder && blockId) {
-        setAttributes({
-          blockId: undefined
-        });
       }
-    }, [parents, clientId, blockId, setAttributes]);
+    } else {
+      /**
+       * Find the parent form builder block
+       */
+
+      // Get the parent form
+      const parents = wp.data.select('core/block-editor').getBlockParentsByBlockName(clientId, 'tsjippy-forms/formbuilder');
+      (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useEffect)(() => {
+        const isChildOfFormBuilder = parents.length > 0;
+        if (isChildOfFormBuilder && blockId == undefined) {
+          setAttributes({
+            blockId: clientId
+          });
+        } else if (!isChildOfFormBuilder && blockId) {
+          setAttributes({
+            blockId: undefined
+          });
+        }
+      }, [parents, clientId, blockId, setAttributes]);
+    }
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(BlockEdit, {
       ...props
     });
