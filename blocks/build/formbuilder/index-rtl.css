@@ -1559,3 +1559,11 @@ form.wp-block-tsjippy-forms-formbuilder .block-list-appender .add-form-element-b
   padding: 5px;
   border-style: solid;
 }
+
+.block-editor-block-list__block[data-block-label]::before {
+  content: attr(data-block-label);
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}

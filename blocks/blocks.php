@@ -182,14 +182,22 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
     /**
      * Set default value
      */
-    $defaultValue = $single[$block['attrs']['dynamic_value']] ?? '';
+    if(empty($block['attrs']['dynamic_value'])){
+        $defaultValue = '';
+    }else{
+        $defaultValue = $single[$block['attrs']['dynamic_value']] ?? '';
+    }
     $blockContent = str_replace('%value-placeholder%', $defaultValue, $blockContent);
     
     /**
      * Add the options
      */
     $options    = [];
-    $optionData = $multi[$block['attrs']['options_dynamic']] ?? [];
+    if(empty($block['attrs']['options_dynamic'])){
+        $optionData = '';
+    }else{
+        $optionData = $multi[$block['attrs']['options_dynamic']] ?? [];
+    }
 
     if(!empty($optionData)){
         foreach($optionData as $key => $value){
@@ -533,3 +541,9 @@ function addGlobalAttributes( $args ) {
 
 	return $args;
 }
+
+function my_custom_post_view_config( $view_config ) {
+    // Modify view configuration, fields, or filters here
+    return $view_config;
+}
+add_filter( 'get_entity_view_config_posttype_page', __NAMESPACE__.'\my_custom_post_view_config' );

@@ -8,7 +8,6 @@ import {
     PanelBody,
     TextControl,
     ToggleControl,
-    TextareaControl,
 } from '@wordpress/components';
 import {
     useState,
@@ -51,12 +50,11 @@ export default function Edit({
     );
 
     const storeAttributeAttributes = (value, name) => {
-        let newAttributes   = { ...(attributes.inputAttributes || {})};
-
-        newAttributes[name] = value;
-
         setAttributes({
-            inputAttributes:  newAttributes
+            inputAttributes: {
+                ...(attributes.inputAttributes || {}),
+                value,
+            },
         });
     };
 
@@ -115,17 +113,6 @@ export default function Edit({
         />
     );
 
-    const inputValue =
-        attributes.type === 'submit' ? (
-            <TextControl
-                label="Input Content"
-                value={attributes.value}
-                onChange={(value) =>
-                    setAttributes({ value })
-                }
-            />
-        ) : null;
-
     const selectableOptions =
         ['radio', 'checkbox', 'select'].includes(
             attributes.type
@@ -152,93 +139,16 @@ export default function Edit({
             </>
         ) : null;
 
-    const renderPropertiesForm = () => {
-        if (!isSelected) {
-            return (
-                <InputHtml
-                    attributes={attributes}
-                    blockProps={blockProps}
-                    labelChild={labelChild}
-                />
-            );
-        }
+    const attributeControls = dynamicInputs(
+        attributes,
+        'default',
+        storeAttributeAttributes
+    );
 
-        if (attributes.type === '') {
-            return inputTypeSelector;
-        }
-
-        if (!attributes.name) {
-            return (
-                <>
-                    {inputTypeSelector}
-                    {inputNameComponent}
-                </>
-            );
-        }
-
-        const attributeControls = dynamicInputs(
-            attributes,
-            'default',
-            storeAttributeAttributes
-        );
-
-        const ariaControls = attributes.ariaAttributes
-            ? dynamicInputs(
-                  attributes,
-                  'aria',
-                  storeAttributeAttributes
-              )
-            : [];
-
-        return (
-            <>
-                <InputHtml
-                    attributes={attributes}
-                    blockProps={blockProps}
-                    labelChild={labelChild}
-                />
-
-                {inputTypeSelector}
-                {inputNameComponent}
-                {selectableOptions}
-
-				<h4>Dynamic Value (prefill)</h4>
-                <PrefillValueSelector
-                    value={attributes.dynamic_value}
-                    onChange={(value) =>
-                        setAttributes({
-                            dynamic_value: value,
-                        })
-                    }
-                />
-
-                <div className="attributes-form">
-                    <h3>Input properties</h3>
-
-                    {attributeControls}
-
-                    <ToggleControl
-                        label={__(
-                            'Add aria attributes',
-                            'tsjippy'
-                        )}
-                        checked={
-                            !!attributes.ariaAttributes
-                        }
-                        onChange={(ariaAttributes) =>
-                            setAttributes({
-                                ariaAttributes,
-                            })
-                        }
-                    />
-
-                    {ariaControls}
-                </div>
-            </>
-        );
-    };
-
-    const legend = attributes.type.charAt(0).toUpperCase() + attributes.type.slice(1);
+    const legend = attributes.type
+        ? attributes.type.charAt(0).toUpperCase() +
+        attributes.type.slice(1)
+        : '';
 
     return (
         <>
@@ -249,17 +159,18 @@ export default function Edit({
                         'tsjippy'
                     )}
                 >
-                    <SelectControl
-                        label="Input Type"
-                        value={attributes.type}
-                        options={typeOptions}
-                        onChange={(type) =>
-                            setAttributes({ type })
-                        }
-                    />
+                    {inputTypeSelector}
 
                     {inputNameComponent}
-                    {inputValue}
+
+                    <PrefillValueSelector
+                        value={attributes.dynamic_value}
+                        onChange={(value) =>
+                            setAttributes({
+                                dynamic_value: value,
+                            })
+                        }
+                    />
 
                     <ToggleControl
                         label={__(
@@ -274,7 +185,7 @@ export default function Edit({
 
                     <ToggleControl
                         label={__(
-                            'This is a required input',
+                            'Required',
                             'tsjippy'
                         )}
                         checked={!!attributes.required}
@@ -282,6 +193,7 @@ export default function Edit({
                             setAttributes({ required })
                         }
                     />
+                    {attributeControls}
 
                     {attributes.multiple && (
                         <>
@@ -315,12 +227,53 @@ export default function Edit({
                         </>
                     )}
                 </PanelBody>
+
+                {['checkbox', 'radio'].includes(attributes.type) && (
+                    <PanelBody
+                        title={__(
+                            'Selectable Options',
+                            'tsjippy'
+                        )}
+                        initialOpen={ true }
+                    >
+                        {selectableOptions}
+                    </PanelBody>
+                )}
+
+                <PanelBody
+                    title={__(
+                        'Input Aria Attributes',
+                        'tsjippy'
+                    )}
+                    initialOpen={ false }
+                >
+                    { dynamicInputs(
+                        attributes,
+                        'aria',
+                        storeAttributeAttributes
+                    ) }
+                </PanelBody>
             </InspectorControls>
 
             <div {...blockProps}>
                 { legend } input
                 <br></br>
-                {renderPropertiesForm()}
+                
+                {
+                !attributes.type || !attributes.name
+                     ?
+                        <>
+                            {inputTypeSelector}
+                            {inputNameComponent}
+                        </>
+                    :
+                        <InputHtml
+                            attributes={attributes}
+                            blockProps={blockProps}
+                            labelChild={labelChild}
+                        />
+                }
+                    
             </div>
         </>
     );

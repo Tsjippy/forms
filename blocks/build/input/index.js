@@ -494,7 +494,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   inputSchema: () => (/* binding */ inputSchema),
 /* harmony export */   inputTypes: () => (/* binding */ inputTypes)
 /* harmony export */ });
-const inputTypes = ["button", "checkbox", "color", "date", "datetime-local", "email", "file", "hidden", "image", "month", "number", "password", "radio", "range", "reset", "search", "submit", "tel", "text", "textarea", "time", "url", "week"];
+const inputTypes = ["button", "checkbox", "color", "date", "datetime-local", "email", "file", "hidden", "image", "month", "number", "password", "radio", "range", "reset", "search", "tel", "text", "textarea", "time", "url", "week"];
 const inputSchema = {
   sharedAttributes: [{
     attribute: "id",
@@ -511,9 +511,6 @@ const inputSchema = {
   }, {
     attribute: "title",
     expectedType: "string"
-  }, {
-    attribute: "hidden",
-    expectedType: "boolean"
   }, {
     attribute: "lang",
     expectedType: "string"
@@ -560,16 +557,10 @@ const inputSchema = {
       attribute: "required",
       expectedType: "boolean"
     }, {
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "label",
       expectedType: "string"
     }],
     color: [{
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "alpha",
       expectedType: "boolean"
     }, {
@@ -594,9 +585,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     "datetime-local": [{
       attribute: "list",
@@ -616,9 +604,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     email: [{
       attribute: "autofocus",
@@ -651,9 +636,6 @@ const inputSchema = {
       attribute: "size",
       expectedType: "number"
     }, {
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "dirname",
       expectedType: "string"
     }],
@@ -674,9 +656,6 @@ const inputSchema = {
       expectedType: "boolean"
     }],
     hidden: [{
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "dirname",
       expectedType: "string"
     }],
@@ -726,9 +705,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     number: [{
       attribute: "autofocus",
@@ -754,9 +730,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     password: [{
       attribute: "autofocus",
@@ -786,22 +759,10 @@ const inputSchema = {
       attribute: "size",
       expectedType: "number"
     }, {
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "dirname",
       expectedType: "string"
     }],
     radio: [{
-      attribute: "checked",
-      expectedType: "boolean"
-    }, {
-      attribute: "required",
-      expectedType: "boolean"
-    }, {
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "label",
       expectedType: "string"
     }],
@@ -817,9 +778,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     reset: [{
       attribute: "formaction",
@@ -835,9 +793,6 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "formtarget",
-      expectedType: "string"
-    }, {
-      attribute: "value",
       expectedType: "string"
     }],
     search: [{
@@ -870,28 +825,6 @@ const inputSchema = {
     }, {
       attribute: "size",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
-    }],
-    submit: [{
-      attribute: "formaction",
-      expectedType: "string"
-    }, {
-      attribute: "formenctype",
-      expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain"
-    }, {
-      attribute: "formmethod",
-      expectedType: "get|post|dialog"
-    }, {
-      attribute: "formnovalidate",
-      expectedType: "boolean"
-    }, {
-      attribute: "formtarget",
-      expectedType: "string"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     tel: [{
       attribute: "autofocus",
@@ -923,9 +856,6 @@ const inputSchema = {
     }, {
       attribute: "size",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     text: [{
       attribute: "autofocus",
@@ -957,9 +887,6 @@ const inputSchema = {
     }, {
       attribute: "size",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     textarea: [{
       attribute: "autofocus",
@@ -1004,9 +931,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     url: [{
       attribute: "autofocus",
@@ -1038,9 +962,6 @@ const inputSchema = {
     }, {
       attribute: "size",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     week: [{
       attribute: "list",
@@ -1060,9 +981,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }]
   },
   ariaAttributes: [{
@@ -1133,9 +1051,6 @@ const inputSchema = {
     expectedType: "boolean"
   }, {
     attribute: "haspopup",
-    expectedType: "boolean"
-  }, {
-    attribute: "hidden",
     expectedType: "boolean"
   }, {
     attribute: "invalid",
@@ -1284,12 +1199,11 @@ function Edit({
     value: type
   }))], []);
   const storeAttributeAttributes = (value, name) => {
-    let newAttributes = {
-      ...(attributes.inputAttributes || {})
-    };
-    newAttributes[name] = value;
     setAttributes({
-      inputAttributes: newAttributes
+      inputAttributes: {
+        ...(attributes.inputAttributes || {}),
+        value
+      }
     });
   };
   const [inputName, setInputName] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(attributes.name || '');
@@ -1327,13 +1241,6 @@ function Edit({
       type
     })
   });
-  const inputValue = attributes.type === 'submit' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
-    label: "Input Content",
-    value: attributes.value,
-    onChange: value => setAttributes({
-      value
-    })
-  }) : null;
   const selectableOptions = ['radio', 'checkbox', 'select'].includes(attributes.type) ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h4", {
       children: "Static Options"
@@ -1349,75 +1256,30 @@ function Edit({
       })
     })]
   }) : null;
-  const renderPropertiesForm = () => {
-    if (!isSelected) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_8__.InputHtml, {
-        attributes: attributes,
-        blockProps: blockProps,
-        labelChild: labelChild
-      });
-    }
-    if (attributes.type === '') {
-      return inputTypeSelector;
-    }
-    if (!attributes.name) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
-        children: [inputTypeSelector, inputNameComponent]
-      });
-    }
-    const attributeControls = (0,_components_dynamic_inputs_js__WEBPACK_IMPORTED_MODULE_7__.dynamicInputs)(attributes, 'default', storeAttributeAttributes);
-    const ariaControls = attributes.ariaAttributes ? (0,_components_dynamic_inputs_js__WEBPACK_IMPORTED_MODULE_7__.dynamicInputs)(attributes, 'aria', storeAttributeAttributes) : [];
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_8__.InputHtml, {
-        attributes: attributes,
-        blockProps: blockProps,
-        labelChild: labelChild
-      }), inputTypeSelector, inputNameComponent, selectableOptions, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h4", {
-        children: "Dynamic Value (prefill)"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_9__.PrefillValueSelector, {
-        value: attributes.dynamic_value,
-        onChange: value => setAttributes({
-          dynamic_value: value
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
-        className: "attributes-form",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h3", {
-          children: "Input properties"
-        }), attributeControls, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Add aria attributes', 'tsjippy'),
-          checked: !!attributes.ariaAttributes,
-          onChange: ariaAttributes => setAttributes({
-            ariaAttributes
-          })
-        }), ariaControls]
-      })]
-    });
-  };
-  const legend = attributes.type.charAt(0).toUpperCase() + attributes.type.slice(1);
+  const attributeControls = (0,_components_dynamic_inputs_js__WEBPACK_IMPORTED_MODULE_7__.dynamicInputs)(attributes, 'default', storeAttributeAttributes);
+  const legend = attributes.type ? attributes.type.charAt(0).toUpperCase() + attributes.type.slice(1) : '';
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Input Settings', 'tsjippy'),
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
-          label: "Input Type",
-          value: attributes.type,
-          options: typeOptions,
-          onChange: type => setAttributes({
-            type
+        children: [inputTypeSelector, inputNameComponent, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_9__.PrefillValueSelector, {
+          value: attributes.dynamic_value,
+          onChange: value => setAttributes({
+            dynamic_value: value
           })
-        }), inputNameComponent, inputValue, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Allow multiple answers', 'tsjippy'),
           checked: !!attributes.multiple,
           onChange: multiple => setAttributes({
             multiple
           })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('This is a required input', 'tsjippy'),
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Required', 'tsjippy'),
           checked: !!attributes.required,
           onChange: required => setAttributes({
             required
           })
-        }), attributes.multiple && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+        }), attributeControls, attributes.multiple && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
             label: "Add Button Text",
             value: attributes.add_button_content,
@@ -1432,10 +1294,24 @@ function Edit({
             })
           })]
         })]
-      })
+      }), ['checkbox', 'radio'].includes(attributes.type) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Selectable Options', 'tsjippy'),
+        initialOpen: true,
+        children: selectableOptions
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Input Aria Attributes', 'tsjippy'),
+        initialOpen: false,
+        children: (0,_components_dynamic_inputs_js__WEBPACK_IMPORTED_MODULE_7__.dynamicInputs)(attributes, 'aria', storeAttributeAttributes)
+      })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
       ...blockProps,
-      children: [legend, " input", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("br", {}), renderPropertiesForm()]
+      children: [legend, " input", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("br", {}), !attributes.type || !attributes.name ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
+        children: [inputTypeSelector, inputNameComponent]
+      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_components_InputHtml_js__WEBPACK_IMPORTED_MODULE_8__.InputHtml, {
+        attributes: attributes,
+        blockProps: blockProps,
+        labelChild: labelChild
+      })]
     })]
   });
 }
@@ -1606,7 +1482,7 @@ module.exports = window["wp"]["i18n"];
   \******************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","attributes":{"type":{"type":"string","default":""},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"ariaAttributes":{"type":"boolean","default":false},"options":{"type":"array","default":[]},"options_dynamic":{"type":"string","default":""},"dynamic_value":{"type":"string","default":""},"add_button_content":{"type":"string","default":"+"},"remove_button_content":{"type":"string","default":"-"},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"hasLabelParent":{"type":"boolean","default":false},"reminderConditions":{"type":"array","default":[]},"roles":{"type":"array","default":[]}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/input","version":"0.1.0","title":"Form Input","category":"form-elements","icon":"forms","description":"Input element for a form","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","attributes":{"type":{"type":"string","default":""},"name":{"type":"string","default":""},"value":{"type":"string","default":""},"inputAttributes":{"type":"object","default":{}},"options":{"type":"array","default":[]},"options_dynamic":{"type":"string","default":""},"dynamic_value":{"type":"string","default":""},"add_button_content":{"type":"string","default":"+"},"remove_button_content":{"type":"string","default":"-"},"multiple":{"type":"boolean","default":false},"required":{"type":"boolean","default":false},"hasLabelParent":{"type":"boolean","default":false},"reminderConditions":{"type":"array","default":[]},"roles":{"type":"array","default":[]}}}');
 
 /***/ }
 

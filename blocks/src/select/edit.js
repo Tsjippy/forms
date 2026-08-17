@@ -42,8 +42,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		return () => clearTimeout(timeoutId);
 	}, [ name, attributes.name, setAttributes]);
 
-	const legend = attributes.name.charAt(0).toUpperCase() + attributes.name.slice(1);
-
 	return (
 		<>
 		<InspectorControls>
@@ -110,7 +108,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					? 	<Spinner />
 					:
 						<>
-							{ legend } Select
+							Dropdown Select
+							<br></br>
 							<RenderedSelect
 								attributes     = { attributes }
 								blockProps 	   = { blockProps }

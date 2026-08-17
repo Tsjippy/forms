@@ -31,10 +31,6 @@
 			"type": "object",
 			"default": {}
 		},
-		"ariaAttributes": {
-			"type": "boolean",
-			"default": false
-		},
 		"options": {
 			"type": "array",
 			"default": []

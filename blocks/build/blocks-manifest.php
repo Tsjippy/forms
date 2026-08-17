@@ -285,10 +285,6 @@ return array(
 					
 				)
 			),
-			'ariaAttributes' => array(
-				'type' => 'boolean',
-				'default' => false
-			),
 			'options' => array(
 				'type' => 'array',
 				'default' => array(

@@ -87,8 +87,11 @@ function getFieldValue(elementOrSelector, form, checkDatalist = true, compareVal
       el = elementOrSelector;
     }
     name = el.name;
-    // We should look for an id
-  } else {
+    selector = `[data-blockid="${el.dataset.blockid}"]`;
+  }
+
+  // We should look for an id
+  else {
     selector = elementOrSelector;
     el = form.querySelector(selector);
     name = el.name;
@@ -3050,6 +3053,33 @@ function PlaceholderPicker({
 
 /***/ },
 
+/***/ "./src/formbuilder/filters/addBlockName.js"
+/*!*************************************************!*\
+  !*** ./src/formbuilder/filters/addBlockName.js ***!
+  \*************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__);
+
+wp.hooks.addFilter('editor.BlockListBlock', 'my-plugin/group-heading', BlockListBlock => props => {
+  if (props.block.name.includes('tsjippy')) {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(BlockListBlock, {
+      ...props
+    });
+  }
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(BlockListBlock, {
+    ...props,
+    wrapperProps: {
+      ...props.wrapperProps,
+      'data-block-label': props.block.name.split('/')[1]
+    }
+  });
+});
+
+/***/ },
+
 /***/ "./src/formbuilder/filters/addButtonToInnerBlocks.js"
 /*!***********************************************************!*\
   !*** ./src/formbuilder/filters/addButtonToInnerBlocks.js ***!
@@ -3463,6 +3493,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _filters_addButtonToInnerBlocks__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./filters/addButtonToInnerBlocks */ "./src/formbuilder/filters/addButtonToInnerBlocks.js");
 /* harmony import */ var _filters_hasConditionsIndicator__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./filters/hasConditionsIndicator */ "./src/formbuilder/filters/hasConditionsIndicator.js");
 /* harmony import */ var _filters_addHiddenAttribute__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./filters/addHiddenAttribute */ "./src/formbuilder/filters/addHiddenAttribute.js");
+/* harmony import */ var _filters_addBlockName_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./filters/addBlockName.js */ "./src/formbuilder/filters/addBlockName.js");
 /**
  * Registers a new block provided a unique name and an object defining its behavior.
  *
@@ -3482,6 +3513,7 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * Internal dependencies
  */
+
 
 
 
@@ -3834,7 +3866,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   inputSchema: () => (/* binding */ inputSchema),
 /* harmony export */   inputTypes: () => (/* binding */ inputTypes)
 /* harmony export */ });
-const inputTypes = ["button", "checkbox", "color", "date", "datetime-local", "email", "file", "hidden", "image", "month", "number", "password", "radio", "range", "reset", "search", "submit", "tel", "text", "textarea", "time", "url", "week"];
+const inputTypes = ["button", "checkbox", "color", "date", "datetime-local", "email", "file", "hidden", "image", "month", "number", "password", "radio", "range", "reset", "search", "tel", "text", "textarea", "time", "url", "week"];
 const inputSchema = {
   sharedAttributes: [{
     attribute: "id",
@@ -3851,9 +3883,6 @@ const inputSchema = {
   }, {
     attribute: "title",
     expectedType: "string"
-  }, {
-    attribute: "hidden",
-    expectedType: "boolean"
   }, {
     attribute: "lang",
     expectedType: "string"
@@ -3900,16 +3929,10 @@ const inputSchema = {
       attribute: "required",
       expectedType: "boolean"
     }, {
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "label",
       expectedType: "string"
     }],
     color: [{
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "alpha",
       expectedType: "boolean"
     }, {
@@ -3934,9 +3957,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     "datetime-local": [{
       attribute: "list",
@@ -3956,9 +3976,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     email: [{
       attribute: "autofocus",
@@ -3991,9 +4008,6 @@ const inputSchema = {
       attribute: "size",
       expectedType: "number"
     }, {
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "dirname",
       expectedType: "string"
     }],
@@ -4014,9 +4028,6 @@ const inputSchema = {
       expectedType: "boolean"
     }],
     hidden: [{
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "dirname",
       expectedType: "string"
     }],
@@ -4066,9 +4077,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     number: [{
       attribute: "autofocus",
@@ -4094,9 +4102,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     password: [{
       attribute: "autofocus",
@@ -4126,22 +4131,10 @@ const inputSchema = {
       attribute: "size",
       expectedType: "number"
     }, {
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "dirname",
       expectedType: "string"
     }],
     radio: [{
-      attribute: "checked",
-      expectedType: "boolean"
-    }, {
-      attribute: "required",
-      expectedType: "boolean"
-    }, {
-      attribute: "value",
-      expectedType: "string"
-    }, {
       attribute: "label",
       expectedType: "string"
     }],
@@ -4157,9 +4150,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     reset: [{
       attribute: "formaction",
@@ -4175,9 +4165,6 @@ const inputSchema = {
       expectedType: "boolean"
     }, {
       attribute: "formtarget",
-      expectedType: "string"
-    }, {
-      attribute: "value",
       expectedType: "string"
     }],
     search: [{
@@ -4210,28 +4197,6 @@ const inputSchema = {
     }, {
       attribute: "size",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
-    }],
-    submit: [{
-      attribute: "formaction",
-      expectedType: "string"
-    }, {
-      attribute: "formenctype",
-      expectedType: "application/x-www-form-urlencoded|multipart/form-data|text/plain"
-    }, {
-      attribute: "formmethod",
-      expectedType: "get|post|dialog"
-    }, {
-      attribute: "formnovalidate",
-      expectedType: "boolean"
-    }, {
-      attribute: "formtarget",
-      expectedType: "string"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     tel: [{
       attribute: "autofocus",
@@ -4263,9 +4228,6 @@ const inputSchema = {
     }, {
       attribute: "size",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     text: [{
       attribute: "autofocus",
@@ -4297,9 +4259,6 @@ const inputSchema = {
     }, {
       attribute: "size",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     textarea: [{
       attribute: "autofocus",
@@ -4344,9 +4303,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     url: [{
       attribute: "autofocus",
@@ -4378,9 +4334,6 @@ const inputSchema = {
     }, {
       attribute: "size",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }],
     week: [{
       attribute: "list",
@@ -4400,9 +4353,6 @@ const inputSchema = {
     }, {
       attribute: "step",
       expectedType: "number"
-    }, {
-      attribute: "value",
-      expectedType: "string"
     }]
   },
   ariaAttributes: [{
@@ -4473,9 +4423,6 @@ const inputSchema = {
     expectedType: "boolean"
   }, {
     attribute: "haspopup",
-    expectedType: "boolean"
-  }, {
-    attribute: "hidden",
     expectedType: "boolean"
   }, {
     attribute: "invalid",

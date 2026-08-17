@@ -481,9 +481,11 @@ function sendBlockContent(block, postId){
 
             if(
                 $element->hidden && 
-                !$shouldCloseLabel ||
                 (
-                    $shouldCloseLabel && $element->type == 'label'
+                    !$shouldCloseLabel ||
+                    (
+                        $shouldCloseLabel && $element->type == 'label'
+                    )
                 )
             ){
                 $attributes['hidden']   = true;
