@@ -469,15 +469,15 @@ class FormReminders extends Forms
                 }
 
                 // Store the in the reminders array
-                if (!isset($this->reminders['metaforms'][$this->formData->id])) {
-                    $this->reminders['metaforms'][$this->formData->id]   = [];
+                if (!isset($this->reminders['metaforms'][$this->formData->blockId])) {
+                    $this->reminders['metaforms'][$this->formData->blockId]   = [];
                 }
 
-                if (!isset($this->reminders['metaforms'][$this->formData->id][$element->id])) {
-                    $this->reminders['metaforms'][$this->formData->id][$element->id]   = [];
+                if (!isset($this->reminders['metaforms'][$this->formData->blockId][$element->blockId])) {
+                    $this->reminders['metaforms'][$this->formData->blockId][$element->blockId]   = [];
                 }
 
-                $this->reminders['metaforms'][$this->formData->id][$element->id][]   = $userId;
+                $this->reminders['metaforms'][$this->formData->blockId][$element->blockId][]   = $userId;
             }
         }
     }
@@ -764,7 +764,7 @@ class FormReminders extends Forms
         foreach ($this->defaultForms[$today] as $formDetails) {
             $this->formData = $formDetails['form'];
 
-            $formId = $this->formData->id;
+            $formId = $this->formData->blockId;
 
             // Do nothing if there are no reminders for this form
             if (!isset($this->reminders['defaultforms'][$formId])) {

@@ -409,7 +409,7 @@ class SubmitForm extends SaveFormSettings
             }
 
             if (empty($recipients)) {
-                TSJIPPY\printArray("No to email found for email $key on form {$this->formData->slug} with id {$this->formData->id}");
+                TSJIPPY\printArray("No to email found for email $key on form {$this->formData->slug} with id {$this->formData->blockId}");
                 continue;
             }
 

@@ -25,10 +25,10 @@ export default function save({ attributes }) {
       target={attributes.target}
       autocomplete={attributes.autocomplete}
       data-formName={attributes.name}
-      data-blockId={attributes.id}
+      data-blockId={attributes.blockId}
       {...blockProps}
     >
-      <input type="hidden" name="block-id" value={attributes.id} />
+      <input type="hidden" name="block-id" value={attributes.blockId} />
       <input type="hidden" name="post-id" value={attributes.postId} />
       <InnerBlocks.Content />
       <FormSubmitter attributes={attributes} />

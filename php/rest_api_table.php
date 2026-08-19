@@ -380,7 +380,7 @@ function saveTableSettings()
         $forms->getForm($_POST['form-id']);
 
         //update existing
-        $result = $forms->insertOrUpdateData($forms->tableName, $formSettings, ['id' => $forms->formData->id]);
+        $result = $forms->insertOrUpdateData($forms->tableName, $formSettings, ['id' => $forms->formData->blockId]);
 
         if (is_wp_error($result)) {
             return $result;

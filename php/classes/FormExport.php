@@ -43,7 +43,7 @@ class FormExport extends Forms
         unset($this->formData->url);
 
         // Remove the id
-        unset($this->formData->id);
+        unset($this->formData->blockId);
 
         // Set form version to 1
         $this->formData->version     = 1;
@@ -74,7 +74,7 @@ class FormExport extends Forms
             'forms',
             "select * from %i where form_id=%d", 
             $this->formEmailTable, 
-            $this->formData->id
+            $this->formData->blockId
         );
 
         foreach ($emailSettings as &$emailSetting) {
@@ -120,7 +120,7 @@ class FormExport extends Forms
         // Form elements
         foreach ($formEmails as $email) {
 
-            $email->form_id    = $this->formData->id;
+            $email->form_id    = $this->formData->blockId;
 
             if (!empty($email->submitted_trigger)) {
                 $triggers    = maybe_unserialize($email->submitted_trigger);
@@ -257,10 +257,10 @@ class FormExport extends Forms
                     $this->formData    = new stdClass();
                 }
 
-                //$this->formData->id     = $this->insertOrUpdateData($this->tableName, $object);
+                //$this->formData->blockId     = $this->insertOrUpdateData($this->tableName, $object);
 
-                if (is_wp_error($this->formData->id)) {
-                    return $this->formData->id;
+                if (is_wp_error($this->formData->blockId)) {
+                    return $this->formData->blockId;
                 }
             } elseif ($type    == 'elements') {
                 //$elementIdMapping    = $this->insertFormElements($object);
@@ -278,7 +278,7 @@ class FormExport extends Forms
                         continue;
                     }
 
-                    $reminder->form_id    = $this->formData->id;
+                    $reminder->form_id    = $this->formData->blockId;
 
                     //$this->insertOrUpdateData($this->formReminderTable, $reminder);
                 }

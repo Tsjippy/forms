@@ -13,8 +13,6 @@ if (! defined('ABSPATH')) {
 
 class SaveFormSettings extends Forms
 {
-    use CreateJs;
-
     /**
      * Constructor
      *

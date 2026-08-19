@@ -17,10 +17,6 @@
   "style": "file:./style-index.css",
   "viewScript": "tsjippy_forms_script",
   "attributes": {
-    "id": {
-      "type": "string",
-      "default": ""
-    },
     "postId": {
       "type": "number",
       "default": 0

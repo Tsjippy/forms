@@ -2162,12 +2162,6 @@ function Edit({
   setAttributes,
   clientId
 }) {
-  if (attributes.id === -1) {
-    setAttributes({
-      id: clientId
-    });
-  }
-
   /* Local state for available roles and actions fetched from the API. */
   const [availableRoles, setAvailableRoles] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
   const [availableActions, setAvailableActions] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
@@ -2211,15 +2205,18 @@ function Edit({
 
   /* Read inner blocks so the editor can inspect nested form elements if needed. */
   const innerBlocks = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.useSelect)(select => {
-    const block = select('core/block-editor').getBlock(clientId);
-    return block?.innerBlocks || [];
+    const {
+      getClientIdsOfDescendants
+    } = select('core/block-editor');
+    const ids = getClientIdsOfDescendants([clientId]);
+    return ids.map(id => select('core/block-editor').getBlock(id));
   }, [clientId]);
 
   // Load all conditions once
   (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_5__.useSelect)(select => select('tsjippy-forms/conditions-store').getFormConditions(attributes.postId), [attributes.postId]);
 
   /**
-   * THe amount of formsteps in the form
+   * The amount of formsteps in the form
    */
   const stepAmount = innerBlocks?.filter(block => block.name === 'tsjippy-forms/formstep').length || 0;
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
@@ -2328,6 +2325,7 @@ function Edit({
     }, 800);
     return () => clearTimeout(timeoutId);
   }, [formName, setAttributes, attributes.name]);
+  const inputBlocks = innerBlocks.filter(block => ['core/text-control', 'core/select-control', 'core/textarea-control', 'core/radio', 'core/checkbox', 'core/toggle-control', 'tsjippy-forms/input', 'tsjippy-forms/select'].includes(block.name));
 
   /**
    * Return HTML
@@ -2397,6 +2395,46 @@ function Edit({
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Actions', 'tsjippy'),
         initialOpen: false,
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(ActionCheckboxes, {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Auto Archive', 'tsjippy'),
+        initialOpen: false,
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Auto Archive Block', 'tsjippy'),
+          value: attributes.auto_archive_element,
+          options: [{
+            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a block', 'tsjippy'),
+            value: ''
+          }, ...inputBlocks.map(block => ({
+            label: block.attributes?.name || block.name,
+            value: block.attributes.blockId
+          }))],
+          onChange: value => setAttributes({
+            auto_archive_element: value
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Auto Archive Value', 'tsjippy'),
+          help: "You can use placeholders like %today%-2days",
+          value: attributes.auto_archive_value,
+          onChange: value => setAttributes({
+            auto_archive_value: value
+          })
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Split Entries', 'tsjippy'),
+        initialOpen: false,
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+          multiple: true,
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Split Blocks', 'tsjippy'),
+          help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form submission data will be split on the values of these inputs, while sharing the values of the other inputs.', 'tsjippy'),
+          value: attributes.split_elements || [],
+          options: inputBlocks.map(block => ({
+            label: block.attributes?.name || block.name,
+            value: block.attributes?.blockId
+          })),
+          onChange: values => setAttributes({
+            split_elements: Array.isArray(values) ? values : [values]
+          })
+        })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('E-mail Settings', 'tsjippy'),
         initialOpen: false,
@@ -2417,10 +2455,10 @@ function Edit({
         value: formName,
         onChange: value => setFormName(value)
       }) : isEmailsFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_emails_EmailSettings_js__WEBPACK_IMPORTED_MODULE_11__.EmailSettings, {
-        blockId: attributes.id,
+        blockId: attributes.blockId,
         formElements: []
       }) : isRemindersFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(FormReminderPanel, {
-        blockId: attributes.id,
+        blockId: attributes.blockId,
         saveInMeta: attributes.user_meta
       }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
@@ -3589,12 +3627,12 @@ function save({
     target: attributes.target,
     autocomplete: attributes.autocomplete,
     "data-formName": attributes.name,
-    "data-blockId": attributes.id,
+    "data-blockId": attributes.blockId,
     ...blockProps,
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
       type: "hidden",
       name: "block-id",
-      value: attributes.id
+      value: attributes.blockId
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("input", {
       type: "hidden",
       name: "post-id",
@@ -4815,7 +4853,7 @@ var undo_default = /* @__PURE__ */ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE
   \************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"tsjippy_forms_script","attributes":{"id":{"type":"string","default":""},"postId":{"type":"number","default":0},"version":{"type":"number","default":0},"method":{"type":"string","default":"post"},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":false},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]},"step_amount":{"type":"integer","default":0}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"tsjippy-forms/formbuilder","version":"0.1.0","title":"Form Builder","category":"form-elements","icon":"forms","description":"Form builder using blocks","example":{},"supports":{"html":false},"textdomain":"tsjippy","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"tsjippy_forms_script","attributes":{"postId":{"type":"number","default":0},"version":{"type":"number","default":0},"method":{"type":"string","default":"post"},"target":{"type":"string","default":"_self"},"autocomplete":{"type":"boolean","default":true},"submission_message":{"type":"string","default":"Succesfully received your request"},"submission_id":{"type":"boolean","default":true},"name":{"type":"string","default":""},"actions":{"type":"array","default":["archive","delete"]},"user_meta":{"type":"boolean","default":false},"edit_roles":{"type":"array","default":[]},"auto_archive_element":{"type":"string","default":""},"auto_archive_value":{"type":"string","default":""},"submission_roles":{"type":"array","default":[]},"split_elements":{"type":"array","default":[]},"step_amount":{"type":"integer","default":0}}}');
 
 /***/ }
 

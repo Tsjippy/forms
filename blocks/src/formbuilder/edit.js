@@ -12,7 +12,10 @@ import {
 	Button,
 	ToggleControl,
 	TextControl,
-	Placeholder
+	Placeholder,
+	SelectControl,
+	FormTokenField,
+	BaseControl
 } from '@wordpress/components';
 import { useState, useEffect, useCallback, RawHTML  } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -44,11 +47,6 @@ const TEMPLATE = [
  * This is the editor-side UI for the form block.
  */
 export default function Edit({ attributes, setAttributes, clientId }) {
-	
-	if (attributes.id === -1) {
-		setAttributes({ id: clientId });
-	}
-
 	/* Local state for available roles and actions fetched from the API. */
 	const [availableRoles, setAvailableRoles] = useState([]);
 	const [availableActions, setAvailableActions] = useState([]);
@@ -93,8 +91,12 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	/* Read inner blocks so the editor can inspect nested form elements if needed. */
 	const innerBlocks = useSelect(
 		(select) => {
-			const block = select('core/block-editor').getBlock(clientId);
-			return block?.innerBlocks || [];
+			const { getClientIdsOfDescendants } = select('core/block-editor');
+			const ids = getClientIdsOfDescendants([clientId]);
+
+			return ids.map((id) =>
+				select('core/block-editor').getBlock(id)
+			);
 		},
 		[clientId]
 	);
@@ -106,7 +108,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	);
 
 	/**
-	 * THe amount of formsteps in the form
+	 * The amount of formsteps in the form
 	 */
     const stepAmount	= innerBlocks?.filter(
         block => block.name === 'tsjippy-forms/formstep'
@@ -231,6 +233,19 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		return () => clearTimeout(timeoutId);
 	}, [ formName, setAttributes, attributes.name ]);
 
+	const inputBlocks = innerBlocks.filter((block) =>
+		[
+			'core/text-control',
+			'core/select-control',
+			'core/textarea-control',
+			'core/radio',
+			'core/checkbox',
+			'core/toggle-control',
+			'tsjippy-forms/input',
+			'tsjippy-forms/select',
+		].includes(block.name)
+	);
+
 	/**
 	 * Return HTML
 	 */
@@ -293,6 +308,61 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					<ActionCheckboxes />
 				</PanelBody>
 
+				<PanelBody
+					title={__('Auto Archive', 'tsjippy')}
+					initialOpen={false}
+				>
+					<SelectControl
+						label={__('Auto Archive Block', 'tsjippy')}
+						value={attributes.auto_archive_element}
+						options={[
+							{
+								label: __('Select a block', 'tsjippy'),
+								value: '',
+							},
+							...inputBlocks.map((block) => ({
+								label: block.attributes?.name ||
+									block.name,
+								value: block.attributes.blockId,
+							})),
+						]}
+						onChange={(value) => setAttributes({ auto_archive_element: value })}
+					/>
+
+					<TextControl
+						label    = {__('Auto Archive Value', 'tsjippy')}
+						help	 = "You can use placeholders like %today%-2days"
+						value    = { attributes.auto_archive_value }
+						onChange = { ( value ) => setAttributes({ auto_archive_value: value })}
+					/>
+				</PanelBody>
+
+				<PanelBody
+					title={__('Split Entries', 'tsjippy')}
+					initialOpen={false}
+				>
+					<SelectControl
+						multiple
+						label={__('Split Blocks', 'tsjippy')}
+						help={__(
+							'Form submission data will be split on the values of these inputs, while sharing the values of the other inputs.',
+							'tsjippy'
+						)}
+						value={attributes.split_elements || []}
+						options={inputBlocks.map((block) => ({
+							label: block.attributes?.name || block.name,
+							value: block.attributes?.blockId,
+						}))}
+						onChange={(values) =>
+							setAttributes({
+								split_elements: Array.isArray(values)
+									? values
+									: [values],
+							})
+						}
+					/>
+				</PanelBody>
+
 				<PanelBody title={__('E-mail Settings', 'tsjippy')} initialOpen={false} onToggle={() => setEmailsFormVisibility((prev) => !prev)}>
 					{isEmailsFormVisible
 						? __('Hide Emails Form', 'tsjippy')
@@ -324,13 +394,13 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						
 						isEmailsFormVisible ? 
 							<EmailSettings
-								blockId={attributes.id}
+								blockId={attributes.blockId}
 								formElements={[]}
 							/>
 						:
 							isRemindersFormVisible ? 
 								<FormReminderPanel
-									blockId= { attributes.id }
+									blockId= { attributes.blockId }
 									saveInMeta = { attributes.user_meta }
 								/>			
 								:

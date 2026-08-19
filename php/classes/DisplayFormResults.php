@@ -38,7 +38,7 @@ class DisplayFormResults extends SubmitForm
      * Constructor for the DisplayFormResults class
      * @param string $blockId
      */
-    public function __construct($shortcodeId='', $all = false, $pageSize = 50, $formUrl = '', $userId = 0)
+    public function __construct($shortcodeId='', $all = false, $pageSize = 50, $formUrl = '', $userId = 0, $postId='')
     {
         global $wpdb;
 
@@ -71,8 +71,8 @@ class DisplayFormResults extends SubmitForm
         //Get personal visibility
         if (empty($this->formData)) {
             $this->hiddenColumns        = [];
-        } elseif (!empty($this->formData->id)) {
-            $value  = get_user_meta($this->user->ID, 'tsjippy_hidden_columns_' . $this->formData->id, true);
+        } elseif (!empty($this->formData->blockId)) {
+            $value  = get_user_meta($this->user->ID, 'tsjippy_hidden_columns_' . $this->formData->blockId, true);
             if (!is_array($value)) {
                 $value  = [];
             }
@@ -137,7 +137,7 @@ class DisplayFormResults extends SubmitForm
             ]
         ];
 
-        if (!empty($this->formData->split)) {
+        if (!empty($this->formData->split_elements)) {
             $this->extraElements[-5] = [
                 'slug' => 'sub_id',
                 'name' => 'Sub-Id',
@@ -151,7 +151,7 @@ class DisplayFormResults extends SubmitForm
             }
             $element                 = new \stdClass();
 
-            $element->id             = $id;
+            $element->blockId             = $id;
             if (isset($newElement['type'])) {
                 $element->type = $newElement['type'];
             } else {
@@ -178,14 +178,14 @@ class DisplayFormResults extends SubmitForm
         $baseNames    = $elementIds = [];
 
         // Check if this is an splitted element
-        if (empty($this->formData->split)) {
+        if (empty($this->formData->split_elements)) {
             return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
         }
 
         /**
          * loop over all element ids that data should be splitted on
          */
-        foreach ($this->formData->split as $splitElementId) {
+        foreach ($this->formData->split_elements as $splitElementId) {
             // Get the element slug
             $slug    = $this->getElementById($splitElementId, 'slug');
 
@@ -229,7 +229,7 @@ class DisplayFormResults extends SubmitForm
                         }
 
                         // Add the current element id
-                        $elementIds[$baseName][$name][$element->slug]    = $element->id;
+                        $elementIds[$baseName][$name][$element->slug]    = $element->blockId;
                         break;
                     }
                 }
@@ -262,7 +262,7 @@ class DisplayFormResults extends SubmitForm
             $submission     = new \stdClass();
 
             $submission->id               = $counter;
-            $submission->block_id          = $this->formData->id;
+            $submission->block_id          = $this->formData->blockId;
 
             // Base submission data
             $submission->time_created     = $user->user_registered;
@@ -412,7 +412,7 @@ class DisplayFormResults extends SubmitForm
      */
     private function splittedValuesQueries(&$finalWhere, &$innerJoinString)
     {
-        $splitElements        = $this->formData->split;
+        $splitElements        = $this->formData->split_elements;
         if (empty($splitElements)) {
             return;
         }
@@ -464,14 +464,14 @@ class DisplayFormResults extends SubmitForm
         }
 
         $ect .= implode(",\n\t\t", $splitColumns);
-        $ect .= ",\n\t\tMAX(CASE WHEN element_id = '-6' THEN sub_id END) AS 'sub_archived'";
+        $ect .= ",\n\t\tMAX(CASE WHEN element_id = '-6' THEN value END) AS 'sub_archived'";
         $ect .= "\n\tFROM Raw";
         $ect .= "\n\tWHERE sub_id IS NOT NULL";
         $ect .= "\n\tGROUP BY id, sub_id";
         $ect .= "\n)";
 
         if (!$this->showArchived) {
-            $finalWhere[]            = "(sub_id <> sub_archived or sub_archived is null)";
+            $finalWhere[]            = "(sub_archived <> 1 or sub_archived is null)";
         }
 
         return $ect;
@@ -491,12 +491,12 @@ class DisplayFormResults extends SubmitForm
         /**
          * Build the Common Table Expressions (CTE) needed to make the pivot query
          */
-        $splitElements      = $this->formData->split;
+        $splitElements      = $this->formData->split_elements;
         $existingColumns    = ['id', 'block_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
 
         $columns            = $existingColumns;
 
-        $columnsString      = implode(', S. ', $columns);
+        $columnsString      = implode(', S.', $columns);
 
         $innerJoinString    = '';
 
@@ -551,11 +551,11 @@ class DisplayFormResults extends SubmitForm
 
         foreach ($this->formElements as $element) {
             // Negative element ids are from the submission table
-            if ($element->id < 0 || in_array($element->id, $splitElements) || isset($this->nonInputs[$element->type])) {
+            if ($element->blockId < 0 || in_array($element->blockId, $splitElements) || isset($this->nonInputs[$element->type])) {
                 continue;
             }
 
-            $toColumn[]         = "MAX(CASE WHEN element_id = '$element->id' THEN value END) AS '$element->id'";
+            $toColumn[]         = "MAX(CASE WHEN element_id = '$element->blockId' THEN value END) AS '$element->blockId'";
         }
 
         if (!empty($toColumn)) {
@@ -617,7 +617,7 @@ class DisplayFormResults extends SubmitForm
         $showArchived = $this->showArchived || is_numeric($submissionId);
 
         // Check if a form is loaded
-        if (empty($this->formData->id) && !empty($submissionId)) {
+        if (empty($this->formData->blockId) && !empty($submissionId)) {
             // Load the form before loading the submission, because we need the form elements to load the submission data
             $this->getFormBySubmissionId($submissionId);
         }
@@ -630,9 +630,9 @@ class DisplayFormResults extends SubmitForm
          * Get the where statements
          */
         // Form Id
-        if (isset($this->formData->id)) {
+        if (isset($this->formData->blockId)) {
             $where[]    = "S.block_id=%d";
-            $values[]   = $this->formData->id;
+            $values[]   = $this->formData->blockId;
         }
 
         // Archived
@@ -831,7 +831,7 @@ class DisplayFormResults extends SubmitForm
             return false;
         }
 
-        $this->columnSettings[$element->id] = [
+        $this->columnSettings[$element->blockId] = [
             'slug'                => $element->slug,
             'name'                => empty($element->name) ? $element->slug : $element->name,
             'show'                => 1,
@@ -841,7 +841,7 @@ class DisplayFormResults extends SubmitForm
 
         // Only add element ids if available
         if (!empty($elementIds)) {
-            $this->columnSettings[$element->id]['elementIds']    = $elementIds;
+            $this->columnSettings[$element->blockId]['elementIds']    = $elementIds;
         }
     }
 
@@ -914,7 +914,7 @@ class DisplayFormResults extends SubmitForm
         //loop over all elements to build a new array
         foreach ($this->formElements as $element) {
 
-            $id = $element->id;
+            $id = $element->blockId;
             // If it has related ids, its already added above
             if (!empty($relatedIds[$id])) {
                 continue;
@@ -1414,7 +1414,7 @@ class DisplayFormResults extends SubmitForm
         <div class="tabcontent" id="column-settings-<?php echo esc_attr($this->shortcodeId); ?>">
             <form class="sortable-column-settings-rows">
                 <input type='hidden' class='no-reset' name='shortcode-id' value='<?php echo esc_attr($this->shortcodeId); ?>'>
-                <input type='hidden' class='no-reset' name='form-id' value='<?php echo esc_attr($this->formData->id); ?>'>
+                <input type='hidden' class='no-reset' name='form-id' value='<?php echo esc_attr($this->formData->blockId); ?>'>
 
                 <table class='tsjippy table' style='display:table'>
                     <thead class="column-setting-wrapper">
@@ -1552,7 +1552,7 @@ class DisplayFormResults extends SubmitForm
         <div class="tabcontent <?php echo esc_attr($class); ?>" id="table-rights-<?php echo esc_attr($this->shortcodeId); ?>">
             <form>
                 <input type='hidden' class='no-reset' class='shortcode-settings' name='shortcode-id' value='<?php echo esc_attr($this->shortcodeId); ?>'>
-                <input type='hidden' class='no-reset' class='shortcode-settings' name='form-id' value='<?php echo esc_attr($this->formData->id); ?>'>
+                <input type='hidden' class='no-reset' class='shortcode-settings' name='form-id' value='<?php echo esc_attr($this->formData->blockId); ?>'>
 
                 <h4>
                     Set the title for the results table
@@ -1782,7 +1782,7 @@ class DisplayFormResults extends SubmitForm
                                 preg_match($pattern, $element->slug, $matches)    &&   // preg match was succesfull
                                 !isset($foundElements[$matches[1]])         // the match is not yet in the found elements
                             ) {
-                                $foundElements[$matches[1]] = $element->id;
+                                $foundElements[$matches[1]] = $element->blockId;
                             }
                         }
 
@@ -1800,7 +1800,7 @@ class DisplayFormResults extends SubmitForm
                                     //Check which option is the selected one
                                     ?>
                                     <label>
-                                        <input type='checkbox' name='form-settings[split][<?php echo esc_attr($id); ?>]' value='1' <?php if (in_array($id, $this->formData->split)) echo 'checked'; ?>>
+                                        <input type='checkbox' name='form-settings[split][<?php echo esc_attr($id); ?>]' value='1' <?php if (in_array($id, $this->formData->split_elements)) echo 'checked'; ?>>
                                         <?php echo esc_html($name); ?>
                                     </label>
                                     <br>
@@ -2192,7 +2192,7 @@ class DisplayFormResults extends SubmitForm
         if (empty($this->hiddenColumns)) {
             $hidden    = 'hidden';
         }
-        addElement('button', $tableButtonsWrapper, ['class' => "button small reset-col-vis $hidden", "data-form-id" => $this->formData->id], 'Reset visibility');
+        addElement('button', $tableButtonsWrapper, ['class' => "button small reset-col-vis $hidden", "data-form-id" => $this->formData->blockId], 'Reset visibility');
 
         $this->renderFilterForm($tableButtonsWrapper);
     }
@@ -2207,7 +2207,7 @@ class DisplayFormResults extends SubmitForm
             $parent,
             [
                 'class'             => 'tsjippy table form-data-',
-                'data-form-id'      => $this->formData->id,
+                'data-form-id'      => $this->formData->blockId,
                 'data-shortcode-id' => $this->shortcodeId
             ]
         );
@@ -2235,7 +2235,7 @@ class DisplayFormResults extends SubmitForm
             $parent,
             [
                 'class'             => 'tsjippy table form-data',
-                'data-form-id'      => $this->formData->id,
+                'data-form-id'      => $this->formData->blockId,
                 'data-shortcode-id' => $this->shortcodeId,
                 'data-type'         => esc_attr($type),
                 'data-page'         => $this->currentPage,

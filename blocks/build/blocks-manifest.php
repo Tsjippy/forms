@@ -119,10 +119,6 @@ return array(
 		'style' => 'file:./style-index.css',
 		'viewScript' => 'tsjippy_forms_script',
 		'attributes' => array(
-			'id' => array(
-				'type' => 'string',
-				'default' => ''
-			),
 			'postId' => array(
 				'type' => 'number',
 				'default' => 0

@@ -1555,7 +1555,7 @@ form.wp-block-tsjippy-forms-formbuilder .block-list-appender .add-form-element-b
   background-color: darkgrey;
 }
 
-.formbuilder-child {
+.wp-block-tsjippy-forms-formbuilder, .formbuilder-child {
   padding: 5px;
   border-style: solid;
 }
