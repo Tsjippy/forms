@@ -37,6 +37,7 @@
 - upgrade bugs
 - conditions
 - block id for formbuilder block
+- display form results
 
 ### Updated
 
