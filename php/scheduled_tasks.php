@@ -24,7 +24,7 @@ function initTasks()
  */
 function autoArchiveFormEntries()
 {
-    $editFormResults = new EditFormResults([]);
+    $editFormResults = new EditFormResults();
     $editFormResults->autoArchive();
 }
 

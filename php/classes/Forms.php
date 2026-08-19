@@ -536,13 +536,31 @@ class Forms
     }
 
     /**
+     * Finds all blocks and post ids who are of the formbuilder type
+     */
+    public function getForms(){
+        $this->forms = TSJIPPY\getFromDb(
+            'all_forms',
+            'forms',
+            "SELECT distinct block_id, post_id from %i",
+            $this->submissionTableName
+        );
+
+        foreach($this->forms as &$form){
+            $this->getForm($form->post_id, $form->block_id);
+
+            $form   = $this->formData;
+        }
+    }
+
+    /**
      * Finds a formbuilder block on a post and parses it to html
      * 
      * @param   object|int  $post   The post or post id to search for the block. Default empty to use the object post
      * 
      * @return  string|false   The form html or false if not found
      */
-    public function getForm($post=''){
+    public function getForm($post='', $blockId=''){
         if(empty($post) && $this->formData->post == null){
             return $this->formBlock = [];
         }
@@ -557,10 +575,14 @@ class Forms
             }
         }
 
+        if(empty($blockId)){
+            $blockId    = $this->formData->blockId;
+        }
+
         $blocks = parse_blocks($post->post_content);
 
         foreach($blocks as $block){
-            if($block['attrs']['blockId'] == $this->formData->blockId){
+            if($block['attrs']['blockId'] == $blockId){
                 $this->formBlock = $block;
 
                 foreach($block['attrs'] as $key => $attribute){
@@ -585,18 +607,6 @@ class Forms
      */
     public function showForm($block){
         return render_block($block);
-    }
-
-    /**
-     * Finds all blocks and post ids who are of the formbuilder type
-     */
-    public function getForms(){
-        return TSJIPPY\getFromDb(
-            'all_forms',
-            'forms',
-            "SELECT distinct block_id, post_id from %i",
-            $this->submissionTableName
-        );
     }
 
     /**

@@ -22,7 +22,7 @@ class EditFormResults extends DisplayFormResults
      * @param    string     $formUrl    The form URL
      * @param    int        $userId     The user ID
      */
-    public function __construct($blockId = [], $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
+    public function __construct($blockId = '', $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
         parent::__construct($blockId, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
 
@@ -324,14 +324,14 @@ class EditFormResults extends DisplayFormResults
         //loop over all the forms
         foreach ($this->forms as $form) {
             //check if auto archive is turned on for this form
-            if (!isset($form->autoarchive) || !$form->autoarchive || empty($form->autoarchive_el)) {
+            if (empty($form->auto_archive_element)) {
                 continue;
             }
 
-            $this->getForm($form->id);
+            $this->getForm($form->postId, $form->blockId);
 
-            $triggerId    = $form->autoarchive_el;
-            $triggerValue = $form->autoarchive_value;
+            $triggerId    = $form->auto_archive_element;
+            $triggerValue = $form->auto_archive_value;
 
             if (empty($triggerId) || empty($triggerValue)) {
                 continue;
@@ -372,7 +372,7 @@ class EditFormResults extends DisplayFormResults
             // Find the name of the trigger element
             foreach ($splittedElements as $baseName) {
                 foreach ($baseName as $name => $splitElementIds) {
-                    if (isset($splitElementIds[$triggerId])) {
+                    if (in_array( $triggerId, $splitElementIds)) {
                         $triggerId    = $name;
 
                         break 2;

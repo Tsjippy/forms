@@ -14,6 +14,10 @@ add_action('admin_footer-post.php', function(){
 
     //insertNewForms();
 
+    global $wpdb;
+
+    $wpdb->query("update  `wp_tsjippy_form_submission_values` set value = 0 where submission_id in (select id from `wp_tsjippy_form_submissions`) and element_id = -6");
+
 });
 
 function printJs($blockData, $postId){
@@ -153,11 +157,6 @@ function sendBlockContent(block, postId){
     $oldForms   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}tsjippy_forms");
 
     foreach($oldForms as $form){
-
-        if($form->id != 52){
-            continue;
-        }
-
         if(empty($form->slug)){
             $form->slug = strtolower($form->name);
         }

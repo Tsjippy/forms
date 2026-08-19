@@ -42,14 +42,22 @@ class DisplayFormResults extends SubmitForm
     {
         global $wpdb;
 
-        $this->shortcodeId      = $shortcodeId;
-        $this->shortcodeTable   = $wpdb->prefix . 'tsjippy_form_shortcodes';
-        $this->shortcodeColumnSettingsTable = $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
+        $blockId    = '';
+        $postId     = '';
 
-        $this->loadShortcodeData();
+        if(!empty($shortcodeId)){
+            $this->shortcodeId      = $shortcodeId;
+            $this->shortcodeTable   = $wpdb->prefix . 'tsjippy_form_shortcodes';
+            $this->shortcodeColumnSettingsTable = $wpdb->prefix . 'tsjippy_form_shortcode_column_settings';
+
+            $this->loadShortcodeData();
+
+            $blockId    = $this->tableSettings->block_id;
+            $postId     = $this->tableSettings->post_id;
+        }
 
         // call parent constructor
-        parent::__construct($this->tableSettings->block_id, all: $all, pageSize: $pageSize, postId: $this->tableSettings->post_id, formUrl: $formUrl, userId: $userId);
+        parent::__construct($blockId, all: $all, pageSize: $pageSize, postId: $postId, formUrl: $formUrl, userId: $userId);
 
         $this->columnSettings       = [];
         $this->currentPage          = 0;
