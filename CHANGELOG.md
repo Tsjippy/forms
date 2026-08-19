@@ -36,6 +36,7 @@
 - selected block
 - upgrade bugs
 - conditions
+- block id for formbuilder block
 
 ### Updated
 
