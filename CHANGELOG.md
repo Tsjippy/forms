@@ -15,6 +15,7 @@
 - e-mail settings form
 - dynamic values store
 - is formbuilder child attribute
+- apply conditions to oother blocks as well
 
 ### Changed
 - added input element attributes form
