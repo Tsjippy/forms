@@ -38,6 +38,7 @@
 - conditions
 - block id for formbuilder block
 - display form results
+- archiving of sub entries
 
 ### Updated
 
