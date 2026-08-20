@@ -16,7 +16,7 @@ add_action('admin_footer-post.php', function(){
 
     global $wpdb;
 
-    $wpdb->query("update  `wp_tsjippy_form_submission_values` set value = 0 where submission_id in (select id from `wp_tsjippy_form_submissions`) and element_id = -6");
+    //$wpdb->query("update  `wp_tsjippy_form_submission_values` set value = 0 where submission_id in (select id from `wp_tsjippy_form_submissions`) and element_id = -6");
 
 });
 
@@ -157,6 +157,10 @@ function sendBlockContent(block, postId){
     $oldForms   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}tsjippy_forms");
 
     foreach($oldForms as $form){
+        if($form->id != 129){
+            continue;
+        }
+
         if(empty($form->slug)){
             $form->slug = strtolower($form->name);
         }
@@ -560,6 +564,10 @@ function sendBlockContent(block, postId){
                         if($type == 'property-value' && is_numeric($action)){
                             $action = "the-value-of-$action";
                         }
+                    }
+
+                    if(!empty($element->conditions['copyto'])){
+                        $actions['targets'] = array_values($element->conditions['copyto']);
                     }
 
                     if(!empty($rules) && !empty($actions)){

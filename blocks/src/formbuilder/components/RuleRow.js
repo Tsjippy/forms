@@ -50,52 +50,6 @@ export default function RuleRow({
 		{ label: __('Is not visible', 'tsjippy'), value: 'invisible' },
 	];
 
-	/* Render additional fields for arithmetic-style equations. */
-	const renderExtraOptions = () => {
-		if (!rule?.equation) {
-			return null;
-		}
-
-		if (rule.equation === '+' || rule.equation === '-') {
-			return (
-				<>
-					<SelectControl
-						label={__('Second element', 'tsjippy')}
-						value={rule['conditional-field-2'] || ''}
-						options={[
-							{ label: __('Select second element', 'tsjippy'), value: '' },
-							...(formBlockOptions || []),
-						]}
-						onChange={(element) =>
-							onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', element)
-						}
-						help={ruleErrors.conditionalField2 || ''}
-						data-field-key="conditionalField2"
-					/>
-
-					<SelectControl
-						label={__('Second equation', 'tsjippy')}
-						value={rule['equation-2'] || ''}
-						options={[
-							{ label: __('Select second equation', 'tsjippy'), value: '' },
-							{ label: __('Equals', 'tsjippy'), value: '==' },
-							{ label: __('Does not equal', 'tsjippy'), value: '!=' },
-							{ label: __('Greater than', 'tsjippy'), value: '>' },
-							{ label: __('Less than', 'tsjippy'), value: '<' },
-						]}
-						onChange={(equation2) =>
-							onUpdate(conditionIndex, ruleIndex, 'equation-2', equation2)
-						}
-						help={ruleErrors.equation2 || ''}
-						data-field-key="equation2"
-					/>
-				</>
-			);
-		}
-
-		return null;
-	};
-
 	/* Render the editable UI for one rule entry. */
 	return (
 		<div className={`rule-row inner ${

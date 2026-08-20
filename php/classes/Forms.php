@@ -419,7 +419,7 @@ class Forms
             'block_id' => '%s', 
         ];
 
-        $this->tableFormats[$this->blockConditionsTableName] = apply_filters('tsjippy-forms-block-reminder-formats', $formats, $this);
+        $this->tableFormats[$this->blockRemindersTableName] = apply_filters('tsjippy-forms-block-reminder-formats', $formats, $this);
 
         foreach ($this->tableFormats as &$format) {
             ksort($format);

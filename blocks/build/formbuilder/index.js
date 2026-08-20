@@ -932,6 +932,7 @@ function createEmptyRule() {
  */
 function createEmptyAction() {
   return {
+    'targets': [],
     'action': '',
     'property-name': '',
     'property-value': '',
@@ -1215,9 +1216,9 @@ function ConditionsModal({
     } = focusTarget;
     let selector = '';
     if (section === 'rules') {
-      selector = `[data-rule-index="${conditionIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] input,
-				[data-rule-index="${conditionIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] select,
-				[data-rule-index="${conditionIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] textarea`;
+      selector = `[data-rule-index="${ruleIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] input,
+				[data-rule-index="${ruleIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] select,
+				[data-rule-index="${ruleIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] textarea`;
     }
     if (section === 'actions') {
       selector = `[data-action-index="${actionIndex}"] [data-field-key="${fieldKey}"] input,
@@ -1304,7 +1305,7 @@ function ConditionsModal({
       next[conditionIndex].rules[ruleIndex][key] = value;
 
       // Add a new sub-rule
-      if (key == 'combinator') {
+      if (key === 'combinator' && !next[ruleIndex + 1]) {
         next[conditionIndex].rules[ruleIndex + 1] = createEmptyRule();
       }
       return next;
@@ -1418,19 +1419,23 @@ function ConditionsModal({
     resetErrors();
     setDraftConditions(prev => {
       const next = deepClone(prev);
+      console.log(next);
       next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
       next[conditionIndex].actions.push(createEmptyAction());
+      console.log(next);
       return next;
     });
   }, [clearSuccessMessage]);
   const updateAction = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useCallback)((conditionIndex, actionIndex, key, value) => {
     setDraftConditions(prev => {
       const next = deepClone(prev);
+      console.log(next);
       next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
       if (!next[conditionIndex].actions[actionIndex]) {
         next[conditionIndex].actions[actionIndex] = createEmptyAction();
       }
       next[conditionIndex].actions[actionIndex][key] = value;
+      console.log(next);
       return next;
     });
     resetErrors();
@@ -1508,7 +1513,8 @@ function ConditionsModal({
     const isPulsed = pulseTarget && pulseTarget.section === 'rules' && pulseTarget.ruleIndex === ruleIndex;
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
       className: `item ${isPulsed ? 'pulse' : ''}`,
-      "data-condition-index": ruleIndex,
+      "data-condition-index": conditionIndex,
+      "data-rule-index": ruleIndex,
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_RuleRow__WEBPACK_IMPORTED_MODULE_9__["default"], {
         conditionIndex: conditionIndex,
         rule: rule,
@@ -1607,6 +1613,17 @@ function ConditionsModal({
         onClick: () => deleteAction(conditionIndex, actionIndex),
         icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Delete action', 'tsjippy')
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h4", {
+        children: "Apply Actions to these elements as well"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
+        multiple: true,
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Target elements', 'tsjippy'),
+        value: actionItem?.targets || [],
+        options: [...(formBlockOptions || [])],
+        onChange: values => {
+          const targets = Array.isArray(values) ? values : [values];
+          updateAction(conditionIndex, actionIndex, 'targets', [...new Set(targets)]);
+        }
       })]
     }, actionIndex);
   };
@@ -1875,51 +1892,6 @@ function RuleRow({
     label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Is not visible', 'tsjippy'),
     value: 'invisible'
   }];
-
-  /* Render additional fields for arithmetic-style equations. */
-  const renderExtraOptions = () => {
-    if (!rule?.equation) {
-      return null;
-    }
-    if (rule.equation === '+' || rule.equation === '-') {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Second element', 'tsjippy'),
-          value: rule['conditional-field-2'] || '',
-          options: [{
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select second element', 'tsjippy'),
-            value: ''
-          }, ...(formBlockOptions || [])],
-          onChange: element => onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', element),
-          help: ruleErrors.conditionalField2 || '',
-          "data-field-key": "conditionalField2"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Second equation', 'tsjippy'),
-          value: rule['equation-2'] || '',
-          options: [{
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select second equation', 'tsjippy'),
-            value: ''
-          }, {
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Equals', 'tsjippy'),
-            value: '=='
-          }, {
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Does not equal', 'tsjippy'),
-            value: '!='
-          }, {
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Greater than', 'tsjippy'),
-            value: '>'
-          }, {
-            label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Less than', 'tsjippy'),
-            value: '<'
-          }],
-          onChange: equation2 => onUpdate(conditionIndex, ruleIndex, 'equation-2', equation2),
-          help: ruleErrors.equation2 || '',
-          "data-field-key": "equation2"
-        })]
-      });
-    }
-    return null;
-  };
 
   /* Render the editable UI for one rule entry. */
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {

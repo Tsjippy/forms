@@ -41,14 +41,15 @@ function createEmptyRule() {
  * Create a blank action object.
  */
 function createEmptyAction() {
-	return {
-		'action': '',
-		'property-name': '',
-		'property-value': '',
-		'property-name1': '',
-		'action-value': '',
-		'addition': '',
-	};
+    return {
+        'targets': [],
+        'action': '',
+        'property-name': '',
+        'property-value': '',
+        'property-name1': '',
+        'action-value': '',
+        'addition': '',
+    };
 }
 
 /**
@@ -419,9 +420,9 @@ export default function ConditionsModal({
 		let selector = '';
 
 		if (section === 'rules') {
-			selector = `[data-rule-index="${conditionIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] input,
-				[data-rule-index="${conditionIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] select,
-				[data-rule-index="${conditionIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] textarea`;
+			selector = `[data-rule-index="${ruleIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] input,
+				[data-rule-index="${ruleIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] select,
+				[data-rule-index="${ruleIndex}"] [data-condition-index="${conditionIndex}"] [data-field-key="${fieldKey}"] textarea`;
 		}
 
 		if (section === 'actions') {
@@ -534,7 +535,10 @@ export default function ConditionsModal({
 				next[conditionIndex].rules[ruleIndex][key] = value;
 
 				// Add a new sub-rule
-				if(key == 'combinator'){
+				if (
+					key === 'combinator' &&
+					!next[ruleIndex + 1]
+				) {
 					next[conditionIndex].rules[ruleIndex + 1] = createEmptyRule();
 				}
 
@@ -690,8 +694,13 @@ export default function ConditionsModal({
 		setDraftConditions((prev) => {
 			const next = deepClone(prev);
 
+			console.log(next)
+
 			next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
 			next[conditionIndex].actions.push(createEmptyAction());
+
+			console.log(next)
+
 			return next;
 		});
 	}, [clearSuccessMessage]);
@@ -701,6 +710,7 @@ export default function ConditionsModal({
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
 
+				console.log(next)
 
 				next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
 
@@ -709,6 +719,9 @@ export default function ConditionsModal({
 				}
 
 				next[conditionIndex].actions[actionIndex][key] = value;
+
+				console.log(next)
+
 				return next;
 			});
 
@@ -852,7 +865,8 @@ export default function ConditionsModal({
 			<div
 				key={ruleIndex}
 				className={`item ${isPulsed ? 'pulse' : ''}`}
-				data-condition-index={ruleIndex}
+				data-condition-index={conditionIndex}
+				data-rule-index={ruleIndex}
 			>
 				<RuleRow
 					conditionIndex={conditionIndex}
@@ -891,7 +905,7 @@ export default function ConditionsModal({
 					Object.keys(actionErrors).length > 0 ? 'invalid' : ''
 				} ${isPulsed ? 'pulse' : ''}`}
 				data-action-index={actionIndex}
-			>
+			>	
 				<SelectControl
 					label={__('Action', 'tsjippy')}
 					value={actionItem?.action || ''}
@@ -963,6 +977,28 @@ export default function ConditionsModal({
 				>
 					{__('Delete action', 'tsjippy')}
 				</Button>
+
+				<h4>Apply Actions to these elements as well</h4>
+				<SelectControl
+					multiple
+					label={__('Target elements', 'tsjippy')}
+					value={actionItem?.targets || []}
+					options={[
+						...(formBlockOptions || []),
+					]}
+					onChange={(values) => {
+						const targets = Array.isArray(values)
+							? values
+							: [values];
+
+						updateAction(
+							conditionIndex,
+							actionIndex,
+							'targets',
+							[...new Set(targets)]
+						);
+					}}
+				/>
 			</div>
 		);
 	};
