@@ -1,11 +1,22 @@
+const { select } = wp.data;
+
 wp.hooks.addFilter(
     'editor.BlockListBlock',
-    'my-plugin/group-heading',
+    'tsjippy/add-block-name',
     (BlockListBlock) => (props) => {
-        if (props.block.name.includes('tsjippy')) {
+        const formBuilderParents = select(
+            'core/block-editor'
+        ).getBlockParentsByBlockName(
+            props.clientId,
+            'tsjippy-forms/formbuilder'
+        );
+
+        const isInsideFormBuilder = formBuilderParents.length > 0;
+
+        if (!isInsideFormBuilder) {
             return <BlockListBlock {...props} />;
         }
-        
+
         return (
             <BlockListBlock
                 {...props}

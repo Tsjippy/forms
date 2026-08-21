@@ -14,16 +14,16 @@ class FormExport extends Forms
     /**
      * FormExport constructor.
      *
-     * @param string   $blockId   
+     * @param string   $blockId    
+     * @param string   $postId     Post ID to export forms for
      * @param bool     $all        Whether to export all forms or just one
-     * @param int      $pageSize    Number of forms to export per page
-     * @param string   $postId    Post ID to export forms for
+     * @param int      $pageSize   Number of forms to export per page
      * @param string   $formUrl    URL of the form to export
-     * @param int      $userId    User ID to export forms for
+     * @param int      $userId     User ID to export forms for
      */
-    public function __construct($blockId='', $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
+    public function __construct($blockId='', $postId='', $all=false, $pageSize=50, $formUrl='', $userId=0)
     {
-        parent::__construct(blockId: $blockId, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
+        parent::__construct(blockId: $blockId, postId:$postId, all: $all, pageSize:$pageSize, userId:$userId);
     }
 
     /**

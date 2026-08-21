@@ -3073,8 +3073,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__);
 
-wp.hooks.addFilter('editor.BlockListBlock', 'my-plugin/group-heading', BlockListBlock => props => {
-  if (props.block.name.includes('tsjippy')) {
+const {
+  select
+} = wp.data;
+wp.hooks.addFilter('editor.BlockListBlock', 'tsjippy/add-block-name', BlockListBlock => props => {
+  const formBuilderParents = select('core/block-editor').getBlockParentsByBlockName(props.clientId, 'tsjippy-forms/formbuilder');
+  const isInsideFormBuilder = formBuilderParents.length > 0;
+  if (!isInsideFormBuilder) {
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(BlockListBlock, {
       ...props
     });

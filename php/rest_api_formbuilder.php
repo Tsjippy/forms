@@ -95,20 +95,18 @@ function restApiInitForms()
         array(
             'methods'                 => 'POST',
             'callback'                 =>     function () {
-                $formBuilder    = new SubmitForm();
+                // phpcs:ignore
+                $settings       = TSJIPPY\sanitize($_POST);
 
-                // The user id of the current user
-                $formBuilder->userId = get_current_user_id();
+                $formBuilder    = new SubmitForm(blockId:$settings['block-id'], postId:$settings['post-id'], userId:get_current_user_id());
 
                 // The user id for whom the form is submitted
                 $userId = 0;
-                // phpcs:ignore
-                if (isset($_POST['user-id'])) {
-                    $userId    = (int) $_POST['user-id'];
+                if (isset($settings['user-id'])) {
+                    $userId    = (int) $settings['user-id'];
                 }
-
-                // phpcs:ignore
-                return $formBuilder->formSubmit($userId, TSJIPPY\sanitize($_POST));
+                
+                return $formBuilder->formSubmit($userId, $settings);
             },
             'permission_callback'     => '__return_true',
             'args'                    => array(

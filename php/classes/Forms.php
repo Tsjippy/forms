@@ -21,7 +21,7 @@ class Forms
     public string      $formEmailTable;
     public object|null $formReminder;
     public string      $formReminderTable;
-    public array       $forms;
+    public array|WP_Error       $forms;
     public array       $formBlock;
     public string      $jsFileName;
     public array       $wpMetaKeys;
@@ -53,14 +53,13 @@ class Forms
     /**
      * Constructor
      *
-     * @param int      $postId      The post id the form is in
      * @param string   $blockId     THe block id of the form block
+     * @param int      $postId      The post id the form is in
      * @param bool     $all         Whether to retrieve all submissions or not
      * @param int      $pageSize    Number of submissions per page
-     * @param string   $formUrl     Form URL to retrieve form for
      * @param int      $userId      User ID to retrieve form for
      */
-    public function __construct($blockId='', $all = false, $pageSize = 50, $postId = -1, $formUrl = '',  $userId = 0)
+    public function __construct($blockId='', $postId = -1, $all = false, $pageSize = 50, $userId = 0)
     {
         global $wpdb;
 
@@ -582,7 +581,13 @@ class Forms
         $blocks = parse_blocks($post->post_content);
 
         foreach($blocks as $block){
-            if($block['attrs']['blockId'] == $blockId){
+            if(
+                $block['attrs']['blockId'] == $blockId ||               // This is the block we need
+                (
+                    empty($blockId) &&
+                    $block['blockName'] == "tsjippy-forms/formbuilder"  // Just take the first form on the page
+                )
+            ){
                 $this->formBlock = $block;
 
                 foreach($block['attrs'] as $key => $attribute){
@@ -605,8 +610,8 @@ class Forms
      * 
      * @return string   The html
      */
-    public function showForm($block){
-        return render_block($block);
+    public function showForm(){
+        return render_block($this->formBlock);
     }
 
     /**

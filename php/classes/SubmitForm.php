@@ -15,16 +15,16 @@ class SubmitForm extends SaveFormSettings
     /**
      * Constructor
      *
-     * @param string   $blockId    blockId
+     * @param string   $blockId     blockId
+     * @param int      $postId      Post ID to retrieve form for
      * @param bool     $all         Whether to retrieve all submissions or not
      * @param int      $pageSize    Number of submissions per page
-     * @param int      $postId      Post ID to retrieve form for
      * @param string   $formUrl     Form URL to retrieve form for
      * @param int      $userId      User ID to retrieve form for
      */
-    public function __construct($blockId='', $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
+    public function __construct($blockId='', $postId='', $all=false, $pageSize=50, $formUrl='', $userId=0)
     {
-        parent::__construct(blockId: $blockId, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
+        parent::__construct(blockId: $blockId, postId:$postId, all: $all, pageSize:$pageSize, formUrl:$formUrl, userId:$userId);
     }
 
     /**
@@ -844,7 +844,7 @@ class SubmitForm extends SaveFormSettings
         // check for required empty elements
         foreach ($this->formElements as $element) {
             // element is required but has no value
-            if ($element->required && ($request[str_replace('[]', '', $element->slug)] ?? '') === '') {
+            if ($element->required && !isset($this->nonInputs[$element->type]) && ($request[str_replace('[]', '', $element->slug)] ?? '') === '') {
                 return new \WP_Error('Error', "$element->name is required!");
             }
         }

@@ -156,9 +156,11 @@ function sendBlockContent(block, postId){
 
     $oldForms   = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}tsjippy_forms");
 
+    $settings   = get_option('tsjippy_user-management_settings');
+
     foreach($oldForms as $form){
         if($form->id != 129){
-            continue;
+            //continue;
         }
 
         if(empty($form->slug)){
@@ -176,6 +178,10 @@ function sendBlockContent(block, postId){
             'post_author'   => 1,
             'post_type'     => 'page'
         ] );
+        
+        if(in_array($form->slug, ['child_generic', 'profile_picture', 'user_family', 'user_generics', 'user_location'])){
+            $settings[$form->slug] = $postId;
+        }
 
         echo "Created post <a href='" . get_permalink($postId) ."'>$form->name</a><br>";
 
@@ -616,6 +622,8 @@ function sendBlockContent(block, postId){
 
         printJs($formBlock, $postId);
     }
+
+    update_option('tsjippy_user-management_settings', $settings);
 
     // Drop the table, everything is migrated
     //$wpdb->query("DROP TABLE `{$wpdb->prefix}tsjippy_form_elements`, `{$wpdb->prefix}tsjippy_forms`;");

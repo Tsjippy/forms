@@ -36,7 +36,7 @@ class DisplayFormResults extends SubmitForm
 
     /**
      * Constructor for the DisplayFormResults class
-     * @param string $blockId
+     * @param string $shortcodeId
      */
     public function __construct($shortcodeId='', $all = false, $pageSize = 50, $formUrl = '', $userId = 0, $postId='')
     {
@@ -57,7 +57,7 @@ class DisplayFormResults extends SubmitForm
         }
 
         // call parent constructor
-        parent::__construct($blockId, all: $all, pageSize: $pageSize, postId: $postId, formUrl: $formUrl, userId: $userId);
+        parent::__construct($blockId, postId: $postId, all: $all, pageSize: $pageSize, formUrl: $formUrl, userId: $userId);
 
         $this->columnSettings       = [];
         $this->currentPage          = 0;

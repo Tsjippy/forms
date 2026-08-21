@@ -15,16 +15,15 @@ class EditFormResults extends DisplayFormResults
     /**
      * Constructor
      * 
-     * @param    string     $blockId    The blockId
+     * @param    string     $shortcodeId
      * @param    bool       $all        Whether to show all submissions or only the current
      * @param    int        $pageSize   The number of submissions to display per page
-     * @param    string     $postId     The post ID
      * @param    string     $formUrl    The form URL
      * @param    int        $userId     The user ID
      */
-    public function __construct($blockId = '', $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
+    public function __construct($shortcodeId='', $all=false, $pageSize=50, $formUrl='', $userId=0)
     {
-        parent::__construct($blockId, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
+        parent::__construct($shortcodeId, all: $all, pageSize:$pageSize, formUrl:$formUrl, userId:$userId);
 
         $this->submissionId    = false;
     }

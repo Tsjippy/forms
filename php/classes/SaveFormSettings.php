@@ -25,7 +25,7 @@ class SaveFormSettings extends Forms
      */
     public function __construct($blockId='', $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
     {
-        parent::__construct(blockId: $blockId, all: $all, pageSize:$pageSize, postId:$postId, formUrl:$formUrl, userId:$userId);
+        parent::__construct(blockId: $blockId, all: $all, pageSize:$pageSize, postId:$postId, userId:$userId);
     }
 
     /**
