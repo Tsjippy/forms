@@ -27,6 +27,7 @@
 - Wrapper component for multi block block
 - prefil forms server side
 - store hidden atrribute of inoout in paent label if exist
+- class constructors
 
 ### Fixed
 - conditions form bugs
