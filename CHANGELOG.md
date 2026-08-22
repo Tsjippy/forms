@@ -28,6 +28,7 @@
 - prefil forms server side
 - store hidden atrribute of inoout in paent label if exist
 - class constructors
+- removed formuuilder code
 
 ### Fixed
 - conditions form bugs
