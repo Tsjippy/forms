@@ -249,6 +249,10 @@ function sendBlockContent(block, postId){
                 'name' => $element->slug
             ];
 
+            if($attributes['name'] == 'userid' || $attributes['name'] == 'user-id'){
+                $attributes['name'] = 'user-id';
+            }
+
             // Formstep
             if($element->type == 'formstep'){
                 $attributes['text'] = $element->text;

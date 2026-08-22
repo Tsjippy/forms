@@ -159,9 +159,11 @@ class Forms
         // $this->userId is the user id for whom the form is submitted
         $this->userId    = $userId === 0 ? $this->user->ID : $userId;
 
-        $this->getForm();
+        if(!empty($blockId) || $postId != -1){
+            $this->getForm();
 
-        $this->getAllFormElements();
+            $this->getAllFormElements();
+        }
 
         $this->tableFormats();
 
@@ -884,7 +886,7 @@ class Forms
 
         $element->blockId       = $block['attrs']['blockId'] ?? '';
 
-        $element->required      = empty($block['attrs']['required']);
+        $element->required      = !empty($block['attrs']['required']);
 
         $element->slug          = $block['attrs']['name'] ?? '';
 

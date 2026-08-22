@@ -844,7 +844,10 @@ class SubmitForm extends SaveFormSettings
         // check for required empty elements
         foreach ($this->formElements as $element) {
             // element is required but has no value
-            if ($element->required && !isset($this->nonInputs[$element->type]) && ($request[str_replace('[]', '', $element->slug)] ?? '') === '') {
+            if (
+                $element->required && 
+                !isset($this->nonInputs[$element->type]) && 
+                ($request[str_replace('[]', '', $element->slug)] ?? '') === '') {
                 return new \WP_Error('Error', "$element->name is required!");
             }
         }
@@ -880,9 +883,9 @@ class SubmitForm extends SaveFormSettings
 
         $formresults        = (array) $formresults;
 
-        $message = $this->formData->succes_message;
+        $message = $this->formData->submission_message;
         if (empty($message)) {
-            $message = 'succes';
+            $message = 'Succes';
         }
 
         // Save to submission table
