@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [11.8.8] - 2026-08-22
+
+
+### Added
 - very first version of block builder form
 - block conditions table
 - dynamic js generator for block forms
@@ -42,8 +53,6 @@
 - block id for formbuilder block
 - display form results
 - archiving of sub entries
-
-### Updated
 
 ## [11.8.7] - 2026-07-15
 
