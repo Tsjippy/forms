@@ -9,14 +9,15 @@ if (! defined('ABSPATH')) {
 }
 
 add_action('admin_footer-post.php', function(){
-
-    //upgradeDatabase();
-
-    //insertNewForms();
-
     global $wpdb;
 
-    //$wpdb->query("update  `wp_tsjippy_form_submission_values` set value = 0 where submission_id in (select id from `wp_tsjippy_form_submissions`) and element_id = -6");
+    if(!empty($wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}tsjippy_form_elements'"))) {
+        upgradeDatabase();
+
+        insertNewForms();
+
+        $wpdb->query("update  `{$wpdb->prefix}tsjippy_form_submission_values` set value = 0 where submission_id in (select id from `{$wpdb->prefix}tsjippy_form_submissions`) and element_id = -6");
+    }
 
 });
 
@@ -32,10 +33,6 @@ function printJs($blockData, $postId){
 
 add_action('wp_ajax_save_generated_blocks', function () {
     $content = wp_unslash($_POST['content'] ?? '');
-
-    $blocks = parse_blocks($content);
-
-    //$content = str_replace('u005c', "\\", $content);
 
     wp_update_post(
         [
@@ -626,7 +623,7 @@ function sendBlockContent(block, postId){
     update_option('tsjippy_user-management_settings', $settings);
 
     // Drop the table, everything is migrated
-    //$wpdb->query("DROP TABLE `{$wpdb->prefix}tsjippy_form_elements`, `{$wpdb->prefix}tsjippy_forms`;");
+    $wpdb->query("DROP TABLE `{$wpdb->prefix}tsjippy_form_elements`, `{$wpdb->prefix}tsjippy_forms`;");
 }
 
 function upgradeDatabase(){
