@@ -23,7 +23,7 @@ export default function save({ attributes }) {
     const blockProps = useBlockProps.save();
 
     return (
-        attributes.type === 'text' && attributes.multiple ?
+        ['text', "email", "tel", "text", "url"].includes(attributes.type) && attributes.multiple ?
             <div className={`${blockProps.className ?? ''} option-wrapper`}>
                 <ul className="list-selection-list" />
                 <div className="multi-text-input-wrapper">

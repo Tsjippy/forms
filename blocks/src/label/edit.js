@@ -127,7 +127,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 							</Placeholder>
 						</>
 					: 
-						attributes.childAttr?.multiple ?
+						attributes.childAttr?.multiple && !['text', "email", "tel", "text", "url"].includes(attributes.childAttr?.type) ?
 							<Multiple
 								inner      = { labelComponent }
 								attributes = { attributes.childAttr }

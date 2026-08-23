@@ -20,6 +20,8 @@ export function InputHtml({
         prefillValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
     }
 
+    console.log('test');
+
     /**
      * Checkboxes
      */
@@ -113,7 +115,7 @@ export function InputHtml({
     /**
      * Render the the multpiple version if not wrapped in an label and not a text input
      */
-    return attributes.multiple && !labelChild && attributes.type != 'text' ? (
+    return attributes.multiple && !labelChild && !['text', "email", "tel", "text", "url"].includes(attributes.type) ? (
         <Multiple
             inner={html}
             attributes={attributes}
