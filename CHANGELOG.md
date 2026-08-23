@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- rendering of multi tel, email and others
 
 ### Fixed
 
