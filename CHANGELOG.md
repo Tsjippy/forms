@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- rendering of multi tel, email and others
 
 ### Fixed
 
 ### Updated
+
+## [11.9.1] - 2026-08-23
+
+
+### Changed
+- rendering of multi tel, email and others
 
 ## [11.9.0] - 2026-08-23
 
