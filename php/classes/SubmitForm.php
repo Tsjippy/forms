@@ -688,7 +688,9 @@ class SubmitForm extends SaveFormSettings
 
         $placeholders['formurl'] = $formUrl;
 
-        $placeholders['formid']  = $this->submission->form_id;
+        $placeholders['blockid']  = $this->submission->block_id;
+
+        $placeholders['postid']  = $this->submission->post_id;
 
         $this->sendEmail('submitted', $placeholders);
 
@@ -811,9 +813,10 @@ class SubmitForm extends SaveFormSettings
     {
         $this->submission                    = new \stdClass();
 
-        $this->submission->form_id           = $request['form-id'];
+        $this->submission->post_id           = $request['post-id'];
+        $this->submission->block_id          = $request['block-id'];
 
-        $this->getForm($this->submission->form_id);
+        $this->getForm($this->submission->post_id, $this->submission->block_id);
 
         // The user id of the current user
         $this->userId                        = $this->user->ID;

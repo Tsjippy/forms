@@ -35,6 +35,7 @@ add_filter('tsjippy-file-upload-delete-permission', function($permission){
 add_action('update_user_meta', function($metaId, $userId, $metaKey){
     wp_cache_delete("default-meta-values-".$userId, 'tsjippy_forms');
     wp_cache_delete("default-array-meta-values-".$userId, 'tsjippy_forms');
+    wp_cache_delete("get-form-reminders", 'tsjippy_forms');
 
     // Check if this key is not yet in the cache
     $keys = wp_cache_get('user-meta-keys', 'tsjippy_forms', false, $found);
@@ -42,3 +43,4 @@ add_action('update_user_meta', function($metaId, $userId, $metaKey){
         wp_cache_delete("user-meta-keys", 'tsjippy_forms');
     }
 }, 10, 3);
+

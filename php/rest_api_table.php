@@ -374,19 +374,6 @@ function saveTableSettings()
         return $result;
     }
 
-    //also update form setings if needed
-    $formSettings = TSJIPPY\sanitize($_POST['form-settings']);
-    if (is_array($formSettings) && is_numeric($_POST['form-id'])) {
-        $forms->getForm($_POST['form-id']);
-
-        //update existing
-        $result = $forms->insertOrUpdateData($forms->tableName, $formSettings, ['id' => $forms->formData->blockId]);
-
-        if (is_wp_error($result)) {
-            return $result;
-        }
-    }
-
     return "Succesfully saved your table settings";
 }
 
@@ -413,7 +400,8 @@ function removeSubmission()
  */
 function archiveSubmission()
 {
-    $formTable                  = new EditFormResults(TSJIPPY\sanitize($_POST));
+    $requestData                = TSJIPPY\sanitize($_POST);
+    $formTable                  = new EditFormResults();
     $formTable->submissionId    = (int) $_POST['submission-id'];
     $action                     = TSJIPPY\sanitize($_POST['action']);
 
@@ -438,12 +426,13 @@ function archiveSubmission()
  */
 function getInputHtml()
 {
-    $formTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
+    $requestData = TSJIPPY\sanitize($_POST);
+    $formTable   = new DisplayFormResults();
 
     $formTable->parseSubmissions('', (int) $_POST['submission-id']);
 
     // Get the form id from the submission and load the form
-    $formTable->getForm($formTable->submission->form_id);
+    $formTable->getForm($formTable->submission->post_id, $formTable->submission->block_id);
 
     $userId             = $formTable->submission->user_id;
 

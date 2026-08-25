@@ -242,21 +242,19 @@ class SaveFormSettings extends Forms
      * Updates the form e-mails in the db
      *
      * @param    array        $formEmails    The form e-mails to be saved, this should be an array of associative arrays where the keys are the column names in the db and the values are the values to update
-     * @param    int|string    $formId        The id of the form to update the e-mails for
+     * @param    int|string   $blockId       The id of the form to update the e-mails for
      *
-     * @return    true|WP_Error                    The result or error on failure
+     * @return    true|WP_Error              The result or error on failure
      */
-    public function saveFormEmails($formEmails, $formId)
+    public function saveFormEmails($formEmails, $blockId)
     {
-        global $wpdb;
-
         // Remove deleted emails
         $existingEmails    = TSJIPPY\getFromDb(
-            "get_email_ids_for_form_$formId",
+            "get_email_ids_for_form_$blockId",
             "forms",
-            "SELECT id FROM %i WHERE form_id = %d",
+            "SELECT id FROM %i WHERE block_id = %d",
             $this->formEmailTable,
-            $formId
+            $blockId
         );
 
         $emailsToKeep    = array_column($formEmails, 'email-id');
@@ -284,7 +282,7 @@ class SaveFormSettings extends Forms
 
         // Update each email
         foreach ($formEmails as $email) {
-            $email['form_id']    = $formId;
+            $email['block_id']   = $blockId;
             $email['message']    = trim(wp_unslash($email['message']));
 
             $where               = [];

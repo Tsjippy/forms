@@ -505,6 +505,23 @@ class Forms
     }
 
     /**
+     * Resets the instance form data
+     *
+     */
+    public function reset(){
+        // Reset form data
+        $this->formData->blockId = null;
+        $this->formData->postId = null;
+        $this->formData->post   = null;
+
+        $this->elementMapping   = [];
+
+        $this->formElements     = [];
+
+        $this->formBlock        = [];
+    }
+
+    /**
      * Creates the element mappers to find elements based on id, name or type
      *
      * @param    bool    $force        Whether to requery, default false
@@ -540,6 +557,10 @@ class Forms
      * Finds all blocks and post ids who are of the formbuilder type
      */
     public function getForms(){
+        if(!empty($this->forms)){
+            return;
+        }
+
         $this->forms = TSJIPPY\getFromDb(
             'all_forms',
             'forms',
@@ -550,7 +571,7 @@ class Forms
         foreach($this->forms as &$form){
             $this->getForm($form->post_id, $form->block_id);
 
-            $form   = $this->formData;
+            $form   = clone($this->formData);
         }
     }
 
@@ -563,7 +584,26 @@ class Forms
      */
     public function getForm($post='', $blockId=''){
         if(empty($post) && $this->formData->post == null){
-            return $this->formBlock = [];
+            $post  = false;
+
+            if(!empty($this->formData->postId)){
+                $post   = get_post($this->formData->postId);
+            }
+
+            if(empty($post)){
+                if(empty($blockId)){
+                    return $this->formBlock = [];
+                }
+
+                $this->getForms();
+
+                foreach($this->forms as $form){
+                    if($form->blockId == $blockId){
+                        $post   = $form->postId;
+                        break;
+                    }
+                }
+            }
         }
 
         if(empty($post)){
@@ -574,6 +614,8 @@ class Forms
             }else{
                 $post   = get_post($post);
             }
+
+            $this->formData->post = $post;
         }
 
         if(empty($blockId)){
@@ -670,7 +712,7 @@ class Forms
             if (!isset($this->elementMapping['id'][$id])) {
                 $url    = get_page_link($post);
 
-                TSJIPPY\printArray("Element with id '$id' not found on form '{$this->formData->slug}' with id  '{$this->formData->blockId}' on page $url", false);
+                TSJIPPY\printArray("Element with id '$id' not found on form '{$this->formData->slug}' with id '{$this->formData->blockId}' on page $url", false);
                 return false;
             }
         }
@@ -914,6 +956,8 @@ class Forms
         }
 
         if (empty($this->formBlock)) {
+            $this->getForm();
+
             return new \WP_Error('forms', 'No formBlock given');
         }
 

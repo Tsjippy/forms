@@ -2072,7 +2072,7 @@ class DisplayFormResults extends SubmitForm
         //check if we have rights on this table
         if (!isset($this->tableEditPermissions) || !$this->tableEditPermissions) {
             if (
-                array_intersect_key($this->userRoles, $this->tableSettings->edit_right_roles) ||
+                array_intersect_key($this->userRoles, $this->tableSettings->edit_right_roles ?? []) ||
                 isset($this->tableSettings->edit_right_roles[$this->userId])
             ) {
                 $this->tableEditPermissions = true;

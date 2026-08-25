@@ -319,22 +319,20 @@ function strReplaceFirst($search, $replace, $subject) {
 /**
  * Displays recommended form fields based on the provided attributes
  *
- * @param   array   $atts    The shortcode attributes
+ * @param   array   $atts    The block attributes
  *
- * @return  string            The HTML for the recommended form fields
+ * @return  string           The HTML for the recommended form fields
  */
 function missingFormFields($atts)
 {
-    $a = shortcode_atts(array(
-        'type'   => 'mandatory'
-    ), $atts);
+    if(!is_user_logged_in()){
+        return '';
+    }
 
     $html    = '';
 
-    return '';
-
     $forms      = new FormReminders();
-    $fieldHtml  = $forms->getReminderHtml(get_current_user_id(), $a['type']);
+    $fieldHtml  = $forms->getReminderHtml(get_current_user_id(), $atts['type'] ?? 'all');
 
     if (!empty($fieldHtml)) {
         $html .=  '<div id=recommendations style="margin-top:20px;">';

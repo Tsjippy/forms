@@ -29,13 +29,14 @@ class FormExport extends Forms
     /**
      * Writes the form export to the output buffer for download
      * 
-     * @param int    $formId    ID of the form to export
+     * @param int    $postId    ID of the formpost to export
+     * @param int    $blockId   ID of the formblock to export
      * 
      * @return void
      */
-    public function exportForm($formId)
+    public function exportForm($postId, $blockId='')
     {
-        $this->getForm($formId);
+        $this->getForm($postId, $blockId);
 
         /**
          * Form Settings
@@ -61,7 +62,7 @@ class FormExport extends Forms
          * Form Elements
          */
         foreach ($this->formElements as &$element) {
-            unset($element->form_id);
+            unset($element->block_id);
         }
 
         $content    .= "elements: " . json_encode(serialize($this->formElements)) . "\n";
@@ -70,15 +71,17 @@ class FormExport extends Forms
          * Form E-mails
          */
         $emailSettings    = TSJIPPY\getFromDb(
-            "get_email_settings_$formId",
+            "get_email_settings_$postId",
             'forms',
-            "select * from %i where form_id=%d", 
+            "select * from %i where post_id=%d and block_id=%d", 
             $this->formEmailTable, 
+            $this->formData->postId, 
             $this->formData->blockId
         );
 
         foreach ($emailSettings as &$emailSetting) {
-            unset($emailSetting->form_id);
+            unset($emailSetting->post_id);
+            unset($emailSetting->block_id);
         }
 
         if (!empty($emailSettings)) {
@@ -89,11 +92,11 @@ class FormExport extends Forms
          * Form Reminders
          */
         $reminders            = TSJIPPY\getFromDb(
-            "form_reminders_$formId",
+            "form_reminders_$blockId",
             'forms',
-            "SELECT * FROM %i WHERE form_id = %d", 
-            $this->formReminderTable, 
-            $formId
+            "SELECT * FROM %i WHERE", 
+            $this->formData->postId, 
+            $this->formData->blockId
         );
 
         if (!empty($reminders)) {
@@ -120,7 +123,7 @@ class FormExport extends Forms
         // Form elements
         foreach ($formEmails as $email) {
 
-            $email->form_id    = $this->formData->blockId;
+            $email->block_id    = $this->formData->blockId;
 
             if (!empty($email->submitted_trigger)) {
                 $triggers    = maybe_unserialize($email->submitted_trigger);
@@ -257,7 +260,7 @@ class FormExport extends Forms
                     $this->formData    = new stdClass();
                 }
 
-                //$this->formData->blockId     = $this->insertOrUpdateData($this->tableName, $object);
+                $this->formData->blockId     = $this->insertOrUpdateData($this->tableName, $object);
 
                 if (is_wp_error($this->formData->blockId)) {
                     return $this->formData->blockId;
@@ -278,9 +281,10 @@ class FormExport extends Forms
                         continue;
                     }
 
-                    $reminder->form_id    = $this->formData->blockId;
+                    $reminder->post_id    = $this->formData->postId;
+                    $reminder->block_id   = $this->formData->blockId;
 
-                    //$this->insertOrUpdateData($this->formReminderTable, $reminder);
+                    $this->insertOrUpdateData($this->formReminderTable, $reminder);
                 }
             } else {
                 TSJIPPY\printArray("Unknown import type: $type");
