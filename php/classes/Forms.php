@@ -470,6 +470,8 @@ class Forms
         }
 
         $this->formReminder    = $results[0];
+
+        return $this->formReminder;
     }
 
     /**

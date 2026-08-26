@@ -2101,9 +2101,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _filters_storeClientIdInAttributes_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./filters/storeClientIdInAttributes.js */ "./src/formbuilder/filters/storeClientIdInAttributes.js");
 /* harmony import */ var _components_Submitter_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/Submitter.js */ "./src/formbuilder/components/Submitter.js");
 /* harmony import */ var _emails_EmailSettings_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./emails/EmailSettings.js */ "./src/formbuilder/emails/EmailSettings.js");
-/* harmony import */ var _js_forms_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./../../../js/forms.js */ "../js/forms.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__);
+/* harmony import */ var _form_reminders_FormReminderPanel_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./form-reminders/FormReminderPanel.js */ "./src/formbuilder/form-reminders/FormReminderPanel.js");
+/* harmony import */ var _js_forms_js__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./../../../js/forms.js */ "../js/forms.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__);
+
 
 
 
@@ -2235,14 +2237,14 @@ function Edit({
   /* Build role checkboxes for the inspector panel. */
   const RoleCheckboxes = () => {
     if (!availableRoles.length) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("p", {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("p", {
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No roles available.', 'tsjippy')
       });
     }
     return availableRoles.map(role => {
       const roleSlug = role.slug || role.value || role;
       const roleLabel = role.label || role.name || roleSlug;
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
         label: roleLabel,
         checked: (attributes.roles || []).includes(roleSlug),
         onChange: checked => onRoleSelected(checked, roleSlug)
@@ -2253,14 +2255,14 @@ function Edit({
   /* Build action checkboxes for the inspector panel. */
   const ActionCheckboxes = () => {
     if (!availableActions.length) {
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("p", {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("p", {
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No actions available.', 'tsjippy')
       });
     }
     return availableActions.map(action => {
       const actionSlug = action.slug || action.value || action;
       const actionLabel = action.label || action.name || actionSlug;
-      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.CheckboxControl, {
         label: actionLabel,
         checked: (attributes.actions || []).includes(actionSlug),
         onChange: checked => actionSelected(checked, actionSlug)
@@ -2268,7 +2270,7 @@ function Edit({
     });
   };
   const FormMethodComponent = props => {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RadioControl, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RadioControl, {
       label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Method', 'tsjippy'),
       help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('The type of the form. Get adds values to the URL. Post submits invisibly.', 'tsjippy'),
       selected: attributes.method,
@@ -2302,16 +2304,16 @@ function Edit({
   /**
    * Return HTML
    */
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Settings', 'tsjippy'),
-        initialOpen: true,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(FormMethodComponent, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+        initialOpen: attributes.name == '',
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(FormMethodComponent, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
           label: "Form Name",
           value: formName,
           onChange: value => setFormName(value)
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RadioControl, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RadioControl, {
           label: "Form Target",
           help: "Target location for the form response",
           selected: attributes.target,
@@ -2334,43 +2336,43 @@ function Edit({
           onChange: target => setAttributes({
             target: target
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Enable autocomplete", "tsjippy"),
           checked: !!attributes.autocomplete,
           onChange: () => setAttributes({
             autocomplete: !attributes.autocomplete
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
           label: "Submission Message",
           value: attributes.submission_message,
           onChange: value => setAttributes({
             submission_message: value
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Include submission ID in message", "tsjippy"),
           checked: !!attributes.submission_id,
           onChange: () => setAttributes({
             submission_id: !attributes.submission_id
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.ToggleControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Save submissions in usermeta table", "tsjippy"),
           checked: !!attributes.user_meta,
           onChange: () => setAttributes({
             user_meta: !attributes.user_meta
           })
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Roles', 'tsjippy'),
         initialOpen: false,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(RoleCheckboxes, {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(RoleCheckboxes, {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Actions', 'tsjippy'),
         initialOpen: false,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(ActionCheckboxes, {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(ActionCheckboxes, {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Auto Archive', 'tsjippy'),
         initialOpen: false,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Auto Archive Block', 'tsjippy'),
           value: attributes.auto_archive_element,
           options: [{
@@ -2383,7 +2385,7 @@ function Edit({
           onChange: value => setAttributes({
             auto_archive_element: value
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Auto Archive Value', 'tsjippy'),
           help: "You can use placeholders like %today%-2days",
           value: attributes.auto_archive_value,
@@ -2391,10 +2393,10 @@ function Edit({
             auto_archive_value: value
           })
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Split Entries', 'tsjippy'),
         initialOpen: false,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
           multiple: true,
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Split Blocks', 'tsjippy'),
           help: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form submission data will be split on the values of these inputs, while sharing the values of the other inputs.', 'tsjippy'),
@@ -2407,43 +2409,43 @@ function Edit({
             split_elements: Array.isArray(values) ? values : [values]
           })
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('E-mail Settings', 'tsjippy'),
         initialOpen: false,
         onToggle: () => setEmailsFormVisibility(prev => !prev),
         children: isEmailsFormVisible ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Hide Emails Form', 'tsjippy') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Show Emails Form', 'tsjippy')
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Form Reminders', 'tsjippy'),
         initialOpen: false,
         onToggle: () => setRemindersFormVisibility(prev => !prev),
         children: isRemindersFormVisible ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Hide Reminders Form', 'tsjippy') : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Show Reminders Form', 'tsjippy')
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
       ...blockProps,
-      children: attributes.method == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(FormMethodComponent, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("br", {})]
-      }) : attributes.name == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
+      children: attributes.method == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.Fragment, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(FormMethodComponent, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("br", {})]
+      }) : attributes.name == '' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
         label: "Form Name",
         value: formName,
         onChange: value => setFormName(value)
-      }) : isEmailsFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_emails_EmailSettings_js__WEBPACK_IMPORTED_MODULE_11__.EmailSettings, {
+      }) : isEmailsFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_emails_EmailSettings_js__WEBPACK_IMPORTED_MODULE_11__.EmailSettings, {
         blockId: attributes.blockId,
         formElements: []
-      }) : isRemindersFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(FormReminderPanel, {
+      }) : isRemindersFormVisible ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_form_reminders_FormReminderPanel_js__WEBPACK_IMPORTED_MODULE_12__.FormReminderPanel, {
         blockId: attributes.blockId,
         saveInMeta: attributes.user_meta
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.Fragment, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
+      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.Fragment, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InnerBlocks, {
           template: TEMPLATE,
           renderAppender: false
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_Submitter_js__WEBPACK_IMPORTED_MODULE_10__.FormSubmitter, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_Submitter_js__WEBPACK_IMPORTED_MODULE_10__.FormSubmitter, {
           attributes: attributes
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.Inserter, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.Inserter, {
           rootClientId: clientId,
           isAppender: true,
           renderToggle: ({
             onToggle
-          }) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
+          }) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
             variant: "primary",
             onClick: onToggle,
             icon: _wordpress_icons__WEBPACK_IMPORTED_MODULE_6__["default"],
@@ -3461,6 +3463,476 @@ const addBlockId = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_1__.createHigh
   };
 }, 'addBlockId');
 (0,_wordpress_hooks__WEBPACK_IMPORTED_MODULE_0__.addFilter)('editor.BlockEdit', 'tsjippy-forms/addblock-id', addBlockId);
+
+/***/ },
+
+/***/ "./src/formbuilder/form-reminders/FormReminderPanel.js"
+/*!*************************************************************!*\
+  !*** ./src/formbuilder/form-reminders/FormReminderPanel.js ***!
+  \*************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   FormReminderPanel: () => (/* binding */ FormReminderPanel)
+/* harmony export */ });
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _WarningConditions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WarningConditions */ "./src/formbuilder/form-reminders/WarningConditions.js");
+/* harmony import */ var _reminderDefaults__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./reminderDefaults */ "./src/formbuilder/form-reminders/reminderDefaults.js");
+/* harmony import */ var _reminderApi__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./reminderApi */ "./src/formbuilder/form-reminders/reminderApi.js");
+/* harmony import */ var _reminderUtils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./reminderUtils */ "./src/formbuilder/form-reminders/reminderUtils.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__);
+
+
+
+
+
+
+
+function FormReminderPanel({
+  blockId,
+  saveInMeta = false
+}) {
+  const [reminder, setReminder] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(_reminderDefaults__WEBPACK_IMPORTED_MODULE_3__["default"]);
+  const [isLoading, setIsLoading] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [isSaving, setIsSaving] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [notice, setNotice] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+
+  //const triggerFound = hasShouldSubmitEmailTrigger(emailSettings);
+  const recurringEnabled = !!reminder.frequency;
+  const dateWindowLimits = (0,_reminderUtils__WEBPACK_IMPORTED_MODULE_5__.getDateWindowLimits)(reminder);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (!blockId) {
+      return;
+    }
+    setIsLoading(true);
+    setNotice(null);
+    (0,_reminderApi__WEBPACK_IMPORTED_MODULE_4__.getReminder)(blockId).then(response => {
+      setReminder((0,_reminderUtils__WEBPACK_IMPORTED_MODULE_5__.normaliseReminderResponse)(response, _reminderDefaults__WEBPACK_IMPORTED_MODULE_3__["default"]));
+    }).catch(() => {
+      setNotice({
+        status: 'error',
+        message: 'Could not load form reminder settings.'
+      });
+    }).finally(() => {
+      setIsLoading(false);
+    });
+  }, [blockId]);
+  const updateReminder = (key, value) => {
+    console.log(key);
+    console.log(value);
+    setReminder(current => {
+      console.log(current);
+      let newReminder = {
+        ...current
+      };
+      newReminder[key] = value;
+      return newReminder;
+    });
+    console.log(reminder);
+  };
+  const handleRecurringToggle = enabled => {
+    setReminder(current => {
+      if (!enabled) {
+        return {
+          ...current,
+          frequency: '',
+          period: '',
+          window_start: '',
+          window_end: ''
+        };
+      }
+      return {
+        ...current,
+        frequency: current.frequency || 1,
+        period: current.period || 'days'
+      };
+    });
+  };
+  const handleSave = async () => {
+    if (!blockId) {
+      setNotice({
+        status: 'error',
+        message: 'Cannot save reminder because the block ID is missing.'
+      });
+      return;
+    }
+    setIsSaving(true);
+    setNotice(null);
+    try {
+      await (0,_reminderApi__WEBPACK_IMPORTED_MODULE_4__.saveReminder)(blockId, {
+        ...reminder,
+        block_id: blockId
+      });
+      setNotice({
+        status: 'success',
+        message: 'Form reminder saved.'
+      });
+    } catch (error) {
+      setNotice({
+        status: 'error',
+        message: 'Could not save form reminder.'
+      });
+    }
+    setIsSaving(false);
+  };
+  const [frequency, setFrequency] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(reminder.frequency || '');
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    setFrequency(reminder.frequency || '');
+  }, [reminder.frequency]);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    const timeoutId = setTimeout(() => {
+      if (frequency !== reminder.frequency) {
+        updateReminder('frequency', value);
+      }
+    }, 800);
+    return () => clearTimeout(timeoutId);
+  }, [frequency, reminder.frequency]);
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.PanelBody, {
+    title: "Form Reminders",
+    initialOpen: true,
+    children: [notice && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
+      status: notice.status,
+      isDismissible: true,
+      onRemove: () => setNotice(null),
+      children: notice.message
+    }), isLoading && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
+      className: "tsjippy-formbuilder-reminders__loading",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("span", {
+        children: "Loading reminder settings..."
+      })]
+    }), !saveInMeta && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+        label: "Enable Recurring Form Submissions",
+        checked: recurringEnabled,
+        onChange: handleRecurringToggle
+      }), recurringEnabled && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
+        className: "tsjippy-formbuilder-reminders__recurring",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h4", {
+          children: "Recurring Submissions"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+          type: "number",
+          label: "Request new form submissions every",
+          value: frequency,
+          min: 1,
+          onChange: value => setFrequency(value)
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.RadioControl, {
+          label: "Period",
+          selected: reminder.period,
+          options: [{
+            label: 'Years',
+            value: 'years'
+          }, {
+            label: 'Months',
+            value: 'months'
+          }, {
+            label: 'Days',
+            value: 'days'
+          }],
+          onChange: value => updateReminder('period', value)
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h4", {
+          children: "Date Window"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
+          children: "Allow submissions within this date window."
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+          type: "date",
+          label: "From",
+          value: reminder.window_start || '',
+          min: dateWindowLimits.min,
+          max: dateWindowLimits.max,
+          onChange: value => updateReminder('window_start', value)
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+          type: "date",
+          label: "To",
+          value: reminder.window_end || '',
+          min: dateWindowLimits.min,
+          max: dateWindowLimits.max,
+          onChange: value => updateReminder('window_end', value)
+        })]
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
+      className: "tsjippy-formbuilder-reminders__amount",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h4", {
+        children: "Reminder Amount"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
+        children: "How many times should people be reminded? Leave empty for unlimited."
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.RadioControl, {
+        label: "Remind once every",
+        selected: reminder.reminder_period,
+        options: [{
+          label: 'Week',
+          value: 'week'
+        }, {
+          label: 'Day',
+          value: 'day'
+        }],
+        onChange: value => updateReminder('reminder_period', value)
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+        type: "number",
+        label: "For this many times",
+        value: reminder.reminder_amount || '',
+        min: 0,
+        onChange: value => updateReminder('reminder_amount', value)
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
+      className: "tsjippy-formbuilder-reminders__start-date",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h4", {
+        children: "Start reminding from"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
+        type: "date",
+        label: "Reminder start date",
+        value: reminder.reminder_start_date || '',
+        min: dateWindowLimits.min,
+        max: dateWindowLimits.max,
+        onChange: value => updateReminder('reminder_start_date', value)
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
+      className: "tsjippy-formbuilder-reminders__conditions",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("h4", {
+        children: "Warning Exclusions"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_WarningConditions__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        value: reminder.conditions || [],
+        onChange: conditions => updateReminder('conditions', conditions)
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+      variant: "primary",
+      onClick: handleSave,
+      disabled: isSaving || isLoading || !blockId,
+      children: isSaving ? 'Saving...' : 'Save form reminder'
+    })]
+  });
+}
+
+/***/ },
+
+/***/ "./src/formbuilder/form-reminders/WarningConditions.js"
+/*!*************************************************************!*\
+  !*** ./src/formbuilder/form-reminders/WarningConditions.js ***!
+  \*************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ WarningConditions)
+/* harmony export */ });
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
+
+
+const emptyCondition = {
+  field: '',
+  operator: 'equals',
+  value: ''
+};
+function WarningConditions({
+  value = [],
+  onChange
+}) {
+  const conditions = Array.isArray(value) ? value : [];
+  const addCondition = () => {
+    onChange([...conditions, {
+      ...emptyCondition
+    }]);
+  };
+  const updateCondition = (index, key, nextValue) => {
+    const updatedConditions = conditions.map((condition, conditionIndex) => {
+      if (conditionIndex !== index) {
+        return condition;
+      }
+      return {
+        ...condition,
+        nextValue
+      };
+    });
+    onChange(updatedConditions);
+  };
+  const removeCondition = index => {
+    onChange(conditions.filter((condition, conditionIndex) => {
+      return conditionIndex !== index;
+    }));
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+    className: "tsjippy-warning-conditions",
+    children: [conditions.length === 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("p", {
+      children: "No warning exclusions configured."
+    }), conditions.map((condition, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+      className: "tsjippy-warning-conditions__condition",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+        label: "Field",
+        value: condition.field || '',
+        onChange: nextValue => updateCondition(index, 'field', nextValue)
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.SelectControl, {
+        label: "Operator",
+        value: condition.operator || 'equals',
+        options: [{
+          label: 'Equals',
+          value: 'equals'
+        }, {
+          label: 'Does not equal',
+          value: 'not_equals'
+        }, {
+          label: 'Contains',
+          value: 'contains'
+        }, {
+          label: 'Is empty',
+          value: 'empty'
+        }, {
+          label: 'Is not empty',
+          value: 'not_empty'
+        }],
+        onChange: nextValue => updateCondition(index, 'operator', nextValue)
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.TextControl, {
+        label: "Value",
+        value: condition.value || '',
+        onChange: nextValue => updateCondition(index, 'value', nextValue)
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.Button, {
+        variant: "secondary",
+        isDestructive: true,
+        onClick: () => removeCondition(index),
+        children: "Remove exclusion"
+      })]
+    }, index)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_0__.Button, {
+      variant: "secondary",
+      onClick: addCondition,
+      children: "Add exclusion"
+    })]
+  });
+}
+
+/***/ },
+
+/***/ "./src/formbuilder/form-reminders/reminderApi.js"
+/*!*******************************************************!*\
+  !*** ./src/formbuilder/form-reminders/reminderApi.js ***!
+  \*******************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getReminder: () => (/* binding */ getReminder),
+/* harmony export */   saveReminder: () => (/* binding */ saveReminder)
+/* harmony export */ });
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__);
+
+function getReminder(blockId) {
+  console.log(blockId);
+  return _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()({
+    path: `${tsjippy.restApiPrefix}/forms/get_form_reminders`,
+    method: 'POST',
+    data: {
+      blockId: blockId
+    }
+  });
+}
+function saveReminder(blockId, reminder) {
+  return _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()({
+    path: `${tsjippy.restApiPrefix}/forms/save_form_reminders`,
+    method: 'POST',
+    data: {
+      blockId: blockId,
+      reminder: reminder
+    }
+  });
+}
+
+/***/ },
+
+/***/ "./src/formbuilder/form-reminders/reminderDefaults.js"
+/*!************************************************************!*\
+  !*** ./src/formbuilder/form-reminders/reminderDefaults.js ***!
+  \************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+const emptyReminder = {
+  id: null,
+  block_id: '',
+  frequency: '',
+  period: '',
+  reminder_start_date: '',
+  reminder_amount: '',
+  reminder_period: '',
+  window_start: '',
+  window_end: '',
+  conditions: []
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (emptyReminder);
+
+/***/ },
+
+/***/ "./src/formbuilder/form-reminders/reminderUtils.js"
+/*!*********************************************************!*\
+  !*** ./src/formbuilder/form-reminders/reminderUtils.js ***!
+  \*********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   formatDateForInput: () => (/* binding */ formatDateForInput),
+/* harmony export */   getDateWindowLimits: () => (/* binding */ getDateWindowLimits),
+/* harmony export */   normaliseReminderResponse: () => (/* binding */ normaliseReminderResponse)
+/* harmony export */ });
+function normaliseReminderResponse(response, emptyReminder) {
+  return {
+    ...emptyReminder,
+    ...response,
+    block_id: response?.block_id || '',
+    frequency: response?.frequency || '',
+    period: response?.period || '',
+    reminder_start_date: response?.reminder_start_date || '',
+    reminder_amount: response?.reminder_amount || '',
+    reminder_period: response?.reminder_period || '',
+    window_start: response?.window_start || '',
+    window_end: response?.window_end || '',
+    conditions: Array.isArray(response?.conditions) ? response.conditions : []
+  };
+}
+function getDateWindowLimits(reminder) {
+  const frequency = parseInt(reminder.frequency, 10);
+  const period = reminder.period;
+  if (!frequency || !period) {
+    return {
+      min: undefined,
+      max: undefined
+    };
+  }
+  const today = new Date();
+  const minDate = new Date(today);
+  const maxDate = new Date(today);
+  if (period === 'days') {
+    minDate.setDate(today.getDate() - frequency + 1);
+    maxDate.setDate(today.getDate() + frequency - 1);
+  }
+  if (period === 'months') {
+    minDate.setMonth(today.getMonth() - frequency);
+    minDate.setDate(minDate.getDate() + 1);
+    maxDate.setMonth(today.getMonth() + frequency);
+    maxDate.setDate(maxDate.getDate() - 1);
+  }
+  if (period === 'years') {
+    minDate.setFullYear(today.getFullYear() - frequency);
+    minDate.setDate(minDate.getDate() + 1);
+    maxDate.setFullYear(today.getFullYear() + frequency);
+    maxDate.setDate(maxDate.getDate() - 1);
+  }
+  return {
+    min: formatDateForInput(minDate),
+    max: formatDateForInput(maxDate)
+  };
+}
+function formatDateForInput(date) {
+  return date.toISOString().split('T')[0];
+}
 
 /***/ },
 

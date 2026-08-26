@@ -28,6 +28,7 @@ import './filters/addButtonToInnerBlocks.js';
 import './filters/storeClientIdInAttributes.js';
 import { FormSubmitter } from './components/Submitter.js';
 import { EmailSettings } from './emails/EmailSettings.js';
+import { FormReminderPanel } from './form-reminders/FormReminderPanel.js';
 
 import * as forms from './../../../js/forms.js';
 
@@ -252,7 +253,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={__('Form Settings', 'tsjippy')} initialOpen={true}>
+				<PanelBody title={__('Form Settings', 'tsjippy')} initialOpen={attributes.name == ''}>
 					<FormMethodComponent />
 
 					<TextControl

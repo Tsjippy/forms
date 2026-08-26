@@ -25,7 +25,7 @@ export function getDateWindowLimits(reminder) {
         };
     }
 
-    const today = new Date();
+    const today   = new Date();
 
     const minDate = new Date(today);
     const maxDate = new Date(today);

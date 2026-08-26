@@ -217,7 +217,6 @@ function InputHtml({
     var prefill = (0,_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_2__.usePrefill)();
     prefillValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
   }
-  console.log('test');
 
   /**
    * Checkboxes
@@ -1263,6 +1262,7 @@ function Edit({
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.InspectorControls, {
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
         title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Input Settings', 'tsjippy'),
+        initialOpen: attributes.name == '' || attributes.type == '',
         children: [inputTypeSelector, inputNameComponent, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_9__.PrefillValueSelector, {
           value: attributes.dynamic_value,
           onChange: value => setAttributes({

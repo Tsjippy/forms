@@ -20,8 +20,6 @@ export function InputHtml({
         prefillValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
     }
 
-    console.log('test');
-
     /**
      * Checkboxes
      */

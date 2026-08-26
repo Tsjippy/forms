@@ -56,9 +56,10 @@ class FormReminders extends Forms
         //Retrieve all users
         $this->userIds    = TSJIPPY\getUserAccounts(false, false, 'ID');
 
+        // Get all blocks which should be submitted
         $this->getMandatoryElements();
 
-        $this->checkElementNeedsInput();
+        $this->getElementReminders();
 
         foreach ($this->defaultForms as $day => $submissionForm) {
             if (empty($submissionForm)) {
@@ -306,20 +307,25 @@ class FormReminders extends Forms
     protected function getMandatoryElements()
     {
         $this->mandatoryElements    = apply_filters("tsjippy-forms-elements-filter", $this->mandatoryElements, $this);
+
+        // Sort on form
+        usort($this->mandatoryElements, function ($a, $b) {
+            return $a->postId <=> $b->postId; // The spaceship operator (<=>) simplifies comparisons in PHP 7+
+        });
     }
 
     /**
      * Checks if a given set of conditions applies to the current user. Returns true if there is a match
      *
-     * @param    object    $conditions        The element conditions
-     * @param    int        $userId            The user id
+     * @param    object   $conditions        The element conditions
+     * @param    int      $userId            The user id
      * @param    array    $submissions    The submissions to check
      *
      * @return    bool                    true if no conditions or the condition apply, false if it does not apply
      */
     public function checkIfConditionsAppliesToUser($conditions, $userId, $submissions = '')
     {
-        if (!is_array($conditions)) {
+        if (!is_array($conditions) || empty($conditions)) {
             return true;
         }
 
@@ -339,7 +345,7 @@ class FormReminders extends Forms
             unset($conditions['roles']);
         }
 
-        $applies = false;
+        $applies = null;
 
         foreach ($conditions as $check) {
             // get the user value
@@ -418,11 +424,18 @@ class FormReminders extends Forms
 
             // Check the result
             if ($result) {
-                $applies = true;
-
                 //break this loop when we already know we should skip this field
-                if (!empty($check['combinator']) && $check['combinator'] == 'or') {
-                    break;
+                if (!empty($check['combinator'])) {
+                    // One of the conditions applies so return true
+                    if( $check['combinator'] == 'or'){
+                        $applies = true;
+                        break;
+                    }
+                    
+                    // the combinator is AND and we have not seen a false yet
+                    elseif(empty($applies)){
+                        $applies = true;
+                    }   
                 }
             }
         }
@@ -431,31 +444,28 @@ class FormReminders extends Forms
     }
 
     /**
-     * Checks if a given elements needs some input of a given user and returns html links for each element that needs input
+     * Builds the reminders array
      *
      * @return    string                The html
      */
-    public function checkElementNeedsInput()
+    public function getElementReminders()
     {
-        // Sort on form
-        usort($this->mandatoryElements, function ($a, $b) {
-            return $a->postId <=> $b->postId; // The spaceship operator (<=>) simplifies comparisons in PHP 7+
-        });
-
         // Loop over all mandatory and required elements
         foreach ($this->mandatoryElements as $element) {
-            $this->reset();
+            if($element->postId != $this->formData->postId){
+                $this->reset();
 
-            // Load the form data for this element to save db queries in the getElementById function
-            $this->getForm($element->postId);
+                // Load the form data for this element to save db queries in the getElementById function
+                $this->getForm($element->postId);
+            }
 
-            // Unserialize the warning conditions
+            // Get the warning conditions
             $warningCondition = $this->getReminderConditions($element->postId, $element->blockId);
 
             // Loop over the users
             foreach ($this->userIds as $userId) {
                 //check if this element applies to this user
-                if ($this->checkIfConditionsAppliesToUser($warningCondition, $userId)) {
+                if (!$this->checkIfConditionsAppliesToUser($warningCondition, $userId)) {
                     continue;
                 }
 
@@ -477,7 +487,7 @@ class FormReminders extends Forms
                     continue;
                 }
 
-                // Store the in the reminders array
+                // Store the user id in the reminders array
                 if (!isset($this->reminders['metaforms'][$this->formData->blockId])) {
                     $this->reminders['metaforms'][$this->formData->blockId]   = [];
                 }
@@ -551,7 +561,13 @@ class FormReminders extends Forms
                     continue;
                 }
 
-                foreach ($this->reminders['defaultforms'] as $formId => $userIds) {
+                $formId = $formDetails['form']->id;
+
+                if (!isset($this->reminders['defaultforms'][$formId])) {
+                    continue;
+                }
+
+                foreach ($this->reminders['defaultforms'][$formId] as $userIds) {
                     foreach ($userIds as $userId) {
                         $child                = $family->isChild($userId);
                         $childName          = '';

@@ -19,7 +19,7 @@ import {
     normaliseReminderResponse,
 } from './reminderUtils';
 
-export default function FormReminderPanel({
+export function FormReminderPanel({
     blockId,
     saveInMeta = false
 }) {
@@ -28,7 +28,7 @@ export default function FormReminderPanel({
     const [isSaving, setIsSaving] = useState(false);
     const [notice, setNotice] = useState(null);
 
-    const triggerFound = hasShouldSubmitEmailTrigger(emailSettings);
+    //const triggerFound = hasShouldSubmitEmailTrigger(emailSettings);
     const recurringEnabled = !!reminder.frequency;
 
     const dateWindowLimits = getDateWindowLimits(reminder);
@@ -59,10 +59,20 @@ export default function FormReminderPanel({
     }, [blockId]);
 
     const updateReminder = (key, value) => {
-        setReminder((current) => ({
-            ...current,
-            value,
-        }));
+        console.log(key)
+        console.log(value)
+
+        setReminder((current) => {
+            console.log(current);
+
+            let newReminder = {...current};
+
+            newReminder[key]    = value;
+            
+            return newReminder;
+        });
+
+        console.log(reminder)
     };
 
     const handleRecurringToggle = (enabled) => {
@@ -118,6 +128,24 @@ export default function FormReminderPanel({
         setIsSaving(false);
     };
 
+    const [frequency, setFrequency] = useState(
+        reminder.frequency || ''
+    );
+
+    useEffect(() => {
+        setFrequency(reminder.frequency || '');
+    }, [reminder.frequency]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (frequency !== reminder.frequency) {
+                updateReminder('frequency', value)
+            }
+        }, 800);
+
+        return () => clearTimeout(timeoutId);
+    }, [frequency, reminder.frequency]);
+
     return (
         <PanelBody title="Form Reminders" initialOpen>
             {notice && (
@@ -137,12 +165,12 @@ export default function FormReminderPanel({
                 </div>
             )}
 
-            {!triggerFound && (
+            {/* {!triggerFound && (
                 <Notice status="warning" isDismissible={false}>
                     If you define form reminders you should also define an
                     e-mail with the "The form is due for submission" trigger.
                 </Notice>
-            )}
+            )} */}
 
             {!saveInMeta && (
                 <>
@@ -159,10 +187,10 @@ export default function FormReminderPanel({
                             <TextControl
                                 type="number"
                                 label="Request new form submissions every"
-                                value={reminder.frequency}
+                                value={frequency}
                                 min={1}
                                 onChange={(value) =>
-                                    updateReminder('frequency', value)
+                                    setFrequency(value)
                                 }
                             />
 

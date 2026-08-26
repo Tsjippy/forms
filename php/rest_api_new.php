@@ -66,7 +66,7 @@ function restApiInitFormsNew()
             'callback'            => function($wpRestRequest){
                 $forms  = new Forms();
 
-                return $forms->getFormReminder((int) $wpRestRequest->get_param('blockId'));
+                return $forms->getFormReminder($wpRestRequest->get_param('blockId'));
             },
             'permission_callback' => __NAMESPACE__ . '\checkPermissions',
             'args'                    => array(
@@ -90,7 +90,7 @@ function restApiInitFormsNew()
                 'blockId'        => array(
                     'required'    => true
                 ),
-                'emails'        => array(
+                'reminder'        => array(
                     'required'    => true
                 ),
 
@@ -199,7 +199,7 @@ function restApiInitFormsNew()
                  * Makes sure we do not store unnecesary data
                  */
                 foreach($conditions as &$condition){
-                    foreach($condition['rules'] as &$rule){
+                    foreach (($condition['rules'] ?? []) as &$rule) {
                         // conditional-field-2
                         if(
                             !isset(['== value' => 1, '!= value' => 1, '> value' => 1, '< value' => 1, '+' => 1, '-' => 1][$rule['equation']]) && // Not one of these 
@@ -240,6 +240,11 @@ function restApiInitFormsNew()
                 return $newConditions;
             },
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
+            'args'                    => array(
+                'blockId'        => array(
+                    'required'    => true
+                )
+            )
         )
     );
 }
@@ -277,9 +282,9 @@ function saveFormReminders($wpRestRequest)
 {
     $saver    = new SaveFormSettings();
 
-    $reminder = TSJIPPY\sanitize($wpRestRequest->get_param('reminder') ?? []);
+    $reminder = TSJIPPY\sanitize($wpRestRequest->get_param('reminder'));
 
-    $result   = $saver->updateFormReminder((int) $wpRestRequest->get_param('blockId'), $reminder);
+    $result   = $saver->updateFormReminder($wpRestRequest->get_param('blockId'), $reminder);
 
     if (is_wp_error($result)) {
         return $result;

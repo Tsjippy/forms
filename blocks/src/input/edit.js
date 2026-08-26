@@ -158,6 +158,8 @@ export default function Edit({
                         'Input Settings',
                         'tsjippy'
                     )}
+
+                    initialOpen={attributes.name == '' || attributes.type == ''}
                 >
                     {inputTypeSelector}
 
