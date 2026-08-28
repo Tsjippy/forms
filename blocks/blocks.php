@@ -332,7 +332,13 @@ function missingFormFields($atts)
     $html    = '';
 
     $forms      = new FormReminders();
-    $fieldHtml  = $forms->getReminderHtml(get_current_user_id(), $atts['type'] ?? 'all');
+    $fieldHtml  = $forms->getReminderHtml($forms->userId, $atts['type'] ?? 'all');
+
+    $family     = new TSJIPPY\FAMILY\Family();
+
+    foreach($family->getChildren($forms->userId) as $child){
+        $fieldHtml  .= $forms->getReminderHtml($child, $atts['type'] ?? 'all');
+    }
 
     if (!empty($fieldHtml)) {
         $html .=  '<div id=recommendations style="margin-top:20px;">';

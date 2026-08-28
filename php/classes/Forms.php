@@ -607,6 +607,10 @@ class Forms
                 }
             }
         }
+        
+        if($post != $this->formData->post && $post != $this->formData->postId){
+            $this->reset();
+        }
 
         if(empty($post)){
             $post   = $this->formData->post;
@@ -686,7 +690,7 @@ class Forms
     /**
      * Finds an element by its id
      *
-     * @param    int        $id        the element id
+     * @param    int       $id        the element id
      * @param    string    $key    A specific element attribute to return. Default empty
      *
      * @return    object|array|string|false            The element or element property
