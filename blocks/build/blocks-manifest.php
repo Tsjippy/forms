@@ -95,14 +95,6 @@ return array(
 			'metaKey' => array(
 				'type' => 'string',
 				'default' => ''
-			),
-			'notChild' => array(
-				'type' => 'boolean',
-				'default' => false
-			),
-			'remindByEmail' => array(
-				'type' => 'boolean',
-				'default' => false
 			)
 		)
 	),
@@ -334,14 +326,6 @@ return array(
 				'default' => array(
 					
 				)
-			),
-			'notChild' => array(
-				'type' => 'boolean',
-				'default' => false
-			),
-			'remindByEmail' => array(
-				'type' => 'boolean',
-				'default' => false
 			)
 		)
 	),
@@ -458,14 +442,6 @@ return array(
 			'dynamic_selected_value' => array(
 				'type' => 'string',
 				'default' => ''
-			),
-			'notChild' => array(
-				'type' => 'boolean',
-				'default' => false
-			),
-			'remindByEmail' => array(
-				'type' => 'boolean',
-				'default' => false
 			)
 		)
 	)

@@ -70,14 +70,6 @@
     "roles": {
       "type": "array",
       "default": []
-    },
-    "notChild": {
-      "type": "boolean",
-      "default": false
-    },
-    "remindByEmail": {
-      "type": "boolean",
-      "default": false
     }
   }
 }

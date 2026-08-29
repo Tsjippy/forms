@@ -165,8 +165,25 @@ function restApiInitFormsNew()
         )
     );
 
+    // Get All Possible User meta keys
+    register_rest_route(
+        TSJIPPY\RESTAPIPREFIX . '/forms',
+        '/get_user_meta_keys',
+        array(
+            'methods'  => 'POST',
+            'callback' => function ($wpRestRequest) {
+                $forms  = new Forms();
+
+                return array_keys($forms->userMetaKeys());
+            },
+            'permission_callback' => function(){
+                return current_user_can('edit_posts');
+            }
+        )
+    );
+
     /**
-     * Get Element Conditions
+     * Get Block Conditions
      */
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
@@ -183,7 +200,7 @@ function restApiInitFormsNew()
         )
     );
 
-    // Save Element Conditions
+    // Save Block Conditions
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
         '/save_element_conditions',

@@ -5,7 +5,7 @@ const { PanelBody, ToggleControl } = wp.components;
 const { Fragment } = wp.element;
 const { useSelect } = wp.data;
 
-console.log("hi there");
+import UserMetaRequiredControls from '../../../shared/AddRequiredOptions';
 /**
  * Add extra attributes to all blocks that already have a required attribute.
  */
@@ -30,6 +30,14 @@ addFilter(
 				type: 'boolean',
 				default: false,
 			},
+			conditionMode: {
+				type: "string",
+				default: "and"
+			},
+			conditions: {
+				type: "array",
+				default: []
+			}
 		};
 
 		return settings;
@@ -92,28 +100,10 @@ addFilter(
 								title="Required Options"
 								initialOpen={true}
 							>
-								<ToggleControl
-									label="Not Required For Children"
-									checked={
-										attributes.notChild || false
-									}
-									onChange={(notChild) =>
-										setAttributes({
-											notChild,
-										})
-									}
-								/>
-
-								<ToggleControl
-									label="Remind By Email"
-									checked={
-										attributes.remindByEmail || false
-									}
-									onChange={(remindByEmail) =>
-										setAttributes({
-											remindByEmail,
-										})
-									}
+								<UserMetaRequiredControls
+									clientId={clientId}
+									attributes={attributes}
+									setAttributes={setAttributes}
 								/>
 							</PanelBody>
 						</InspectorControls>

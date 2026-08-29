@@ -1320,7 +1320,7 @@ class Forms
      * 
      * @return array $allMetaKeys     Array containing all user meta keys
      */
-    protected function userMetaKeys(){
+    public function userMetaKeys(){
         $value = wp_cache_get('user-meta-keys', 'tsjippy_forms', false, $found);
 
         if ($found) {
@@ -1332,9 +1332,10 @@ class Forms
         $allMetaKeys    = array_flip(TSJIPPY\getFromDb(
             'all-meta-keys',
             'forms',
-            "SELECT distinct meta_key FROM %i a where meta_key not like %s ORDER BY `meta_key` ASC",
+            "SELECT distinct meta_key FROM %i where meta_key not like %s and meta_key not like %s ORDER BY `meta_key` ASC",
             $wpdb->usermeta,
-            $wpdb->esc_like('_').'%'
+            $wpdb->esc_like('_').'%',
+            $wpdb->esc_like("tsjippy_hidden_columns_").'%'
         ));
 
         $familyMetaKeys = TSJIPPY\FAMILY\getFamilyMetaKeys();

@@ -874,6 +874,202 @@ document.addEventListener("change", ev => {
 
 /***/ },
 
+/***/ "./shared/AddRequiredOptions.js"
+/*!**************************************!*\
+  !*** ./shared/AddRequiredOptions.js ***!
+  \**************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ UserMetaRequiredControls)
+/* harmony export */ });
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__);
+
+
+
+
+
+function UserMetaRequiredControls({
+  clientId,
+  attributes,
+  setAttributes
+}) {
+  const [metaKeys, setMetaKeys] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)([]);
+  const [loadingMetaKeys, setLoadingMetaKeys] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
+  const userMetaEnabled = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_1__.useSelect)(select => {
+    if (!attributes.required) {
+      return false;
+    }
+    const editor = select('core/block-editor');
+    const parentId = editor.getBlockParentsByBlockName(clientId, 'tsjippy-forms/formbuilder')?.[0];
+    return editor.getBlock(parentId)?.attributes?.user_meta === true;
+  }, [clientId, attributes.required]);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    setLoadingMetaKeys(true);
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
+      path: `${tsjippy.restApiPrefix}/forms/get_user_meta_keys`,
+      method: 'POST'
+    }).then(keys => {
+      setMetaKeys((keys || []).map(key => ({
+        label: key,
+        value: key
+      })));
+    }).catch(() => {
+      setMetaKeys([]);
+    }).finally(() => {
+      setLoadingMetaKeys(false);
+    });
+  }, []);
+  if (!attributes.required || !userMetaEnabled) {
+    return null;
+  }
+  const conditions = attributes.conditions?.length ? attributes.conditions : [{
+    key: '',
+    operator: 'equals',
+    value: ''
+  }];
+  const updateCondition = (index, field, value) => {
+    const newConditions = [...conditions];
+    newConditions[index] = {
+      ...newConditions[index],
+      [field]: value
+    };
+
+    // Empty value when changing the operator
+    if (field === 'operator' && ['empty', 'not_empty'].includes(value)) {
+      newConditions[index].value = '';
+    }
+    setAttributes({
+      conditions: newConditions
+    });
+  };
+  const addCondition = () => {
+    setAttributes({
+      conditions: [...conditions, {
+        key: '',
+        operator: 'equals',
+        value: ''
+      }]
+    });
+  };
+  const removeCondition = index => {
+    const newConditions = conditions.filter((_, i) => i !== index);
+    setAttributes({
+      conditions: newConditions.length > 0 ? newConditions : [{
+        key: '',
+        operator: 'equals',
+        value: ''
+      }]
+    });
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.ToggleControl, {
+      label: "Not Required For Children",
+      checked: attributes.notChild || false,
+      onChange: notChild => setAttributes({
+        notChild
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.ToggleControl, {
+      label: "Remind By Email",
+      checked: attributes.remindByEmail || false,
+      onChange: remindByEmail => setAttributes({
+        remindByEmail
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
+      label: "Condition Matching",
+      value: attributes.conditionMode || 'and',
+      options: [{
+        label: 'All Conditions (AND)',
+        value: 'and'
+      }, {
+        label: 'Any Condition (OR)',
+        value: 'or'
+      }],
+      onChange: conditionMode => setAttributes({
+        conditionMode
+      })
+    }), conditions.map((condition, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+      style: {
+        border: '1px solid #ddd',
+        padding: '12px',
+        marginBottom: '12px',
+        borderRadius: '4px'
+      },
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
+        label: "User Meta Key",
+        value: condition.key || '',
+        options: [{
+          label: loadingMetaKeys ? 'Loading user meta keys...' : 'Select a user meta key',
+          value: '',
+          disabled: true
+        }, ...metaKeys],
+        disabled: loadingMetaKeys,
+        onChange: value => updateCondition(index, 'key', value)
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
+        label: "Operator",
+        value: condition.operator || 'equals',
+        options: [{
+          label: 'Equals',
+          value: 'equals'
+        }, {
+          label: 'Not Equals',
+          value: 'not_equals'
+        }, {
+          label: 'Contains',
+          value: 'contains'
+        }, {
+          label: 'Does Not Contain',
+          value: 'not_contains'
+        }, {
+          label: 'Greater Than',
+          value: 'gt'
+        }, {
+          label: 'Greater Than Or Equal',
+          value: 'gte'
+        }, {
+          label: 'Less Than',
+          value: 'lt'
+        }, {
+          label: 'Less Than Or Equal',
+          value: 'lte'
+        }, {
+          label: 'Is Empty',
+          value: 'empty'
+        }, {
+          label: 'Is Not Empty',
+          value: 'not_empty'
+        }],
+        onChange: value => updateCondition(index, 'operator', value)
+      }), !['empty', 'not_empty'].includes(condition.operator) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.TextControl, {
+        label: "Value",
+        value: condition.value || '',
+        onChange: value => updateCondition(index, 'value', value)
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Button, {
+        isDestructive: true,
+        variant: "secondary",
+        onClick: () => removeCondition(index),
+        children: "Remove Condition"
+      })]
+    }, index)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Button, {
+      variant: "primary",
+      onClick: addCondition,
+      children: "Add Condition"
+    })]
+  });
+}
+
+/***/ },
+
 /***/ "./src/formbuilder/components/ConditionsModal.js"
 /*!*******************************************************!*\
   !*** ./src/formbuilder/components/ConditionsModal.js ***!
@@ -3210,9 +3406,9 @@ const addConditionsForm = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_4__.cre
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__);
-
+/* harmony import */ var _shared_AddRequiredOptions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../shared/AddRequiredOptions */ "./shared/AddRequiredOptions.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
 const {
   addFilter
 } = wp.hooks;
@@ -3232,10 +3428,11 @@ const {
 const {
   useSelect
 } = wp.data;
-console.log("hi there");
+
 /**
  * Add extra attributes to all blocks that already have a required attribute.
  */
+
 addFilter('blocks.registerBlockType', 'tsjippy/forms-user-meta-attributes', settings => {
   if (!settings.attributes || typeof settings.attributes.required === 'undefined') {
     return settings;
@@ -3249,6 +3446,14 @@ addFilter('blocks.registerBlockType', 'tsjippy/forms-user-meta-attributes', sett
     remindByEmail: {
       type: 'boolean',
       default: false
+    },
+    conditionMode: {
+      type: "string",
+      default: "and"
+    },
+    conditions: {
+      type: "array",
+      default: []
     }
   };
   return settings;
@@ -3267,7 +3472,7 @@ addFilter('editor.BlockEdit', 'tsjippy/forms-user-meta-controls', createHigherOr
 
   // Ignore blocks without a required attribute
   if (typeof attributes.required === 'undefined' || props.name.includes('tsjippy')) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(BlockEdit, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(BlockEdit, {
       ...props
     });
   }
@@ -3281,30 +3486,22 @@ addFilter('editor.BlockEdit', 'tsjippy/forms-user-meta-controls', createHigherOr
     return parent?.attributes?.user_meta === true;
   }, [clientId]);
   if (!userMetaEnabled) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(BlockEdit, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(BlockEdit, {
       ...props
     });
   }
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(BlockEdit, {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(BlockEdit, {
       ...props
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(InspectorControls, {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(PanelBody, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(InspectorControls, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(PanelBody, {
         title: "Required Options",
         initialOpen: true,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(ToggleControl, {
-          label: "Not Required For Children",
-          checked: attributes.notChild || false,
-          onChange: notChild => setAttributes({
-            notChild
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(ToggleControl, {
-          label: "Remind By Email",
-          checked: attributes.remindByEmail || false,
-          onChange: remindByEmail => setAttributes({
-            remindByEmail
-          })
-        })]
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_shared_AddRequiredOptions__WEBPACK_IMPORTED_MODULE_0__["default"], {
+          clientId: clientId,
+          attributes: attributes,
+          setAttributes: setAttributes
+        })
       })
     })]
   });
