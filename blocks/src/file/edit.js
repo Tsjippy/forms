@@ -4,6 +4,7 @@ import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { Rendered } from './components/Rendered.js';
+import UserMetaRequiredControls from '../../shared/AddRequiredOptions';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -59,6 +60,12 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					label    = { __('Required', 'tsjippy') }
 					checked  = {!!attributes.required}
 					onChange = { ( checked ) => setAttributes({ required: checked })}
+				/>
+				
+				<UserMetaRequiredControls
+					clientId={clientId}
+					attributes={attributes}
+					setAttributes={setAttributes}
 				/>
 
 				<TextControl

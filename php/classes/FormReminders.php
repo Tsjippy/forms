@@ -459,47 +459,6 @@ class FormReminders extends Forms
     }
 
     /**
-     * Gets all mandatory forms for today as html links
-     *
-     * @param   bool    $includeMandatoryForms    Whether to include mandatory forms without element reminders as well
-     *
-     * @return string|array             Returns html links to forms who are due for submission if a user_id is given, an array of form => [user_ids] otherwise
-     */
-    public function getAllFormRemindersForToday($userId, $includeMandatoryForms = true)
-    {
-        $today      = gmdate('D');
-        $family     = new TSJIPPY\FAMILY\Family();
-        $reminders  = [];
-
-        /**
-         * Form reminders
-         */
-        if ($includeMandatoryForms) {
-            foreach ($this->formReminders[$today] as $formDetails) {
-                $formId     = $formDetails['form']->block_id;
-
-                foreach ($this->reminders[$formId] as $blockId) {
-                    $child                = $family->isChild($userId);
-                    $childName          = '';
-                    if ($child) {
-                        $childName        = get_userdata($userId)->first_name;
-                    }
-
-                    $reminders .= $this->getFormReminderHtml($formId, $childName);
-                }
-            }
-        }
-
-        foreach ($reminders as &$forms) {
-            foreach ($forms as $formId => &$reminder) {
-                $reminder .= '</ul>';
-            }
-        }
-
-        return $reminders;
-    }
-
-    /**
      * Get the html for a specific block
      *
      * @param   int     $blockId     The block id to get the html for
@@ -512,10 +471,17 @@ class FormReminders extends Forms
     {
         $element    = $this->getElementById($blockId);
         if (!$element) {
+            TSJIPPY\printArray("Invallid reminder: blockid $blockId does not exist");
             return '';
         }
 
-        if ($type != 'all' && !$element->$type) {
+        if (
+            ($type != 'all' && !$element->$type) ||                     // not the right type           
+            (
+                ($element->block['attrs']['notChild'] ?? false) &&      // this is for  achild 
+                $childId                                                // not required for a child
+            )
+        ) {
             return '';
         }
 
@@ -638,23 +604,6 @@ class FormReminders extends Forms
 
             foreach ($this->reminders[$formId] as $userId) {
                 $this->sendEmail($userId);
-            }
-        }
-
-        foreach ($this->getAllFormRemindersForToday(false) as $userId => $forms) {
-            foreach ($forms as $formId => $html) {
-                // Load the form data for this form
-                foreach ($this->formReminders[$today] as $formDetails) {
-                    if ($formDetails['form']->blockId == $formId) {
-                        $this->formData = $formDetails['form'];
-                        break;
-                    }
-                }
-
-                // Load the e-mail settings for this form
-                $this->getEmailSettings();
-
-                $this->sendEmail($userId, $html);
             }
         }
     }

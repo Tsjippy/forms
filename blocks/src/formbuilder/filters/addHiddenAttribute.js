@@ -101,7 +101,7 @@ const withHiddenControl = createHigherOrderComponent(
 					<BlockEdit { ...props } />
 
 					<InspectorControls>
-						<PanelBody title="Visibility">
+						<PanelBody title="Visibility" initialOpen={false}>
 							<ToggleControl
 								label="Hidden"
 								checked={ !! isHidden }

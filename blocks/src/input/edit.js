@@ -26,6 +26,7 @@ import {
     PrefillValueSelector,
 } from '../../shared/usePrefill.js';
 import AddOptions from '../../shared/AddOptions';
+import UserMetaRequiredControls from '../../shared/AddRequiredOptions';
 
 export default function Edit({
     attributes,
@@ -195,6 +196,12 @@ export default function Edit({
                             setAttributes({ required })
                         }
                     />
+                    <UserMetaRequiredControls
+                        clientId={clientId}
+                        attributes={attributes}
+                        setAttributes={setAttributes}
+                    />
+                    
                     {attributeControls}
 
                     {attributes.multiple && (

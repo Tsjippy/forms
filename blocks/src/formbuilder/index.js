@@ -27,6 +27,7 @@ import './filters/addButtonToInnerBlocks';
 import './filters/hasConditionsIndicator';
 import './filters/addHiddenAttribute';
 import './filters/addBlockName.js';
+import './filters/addFineGrainRequiredToggles.js';
 
 /**
  * Every block starts by registering a new block type definition.

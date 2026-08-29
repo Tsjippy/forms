@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { PrefillOptionsSelector, PrefillValueSelector, usePrefill } from '../../shared/usePrefill.js';
 import { RenderedSelect } from './components/RenderedSelect.js';
 import AddOptions from '../../shared/AddOptions';
+import UserMetaRequiredControls from '../../shared/AddRequiredOptions';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -91,6 +92,12 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					label    = { __('Required', 'tsjippy') }
 					checked  = {!!attributes.required}
 					onChange = { ( checked ) => setAttributes({ required: checked })}
+				/>
+				
+				<UserMetaRequiredControls
+					clientId={clientId}
+					attributes={attributes}
+					setAttributes={setAttributes}
 				/>
 			</PanelBody>
 		</InspectorControls>
