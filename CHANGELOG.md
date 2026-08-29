@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- implemented requirement settings
 
 ### Fixed
 - reminders
