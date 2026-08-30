@@ -183,11 +183,30 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
      * Set default value
      */
     if(empty($block['attrs']['dynamic_value'])){
-        $defaultValue = '';
+        $defaultValue = $single[$block['attrs']['name']] ?? '';
     }else{
         $defaultValue = $single[$block['attrs']['dynamic_value']] ?? '';
     }
-    $blockContent = str_replace('%value-placeholder%', $defaultValue, $blockContent);
+
+    /**
+     * Set checked option
+     */
+    if(in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])){
+        if(is_array($defaultValue)){
+            foreach($defaultValue as $value){
+                $blockContent = str_replace("value=\"$value\"", "value=\"$value\" checked=\"checked\"", $blockContent);
+            }
+        }else{
+            $whatotdp=1;
+        }
+    }elseif(($block['name']) == "tsjippy-forms/select"){
+        $whatotdp=1;
+    }else{
+        if(!is_string($defaultValue)){
+            $defaultValue    = '';
+        }
+        $blockContent = str_replace('%value-placeholder%', $defaultValue, $blockContent);
+    }
     
     /**
      * Add the options
@@ -375,7 +394,7 @@ function showFormSelector($atts = [])
         'no_meta'   => true
     ), $atts);
 
-    $formTable    = new DisplayFormResults($atts);
+    $formTable    = new DisplayFormResults();
     $formTable->getForms();
 
     $forms          = $formTable->forms;

@@ -272,6 +272,15 @@ class FormReminders extends Forms
      */
     public function checkIfConditionsAppliesToUser($conditions, $userId, $submissions = '')
     {
+        $family = new TSJIPPY\FAMILY\Family();
+
+        if (
+            ($block->block['attrs']['notChild'] ?? false) &&      // this is for a child 
+            $family->isChild($userId)                             // This user is a child
+        ){
+            return false;
+        }
+
         if (!is_array($conditions) || empty($conditions)) {
             return true;
         }
@@ -416,11 +425,14 @@ class FormReminders extends Forms
             //check if this block applies to this user
             if (
                 (
+                    !empty($block->block['attrs']['roles']) &&  // We should check on roles
                     (
-                        !$inverse && empty($overlappingRoles)   // We have none of the roles so it does not apply to us
-                    ) ||
-                    (
-                        $inverse && !empty($overlappingRoles)   // We have one of the excludion roles so is does not apply to us
+                        (
+                            !$inverse && empty($overlappingRoles)   // We have none of the roles so it does not apply to us
+                        ) ||
+                        (
+                            $inverse && !empty($overlappingRoles)   // We have one of the excludion roles so is does not apply to us
+                        )
                     )
                 ) ||
                 (
@@ -466,7 +478,10 @@ class FormReminders extends Forms
      */
     protected function getBlockReminderHtml($block, $type = 'all', $childId = false)
     {
-        if(type($block) == 'string'){
+        /**
+         * Load the block if only block id is given
+         */
+        if(gettype($block) == 'string'){
             $block    = $this->getBlockById($block);
 
             if (!$block) {
@@ -475,13 +490,7 @@ class FormReminders extends Forms
             }
         }
 
-        if (
-            ($type != 'all' && !$block->$type) ||                     // not the right type           
-            (
-                ($block->block['attrs']['notChild'] ?? false) &&      // this is for a child 
-                $childId                                                // not required for a child
-            )
-        ) {
+        if ( $type != 'all' && !$block->$type) {
             return '';
         }
 

@@ -486,7 +486,7 @@ function InputHtml({
   let prefillValue = '';
   if (!isSaving) {
     var prefill = (0,_shared_usePrefill_js__WEBPACK_IMPORTED_MODULE_2__.usePrefill)();
-    prefillValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
+    prefillValue = prefill?.data?.single?.[attributes.dynamic_value || attributes.name || ''] || '';
   }
 
   /**
@@ -514,7 +514,7 @@ function InputHtml({
           value: option.value,
           className: "formbuilder",
           autoComplete: "on",
-          checked: prefillValue === option.value,
+          checked: prefillValue.includes(option.value),
           "data-blockid": attributes.blockId,
           ...attributes.inputAttributes,
           required: attributes.required

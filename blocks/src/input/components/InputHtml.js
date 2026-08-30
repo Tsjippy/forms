@@ -17,7 +17,7 @@ export function InputHtml({
     if(!isSaving){
         var prefill = usePrefill();
 
-        prefillValue = prefill?.single?.[attributes.dynamic_value ?? ''] ?? '';
+        prefillValue = prefill?.data?.single?.[attributes.dynamic_value || attributes.name || ''] || '';
     }
 
     /**
@@ -28,7 +28,7 @@ export function InputHtml({
 
         if(isSaving){
             options = attributes.options;
-        }else{            
+        }else{        
             const dynamicOptions = Object.entries(
                 prefill?.multi?.[
                     attributes.options_dynamic ?? ''
@@ -60,7 +60,7 @@ export function InputHtml({
                             value={option.value}
                             className="formbuilder"
                             autoComplete="on"
-                            checked={ prefillValue === option.value }
+                            checked={ prefillValue.includes(option.value) }
                             data-blockid={attributes.blockId}
                             {...attributes.inputAttributes}
                             required={attributes.required}

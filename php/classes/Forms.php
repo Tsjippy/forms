@@ -627,7 +627,8 @@ class Forms
             $this->reset();
         }
 
-        $this->formData->post = $post;
+        $this->formData->post   = $post;
+        $this->formData->postId = $post->ID;
 
         if(empty($blockId)){
             $blockId    = $this->formData->blockId;
