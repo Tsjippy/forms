@@ -440,7 +440,7 @@ function getInputHtml()
 
     $elementId          = (int) $_POST['element-id'];
 
-    $element            = $formTable->getElementById($elementId);
+    $element            = $formTable->getBlockById($elementId);
 
     if (!$element) {
         return new \WP_Error('No element found', "No element found with id '$elementId'");
@@ -472,10 +472,10 @@ function getInputHtml()
 
         // This option is a list option
         if ($optionType == 'list') {
-            $datalist     = $formTable->getElementBySlug($optionValue);
+            $datalist     = $formTable->getBlockBySlug($optionValue);
 
             if ($datalist == $element) {
-                $datalist = $formTable->getElementBySlug($optionValue . '-list');
+                $datalist = $formTable->getBlockBySlug($optionValue . '-list');
                 TSJIPPY\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
             }
 
@@ -488,17 +488,17 @@ function getInputHtml()
 
     // prepend html with the html of previous element that wrap this elemnt
     $index           = $element->priority - 2;
-    $prevElement     = $formTable->formElements[$index];
+    $prevElement     = $formTable->formBlocks[$index];
     while ($prevElement && $prevElement->wrap) {
         $index--;
         $html        = $formTable->getElementHtml($prevElement, '') . $html;
-        $prevElement = $formTable->formElements[$index];
+        $prevElement = $formTable->formBlocks[$index];
     }
 
     // add next elements if they are wrapped in this one
     $index           = $element->priority;
     while ($element->wrap) {
-        $element     = $formTable->formElements[$index];
+        $element     = $formTable->formBlocks[$index];
         $html       .= $formTable->getElementHtml($element, '');
         $index++;
     }
@@ -540,7 +540,7 @@ function editValue()
     }
 
     //get transformed value
-    $element        = $formTable->getElementById($elementId);
+    $element        = $formTable->getBlockById($elementId);
     $submissions    = $formTable->getSubmissions('', $formTable->submissionId);
     $transValue     = $formTable->transformInputData($newValue, $element, $submissions[0]);
 

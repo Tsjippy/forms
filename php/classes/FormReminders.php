@@ -453,7 +453,11 @@ class FormReminders extends Forms
                     $metaKey    = 'tsjippy_' . $metaKey;
                 }
 
-                $value  = get_user_meta($userId, $metaKey, true);
+                if(isset($this->wpUserKeys[$metaKey])){
+                    $value  = get_user($userId)->$metaKey ?? '';
+                }else{
+                    $value  = get_user_meta($userId, $metaKey, true);
+                }
             }
 
             // Block has a value

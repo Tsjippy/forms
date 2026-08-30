@@ -111,7 +111,7 @@ export function InputHtml({
     }
 
     /**
-     * Render the the multpiple version if not wrapped in an label and not a text input
+     * Render the the multiple version if not wrapped in an label and not a text input
      */
     return attributes.multiple && !labelChild && !['text', "email", "tel", "text", "url"].includes(attributes.type) ? (
         <Multiple

@@ -25,6 +25,7 @@ class Forms
     public array       $formBlock;
     public string      $jsFileName;
     public array       $wpMetaKeys;
+    public array       $wpUserKeys;
     public string      $objectName;
     public bool        $onlyOwn;
     public int         $pageSize;
@@ -92,14 +93,23 @@ class Forms
         $this->tableFormats                 = [];
         $this->user                         = wp_get_current_user();
         $this->userId                       = $this->user->ID;  // The user id for who we retrieve a form (results)
-        $this->userIdBlockName            = '';
+        $this->userIdBlockName              = '';
         $this->userRoles                    = array_flip($this->user->roles);
         $this->formData->blockId            = $blockId;
         $this->formData->postId             = $postId;
         $this->formData->post               = null;
-        $this->formData->split_blocks     = [];
+        $this->formData->split_blocks       = [];
 
-        $this->wpMetaKeys                   = [
+        $this->wpUserKeys                   = [
+            'user_nicename'     => 1,
+            'user_email'        => 1,
+            'user_url'          => 1,
+            'user_registered'   => 1,
+            'user_status'       => 1,
+            'display_name'      => 1,
+        ];
+
+        $this->wpMetaKeys                   = array_merge($this->wpUserKeys, [
             'nickname'                              => 1,
             'first_name'                            => 1,
             'last_name'                             => 1,
@@ -121,7 +131,7 @@ class Forms
             'wp_user-settings-time'                 => 1,
             'wp_persisted_preferences'              => 1,
             '2fa_hash'                              => 1
-        ];
+        ]);
 
         $this->nonInputs                    = [
             'label'       => 1,

@@ -46,7 +46,7 @@ trait ExportFormResults
         // There is a custom sort column defined
         if (is_numeric($this->tableSettings->default_sort ?? null)) {
             $sortElementId      = $this->tableSettings->default_sort;
-            $sortElement        = $this->getElementById($sortElementId);
+            $sortElement        = $this->getBlockById($sortElementId);
             $sortElementType    = $sortElement->type;
             $sortColumnName     = $this->columnSettings[$sortElementId]['nice-name'];
             $sortCol            = array_search($sortColumnName, $this->excelContent[0]);
