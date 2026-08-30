@@ -9,7 +9,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-class FormExport extends Forms
+class FormExport extends SaveFormSettings
 {
     /**
      * FormExport constructor.
@@ -59,13 +59,13 @@ class FormExport extends Forms
         $content    = "form: " . json_encode(serialize($this->formData)) . "\n";
 
         /**
-         * Form Elements
+         * Form Blocks
          */
-        foreach ($this->formElements as &$element) {
-            unset($element->block_id);
+        foreach ($this->formBlocks as &$block) {
+            unset($block->block_id);
         }
 
-        $content    .= "elements: " . json_encode(serialize($this->formElements)) . "\n";
+        $content    .= "blocks: " . json_encode(serialize($this->formBlocks)) . "\n";
 
         /**
          * Form E-mails
@@ -111,16 +111,16 @@ class FormExport extends Forms
     }
 
     /**
-     * Inserts form elements, while updating conditions with new element ids
+     * Inserts form blocks, while updating conditions with new block ids
      *
      * @param array    $formEmails        Array of form emails to insert
-     * @param array    $elementIdMapping     Mapping of old element ids to new element ids
+     * @param array    $blockIdMapping     Mapping of old block ids to new block ids
      *
-     * @return array|\WP_Error            Array of old element ids to new element ids or WP_Error on failure
+     * @return array|\WP_Error            Array of old block ids to new block ids or WP_Error on failure
      */
-    protected function insertFormEmails($formEmails, $elementIdMapping)
+    protected function insertFormEmails($formEmails, $blockIdMapping)
     {
-        // Form elements
+        // Form blocks
         foreach ($formEmails as $email) {
 
             $email->block_id    = $this->formData->blockId;
@@ -128,22 +128,22 @@ class FormExport extends Forms
             if (!empty($email->submitted_trigger)) {
                 $triggers    = maybe_unserialize($email->submitted_trigger);
 
-                if (isset($triggers['element'])) {
-                    if (is_numeric($triggers['element'])) {
-                        $trigger['elements']    = $elementIdMapping[$trigger['element']];
+                if (isset($triggers['block'])) {
+                    if (is_numeric($triggers['block'])) {
+                        $trigger['blocks']    = $blockIdMapping[$trigger['block']];
                     }
 
-                    if (is_numeric($triggers['valueelement'])) {
-                        $triggers['valueelement']    = $elementIdMapping[$trigger['valueelement']];
+                    if (is_numeric($triggers['valueblock'])) {
+                        $triggers['valueblock']    = $blockIdMapping[$trigger['valueblock']];
                     }
                 } else {
                     foreach ($triggers as &$trigger) {
-                        if (is_numeric($trigger['element'])) {
-                            $trigger['element']    = $elementIdMapping[$trigger['element']];
+                        if (is_numeric($trigger['block'])) {
+                            $trigger['block']    = $blockIdMapping[$trigger['block']];
                         }
 
-                        if (is_numeric($trigger['valueelement'])) {
-                            $trigger['valueelement']    = $elementIdMapping[$trigger['valueelement']];
+                        if (is_numeric($trigger['valueblock'])) {
+                            $trigger['valueblock']    = $blockIdMapping[$trigger['valueblock']];
                         }
                     }
                 }
@@ -152,14 +152,14 @@ class FormExport extends Forms
             }
 
             if (!empty($email->conditional_field)) {
-                $email->conditional_field    = $elementIdMapping[$email->conditional_field];
+                $email->conditional_field    = $blockIdMapping[$email->conditional_field];
             }
 
             if (!empty($email->conditional_fields)) {
                 $conditionalFields    = maybe_unserialize($email->conditional_fields);
 
                 foreach ($conditionalFields as &$conditionalFieldId) {
-                    $conditionalFieldId    = $elementIdMapping[$conditionalFieldId];
+                    $conditionalFieldId    = $blockIdMapping[$conditionalFieldId];
                 }
 
                 $email->conditional_fields    = serialize($conditionalFields);
@@ -169,7 +169,7 @@ class FormExport extends Forms
                 $conditionalFromEmails    = maybe_unserialize($email->conditional_from_email);
 
                 foreach ($conditionalFromEmails as &$conditionalFromEmail) {
-                    $conditionalFromEmail['fieldid']    = $elementIdMapping[$conditionalFromEmail['fieldid']];
+                    $conditionalFromEmail['fieldid']    = $blockIdMapping[$conditionalFromEmail['fieldid']];
                 }
 
                 $email->conditional_from_email    = serialize($conditionalFromEmails);
@@ -179,7 +179,7 @@ class FormExport extends Forms
                 $conditionalEmailTo    = maybe_unserialize($email->conditional_email_to);
 
                 foreach ($conditionalEmailTo as &$conditionalEmailToField) {
-                    $conditionalEmailToField['fieldid']    = $elementIdMapping[$conditionalEmailToField['fieldid']];
+                    $conditionalEmailToField['fieldid']    = $blockIdMapping[$conditionalEmailToField['fieldid']];
                 }
 
                 $email->conditional_email_to    = serialize($conditionalEmailTo);
@@ -212,14 +212,14 @@ class FormExport extends Forms
 
         $contents      = $wpFileSystem->get_contents($path);
 
-        if (!str_contains($contents, 'form: ') || !str_contains($contents, 'elements: ')) {
+        if (!str_contains($contents, 'form: ') || !str_contains($contents, 'blocks: ')) {
             return new \WP_Error("forms", "Invalid sform file!");
         }
 
         $lines              = explode("\n", $contents);
 
         $autoArchiveEl      = null;
-        $elementIdMapping   = [];
+        $blockIdMapping   = [];
         $url                = '';   
         $postId             = 0;
 
@@ -265,15 +265,15 @@ class FormExport extends Forms
                 if (is_wp_error($this->formData->blockId)) {
                     return $this->formData->blockId;
                 }
-            } elseif ($type    == 'elements') {
-                //$elementIdMapping    = $this->insertFormElements($object);
+            } elseif ($type    == 'blocks') {
+                //$blockIdMapping    = $this->insertFormBlocks($object);
 
-                if (is_wp_error($elementIdMapping)) {
-                    return $elementIdMapping;
+                if (is_wp_error($blockIdMapping)) {
+                    return $blockIdMapping;
                 }
             } elseif ($type    == 'emails') {
                 // Form e-mails
-                $this->insertFormEmails($object, $elementIdMapping);
+                $this->insertFormEmails($object, $blockIdMapping);
             } elseif ($type    == 'reminders') {
                 // Form reminders
                 foreach ($object as $reminder) {

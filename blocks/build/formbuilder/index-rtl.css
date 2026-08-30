@@ -1367,3 +1367,8 @@ form.wp-block-tsjippy-forms-formbuilder .block-list-appender .add-form-element-b
   font-weight: 700;
   margin-bottom: 8px;
 }
+
+.required-options {
+  background-color: lightgrey;
+  padding: 3px;
+}

@@ -596,29 +596,6 @@ function sendBlockContent(block, postId){
                     }
                 }
             }
-
-            /**
-             * Warning conditons
-             */
-            if(!empty($element->warning_conditions)){
-                $element->warning_conditions = maybe_unserialize($element->warning_conditions);
-
-                if(!empty($element->warning_conditions)){
-                    $wpdb->insert(
-                        $wpdb->prefix."tsjippy_form_block_reminders",
-                        [
-                            "rules" => maybe_serialize(TSJIPPY\cleanUpNestedArray($element->warning_conditions)),
-                            "block_id" => $element->id,
-                            "post_id" => $postId
-                        ],
-                        [
-                            '%s',
-                            '%s',
-                            '%d',
-                        ]
-                    );
-                }
-            }
         }
 
         printJs($formBlock, $postId);

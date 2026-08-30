@@ -31,12 +31,12 @@ class SubmitForm extends SaveFormSettings
      * Transforms a given string to hyperlinks or other formats
      *
      * @param    string    $string         The string to convert
-     * @param    object    $element        The element the string value belongs to
+     * @param    object    $block        The block the string value belongs to
      * @param    object    $submission     The submission this string belongs to
      *
      * @return    string                   The transformed string
      */
-    public function transformInputData($string, $element, $submission)
+    public function transformInputData($string, $block, $submission)
     {
         if (empty($string)) {
             return $string;
@@ -52,7 +52,7 @@ class SubmitForm extends SaveFormSettings
                 if (!empty($output)) {
                     $output .= "<br>";
                 }
-                $output .= $this->transformInputData($sub, $element, $submission);
+                $output .= $this->transformInputData($sub, $block, $submission);
             }
             return $output;
         }
@@ -75,7 +75,7 @@ class SubmitForm extends SaveFormSettings
         /**
          * File Uploads
          */
-        elseif ( isset(['image' => 1, 'file' => 1][$element->type]) ){
+        elseif ( isset(['image' => 1, 'file' => 1][$block->type]) ){
             if($string == 'X'){
                 return $string;
             }
@@ -198,11 +198,11 @@ class SubmitForm extends SaveFormSettings
          * Filters the string transform
          * 
          * @param   mixed   $output     The string
-         * @param   object  $element    The form element
+         * @param   object  $block    The form block
          * @param   object  $submission The form submission data
          * @param   object  $object     The current instance
          */
-        $output = apply_filters('tsjippy-forms-transform-formtable-data', $output, $element, $submission, $this);
+        $output = apply_filters('tsjippy-forms-transform-formtable-data', $output, $block, $submission, $this);
         return $output;
     }
 
@@ -218,10 +218,10 @@ class SubmitForm extends SaveFormSettings
         //loop over all conditions
         foreach ($conditions as $condition) {
 
-            $elementName    = $this->getElementById($condition['fieldid'], 'slug');
+            $blockName    = $this->getBlockById($condition['fieldid'], 'slug');
 
             //get the submitted form value
-            $formValue = $this->submission->{$elementName};
+            $formValue = $this->submission->{$blockName};
 
             //if the value matches the conditional value
             if (strtolower($formValue) == strtolower($condition['value'])) {
@@ -272,20 +272,20 @@ class SubmitForm extends SaveFormSettings
             return false;
         }
 
-        $changedElementId    = (int) $_POST['element-id'] ?? '';
+        $changedBlockId    = (int) $_POST['block-id'] ?? '';
 
-        // check if a certain element is changed to a certain value
+        // check if a certain block is changed to a certain value
         if ($trigger == 'fieldchanged') {
 
-            // the changed element is not the conditional element)
-            if ($changedElementId != $email->conditional_field) {
+            // the changed block is not the conditional block)
+            if ($changedBlockId != $email->conditional_field) {
                 return false;
             }
 
-            // get the element value
-            $elementName    = str_replace('[]', '', $this->getElementById($changedElementId, 'name'));
+            // get the block value
+            $blockName    = str_replace('[]', '', $this->getBlockById($changedBlockId, 'name'));
 
-            $formValue         = $this->submission->{$elementName};
+            $formValue         = $this->submission->{$blockName};
             if (is_array($formValue)) {
                 $formValue    = $formValue[0];
             }
@@ -299,8 +299,8 @@ class SubmitForm extends SaveFormSettings
                 return false;
             }
         } elseif (
-            $trigger == 'fieldschanged'                                    &&        // an element has been changed
-            !in_array($changedElementId, $email->conditional_fields)            // and the element is not in the conditional fields array
+            $trigger == 'fieldschanged'                                    &&        // an block has been changed
+            !in_array($changedBlockId, $email->conditional_fields)            // and the block is not in the conditional fields array
         ) {
             return false;
         } elseif ($trigger == 'submitted' && $email->email_trigger == 'submittedcond') {    // check if the submit condition is matched
@@ -308,18 +308,18 @@ class SubmitForm extends SaveFormSettings
                 return false;
             }
 
-            // get element and the form result of that element
-            $element    = $this->getElementById($email->submitted_trigger['element']);
-            if (empty($this->submission->{$element->slug})) {
+            // get block and the form result of that block
+            $block    = $this->getBlockById($email->submitted_trigger['block']);
+            if (empty($this->submission->{$block->slug})) {
                 $elValue    = '';
             } else {
-                $elValue    = $this->submission->{$element->slug};
+                $elValue    = $this->submission->{$block->slug};
             }
 
             // get the value to compare with
-            if (is_numeric($email->submitted_trigger['value-element'] ?? '')) {
-                $compareElement    = $this->getElementById($email->submitted_trigger['value-element']);
-                $compareElValue    = $this->submission->{$compareElement->slug};
+            if (is_numeric($email->submitted_trigger['value-block'] ?? '')) {
+                $compareBlock    = $this->getBlockById($email->submitted_trigger['value-block']);
+                $compareElValue    = $this->submission->{$compareBlock->slug};
             } else {
                 $compareElValue    = $email->submitted_trigger['value'];
             }
@@ -526,12 +526,12 @@ class SubmitForm extends SaveFormSettings
 
         global $wpdb;
 
-        // loop over all split elements
+        // loop over all split blocks
         foreach ($this->formData->split as $index => $id) {
-            // get the name of the split element
-            $slug    = $this->getElementById($id, 'slug');
+            // get the name of the split block
+            $slug    = $this->getBlockById($id, 'slug');
 
-            // Check if we are dealing with an split element with form name[X]name
+            // Check if we are dealing with an split block with form name[X]name
             if (
                 preg_match('/(.*?)\[[0-9]\](\[.*?\])/', $slug, $matches) &&
                 isset($matches[1]) &&
@@ -547,8 +547,8 @@ class SubmitForm extends SaveFormSettings
                             continue;
                         }
 
-                        // Find the element id
-                        $elementId    = $this->getElementBySlug($matches[1] . "[$in][$subKey]", 'id');
+                        // Find the block id
+                        $blockId    = $this->getBlockBySlug($matches[1] . "[$in][$subKey]", 'id');
 
                         // insert the value
                         TSJIPPY\insertInDb(
@@ -556,7 +556,7 @@ class SubmitForm extends SaveFormSettings
                             [
                                 'submission_id' => $this->submission->id,
                                 'sub_id'        => $in,
-                                'element_id'    => $elementId,
+                                'block_id'    => $blockId,
                                 'value'         => $subValue
                             ],
                             [
@@ -582,14 +582,14 @@ class SubmitForm extends SaveFormSettings
                         continue;
                     }
 
-                    $elementId = $this->getElementBySlug($slug . '[' . $key . ']', 'id');
+                    $blockId = $this->getBlockBySlug($slug . '[' . $key . ']', 'id');
 
                     TSJIPPY\insertInDb(
                         $this->submissionValuesTableName,
                         [
                             'submission_id' => $this->submission->id,
                             'sub_id'        => $index,
-                            'element_id'    => $elementId,
+                            'block_id'    => $blockId,
                             'value'         => $subValue
                         ],
                         [
@@ -661,10 +661,10 @@ class SubmitForm extends SaveFormSettings
             }
 
             if ($key == 'viewhash') {
-                $elementId = -7;
+                $blockId = -7;
             } else {
-                $elementId    = $this->getElementBySlug($key, 'id');
-                if (!$elementId) {
+                $blockId    = $this->getBlockBySlug($key, 'id');
+                if (!$blockId) {
                     continue;
                 }
             }
@@ -672,7 +672,7 @@ class SubmitForm extends SaveFormSettings
             //insert the data
             $data    = [
                 'submission_id' => $this->submission->id,
-                'element_id'    => $elementId,
+                'block_id'    => $blockId,
                 'value'         => $result
             ];
 
@@ -731,7 +731,7 @@ class SubmitForm extends SaveFormSettings
                 $index = array_keys($result)[0];
 
                 if(is_string($index)){
-                    $el     = $this->getElementBySlug($key . '[' . $index . ']');
+                    $el     = $this->getBlockBySlug($key . '[' . $index . ']');
                     if (count(array_keys($result)) == 1 && $el) {
                         $subKey    = array_keys($result)[0];
                     }
@@ -844,14 +844,14 @@ class SubmitForm extends SaveFormSettings
 
         $orgFormResults                      = $request;
 
-        // check for required empty elements
-        foreach ($this->formElements as $element) {
-            // element is required but has no value
+        // check for required empty blocks
+        foreach ($this->formBlocks as $block) {
+            // block is required but has no value
             if (
-                $element->required && 
-                !isset($this->nonInputs[$element->type]) && 
-                ($request[str_replace('[]', '', $element->slug)] ?? '') === '') {
-                return new \WP_Error('Error', "$element->name is required!");
+                $block->required && 
+                !isset($this->nonInputs[$block->type]) && 
+                ($request[str_replace('[]', '', $block->slug)] ?? '') === '') {
+                return new \WP_Error('Error', "$block->name is required!");
             }
         }
 

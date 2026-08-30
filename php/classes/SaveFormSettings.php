@@ -17,8 +17,8 @@ class SaveFormSettings extends Forms
      * Constructor
      *
      * @param    string  $blockId  The blockId
-     * @param    bool    $all      Whether to show all elements or only the visible ones
-     * @param    int     $pageSize The number of elements to show per page
+     * @param    bool    $all      Whether to show all blocks or only the visible ones
+     * @param    int     $pageSize The number of blocks to show per page
      * @param    string  $postId   The post id to get the form for
      * @param    string  $formUrl  The url of the form
      * @param    int     $userId   The user id to get the form for
@@ -109,7 +109,7 @@ class SaveFormSettings extends Forms
                 'forms'
             );
         } else {
-            //Update element
+            //Update block
             $result = TSJIPPY\updateDbValue(
                 $table,
                 $data,
@@ -196,7 +196,7 @@ class SaveFormSettings extends Forms
     {
         $priority    = 0;
 
-        foreach ($settings as $elementId => $column) {
+        foreach ($settings as $blockId => $column) {
             if (!is_array($column)) {
                 continue;
             }
@@ -204,7 +204,7 @@ class SaveFormSettings extends Forms
             $priority++;
             $column['priority']     = $priority;
 
-            $column['element_id']   = $elementId;
+            $column['block_id']   = $blockId;
 
             $column['shortcode_id'] = $shortcodeId;
 

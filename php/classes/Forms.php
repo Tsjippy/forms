@@ -14,10 +14,10 @@ class Forms
 {
     public bool        $all;            // do not page submissions
     public bool        $editRights;
-    public array       $elementMapping;
+    public array       $blockMapping;
     public array       $emailSettings;
     public object      $formData;
-    public array       $formElements;
+    public array       $formBlocks;
     public string      $formEmailTable;
     public object|null $formReminder;
     public string      $formReminderTable;
@@ -38,12 +38,11 @@ class Forms
     public string      $submissionTableName;
     public string      $submissionValuesTableName;
     public string      $blockConditionsTableName;
-    public string      $blockRemindersTableName;
     public array       $submitRoles;
     protected array    $tableFormats;
     public \WP_User    $user;
     public int         $userId;
-    protected string   $userIdElementName;
+    protected string   $userIdBlockName;
     public array       $userRoles;
     public array        $defaultArrayValues;
     public array        $defaultValues;
@@ -64,11 +63,11 @@ class Forms
         global $wpdb;
 
         $this->all                          = $all;
-        $this->elementMapping               = [];
+        $this->blockMapping               = [];
         $this->emailSettings                = [];
         $this->formData                     = new stdClass();
         $this->formEmailTable               = $wpdb->prefix . 'tsjippy_form_emails';
-        $this->formElements                 = [];
+        $this->formBlocks                 = [];
         $this->formReminder                 = null;
         $this->formReminderTable            = $wpdb->prefix . 'tsjippy_form_reminders';
         $this->forms                        = [];
@@ -89,17 +88,16 @@ class Forms
         $this->submissionTableName          = $wpdb->prefix . 'tsjippy_form_submissions';
         $this->submissionValuesTableName    = $wpdb->prefix . 'tsjippy_form_submission_values';
         $this->blockConditionsTableName     = $wpdb->prefix . 'tsjippy_form_block_conditions';
-        $this->blockRemindersTableName      = $wpdb->prefix . 'tsjippy_form_block_reminders';
         $this->submitRoles                  = [];
         $this->tableFormats                 = [];
         $this->user                         = wp_get_current_user();
         $this->userId                       = $this->user->ID;  // The user id for who we retrieve a form (results)
-        $this->userIdElementName            = '';
+        $this->userIdBlockName            = '';
         $this->userRoles                    = array_flip($this->user->roles);
         $this->formData->blockId            = $blockId;
         $this->formData->postId             = $postId;
         $this->formData->post               = null;
-        $this->formData->split_elements     = [];
+        $this->formData->split_blocks     = [];
 
         $this->wpMetaKeys                   = [
             'nickname'                              => 1,
@@ -162,7 +160,7 @@ class Forms
         if(!empty($blockId) || $postId != -1){
             $this->getForm();
 
-            $this->getAllFormElements();
+            $this->getAllformBlocks();
         }
 
         $this->tableFormats();
@@ -247,7 +245,7 @@ class Forms
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             shortcode_id mediumint(9) NOT NULL,
             width mediumint(9),
-            element_id tinytext,
+            block_id tinytext,
             `show` boolean,
             slug tinytext,
             name tinytext,
@@ -279,7 +277,7 @@ class Forms
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             submission_id    mediumint(9) NOT NULL,
             sub_id    mediumint(9),
-            element_id mediumint(9) NOT NULL,
+            block_id mediumint(9) NOT NULL,
             `value` longtext NOT NULL,
             PRIMARY KEY  (id)
        ) $charsetCollate;";
@@ -297,17 +295,6 @@ class Forms
        ) $charsetCollate;";
 
         maybe_create_table($this->blockConditionsTableName, $sql);
-
-        // Block reminders table
-        $sql = "CREATE TABLE {$this->blockRemindersTableName} (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            post_id mediumint(9),
-            `block_id` tinytext,
-            `rules` longtext,
-            PRIMARY KEY  (id)
-       ) $charsetCollate;";
-
-        maybe_create_table($this->blockRemindersTableName, $sql);
     }
 
     /**
@@ -363,7 +350,7 @@ class Forms
         $formats    = [
             'submission_id' => '%d',
             'sub_id'        => '%d',
-            'element_id'    => '%d',
+            'block_id'    => '%d',
             'value'         => '%s'
         ];
 
@@ -390,7 +377,7 @@ class Forms
         // Column Settings
         $formats    = [
             'shortcode_id'     => '%d',
-            'element_id'       => '%s',
+            'block_id'       => '%s',
             'width'            => '%d',
             'show'             => '%d',
             'slug'             => '%s',
@@ -419,8 +406,6 @@ class Forms
             'post_id'  => '%d',
             'block_id' => '%s', 
         ];
-
-        $this->tableFormats[$this->blockRemindersTableName] = apply_filters('tsjippy-forms-block-reminder-formats', $formats, $this);
 
         foreach ($this->tableFormats as &$format) {
             ksort($format);
@@ -516,64 +501,77 @@ class Forms
         $this->formData->postId = null;
         $this->formData->post   = null;
 
-        $this->elementMapping   = [];
+        $this->blockMapping   = [];
 
-        $this->formElements     = [];
+        $this->formBlocks     = [];
 
         $this->formBlock        = [];
     }
 
     /**
-     * Creates the element mappers to find elements based on id, name or type
+     * Creates the block mappers to find blocks based on id, name or type
      *
      * @param    bool    $force        Whether to requery, default false
      */
-    public function elementMapper($force = false)
+    public function blockMapper($force = false)
     {
         if (
             empty($this->formData) ||
             (
-                isset($this->elementMapping) &&
-                !empty($this->elementMapping['type']) &&
+                isset($this->blockMapping) &&
+                !empty($this->blockMapping['type']) &&
                 !$force
             )
         ) {
             return;
         }
 
-        //used to find the index of an element based on its unique id, type or name
-        $this->elementMapping                                    = [];
-        $this->elementMapping['type']                            = [];
-        $this->elementMapping['slug']                            = [];
+        //used to find the index of an block based on its unique id, type or name
+        $this->blockMapping                                    = [];
+        $this->blockMapping['type']                            = [];
+        $this->blockMapping['slug']                            = [];
 
-        $this->getAllFormElements(true);
+        $this->getAllformBlocks(true);
 
-        foreach ($this->formElements as $index => $element) {
-            $this->elementMapping['id'][$element->blockId]          = $index;
-            $this->elementMapping['slug'][$element->slug][$index]   = $index;
-            $this->elementMapping['type'][$element->type][$index]   = $index;
+        foreach ($this->formBlocks as $index => $block) {
+            $this->blockMapping['id'][$block->blockId]          = $index;
+            $this->blockMapping['slug'][$block->slug][$index]   = $index;
+            $this->blockMapping['type'][$block->type][$index]   = $index;
         }
     }
 
     /**
      * Finds all blocks and post ids who are of the formbuilder type
      */
-    public function getForms(){
+    public function getForms($type=null){
         if(!empty($this->forms)){
             return;
         }
 
-        $this->forms = TSJIPPY\getFromDb(
+        global $wpdb;
+
+        $likeString = '%'.$wpdb->esc_like('<!-- wp:tsjippy-forms/formbuilder').'%';
+
+        if($type == 'meta'){
+            $likeString .= $wpdb->esc_like('"user_meta":true').'%';
+        }
+
+        $posts = TSJIPPY\getFromDb(
             'all_forms',
             'forms',
-            "SELECT distinct block_id, post_id from %i",
-            $this->submissionTableName
+            "SELECT * FROM %i where post_content like %s",
+            $wpdb->posts,
+            $likeString
         );
 
-        foreach($this->forms as &$form){
-            $this->getForm($form->post_id, $form->block_id);
+        foreach($posts as $post){
+            $this->getForm($post);
 
-            $form   = clone($this->formData);
+            $this->forms[]   = [
+                'formData'  => clone($this->formData),
+                'blocks'  => $this->formBlocks,
+                'formBlock' => $this->formBlock,
+            ];
         }
     }
 
@@ -607,10 +605,6 @@ class Forms
                 }
             }
         }
-        
-        if($post != $this->formData->post && $post != $this->formData->postId){
-            $this->reset();
-        }
 
         if(empty($post)){
             $post   = $this->formData->post;
@@ -620,9 +614,20 @@ class Forms
             }else{
                 $post   = get_post($post);
             }
-
-            $this->formData->post = $post;
         }
+        
+        if(
+            
+            $post != $this->formData->post || 
+            (
+                is_numeric($post) && 
+                $post != $this->formData->postId
+            )
+        ){
+            $this->reset();
+        }
+
+        $this->formData->post = $post;
 
         if(empty($blockId)){
             $blockId    = $this->formData->blockId;
@@ -641,10 +646,10 @@ class Forms
                 $this->formBlock = $block;
 
                 foreach($block['attrs'] as $key => $attribute){
-                    $this->formData->$key   = $attribute;
+                    $this->formData->$key   = maybe_unserialize($attribute);
                 }
 
-                $this->elementMapper(true);
+                $this->blockMapper(true);
 
                 return true;
             }
@@ -688,14 +693,14 @@ class Forms
     }
 
     /**
-     * Finds an element by its id
+     * Finds an block by its id
      *
-     * @param    int       $id        the element id
-     * @param    string    $key    A specific element attribute to return. Default empty
+     * @param    int       $id        the block id
+     * @param    string    $key    A specific block attribute to return. Default empty
      *
-     * @return    object|array|string|false            The element or element property
+     * @return    object|array|string|false            The block or block property
      */
-    public function getElementById($id, $key = '')
+    public function getBlockById($id, $key = '')
     {
         global $post;
 
@@ -704,7 +709,7 @@ class Forms
         }
 
         if (!is_numeric($id) && gettype($id) == 'string') {
-            return $this->getElementBySlug($id, $key);
+            return $this->getBlockBySlug($id, $key);
         }
 
         //load if needed
@@ -712,49 +717,49 @@ class Forms
             $this->getForm();
         }
 
-        if (!isset($this->elementMapping['id'][$id])) {
-            $this->elementMapper(true);
+        if (!isset($this->blockMapping['id'][$id])) {
+            $this->blockMapper(true);
 
-            if (!isset($this->elementMapping['id'][$id])) {
+            if (!isset($this->blockMapping['id'][$id])) {
                 $url    = get_page_link($post);
 
-                TSJIPPY\printArray("Element with id '$id' not found on form '{$this->formData->slug}' with id '{$this->formData->blockId}' on page $url", false);
+                TSJIPPY\printArray("Block with id '$id' not found on form '{$this->formData->slug}' with id '{$this->formData->blockId}' on page $url", false);
                 return false;
             }
         }
-        $elementIndex    = $this->elementMapping['id'][$id];
+        $blockIndex    = $this->blockMapping['id'][$id];
 
-        $element        = $this->formElements[$elementIndex];
-        if (empty($element)) {
+        $block        = $this->formBlocks[$blockIndex];
+        if (empty($block)) {
             return false;
         }
 
-        $element->index    = $elementIndex;
+        $block->index    = $blockIndex;
 
         if (empty($key)) {
-            return $element;
+            return $block;
         } else {
-            return $element->$key;
+            return $block->$key;
         }
     }
 
     /**
-     * Finds an element by its slug
+     * Finds an block by its slug
      *
-     * @param    string    $slug               The element slug
-     * @param    string    $key                A specific element attribute to return. Default empty
-     * @param    bool      $single             Wheter to return a singel element, default true
+     * @param    string    $slug               The block slug
+     * @param    string    $key                A specific block attribute to return. Default empty
+     * @param    bool      $single             Wheter to return a singel block, default true
      *
-     * @return    object|array|string|false    The element or an array of elements or an element property of false if not found
+     * @return    object|array|string|false    The block or an array of blocks or an block property of false if not found
      */
-    public function getElementBySlug($slug, $key = '', $single = true)
+    public function getBlockBySlug($slug, $key = '', $single = true)
     {
         if (empty($slug)) {
             return false;
         }
 
         //load if needed
-        if (empty($this->elementMapping)) {
+        if (empty($this->blockMapping)) {
             $result    = $this->getForm();
 
             if (is_wp_error($result)) {
@@ -762,19 +767,19 @@ class Forms
             }
         }
 
-        if (!isset($this->elementMapping['slug'][$slug])) {
+        if (!isset($this->blockMapping['slug'][$slug])) {
             // first part of the name, remove anything after [
             $slugNew    = explode('[', $slug)[0];
 
-            if (isset($this->elementMapping['slug'][$slugNew])) {
+            if (isset($this->blockMapping['slug'][$slugNew])) {
                 // remove '[]'
                 $slug    = $slugNew;
-            } elseif (isset($this->elementMapping['slug'][$slug . '[]'])) {
+            } elseif (isset($this->blockMapping['slug'][$slug . '[]'])) {
                 // add []
                 $slug    = '[]';
-            } elseif (!empty($this->formData->split_elements)) {
+            } elseif (!empty($this->formData->split_blocks)) {
                 // only the last part of a splitted name is given
-                $mainName    = explode('[', $this->getElementById($this->formData->split_elements[0], 'slug'))[0];
+                $mainName    = explode('[', $this->getBlockById($this->formData->split_blocks[0], 'slug'))[0];
 
                 // we already tried adding splits, did not work
                 if (str_contains($slug, $mainName . '[1][')) {
@@ -787,51 +792,51 @@ class Forms
                     $slug        = $mainName . "[0][$slug]";
                 }
 
-                return $this->getElementBySlug($slug, $key, $single);
+                return $this->getBlockBySlug($slug, $key, $single);
             } else {
-                //TSJIPPY\printArray("Element with slug $slug not found on form {$this->formData->slug} with id {$this->formData->blockId}");
+                //TSJIPPY\printArray("Block with slug $slug not found on form {$this->formData->slug} with id {$this->formData->blockId}");
                 return false;
             }
         }
-        $elementIndexes    = $this->elementMapping['slug'][$slug];
+        $blockIndexes    = $this->blockMapping['slug'][$slug];
 
-        $elements        = [];
+        $blocks        = [];
 
-        foreach ($elementIndexes as $index) {
-            $element        = $this->formElements[$index];
-            $element->index = $index;
-            $elements[]     = $element;
+        foreach ($blockIndexes as $index) {
+            $block        = $this->formBlocks[$index];
+            $block->index = $index;
+            $blocks[]     = $block;
         }
 
         if (!$single) {
-            return $elements;
+            return $blocks;
         }
 
-        $element    = $elements[0];
+        $block    = $blocks[0];
 
         if (empty($key)) {
-            return $element;
+            return $block;
         } else {
-            return $element->$key;
+            return $block->$key;
         }
     }
 
     /**
-     * Finds an element by its type
+     * Finds an block by its type
      *
-     * @param    string    $type    The element type
+     * @param    string    $type    The block type
      * @param    bool    $load    Try to load the formdata if empty default true
      *
-     * @return    object|array|string|false            An array of elements
+     * @return    object|array|string|false            An array of blocks
      */
-    public function getElementByType($type, $load = true)
+    public function getBlockByType($type, $load = true)
     {
         if (empty($type)) {
             return false;
         }
 
         //load if needed
-        if (empty($this->elementMapping['type']) && $load) {
+        if (empty($this->blockMapping['type']) && $load) {
             $result    = $this->getForm();
 
             if (is_wp_error($result)) {
@@ -839,41 +844,41 @@ class Forms
             }
         }
 
-        if (!isset($this->elementMapping['type'][$type])) {
-            //TSJIPPY\printArray("Element with id $type not found");
+        if (!isset($this->blockMapping['type'][$type])) {
+            //TSJIPPY\printArray("Block with id $type not found");
             return false;
         }
 
-        $elementIndexes    = $this->elementMapping['type'][$type];
+        $blockIndexes    = $this->blockMapping['type'][$type];
 
-        $elements        = [];
+        $blocks        = [];
 
-        foreach ($elementIndexes as $index) {
-            $element        = $this->formElements[$index];
-            $element->index = $index;
-            $elements[]     = $element;
+        foreach ($blockIndexes as $index) {
+            $block        = $this->formBlocks[$index];
+            $block->index = $index;
+            $blocks[]     = $block;
         }
 
-        return $elements;
+        return $blocks;
     }
 
     /**
-     * Finds the user name element in a form
+     * Finds the user name block in a form
      *
-     * @return    string    the element name or false if no name element is found
+     * @return    string    the block name or false if no name block is found
      */
-    public function findUserNameElementName()
+    public function findUserNameBlockName()
     {
-        // find the user id element
+        // find the user id block
         $userNameKey    = false;
 
-        if ($this->getElementBySlug('name')) {
+        if ($this->getBlockBySlug('name')) {
             $userNameKey    = 'name';
-        } elseif ($this->getElementBySlug('fullname')) {
+        } elseif ($this->getBlockBySlug('fullname')) {
             $userNameKey    = 'fullname';
-        } elseif ($this->getElementBySlug('firstname')) {
+        } elseif ($this->getBlockBySlug('firstname')) {
             $userNameKey    = 'firstname';
-        } elseif ($this->getElementBySlug('lasttname')) {
+        } elseif ($this->getBlockBySlug('lasttname')) {
             $userNameKey    = 'lasttname';
         }
 
@@ -881,20 +886,20 @@ class Forms
     }
 
     /**
-     * Finds the phonenumber element in a form
+     * Finds the phonenumber block in a form
      *
-     * @return    string    the element name or false if no phonenumber element is found
+     * @return    string    the block name or false if no phonenumber block is found
      */
-    public function findPhoneNumberElementName()
+    public function findPhoneNumberBlockName()
     {
-        // find the user id element
+        // find the user id block
         $phonenumberKey    = false;
 
-        if ($this->getElementBySlug('phone')) {
+        if ($this->getBlockBySlug('phone')) {
             $phonenumberKey    = 'phone';
-        } elseif ($this->getElementBySlug('phonenumber')) {
+        } elseif ($this->getBlockBySlug('phonenumber')) {
             $phonenumberKey    = 'phonenumber';
-        } elseif ($this->getElementBySlug('phone_number')) {
+        } elseif ($this->getBlockBySlug('phone_number')) {
             $phonenumberKey    = 'phone_number';
         }
 
@@ -902,18 +907,18 @@ class Forms
     }
 
     /**
-     * Finds the e-mail element in a form
+     * Finds the e-mail block in a form
      *
-     * @return    string    the element name or false if no e-mail element is found
+     * @return    string    the block name or false if no e-mail block is found
      */
-    public function findEmailElementName()
+    public function findEmailBlockName()
     {
-        // find the user id element
+        // find the user id block
         $emailKey    = false;
 
-        if ($this->getElementBySlug('email')) {
+        if ($this->getBlockBySlug('email')) {
             $emailKey    = 'email';
-        } elseif ($this->getElementBySlug('e-mail')) {
+        } elseif ($this->getBlockBySlug('e-mail')) {
             $emailKey    = 'e-mail';
         }
 
@@ -926,38 +931,38 @@ class Forms
      * @param   array   $block
      */
     private function parseBlocks($block){
-        $element = new stdClass();
+        $newBlock = new stdClass();
 
-        $element->block         = $block;
+        $newBlock->block         = $block;
 
-        $element->type          = explode('/', $block['blockName'])[1];
+        $newBlock->type          = explode('/', $block['blockName'])[1];
 
-        $element->blockId       = $block['attrs']['blockId'] ?? '';
+        $newBlock->blockId       = $block['attrs']['blockId'] ?? '';
 
-        $element->required      = !empty($block['attrs']['required']);
+        $newBlock->required      = !empty($block['attrs']['required']);
 
-        $element->slug          = $block['attrs']['name'] ?? '';
+        $newBlock->slug          = $block['attrs']['name'] ?? '';
 
-        $element->name          = ucfirst(str_replace('_', ' ', $element->slug));
+        $newBlock->name          = ucfirst(str_replace('_', ' ', $newBlock->slug));
 
-        $this->formElements[]   = $element;
+        $this->formBlocks[]   = $newBlock;
 
-        // Get all form elements
+        // Get all form blocks
         foreach($block['innerBlocks'] as $innerBlock){
             $this->parseBlocks($innerBlock);
         }
     }
 
     /**
-     * Get all elements belonging to the current form
+     * Get all blocks belonging to the current form
      *
      * @param    string     $sortCol        the column to sort on. Default empty
-     * @param    int        $formId         The id of the form to get elements for, default empty
+     * @param    int        $formId         The id of the form to get blocks for, default empty
      * @param    bool       $force          Whether to requery, default false
      */
-    public function getAllFormElements($force = false)
+    public function getAllformBlocks($force = false)
     {
-        if (!empty($this->formElements) && !$force) {
+        if (!empty($this->formBlocks) && !$force) {
             return '';
         }
 
@@ -967,30 +972,30 @@ class Forms
             return new \WP_Error('forms', 'No formBlock given');
         }
 
-        $this->formElements   = [];
+        $this->formBlocks   = [];
 
         foreach($this->formBlock['innerBlocks'] as $innerBlock){
             $this->parseBlocks($innerBlock);
         }
 
         /**
-         * Filters the elements of this form,
-         * @param    array   $elements  The elements array
+         * Filters the blocks of this form,
+         * @param    array   $blocks  The blocks array
          * @param    object  $object    The form instance
          * @param    bool    $force     Wheter to force a requery
          */
-        $this->formElements         =  apply_filters('tsjippy-forms-elements', $this->formElements, $this, false);
+        $this->formBlocks         =  apply_filters('tsjippy-forms-blocks', $this->formBlocks, $this, false);
     }
 
     /**
      * Get submission value
      *
      * @param    int        $submissionId    The id of a submission
-     * @param    string    $elementId        The element_id of the submission value
+     * @param    string    $blockId        The block_id of the submission value
      * @param    int        $subId            The sub id in case of multiple values for the same key
      * @param    bool    $returnArray    Wheter to return an array of values, default false
      */
-    public function getSubmissionValue($submissionId, $elementId, $subId = '', $returnArray = false)
+    public function getSubmissionValue($submissionId, $blockId, $subId = '', $returnArray = false)
     {
         global $wpdb;
 
@@ -999,8 +1004,8 @@ class Forms
          */
         if (!empty($this->submissions)) {
             foreach ($this->submissions as $submission) {
-                if ($submission->id == $submissionId && isset($submission->{$elementId})) {
-                    return $submission->{$elementId};
+                if ($submission->id == $submissionId && isset($submission->{$blockId})) {
+                    return $submission->{$blockId};
                 }
             }
         }
@@ -1008,13 +1013,13 @@ class Forms
         $baseQuery    = "SELECT `value` FROM %i WHERE ";
         $where        = [
             'submission_id = %d',
-            'element_id = %s'
+            'block_id = %s'
         ];
 
         $values        = [
             $this->submissionValuesTableName,
             $submissionId,
-            $elementId
+            $blockId
         ];
 
         if (is_numeric($subId)) {
@@ -1117,7 +1122,7 @@ class Forms
         // Replace ids with names
         foreach ($replaceValues as $index => $value) {
             if (is_numeric($index)) {
-                $replaceValues[$this->getElementById($index, 'name')]    = $value;
+                $replaceValues[$this->getBlockById($index, 'name')]    = $value;
             }
         }
 

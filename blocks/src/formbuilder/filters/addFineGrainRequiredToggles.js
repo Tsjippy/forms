@@ -37,7 +37,15 @@ addFilter(
 			conditions: {
 				type: "array",
 				default: []
-			}
+			},
+			roles: {
+				type: "array",
+				default: []
+			},
+			inverseRoles: {
+				type: 'boolean',
+				default: false,
+			},
 		};
 
 		return settings;

@@ -19,15 +19,15 @@ class DisplayFormResults extends SubmitForm
     public int      $currentPage;
     public bool     $enriched;
     public array    $excelContent;
-    public array    $extraElements;
+    public array    $extraBlocks;
     public bool     $formEditPermissions;
     public array    $hiddenColumns;
     public bool     $ownData;
     public string   $sortColumn;
     public string   $sortDirection;
-    public array    $sortElementIds;
+    public array    $sortBlockIds;
     public bool     $spliced;
-    public array    $subElements;
+    public array    $subBlocks;
     public bool     $tableEditPermissions;
     public object   $tableSettings;
     public bool     $tableViewPermissions;
@@ -63,14 +63,14 @@ class DisplayFormResults extends SubmitForm
         $this->currentPage          = 0;
         $this->enriched             = false;
         $this->excelContent         = [];
-        $this->extraElements        = [];
+        $this->extraBlocks        = [];
         $this->formEditPermissions  = false;
         $this->ownData              = false;
         $this->sortColumn           = '';
         $this->sortDirection        = 'ASC';
-        $this->sortElementIds       = [];
+        $this->sortBlockIds       = [];
         $this->spliced              = false;
-        $this->subElements          = [];
+        $this->subBlocks          = [];
         $this->tableEditPermissions = false;
         $this->tableSettings        = new stdClass();
         $this->tableViewPermissions = false;
@@ -89,8 +89,8 @@ class DisplayFormResults extends SubmitForm
             return new WP_Error('forms', 'No form data found for the given form results shortcode');
         }
 
-        // add the elements filter before the parent construct, as that will apply the filter
-        add_filter('tsjippy-forms-elements', [$this, 'addExtraElements'], 10, 3);
+        // add the blocks filter before the parent construct, as that will apply the filter
+        add_filter('tsjippy-forms-blocks', [$this, 'addExtraBlocks'], 10, 3);
 
         wp_enqueue_style('tsjippy_formtable_style');
 
@@ -110,17 +110,17 @@ class DisplayFormResults extends SubmitForm
     }
 
     /**
-     * Function to add the elements for submission meta
+     * Function to add the blocks for submission meta
      *
-     * @param array $elements The current array of elements
-     * @param object $object The form or shortcode object for which the elements are being retrieved
-     * @param bool $force Whether to force adding the extra elements even if they already exist
-     * @return array The updated array of elements with the extra elements added
+     * @param array $blocks The current array of blocks
+     * @param object $object The form or shortcode object for which the blocks are being retrieved
+     * @param bool $force Whether to force adding the extra blocks even if they already exist
+     * @return array The updated array of blocks with the extra blocks added
      */
-    public function addExtraElements($elements, $object, $force)
+    public function addExtraBlocks($blocks, $object, $force)
     {
-        // Build the array of element details
-        $this->extraElements    = [
+        // Build the array of block details
+        $this->extraBlocks    = [
             // -6 = archived indexes
             // -7 = hash
             -4 => [
@@ -145,57 +145,57 @@ class DisplayFormResults extends SubmitForm
             ]
         ];
 
-        if (!empty($this->formData->split_elements)) {
-            $this->extraElements[-5] = [
+        if (!empty($this->formData->split_blocks)) {
+            $this->extraBlocks[-5] = [
                 'slug' => 'sub_id',
                 'name' => 'Sub-Id',
                 'type' => 'number'
             ];
         }
 
-        foreach ($this->extraElements as $id => $newElement) {
-            if (isset($this->elementMapping['id'][$id])) {
+        foreach ($this->extraBlocks as $id => $newBlock) {
+            if (isset($this->blockMapping['id'][$id])) {
                 continue;
             }
-            $element                 = new \stdClass();
+            $block                 = new \stdClass();
 
-            $element->blockId             = $id;
-            if (isset($newElement['type'])) {
-                $element->type = $newElement['type'];
+            $block->blockId             = $id;
+            if (isset($newBlock['type'])) {
+                $block->type = $newBlock['type'];
             } else {
-                $element->type        = 'text';
+                $block->type        = 'text';
             }
-            $element->slug            = $newElement['slug'];
-            $element->name            = $newElement['name'];
+            $block->slug            = $newBlock['slug'];
+            $block->name            = $newBlock['name'];
 
             // Add to the front of the array
-            array_unshift($elements, $element);
+            array_unshift($blocks, $block);
         }
 
-        return $elements;
+        return $blocks;
     }
 
     /**
-     * Finds all elements that should be splitted
+     * Finds all blocks that should be splitted
      * Two options:
      *    1 - case of a BASENAME[index]SUBNAME name
      *    2 - case of a BASENAME[index] name
      */
-    public function findSplitElementIds()
+    public function findSplitBlockIds()
     {
-        $baseNames    = $elementIds = [];
+        $baseNames    = $blockIds = [];
 
-        // Check if this is an splitted element
-        if (empty($this->formData->split_elements)) {
-            return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
+        // Check if this is an splitted block
+        if (empty($this->formData->split_blocks)) {
+            return apply_filters('tsjippy-forms-split-block-ids', $blockIds, $this);
         }
 
         /**
-         * loop over all element ids that data should be splitted on
+         * loop over all block ids that data should be splitted on
          */
-        foreach ($this->formData->split_elements as $splitElementId) {
-            // Get the element slug
-            $slug    = $this->getElementById($splitElementId, 'slug');
+        foreach ($this->formData->split_blocks as $splitBlockId) {
+            // Get the block slug
+            $slug    = $this->getBlockById($splitBlockId, 'slug');
 
             // Find the base slug keyword followed by one or more numbers between [] followed by a keyword between []
             $pattern    = "/(.*?)\[[0-9]+\]\[([^\]]+)\]/i";
@@ -204,47 +204,47 @@ class DisplayFormResults extends SubmitForm
             if (preg_match($pattern, $slug, $matches)) {
                 $baseNames[$matches[1]]      = $matches[1];
             } else {
-                // Splitted element with just normal multiple values slug[index]
-                $elementIds[$splitElementId] = $splitElementId;
+                // Splitted block with just normal multiple values slug[index]
+                $blockIds[$splitBlockId] = $splitBlockId;
             }
         }
 
         if (empty($baseNames)) {
-            return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
+            return apply_filters('tsjippy-forms-split-block-ids', $blockIds, $this);
         }
 
         /**
-         * Loop over all elements to find splitted ones
+         * Loop over all blocks to find splitted ones
          */
-        foreach ($this->formElements as $element) {
-            // Check if this is an indexed splitted element basename[index][keyname]
-            if (str_contains($element->slug, '[')) {
+        foreach ($this->formBlocks as $block) {
+            // Check if this is an indexed splitted block basename[index][keyname]
+            if (str_contains($block->slug, '[')) {
                 // loop over all base names that data should be splitted on
                 foreach ($baseNames as $baseName) {
-                    // Check if this name belongs to this splitted element
+                    // Check if this name belongs to this splitted block
                     $pattern        = "/$baseName\[[0-9]+\]\[([^\]]+)\]/i";
 
-                    if (preg_match($pattern, $element->slug, $matches)) {
+                    if (preg_match($pattern, $block->slug, $matches)) {
                         $name            = $matches[1];
 
-                        // store found element ids by basename
-                        if (empty($elementIds[$baseName])) {
-                            $elementIds[$baseName]    = [];
+                        // store found block ids by basename
+                        if (empty($blockIds[$baseName])) {
+                            $blockIds[$baseName]    = [];
                         }
 
-                        if (empty($elementIds[$baseName][$name])) {
-                            $elementIds[$baseName][$name]    = [];
+                        if (empty($blockIds[$baseName][$name])) {
+                            $blockIds[$baseName][$name]    = [];
                         }
 
-                        // Add the current element id
-                        $elementIds[$baseName][$name][$element->slug]    = $element->blockId;
+                        // Add the current block id
+                        $blockIds[$baseName][$name][$block->slug]    = $block->blockId;
                         break;
                     }
                 }
             }
         }
 
-        return apply_filters('tsjippy-forms-split-element-ids', $elementIds, $this);
+        return apply_filters('tsjippy-forms-split-block-ids', $blockIds, $this);
     }
 
     /**
@@ -264,7 +264,7 @@ class DisplayFormResults extends SubmitForm
             $users  = get_users();
         }
 
-        $needed = str_replace('[]', '', $this->elementMapping['slug']);
+        $needed = str_replace('[]', '', $this->blockMapping['slug']);
 
         foreach ($users as $user) {
             $submission     = new \stdClass();
@@ -335,7 +335,7 @@ class DisplayFormResults extends SubmitForm
         }
 
         // sort colomn
-        if (!empty($this->sortElementIds)) {
+        if (!empty($this->sortBlockIds)) {
             if ($this->sortDirection != 'ASC') {
                 $this->sortDirection    = 'DESC';
             }
@@ -372,24 +372,24 @@ class DisplayFormResults extends SubmitForm
             // phpcs:ignore
             $filterValue    = TSJIPPY\sanitize($_POST[$filterKey]);
 
-            $filterElement  = $this->getElementById($filter['element']);
+            $filterBlock  = $this->getBlockById($filter['block']);
 
-            // Invalid filter element id
-            if (!$filterElement) {
+            // Invalid filter block id
+            if (!$filterBlock) {
                 continue;
             }
 
             /**
-             * Check if we are filtering on a indexed element
+             * Check if we are filtering on a indexed block
              */
-            $exploded            = explode('[', $filterElement->slug);
+            $exploded            = explode('[', $filterBlock->slug);
             if (count($exploded) > 1) {
                 $filterIndex        = str_replace(']', '', end($exploded));
 
                 $name               = "{$exploded[0]}[%][$filterIndex]";
-                $filterElementIds   = '';
+                $filterBlockIds   = '';
             } else {
-                $filterElementIds    = [$filter['element']];
+                $filterBlockIds    = [$filter['block']];
             }
 
             // Add the filter query
@@ -401,10 +401,10 @@ class DisplayFormResults extends SubmitForm
                 $filterValue    = "%$filterValue%";
             }
 
-            $placeholders   = implode(', ', array_fill(0, count($filterElementIds), '%d'));
+            $placeholders   = implode(', ', array_fill(0, count($filterBlockIds), '%d'));
 
-            $where[]    = "(V.element_id NOT IN ($placeholders) or LOWER(V.value) {$filter['type']} %s)";
-            $values[]    = array_merge($values, $filterElementIds);
+            $where[]    = "(V.block_id NOT IN ($placeholders) or LOWER(V.value) {$filter['type']} %s)";
+            $values[]    = array_merge($values, $filterBlockIds);
             $values[]    = strtolower($filterValue);
         }
     }
@@ -420,8 +420,8 @@ class DisplayFormResults extends SubmitForm
      */
     private function splittedValuesQueries(&$finalWhere, &$innerJoinString)
     {
-        $splitElements        = $this->formData->split_elements;
-        if (empty($splitElements)) {
+        $splitBlocks        = $this->formData->split_blocks;
+        if (empty($splitBlocks)) {
             return;
         }
 
@@ -431,33 +431,33 @@ class DisplayFormResults extends SubmitForm
         $splitColumns    = [];
 
         /**
-         * Process split elements with the form base[index][key]
+         * Process split blocks with the form base[index][key]
          */
-        foreach ($this->findSplitElementIds() as $base) {
+        foreach ($this->findSplitBlockIds() as $base) {
             if(!is_array($base)){
                 TSJIPPY\printArray([
-                    $this->findSplitElementIds(),
+                    $this->findSplitBlockIds(),
                     $base
                 ]);
             }
             foreach ($base as $columnName => $ids) {
-                // Make the array of elements that share the same name a comma separated string for the query
+                // Make the array of blocks that share the same name a comma separated string for the query
                 $implodedIds    = implode(", ", array_values($ids));
 
                 // Store the other ids as well
-                $splitElements    = array_merge($splitElements, array_values($ids));
+                $splitBlocks    = array_merge($splitBlocks, array_values($ids));
 
                 // Add the column to the query
-                $splitColumns[] = "MAX(CASE WHEN element_id IN ($implodedIds) THEN value END) AS '$columnName'";
+                $splitColumns[] = "MAX(CASE WHEN block_id IN ($implodedIds) THEN value END) AS '$columnName'";
 
                 // Make sure we sort on the $columnName if needed
-                foreach ($this->sortElementIds as $elementId => $value) {
-                    if (isset($ids[$elementId])) {
-                        unset($this->sortElementIds[$elementId]);
-                        $this->sortElementIds[$columnName] = $columnName;
+                foreach ($this->sortBlockIds as $blockId => $value) {
+                    if (isset($ids[$blockId])) {
+                        unset($this->sortBlockIds[$blockId]);
+                        $this->sortBlockIds[$columnName] = $columnName;
                     }
                 }
-                unset($elementId);
+                unset($blockId);
             }
         }
 
@@ -465,14 +465,14 @@ class DisplayFormResults extends SubmitForm
          * Process simple base[index] splits
          */
         if (empty($splitColumns)) {
-            foreach ($splitElements as $splitElement) {
+            foreach ($splitBlocks as $splitBlock) {
                 // Add the column to the query
-                $splitColumns[]         = "MAX(CASE WHEN element_id = $splitElement THEN value END) AS '$splitElement'";
+                $splitColumns[]         = "MAX(CASE WHEN block_id = $splitBlock THEN value END) AS '$splitBlock'";
             }
         }
 
         $ect .= implode(",\n\t\t", $splitColumns);
-        $ect .= ",\n\t\tMAX(CASE WHEN element_id = '-6' THEN value END) AS 'sub_archived'";
+        $ect .= ",\n\t\tMAX(CASE WHEN block_id = '-6' THEN value END) AS 'sub_archived'";
         $ect .= "\n\tFROM Raw";
         $ect .= "\n\tWHERE sub_id IS NOT NULL";
         $ect .= "\n\tGROUP BY id, sub_id";
@@ -499,7 +499,7 @@ class DisplayFormResults extends SubmitForm
         /**
          * Build the Common Table Expressions (CTE) needed to make the pivot query
          */
-        $splitElements      = $this->formData->split_elements;
+        $splitBlocks      = $this->formData->split_blocks;
         $existingColumns    = ['id', 'block_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
 
         $columns            = $existingColumns;
@@ -538,9 +538,9 @@ class DisplayFormResults extends SubmitForm
         $rawWhere    = implode(' AND ', $rawWhere);
 
         // ECT for all the values
-        $ect                 = "-- Table with raw data on several rows, where only the element_id and value are unique\n"
+        $ect                 = "-- Table with raw data on several rows, where only the block_id and value are unique\n"
             . "WITH Raw AS (\n\t"
-            . "SELECT S.$columnsString, V.sub_id, V.element_id, V.value\n\tFROM %i as S\n\t"
+            . "SELECT S.$columnsString, V.sub_id, V.block_id, V.value\n\tFROM %i as S\n\t"
             . "INNER JOIN %i as V ON S.id = V.submission_id \n\t"
             . "WHERE $rawWhere\n"
             . ")";
@@ -557,13 +557,13 @@ class DisplayFormResults extends SubmitForm
         $ect               .= ", \n-- Table where the rows are transposed to columns\nEmptySubIdValues AS (\n\tSELECT \n\t\t$columnsString";
         $toColumn            = [];
 
-        foreach ($this->formElements as $element) {
-            // Negative element ids are from the submission table
-            if ($element->blockId < 0 || in_array($element->blockId, $splitElements) || isset($this->nonInputs[$element->type])) {
+        foreach ($this->formBlocks as $block) {
+            // Negative block ids are from the submission table
+            if ($block->blockId < 0 || in_array($block->blockId, $splitBlocks) || isset($this->nonInputs[$block->type])) {
                 continue;
             }
 
-            $toColumn[]         = "MAX(CASE WHEN element_id = '$element->blockId' THEN value END) AS '$element->blockId'";
+            $toColumn[]         = "MAX(CASE WHEN block_id = '$block->blockId' THEN value END) AS '$block->blockId'";
         }
 
         if (!empty($toColumn)) {
@@ -626,7 +626,7 @@ class DisplayFormResults extends SubmitForm
 
         // Check if a form is loaded
         if (empty($this->formData->blockId) && !empty($submissionId)) {
-            // Load the form before loading the submission, because we need the form elements to load the submission data
+            // Load the form before loading the submission, because we need the form blocks to load the submission data
             $this->getFormBySubmissionId($submissionId);
         }
 
@@ -743,19 +743,19 @@ class DisplayFormResults extends SubmitForm
         /**
          * Sort column
          */
-        if (!empty($this->sortElementIds)) {
+        if (!empty($this->sortBlockIds)) {
             if ($this->sortDirection != 'ASC') {
                 $this->sortDirection    = 'DESC';
             }
 
             $query        .= " \nORDER BY ";
             $sortables    = [];
-            foreach ($this->sortElementIds as $elementId => $value) {
-                if ($elementId < 0) {
-                    $elementId     = $this->extraElements[$elementId]['slug'];
+            foreach ($this->sortBlockIds as $blockId => $value) {
+                if ($blockId < 0) {
+                    $blockId     = $this->extraBlocks[$blockId]['slug'];
                 }
 
-                $sortables[] = "`$elementId` $this->sortDirection";
+                $sortables[] = "`$blockId` $this->sortDirection";
             }
 
             $query    .= implode(', ', $sortables);
@@ -784,9 +784,9 @@ class DisplayFormResults extends SubmitForm
          * Unserialize values
          */
         foreach ($submissions as &$submission) {
-            foreach ($submission as $elementId => &$value) {
-                if (!empty($nonSplittedValues[$submission->id]) && is_numeric($elementId)) {
-                    $value    = $nonSplittedValues[$submission->id][$elementId];
+            foreach ($submission as $blockId => &$value) {
+                if (!empty($nonSplittedValues[$submission->id]) && is_numeric($blockId)) {
+                    $value    = $nonSplittedValues[$submission->id][$blockId];
                 } else {
                     $value    = maybe_unserialize($value);
                 }
@@ -825,31 +825,31 @@ class DisplayFormResults extends SubmitForm
     }
 
     /**
-     * Adds a new column setting for a new element
+     * Adds a new column setting for a new block
      *
-     * @param object    $element    the element to check if column settings exists for
-     * @param array        $elementIds    optional array of element ids that belong to this column
+     * @param object    $block    the block to check if column settings exists for
+     * @param array        $blockIds    optional array of block ids that belong to this column
      *
      * @return false|array            false if no column setting was added, array of column settings if added
      */
-    public function addColumnSetting($element, $elementIds = [])
+    public function addColumnSetting($block, $blockIds = [])
     {
-        //do not show non-input elements
-        if (isset($this->nonInputs[$element->type])) {
+        //do not show non-input blocks
+        if (isset($this->nonInputs[$block->type])) {
             return false;
         }
 
-        $this->columnSettings[$element->blockId] = [
-            'slug'                => $element->slug,
-            'name'                => empty($element->name) ? $element->slug : $element->name,
+        $this->columnSettings[$block->blockId] = [
+            'slug'                => $block->slug,
+            'name'                => empty($block->name) ? $block->slug : $block->name,
             'show'                => 1,
             'edit_right_roles'    => [],
             'view_right_roles'    => []
         ];
 
-        // Only add element ids if available
-        if (!empty($elementIds)) {
-            $this->columnSettings[$element->blockId]['elementIds']    = $elementIds;
+        // Only add block ids if available
+        if (!empty($blockIds)) {
+            $this->columnSettings[$block->blockId]['blockIds']    = $blockIds;
         }
     }
 
@@ -883,16 +883,16 @@ class DisplayFormResults extends SubmitForm
         $this->enriched    = true;
 
         /**
-         * Get all splitted elements that share the same name and add the ids to the column settings
+         * Get all splitted blocks that share the same name and add the ids to the column settings
          */
-        $elementIds    = $this->findSplitElementIds();
+        $blockIds    = $this->findSplitBlockIds();
         $relatedIds    = [];
-        if (!empty($elementIds)) {
+        if (!empty($blockIds)) {
             // loop over all base names that data should be splitted on
-            foreach ($elementIds as $baseName => $names) {
+            foreach ($blockIds as $baseName => $names) {
                 if (is_numeric($baseName)) {
                     if (isset($this->columnSettings[$names])) {
-                        $this->columnSettings[$names]['elementIds']    = [$names];
+                        $this->columnSettings[$names]['blockIds']    = [$names];
                     }
                     continue;
                 }
@@ -907,22 +907,22 @@ class DisplayFormResults extends SubmitForm
                     $id = array_values($elIds)[0];
                     if (!isset($this->columnSettings[$id])) {
                         // Use the generic name to create the column setting
-                        $element    = $this->getElementById($id);
-                        $element->slug = strtolower(str_replace(' ', '-', $name));
-                        $element->name = ucfirst($name);
+                        $block    = $this->getBlockById($id);
+                        $block->slug = strtolower(str_replace(' ', '-', $name));
+                        $block->name = ucfirst($name);
 
-                        $this->addColumnSetting($element, $relatedIds[$id]);
+                        $this->addColumnSetting($block, $relatedIds[$id]);
                     }
 
-                    $this->columnSettings[$id]['elementIds']    = $elIds;
+                    $this->columnSettings[$id]['blockIds']    = $elIds;
                 }
             }
         }
 
-        //loop over all elements to build a new array
-        foreach ($this->formElements as $element) {
+        //loop over all blocks to build a new array
+        foreach ($this->formBlocks as $block) {
 
-            $id = $element->blockId;
+            $id = $block->blockId;
             // If it has related ids, its already added above
             if (!empty($relatedIds[$id])) {
                 continue;
@@ -940,9 +940,9 @@ class DisplayFormResults extends SubmitForm
                 }
             }
 
-            //check if the element is in the array, if not add it
+            //check if the block is in the array, if not add it
             if (!isset($this->columnSettings[$id])) {
-                $this->addColumnSetting($element, $relatedIds[$id] ?? []);
+                $this->addColumnSetting($block, $relatedIds[$id] ?? []);
             }
         }
 
@@ -978,7 +978,7 @@ class DisplayFormResults extends SubmitForm
             }
 
             if (isset($names[$setting['name']])) {
-                //remove the duplicate element: same name but different id
+                //remove the duplicate block: same name but different id
                 unset($this->columnSettings[$key]);
             }
 
@@ -986,7 +986,7 @@ class DisplayFormResults extends SubmitForm
 
             if (!$setting['show']) {
 
-                //remove the element
+                //remove the block
                 unset($this->columnSettings[$key]);
 
                 //add it again, at the end of the array
@@ -1018,12 +1018,12 @@ class DisplayFormResults extends SubmitForm
         $rowHasContents  = false;
         $iconUrl         = TSJIPPY\pathToUrl(PLUGINPATH . 'pictures/copy.png');
 
-        foreach ($this->columnSettings as $elementId => $columnSetting) {
+        foreach ($this->columnSettings as $blockId => $columnSetting) {
 
             if (
                 !is_array($columnSetting) ||
                 !$columnSetting['show'] ||
-                !is_numeric($elementId)
+                !is_numeric($blockId)
             ) {
                 continue;
             }
@@ -1075,9 +1075,9 @@ class DisplayFormResults extends SubmitForm
                 array_intersect_key($this->userRoles, $columnSetting['edit_right_roles']) ||
                 $this->tableEditPermissions
             ) {
-                $elementEditRights = true;
+                $blockEditRights = true;
             } else {
-                $elementEditRights = false;
+                $blockEditRights = false;
             }
 
             $attributes = [];
@@ -1087,23 +1087,23 @@ class DisplayFormResults extends SubmitForm
             */
             $class          = str_replace('[]', '', $columnSetting['slug']);
 
-            $elementName    = $columnSetting['name'];
+            $blockName    = $columnSetting['name'];
 
             //add field value if we are allowed to see it
             if ($value != 'X') {
                 $rowHasContents    = true;
 
                 /**
-                 * Find splitted element values
+                 * Find splitted block values
                  */
-                $columnElements = $columnSetting['elementIds'] ?? [];
-                if (in_array($elementId, $columnElements)) {
+                $columnBlocks = $columnSetting['blockIds'] ?? [];
+                if (in_array($blockId, $columnBlocks)) {
                     if (!empty($this->submission->sub_id)) {
                         $attributes["data-subid"] = $this->submission->sub_id;
                     }
 
                     // Find the splitted value
-                    foreach ($columnElements as $id) {
+                    foreach ($columnBlocks as $id) {
                         if (!empty($this->submission->{$id})) {
                             $value    = $this->submission->{$id};
                             break;
@@ -1114,10 +1114,10 @@ class DisplayFormResults extends SubmitForm
                 /**
                  * Find regular values
                  */
-                if (isset($this->submission->{$elementId})) {
-                    $value    = $this->submission->{$elementId};
-                } elseif (isset($this->submission->{$elementName})) {
-                    $value    = $this->submission->{$elementName};
+                if (isset($this->submission->{$blockId})) {
+                    $value    = $this->submission->{$blockId};
+                } elseif (isset($this->submission->{$blockName})) {
+                    $value    = $this->submission->{$blockName};
                 } elseif (isset($this->submission->{$class})) {
                     $value    = $this->submission->{$class};
                 } elseif (empty($value)) {
@@ -1133,9 +1133,9 @@ class DisplayFormResults extends SubmitForm
 
                 $value            = apply_filters('tsjippy-forms-result-table-value', $value, $columnSetting, $this->submission, $this);
 
-                $element          = $this->getElementBySlug($class);
-                if ($element) {
-                    $value        = $this->transformInputData($value, $element, $this->submission);
+                $block          = $this->getBlockBySlug($class);
+                if ($block) {
+                    $value        = $this->transformInputData($value, $block, $this->submission);
                 }
 
                 //show original email in excel
@@ -1166,7 +1166,7 @@ class DisplayFormResults extends SubmitForm
             }
 
             //Add classes to the cell
-            if ($elementName == "displayname") {
+            if ($blockName == "displayname") {
                 $class .= ' sticky';
             }
 
@@ -1178,8 +1178,8 @@ class DisplayFormResults extends SubmitForm
                 $class    .= ' copy-wrapper';
             }
 
-            //if the user has one of the roles defined for this element
-            if ($elementEditRights && $elementName != 'id') {
+            //if the user has one of the roles defined for this block
+            if ($blockEditRights && $blockName != 'id') {
                 $class    .= ' edit forms-table';
             }
 
@@ -1194,9 +1194,9 @@ class DisplayFormResults extends SubmitForm
                 $attributes['style']    = "max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;";
             }
 
-            // for action buttons there is no element id
-            if ($elementId) {
-                $attributes['data-element-id'] = $elementId;
+            // for action buttons there is no block id
+            if ($blockId) {
+                $attributes['data-block-id'] = $blockId;
             }
 
             /**
@@ -1379,11 +1379,11 @@ class DisplayFormResults extends SubmitForm
         );
 
         foreach ($results as $setting) {
-            // do not add if the element does not exist anymore
+            // do not add if the block does not exist anymore
             if (
-                is_numeric($setting->element_id) &&
-                $setting->element_id    > -1 &&
-                !isset($this->elementMapping['id'][$setting->element_id])
+                is_numeric($setting->block_id) &&
+                $setting->block_id    > -1 &&
+                !isset($this->blockMapping['id'][$setting->block_id])
             ) {
                 continue;
             }
@@ -1401,7 +1401,7 @@ class DisplayFormResults extends SubmitForm
                 $setting->edit_right_roles    = [];
             }
 
-            $this->columnSettings[$setting->element_id] = (array)$setting;
+            $this->columnSettings[$setting->block_id] = (array)$setting;
         }
 
         return true;
@@ -1439,7 +1439,7 @@ class DisplayFormResults extends SubmitForm
                     </thead>
                     <tbody>
                         <?php
-                        foreach ($this->columnSettings as $elementIndex => $columnSetting) {
+                        foreach ($this->columnSettings as $blockIndex => $columnSetting) {
                             if (!isset($columnSetting['slug'])) {
                                 continue;
                             }
@@ -1458,9 +1458,9 @@ class DisplayFormResults extends SubmitForm
                             }
 
                         ?>
-                            <tr class="column-setting-wrapper" data-element-id="<?php echo esc_attr($elementIndex); ?>">
-                                <input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($elementIndex); ?>][column-id]" value="<?php echo esc_attr($columnSetting['id'] ?? -9); ?>">
-                                <input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($elementIndex); ?>][slug]" value="<?php echo esc_attr($columnSetting['slug'] ?? ''); ?>">
+                            <tr class="column-setting-wrapper" data-block-id="<?php echo esc_attr($blockIndex); ?>">
+                                <input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($blockIndex); ?>][column-id]" value="<?php echo esc_attr($columnSetting['id'] ?? -9); ?>">
+                                <input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($blockIndex); ?>][slug]" value="<?php echo esc_attr($columnSetting['slug'] ?? ''); ?>">
                                 <td>
                                     <span class="movecontrol formfield-button" aria-hidden="true">:::</span>
                                 </td>
@@ -1470,20 +1470,20 @@ class DisplayFormResults extends SubmitForm
                                     </span>
                                 </td>
                                 <td>
-                                    <input type="text" class="column-settings" name="column-settings[<?php echo esc_attr($elementIndex); ?>][nice-name]" value="<?php echo esc_attr($name); ?>" style="margin-right:0px;">
+                                    <input type="text" class="column-settings" name="column-settings[<?php echo esc_attr($blockIndex); ?>][nice-name]" value="<?php echo esc_attr($name); ?>" style="margin-right:0px;">
                                 </td>
                                 <td>
-                                    <input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($elementIndex); ?>][show]" value="<?php echo esc_attr($columnSetting['show']); ?>">
+                                    <input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($blockIndex); ?>][show]" value="<?php echo esc_attr($columnSetting['show']); ?>">
                                     <span class="visibility-icon">
                                         <img class='visibility-icon $visibility' src=' <?php echo esc_url(TSJIPPY\PICTURESURL .  "/$visibility.png"); ?>' width='20px' loading='lazy' style='min-width:20px;'>
                                     </span>
                                 </td>
                                 <?php
-                                //only add view permission for numeric elements others are buttons
-                                if (is_numeric($elementIndex)) {
+                                //only add view permission for numeric blocks others are buttons
+                                if (is_numeric($blockIndex)) {
                                 ?>
                                     <td style='max-width:200px;text-wrap: auto; text-align: left;'>
-                                        <select class='column-settings inline' name='column-settings[<?php echo esc_attr($elementIndex); ?>][view-right-roles][]' multiple='multiple' style="margin-right:0px;">
+                                        <select class='column-settings inline' name='column-settings[<?php echo esc_attr($blockIndex); ?>][view-right-roles][]' multiple='multiple' style="margin-right:0px;">
                                             <?php
                                             foreach ($viewRoles as $key => $roleName) {
                                             ?>
@@ -1503,7 +1503,7 @@ class DisplayFormResults extends SubmitForm
                                 }
                                 ?>
                                 <td style='max-width:200px;text-wrap: auto; text-align: left;'>
-                                    <select class='column-settings inline' name='column-settings[<?php echo esc_attr($elementIndex); ?>][edit-right-roles][]' multiple='multiple' style="margin-right:0px;">
+                                    <select class='column-settings inline' name='column-settings[<?php echo esc_attr($blockIndex); ?>][edit-right-roles][]' multiple='multiple' style="margin-right:0px;">
                                         <?php
                                         foreach ($editRoles as $key => $roleName) {
                                         ?>
@@ -1516,10 +1516,10 @@ class DisplayFormResults extends SubmitForm
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="number" class="column-settings" name="column-settings[<?php echo esc_attr($elementIndex); ?>][width]" value="<?php echo esc_attr($width); ?>" placeholder="200" min="100" style="max-width: 80px; margin-right:0px;">px
+                                    <input type="number" class="column-settings" name="column-settings[<?php echo esc_attr($blockIndex); ?>][width]" value="<?php echo esc_attr($width); ?>" placeholder="200" min="100" style="max-width: 80px; margin-right:0px;">px
                                 </td>
                                 <td>
-                                    <input type="checkbox" class="column-settings" name="column-settings[<?php echo esc_attr($elementIndex); ?>][copy]" value="1" <?php if (isset($columnSetting['copy'])) echo 'checked'; ?> style="max-width: 40px; margin-right:0px;">
+                                    <input type="checkbox" class="column-settings" name="column-settings[<?php echo esc_attr($blockIndex); ?>][copy]" value="1" <?php if (isset($columnSetting['copy'])) echo 'checked'; ?> style="max-width: 40px; margin-right:0px;">
                                 </td>
                             </tr>
                         <?php
@@ -1637,7 +1637,7 @@ class DisplayFormResults extends SubmitForm
                         ?>
                             <tr class='clone-div' data-div-id='<?php echo esc_attr($index); ?>'>
                                 <td>
-                                    <select name='table-settings[filter][<?php echo esc_attr($index); ?>][element]' class='inline'>
+                                    <select name='table-settings[filter][<?php echo esc_attr($index); ?>][block]' class='inline'>
                                         <?php
                                         foreach ($this->columnSettings as $key => $columnSetting) {
 
@@ -1651,7 +1651,7 @@ class DisplayFormResults extends SubmitForm
                                         ?>
                                             <option
                                                 value='<?php echo esc_attr($key); ?>'
-                                                <?php if ($this->tableSettings->filter[$index]['element'] == $key) echo 'selected="selected"'; ?>>
+                                                <?php if ($this->tableSettings->filter[$index]['block'] == $key) echo 'selected="selected"'; ?>>
                                                 <?php echo esc_html($name); ?>
                                             </option>
                                         <?php
@@ -1782,19 +1782,19 @@ class DisplayFormResults extends SubmitForm
                     <div class='permission-wrapper hidden'>
                         <?php
                         // Splitted fields
-                        $foundElements = [];
-                        foreach ($this->formElements as $key => $element) {
+                        $foundBlocks = [];
+                        foreach ($this->formBlocks as $key => $block) {
                             $pattern = "/([^\[]+)\[[0-9]*\]/i";
 
                             if (
-                                preg_match($pattern, $element->slug, $matches)    &&   // preg match was succesfull
-                                !isset($foundElements[$matches[1]])         // the match is not yet in the found elements
+                                preg_match($pattern, $block->slug, $matches)    &&   // preg match was succesfull
+                                !isset($foundBlocks[$matches[1]])         // the match is not yet in the found blocks
                             ) {
-                                $foundElements[$matches[1]] = $element->blockId;
+                                $foundBlocks[$matches[1]] = $block->blockId;
                             }
                         }
 
-                        if (!empty($foundElements)) {
+                        if (!empty($foundBlocks)) {
                             ?>
                             <div class="table-rights-wrapper">
                                 <h4>
@@ -1802,13 +1802,13 @@ class DisplayFormResults extends SubmitForm
                                 </h4>
                                 <?php
 
-                                foreach ($foundElements as $element => $id) {
-                                    $name    = ucfirst(strtolower(str_replace('_', ' ', $element)));
+                                foreach ($foundBlocks as $block => $id) {
+                                    $name    = ucfirst(strtolower(str_replace('_', ' ', $block)));
 
                                     //Check which option is the selected one
                                     ?>
                                     <label>
-                                        <input type='checkbox' name='form-settings[split][<?php echo esc_attr($id); ?>]' value='1' <?php if (in_array($id, $this->formData->split_elements)) echo 'checked'; ?>>
+                                        <input type='checkbox' name='form-settings[split][<?php echo esc_attr($id); ?>]' value='1' <?php if (in_array($id, $this->formData->split_blocks)) echo 'checked'; ?>>
                                         <?php echo esc_html($name); ?>
                                     </label>
                                     <br>
@@ -2104,7 +2104,7 @@ class DisplayFormResults extends SubmitForm
     /**
      * Renders the table filter html
      * 
-     * @param    string        $parent        The parent element to add the filter form to
+     * @param    string        $parent        The parent block to add the filter form to
      *
      * @return string    The html
      */
@@ -2120,11 +2120,11 @@ class DisplayFormResults extends SubmitForm
 
         $hasFilters    = false;
         foreach ($this->tableSettings->filter as $filter) {
-            $filterElement = $this->getElementById($filter['element']);
+            $filterBlock = $this->getBlockById($filter['block']);
             $filterValue   = false;
             $filterKey     = strtolower($filter['name']);
 
-            if (!$filterElement || empty($filterKey)) {
+            if (!$filterBlock || empty($filterKey)) {
                 continue;
             }
 
@@ -2139,10 +2139,10 @@ class DisplayFormResults extends SubmitForm
             $wrapperSpan    = addElement('span', $filterWrapper, ['class' => 'filter-option']);
             addElement('h4', $wrapperSpan, [], ucfirst($filterKey));
 
-            $elementNode    = '';
+            $blockNode    = '';
 
-            // make sure the name is not the element name but the filtername
-            //$elementNode->setAttribute('name', $filterKey);
+            // make sure the name is not the block name but the filtername
+            //$blockNode->setAttribute('name', $filterKey);
         }
 
         if (!$hasFilters) {
@@ -2155,7 +2155,7 @@ class DisplayFormResults extends SubmitForm
     /**
      * Renders the table buttons html
      * 
-     * @param \DOMElement        $parent        The parent element to add the buttons to
+     * @param \DOMBlock        $parent        The parent block to add the buttons to
      *
      * @return string    The html
      */
@@ -2232,7 +2232,7 @@ class DisplayFormResults extends SubmitForm
      *
      * @param    string       $type          Either 'own', 'others' or 'all'
      * @param    array        $submissions   Array of Submissions
-     * @param    \DOMElement  $parent        The parent element to add the table to
+     * @param    \DOMBlock  $parent        The parent block to add the table to
      *
      * @return    bool                       If there are submissions or not
      */
@@ -2278,7 +2278,7 @@ class DisplayFormResults extends SubmitForm
     /**
      * Render the navigation menu in case of multiple pages of results
      * 
-     * @param    \DOMElement  $parent   The parent element to add the navigation menu to
+     * @param    \DOMBlock  $parent   The parent block to add the navigation menu to
      */
     public function navigationMenu($parent)
     {
@@ -2358,9 +2358,9 @@ class DisplayFormResults extends SubmitForm
      * @param    string      $type     Either 'own', 'others' or 'all'
      * @param    bool        $force    Whether to retrieve submissions even if already done
      * @param    bool        $all      Retrieve all bookings or paged, default false for paged
-     * @param    \DOMElement  $parent   The DOM Element to apped to default empty for new dom document creation
+     * @param    \DOMBlock  $parent   The DOM Block to apped to default empty for new dom document creation
      *
-     * @return   \DOMElement|false     The created element
+     * @return   \DOMBlock|false     The created block
      */
     public function renderTable($type, $force = false, $all = false, $parent = '')
     {
@@ -2385,7 +2385,7 @@ class DisplayFormResults extends SubmitForm
          * @param    bool           $shouldShow Whether or not to show the table, default true
          * @param    object         $object     The current instance of the form table class, can be used to get more information about the form and the user to decide whether or not to show the table
          * @param    string         $type       The type of results that would be shown, either 'own', 'others' or 'all'
-         * @param    \DOMElement    $parent     The parent node to append to
+         * @param    \DOMBlock    $parent     The parent node to append to
          */
         $shouldShow    = apply_filters('tsjippy-forms-table-should-show', true, $this, $type, $parent);
 
@@ -2416,23 +2416,23 @@ class DisplayFormResults extends SubmitForm
             if (isset($_REQUEST['sortcol'])) {
                 // phpcs:ignore
                 $sortCol    = TSJIPPY\sanitize($_REQUEST['sortcol']);
-                $this->sortElementIds    = [$sortCol => $sortCol];
+                $this->sortBlockIds    = [$sortCol => $sortCol];
             }
 
-            // Default sort elements
+            // Default sort blocks
             else {
-                $defaultSortElement     = $this->tableSettings->default_sort;
-                $sortElement            = $this->getElementById($defaultSortElement);
+                $defaultSortBlock     = $this->tableSettings->default_sort;
+                $sortBlock            = $this->getBlockById($defaultSortBlock);
 
-                // check if this is an sub id, use all elements in that case
-                if ($sortElement) {
-                    $exploded            = explode('[', $sortElement->slug);
+                // check if this is an sub id, use all blocks in that case
+                if ($sortBlock) {
+                    $exploded            = explode('[', $sortBlock->slug);
 
                     if (count($exploded) > 1) {
                         $sort = str_replace(']', '', end($exploded));
                         $name = "{$exploded[0]}[%][$sort]";
                     } else {
-                        $this->sortElementIds    = [$defaultSortElement =>  $defaultSortElement];
+                        $this->sortBlockIds    = [$defaultSortBlock =>  $defaultSortBlock];
                     }
                 }
             }
@@ -2500,7 +2500,7 @@ class DisplayFormResults extends SubmitForm
     /**
      * Prints the table footer
      *
-     * @param    \DOMElement    $parent    The parent node to append to
+     * @param    \DOMBlock    $parent    The parent node to append to
      */
     private function printTableFooter($parent)
     {
@@ -2525,7 +2525,7 @@ class DisplayFormResults extends SubmitForm
         /**
          * Runs within the formwrapper div of the results table
          * 
-         * @param   \DOMElement $parent The parent node
+         * @param   \DOMBlock $parent The parent node
          * @param   object      $object The DisplayFormResults instance
          */
         do_action('tsjippy-forms-results-table-footer', $formWrapper, $this);
@@ -2568,9 +2568,9 @@ class DisplayFormResults extends SubmitForm
         }
 
         /**
-         * Allows to change the DOMElements
+         * Allows to change the DOMBlocks
          * 
-         * @param   \DOMElement  $formTableWrapper   The formtable node
+         * @param   \DOMBlock  $formTableWrapper   The formtable node
          * @param   object      $object             The DisplayFormResults instance
          */
         do_action('tsjippy-forms-results-html', $formTableWrapper, $this);
@@ -2582,7 +2582,7 @@ class DisplayFormResults extends SubmitForm
      * Prints the results table head
      *
      * @param    string        $type        Either 'own', 'others' or 'all'
-     * @param    \DOMElement   $table       The table node to add the head to
+     * @param    \DOMBlock   $table       The table node to add the head to
      */
     private function resultTableHead($type, $table)
     {
@@ -2591,10 +2591,10 @@ class DisplayFormResults extends SubmitForm
         $tr       = addElement('tr', $thead);
 
         // Loop over the column settings
-        foreach ($this->columnSettings as $elementId => $columnSetting) {
+        foreach ($this->columnSettings as $blockId => $columnSetting) {
 
             if (
-                !is_numeric($elementId)                    ||
+                !is_numeric($blockId)                    ||
                 !$columnSetting['show']                    ||                          //hidden column
                 (
                     !$this->ownData                        ||                          //The table does not contain data of our own
@@ -2613,17 +2613,17 @@ class DisplayFormResults extends SubmitForm
              * Build the class string
              */
             if (
-                isset($this->sortElementIds[$columnSetting['slug']]) ||
-                array_intersect($columnSetting['elementIds'] ?? [], $this->sortElementIds)
+                isset($this->sortBlockIds[$columnSetting['slug']]) ||
+                array_intersect($columnSetting['blockIds'] ?? [], $this->sortBlockIds)
             ) {
                 $class    = strtolower($this->sortDirection) . ' defaultsort';
-            } elseif ($this->tableSettings->default_sort == $elementId) {
+            } elseif ($this->tableSettings->default_sort == $blockId) {
                 $class    = "defaultsort";
             } else {
                 $class    = "";
             }
 
-            if (isset($this->sortElementIds[$columnSetting['element_id'] ?? ''])) {
+            if (isset($this->sortBlockIds[$columnSetting['block_id'] ?? ''])) {
                 $class    = strtolower($this->sortDirection) . ' defaultsort';
             }
 
@@ -2642,7 +2642,7 @@ class DisplayFormResults extends SubmitForm
                 $attributes['style']    = "max-width:{$columnSetting['width']}px;width:{$columnSetting['width']}px;min-width:{$columnSetting['width']}px;text-wrap: balance;";
             }
 
-            // add element using attribute array
+            // add block using attribute array
             $th = addElement(
                 'th',
                 $tr,

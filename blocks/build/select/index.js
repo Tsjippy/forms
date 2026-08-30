@@ -92,16 +92,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ UserMetaRequiredControls)
 /* harmony export */ });
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
-/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
-/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
+/* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__);
+
 
 
 
@@ -112,9 +115,26 @@ function UserMetaRequiredControls({
   attributes,
   setAttributes
 }) {
-  const [metaKeys, setMetaKeys] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)([]);
-  const [loadingMetaKeys, setLoadingMetaKeys] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
-  const userMetaEnabled = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_1__.useSelect)(select => {
+  const [metaKeys, setMetaKeys] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
+  const [loadingMetaKeys, setLoadingMetaKeys] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(true);
+  const [availableRoles, setAvailableRoles] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
+  const [loadingRoles, setLoadingRoles] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(true);
+
+  /* Load available roles from the server for the inspector panel. */
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
+    setLoadingRoles(true);
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_3___default()({
+      path: `${tsjippy.restApiPrefix}/forms/get_roles`,
+      method: 'POST'
+    }).then(res => {
+      setAvailableRoles(Array.isArray(res) ? res : []);
+    }).catch(() => {
+      setAvailableRoles([]);
+    }).finally(() => {
+      setLoadingRoles(false);
+    });
+  }, []);
+  const userMetaEnabled = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => {
     if (!attributes.required) {
       return false;
     }
@@ -122,9 +142,9 @@ function UserMetaRequiredControls({
     const parentId = editor.getBlockParentsByBlockName(clientId, 'tsjippy-forms/formbuilder')?.[0];
     return editor.getBlock(parentId)?.attributes?.user_meta === true;
   }, [clientId, attributes.required]);
-  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
     setLoadingMetaKeys(true);
-    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_2___default()({
+    _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_3___default()({
       path: `${tsjippy.restApiPrefix}/forms/get_user_meta_keys`,
       method: 'POST'
     }).then(keys => {
@@ -180,99 +200,154 @@ function UserMetaRequiredControls({
       }]
     });
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.ToggleControl, {
-      label: "Not Required For Children",
-      checked: attributes.notChild || false,
-      onChange: notChild => setAttributes({
-        notChild
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.ToggleControl, {
-      label: "Remind By Email",
-      checked: attributes.remindByEmail || false,
-      onChange: remindByEmail => setAttributes({
-        remindByEmail
-      })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
-      label: "Condition Matching",
-      value: attributes.conditionMode || 'and',
-      options: [{
-        label: 'All Conditions (AND)',
-        value: 'and'
-      }, {
-        label: 'Any Condition (OR)',
-        value: 'or'
-      }],
-      onChange: conditionMode => setAttributes({
-        conditionMode
-      })
-    }), conditions.map((condition, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-      style: {
-        border: '1px solid #ddd',
-        padding: '12px',
-        marginBottom: '12px',
-        borderRadius: '4px'
-      },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
-        label: "User Meta Key",
-        value: condition.key || '',
-        options: [{
-          label: loadingMetaKeys ? 'Loading user meta keys...' : 'Select a user meta key',
-          value: '',
-          disabled: true
-        }, ...metaKeys],
-        disabled: loadingMetaKeys,
-        onChange: value => updateCondition(index, 'key', value)
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.SelectControl, {
-        label: "Operator",
-        value: condition.operator || 'equals',
-        options: [{
-          label: 'Equals',
-          value: 'equals'
-        }, {
-          label: 'Not Equals',
-          value: 'not_equals'
-        }, {
-          label: 'Contains',
-          value: 'contains'
-        }, {
-          label: 'Does Not Contain',
-          value: 'not_contains'
-        }, {
-          label: 'Greater Than',
-          value: 'gt'
-        }, {
-          label: 'Greater Than Or Equal',
-          value: 'gte'
-        }, {
-          label: 'Less Than',
-          value: 'lt'
-        }, {
-          label: 'Less Than Or Equal',
-          value: 'lte'
-        }, {
-          label: 'Is Empty',
-          value: 'empty'
-        }, {
-          label: 'Is Not Empty',
-          value: 'not_empty'
-        }],
-        onChange: value => updateCondition(index, 'operator', value)
-      }), !['empty', 'not_empty'].includes(condition.operator) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.TextControl, {
-        label: "Value",
-        value: condition.value || '',
-        onChange: value => updateCondition(index, 'value', value)
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Button, {
-        isDestructive: true,
-        variant: "secondary",
-        onClick: () => removeCondition(index),
-        children: "Remove Condition"
+
+  /* Add or remove a role from the stored attributes. */
+  const onRoleSelected = (checked, roleSlug) => {
+    let newRoles = [...attributes.roles];
+    if (checked) {
+      if (!newRoles.includes(roleSlug)) {
+        newRoles.push(roleSlug);
+      }
+    } else {
+      newRoles = newRoles.filter(role => role !== roleSlug);
+    }
+    setAttributes({
+      roles: newRoles
+    });
+  };
+
+  /* Build role checkboxes for the inspector panel. */
+  const RoleCheckboxes = () => {
+    if (loadingRoles) {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Spinner, {})
+      });
+    }
+    if (!availableRoles.length) {
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
+        children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('No roles available.', 'tsjippy')
+      });
+    }
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h4", {
+        children: "Only Required When Roles Match"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.ToggleControl, {
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Inverse Roles Logic", "tsjippy"),
+        checked: attributes.inverseRoles || false,
+        onChange: inverseRoles => setAttributes({
+          inverseRoles
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("h4", {
+        children: [attributes.inverseRoles ? "Not" : "Only", " Required For Users With Role"]
+      }), availableRoles.map(role => {
+        const roleSlug = role.slug || role.value || role;
+        const roleLabel = role.label || role.name || roleSlug;
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.CheckboxControl, {
+          label: roleLabel,
+          checked: attributes.roles.includes(roleSlug),
+          onChange: checked => onRoleSelected(checked, roleSlug)
+        }, roleSlug);
       })]
-    }, index)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__.Button, {
-      variant: "primary",
-      onClick: addCondition,
-      children: "Add Condition"
-    })]
+    });
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
+      class: "required-options",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.ToggleControl, {
+        label: "Not Required For Children",
+        checked: attributes.notChild || false,
+        onChange: notChild => setAttributes({
+          notChild
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.ToggleControl, {
+        label: "Remind By Email",
+        checked: attributes.remindByEmail || false,
+        onChange: remindByEmail => setAttributes({
+          remindByEmail
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h4", {
+        children: "Only Required When Conditions Match"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.SelectControl, {
+        label: "Condition Matching",
+        value: attributes.conditionMode || 'and',
+        options: [{
+          label: 'All Conditions (AND)',
+          value: 'and'
+        }, {
+          label: 'Any Condition (OR)',
+          value: 'or'
+        }],
+        onChange: conditionMode => setAttributes({
+          conditionMode
+        })
+      }), conditions.map((condition, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
+        style: {
+          border: '1px solid #ddd',
+          padding: '12px',
+          marginBottom: '12px',
+          borderRadius: '4px'
+        },
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.SelectControl, {
+          label: "User Meta Key",
+          value: condition.key || '',
+          options: [{
+            label: loadingMetaKeys ? 'Loading user meta keys...' : 'Select a user meta key',
+            value: '',
+            disabled: true
+          }, ...metaKeys],
+          disabled: loadingMetaKeys,
+          onChange: value => updateCondition(index, 'key', value)
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.SelectControl, {
+          label: "Operator",
+          value: condition.operator || 'equals',
+          options: [{
+            label: 'Equals',
+            value: 'equals'
+          }, {
+            label: 'Not Equals',
+            value: 'not_equals'
+          }, {
+            label: 'Contains',
+            value: 'contains'
+          }, {
+            label: 'Does Not Contain',
+            value: 'not_contains'
+          }, {
+            label: 'Greater Than',
+            value: 'gt'
+          }, {
+            label: 'Greater Than Or Equal',
+            value: 'gte'
+          }, {
+            label: 'Less Than',
+            value: 'lt'
+          }, {
+            label: 'Less Than Or Equal',
+            value: 'lte'
+          }, {
+            label: 'Is Empty',
+            value: 'empty'
+          }, {
+            label: 'Is Not Empty',
+            value: 'not_empty'
+          }],
+          onChange: value => updateCondition(index, 'operator', value)
+        }), !['empty', 'not_empty'].includes(condition.operator) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.TextControl, {
+          label: "Value",
+          value: condition.value || '',
+          onChange: value => updateCondition(index, 'value', value)
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
+          isDestructive: true,
+          variant: "secondary",
+          onClick: () => removeCondition(index),
+          children: "Remove Condition"
+        })]
+      }, index)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Button, {
+        variant: "primary",
+        onClick: addCondition,
+        children: "Add Condition"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(RoleCheckboxes, {})]
+    })
   });
 }
 

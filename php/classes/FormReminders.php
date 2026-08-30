@@ -4,6 +4,8 @@ namespace TSJIPPY\FORMS;
 
 use TSJIPPY;
 
+use function PHPSTORM_META\type;
+
 if (! defined('ABSPATH')) {
     exit;
 }
@@ -12,7 +14,7 @@ class FormReminders extends Forms
 {
     public array|bool   $reminders;
     public string       $html;
-    public array|bool   $mandatoryElements;
+    public array|bool   $requiredMetaBlocks;
     public array|bool   $formReminders;
 
     /**
@@ -25,28 +27,38 @@ class FormReminders extends Forms
         parent::__construct();
 
         $this->formReminders     = [];
-        $this->mandatoryElements = [];
+        $this->requiredMetaBlocks = [];
         $this->html              = '';
 
         $this->getFormsWithReminders();
         
         // Get all blocks which should be submitted
-        $this->getMandatoryElements();
+        $this->getRequiredMetaBlocks();
 
         $this->reminders  = [];
     }
 
     /**
-     * Gets all blocks with reminder settings from the db
+     * Gets all required blocks from all meta forms
      */
-    protected function getBlocksWithReminders()
+    protected function getRequiredMetaBlocks()
     {
-        return  TSJIPPY\getFromDb(
-            "get_form_block_reminders",
-            "forms",
-            "SELECT * FROM %i",
-            $this->blockRemindersTableName
-        );
+        $this->getForms('meta');
+
+        $requiredBlocks = [];
+        foreach($this->forms as $form){            
+            $postId = $form['formData']->postId;
+            foreach($form['blocks'] as $blockData){
+                if($blockData->block['attrs']['required'] ?? false){
+                    $blockData->postId  = $postId;
+                    $requiredBlocks[]   = $blockData;
+                }
+            }
+        }
+
+        $this->requiredMetaBlocks    = apply_filters("tsjippy-forms-blocks-filter", TSJIPPY\cleanUpNestedArray($requiredBlocks), $this);
+
+        return $this->requiredMetaBlocks;
     }
 
     /**
@@ -92,38 +104,6 @@ class FormReminders extends Forms
     }
 
     /**
-     * Get mandatory and recommended elements from the db
-     */
-    protected function getMandatoryElements()
-    {
-        $this->mandatoryElements    = apply_filters("tsjippy-forms-elements-filter", $this->getBlocksWithReminders(), $this);
-
-        // Sort on form
-        usort($this->mandatoryElements, function ($a, $b) {
-            return $a->post_id <=> $b->post_id; // The spaceship operator (<=>) simplifies comparisons in PHP 7+
-        });
-    }
-
-    /**
-     * Retrieves the reminder conditions for a specific block from the db
-     * 
-     * @param   int $postId
-     * @param   int $blockId
-     */
-    public function getElementReminderConditions($postId, $blockId){
-        $conditions    = TSJIPPY\getFromDb(
-            "get_element_reminder_conditions_".$blockId,
-            'forms',
-            "select * from %i where post_id = %d and block_id = %d",
-            $this->blockRemindersTableName,
-            $postId,
-            $blockId
-        );
-
-        return $conditions;   
-    }
-
-    /**
      * Gets the reminders for a given user id
      *
      * @param   int $userId    The user id to get the reminders for
@@ -133,9 +113,9 @@ class FormReminders extends Forms
     public function getUserReminders($userId)
     {
         /**
-         * Get all the elements on meta forms
+         * Get all the blocks on meta forms
          */
-        $elements   = $this->getElementReminders($userId);
+        $blocks   = $this->getRequiredBlockReminders($userId);
 
         /**
          * Get forms
@@ -163,8 +143,8 @@ class FormReminders extends Forms
         }
 
         return [
-            'elements'  => $elements,
-            'forms'     => $forms
+            'blocks'  => $blocks,
+            'forms'   => $forms
         ];
     }
 
@@ -284,7 +264,7 @@ class FormReminders extends Forms
     /**
      * Checks if a given set of conditions applies to the current user. Returns true if there is a match
      *
-     * @param    object   $conditions        The element conditions
+     * @param    object   $conditions        The block conditions
      * @param    int      $userId            The user id
      * @param    array    $submissions    The submissions to check
      *
@@ -414,31 +394,48 @@ class FormReminders extends Forms
 
     /**
      * Builds the reminders array
+     * 
+     * @param   int $userId
      *
      * @return    string                The html
      */
-    public function getElementReminders($userId)
+    public function getRequiredBlockReminders($userId)
     {
-        $elements   = [];
+        $blocksNeedingInput   = [];
 
-        // Loop over all mandatory and required elements
-        foreach ($this->mandatoryElements as $element) {
-            // Load the form data for this element to save db queries in the getElementById function
-            $this->getForm($element->post_id);
+        // Loop over all required blocks
+        foreach ($this->requiredMetaBlocks as $block) {
+            // Load the form data
+            $this->getForm($block->postId);
 
             // Get the warning conditions
-            $warningCondition = $this->getElementReminderConditions($element->post_id, $element->block_id);
+            $warningCondition = $block->block['attrs']['conditions'] ?? [];
+            $overlappingRoles = array_intersect($this->user->roles, $block->block['attrs']['roles'] ?? []);
+            $inverse          = $block->block['attrs']['inverseRoles'] ?? false;
 
-            //check if this element applies to this user
-            if (!$this->checkIfConditionsAppliesToUser($warningCondition, $userId)) {
+            //check if this block applies to this user
+            if (
+                (
+                    (
+                        !$inverse && empty($overlappingRoles)   // We have none of the roles so it does not apply to us
+                    ) ||
+                    (
+                        $inverse && !empty($overlappingRoles)   // We have one of the excludion roles so is does not apply to us
+                    )
+                ) ||
+                (
+                    !empty($warningCondition) && 
+                    !$this->checkIfConditionsAppliesToUser($warningCondition, $userId)
+                )
+            ) {
                 continue;
             }
 
-            $name       = $this->getElementById($element->block_id, 'name');
+            $name       = $block->name;
             if (str_contains($name, '[')) {
                 $value  = TSJIPPY\getMetaArrayValue($userId, $name, $value);
             } else {
-                $metaKey          = explode('[', $element->slug)[0];
+                $metaKey          = explode('[', $block->slug)[0];
                 
                 if(!str_contains($metaKey, 'tsjippy_') && !isset($this->wpMetaKeys[$metaKey])){
                     $metaKey    = 'tsjippy_' . $metaKey;
@@ -447,38 +444,41 @@ class FormReminders extends Forms
                 $value  = get_user_meta($userId, $metaKey, true);
             }
 
-            // Element has a value
+            // Block has a value
             if (!empty($value)) {
                 continue;
             }
 
-            $elements[] = $element;
+            $blocksNeedingInput[] = $block;
         }
 
-        return $elements;
+        return $blocksNeedingInput;
     }
 
     /**
      * Get the html for a specific block
      *
-     * @param   int     $blockId     The block id to get the html for
-     * @param   string  $type        The type of reminder to get the html for
-     * @param   int     $childId     The user id of the child to include in the reminder text if applicable
-     * @return  string               The html for the element reminder
+     * @param   string|object   $block       The block or block id to get the html for
+     * @param   string          $type        The type of reminder to get the html for
+     * @param   int             $childId     The user id of the child to include in the reminder text if applicable
+     * @return  string               The html for the block reminder
      *
      */
-    protected function getElementReminderHtml($blockId, $type = 'all', $childId = false)
+    protected function getBlockReminderHtml($block, $type = 'all', $childId = false)
     {
-        $element    = $this->getElementById($blockId);
-        if (!$element) {
-            TSJIPPY\printArray("Invallid reminder: blockid $blockId does not exist");
-            return '';
+        if(type($block) == 'string'){
+            $block    = $this->getBlockById($block);
+
+            if (!$block) {
+                TSJIPPY\printArray("Invallid reminder: blockid $block does not exist");
+                return '';
+            }
         }
 
         if (
-            ($type != 'all' && !$element->$type) ||                     // not the right type           
+            ($type != 'all' && !$block->$type) ||                     // not the right type           
             (
-                ($element->block['attrs']['notChild'] ?? false) &&      // this is for  achild 
+                ($block->block['attrs']['notChild'] ?? false) &&      // this is for a child 
                 $childId                                                // not required for a child
             )
         ) {
@@ -488,7 +488,7 @@ class FormReminders extends Forms
         $formUrl    = get_permalink($this->formData->postId);       
 
         //Show a nice name
-        $name       = ucfirst( $element->name);
+        $name       = ucfirst( $block->name);
 
         if (!empty($childId)) {
             $childName    = get_user($childId)->first_name;
@@ -497,17 +497,17 @@ class FormReminders extends Forms
         }
 
         /**
-         * Filters the link to an form or form element that needs to be submitted
+         * Filters the link to an form or form block that needs to be submitted
          * 
          * @param   string  $link       The hyperlink html
          * @param   object  $object     The current object
-         * @param   object  $element    The form element
+         * @param   object  $block    The form block
          * @param   string  $formUrl    The url
          * @param   string  $type        The type of reminder to get the html for
          * @param   int     $childId     The user id of the child to include in the reminder text if applicable
-         * @return  string               The html for the element reminder
+         * @return  string               The html for the block reminder
          */
-        return apply_filters('tsjippy-forms-reminder-link', "<a href='$formUrl#{$element->slug}'>$name</a>", $this, $element, $formUrl, $type, $childId);
+        return apply_filters('tsjippy-forms-reminder-link', "<a href='$formUrl#{$block->slug}'>$name</a>", $this, $block, $formUrl, $type, $childId);
     }
 
     /**
@@ -552,12 +552,12 @@ class FormReminders extends Forms
 
         $reminders     = $this->getUserReminders($userId);
 
-        // HTML for individual elements on a meta form
-        if (!empty($reminders['elements'])) {
-            foreach ($reminders['elements'] as $element) {
+        // HTML for individual blocks on a meta form
+        if (!empty($reminders['blocks'])) {
+            foreach ($reminders['blocks'] as $block) {
                 // Load the form data
-                $this->getForm(post: $element->post_id, blockId: $element->block_id);
-                $result = $this->getElementReminderHtml($element->block_id, $type, $child);
+                $this->getForm(post: $block->postId, blockId: $block->blockId);
+                $result = $this->getBlockReminderHtml($block, $type, $child);
 
                 if (!empty($result)) {
                     $html   .= "<li>$result</li>";

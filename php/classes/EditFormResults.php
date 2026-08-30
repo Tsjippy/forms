@@ -31,13 +31,13 @@ class EditFormResults extends DisplayFormResults
     /**
      * Update an existing form submission
      *
-     * @param    int        $elementId    The element id of the value
+     * @param    int        $blockId    The block id of the value
      * @param    mixed    $value        The value to set
      * @param    int        $subId        The sub id in case of multiple values for the same key, default null
      *
      * @return    true|\WP_Error        The result or error on failure
      */
-    public function updateSubmission($elementId, $value, $subId = null)
+    public function updateSubmission($blockId, $value, $subId = null)
     {
         global $wpdb;
 
@@ -60,11 +60,11 @@ class EditFormResults extends DisplayFormResults
          * Filters the form results
          *
          * @param mixed            $value            The value to set
-         * @param int            $elementId        The element id of the value
+         * @param int            $blockId        The block id of the value
          * @param int            $subId            The sub id of the value
          * @param object        $object            The EditFormResults Instance
          */
-        $value                 = apply_filters('tsjippy-forms-before-updating-formdata', $value, $elementId, $subId, $this);
+        $value                 = apply_filters('tsjippy-forms-before-updating-formdata', $value, $blockId, $subId, $this);
 
         if ($value === null || is_wp_error($value)) {
             return $value;
@@ -84,10 +84,10 @@ class EditFormResults extends DisplayFormResults
             '%s'
         ];
 
-        if ($elementId == 'user_id') {
+        if ($blockId == 'user_id') {
             $data['user_id']            = $value;
             $formats[]                = '%d';
-        } elseif ($elementId == 'submitter_id') {
+        } elseif ($blockId == 'submitter_id') {
             $data['submitter_id']    = $value;
             $formats[]                = '%d';
         }
@@ -131,12 +131,12 @@ class EditFormResults extends DisplayFormResults
          * Update submission values
          */
         // Filters if we should do the update, return false for no update
-        $continue    = apply_filters('tsjippy-forms-should-update-form-data', true, $elementId, $submissionId, $subId, $value, $this);
-        if ($elementId != 'user_id' && $elementId != 'submitter_id' && $continue) {
+        $continue    = apply_filters('tsjippy-forms-should-update-form-data', true, $blockId, $submissionId, $subId, $value, $this);
+        if ($blockId != 'user_id' && $blockId != 'submitter_id' && $continue) {
             //Update the submission data
             $where    = array(
                 'submission_id'    => $submissionId,
-                'element_id'    => $elementId,
+                'block_id'    => $blockId,
             );
 
             $formats    = array(
@@ -152,7 +152,7 @@ class EditFormResults extends DisplayFormResults
             $data    = [
                 'submission_id'    => $submissionId,    // include in case we need to create instead of update
                 'sub_id'        => $subId,            // include in case we need to create instead of update
-                'element_id'    => $elementId,        // include in case we need to create instead of update
+                'block_id'    => $blockId,        // include in case we need to create instead of update
                 'value'         => $value
             ];
 
@@ -169,7 +169,7 @@ class EditFormResults extends DisplayFormResults
             }
         }
 
-        do_action('tsjippy-forms-after-updating-formdata', $value, $elementId, $subId, $this);
+        do_action('tsjippy-forms-after-updating-formdata', $value, $blockId, $subId, $this);
 
         $this->sendEmail('fieldchanged');
         $this->sendEmail('fieldschanged');
@@ -202,7 +202,7 @@ class EditFormResults extends DisplayFormResults
                 array(
                     'submission_id' => $submissionId,
                     'sub_id'        => $subId,
-                    'element_id'    => -6,
+                    'block_id'    => -6,
                     'value'         => 1
                 ),
                 array(
@@ -221,7 +221,7 @@ class EditFormResults extends DisplayFormResults
                 $this->submissionValuesTableName,
                 array(
                     'submission_id'    => $submissionId,
-                    'element_id'    => -6,
+                    'block_id'    => -6,
                     'sub_id'        => $subId
                 ),
                 [
@@ -323,13 +323,13 @@ class EditFormResults extends DisplayFormResults
         //loop over all the forms
         foreach ($this->forms as $form) {
             //check if auto archive is turned on for this form
-            if (empty($form->auto_archive_element)) {
+            if (empty($form->auto_archive_block)) {
                 continue;
             }
 
             $this->getForm($form->postId, $form->blockId);
 
-            $triggerId    = $form->auto_archive_element;
+            $triggerId    = $form->auto_archive_block;
             $triggerValue = $form->auto_archive_value;
 
             if (empty($triggerId) || empty($triggerValue)) {
@@ -366,12 +366,12 @@ class EditFormResults extends DisplayFormResults
             }
 
             // Get potential split
-            $splittedElements    = $this->findSplitElementIds();
+            $splittedBlocks    = $this->findSplitBlockIds();
 
-            // Find the name of the trigger element
-            foreach ($splittedElements as $baseName) {
-                foreach ($baseName as $name => $splitElementIds) {
-                    if (in_array( $triggerId, $splitElementIds)) {
+            // Find the name of the trigger block
+            foreach ($splittedBlocks as $baseName) {
+                foreach ($baseName as $name => $splitBlockIds) {
+                    if (in_array( $triggerId, $splitBlockIds)) {
                         $triggerId    = $name;
 
                         break 2;
@@ -412,23 +412,23 @@ class EditFormResults extends DisplayFormResults
                 continue;
             }
 
-            $elementName            = $this->getElementById($id, 'name');
-            if (!$elementName) {
+            $blockName            = $this->getBlockById($id, 'name');
+            if (!$blockName) {
                 continue;
             }
 
-            preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $elementName, $matches);
+            preg_match('/(.*?)\[[0-9]\]\[.*?\]/', $blockName, $matches);
 
             if (isset($matches[1])) {
-                $elementName    = $matches[1];
+                $blockName    = $matches[1];
             }
 
             $archivedCount    = count($this->getSubmissionValue($this->submission->id, -6, '', true));
 
             // Check id there are still non archived entries
             if (
-                isset($this->submission->{$elementName}) &&
-                count($this->submission->{$elementName}) > $archivedCount
+                isset($this->submission->{$blockName}) &&
+                count($this->submission->{$blockName}) > $archivedCount
             ) {
                 $allArchived = false;
             }
