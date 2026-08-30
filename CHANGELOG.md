@@ -9,6 +9,7 @@
 
 ### Fixed
 - reminders
+- prefill forms in block editor
 
 ### Updated
 
