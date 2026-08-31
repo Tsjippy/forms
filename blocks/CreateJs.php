@@ -71,13 +71,13 @@ function getBlockId($block){
 }
 
 /**
- * Returns the css selector for the given element based on the element type and slug. For example, if the element is a radio button with the slug "gender", the function will return "[name='gender[]']" to select all radio buttons with
- * the name "* gender[]" . If the element is a file input with the slug "resume", the function will return "[name='resume_files[]']" to select the file input. If the element is a checkbox with the slug "interests[]", the function will return "[id^='E123']" (assuming the element id is 123) to select all checkboxes with an id that starts with "E123" . The function takes into account different input types and naming conventions to generate the correct selector for each element.
+ * Returns the css selector for the given block based on the block type and slug. For example, if the block is a radio button with the slug "gender", the function will return "[name='gender[]']" to select all radio buttons with
+ * the name "* gender[]" . If the block is a file input with the slug "resume", the function will return "[name='resume_files[]']" to select the file input. If the block is a checkbox with the slug "interests[]", the function will return "[id^='E123']" (assuming the block id is 123) to select all checkboxes with an id that starts with "E123" . The function takes into account different input types and naming conventions to generate the correct selector for each block.
  *
  * @param array  $block The block for which to generate the selector
  * @param string $value Specific value in case there are multiple for the same block
  *
- * @return string The css selector for the given element
+ * @return string The css selector for the given block
  */
 function getSelector($block, $value='')
 {
@@ -178,7 +178,7 @@ function dynamicJs($conditions, $innerBlocks){
                      */
                     // Clicked and changed do not need variables
                     if(isset(['changed' => 1, 'clicked' => 1][$rule['equation']])){
-                        // Clicked or changed the element
+                        // Clicked or changed the block
                         $comparators[$conditionIndex][] = "el.dataset.blockid == '{$rule['conditional-field']}'";
                     }
                     
@@ -301,10 +301,10 @@ function dynamicJs($conditions, $innerBlocks){
         $actionStrings   = [];
 
         foreach($actions as $conditionIndex => $actionData){
-            // The element to perform the action on
+            // The block to perform the action on
             $targetQuery = "target  = form.querySelector(`[data-blockid='{$actionData['target']}']`)";
                     
-            // Show/hide/toggle the label in stead of the element
+            // Show/hide/toggle the label in stead of the block
             if(str_contains($actionData['action'], 'target.classList') && ($innerBlocks[$actionData['target']]['attrs']['labelChild'] ?? false)){
                 $targetQuery .= ".closest('label')";
             }
@@ -394,7 +394,7 @@ class <?php echo esc_attr($className);?> {
 
         FormFunctions.tidyMultiInputs();
         
-        // Loop over the elements who's value is given in the url and set the value;
+        // Loop over the blocks who's value is given in the url and set the value;
         if (typeof(urlSearchParams) == 'undefined') {
             window.urlSearchParams = new URLSearchParams(window.location.search.replaceAll('&amp;', '&'));
         }
@@ -406,10 +406,10 @@ class <?php echo esc_attr($className);?> {
         });
 
         /**
-        * Loop over the elements who have a default value and apply the logic;
+        * Loop over the blocks who have a default value and apply the logic;
         */
         this.forms.forEach (form => {Array.from(form.elements).filter(element => {
-            // Exclude elements without a name, as they are typically not submitted
+            // Exclude blocks without a name, as they are typically not submitted
             if (!element.name) {
                 return false;
             }

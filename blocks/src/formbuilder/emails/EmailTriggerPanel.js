@@ -8,7 +8,7 @@ import {
 export default function EmailTriggerPanel({
     value,
     formElements,
-    onChange,
+    onChange
 }) {
     const update = (changes) => {
         onChange({
@@ -16,6 +16,17 @@ export default function EmailTriggerPanel({
             ...changes,
         });
     };
+
+    const fieldOptions = [
+		{
+			label: 'Select field',
+			value: '',
+		},
+		...formElements.map((field) => ({
+			label: field.label,
+			value: field.id,
+		})),
+	];
 
     return (
         <PanelBody

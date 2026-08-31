@@ -63,10 +63,10 @@ function restApiInitForms()
         )
     );
 
-    // request form element
+    // request form block
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
-        '/request_form_element',
+        '/request_form_block',
         array(
             'methods'             => 'POST',
             'callback'            => __NAMESPACE__ . '\requestFormElement',
@@ -78,10 +78,10 @@ function restApiInitForms()
                         return is_numeric($formId);
                     }
                 ),
-                'element-id'        => array(
+                'block-id'        => array(
                     'required'    => true,
-                    'validate_callback' => function ($elementId) {
-                        return is_numeric($elementId);
+                    'validate_callback' => function ($blockId) {
+                        return is_numeric($blockId);
                     }
                 )
             )

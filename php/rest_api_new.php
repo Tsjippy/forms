@@ -25,7 +25,7 @@ function restApiInitFormsNew()
             'callback'            => function($wpRestRequest){
                 $forms  = new Forms();
 
-                return $forms->getFormEmailSettings((int) $wpRestRequest->get_param('blockId'));
+                return $forms->getFormEmailSettings($wpRestRequest->get_param('blockId'));
             },
             'permission_callback' => __NAMESPACE__ . '\checkPermissions',
             'args'                    => array(
@@ -187,7 +187,7 @@ function restApiInitFormsNew()
      */
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
-        '/get_element_conditions',
+        '/get_block_conditions',
         array(
             'methods'                 => 'POST',
             'callback'                => function($wpRest){
@@ -203,7 +203,7 @@ function restApiInitFormsNew()
     // Save Block Conditions
     register_rest_route(
         TSJIPPY\RESTAPIPREFIX . '/forms',
-        '/save_element_conditions',
+        '/save_block_conditions',
         array(
             'methods'                 => 'POST',
             'callback'                => function($wpRest){

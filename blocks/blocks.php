@@ -31,7 +31,7 @@ function initBlocks()
                 'autoRegister' => true,
             ),
             'icon'  => 'forms',
-            "category" => "form-elements",
+            "category" => "form-blocks",
         )
     );
 
@@ -77,7 +77,7 @@ function initBlocks()
                 'autoRegister' => true,
             ),
             'icon'  => 'table',
-            "category" => "form-elements",
+            "category" => "form-blocks",
         )
     );
 
@@ -98,7 +98,7 @@ function initBlocks()
                 'autoRegister' => true,
             ),
             'icon'  => 'ellipsis',
-            "category" => "form-elements",
+            "category" => "form-blocks",
         )
     );
 }
@@ -142,7 +142,7 @@ function formResults($atts)
 add_filter( 'block_categories_all', __NAMESPACE__.'\addFormsCategory' );
 
 /**
- * Adds the form-elements block category
+ * Adds the form-blocks block category
  * 
  * @param   array   $categories
  */
@@ -151,7 +151,7 @@ function addFormsCategory( $categories) {
         $categories,
         array(
             array(
-                'slug'  => 'form-elements', // Your unique category slug
+                'slug'  => 'form-blocks', // Your unique category slug
                 'title' => __( 'Elements for the formbuilder block', '%TEXTDOMAIN%' ), // Category display name
                 'icon'  => 'forms', // Optional Dashicon
             ),
@@ -285,7 +285,7 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
      */
     if ( 
         !empty( $block['attrs']['hidden'] ) &&  // Hidden is enabled.
-        empty( $block['attrs']['labelChild'])   // And not in a label element
+        empty( $block['attrs']['labelChild'])   // And not in a label block
     ) {
         $processor = new \WP_HTML_Tag_Processor( $blockContent );
 

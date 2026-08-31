@@ -1332,7 +1332,7 @@ class Forms
         return TSJIPPY\getFromDb(
             "form-email-settings-$blockId", 
             'forms',
-            "select * from %i where post_id=%s",
+            "select * from %i where block_id=%s",
             $this->formEmailTable,
             $blockId
         );
