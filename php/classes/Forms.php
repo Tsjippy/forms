@@ -667,7 +667,7 @@ class Forms
                          * 
                          * @param   array   $actions The form table actions
                          */
-                        $this->formData->actions   = apply_filters('tsjippy-forms-actions', $attribute);
+                        $this->formData->actions   = apply_filters('tsjippy-forms-actions', (array) $attribute);
                     }
                 }
 

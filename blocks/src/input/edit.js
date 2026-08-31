@@ -54,7 +54,7 @@ export default function Edit({
         setAttributes({
             inputAttributes: {
                 ...(attributes.inputAttributes || {}),
-                value,
+                [name]:value,
             },
         });
     };

@@ -1356,7 +1356,7 @@ class DisplayFormResults extends SubmitForm
             "SELECT * FROM %i WHERE id = %d",
             $this->shortcodeTable,
             $this->shortcodeId
-        )[0];
+        )[0] ?? new stdClass();
 
         if(empty($this->tableSettings->edit_right_roles)){
             $this->tableSettings->edit_right_roles = [
