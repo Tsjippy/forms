@@ -10,6 +10,7 @@
 ### Fixed
 - reminders
 - prefill forms in block editor
+- column settings form results
 
 ### Updated
 
