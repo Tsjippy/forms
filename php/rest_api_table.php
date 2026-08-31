@@ -84,7 +84,9 @@ function restApiInitTable()
             'methods'             => \WP_REST_Server::CREATABLE,
             'callback'            => __NAMESPACE__ . '\saveColumnSettings',
             'permission_callback' => function () {
-                $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
+                $settings          = TSJIPPY\sanitize($_POST);
+
+                $formsTable        = new DisplayFormResults($settings['shortcode-id']);
                 return $formsTable->tableEditPermissions;
             },
             'args'                => array(
@@ -109,7 +111,8 @@ function restApiInitTable()
             'methods'             => \WP_REST_Server::CREATABLE,
             'callback'            => __NAMESPACE__ . '\saveTableSettings',
             'permission_callback' => function () {
-                $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
+                $settings          = TSJIPPY\sanitize($_POST);
+                $formsTable        = new DisplayFormResults();
                 return $formsTable->tableEditPermissions;
             },
             'args'                => array(
@@ -134,7 +137,8 @@ function restApiInitTable()
             'methods'             => \WP_REST_Server::CREATABLE,
             'callback'            => __NAMESPACE__ . '\removeSubmission',
             'permission_callback' => function () {
-                $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
+                $settings          = TSJIPPY\sanitize($_POST);
+                $formsTable        = new DisplayFormResults();
                 return $formsTable->tableEditPermissions;
             },
             'args'                => array(
@@ -156,7 +160,8 @@ function restApiInitTable()
             'methods'             => \WP_REST_Server::CREATABLE,
             'callback'            => __NAMESPACE__ . '\archiveSubmission',
             'permission_callback' => function () {
-                $formsTable        = new DisplayFormResults(TSJIPPY\sanitize($_POST));
+                $settings          = TSJIPPY\sanitize($_POST);
+                $formsTable        = new DisplayFormResults();
                 return $formsTable->tableEditPermissions;
             },
             'args'                => array(
@@ -191,7 +196,7 @@ function restApiInitTable()
                         return is_numeric($submissionId);
                     }
                 ),
-                'element-id'      => array(
+                'block-id'      => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
                         return is_numeric($submissionId);
@@ -213,7 +218,7 @@ function restApiInitTable()
             'callback'            => __NAMESPACE__ . '\getInputHtml',
             'permission_callback' => '__return_true',                        // Allow public access, the function itself will check if the user has permissions to view the input or not
             'args'                => array(
-                'element-id'      => array(
+                'block-id'      => array(
                     'required'    => true,
                 ),
                 'submission-id'   => array(
@@ -253,8 +258,9 @@ function restApiInitTable()
  */
 function getPage()
 {
+    $settings    = TSJIPPY\sanitize($_POST);
     // phpcs:ignore
-    $displayFormResults = new DisplayFormResults(atts: TSJIPPY\sanitize($_POST), pageSize: TSJIPPY\sanitize($_REQUEST['pagesize'] ?? 50)); 
+    $displayFormResults = new DisplayFormResults(pageSize: TSJIPPY\sanitize($_REQUEST['pagesize'] ?? 50)); 
 
     $displayFormResults->loadShortcodeData();
 
@@ -321,21 +327,19 @@ function deleteTablePrefs(\WP_REST_Request $request)
 /**
  * Saves the column settings for a specific shortcode
  *
- * @param array|\WP_REST_Request $settings The column settings to save
- * @param string $shortcodeId The ID of the shortcode to save the settings for
+ * @param \WP_REST_Request $wpRest
+ * 
  * @return string|WP_Error A success message or a WP_Error object if an error occurred
  */
-function saveColumnSettings($settings = [], $shortcodeId = '')
+function saveColumnSettings($wpRest = [])
 {
     $forms    = new SaveFormSettings();
 
-    if ($settings instanceof \WP_REST_Request) {
-        $params   = $settings->get_params();
+    $params   = $wpRest->get_params();
 
-        $settings = $params['column-settings'];
-    }
+    $settings = $params['column-settings'];
 
-    $result = $forms->saveColumnSettings($settings, $shortcodeId);
+    $result = $forms->saveColumnSettings($settings, $params['shortcode-id']);
 
     if (is_wp_error($result)) {
         return $result;
@@ -422,7 +426,7 @@ function archiveSubmission()
 }
 
 /**
- * Retrieves the element html needed to be able to update a form result entry
+ * Retrieves the block html needed to be able to update a form result entry
  */
 function getInputHtml()
 {
@@ -438,69 +442,27 @@ function getInputHtml()
 
     $formTable->userId  = $userId;
 
-    $elementId          = (int) $_POST['element-id'];
+    $blockId          = (int) $_POST['block-id'];
 
-    $element            = $formTable->getBlockById($elementId);
+    $block            = $formTable->getBlockById($blockId);
 
-    if (!$element) {
-        return new \WP_Error('No element found', "No element found with id '$elementId'");
+    if (!$block) {
+        return new \WP_Error('No block found', "No block found with id '$blockId'");
     }
 
-    $value        = $formTable->getSubmissionValue((int) $_POST['submission-id'], $elementId, isset($_POST['subid']) ? (int) $_POST['subid'] : null);
+    $value        = $formTable->getSubmissionValue((int) $_POST['submission-id'], $blockId, isset($_POST['subid']) ? (int) $_POST['subid'] : null);
 
-    // Get element html
-    $html         = $formTable->getElementHtml($element, '', $value);
+    // Get block html
+    $html         = render_block($block);
 
     /**
-     * Check if this element needs a datalist
+     * Check if this block needs a datalist
      */
-    // Get all options
-    $options    = explode("\n", trim($element->options));
+    $listBlockId    = $block['attrs']['list'] ?? '';
 
-    //Loop over the options array
-    foreach ($options as $option) {
-        //Remove starting or ending spaces and make it lowercase
-        $option    = explode('=', trim($option));
-
-        $optionType = $option[0];
-
-        if (empty($option[1])) {
-            TSJIPPY\printArray(["Option '$optionType' has no value, skipping", $option]);
-            continue;
-        }
-        $optionValue      = str_replace('\\\\', '\\', $option[1]);
-
-        // This option is a list option
-        if ($optionType == 'list') {
-            $datalist     = $formTable->getBlockBySlug($optionValue);
-
-            if ($datalist == $element) {
-                $datalist = $formTable->getBlockBySlug($optionValue . '-list');
-                TSJIPPY\printArray("Datalist '$optionValue' cannot have the same name as the element depending on it");
-            }
-
-            // Get the html of the datalist element
-            if ($datalist) {
-                $html .= $formTable->getElementHtml($datalist, '');
-            }
-        }
-    }
-
-    // prepend html with the html of previous element that wrap this elemnt
-    $index           = $element->priority - 2;
-    $prevElement     = $formTable->formBlocks[$index];
-    while ($prevElement && $prevElement->wrap) {
-        $index--;
-        $html        = $formTable->getElementHtml($prevElement, '') . $html;
-        $prevElement = $formTable->formBlocks[$index];
-    }
-
-    // add next elements if they are wrapped in this one
-    $index           = $element->priority;
-    while ($element->wrap) {
-        $element     = $formTable->formBlocks[$index];
-        $html       .= $formTable->getElementHtml($element, '');
-        $index++;
+    if(!empty($listBlockId)){
+        $listBlock  = $formTable->getBlockById($listBlockId);
+        $html      .= render_block($listBlock);
     }
 
     return $html;
@@ -515,7 +477,7 @@ function editValue()
 
     $formTable->submissionId = (int) $_POST['submission-id'];
 
-    $elementId               = (int) $_POST['element-id'];
+    $blockId               = (int) $_POST['block-id'];
 
     $subId                   = (int) $_POST['subid'];
     if ($subId == '') {
@@ -524,7 +486,7 @@ function editValue()
 
     $newValue                = json_decode(TSJIPPY\sanitize($_POST['new-value'], 'textarea_field'));
 
-    $oldValue                = $formTable->getSubmissionValue($formTable->submissionId, $elementId, $subId);
+    $oldValue                = $formTable->getSubmissionValue($formTable->submissionId, $blockId, $subId);
 
     if ($oldValue == $newValue) {
         if (is_array($oldValue)) {
@@ -534,15 +496,15 @@ function editValue()
     }
 
     // update the submissiom
-    $result        = $formTable->updateSubmission($elementId, $newValue, $subId);
+    $result        = $formTable->updateSubmission($blockId, $newValue, $subId);
     if (is_wp_error($result)) {
         return $result;
     }
 
     //get transformed value
-    $element        = $formTable->getBlockById($elementId);
+    $block        = $formTable->getBlockById($blockId);
     $submissions    = $formTable->getSubmissions('', $formTable->submissionId);
-    $transValue     = $formTable->transformInputData($newValue, $element, $submissions[0]);
+    $transValue     = $formTable->transformInputData($newValue, $block, $submissions[0]);
 
     //send message back to js
     return [

@@ -182,7 +182,7 @@ return array(
 					
 				)
 			),
-			'split_elements' => array(
+			'split_blocks' => array(
 				'type' => 'array',
 				'default' => array(
 					

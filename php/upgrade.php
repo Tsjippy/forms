@@ -90,7 +90,7 @@ function sendBlockContent(block, postId){
         'auto_archive_element' => 'autoarchive_el',
         'auto_archive_value' => 'autoarchive_value',
         'submission_roles'   => 'submit_others_form',
-        'split_elements'     => 'split',
+        'split_blocks'       => 'split',
         'blockId'            => 'id'
     ];
 

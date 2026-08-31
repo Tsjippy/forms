@@ -562,6 +562,11 @@ function addGlobalAttributes( $args ) {
         'default' => false,
     );
 
+    $args['attributes']['formbuilderChild'] = array(
+        'type'    => 'boolean',
+        'default' => false,
+    );
+
 	return $args;
 }
 

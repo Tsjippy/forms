@@ -76,7 +76,7 @@
       "type": "array",
       "default": []
     },
-    "split_elements": {
+    "split_blocks": {
       "type": "array",
       "default": []
     },

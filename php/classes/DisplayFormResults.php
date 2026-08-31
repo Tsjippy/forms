@@ -500,11 +500,11 @@ class DisplayFormResults extends SubmitForm
          * Build the Common Table Expressions (CTE) needed to make the pivot query
          */
         $splitBlocks      = $this->formData->split_blocks;
-        $existingColumns    = ['id', 'block_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
+        $existingColumns    = ['id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
 
         $columns            = $existingColumns;
 
-        $columnsString      = implode(', S.', $columns);
+        $columnsString      = "S.block_id as form_block_id, S.".implode(', S.', $columns);
 
         $innerJoinString    = '';
 
@@ -540,7 +540,7 @@ class DisplayFormResults extends SubmitForm
         // ECT for all the values
         $ect                 = "-- Table with raw data on several rows, where only the block_id and value are unique\n"
             . "WITH Raw AS (\n\t"
-            . "SELECT S.$columnsString, V.sub_id, V.block_id, V.value\n\tFROM %i as S\n\t"
+            . "SELECT $columnsString, V.block_id, V.sub_id, V.value\n\tFROM %i as S\n\t"
             . "INNER JOIN %i as V ON S.id = V.submission_id \n\t"
             . "WHERE $rawWhere\n"
             . ")";
@@ -637,7 +637,7 @@ class DisplayFormResults extends SubmitForm
         /**
          * Get the where statements
          */
-        // Form Id
+        // Block Id
         if (isset($this->formData->blockId)) {
             $where[]    = "S.block_id=%d";
             $values[]   = $this->formData->blockId;
@@ -840,8 +840,8 @@ class DisplayFormResults extends SubmitForm
         }
 
         $this->columnSettings[$block->blockId] = [
-            'slug'                => $block->slug,
-            'name'                => empty($block->name) ? $block->slug : $block->name,
+            'slug'                => $block->split_slug ?? $block->slug,
+            'name'                => $block->split_name ?? $block->name,
             'show'                => 1,
             'edit_right_roles'    => [],
             'view_right_roles'    => []
@@ -908,8 +908,8 @@ class DisplayFormResults extends SubmitForm
                     if (!isset($this->columnSettings[$id])) {
                         // Use the generic name to create the column setting
                         $block    = $this->getBlockById($id);
-                        $block->slug = strtolower(str_replace(' ', '-', $name));
-                        $block->name = ucfirst($name);
+                        $block->split_slug = strtolower(str_replace(' ', '-', $name));
+                        $block->split_name = ucfirst($name);
 
                         $this->addColumnSetting($block, $relatedIds[$id]);
                     }
@@ -947,18 +947,7 @@ class DisplayFormResults extends SubmitForm
         }
 
         //Add a row for each table action as well
-        $actions    = [];
-        foreach ($this->formData->actions ?? [] as $action) {
-            $actions[]    = $action;
-        }
-
-        /**
-         * Filters the forms actions
-         * 
-         * @param   array   $actions The form table actions
-         */
-        $actions = apply_filters('tsjippy-forms-actions', $actions);
-        foreach ($actions as $action) {
+        foreach ($this->formData->actions as $action) {
             if (!isset($this->columnSettings[$action]) || !is_array($this->columnSettings[$action])) {
                 $this->columnSettings[$action] = [
                     'slug'                => $action,
@@ -1369,6 +1358,17 @@ class DisplayFormResults extends SubmitForm
             $this->shortcodeId
         )[0];
 
+        if(empty($this->tableSettings->edit_right_roles)){
+            $this->tableSettings->edit_right_roles = [
+                'administrator' => 1,
+                'editor' => 1
+            ];
+        }
+
+        if(empty($this->tableSettings->view_right_roles)){
+            $this->tableSettings->view_right_roles  = $this->tableSettings->edit_right_roles;
+        }
+
         $this->columnSettings        = [];
         $results                     = TSJIPPY\getFromDb(
             "get_shortcode_settings_$this->shortcodeId",
@@ -1446,7 +1446,7 @@ class DisplayFormResults extends SubmitForm
 
                             $name    = $columnSetting['name'];
                             if (empty($name)) {
-                                $name = ucfirst(str_replace('-', ' ', $columnSetting['name']));
+                                $name = ucfirst(str_replace('-', ' ', $columnSetting['slug']));
                             }
 
                             $width        = empty($columnSetting['width']) ? 200 : $columnSetting['width'];
@@ -1459,7 +1459,7 @@ class DisplayFormResults extends SubmitForm
 
                         ?>
                             <tr class="column-setting-wrapper" data-block-id="<?php echo esc_attr($blockIndex); ?>">
-                                <input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($blockIndex); ?>][column-id]" value="<?php echo esc_attr($columnSetting['id'] ?? -9); ?>">
+                                <input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($blockIndex); ?>][column-id]" value="<?php echo esc_attr($columnSetting['id'] ?? -1); ?>">
                                 <input type="hidden" class="no-reset" name="column-settings[<?php echo esc_attr($blockIndex); ?>][slug]" value="<?php echo esc_attr($columnSetting['slug'] ?? ''); ?>">
                                 <td>
                                     <span class="movecontrol formfield-button" aria-hidden="true">:::</span>
@@ -2155,7 +2155,7 @@ class DisplayFormResults extends SubmitForm
     /**
      * Renders the table buttons html
      * 
-     * @param \DOMBlock        $parent        The parent block to add the buttons to
+     * @param \DOMElement        $parent        The parent block to add the buttons to
      *
      * @return string    The html
      */
@@ -2232,7 +2232,7 @@ class DisplayFormResults extends SubmitForm
      *
      * @param    string       $type          Either 'own', 'others' or 'all'
      * @param    array        $submissions   Array of Submissions
-     * @param    \DOMBlock  $parent        The parent block to add the table to
+     * @param    \DOMElement  $parent        The parent block to add the table to
      *
      * @return    bool                       If there are submissions or not
      */
@@ -2278,7 +2278,7 @@ class DisplayFormResults extends SubmitForm
     /**
      * Render the navigation menu in case of multiple pages of results
      * 
-     * @param    \DOMBlock  $parent   The parent block to add the navigation menu to
+     * @param    \DOMElement  $parent   The parent block to add the navigation menu to
      */
     public function navigationMenu($parent)
     {
@@ -2358,9 +2358,9 @@ class DisplayFormResults extends SubmitForm
      * @param    string      $type     Either 'own', 'others' or 'all'
      * @param    bool        $force    Whether to retrieve submissions even if already done
      * @param    bool        $all      Retrieve all bookings or paged, default false for paged
-     * @param    \DOMBlock  $parent   The DOM Block to apped to default empty for new dom document creation
+     * @param    \DOMElement  $parent   The DOM Block to apped to default empty for new dom document creation
      *
-     * @return   \DOMBlock|false     The created block
+     * @return   \DOMElement|false     The created block
      */
     public function renderTable($type, $force = false, $all = false, $parent = '')
     {
@@ -2385,7 +2385,7 @@ class DisplayFormResults extends SubmitForm
          * @param    bool           $shouldShow Whether or not to show the table, default true
          * @param    object         $object     The current instance of the form table class, can be used to get more information about the form and the user to decide whether or not to show the table
          * @param    string         $type       The type of results that would be shown, either 'own', 'others' or 'all'
-         * @param    \DOMBlock    $parent     The parent node to append to
+         * @param    \DOMElement    $parent     The parent node to append to
          */
         $shouldShow    = apply_filters('tsjippy-forms-table-should-show', true, $this, $type, $parent);
 
@@ -2500,7 +2500,7 @@ class DisplayFormResults extends SubmitForm
     /**
      * Prints the table footer
      *
-     * @param    \DOMBlock    $parent    The parent node to append to
+     * @param    \DOMElement    $parent    The parent node to append to
      */
     private function printTableFooter($parent)
     {
@@ -2525,7 +2525,7 @@ class DisplayFormResults extends SubmitForm
         /**
          * Runs within the formwrapper div of the results table
          * 
-         * @param   \DOMBlock $parent The parent node
+         * @param   \DOMElement $parent The parent node
          * @param   object      $object The DisplayFormResults instance
          */
         do_action('tsjippy-forms-results-table-footer', $formWrapper, $this);
@@ -2568,9 +2568,9 @@ class DisplayFormResults extends SubmitForm
         }
 
         /**
-         * Allows to change the DOMBlocks
+         * Allows to change the DOMElements
          * 
-         * @param   \DOMBlock  $formTableWrapper   The formtable node
+         * @param   \DOMElement  $formTableWrapper   The formtable node
          * @param   object      $object             The DisplayFormResults instance
          */
         do_action('tsjippy-forms-results-html', $formTableWrapper, $this);
@@ -2582,7 +2582,7 @@ class DisplayFormResults extends SubmitForm
      * Prints the results table head
      *
      * @param    string        $type        Either 'own', 'others' or 'all'
-     * @param    \DOMBlock   $table       The table node to add the head to
+     * @param    \DOMElement   $table       The table node to add the head to
      */
     private function resultTableHead($type, $table)
     {

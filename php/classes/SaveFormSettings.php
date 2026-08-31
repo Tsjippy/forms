@@ -216,13 +216,13 @@ class SaveFormSettings extends Forms
                 }
 
                 //merge and save
-                $column['view-right-roles'] = array_flip(array_merge($column['view-right-roles'], $column['edit-right-roles']));
+                $column['view-right-roles'] = array_flip(array_merge($column['view-right-roles'] ?? [], $column['edit-right-roles'] ?? []));
             }
-            $column['edit-right-roles']     = array_flip($column['edit-right-roles']);
+            $column['edit-right-roles']     = array_flip($column['edit-right-roles'] ?? []);
 
             $where    = [];
 
-            if (!empty($column['column-id'])) {
+            if (($column['column-id'] ?? -1) != -1) {
                 $where    = [
                     'id'    => $column['column-id']
                 ];

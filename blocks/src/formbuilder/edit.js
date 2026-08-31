@@ -349,14 +349,14 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 							'Form submission data will be split on the values of these inputs, while sharing the values of the other inputs.',
 							'tsjippy'
 						)}
-						value={attributes.split_elements || []}
+						value={attributes.split_blocks || []}
 						options={inputBlocks.map((block) => ({
 							label: block.attributes?.name || block.name,
 							value: block.attributes?.blockId,
 						}))}
 						onChange={(values) =>
 							setAttributes({
-								split_elements: Array.isArray(values)
+								split_blocks: Array.isArray(values)
 									? values
 									: [values],
 							})

@@ -648,7 +648,7 @@ class Forms
 
         foreach($blocks as $block){
             if(
-                $block['attrs']['blockId'] == $blockId ||               // This is the block we need
+                ($block['attrs']['blockId'] ?? '') == $blockId ||               // This is the block we need
                 (
                     empty($blockId) &&
                     $block['blockName'] == "tsjippy-forms/formbuilder"  // Just take the first form on the page
@@ -656,8 +656,19 @@ class Forms
             ){
                 $this->formBlock = $block;
 
+                $block['attrs'] = map_deep($block['attrs'], 'maybe_unserialize');
+
                 foreach($block['attrs'] as $key => $attribute){
-                    $this->formData->$key   = maybe_unserialize($attribute);
+                    $this->formData->$key   = $attribute;
+
+                    if($key == 'actions'){
+                        /**
+                         * Filters the forms actions
+                         * 
+                         * @param   array   $actions The form table actions
+                         */
+                        $this->formData->actions   = apply_filters('tsjippy-forms-actions', $attribute);
+                    }
                 }
 
                 $this->blockMapper(true);
@@ -717,10 +728,6 @@ class Forms
 
         if (empty($id)) {
             return false;
-        }
-
-        if (!is_numeric($id) && gettype($id) == 'string') {
-            return $this->getBlockBySlug($id, $key);
         }
 
         //load if needed
