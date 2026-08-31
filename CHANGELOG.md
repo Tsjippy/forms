@@ -2,17 +2,6 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-
-### Changed
-
-### Fixed
-
-### Updated
-
-## [11.9.2] - 2026-08-31
-
-
-### Added
 - block reminders
 
 ### Changed
@@ -23,6 +12,8 @@
 - prefill forms in block editor
 - column settings form results
 - get email settings
+
+### Updated
 
 ## [11.9.1] - 2026-08-23
 
