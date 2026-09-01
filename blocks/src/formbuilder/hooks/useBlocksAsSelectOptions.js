@@ -1,6 +1,6 @@
 import { useMemo } from '@wordpress/element';
 
-export function getBlocksAsSelectOptions(allNestedBlocks) {
+export function useBlocksAsSelectOptions(allNestedBlocks, excludeBlockId) {
 	return useMemo(() => {
 		return (allNestedBlocks || []).map((block) => {
 			let name = block.attributes?.name ?? block.attributes?.text ?? '';
@@ -14,6 +14,6 @@ export function getBlocksAsSelectOptions(allNestedBlocks) {
 				label,
 				value: block.attributes.blockId,
 			};
-		});
-	}, [allNestedBlocks]);
+		}).filter((option) => option.value !== excludeBlockId);
+	}, [allNestedBlocks, excludeBlockId]);
 }

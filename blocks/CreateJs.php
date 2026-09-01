@@ -142,7 +142,7 @@ function dynamicJs($conditions, $innerBlocks){
 
     foreach($triggers as $triggerString => $triggeredConditions){
         // Open if statement
-        echo "\n\n\t\t" . wp_kses_post($triggerString);
+        echo "\n\n\t\t" . $triggerString;
 
         $comparing    = true;
 
@@ -219,7 +219,7 @@ function dynamicJs($conditions, $innerBlocks){
 
                         // When adding or subsrtracting we first need to calculate the compare value
                         if(isset(['+' => 1, '-' => 1][$comparator])){
-                            $compareFrom  = esc_attr($varName) . ' ' . esc_attr($comparator) . ' ' . $varName . "_2";
+                            $compareFrom  = $varName . ' ' . $comparator . ' ' . $varName . "_2";
 
                             $comparator   = $rule['equation2'];
                         }
@@ -238,15 +238,13 @@ function dynamicJs($conditions, $innerBlocks){
             /**
              * Create the action js
              */
-            $actions[$conditionIndex] = [
-                'target'    => $condition->block_id
-            ];
+            $actions[$conditionIndex] = [];
 
-            foreach($condition->actions as $action){
-                if($action['action'] == 'set-property'){
-                    $addition   = $action['addition'] ?? '';
+            foreach($condition->actions as $actionData){
+                if($actionData['action'] == 'set-property'){
+                    $addition   = $actionData['addition'] ?? '';
 
-                    $newValue   = $action['property-value'];
+                    $newValue   = $actionData['property-value'];
 
                     // We should replace with a dynamic value
                     if(str_contains($newValue, 'the-value-of-')){
@@ -259,23 +257,26 @@ function dynamicJs($conditions, $innerBlocks){
                     $actions[$conditionIndex]['action'] = 
                 "this.change_field_property(
                     target,
-                    '{$action['property-name']}',
+                    '{$actionData['property-name']}',
                     $newValue,
                     form,
                     '{$addition}'
                 );";   
                 }else{
                     // Add, remove or toggle the hidden class
-                    if($action['action'] == 'show'){
+                    if($actionData['action'] == 'show'){
                         $action = 'remove';
-                    }elseif($action['action'] == 'hide'){
+                    }elseif($actionData['action'] == 'hide'){
                         $action = 'add';
                     }else{
-                        $action = $action['action'];
+                        $action = $actionData['action'];
                     }
 
                     $actions[$conditionIndex]['action'] = "target.classList.$action('hidden');";
                 }
+
+                
+                $actions[$conditionIndex]['targets'] = array_merge([$condition->block_id], $actionData['targets'] ?? []);
             }
         }
 
@@ -294,28 +295,35 @@ function dynamicJs($conditions, $innerBlocks){
                 // First time we see this one, print it
                 $unique[$key] = $var;
         
-                echo "\n\t\t\tlet $key = " . wp_kses_post($var) ."\n";
+                echo "\n\t\t\tlet $key = " . $var ."\n";
             }
         }
 
         $actionStrings   = [];
 
         foreach($actions as $conditionIndex => $actionData){
-            // The block to perform the action on
-            $targetQuery = "target  = form.querySelector(`[data-blockid='{$actionData['target']}']`)";
+            $querySelector = "[data-blockid='" . implode("'], [data-blockid='", $actionData['targets']) . "']";
+
+            // The block(s) to perform the action on
+            $targetQuery = "\n\t\t\t\tform.querySelectorAll(`$querySelector`).forEach(target => {";
                     
-            // Show/hide/toggle the label in stead of the block
-            if(str_contains($actionData['action'], 'target.classList') && ($innerBlocks[$actionData['target']]['attrs']['labelChild'] ?? false)){
-                $targetQuery .= ".closest('label')";
-            }
-                    
-            $actionStrings[$conditionIndex] = "\n\t\t\t\t" . $targetQuery . ";\n";
-            $actionStrings[$conditionIndex] .= "\n\t\t\t\t" . $actionData['action'];
+                // Show/hide/toggle the label in stead of the block
+                if(str_contains($actionData['action'], 'target.classList') ){                
+                    $targetQuery .= "\n\t\t\t\t\tif(target.parentElement.tagName == 'LABEL'){";
+                    $targetQuery .= "\n\t\t\t\t\t\ttarget = target.parentElement;";
+                    $targetQuery .= "\n\t\t\t\t\t}";
+                }
+
+                // Perform the action
+                $targetQuery .= "\n\t\t\t\t\t". $actionData['action'] . ";";
+            $targetQuery .= "\n\t\t\t\t});";
+
+            $actionStrings[$conditionIndex] .= $targetQuery;
         }
 
         if(empty($comparators )){
             foreach($actionStrings as $actionString){
-                echo wp_kses_post($actionString);
+                echo $actionString;
             }
         }
 
@@ -336,7 +344,7 @@ function dynamicJs($conditions, $innerBlocks){
                 }
             
             echo "\n\t\t\t){";
-                echo wp_kses_post($actionStrings[$conditionIndex]);
+                echo $actionStrings[$conditionIndex];
             echo "\n\t\t\t}";
         }
 

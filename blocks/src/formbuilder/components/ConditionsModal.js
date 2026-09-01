@@ -9,7 +9,7 @@ import {
 	createPortal,
 } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { getBlocksAsSelectOptions } from '../hooks/getBlocksAsSelectOptions.js';
+import { useBlocksAsSelectOptions } from '../hooks/useBlocksAsSelectOptions.js';
 import {
 	plus,
 	trash,
@@ -331,7 +331,7 @@ export default function ConditionsModal({
 	const [fieldErrors, setFieldErrors] = useState({});
 	const [focusTarget, setFocusTarget] = useState(null);
 	const [pulseTarget, setPulseTarget] = useState(null);
-	const formBlockOptions = getBlocksAsSelectOptions(allNestedBlocks);
+	const formBlockOptions = useBlocksAsSelectOptions(allNestedBlocks, blockId);
 	const modalRef = useRef(null);
 	const previousBodyOverflow = useRef('');
 
@@ -897,6 +897,20 @@ export default function ConditionsModal({
 		inputSchema.sharedAttributes.concat(inputSchema.types[blockProps.attributes.type] || []).forEach(data => datalistOptions.push(data.attribute));
 		inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-' + data.attribute));
 		datalistOptions.sort();
+
+		const actionOptions = [
+			{ label: __('Select action', 'tsjippy'), value: '' },
+			{ label: __('Show', 'tsjippy'), value: 'show' },
+			{ label: __('Hide', 'tsjippy'), value: 'hide' },
+			{ label: __('Toggle visibility', 'tsjippy'), value: 'toggle' },
+		];
+
+		if (blockProps.name === 'tsjippy-forms/input' || blockProps.name === 'tsjippy-forms/select' ) {
+			actionOptions.push({
+				label: __('Set property', 'tsjippy'),
+				value: 'set-property',
+			});
+		}
 		
 		return (
 			<div
@@ -909,19 +923,13 @@ export default function ConditionsModal({
 				<SelectControl
 					label={__('Action', 'tsjippy')}
 					value={actionItem?.action || ''}
-					options={[
-						{ label: __('Select action', 'tsjippy'), value: '' },
-						{ label: __('Show', 'tsjippy'), value: 'show' },
-						{ label: __('Hide', 'tsjippy'), value: 'hide' },
-						{ label: __('Toggle visibility', 'tsjippy'), value: 'toggle' },
-						{ label: __('Set property', 'tsjippy'), value: 'set-property' },
-					]}
+					options={ actionOptions }
 					onChange={(value) => updateAction(conditionIndex, actionIndex, 'action', value)}
 					help={actionErrors.action || ''}
 					data-field-key="action"
 				/>
 
-				{(actionItem?.action || '') == 'set-property' && blockProps.name == 'tsjippy-forms/input' ?
+				{(actionItem?.action || '') == 'set-property' ?
 					<>
 					<TextControl
 						label={__('Property name', 'tsjippy')}
@@ -1057,11 +1065,13 @@ export default function ConditionsModal({
 					condition.actions.map((action, actionIndex) => renderActionRow(action, actionIndex, conditionIndex, blockProps))
 				)}
 				
-				<div className="actions">
-					<Button variant="secondary" onClick={() => addAction(conditionIndex)} icon={plus}>
-						{__('Add another action', 'tsjippy')}
-					</Button>
-				</div>
+				{ (blockProps.name === 'tsjippy-forms/input' || blockProps.name === 'tsjippy-forms/select' ) &&
+					<div className="actions">
+						<Button variant="secondary" onClick={() => addAction(conditionIndex)} icon={plus}>
+							{__('Add another action', 'tsjippy')}
+						</Button>
+					</div>
+				}
 
 				{/* Action buttons for managing the current condition and rule. */}
 				<div className="actions">
