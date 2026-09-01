@@ -13,6 +13,7 @@
 - column settings form results
 - get email settings
 - setting dynamic input props
+- form import/export
 
 ### Updated
 
