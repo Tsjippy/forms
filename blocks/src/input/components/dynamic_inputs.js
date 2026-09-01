@@ -12,7 +12,7 @@ import {
 } from '@wordpress/components';
 import { useMemo } from '@wordpress/element';
 
-import * as elementAttributes from './element_attributes.js';
+import * as blockAttributes from './block_attributes.js';
 
 /**
  * Stores data-* attributes
@@ -45,11 +45,11 @@ export const dynamicInputs = (attributes, type, saveFunction) => {
     let inputData;
 
     if (type === 'area') {
-        inputData = elementAttributes.inputSchema.ariaAttributes;
+        inputData = blockAttributes.inputSchema.ariaAttributes;
     } else {
         inputData = (
-            elementAttributes.inputSchema.types?.[attributes.type] || []
-        ).concat(elementAttributes.inputSchema.sharedAttributes);
+            blockAttributes.inputSchema.types?.[attributes.type] || []
+        ).concat(blockAttributes.inputSchema.sharedAttributes);
     }
 
     const values = attributes.inputAttributes || [];

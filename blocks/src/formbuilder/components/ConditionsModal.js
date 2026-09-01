@@ -21,7 +21,7 @@ import {
 import apiFetch from '@wordpress/api-fetch';
 
 import RuleRow from './RuleRow';
-import {inputSchema} from './../../input/components/element_attributes.js';
+import {inputSchema} from './../../input/components/block_attributes.js';
 
 /**
  * Create a blank condition object.
@@ -157,7 +157,7 @@ function validateConditions(conditions) {
 			const ruleErrors = {};
 
 			if (!rule?.['conditional-field']) {
-				ruleErrors.conditionalField = __('Select an element.', 'tsjippy');
+				ruleErrors.conditionalField = __('Select an block.', 'tsjippy');
 
 				if (firstErrorTarget.section === null) {
 					firstErrorTarget.section = 'rules';
@@ -200,7 +200,7 @@ function validateConditions(conditions) {
 			if (rule?.equation === '+' || rule?.equation === '-') {
 				if (!rule?.['conditional-field-2']) {
 					ruleErrors.conditionalField2 = __(
-						'Select a second element.',
+						'Select a second block.',
 						'tsjippy'
 					);
 
@@ -757,7 +757,7 @@ export default function ConditionsModal({
 	async function saveConditionsRequest(blockId, conditions, props) {
 		// update the conditions on the server
 		const savedConditions = await apiFetch({
-			path: `${tsjippy.restApiPrefix}/forms/save_element_conditions`,
+			path: `${tsjippy.restApiPrefix}/forms/save_block_conditions`,
 			method: 'POST',
 			data: {
 				postId: postId,
@@ -929,10 +929,10 @@ export default function ConditionsModal({
 						onChange={(value) => updateAction(conditionIndex, actionIndex, 'property-name', value)}
 						help={actionErrors.propertyName || ''}
 						data-field-key="propertyName"
-						list='element-properties'
+						list='block-properties'
 					/>
 
-					<datalist id="element-properties">
+					<datalist id="block-properties">
 						{datalistOptions.map((attribute) => <option value={attribute}></option>)}
 					</datalist>
 
@@ -944,18 +944,18 @@ export default function ConditionsModal({
 						onChange       = {(value) => updateAction(conditionIndex, actionIndex, 'property-value', value)}
 						help           = {actionErrors.propertyValue || ''}
 						data-field-key = "propertyValue"
-						list           = "possible-elements"
+						list           = "possible-blocks"
 					/>
 
-					<datalist id="possible-elements">
+					<datalist id="possible-blocks">
 						{formBlockOptions.map((data) => <option value={"the-value-of-"+data.value}>{data.label}</option>)}
 					</datalist>
 
 					{ 
-						// If we selected another element to be the value of this property we should allow to add extra to the value
+						// If we selected another block to be the value of this property we should allow to add extra to the value
 						['date', 'number', 'range', 'week', 'month'].includes(blockProps.attributes.type) && (actionItem?.['property-value'] || '').includes("the-value-of-") ?
 							<NumberControl
-							    label              = { __( 'Amount to add to the element value', 'tsjippy') }
+							    label              = { __( 'Amount to add to the block value', 'tsjippy') }
 								isShiftStepEnabled = { true }
 								onChange           = {(value) => updateAction(conditionIndex, actionIndex, 'addition', value)}
 								shiftStep          = { 1 }
@@ -978,10 +978,10 @@ export default function ConditionsModal({
 					{__('Delete action', 'tsjippy')}
 				</Button>
 
-				<h4>Apply Actions to these elements as well</h4>
+				<h4>Apply Actions to these blocks as well</h4>
 				<SelectControl
 					multiple
-					label={__('Target elements', 'tsjippy')}
+					label={__('Target blocks', 'tsjippy')}
 					value={actionItem?.targets || []}
 					options={[
 						...(formBlockOptions || []),
@@ -1195,7 +1195,7 @@ export default function ConditionsModal({
 
 	return createPortal(
 		<div
-			id="element-conditions-modal"
+			id="block-conditions-modal"
 			className="modal"
 			onClick={handleOverlayClick}
 		>

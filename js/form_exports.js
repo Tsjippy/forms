@@ -209,7 +209,7 @@ export function fixNumbering(wrapper) {
 			legend.textContent = legend.textContent.replace(/[0-9]+(?!.*[0-9])/, ' '+(index+1));
 		}); */
 
-    //Update the elements
+    //Update the blocks
     clone.querySelectorAll("input,select,textarea").forEach((input) => {
       //Do not copy nice selects
       if (!input.classList.contains("nice-select-search")) {
@@ -237,7 +237,7 @@ export function removeNode(target) {
   let parentNode   = node.closest(".clone-divs-wrapper");
   let allCloneDivs = parentNode.querySelectorAll(".clone-div");
 
-  //Check if we are removing the last element
+  //Check if we are removing the last block
   if (allCloneDivs[allCloneDivs.length - 1] == node) {
     let addElement = node.querySelector(".add");
 
@@ -406,7 +406,7 @@ export function changeFieldValue(
       if (target.value.toLowerCase() == value.toLowerCase()) {
         target.checked = true;
       } else {
-        // find the element with the given value and check it
+        // find the block with the given value and check it
         let targets = form.querySelectorAll(`[name="${name}" i]`);
         for (const element of targets) {
           if (element.value.toLowerCase() == value.toLowerCase()) {

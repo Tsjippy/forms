@@ -3,21 +3,21 @@ import { InnerBlocks, useBlockProps, useInnerBlocksProps, InspectorControls, Blo
 import { RadioControl, PanelBody, Button, Popover, TextControl, ToggleControl, CheckboxControl, SelectControl, Spinner, Flex, FlexItem, ToolbarGroup, ToolbarButton } from '@wordpress/components';
 import { useState, useEffect } from 'react';
 import apiFetch from "@wordpress/api-fetch";
-import { RawHTML, Fragment } from '@wordpress/element';
+import { RawHTML, Fragment } from '@wordpress/block';
 import { useSelect, useDispatch } from "@wordpress/data";
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { addFilter, currentFilter } from '@wordpress/hooks';
 import { html, seen } from '@wordpress/icons';
 import domReady from '@wordpress/dom-ready';
-import { createRoot } from '@wordpress/element';
+import { createRoot } from '@wordpress/block';
 
 export const conditionsFormParser = () => {
     const [ isConditionsFormVisible, setConditionsFormVisibility ]  = useState( false );
     const [ conditionsForm, setConditionsForm ]                     = useState( '' );
 
-    const elementConditions = () => {
-        const [ conditionalElement, setConditionalElement ] = useState( '50%' );
+    const blockConditions = () => {
+        const [ conditionalBlock, setConditionalBlock ] = useState( '50%' );
         return (
             <>
             <div class='modal-content'>
@@ -32,12 +32,12 @@ export const conditionsFormParser = () => {
                     <span class='condition-if'>If</span>
                     <br></br>
                     <div className="rule-row" data-rule-index="0">
-                        <input type="hidden" className="combinator" name="element-conditions[0][rules][0][combinator]" value="" />
+                        <input type="hidden" className="combinator" name="block-conditions[0][rules][0][combinator]" value="" />
 
                         <SelectControl
-                            label   = "Element"
-                            name    = "element-conditions[0][rules][0][conditional-field]"
-                            value   = { conditionalElement }
+                            label   = "Block"
+                            name    = "block-conditions[0][rules][0][conditional-field]"
+                            value   = { conditionalBlock }
                             options = { [
                                 { label: 'Big', value: '100%' },
                                 { label: 'Medium', value: '50%' },
@@ -54,15 +54,15 @@ export const conditionsFormParser = () => {
 
     /**
      * 
-     * @returns Shows the conditions form for an element if needed
+     * @returns Shows the conditions form for an block if needed
      */
     const showConditionsForm    = () => {
-        if( document.querySelector(`#element-conditions-modal`) == null ){
+        if( document.querySelector(`#block-conditions-modal`) == null ){
             /**
              * Create the modal div to render the react inside
              */
             let div = document.createElement('div');
-            div.id ='element-conditions-modal';
+            div.id ='block-conditions-modal';
             div.classList.add("modal");
             document.body.append(div);
         }
@@ -70,9 +70,9 @@ export const conditionsFormParser = () => {
         /**
          * Register the react component
          */
-        const domNode = document.getElementById('element-conditions-modal');
+        const domNode = document.getElementById('block-conditions-modal');
         const root = createRoot(domNode);
-        root.render(elementConditions());
+        root.render(blockConditions());
 
         // Show the form
         if(isConditionsFormVisible){
@@ -82,7 +82,7 @@ export const conditionsFormParser = () => {
     }
 
     /**
-     * Get the conditions form for this element
+     * Get the conditions form for this block
      * 
      * @param {boolean} toggled 
      */

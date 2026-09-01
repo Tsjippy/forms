@@ -62,8 +62,8 @@ export default function RuleRow({
 					{ label: __('Select block', 'tsjippy'), value: '' },
 					...(formBlockOptions || []),
 				]}
-				onChange={(element) =>
-					onUpdate(conditionIndex, ruleIndex, 'conditional-field', element)
+				onChange={(block) =>
+					onUpdate(conditionIndex, ruleIndex, 'conditional-field', block)
 				}
 				help={ruleErrors.conditionalField || ''}
 				data-field-key="conditionalField"
@@ -87,14 +87,14 @@ export default function RuleRow({
 				<>
 					{['== value', '!= value', '> value', '< value', '+', '-'].includes(rule.equation) && (
 						<SelectControl
-							label={__('Second element', 'tsjippy')}
+							label={__('Second block', 'tsjippy')}
 							value={rule?.['conditional-field-2'] || ''}
 							options={[
-								{ label: __('Select second element', 'tsjippy'), value: '' },
+								{ label: __('Select second block', 'tsjippy'), value: '' },
 								...(formBlockOptions || []),
 							]}
-							onChange={(element) =>
-								onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', element)
+							onChange={(block) =>
+								onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', block)
 							}
 							help={ruleErrors.conditionalField2 || ''}
 							data-field-key="conditionalField2"

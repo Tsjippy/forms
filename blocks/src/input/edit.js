@@ -18,7 +18,7 @@ import { useSelect } from '@wordpress/data';
 
 import './editor.scss';
 
-import * as elementAttributes from './components/element_attributes.js';
+import * as blockAttributes from './components/block_attributes.js';
 import { dynamicInputs } from './components/dynamic_inputs.js';
 import { InputHtml } from './components/InputHtml.js';
 import {
@@ -42,7 +42,7 @@ export default function Edit({
                 label: __('Select an input type', 'tsjippy'),
                 value: '',
             },
-            ...elementAttributes.inputTypes.map((type) => ({
+            ...blockAttributes.inputTypes.map((type) => ({
                 label: type,
                 value: type,
             })),

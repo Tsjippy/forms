@@ -4,7 +4,7 @@ import apiFetch from '@wordpress/api-fetch';
 const STORE_NAME = 'tsjippy-forms/conditions-store';
 
 const DEFAULT_STATE = {
-    conditionsByElement: {},
+    conditionsByBlock: {},
     loadingByPost: {},
     errorByPost: {},
     loadedByPost: {},
@@ -12,7 +12,7 @@ const DEFAULT_STATE = {
 
 async function fetchConditions(postId) {
     return apiFetch({
-        path: `${tsjippy.restApiPrefix}/forms/get_element_conditions`,
+        path: `${tsjippy.restApiPrefix}/forms/get_block_conditions`,
         method: 'POST',
         data: {
             postId,
@@ -81,8 +81,8 @@ const reducer = (state = DEFAULT_STATE, action) => {
 
             return {
                 ...state,
-                conditionsByElement: {
-                    ...state.conditionsByElement,
+                conditionsByBlock: {
+                    ...state.conditionsByBlock,
                     ...normalized,
                 },
             };
@@ -91,8 +91,8 @@ const reducer = (state = DEFAULT_STATE, action) => {
         case 'SET_CONDITION':
             return {
                 ...state,
-                conditionsByElement: {
-                    ...state.conditionsByElement,
+                conditionsByBlock: {
+                    ...state.conditionsByBlock,
                     [action.blockId]: action.conditions,
                 },
             };
@@ -131,12 +131,12 @@ const reducer = (state = DEFAULT_STATE, action) => {
 
 const selectors = {
     getFormConditions(state) {
-        return state.conditionsByElement;
+        return state.conditionsByBlock;
     },
 
     getConditions(state, blockId) {
         return (
-            state.conditionsByElement[blockId] || [
+            state.conditionsByBlock[blockId] || [
                 {
                     rules: [],
                     actions: [],
@@ -158,7 +158,7 @@ const selectors = {
     },
 
     hasConditions(state, blockId) {
-		const conditions = state.conditionsByElement[blockId] || [];
+		const conditions = state.conditionsByBlock[blockId] || [];
 
 		return conditions.some(
 			(condition) =>

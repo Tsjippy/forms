@@ -89,7 +89,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		});
 	}, []);
 
-	/* Read inner blocks so the editor can inspect nested form elements if needed. */
+	/* Read inner blocks so the editor can inspect nested form blocks if needed. */
 	const innerBlocks = useSelect(
 		(select) => {
 			const { getClientIdsOfDescendants } = select('core/block-editor');
@@ -315,7 +315,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				>
 					<SelectControl
 						label={__('Auto Archive Block', 'tsjippy')}
-						value={attributes.auto_archive_element}
+						value={attributes.auto_archive_block}
 						options={[
 							{
 								label: __('Select a block', 'tsjippy'),
@@ -327,7 +327,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 								value: block.attributes.blockId,
 							})),
 						]}
-						onChange={(value) => setAttributes({ auto_archive_element: value })}
+						onChange={(value) => setAttributes({ auto_archive_block: value })}
 					/>
 
 					<TextControl
@@ -396,7 +396,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						isEmailsFormVisible ? 
 							<EmailSettings
 								blockId={attributes.blockId}
-								formElements={[]}
+								formBlocks={[]}
 							/>
 						:
 							isRemindersFormVisible ? 

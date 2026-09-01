@@ -8,7 +8,7 @@ import EmailAddressPanel from './EmailAddressPanel';
 
 export function EmailSettings({
 	blockId = false,
-	formElements = [],
+	formBlocks = [],
 }) {
 	const [emails, setEmails] = useState([]);
 	const [activeTab, setActiveTab] = useState(0);
@@ -76,7 +76,7 @@ export function EmailSettings({
 			{
 				trigger: {
 					type: 'submitted',
-					element: '',
+					block: '',
 					operator: '==',
 					compare: '',
 					conditionalField: '',
@@ -166,7 +166,7 @@ export function EmailSettings({
 				<>
 					<EmailTriggerPanel
 						value={email.trigger}
-						formElements={formElements}
+						formBlocks={formBlocks}
 						onChange={(trigger) =>
 							updateEmail(activeTab, {
 								trigger,
@@ -177,7 +177,7 @@ export function EmailSettings({
 					<EmailAddressPanel
 						title="Sender Address"
 						value={email.sender}
-						formElements={formElements}
+						formBlocks={formBlocks}
 						onChange={(sender) =>
 							updateEmail(activeTab, {
 								sender,
@@ -188,7 +188,7 @@ export function EmailSettings({
 					<EmailAddressPanel
 						title="Recipient Address"
 						value={email.recipient}
-						formElements={formElements}
+						formBlocks={formBlocks}
 						onChange={(recipient) =>
 							updateEmail(activeTab, {
 								recipient,
@@ -198,7 +198,7 @@ export function EmailSettings({
 
 					<EmailEditor
 						email={email}
-						formElements={formElements}
+						formBlocks={formBlocks}
 						onChange={(changes) =>
 							updateEmail(
 								activeTab,

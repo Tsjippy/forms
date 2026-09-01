@@ -72,7 +72,7 @@ export default function ReminderConditions({
 				return (
 					<div
 						key={index}
-						className="warning-conditions element-conditions"
+						className="warning-conditions block-conditions"
 					>
 						<TextControl
 							label="Meta Key"

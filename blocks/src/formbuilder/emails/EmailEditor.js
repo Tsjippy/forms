@@ -10,7 +10,7 @@ import PlaceholderPicker from './PlaceholderPicker';
 
 export default function EmailEditor({
     email,
-    formElements = [],
+    formBlocks = [],
     onChange,
 }) {
     return (
@@ -19,7 +19,7 @@ export default function EmailEditor({
             initialOpen={false}
         >
             <PlaceholderPicker
-                formElements={formElements}
+                formBlocks={formBlocks}
             />
 
             <TextControl

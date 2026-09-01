@@ -1,7 +1,7 @@
 import { Button } from '@wordpress/components';
 
 export default function PlaceholderPicker({
-    formElements = [],
+    formBlocks = [],
 }) {
     const placeholders = [
         '%id%',
@@ -12,7 +12,7 @@ export default function PlaceholderPicker({
         '%time_created%',
         '%time_last_edited%',
         '%viewhash%',
-        ...formElements.map(
+        ...formBlocks.map(
             (field) => `%${field.slug}%`
         ),
     ];

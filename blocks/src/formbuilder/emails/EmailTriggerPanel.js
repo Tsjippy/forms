@@ -7,7 +7,7 @@ import {
 
 export default function EmailTriggerPanel({
     value,
-    formElements,
+    formBlocks,
     onChange
 }) {
     const update = (changes) => {
@@ -22,7 +22,7 @@ export default function EmailTriggerPanel({
 			label: 'Select field',
 			value: '',
 		},
-		...formElements.map((field) => ({
+		...formBlocks.map((field) => ({
 			label: field.label,
 			value: field.id,
 		})),
@@ -89,17 +89,17 @@ export default function EmailTriggerPanel({
                 <>
                     <SelectControl
                         label="Field"
-                        value={value.element || ''}
+                        value={value.block || ''}
                         options={[
                             {
                                 label:
                                     'Select Field',
                                 value: '',
                             },
-                            ...formElements,
+                            ...formBlocks,
                         ]}
-                        onChange={(element) =>
-                            update({ element })
+                        onChange={(block) =>
+                            update({ block })
                         }
                     />
 

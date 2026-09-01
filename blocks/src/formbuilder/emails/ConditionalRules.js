@@ -6,7 +6,7 @@ import {
 
 export default function ConditionalRules({
 	rules = [],
-	formElements = [],
+	formBlocks = [],
 	onChange,
 }) {
 	const fieldOptions = [
@@ -14,7 +14,7 @@ export default function ConditionalRules({
 			label: 'Select field',
 			value: '',
 		},
-		...formElements.map((field) => ({
+		...formBlocks.map((field) => ({
 			label: field.label,
 			value: field.id,
 		})),

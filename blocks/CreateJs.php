@@ -202,7 +202,7 @@ function dynamicJs($conditions, $innerBlocks){
 
                         $compareFrom  = $varName;
 
-                        $compareValue = $rule['conditional-value'];
+                        $compareValue = strtolower($rule['conditional-value'] ?? '');
 
                         // Wrap in " if not a number
                         if(!is_numeric($compareValue)){

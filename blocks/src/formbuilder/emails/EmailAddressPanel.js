@@ -9,7 +9,7 @@ import ConditionalRules from './ConditionalRules';
 export default function EmailAddressPanel({
 	title,
 	value,
-	formElements,
+	formBlocks,
 	onChange,
 }) {
 	const update = (changes) => {
@@ -60,8 +60,8 @@ export default function EmailAddressPanel({
 						rules={
 							value.rules || []
 						}
-						formElements={
-							formElements
+						formBlocks={
+							formBlocks
 						}
 						onChange={(rules) =>
 							update({
