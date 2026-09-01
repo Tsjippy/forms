@@ -12,6 +12,7 @@
 - prefill forms in block editor
 - column settings form results
 - get email settings
+- setting dynamic input props
 
 ### Updated
 
