@@ -4,12 +4,17 @@
 ### Added
 
 ### Changed
-- styling of infobox
-- exclude current block from block dropdown list
 
 ### Fixed
 
 ### Updated
+
+## [11.9.5] - 2026-09-01
+
+
+### Changed
+- styling of infobox
+- exclude current block from block dropdown list
 
 ## [11.9.4] - 2026-09-01
 
