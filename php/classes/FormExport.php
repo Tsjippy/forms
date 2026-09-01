@@ -41,31 +41,36 @@ class FormExport extends SaveFormSettings
         /**
          * Form Settings
          */
-        unset($this->formData->url);
 
-        // Remove the id
-        unset($this->formData->blockId);
-
-        // Set form version to 1
-        $this->formData->version     = 1;
-
-        $backupName = $this->formData->slug . ".sform";
+        $backupName = str_replace(' ', '-', $this->formData->name) . ".sform";
         TSJIPPY\clearOutput();
 
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary");
         header("Content-disposition: attachment; filename=$backupName");
 
-        $content    = "form: " . json_encode(serialize($this->formData)) . "\n";
+        $data    = [
+            'post_content' => $this->formData->post->post_content,
+            'post_title'   => $this->formData->post->post_title,
+            'post_status'  => $this->formData->post->post_status,
+            'post_type'    => $this->formData->post->post_type
+        ];
+        $content    = "form: " . json_encode(serialize($data)) . "\n";
 
         /**
-         * Form Blocks
-         */
-        foreach ($this->formBlocks as &$block) {
-            unset($block->block_id);
-        }
+         * Form Block Conditions
+         */ 
+        $blockConditions    = TSJIPPY\getFromDb(
+            "get_block_conditions_$postId",
+            'forms',
+            "select * from %i where post_id=%d", 
+            $this->blockConditionsTableName, 
+            $this->formData->postId
+        );
 
-        $content    .= "blocks: " . json_encode(serialize($this->formBlocks)) . "\n";
+        if (!empty($blockConditions)) {
+            $content    .= "block_conditions: " . json_encode(serialize($blockConditions)) . "\n";
+        }
 
         /**
          * Form E-mails
@@ -81,7 +86,6 @@ class FormExport extends SaveFormSettings
 
         foreach ($emailSettings as &$emailSetting) {
             unset($emailSetting->post_id);
-            unset($emailSetting->block_id);
         }
 
         if (!empty($emailSettings)) {
@@ -94,7 +98,7 @@ class FormExport extends SaveFormSettings
         $reminders            = TSJIPPY\getFromDb(
             "form_reminders_$blockId",
             'forms',
-            "SELECT * FROM %i WHERE", 
+            "SELECT * FROM %i WHERE post_id=%d AND block_id=%d", 
             $this->formData->postId, 
             $this->formData->blockId
         );
@@ -108,91 +112,6 @@ class FormExport extends SaveFormSettings
         echo $content;
         
         exit;
-    }
-
-    /**
-     * Inserts form blocks, while updating conditions with new block ids
-     *
-     * @param array    $formEmails        Array of form emails to insert
-     * @param array    $blockIdMapping     Mapping of old block ids to new block ids
-     *
-     * @return array|\WP_Error            Array of old block ids to new block ids or WP_Error on failure
-     */
-    protected function insertFormEmails($formEmails, $blockIdMapping)
-    {
-        // Form blocks
-        foreach ($formEmails as $email) {
-
-            $email->block_id    = $this->formData->blockId;
-
-            if (!empty($email->submitted_trigger)) {
-                $triggers    = maybe_unserialize($email->submitted_trigger);
-
-                if (isset($triggers['block'])) {
-                    if (is_numeric($triggers['block'])) {
-                        $trigger['blocks']    = $blockIdMapping[$trigger['block']];
-                    }
-
-                    if (is_numeric($triggers['valueblock'])) {
-                        $triggers['valueblock']    = $blockIdMapping[$trigger['valueblock']];
-                    }
-                } else {
-                    foreach ($triggers as &$trigger) {
-                        if (is_numeric($trigger['block'])) {
-                            $trigger['block']    = $blockIdMapping[$trigger['block']];
-                        }
-
-                        if (is_numeric($trigger['valueblock'])) {
-                            $trigger['valueblock']    = $blockIdMapping[$trigger['valueblock']];
-                        }
-                    }
-                }
-
-                $email->submitted_trigger    = serialize($triggers);
-            }
-
-            if (!empty($email->conditional_field)) {
-                $email->conditional_field    = $blockIdMapping[$email->conditional_field];
-            }
-
-            if (!empty($email->conditional_fields)) {
-                $conditionalFields    = maybe_unserialize($email->conditional_fields);
-
-                foreach ($conditionalFields as &$conditionalFieldId) {
-                    $conditionalFieldId    = $blockIdMapping[$conditionalFieldId];
-                }
-
-                $email->conditional_fields    = serialize($conditionalFields);
-            }
-
-            if (!empty($email->conditional_from_email)) {
-                $conditionalFromEmails    = maybe_unserialize($email->conditional_from_email);
-
-                foreach ($conditionalFromEmails as &$conditionalFromEmail) {
-                    $conditionalFromEmail['fieldid']    = $blockIdMapping[$conditionalFromEmail['fieldid']];
-                }
-
-                $email->conditional_from_email    = serialize($conditionalFromEmails);
-            }
-
-            if (!empty($email->conditional_email_to)) {
-                $conditionalEmailTo    = maybe_unserialize($email->conditional_email_to);
-
-                foreach ($conditionalEmailTo as &$conditionalEmailToField) {
-                    $conditionalEmailToField['fieldid']    = $blockIdMapping[$conditionalEmailToField['fieldid']];
-                }
-
-                $email->conditional_email_to    = serialize($conditionalEmailTo);
-            }
-
-            //$emailId         = $this->insertOrUpdateData($this->elTableName, $email);
-
-            /* if (is_wp_error($emailId)) {
-                return $emailId;
-            } */
-        }
-
-        return true;
     }
 
     /**
@@ -212,15 +131,11 @@ class FormExport extends SaveFormSettings
 
         $contents      = $wpFileSystem->get_contents($path);
 
-        if (!str_contains($contents, 'form: ') || !str_contains($contents, 'blocks: ')) {
+        if (!str_contains($contents, 'form: ')) {
             return new \WP_Error("forms", "Invalid sform file!");
         }
 
         $lines              = explode("\n", $contents);
-
-        $autoArchiveEl      = null;
-        $blockIdMapping   = [];
-        $url                = '';   
         $postId             = 0;
 
         foreach ($lines as $line) {
@@ -239,52 +154,47 @@ class FormExport extends SaveFormSettings
             $object        = unserialize(json_decode($data));
 
             if ($type    == 'form') {
-                $autoArchiveEl    = $object->autoarchive_el;
-
                 // add a new page
-                $post = array(
-                    'post_type'        => 'page',
-                    'post_title'    => "$object->name form",
-                    'post_content'  => '[tsjippy_formbuilder slug={$object->slug}]',
-                    'post_status'   => "publish",
-                    'post_author'   => '1'
-                );
-
-                $postId = wp_insert_post($post, true, false);
-                $url    = get_permalink($postId);
-
-                // Form data
-                $object->url    = $url;
-
-                if (empty($this->formData)) {
-                    $this->formData    = new stdClass();
-                }
-
-                $this->formData->blockId     = $this->insertOrUpdateData($this->tableName, $object);
-
-                if (is_wp_error($this->formData->blockId)) {
-                    return $this->formData->blockId;
-                }
-            } elseif ($type    == 'blocks') {
-                //$blockIdMapping    = $this->insertFormBlocks($object);
-
-                if (is_wp_error($blockIdMapping)) {
-                    return $blockIdMapping;
-                }
+                $postId = wp_insert_post($object, true, false);
             } elseif ($type    == 'emails') {
                 // Form e-mails
-                $this->insertFormEmails($object, $blockIdMapping);
+                foreach ($object as $email) {
+                    if (empty($email->subject) || empty($email->message)) {
+                        continue;
+                    }
+
+                    $email->post_id    = $postId;
+
+                    unset($email->id);
+
+                    TSJIPPY\insertInDb($this->formEmailTable, $email, $this->tableFormats[$this->formEmailTable], 'forms');
+                }
+            } elseif ($type == 'block_conditions') {
+                // Form block conditions
+                foreach ($object as $condition) {
+                    if (empty($condition->rules) || empty($condition->actions)) {
+                        continue;
+                    }
+
+                    $condition->post_id    = $postId;
+
+                    unset($condition->id);
+
+                    TSJIPPY\insertInDb($this->blockConditionsTableName, $condition, $this->tableFormats[$this->blockConditionsTableName], 'forms');
+                }
             } elseif ($type    == 'reminders') {
+
                 // Form reminders
                 foreach ($object as $reminder) {
                     if (empty($reminder->frequency) || empty($reminder->period)) {
                         continue;
                     }
 
-                    $reminder->post_id    = $this->formData->postId;
-                    $reminder->block_id   = $this->formData->blockId;
+                    $reminder->post_id    = $postId;
 
-                    $this->insertOrUpdateData($this->formReminderTable, $reminder);
+                    unset($reminder->id);
+
+                    TSJIPPY\insertInDb($this->formReminderTable, $object, $this->tableFormats[$this->formReminderTable], 'forms');
                 }
             } else {
                 TSJIPPY\printArray("Unknown import type: $type");
@@ -292,6 +202,8 @@ class FormExport extends SaveFormSettings
             }
         }
 
-        return $postId;
+        $url    = get_permalink($postId);
+
+        return "<div class='success'>Form imported successfully.<br>View it: <a href='$url' target='_blank'>here</a></div>";
     }
 }

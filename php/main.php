@@ -44,3 +44,13 @@ add_action('update_user_meta', function($metaId, $userId, $metaKey){
     }
 }, 10, 3);
 
+/**
+ * Print the export file
+ */
+add_action('tsjippy-plugin-actions', function() {
+    if ($_REQUEST['action'] ?? '' === 'export') {
+        require_once PLUGINPATH . '/php/classes/FormExport.php';
+        $forms    = new FormExport();
+        $forms->exportForm($_REQUEST['post-id'], $_REQUEST['block-id']);
+    }
+});

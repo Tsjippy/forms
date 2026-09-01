@@ -692,6 +692,139 @@ class Forms
     }
 
     /**
+     * Deletes a form post and all data related to it 
+     * 
+     * @param   int     $postId
+     * @param   string  $blockId
+     * @param   bool    $deletePost
+     */
+    public function deleteForm($postId, $blockId, $deletePost=false){
+        global $wpdb;
+
+        $this->getForm($postId, $blockId);
+
+        $blockIds   = [];
+        foreach($this->formBlocks as $block){
+            $blockIds[] = $wpdb->prepare('%s', $block->blockId);
+        }
+        $blockIds = implode(',', $blockIds);
+
+        // Delete conditions
+        TSJIPPY\removeFromDb(
+            $this->blockConditionsTableName,
+            [
+                "DELETE FROM %i WHERE post_id = %d and `block_id` in ( $blockIds )",
+                $this->blockConditionsTableName,
+                $postId
+            ],
+            [],
+            'forms'
+        );
+
+
+        /**
+         * Delete Submission Values
+         */
+        TSJIPPY\removeFromDb(
+            $this->submissionValuesTableName,
+            [
+                "DELETE FROM %i WHERE submission_id IN ( select id from %i where post_id = %d and block_id = %s )",
+                $this->submissionValuesTableName,
+                $this->submissionTableName,
+                $postId,
+                $blockId
+            ],
+            [],
+            'forms'
+        );
+
+        /**
+         * Delete the form block
+         */
+        if($deletePost){
+            wp_delete_post($postId, true);
+        }else{
+            // 1. Get the post object by its ID
+            $post = get_post( $postId );
+
+            if ( $post ) {
+                // 2. Parse the post content into a structured array of blocks
+                $blocks = parse_blocks( $post->post_content );
+                
+                $filteredBlocks = array_filter( $blocks, function( $block ) use ( $blockId ) {
+                    // Return true to keep the block, false to delete it
+                    return $block['blockId'] !== $blockId;
+                } );
+
+                // 4. Re-serialize the remaining blocks back into regular WordPress Gutenberg HTML
+                $updatedContent = serialize_blocks( $filteredBlocks );
+
+                // 5. Update the post in the database
+                wp_update_post( array(
+                    'ID'           => $postId,
+                    'post_content' => $updatedContent,
+                ) );
+            }
+        }
+
+        // Delete E-mails
+        TSJIPPY\removeFromDb(
+            $this->formEmailTable, 
+            [
+                'post_id'    => $postId,
+                'block_id'  => $blockId
+            ], 
+            [
+                '%d',
+                '%s'
+            ], 
+            'forms'
+        );
+
+        // Delete Form Reminders
+        TSJIPPY\removeFromDb(
+            $this->formReminderTable, 
+            [
+                'post_id'    => $postId,
+                'block_id'  => $blockId
+            ], 
+            [
+                '%d',
+                '%s'
+            ], 
+            'forms'
+        );
+        
+        // Delete Form Reminders
+        TSJIPPY\removeFromDb(
+            $this->shortcodeTable, 
+            [
+                'post_id'    => $postId,
+                'block_id'  => $blockId
+            ], 
+            [
+                '%d',
+                '%s'
+            ], 
+            'forms'
+        );
+        
+        // Delete Submissions
+        TSJIPPY\removeFromDb(
+            $this->submissionTableName, 
+            [
+                'post_id'    => $postId,
+                'block_id'  => $blockId
+            ], 
+            [
+                '%d',
+                '%s'
+            ], 
+            'forms'
+        );
+    }
+
+    /**
      * Creates a dropdown with all the forms
      *
      * @return    string    the select html

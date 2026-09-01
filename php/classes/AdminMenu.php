@@ -64,38 +64,42 @@ class AdminMenu extends ADMIN\SubAdminMenu
 
         // sort the forms on name
         usort($forms->forms, function ($a, $b) {
-            return strcasecmp($a->slug, $b->slug);
+            return strcasecmp($a['formData']->name, $b['formData']->name);
         });
 
         $table  = addElement('table', $parent, ['class' => 'tsjippy table formoverview']);
         $thead  = addElement('thead', $table);
         $tr     = addElement('tr', $thead);
 
-        foreach (['Id', 'Name', 'Url', 'Actions'] as $th) {
+        foreach (['Post ID', 'Name', 'Url', 'Actions'] as $th) {
             $th     = addElement('th', $tr, [], $th);
         }
 
         $tbody  = addElement('tbody', $table);
 
         foreach ($forms->forms as $form) {
+            if($form['formData']->post->post_status != 'publish'){
+                continue;
+            }
+
             $tr     = addElement('tr', $tbody);
-            addElement('td', $tr, [], $form->id);
-            addElement('td', $tr, [], $form->name ?? 'Not Set');
+            addElement('td', $tr, [], $form['formData']->postId);
+            addElement('td', $tr, [], $form['formData']->name ?? 'Not Set');
             $td     = addElement('td', $tr, []);
 
-            $formUrl  = $form->url;
-            if (empty($formUrl)) {
-                $td->append("Not set");
-            } else {
-                addElement('a', $td, ['href' => $formUrl, 'target' => '_blank'], 'Link');
-            }
+            $formUrl  = get_permalink($form['formData']->postId) . '#tsjippy-form-' . $form['formData']->blockId;
+            addElement('a', $td, ['href' => $formUrl, 'target' => '_blank'], 'Link');
 
             $td     = addElement('td', $tr, []);
             $formEl = addElement('form', $td, ['method' => 'post', 'style' => 'display: inline-block; margin-right:10px;']);
-            addElement('button', $formEl, ['class' => 'small', 'name' => 'export', 'value' => $form->id], 'Export');
+            addElement('input', $formEl, ['type' => 'hidden', 'name' => 'post-id', 'value' => $form['formData']->postId]);
+            addElement('input', $formEl, ['type' => 'hidden', 'name' => 'block-id', 'value' => $form['formData']->blockId]);
+            addElement('button', $formEl, ['class' => 'small', 'name' => 'action', 'value' => 'export'], 'Export');
 
             $formEl = addElement('form', $td, ['method' => 'post', 'style' => 'display: inline-block;']);
-            addElement('button', $formEl, ['class' => 'small', 'name' => 'delete', 'value' => $form->id], 'Delete');
+            addElement('input', $formEl, ['type' => 'hidden', 'name' => 'post-id', 'value' => $form['formData']->postId]);
+            addElement('input', $formEl, ['type' => 'hidden', 'name' => 'block-id', 'value' => $form['formData']->blockId]);
+            addElement('button', $formEl, ['class' => 'small', 'name' => 'action', 'value' => 'delete'], 'Delete');
         }
 
         return true;
@@ -142,28 +146,18 @@ class AdminMenu extends ADMIN\SubAdminMenu
      */
     public function postActions($request)
     {
-        // phpcs:ignore
         if (isset($request['import-form'])) {
             $formBuilder    = new FormExport();
-            // phpcs:ignore
-            return $formBuilder->importForm(TSJIPPY\sanitize($_FILES['formfile']['tmp_name'] ?? ''));
+
+            $path   = wp_normalize_path($_FILES['formfile']['tmp_name'] ?? '');
+
+            return $formBuilder->importForm($path);
         }
 
-        // phpcs:ignore
-        if (is_numeric($request['export'] ?? '')) {
-            $forms    = new FormExport();
-            // phpcs:ignore
-            $forms->exportForm($request['export']);
-
-            return;
-        }
-
-        // phpcs:ignore
-        if (is_numeric($request['delete'] ?? '')) {
+        if ($request['action'] ?? '' === 'delete') {
             $forms    = new SaveFormSettings();
 
-            // phpcs:ignore
-            return $forms->deleteForm($request['delete']);
+            return $forms->deleteForm($request['post-id'], $request['block-id']);
         }
 
         // phpcs:ignore
@@ -180,7 +174,7 @@ class AdminMenu extends ADMIN\SubAdminMenu
             );
 
             foreach ($emptyForms as $form) {
-                $forms->deleteForm($form->id);
+                $forms->deleteForm($form->postId, $form->blockId);
             }
 
             $count  = count($emptyForms);
