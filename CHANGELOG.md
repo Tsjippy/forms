@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- styling of infobox
 
 ### Fixed
 
