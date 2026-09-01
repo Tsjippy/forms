@@ -5,6 +5,7 @@
 
 ### Changed
 - styling of infobox
+- exclude current block from block dropdown list
 
 ### Fixed
 
