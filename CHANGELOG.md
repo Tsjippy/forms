@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [11.9.3] - 2026-09-01
+
+
+### Added
 - block reminders
 
 ### Changed
@@ -14,8 +25,6 @@
 - get email settings
 - setting dynamic input props
 - form import/export
-
-### Updated
 
 ## [11.9.1] - 2026-08-23
 
