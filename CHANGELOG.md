@@ -7,6 +7,7 @@
 
 ### Fixed
 - form e-mails
+- form submission bug
 
 ### Updated
 
