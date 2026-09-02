@@ -1,7 +1,6 @@
 import apiFetch from '@wordpress/api-fetch';
 
 export function getReminder(blockId) {
-    console.log(blockId)
     return apiFetch({
         path: `${tsjippy.restApiPrefix}/forms/get_form_reminders`,
         method: 'POST',

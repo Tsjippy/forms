@@ -667,7 +667,7 @@ class SubmitForm extends SaveFormSettings
             if ($key == 'viewhash') {
                 $blockId = -7;
             } else {
-                $blockId    = $formresults['block-id'] ?? $this->getBlockBySlug($key, 'id');
+                $blockId    = $this->getBlockBySlug($key, 'blockId');
                 if (!$blockId) {
                     continue;
                 }
@@ -865,7 +865,8 @@ class SubmitForm extends SaveFormSettings
 
         $formUrl                            = $request['formurl'];
 
-        // remove the action and other unnecary info
+        // remove the action and other unnesesary info
+        unset($request['block-id']);
         unset($request['post-id']);
         unset($request['user-id']);
         unset($request['_wpnonce']);

@@ -461,7 +461,7 @@ class Forms
         );
 
         if (empty($results)) {
-            return;
+            return $results;
         }
 
         $this->formReminder    = $results[0];
@@ -889,7 +889,7 @@ class Forms
 
         $block->index    = $blockIndex;
 
-        if (empty($key)) {
+        if (empty($key) || !isset($block->$key)) {
             return $block;
         } else {
             return $block->$key;
@@ -967,7 +967,7 @@ class Forms
 
         $block    = $blocks[0];
 
-        if (empty($key)) {
+        if (empty($key) || !isset($block->$key)) {
             return $block;
         } else {
             return $block->$key;

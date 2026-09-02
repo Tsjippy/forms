@@ -783,15 +783,7 @@ class DisplayFormResults extends SubmitForm
         /**
          * Unserialize values
          */
-        foreach ($submissions as &$submission) {
-            foreach ($submission as $blockId => &$value) {
-                if (!empty($nonSplittedValues[$submission->id]) && is_numeric($blockId)) {
-                    $value    = $nonSplittedValues[$submission->id][$blockId];
-                } else {
-                    $value    = maybe_unserialize($value);
-                }
-            }
-        }
+        $submissions    = map_deep(map_deep($submissions, 'maybe_unserialize'), 'maybe_unserialize');
 
         $submissions    = apply_filters('tsjippy-forms-retrieved-formdata', $submissions, $userId, $this);
 
