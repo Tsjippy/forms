@@ -474,8 +474,6 @@ class Forms
      */
     public function getEmailSettings()
     {
-        global $wpdb;
-
         if (empty($this->formData)) {
             return new WP_Error('forms', "no form is loaded");
         }
@@ -495,7 +493,7 @@ class Forms
             $emails[0]["message"]        = "";
             $emails[0]["headers"]        = "";
             $emails[0]["files"]            = "";
-            $emails[0]["email_trigger"]    = "";
+            $emails[0]["trigger"]    = "";
 
             $this->emailSettings = $emails;
         }
@@ -669,6 +667,10 @@ class Forms
                          */
                         $this->formData->actions   = apply_filters('tsjippy-forms-actions', (array) $attribute);
                     }
+                }
+
+                if(empty($this->formData->slug)){
+                    $this->formData->slug = strtolower(str_replace(' ', '-', trim($this->formData->name)));
                 }
 
                 $this->blockMapper(true);

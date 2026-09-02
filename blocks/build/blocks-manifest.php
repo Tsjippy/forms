@@ -50,6 +50,7 @@ return array(
 		'supports' => array(
 			'html' => false
 		),
+		'render' => 'file:./render.php',
 		'textdomain' => 'tsjippy',
 		'editorScript' => 'file:./index.js',
 		'viewScript' => 'tsjippy_fileupload_script',

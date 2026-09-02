@@ -649,14 +649,14 @@ function upgradeDatabase(){
         ]);
 
         $sender = TSJIPPY\cleanUpNestedArray([
-            'type' => $email->from_email,
+            'type' => $email->sender['email'],
             'email' => $email->from,
             'rules' => $email->conditional_from_email,
             'elseEmail' => $email->else_from,
         ]);
 
         $recipient = TSJIPPY\cleanUpNestedArray([
-            'type' => $email->email_to,
+            'type' => $email->recipient['type'],
             'email' => $email->to,
             'rules' => $email->conditional_email_to,
             'elseEmail' => $email->else_to,

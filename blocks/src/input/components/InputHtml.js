@@ -52,7 +52,9 @@ export function InputHtml({
             >
                 {options.map((option, index) => (
                     <label
+                        className={`checkbox-wrapper-label`}
                         key={`${option.value}-${index}`}
+                        style={{ marginRight: '5px' }}
                     >
                         <input
                             type={attributes.type}

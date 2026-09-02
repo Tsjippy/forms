@@ -10,7 +10,37 @@ export function EmailSettings({
 	blockId = false,
 	formBlocks = [],
 }) {
-	const [emails, setEmails] = useState([]);
+	const [emails, setEmails] = useState([
+		{
+			trigger: {
+				type: 'submitted',
+				block: '',
+				operator: '==',
+				compare: '',
+				conditionalField: '',
+				conditionalValue: '',
+				conditionalFields: [],
+				daysBefore: 0,
+				daysAfter: 0,
+			},
+			sender: {
+				type: 'fixed',
+				email: '',
+				rules: [],
+				elseEmail: '',
+			},
+			recipient: {
+				type: 'fixed',
+				email: '%email%',
+				rules: [],
+				elseEmail: '',
+			},
+			subject: '',
+			message: '',
+			headers: '',
+			attachments: '',
+		}
+	]);
 	const [activeTab, setActiveTab] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);

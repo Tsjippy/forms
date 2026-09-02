@@ -639,7 +639,7 @@ class FormReminders extends Forms
         foreach ($this->emailSettings as $mail) {
             $mail   = (object)$mail;
 
-            if ($mail->email_trigger != 'shouldsubmit') {
+            if ($mail->trigger['type'] != 'shouldsubmit') {
                 continue;
             }
 

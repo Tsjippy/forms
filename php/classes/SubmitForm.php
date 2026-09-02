@@ -260,11 +260,11 @@ class SubmitForm extends SaveFormSettings
     private function checkEmailConditions($email, $trigger)
     {
         if (
-            $email->email_trigger    != $trigger &&                     // trigger of the e-mail does not match the trigger exactly
+            $email->trigger['type']    != $trigger &&                     // trigger of the e-mail does not match the trigger exactly
             (
-                $email->email_trigger    != 'submittedcond' ||        // trigger of the e-mail is not submittedcond
+                $email->trigger['type']    != 'submittedcond' ||        // trigger of the e-mail is not submittedcond
                 (
-                    $email->email_trigger    == 'submittedcond' &&    // trigger of the e-mail is submittedcond
+                    $email->trigger['type']    == 'submittedcond' &&    // trigger of the e-mail is submittedcond
                     $trigger                != 'submitted'            // the trigger is not submitted
                 )
             )
@@ -303,7 +303,7 @@ class SubmitForm extends SaveFormSettings
             !in_array($changedBlockId, $email->conditional_fields)            // and the block is not in the conditional fields array
         ) {
             return false;
-        } elseif ($trigger == 'submitted' && $email->email_trigger == 'submittedcond') {    // check if the submit condition is matched
+        } elseif ($trigger == 'submitted' && $email->trigger['type'] == 'submittedcond') {    // check if the submit condition is matched
             if (!is_array($email->submitted_trigger)) {
                 return false;
             }
@@ -358,14 +358,14 @@ class SubmitForm extends SaveFormSettings
             $from    = '';
 
             //Send e-mail from conditional e-mail adress
-            if ($email->from_email == 'conditional') {
-                $from     = $this->findConditionalEmail($email->conditional_from_email);
+            if ($email->sender['type'] == 'conditional') {
+                $from     = $this->findConditionalEmail($email->sender['rules']);
 
                 if (!$from) {
-                    $from    = $email->else_from;
+                    $from    = $email->sender['elseEmail'];
                 }
-            } elseif ($email->from_email == 'fixed') {
-                $from    = $this->processPlaceholders($email->from, $replaceValues);
+            } elseif ($email->sender['type'] == 'fixed') {
+                $from    = $this->processPlaceholders($email->sender['email'], $replaceValues);
             }
 
             if (empty($from)) {
@@ -373,14 +373,14 @@ class SubmitForm extends SaveFormSettings
             }
 
             $to        = '';
-            if ($email->email_to == 'conditional') {
-                $to = $this->findConditionalEmail($email->conditional_email_to);
+            if ($email->recipient['type'] == 'conditional') {
+                $to = $this->findConditionalEmail($email->recipient['rules']);
 
                 if (!$to) {
-                    $to    = $email->else_to;
+                    $to    = $email->recipient['elseEmail'];
                 }
-            } elseif ($email->email_to == 'fixed') {
-                $to        = $this->processPlaceholders($email->to, $replaceValues);
+            } elseif ($email->recipient['type'] == 'fixed') {
+                $to        = $this->processPlaceholders($email->recipient['email'], $replaceValues);
 
                 // if no e-mail found, find any numbers and assume they are user ids
                 // than replace the id with the e-mail of that user
@@ -649,6 +649,10 @@ class SubmitForm extends SaveFormSettings
          * Process Results
          */
         foreach ($formresults as $key => &$result) {
+            if(in_array($key, ['block-id', 'post-id', 'user-id'])){
+                continue;
+            }
+
             if (is_array($result)) {
                 //sort the array
                 ksort($result);
@@ -663,7 +667,7 @@ class SubmitForm extends SaveFormSettings
             if ($key == 'viewhash') {
                 $blockId = -7;
             } else {
-                $blockId    = $this->getBlockBySlug($key, 'id');
+                $blockId    = $formresults['block-id'] ?? $this->getBlockBySlug($key, 'id');
                 if (!$blockId) {
                     continue;
                 }
@@ -672,7 +676,7 @@ class SubmitForm extends SaveFormSettings
             //insert the data
             $data    = [
                 'submission_id' => $this->submission->id,
-                'block_id'    => $blockId,
+                'block_id'      => $blockId,
                 'value'         => $result
             ];
 
@@ -850,7 +854,9 @@ class SubmitForm extends SaveFormSettings
             if (
                 $block->required && 
                 !isset($this->nonInputs[$block->type]) && 
-                ($request[str_replace('[]', '', $block->slug)] ?? '') === '') {
+                ($request[str_replace('[]', '', $block->slug)] ?? '') === '' &&
+                empty($_FILES[$block->slug."-files"])
+            ) {
                 return new \WP_Error('Error', "$block->name is required!");
             }
         }
@@ -860,13 +866,9 @@ class SubmitForm extends SaveFormSettings
         $formUrl                            = $request['formurl'];
 
         // remove the action and other unnecary info
-        unset($request['form-slug']);
-        unset($request['fileupload']);
-        unset($request['user_id']);
-        unset($request['form-id']);
+        unset($request['post-id']);
+        unset($request['user-id']);
         unset($request['_wpnonce']);
-        unset($request['formurl']);
-        unset($request['form-id']);
 
         $request    = TSJIPPY\cleanUpNestedArray($request);
 
