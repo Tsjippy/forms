@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- form e-mails
-- form submission bug
 
 ### Updated
+
+## [11.9.6] - 2026-09-02
+
+
+### Fixed
+- form e-mails
+- form submission bug
 
 ## [11.9.5] - 2026-09-01
 
