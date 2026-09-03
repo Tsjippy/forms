@@ -26,10 +26,8 @@ export const Multiple = ( props ) => {
     var label = null;
     React.Children.toArray(props.inner.props.children).forEach((child) => {
         if (React.isValidElement(child)) {
-            console.log(child);
             childEl = child;
         }else{
-            console.log(child);
             label = child;
         }
     });

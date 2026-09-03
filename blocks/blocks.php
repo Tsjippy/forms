@@ -159,8 +159,96 @@ function addFormsCategory( $categories) {
     );
 }
 
+add_filter( 'pre_render_block', function($skip, $parsedBlock, $parentBlock ){
+    if(
+        ($parentBlock->name ?? '') == 'tsjippy-forms/label' &&  // THis block has a label parent
+        ($parsedBlock['attrs']['multiple'] ?? false) &&   // and it can have multiple values &&
+        (!in_array($parsedBlock['attrs']['type'] ?? '', ['text', 'email', 'tel', 'url']))
+    ){
+        return '';
+    }
+    return $skip;
+}, 10, 3);
+
 // Hook into the rendering of ALL blocks
 add_filter( 'render_block', __NAMESPACE__.'\addBlockIdAttribute', 10, 3 );
+
+/**
+ * Function to render multi-inputs
+ * 
+ * @param   array   $values         The values to render
+ * @param   string  $blockContent
+ * @param   array   $block
+ */
+function renderMultiInput($values, $blockContent, $block, $label = null){
+    /**
+     * text or similar multi-input
+     */
+    if(in_array($block['attrs']['type'] ?? 'text' , ['text', "email", "tel", "text", "url"])){
+        $listItems   = '';
+        foreach($values as $value){
+            $listItems   .= "<li class='list-selection'>";
+                $listItems   .= "<button type='button' class='small remove-list-selection'>";
+                    $listItems   .= "<span class='remove-list-selection'>×</span>";
+                $listItems   .= "</button>";
+                $listItems   .= "<input type='hidden' class='no-reset' name='{$block['attrs']['name']}' value='$value'>";
+                $listItems   .= "<span class='selected-name'>$value</span>";
+            $listItems   .= "</li>";
+        }
+
+        $blockContent = str_replace('%value-placeholder%', $listItems, $blockContent);
+    }
+    
+    /**
+     * Other multi-inputs
+     */
+    else{
+        ob_start();
+        ?>
+        <div class="required flex" style="width: '85%';">
+            <div class="clone-divs-wrapper">
+                <?php
+                $name  = $block['attrs']['name'] ?? '';
+                foreach($values as $index => $value){
+                    ?>
+                    <div class="clone-div" data-div-id="<?php echo esc_attr($index);?>">
+                        <?php echo wp_kses_post($label ?? '');?>
+                        <div
+                            class="button-wrapper"
+                            style="margin: 'auto'; display: 'flex'"
+                        >
+                            <?php
+                            echo str_replace([$name, '%value-placeholder%'], ["{$name}[$index]", $value], $blockContent);
+                            ?>
+
+                            <button
+                                type="button"
+                                class="remove button hidden"
+                                style="flex: 1; max-width: max-content;"
+                            >
+                                <?php echo esc_html($block['attrs']['removeText'] ?? 'Remove');?>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="add button"
+                                style="flex: 1; max-width: max-content;"
+                            >
+                                <?php echo esc_html($block['attrs']['addText'] ?? 'Add');?>
+                            </button>
+                        </div>
+                    </div>
+                    <?php
+                }
+                ?>
+            </div>
+        </div>
+        <?php
+        $blockContent = ob_get_clean();
+    }
+
+    return $blockContent;
+}
 
 /**
  * Adds the block id as data attribute on the frontend to be used in js
@@ -188,13 +276,28 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
     }
 
     /**
+     * Render nested blocks of labels
+     */
+    if(
+        $block['blockName'] == 'tsjippy-forms/label' &&  // This block has a label parent
+        ($block['innerBlocks'][0]['attrs']['multiple'] ?? false) &&   // and it can have multiple values &&
+        (!in_array($block['innerBlocks'][0]['attrs']['type'] ?? '', ['text', 'email', 'tel', 'url']))
+    ){
+        $blockContent = renderMultiInput($defaultValue, $block['innerBlocks'][0]['innerHTML'], $block['innerBlocks'][0], $blockContent);
+    }
+    /**
      * Set checked option
      */
-    if(is_array($defaultValue) && in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])){
+    elseif(is_array($defaultValue) && in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])){
         foreach($defaultValue as $value){
             $blockContent = str_replace("value=\"$value\"", "value=\"$value\" checked=\"checked\"", $blockContent);
         }
-    }elseif(($block['blockName'] ?? '') == "tsjippy-forms/select"){
+    }
+    
+    /**
+     * Select option for select block
+     */
+    elseif(($block['blockName'] ?? '') == "tsjippy-forms/select"){
         if(!is_array($defaultValue)){
             $defaultValue    = [$defaultValue];
         }
@@ -202,76 +305,23 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
         foreach($defaultValue as $value){
             $blockContent = str_replace("value=\"$value\"", "value=\"$value\" selected=\"selected\"", $blockContent);
         }
-    }elseif(!empty($defaultValue) && ($block['attrs']['multiple'] ?? false)){
+    }
+    
+    /**
+     * Multiple values for multi-inputs
+     */
+    elseif(!empty($defaultValue) && ($block['attrs']['multiple'] ?? false)){
         if(!is_array($defaultValue)){
             $defaultValue    = [$defaultValue];
         }
 
-        /**
-         * text or similar multi-input
-         */
-        if(in_array($block['attrs']['type'] ?? 'text' , ['text', "email", "tel", "text", "url"])){
-            $listItems   = '';
-            foreach($defaultValue as $value){
-                $listItems   .= "<li class='list-selection'>";
-                    $listItems   .= "<button type='button' class='small remove-list-selection'>";
-                        $listItems   .= "<span class='remove-list-selection'>×</span>";
-                    $listItems   .= "</button>";
-                    $listItems   .= "<input type='hidden' class='no-reset' name='{$block['attrs']['name']}' value='$value'>";
-                    $listItems   .= "<span class='selected-name'>$value</span>";
-                $listItems   .= "</li>";
-            }
-
-            $blockContent = str_replace('%value-placeholder%', $listItems, $blockContent);
-        }
-        
-        /**
-         * Other multi-inputs
-         */
-        else{
-            ob_start();
-            ?>
-            <div class="required flex" style="width: '85%';">
-                <div class="clone-divs-wrapper">
-                    <?php
-                    $name  = $block['attrs']['name'] ?? '';
-                    foreach($defaultValue as $index => $value){
-                        ?>
-                        <div class="clone-div" data-div-id="<?php echo esc_attr($index);?>">
-                            <div
-                                class="button-wrapper"
-                                style="margin: 'auto'; display: 'flex'"
-                            >
-                                <?php
-                                echo str_replace([$name, '%value-placeholder%'], ["{$name}[$index]", $value], $blockContent);
-                                ?>
-
-                                <button
-                                    type="button"
-                                    class="remove button hidden"
-                                    style="flex: 1; max-width: max-content;"
-                                >
-                                    <?php echo esc_html($block['attrs']['removeText'] ?? 'Remove');?>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="add button"
-                                    style="flex: 1; max-width: max-content;"
-                                >
-                                    <?php echo esc_html($block['attrs']['addText'] ?? 'Add');?>
-                                </button>
-                            </div>
-                        </div>
-                        <?php
-                    }
-                    ?>
-                </div>
-            </div>
-            <?php
-            $blockContent = ob_get_clean();
-        }
-    }else{
+        $blockContent = renderMultiInput($defaultValue, $blockContent, $block);
+    }
+    
+    /**
+     * Other inputs with a single value, like text, email, tel, url, etc.
+     */
+    else{
         if(!is_string($defaultValue)){
             $defaultValue    = '';
         }
