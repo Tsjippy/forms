@@ -7,6 +7,7 @@
 ### Changed
 
 ### Fixed
+- multi-element preview
 
 ### Updated
 
