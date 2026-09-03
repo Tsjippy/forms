@@ -195,7 +195,6 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
             $blockContent = str_replace("value=\"$value\"", "value=\"$value\" checked=\"checked\"", $blockContent);
         }
     }elseif(($block['blockName'] ?? '') == "tsjippy-forms/select"){
-        $defaultValue = [3];
         if(!is_array($defaultValue)){
             $defaultValue    = [$defaultValue];
         }
@@ -208,18 +207,70 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
             $defaultValue    = [$defaultValue];
         }
 
-        $listItems   = '';
-        foreach($defaultValue as $value){
-            $listItems   .= "<li class='list-selection'>";
-                $listItems   .= "<button type='button' class='small remove-list-selection'>";
-                    $listItems   .= "<span class='remove-list-selection'>×</span>";
-                $listItems   .= "</button>";
-                $listItems   .= "<input type='hidden' class='no-reset' name='{$block['attrs']['name']}' value='$value'>";
-                $listItems   .= "<span class='selected-name'>$value</span>";
-            $listItems   .= "</li>";
-        }
+        /**
+         * text or similar multi-input
+         */
+        if(in_array($block['attrs']['type'] ?? 'text' , ['text', "email", "tel", "text", "url"])){
+            $listItems   = '';
+            foreach($defaultValue as $value){
+                $listItems   .= "<li class='list-selection'>";
+                    $listItems   .= "<button type='button' class='small remove-list-selection'>";
+                        $listItems   .= "<span class='remove-list-selection'>×</span>";
+                    $listItems   .= "</button>";
+                    $listItems   .= "<input type='hidden' class='no-reset' name='{$block['attrs']['name']}' value='$value'>";
+                    $listItems   .= "<span class='selected-name'>$value</span>";
+                $listItems   .= "</li>";
+            }
 
-        $blockContent = str_replace('%value-placeholder%', $listItems, $blockContent);
+            $blockContent = str_replace('%value-placeholder%', $listItems, $blockContent);
+        }
+        
+        /**
+         * Other multi-inputs
+         */
+        else{
+            ob_start();
+            ?>
+            <div class="required flex" style="width: '85%';">
+                <div class="clone-divs-wrapper">
+                    <?php
+                    $name  = $block['attrs']['name'] ?? '';
+                    foreach($defaultValue as $index => $value){
+                        ?>
+                        <div class="clone-div" data-div-id="<?php echo esc_attr($index);?>">
+                            <div
+                                class="button-wrapper"
+                                style="margin: 'auto'; display: 'flex'"
+                            >
+                                <?php
+                                echo str_replace([$name, '%value-placeholder%'], ["{$name}[$index]", $value], $blockContent);
+                                ?>
+
+                                <button
+                                    type="button"
+                                    class="remove button hidden"
+                                    style="flex: 1; max-width: max-content;"
+                                >
+                                    <?php echo esc_html($block['attrs']['removeText'] ?? 'Remove');?>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="add button"
+                                    style="flex: 1; max-width: max-content;"
+                                >
+                                    <?php echo esc_html($block['attrs']['addText'] ?? 'Add');?>
+                                </button>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                </div>
+            </div>
+            <?php
+            $blockContent = ob_get_clean();
+        }
     }else{
         if(!is_string($defaultValue)){
             $defaultValue    = '';

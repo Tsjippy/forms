@@ -20,6 +20,8 @@ export function InputHtml({
         prefillValue = prefill?.data?.single?.[attributes.dynamic_value || attributes.name || ''] || '';
     }
 
+    const renderMultiple = !isSaving && attributes.multiple && !labelChild;
+
     /**
      * Checkboxes
      */
@@ -46,7 +48,7 @@ export function InputHtml({
 
         html = (
             <div
-                {...blockProps}
+                {...(!renderMultiple ? blockProps : {})}
                 className={`${blockProps.className} checkbox-wrapper`}
                 data-blockid={attributes.blockId}
             >
@@ -81,7 +83,7 @@ export function InputHtml({
     else if (attributes.type == 'textarea') {
         html = (
             <textarea
-                {...blockProps}
+                {...(!renderMultiple ? blockProps : {})}
                 type={attributes.type}
                 name={attributes.name}
                 required={attributes.required}
@@ -89,7 +91,7 @@ export function InputHtml({
                 autoComplete="on"
                 {...attributes.inputAttributes}
             >
-                { isSaving ? "%value-placeholder%" : prefillValue }
+                { isSaving || renderMultiple ? "%value-placeholder%" : prefillValue }
             </textarea>
         );
     } 
@@ -100,7 +102,7 @@ export function InputHtml({
     else {
         html = (
             <input
-                {...blockProps}
+                {...(!renderMultiple ? blockProps : {})}
                 type={attributes.type}
                 name={attributes.name}
                 required={attributes.required}
@@ -115,13 +117,22 @@ export function InputHtml({
     /**
      * Render the the multiple version if not wrapped in an label and not a text input
      */
-    return attributes.multiple && !labelChild && !['text', "email", "tel", "url"].includes(attributes.type) ? (
-        <Multiple
-            inner={html}
-            attributes={attributes}
-            isSaving={isSaving}
-        />
-    ) : (
-        html
+    return (
+        !isSaving && 
+        attributes.multiple && 
+        (
+            !labelChild ||
+            ['text', "email", "tel", "url"].includes(attributes.type) 
+        )
+        ? (
+            <Multiple
+                inner={html}
+                attributes={attributes}
+                prefill={prefill}
+                blockProps={blockProps}
+            />
+        ) : (
+            html
+        )
     );
 }

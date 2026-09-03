@@ -35,16 +35,6 @@ export default function save({ attributes }) {
 	};
 
 	return (
-		/**
-		 * Return the multiple version if this is an input which can be multiplied, but not the text type
-		 */
-		attributes.childAttr.multiple && !['text', "email", "tel", "text", "url"].includes(attributes.childAttr.type) ?
-			<Multiple
-				inner      = { labelComponent(false) }
-				attributes = { attributes.childAttr }
-				isSaving   = { true }
-			/>
-		:
-			labelComponent(true)
+		labelComponent(true)
 	);
 }

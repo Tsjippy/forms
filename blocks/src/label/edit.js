@@ -3,8 +3,10 @@ import { InnerBlocks, useBlockProps, InspectorControls } from '@wordpress/block-
 import { PanelBody, TextControl, Placeholder } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
+
 import './editor.scss';
 import { Multiple } from './../input/components/Multiple.js';
+import { usePrefill } from '../../shared/usePrefill.js';
 /**
  * The edit function describes the structure of your block in the context of the
  * editor. This represents what the editor will render when the block is used.
@@ -89,6 +91,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		</label>
 	);
 
+	var prefill = usePrefill();
+
 	return (
 		<>
 		<InspectorControls>
@@ -127,11 +131,12 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 							</Placeholder>
 						</>
 					: 
-						attributes.childAttr?.multiple && !['text', "email", "tel", "text", "url"].includes(attributes.childAttr?.type) ?
+						childBlockAttrs?.multiple && !['text', "email", "tel", "url"].includes(childBlockAttrs.type) ?
 							<Multiple
 								inner      = { labelComponent }
-								attributes = { attributes.childAttr }
-								isSaving   = { false }
+								attributes = { childBlockAttrs }
+								prefill={prefill}
+								blockProps={blockProps}
 							/>
 						:
 							labelComponent
