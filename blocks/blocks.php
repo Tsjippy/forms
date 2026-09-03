@@ -176,31 +176,50 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
 
     $forms->buildDefaultsArray();
 
-    $multi  = $forms->defaultArrayValues;
-    $single = $forms->defaultValues;
+    $defaultValues  = array_merge($forms->defaultArrayValues, $forms->defaultValues);
 
     /**
      * Set default value
      */
     if(empty($block['attrs']['dynamic_value'])){
-        $defaultValue = $single[$block['attrs']['name']] ?? '';
+        $defaultValue = $defaultValues[$block['attrs']['name'] ?? ''] ?? '';
     }else{
-        $defaultValue = $single[$block['attrs']['dynamic_value']] ?? '';
+        $defaultValue = $defaultValues[$block['attrs']['dynamic_value']] ?? '';
     }
 
     /**
      * Set checked option
      */
-    if(in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])){
-        if(is_array($defaultValue)){
-            foreach($defaultValue as $value){
-                $blockContent = str_replace("value=\"$value\"", "value=\"$value\" checked=\"checked\"", $blockContent);
-            }
-        }else{
-            $whatotdp=1;
+    if(is_array($defaultValue) && in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])){
+        foreach($defaultValue as $value){
+            $blockContent = str_replace("value=\"$value\"", "value=\"$value\" checked=\"checked\"", $blockContent);
         }
-    }elseif(($block['name']) == "tsjippy-forms/select"){
-        $whatotdp=1;
+    }elseif(($block['blockName'] ?? '') == "tsjippy-forms/select"){
+        $defaultValue = [3];
+        if(!is_array($defaultValue)){
+            $defaultValue    = [$defaultValue];
+        }
+
+        foreach($defaultValue as $value){
+            $blockContent = str_replace("value=\"$value\"", "value=\"$value\" selected=\"selected\"", $blockContent);
+        }
+    }elseif(!empty($defaultValue) && ($block['attrs']['multiple'] ?? false)){
+        if(!is_array($defaultValue)){
+            $defaultValue    = [$defaultValue];
+        }
+
+        $listItems   = '';
+        foreach($defaultValue as $value){
+            $listItems   .= "<li class='list-selection'>";
+                $listItems   .= "<button type='button' class='small remove-list-selection'>";
+                    $listItems   .= "<span class='remove-list-selection'>×</span>";
+                $listItems   .= "</button>";
+                $listItems   .= "<input type='hidden' class='no-reset' name='{$block['attrs']['name']}' value='$value'>";
+                $listItems   .= "<span class='selected-name'>$value</span>";
+            $listItems   .= "</li>";
+        }
+
+        $blockContent = str_replace('%value-placeholder%', $listItems, $blockContent);
     }else{
         if(!is_string($defaultValue)){
             $defaultValue    = '';

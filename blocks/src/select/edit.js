@@ -68,6 +68,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 				<PrefillValueSelector
 					value    = { attributes.dynamic_selected_value }
 					onChange = { (value) => setAttributes({ dynamic_selected_value: value }) }
+					allowMultiple={attributes.multiple}
 				/>
 
 				<ToggleControl

@@ -107,7 +107,7 @@ export function InputHtml({
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
-                value = { isSaving ? "%value-placeholder%" :  prefillValue }
+                value = { isSaving && !['text', "email", "tel", "text", "url"].includes(attributes.type) ? "%value-placeholder%" :  prefillValue }
             />
         );
     }
@@ -115,7 +115,7 @@ export function InputHtml({
     /**
      * Render the the multiple version if not wrapped in an label and not a text input
      */
-    return attributes.multiple && !labelChild && !['text', "email", "tel", "text", "url"].includes(attributes.type) ? (
+    return attributes.multiple && !labelChild && !['text', "email", "tel", "url"].includes(attributes.type) ? (
         <Multiple
             inner={html}
             attributes={attributes}

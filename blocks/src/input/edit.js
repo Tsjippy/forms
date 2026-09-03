@@ -173,6 +173,7 @@ export default function Edit({
                                 dynamic_value: value,
                             })
                         }
+                        allowMultiple={attributes.multiple}
                     />
 
                     <ToggleControl

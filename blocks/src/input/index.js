@@ -4,6 +4,7 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
  */
 import { registerBlockType } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -27,4 +28,12 @@ registerBlockType( metadata.name, {
 	 * @see ./save.js
 	 */
 	save,
+
+	// This updates the List View name dynamically
+    __experimentalLabel: (attributes, { context }) => {
+        const { type, name } = attributes;
+        
+        // Return a fallback if the attribute is empty
+        return type ? `${type.charAt(0).toUpperCase() + type.slice(1)} input: ${name}` : __('Input', 'tsjippy');
+    },
 } );

@@ -53,12 +53,45 @@ export const PrefillOptionsSelector = ({ value, onChange }) => {
     );
 };
 
-export const PrefillValueSelector = ({ value, onChange }) => {
+export const PrefillValueSelector = ({ value, onChange, allowMultiple }) => {
     const { data: prefillData, isLoading } = usePrefill();
 
     if (isLoading || !prefillData) {
         return <Spinner />;
     }
+
+    const singleOptions = Object.keys(prefillData.single || {}).map((key) => ({
+        label: key,
+        value: key,
+    }));
+
+    const optionsMap = new Map();
+
+    Object.keys(prefillData.single || {}).forEach((key) => {
+        optionsMap.set(key, {
+            label: key,
+            value: key,
+        });
+    });
+
+    if (allowMultiple) {
+        Object.keys(prefillData.multi || {}).forEach((key) => {
+            optionsMap.set(key, {
+                label: key,
+                value: key,
+            });
+        });
+    }
+
+    const options = [
+        {
+            label: __('Select an option', 'tsjippy'),
+            value: '',
+        },
+        ...Array.from(optionsMap.values()).sort((a, b) =>
+            a.label.localeCompare(b.label)
+        ),
+    ];
 
     return (
         <SelectControl
@@ -68,16 +101,7 @@ export const PrefillValueSelector = ({ value, onChange }) => {
                 'Select a key for the dynamically set value. This is used to pre-fill the input field based on the current logged-in user.',
                 'tsjippy'
             )}
-            options={[
-                {
-                    label: __('Select an option', 'tsjippy'),
-                    value: '',
-                },
-                ...Object.keys(prefillData.single || {}).map((key) => ({
-                    label: key,
-                    value: key,
-                })),
-            ]}
+            options={options}
             onChange={onChange}
         />
     );

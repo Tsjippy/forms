@@ -1559,8 +1559,10 @@ class Forms
         $multiKeys  = array_flip(TSJIPPY\getFromDb(
             'multiple-user-meta',
             'forms',
-            "select distinct meta_key from (SELECT meta_key, user_id, COUNT(*) FROM %i GROUP BY meta_key, user_id HAVING (COUNT(*) > 1)) as multiple;",
-            $wpdb->usermeta
+            "select distinct meta_key from (SELECT meta_key, user_id, COUNT(*) FROM %i where meta_key not like %s and meta_key not like %s GROUP BY meta_key, user_id HAVING (COUNT(*) > 1)) as multiple;",
+            $wpdb->usermeta,
+            $wpdb->esc_like('_').'%',
+            $wpdb->esc_like('tsjippy_hidden_columns_').'%'
         ));
 
         /**

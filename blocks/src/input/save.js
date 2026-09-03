@@ -25,7 +25,9 @@ export default function save({ attributes }) {
     return (
         ['text', "email", "tel", "text", "url"].includes(attributes.type) && attributes.multiple ?
             <div className={`${blockProps.className ?? ''} option-wrapper`}>
-                <ul className="list-selection-list" />
+                <ul className="list-selection-list">
+                    %value-placeholder%
+                </ul>
                 <div className="multi-text-input-wrapper">
                     <InputHtml
                         attributes={attributes}
