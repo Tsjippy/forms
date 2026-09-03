@@ -2,14 +2,21 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- display input name in list view of block editior
 
 ### Changed
 
 ### Fixed
-- multi-element preview
 
 ### Updated
+
+## [11.9.7] - 2026-09-03
+
+
+### Added
+- display input name in list view of block editior
+
+### Fixed
+- multi-element preview
 
 ## [11.9.6] - 2026-09-02
 
