@@ -109,7 +109,7 @@ export function InputHtml({
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
-                value = { isSaving && !['text', "email", "tel", "text", "url"].includes(attributes.type) ? "%value-placeholder%" :  prefillValue }
+                value = { isSaving ? "%value-placeholder%" :  prefillValue }
             />
         );
     }

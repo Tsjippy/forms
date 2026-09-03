@@ -196,7 +196,7 @@ function renderMultiInput($values, $blockContent, $block, $label = null){
             $listItems   .= "</li>";
         }
 
-        $blockContent = str_replace('%value-placeholder%', $listItems, $blockContent);
+        $blockContent = str_replace(['value="%value-placeholder%"', '%value-placeholder%'], ['', $listItems], $blockContent);
     }
     
     /**
