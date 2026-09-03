@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- display input name in list view of block editior
 
 ### Changed
 
