@@ -669,25 +669,52 @@ add_filter( 'register_block_type_args', __NAMESPACE__.'\addGlobalAttributes' );
  */
 function addGlobalAttributes( $args ) {
     if ( ! isset( $args['attributes'] ) || ! is_array( $args['attributes'] ) ) {
-		$args['attributes'] = array();
-	}
-    
-    $args['attributes']['blockId'] = array(
-        'type'    => 'string',
-        'default' => '',
+        $args['attributes'] = array();
+    }
+
+    $args['attributes'] = array_merge(
+        $args['attributes'],
+        [
+            'blockId' => [
+                'type'    => 'string',
+                'default' => '',
+            ],
+            'hidden' => [
+                'type'    => 'boolean',
+                'default' => false,
+            ],
+            'formbuilderChild' => [
+                'type'    => 'boolean',
+                'default' => false,
+            ],
+            'notChild' => [
+                'type'    => 'boolean',
+                'default' => false,
+            ],
+            'remindByEmail' => [
+                'type'    => 'boolean',
+                'default' => false,
+            ],
+            'conditionMode' => [
+                'type'    => 'string',
+                'default' => 'and',
+            ],
+            'conditions' => [
+                'type'    => 'array',
+                'default' => [],
+            ],
+            'roles' => [
+                'type'    => 'array',
+                'default' => [],
+            ],
+            'inverseRoles' => [
+                'type'    => 'boolean',
+                'default' => false,
+            ],
+        ]
     );
 
-    $args['attributes']['hidden'] = array(
-        'type'    => 'boolean',
-        'default' => false,
-    );
-
-    $args['attributes']['formbuilderChild'] = array(
-        'type'    => 'boolean',
-        'default' => false,
-    );
-
-	return $args;
+    return $args;
 }
 
 function my_custom_post_view_config( $view_config ) {

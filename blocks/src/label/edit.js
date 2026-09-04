@@ -84,7 +84,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		<label >
 			{ attributes.text }
 			<InnerBlocks
-				allowedBlocks={['tsjippy-forms/input']}
+				allowedBlocks={['tsjippy-forms/input', 'tsjippy-forms/file']}
 				orientation="vertical"
 				renderAppender={false}
 			/>

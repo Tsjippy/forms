@@ -10,11 +10,14 @@ import {
     ToggleControl,
 } from '@wordpress/components';
 import {
+    useRef,
     useState,
     useEffect,
     useMemo,
 } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useDispatch,useSelect } from '@wordpress/data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
+import { switchToBlockType, createBlock } from '@wordpress/blocks';
 
 import './editor.scss';
 
@@ -35,6 +38,8 @@ export default function Edit({
     clientId,
 }) {
     const blockProps = useBlockProps();
+
+    const { replaceBlock } = useDispatch( blockEditorStore );
 
     const typeOptions = useMemo(
         () => [
@@ -110,7 +115,21 @@ export default function Edit({
             label="Input Type"
             value={attributes.type}
             options={typeOptions}
-            onChange={(type) => setAttributes({ type })}
+            onChange={ ( type ) => {
+                // If the user selects a file or image input type, replace the block with the file block
+                if ( [ 'file', 'image' ].includes( type ) ) {
+                    replaceBlock(
+                        clientId,
+                        createBlock( 'tsjippy-forms/file', {
+                            name: attributes.name,
+                        } )
+                    );
+
+                    return;
+                }
+
+                setAttributes( { type } );
+            } }
         />
     );
 

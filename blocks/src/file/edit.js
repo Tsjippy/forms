@@ -2,8 +2,8 @@ import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, TextControl, TextareaControl, ToggleControl, Spinner } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import ServerSideRender from '@wordpress/server-side-render';
 
-import { Rendered } from './components/Rendered.js';
 import UserMetaRequiredControls from '../../shared/AddRequiredOptions';
 
 /**
@@ -37,7 +37,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	return (
 		<>
 		<InspectorControls>
-			<PanelBody title={__('Dropdown Selector Settings', 'tsjippy')}>
+			<PanelBody title={__('File Input Settings', 'tsjippy')}>
 				<TextControl
 					label    = { __("Name", 'tsjippy')}
 					value    = { name }
@@ -103,8 +103,9 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						onChange = { ( value ) => setName( value )}
 					/> 
 				:
-					<Rendered
-						attributes     = { attributes }
+					<ServerSideRender
+						block="tsjippy-forms/file"
+						attributes={ attributes }
 					/>
 			}
 		</div>

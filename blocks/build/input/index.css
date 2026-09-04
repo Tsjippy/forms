@@ -1,1 +1,22 @@
-.attributes-form{background-color:#dcdcdc;margin-top:20px;padding:10px}.attributes-form .components-base-control{margin-top:20px}.attributes-form .components-base-control .components-base-control__label{margin-bottom:1px;margin-left:5px}
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/.pnpm/css-loader@6.11.0_webpack@5.110.1/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/.pnpm/postcss-loader@6.2.1_postcss@8.5.26_webpack@5.110.1/node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/.pnpm/sass-loader@16.0.8_sass@1.103.1_webpack@5.110.1/node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/input/editor.scss ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/**
+ * The following styles get applied inside the editor only.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+.attributes-form {
+  margin-top: 20px;
+  background-color: gainsboro;
+  padding: 10px;
+}
+.attributes-form .components-base-control {
+  margin-top: 20px;
+}
+.attributes-form .components-base-control .components-base-control__label {
+  margin-bottom: 1px;
+  margin-left: 5px;
+}
+
+/*# sourceMappingURL=index.css.map*/

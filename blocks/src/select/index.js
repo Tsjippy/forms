@@ -27,4 +27,12 @@ registerBlockType( metadata.name, {
 	 * @see ./save.js
 	 */
 	save,
+
+	// This updates the List View name dynamically
+    __experimentalLabel: (attributes, { context }) => {
+        const { name } = attributes;
+        
+        // Return a fallback if the attribute is empty
+        return `Select: ${name}`;
+    },
 } );

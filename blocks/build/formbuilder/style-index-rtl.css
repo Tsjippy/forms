@@ -1,1 +1,200 @@
-input[type=email],input[type=month],input[type=number],input[type=password],input[type=search],input[type=tel],input[type=text],input[type=url]{width:100%}input:disabled{border:none;font-size:inherit;font-weight:700;padding:0}input.invalid{background-color:#fdd}.formfield-input:not(input[type=radio]){float:right}.info-box{position:relative;z-index:2}.info-icon{flex:1;margin-right:10px!important;padding-top:30px;width:25px}label .info-icon{margin-top:-30px;padding-top:0}.formsteploader{display:block;margin-right:auto;margin-left:auto}.step{background-color:#bd2919;border:none;border-radius:50%;display:inline-block;height:15px;margin:0 2px;opacity:.5;width:15px}.step.active{height:18px;opacity:1;width:18px}.step.finish{background-color:#8a1a0e;opacity:.8}.next-button{float:left}@media(max-width:570px){.submit-wrapper{margin-top:0}}.submit-wrapper{width:100%}.submit-wrapper .button{margin-left:10px}.multi-step-controls-wrapper{display:flex;padding-top:20px;width:100%}.multi-step-controls-wrapper .submit-wrapper{justify-content:end;margin:0}.multi-step-controls-wrapper .submit-wrapper .button,.multi-step-controls-wrapper .submit-wrapper .loadergif{margin-top:0}.form-submit:disabled{background-color:gray}.form-submit:disabled .online{display:none}.conditions-info{color:#bd2919;float:left;font-size:xx-large;margin-left:30px;margin-top:-20px}.clone-div{margin-top:5px}.clone-div button{margin-top:auto;max-height:40px;max-width:50px}.option-label{margin-right:5px}.label-text{margin-bottom:5px}.input-wrapper{margin-top:10px}.input-wrapper:not(.info){float:right}.input-wrapper.flex{display:flex;flex-wrap:wrap}@media(max-width:570px){.input-wrapper.flex input[type=date],.input-wrapper.flex input[type=email],.input-wrapper.flex input[type=month],.input-wrapper.flex input[type=number],.input-wrapper.flex input[type=password],.input-wrapper.flex input[type=tel],.input-wrapper.flex input[type=text]{margin-bottom:10px;width:100%}}.input-wrapper input:not([type=checkbox],[type=radio]){margin-left:10px}.clone-div .nice-select{display:inline-block}.nice-select.relation{min-width:150px}.form-label{width:100%}.highlight{background-color:#f3f37d;background:#f3f37d}.export-button-wrapper{display:flex;margin:50px 0 20px}.export-button-wrapper form{min-width:fit-content}.edit.forms-table{text-decoration:underline;text-decoration-color:#bd2919}.checkbox-label{margin-left:10px}
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/.pnpm/css-loader@6.11.0_webpack@5.110.1/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/.pnpm/postcss-loader@6.2.1_postcss@8.5.26_webpack@5.110.1/node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/.pnpm/sass-loader@16.0.8_sass@1.103.1_webpack@5.110.1/node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/formbuilder/style.scss ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/**
+ * The following styles get applied both on the front of your site
+ * and in the editor.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+input[type=text], input[type=email], input[type=tel], input[type=month], input[type=password], input[type=search], input[type=number], input[type=url] {
+  width: 100%;
+}
+input:disabled {
+  border: none;
+  padding: 0;
+  font-weight: bold;
+  font-size: inherit;
+}
+input {
+  /* Mark input boxes that gets an error on validation: */
+}
+input.invalid {
+  background-color: #ffdddd;
+}
+
+.formfield-input:not(input[type=radio]) {
+  float: right;
+}
+
+.info-box {
+  position: relative;
+  z-index: 2;
+}
+
+.info-icon {
+  flex: 1;
+  margin-right: 10px !important;
+  width: 25px;
+  padding-top: 30px;
+}
+
+label .info-icon {
+  margin-top: -30px;
+  padding-top: 0px;
+}
+
+.formsteploader {
+  margin-right: auto;
+  margin-left: auto;
+  display: block;
+}
+
+/* Make circles that indicate the steps of the form: */
+.step {
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bd2919;
+  border: none;
+  border-radius: 50%;
+  display: inline-block;
+  opacity: 0.5;
+  /* Mark the active step: */
+}
+.step.active {
+  opacity: 1;
+  height: 18px;
+  width: 18px;
+}
+.step {
+  /* Mark the steps that are finished and valid: */
+}
+.step.finish {
+  background-color: #8a1a0e;
+  opacity: 0.8;
+}
+
+.next-button {
+  float: left;
+}
+
+@media (max-width: 570px) {
+  .submit-wrapper {
+    margin-top: 0px;
+  }
+}
+.submit-wrapper {
+  width: 100%;
+}
+.submit-wrapper .button {
+  margin-left: 10px;
+}
+
+.multi-step-controls-wrapper {
+  display: flex;
+  width: 100%;
+  padding-top: 20px;
+}
+.multi-step-controls-wrapper .submit-wrapper {
+  justify-content: end;
+  margin: 0px;
+}
+.multi-step-controls-wrapper .submit-wrapper .button {
+  margin-top: 0px;
+}
+.multi-step-controls-wrapper .submit-wrapper .loadergif {
+  margin-top: 0px;
+}
+
+.form-submit:disabled {
+  background-color: grey;
+}
+.form-submit:disabled .online {
+  display: none;
+}
+
+.conditions-info {
+  margin-top: -20px;
+  margin-left: 30px;
+  float: left;
+  color: #bd2919;
+  font-size: xx-large;
+}
+
+.clone-div {
+  margin-top: 5px;
+}
+.clone-div button {
+  max-width: 50px;
+  max-height: 40px;
+  margin-top: auto;
+}
+
+.option-label {
+  margin-right: 5px;
+}
+
+.label-text {
+  margin-bottom: 5px;
+}
+
+.input-wrapper {
+  margin-top: 10px;
+}
+.input-wrapper:not(.info) {
+  float: right;
+}
+.input-wrapper.flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+@media (max-width: 570px) {
+  .input-wrapper.flex input[type=date],
+  .input-wrapper.flex input[type=text],
+  .input-wrapper.flex input[type=email],
+  .input-wrapper.flex input[type=tel],
+  .input-wrapper.flex input[type=month],
+  .input-wrapper.flex input[type=password],
+  .input-wrapper.flex input[type=number] {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+.input-wrapper input:not([type=checkbox], [type=radio]) {
+  margin-left: 10px;
+}
+
+.clone-div .nice-select {
+  display: inline-block;
+}
+
+.nice-select.relation {
+  min-width: 150px;
+}
+
+.form-label {
+  width: 100%;
+}
+
+.highlight {
+  background-color: #f3f37d;
+  background: #f3f37d;
+}
+
+.export-button-wrapper {
+  margin: 50px 0px 20px 0px;
+  display: flex;
+}
+.export-button-wrapper form {
+  min-width: fit-content;
+}
+
+.edit.forms-table {
+  text-decoration: underline;
+  text-decoration-color: #bd2919;
+}
+
+.checkbox-label {
+  margin-left: 10px;
+}
