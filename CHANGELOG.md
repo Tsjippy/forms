@@ -4,6 +4,7 @@
 ### Added
 - auto convert image and file input to file block
 - travelform block pattern
+- more block patterns
 
 ### Changed
 
