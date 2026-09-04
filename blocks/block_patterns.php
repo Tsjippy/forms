@@ -6,16 +6,238 @@ use TSJIPPY;
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+add_action('init', function () {
+    register_block_pattern_category(
+        'tsjippy',
+        [
+            'label' => __('Tsjippy Forms', 'tsjippy'),
+        ]
+    );
+});
+
 /**
- * Travel form
+ * Accommodation form
  */
 register_block_pattern(
-    'tsjippy/travel-form',
+    'tsjippy/accommodation-form',
     [
-        'title'       => __('Travel Form', 'tsjippy'),
-        'description' => __('Travel request form', 'tsjippy'),
+        'title'       => __('Accommodation Form', 'tsjippy'),
+        'description' => __('Accommodation Booking Form', 'tsjippy'),
         'categories'  => ['tsjippy'],
         'content'     => <<<'HTML'
+<!-- wp:tsjippy-forms/formbuilder {"postId":30236,"submission_message":"Successfully received your request","name":"Accommodation Reservations","auto_archive_element":"0","auto_archive_value":"%today%-3days","metadata":{"categories":["tsjippy"],"patternName":"tsjippy/accommodation-form","name":"Accommodation Form"},"blockId":"19"} -->
+<form method="post" target="_self" autocomplete="true" data-formname="Accommodation Reservations" data-blockid="19" class="wp-block-tsjippy-forms-formbuilder"><input type="hidden" name="block-id" value="19"/><input type="hidden" name="post-id" value="30236"/><!-- wp:tsjippy-forms/label {"text":"Your name","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"295","formbuilderChild":true} -->
+<label data-blockid="295"><h4 class="label-text">Your name</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"name","inputAttributes":{"list":"usernames"},"dynamic_value":"display_name","required":true,"blockId":"296","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="name" required data-blockid="296" autocomplete="on" list="usernames" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Your e-mail","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"email"},"blockId":"297","formbuilderChild":true} -->
+<label data-blockid="297"><h4 class="label-text">Your e-mail</h4><br/><!-- wp:tsjippy-forms/input {"type":"email","name":"email","inputAttributes":{"list":"useremails"},"dynamic_value":"user_email","blockId":"298","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="email" name="email" data-blockid="298" autocomplete="on" list="useremails" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Your phonenumber(s)","childAttr":{"multiple":true,"add_button_content":"+","remove_button_content":"-","type":"tel"},"blockId":"299","formbuilderChild":true} -->
+<label data-blockid="299"><h4 class="label-text">Your phonenumber(s)</h4><br/><!-- wp:tsjippy-forms/input {"type":"tel","name":"phonenumbers","dynamic_value":"phonenumbers","multiple":true,"required":true,"blockId":"0ff0cd7d-d927-4d37-a22c-04e07fd49e04","formbuilderChild":true} -->
+<div class="wp-block-tsjippy-forms-input option-wrapper"><ul class="list-selection-list">%value-placeholder%</ul><div class="multi-text-input-wrapper"><input class="wp-block-tsjippy-forms-input" type="tel" name="phonenumbers" required data-blockid="0ff0cd7d-d927-4d37-a22c-04e07fd49e04" autocomplete="on" value="%value-placeholder%"/><button type="button" class="small add-list-selection hidden">add</button></div></div>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:heading {"level":4,"blockId":"301","formbuilderChild":true} -->
+<h4 class="wp-block-heading">Which accommodation do you want to book?<br>(Select a location to display a calendar of availabilities)</h4>
+<!-- /wp:heading -->
+
+<!-- wp:tsjippy-bookings/accomodation {"bookingSubjects":[24522,24523,24524,24530],"name":"accommodation","blockId":"489","formbuilderChild":true} /-->
+
+<!-- wp:tsjippy-forms/label {"text":"Number of adults","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"number"},"blockId":"309","formbuilderChild":true} -->
+<label data-blockid="309"><h4 class="label-text">Number of adults</h4><br/><!-- wp:tsjippy-forms/input {"type":"number","name":"adults","required":true,"blockId":"310","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="number" name="adults" required data-blockid="310" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Number of children","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"number"},"blockId":"311","formbuilderChild":true} -->
+<label data-blockid="311"><h4 class="label-text">Number of children</h4><br/><!-- wp:tsjippy-forms/input {"type":"number","name":"children","required":true,"blockId":"312","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="number" name="children" required data-blockid="312" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Any remarks","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"textarea"},"blockId":"317","formbuilderChild":true} -->
+<label data-blockid="317"><h4 class="label-text">Any remarks</h4><br/><!-- wp:tsjippy-forms/input {"type":"textarea","name":"remarks","blockId":"318","formbuilderChild":true} -->
+<textarea class="wp-block-tsjippy-forms-input" type="textarea" name="remarks" data-blockid="318" autocomplete="on">%value-placeholder%</textarea>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/input {"type":"radio","name":"payment status","options":[{"value":"paid","label":"Paid"},{"value":"not paid","label":"Not paid"},{"value":"free","label":"Free"},{"value":"Internal","label":"Internal"}],"blockId":"1433","hidden":true,"formbuilderChild":true} -->
+<div class="wp-block-tsjippy-forms-input checkbox-wrapper" data-blockid="1433"><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="radio" name="payment status" value="paid" class="formbuilder" autocomplete="on" data-blockid="1433"/>Paid</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="radio" name="payment status" value="not paid" class="formbuilder" autocomplete="on" data-blockid="1433"/>Not paid</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="radio" name="payment status" value="free" class="formbuilder" autocomplete="on" data-blockid="1433"/>Free</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="radio" name="payment status" value="Internal" class="formbuilder" autocomplete="on" data-blockid="1433"/>Internal</label>%options-placeholder%</div>
+<!-- /wp:tsjippy-forms/input -->
+
+<!-- wp:tsjippy-forms/input {"type":"text","name":"payment_amount","blockId":"1434","hidden":true,"formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="payment_amount" data-blockid="1434" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input -->
+
+<!-- wp:tsjippy-forms/input {"type":"textarea","name":"payment_details","inputAttributes":{"value":"Please pay to:Account Name:   SIMAccount Number: 1010365516Bank:Â           Zenith bankDescription:    Stay of %name% in %accommodation% from %start-date% till %end-date%"},"dynamic_value":"Account Name:      SIMrnAccount Number:  1010365516rnBank:                         Zenith bankrnDescription:             Stay of %name% in %subject% %duration%","blockId":"1435","hidden":true,"formbuilderChild":true} -->
+<textarea class="wp-block-tsjippy-forms-input" type="textarea" name="payment_details" data-blockid="1435" autocomplete="on">Please pay to:Account Name:   SIMAccount Number: 1010365516Bank:Â           Zenith bankDescription:    Stay of %name% in %accommodation% from %start-date% till %end-date%</textarea>
+<!-- /wp:tsjippy-forms/input -->
+
+<!-- wp:tsjippy-forms/input {"type":"text","name":"price","blockId":"1436","hidden":true,"formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="price" data-blockid="1436" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input -->
+
+<!-- wp:tsjippy-forms/input {"type":"number","name":"user-id","dynamic_value":"user_id","blockId":"490","hidden":true,"formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="number" name="user-id" data-blockid="490" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input -->
+
+<!-- wp:tsjippy-forms/datalist {"id":"usernames","options_dynamic":"all_users","blockId":"491","formbuilderChild":true} -->
+<datalist class="wp-block-tsjippy-forms-datalist" id="usernames" data-blockid="491">%options-placeholder%</datalist>
+<!-- /wp:tsjippy-forms/datalist -->
+
+<!-- wp:tsjippy-forms/datalist {"id":"useremails","options_dynamic":"emails","blockId":"492","formbuilderChild":true} -->
+<datalist class="wp-block-tsjippy-forms-datalist" id="useremails" data-blockid="492">%options-placeholder%</datalist>
+<!-- /wp:tsjippy-forms/datalist -->
+
+<!-- wp:tsjippy-forms/datalist {"id":"userphones","options_dynamic":"All phonenumbers","blockId":"493","formbuilderChild":true} -->
+<datalist class="wp-block-tsjippy-forms-datalist" id="userphones" data-blockid="493">%options-placeholder%</datalist>
+<!-- /wp:tsjippy-forms/datalist --><div class="submit-wrapper"><button type="button" class="button form-submit">Submit Accommodation Reservations</button></div></form>
+<!-- /wp:tsjippy-forms/formbuilder -->
+HTML,
+    ]
+);
+
+/**
+ * Generics form
+ */
+register_block_pattern(
+    'tsjippy/generics-form',
+    [
+        'title'       => __('Generics Form', 'tsjippy'),
+        'description' => __('User Details Form', 'tsjippy'),
+        'categories'  => ['tsjippy'],
+        'content'     => <<<'HTML'
+<!-- wp:tsjippy-forms/formbuilder {"postId":29989,"submission_message":"Succesfully saved your generic info","submission_id":false,"name":"Generic info","user_meta":true,"auto_archive_element":"0","blockId":"10"} -->
+<form method="post" target="_self" autocomplete="true" data-formname="Generic info" data-blockid="10" class="wp-block-tsjippy-forms-formbuilder"><input type="hidden" name="block-id" value="10"/><input type="hidden" name="post-id" value="29989"/><!-- wp:tsjippy-forms/label {"text":"First Name","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"124","formbuilderChild":true} -->
+<label data-blockid="124"><h4 class="label-text">First Name</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"first_name","required":true,"blockId":"125","formbuilderChild":true,"remindByEmail":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="first_name" required data-blockid="125" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Last Name","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"126","formbuilderChild":true} -->
+<label data-blockid="126"><h4 class="label-text">Last Name</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"last_name","required":true,"blockId":"127","formbuilderChild":true,"remindByEmail":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="last_name" required data-blockid="127" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Primary E-mail Address","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"email"},"blockId":"128","formbuilderChild":true} -->
+<label data-blockid="128"><h4 class="label-text">Primary E-mail Address</h4><br/><!-- wp:tsjippy-forms/input {"type":"email","name":"user_email","required":true,"blockId":"129","formbuilderChild":true,"notChild":true,"remindByEmail":true} -->
+<input class="wp-block-tsjippy-forms-input" type="email" name="user_email" required data-blockid="129" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Secondary E-mail Address","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"email"},"blockId":"130","formbuilderChild":true} -->
+<label data-blockid="130"><h4 class="label-text">Secondary E-mail Address</h4><br/><!-- wp:tsjippy-forms/input {"type":"email","name":"email","required":true,"blockId":"131","formbuilderChild":true,"notChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="email" name="email" required data-blockid="131" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Birthday","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"date"},"blockId":"132","formbuilderChild":true} -->
+<label data-blockid="132"><h4 class="label-text">Birthday</h4><br/><!-- wp:tsjippy-forms/input {"type":"date","name":"birthday","inputAttributes":{"max":"%today%"},"required":true,"blockId":"133","formbuilderChild":true,"remindByEmail":true} -->
+<input class="wp-block-tsjippy-forms-input" type="date" name="birthday" required data-blockid="133" autocomplete="on" max="%today%" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/input {"type":"checkbox","name":"age_preference","options":[{"value":"Hide_age","label":"Hide my age"}],"blockId":"134","formbuilderChild":true} -->
+<div class="wp-block-tsjippy-forms-input checkbox-wrapper" data-blockid="134"><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="checkbox" name="age_preference" value="Hide_age" class="formbuilder" autocomplete="on" data-blockid="134"/>Hide my age</label>%options-placeholder%</div>
+<!-- /wp:tsjippy-forms/input -->
+
+<!-- wp:tsjippy-forms/label {"text":"Gender","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"radio"},"blockId":"135","formbuilderChild":true} -->
+<label data-blockid="135"><h4 class="label-text">Gender</h4><br/><!-- wp:tsjippy-forms/input {"type":"radio","name":"gender","options":[{"value":"Male","label":"Male"},{"value":"Female","label":"Female"}],"onlyOnInherited":true,"blockId":"136","formbuilderChild":true} -->
+<div class="wp-block-tsjippy-forms-input checkbox-wrapper" data-blockid="136"><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="radio" name="gender" value="Male" class="formbuilder" autocomplete="on" data-blockid="136"/>Male</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="radio" name="gender" value="Female" class="formbuilder" autocomplete="on" data-blockid="136"/>Female</label>%options-placeholder%</div>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Phonenumber","childAttr":{"multiple":true,"add_button_content":"+","remove_button_content":"-","type":"tel"},"blockId":"138","formbuilderChild":true} -->
+<label data-blockid="138"><h4 class="label-text">Phonenumber</h4><br/><!-- wp:tsjippy-forms/input {"type":"tel","name":"phonenumbers","inputAttributes":{"pattern":"+[0-9]{9,}"},"multiple":true,"required":true,"blockId":"74d89683-81a1-453f-99dc-ab34289ce334","formbuilderChild":true,"notChild":true,"remindByEmail":true} -->
+<div class="wp-block-tsjippy-forms-input option-wrapper"><ul class="list-selection-list">%value-placeholder%</ul><div class="multi-text-input-wrapper"><input class="wp-block-tsjippy-forms-input" type="tel" name="phonenumbers" required data-blockid="74d89683-81a1-453f-99dc-ab34289ce334" autocomplete="on" pattern="+[0-9]{9,}" value="%value-placeholder%"/><button type="button" class="small add-list-selection hidden">add</button></div></div>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:button {"blockId":"154","formbuilderChild":true} -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Advanced options</a></div>
+<!-- /wp:button -->
+
+<!-- wp:heading {"level":4,"blockId":"155","hidden":true,"formbuilderChild":true} -->
+<h4 class="wp-block-heading">Privacy preferences</h4>
+<!-- /wp:heading -->
+
+<!-- wp:tsjippy-forms/input {"type":"checkbox","name":"privacy_preference","options":[{"value":"hide_profile_picture","label":"Hide my profile picture"},{"value":"hide_name","label":"Hide my name"},{"value":"hide_location","label":"Hide my address"},{"value":"hide_phone","label":"Hide my phone numbers"},{"value":"hide_ministry","label":"Hide my ministries"},{"value":"hide_birthday","label":"Hide my birthday"},{"value":"hide_age","label":"Hide my age"},{"value":"hide_anniversary","label":"Hide my SIM Nigeria anniversary"}],"blockId":"157","hidden":true,"formbuilderChild":true} -->
+<div class="wp-block-tsjippy-forms-input checkbox-wrapper" data-blockid="157"><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="checkbox" name="privacy_preference" value="hide_profile_picture" class="formbuilder" autocomplete="on" data-blockid="157"/>Hide my profile picture</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="checkbox" name="privacy_preference" value="hide_name" class="formbuilder" autocomplete="on" data-blockid="157"/>Hide my name</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="checkbox" name="privacy_preference" value="hide_location" class="formbuilder" autocomplete="on" data-blockid="157"/>Hide my address</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="checkbox" name="privacy_preference" value="hide_phone" class="formbuilder" autocomplete="on" data-blockid="157"/>Hide my phone numbers</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="checkbox" name="privacy_preference" value="hide_ministry" class="formbuilder" autocomplete="on" data-blockid="157"/>Hide my ministries</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="checkbox" name="privacy_preference" value="hide_birthday" class="formbuilder" autocomplete="on" data-blockid="157"/>Hide my birthday</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="checkbox" name="privacy_preference" value="hide_age" class="formbuilder" autocomplete="on" data-blockid="157"/>Hide my age</label><label class="checkbox-wrapper-label" style="margin-right:5px"><input type="checkbox" name="privacy_preference" value="hide_anniversary" class="formbuilder" autocomplete="on" data-blockid="157"/>Hide my SIM Nigeria anniversary</label>%options-placeholder%</div>
+<!-- /wp:tsjippy-forms/input -->
+
+<!-- wp:tsjippy-forms/label {"text":"Nickname","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"158","hidden":true,"formbuilderChild":true} -->
+<label data-blockid="158"><h4 class="label-text">Nickname</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"nickname","blockId":"159","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="nickname" data-blockid="159" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/input {"type":"text","name":"display_name","blockId":"160","hidden":true,"formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="display_name" data-blockid="160" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --><div class="submit-wrapper"><button type="button" class="button form-submit">Submit Generic info</button></div></form>
+<!-- /wp:tsjippy-forms/formbuilder -->
+HTML,
+    ]
+);
+
+/**
+ * family form
+ */
+register_block_pattern(
+    'tsjippy/family-form',
+    [
+        'title'       => __('Family Form', 'tsjippy'),
+        'description' => __('Family Details Form', 'tsjippy'),
+        'categories'  => ['tsjippy'],
+        'content'     => <<<'HTML'
+<!-- wp:tsjippy-forms/label {"text":"Family name","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"onlyOnInherited":true,"formbuilderChild":true} -->
+<label><h4 class="label-text">Family name</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"family_name","dynamic_value":"last_name","onlyOnInherited":true,"formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="family_name" autocomplete="on" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/label {"text":"Upload a family picture","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":""},"onlyOnInherited":true,"formbuilderChild":true} -->
+<label><h4 class="label-text">Upload a family picture</h4><br/><!-- wp:tsjippy-forms/file {"name":"family_picture","formbuilderChild":true} /--></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:tsjippy-forms/formbuilder {"postId":29991,"submission_message":"Succesfully saved your family info","submission_id":false,"name":"Family","user_meta":true,"auto_archive_element":"0","blockId":"12"} -->
+<form method="post" target="_self" autocomplete="true" data-formname="Family" data-blockid="12" class="wp-block-tsjippy-forms-formbuilder"><input type="hidden" name="block-id" value="12"/><input type="hidden" name="post-id" value="29991"/><!-- wp:heading {"level":4,"onlyOnInherited":true,"blockId":"171","formbuilderChild":true} -->
+<h4 class="wp-block-heading">Spouse</h4>
+<!-- /wp:heading -->
+
+<!-- wp:tsjippy-forms/select {"name":"partner","options_dynamic":"Potential spouses","dynamic_selected_value":"partner","onlyOnInherited":true,"blockId":"172","formbuilderChild":true} -->
+<select class="wp-block-tsjippy-forms-select" name="partner" data-blockid="172"><option value="">Select an option</option><option></option>%options-placeholder%</select>
+<!-- /wp:tsjippy-forms/select -->
+
+<!-- wp:tsjippy-forms/label {"text":"Married since","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"date"},"onlyOnInherited":true,"blockId":"173","hidden":true,"formbuilderChild":true} -->
+<label data-blockid="173"><h4 class="label-text">Married since</h4><br/><!-- wp:tsjippy-forms/input {"type":"date","name":"weddingdate","inputAttributes":{"max":"%today%"},"blockId":"174","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="date" name="weddingdate" data-blockid="174" autocomplete="on" max="%today%" value="%value-placeholder%"/>
+<!-- /wp:tsjippy-forms/input --></label>
+<!-- /wp:tsjippy-forms/label -->
+
+<!-- wp:heading {"level":4,"onlyOnInherited":true,"blockId":"175","formbuilderChild":true} -->
+<h4 class="wp-block-heading">Child</h4>
+<!-- /wp:heading -->
+
+<!-- wp:tsjippy-forms/select {"name":"children","options_dynamic":"Potential children","multiple":true,"dynamic_selected_value":"children","onlyOnInherited":true,"blockId":"176","formbuilderChild":true} -->
+<select class="wp-block-tsjippy-forms-select" name="children" multiple data-blockid="176"><option value="">Select an option</option><option></option>%options-placeholder%</select>
+<!-- /wp:tsjippy-forms/select -->
+
+<!-- wp:heading {"level":4,"onlyOnInherited":true,"blockId":"1412","formbuilderChild":true} -->
+<h4 class="wp-block-heading">Siblings</h4>
+<!-- /wp:heading -->
+
+<!-- wp:tsjippy-forms/select {"name":"siblings","options_dynamic":"all_users","multiple":true,"dynamic_selected_value":"siblings","onlyOnInherited":true,"blockId":"1413","formbuilderChild":true} -->
+<select class="wp-block-tsjippy-forms-select" name="siblings" multiple data-blockid="1413"><option value="">Select an option</option><option></option>%options-placeholder%</select>
+<!-- /wp:tsjippy-forms/select --><div class="submit-wrapper"><button type="button" class="button form-submit">Submit Family</button></div></form>
+<!-- /wp:tsjippy-forms/formbuilder -->
 HTML,
     ]
 );
