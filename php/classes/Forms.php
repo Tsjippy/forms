@@ -164,8 +164,14 @@ class Forms
             $this->editRights        = false;
         }
 
-        // $this->userId is the user id for whom the form is submitted
-        $this->userId    = $userId === 0 ? $this->user->ID : $userId;
+        /**
+         * If $userId is set, store it and and provide the user as context
+         */
+        if(!empty($userId)){
+            $this->userId    = $userId;
+
+            add_filter( 'render_block_context', [$this , 'addUserContext'], 10, 3);
+        }
 
         if(!empty($blockId) || $postId != -1){
             $this->getForm();
@@ -177,6 +183,19 @@ class Forms
 
         $this->defaultArrayValues     = [];
         $this->defaultValues          = [];
+    }
+
+    /**
+     * Add the user we want to see results for as context
+     * 
+     * @param   array        $context
+     * @param   array        $parsedBlock
+     * @param   \WP_Block|null   $parentBlock
+     */
+    public function addUserContext($context, $parsedBlock, $parentBlock ){
+        $context['userId']  = $this->userId;
+
+        return $context;
     }
 
     /**
@@ -689,8 +708,12 @@ class Forms
      * 
      * @return string   The html
      */
-    public function showForm(){
-        return render_block($this->formBlock);
+    public function showForm($echo = true){
+        if($echo){
+            echo render_block($this->formBlock);
+        }else{
+            return render_block($this->formBlock);
+        }
     }
 
     /**

@@ -171,7 +171,7 @@ add_filter( 'pre_render_block', function($skip, $parsedBlock, $parentBlock ){
 }, 10, 3);
 
 // Hook into the rendering of ALL blocks
-add_filter( 'render_block', __NAMESPACE__.'\addBlockIdAttribute', 10, 3 );
+add_filter( 'render_block', __NAMESPACE__.'\updateBlockHtml', 10, 3 );
 
 /**
  * Function to render multi-inputs
@@ -251,29 +251,13 @@ function renderMultiInput($values, $blockContent, $block, $label = null){
 }
 
 /**
- * Adds the block id as data attribute on the frontend to be used in js
+ * Fill the form with userdata
  * 
  * @param   string  $blockContent
  * @param   array   $block
+ * @param   mixed   $defaultValue   value or array of values
  */
-function addBlockIdAttribute( $blockContent, $block, $instance ) {
-    /**
-     * Fill with dynamic data
-     */
-    $forms  = new Forms();
-
-    $forms->buildDefaultsArray();
-
-    $defaultValues  = array_merge($forms->defaultArrayValues, $forms->defaultValues);
-
-    /**
-     * Set default value
-     */
-    if(empty($block['attrs']['dynamic_value'])){
-        $defaultValue = $defaultValues[$block['attrs']['name'] ?? ''] ?? '';
-    }else{
-        $defaultValue = $defaultValues[$block['attrs']['dynamic_value']] ?? '';
-    }
+function preFillForm($blockContent, $block, $defaultValue){
 
     /**
      * Render nested blocks of labels
@@ -327,10 +311,19 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
         }
         $blockContent = str_replace('%value-placeholder%', $defaultValue, $blockContent);
     }
-    
-    /**
-     * Add the options
-     */
+
+    return $blockContent;
+}
+
+/**
+ * Adds dynamic options to datalists and selects
+ * Selects the selected option in a select
+ * 
+ * @param   string  $blockContent
+ * @param   array   $block
+ * @param   mixed   $defaultValue   value or array of values
+ */
+function addDataAndSelectOptions($blockContent, $block, $defaultValue){
     $options    = [];
     if(empty($block['attrs']['options_dynamic'])){
         $optionData = '';
@@ -338,41 +331,86 @@ function addBlockIdAttribute( $blockContent, $block, $instance ) {
         $optionData = $multi[$block['attrs']['options_dynamic']] ?? [];
     }
 
-    if(!empty($optionData)){
-        foreach($optionData as $key => $value){
-            // Data list
-            if($block['blockName'] == "tsjippy-forms/datalist"){
-                $option = "<option dataset-value='$key' ";
-                if(is_array($value)){
-                    $option .= "value='{$value['value']}'>{$value['display']}</option>";
-                }else{
-                    $option .= "value='$value'></option>";
-                }
-            }else{
-                $selected   = '';
+    if(empty($optionData)){
+        return str_replace('%options-placeholder%', '', $blockContent);
+    }
 
-                /**
-                 * Determine the selected option
-                 */
-                if(
-                    $defaultValue   == $key &&  
+    foreach($optionData as $key => $value){
+        // Data list
+        if($block['blockName'] == "tsjippy-forms/datalist"){
+            $option = "<option dataset-value='$key' ";
+            if(is_array($value)){
+                $option .= "value='{$value['value']}'>{$value['display']}</option>";
+            }else{
+                $option .= "value='$value'></option>";
+            }
+        }
+        
+        /**
+         * Select dropdown
+         */
+        else{
+            $selected   = '';
+
+            /**
+             * Determine if selected
+             */
+            if(
+                $defaultValue   == $key &&  
+                (
+                    $block['blockName'] == "tsjippy-forms/select" ||
                     (
-                        $block['blockName'] == "tsjippy-forms/select" ||
-                        (
-                            $block['blockName'] == "tsjippy-forms/input" &&
-                            in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])
-                        )
-                    ) 
-                ){
-                    $selected = 'selected="selected"';
-                }
-                $option = "<option value='$key' $selected>$value</option>";
+                        $block['blockName'] == "tsjippy-forms/input" &&
+                        in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])
+                    )
+                ) 
+            ){
+                $selected = 'selected="selected"';
             }
 
-            $options[] = $option;
+            // The option
+            $option = "<option value='$key' $selected>$value</option>";
         }
+
+        $options[] = $option;
     }
-    $blockContent = str_replace('%options-placeholder%', implode("\n", $options), $blockContent);
+    
+    return str_replace('%options-placeholder%', implode("\n", $options), $blockContent);
+}
+
+/**
+ * Adds the block id as data attribute on the frontend to be used in js
+ * 
+ * @param   string  $blockContent
+ * @param   array   $block
+ * @param   \WP_Block $instance      The block instance.
+ */
+function updateBlockHtml( $blockContent, $block, $instance ) {
+    
+    $forms  = new Forms(userId: $instance->context['userId'] ?? 0);
+
+    $forms->buildDefaultsArray();
+
+    $defaultValues  = array_merge($forms->defaultArrayValues, $forms->defaultValues);
+
+    /**
+     * Set default value
+     */
+    if(empty($block['attrs']['dynamic_value'])){
+        $defaultValue = $defaultValues[$block['attrs']['name'] ?? ''] ?? '';
+    }else{
+        $defaultValue = $defaultValues[$block['attrs']['dynamic_value']] ?? '';
+    }
+
+    /**
+     * Fill with dynamic data
+     */
+    $blockContent   = preFillForm($blockContent, $block, $defaultValue);
+    
+    /**
+     * Add the options
+     */
+    $blockContent   = addDataAndSelectOptions($blockContent, $block, $defaultValue);
 
     /**
      * Load dynamic forms script

@@ -5,8 +5,6 @@ export const Multiple = ( props ) => {
     const removeText  = props?.attributes?.remove_button_content ?? '-';
     const prefill     = props?.prefill ?? {};
 
-    console.log('Multiple prefill', prefill);
-
     let value =
         prefill?.data?.multi?.[props?.attributes?.dynamic_value || props?.attributes?.name || '']
         ?? prefill?.data?.single?.[props?.attributes?.dynamic_value || props?.attributes?.name || '']
