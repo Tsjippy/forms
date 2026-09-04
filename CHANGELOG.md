@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- auto convert image and file input to file block
 
 ### Changed
 
