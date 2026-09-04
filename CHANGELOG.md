@@ -2,15 +2,20 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- auto convert image and file input to file block
-- travelform block pattern
-- more block patterns
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [11.9.9] - 2026-09-04
+
+
+### Added
+- auto convert image and file input to file block
+- travelform block pattern
+- more block patterns
 
 ## [11.9.8] - 2026-09-03
 
