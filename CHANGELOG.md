@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- url for children
 
 ### Updated
+
+## [12.0.0] - 2026-09-05
+
+
+### Fixed
+- url for children
 
 ## [11.9.9] - 2026-09-04
 
