@@ -506,7 +506,7 @@ class FormReminders extends Forms
         if (!empty($childId)) {
             $childName    = get_user($childId)->first_name;
             $name        .= " for $childName";
-            $formUrl     .= add_query_arg('child', $childId, $formUrl); 
+            $formUrl     = add_query_arg('child', $childId, $formUrl); 
         }
 
         /**
