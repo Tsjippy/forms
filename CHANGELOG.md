@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- allow checkoxes one per line
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [12.0.1] - 2026-09-06
+
+
+### Added
+- allow checkoxes one per line
 
 ## [12.0.0] - 2026-09-05
 
