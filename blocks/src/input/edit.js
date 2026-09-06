@@ -140,7 +140,7 @@ export default function Edit({
             <>
                 <ToggleControl
                     label={__(
-                        'Each option on its own line',
+                        'One option per line',
                         'tsjippy'
                     )}
                     checked={!!attributes.radioNewLine}
