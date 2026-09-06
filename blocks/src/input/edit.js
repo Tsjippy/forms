@@ -138,6 +138,16 @@ export default function Edit({
             attributes.type
         ) ? (
             <>
+                <ToggleControl
+                    label={__(
+                        'Each option on its own line',
+                        'tsjippy'
+                    )}
+                    checked={!!attributes.radioNewLine}
+                    onChange={(radioNewLine) =>
+                        setAttributes({ radioNewLine })
+                    }
+                />
                 <h4>Static Options</h4>
 				<AddOptions
 					attributes={attributes}

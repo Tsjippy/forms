@@ -327,6 +327,10 @@ return array(
 				'default' => array(
 					
 				)
+			),
+			'radioNewLine' => array(
+				'type' => 'boolean',
+				'default' => false
 			)
 		)
 	),

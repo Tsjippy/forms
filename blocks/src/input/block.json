@@ -70,6 +70,10 @@
 		"roles": {
 			"type": "array",
 			"default": []
+		},
+		"radioNewLine": {
+			"type": "boolean",
+			"default": false
 		}
 	}
 }

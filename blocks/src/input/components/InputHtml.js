@@ -53,6 +53,7 @@ export function InputHtml({
                 data-blockid={attributes.blockId}
             >
                 {options.map((option, index) => (
+                    <>
                     <label
                         className={`checkbox-wrapper-label`}
                         key={`${option.value}-${index}`}
@@ -60,7 +61,7 @@ export function InputHtml({
                     >
                         <input
                             type={attributes.type}
-                            name={attributes.name}
+                            name={`${attributes.name}${attributes.type === 'checkbox' ? '[]' : ''}`}
                             value={option.value}
                             className="formbuilder"
                             autoComplete="on"
@@ -71,6 +72,9 @@ export function InputHtml({
                         />
                         {__(option.label, 'tsjippy')}
                     </label>
+
+                    {attributes.radioNewLine && <br />}
+                    </>
                 ))}
                 { isSaving && "%options-placeholder%" }
             </div>
