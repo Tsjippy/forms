@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- allow checkoxes one per line
 
 ### Changed
 
