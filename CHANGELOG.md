@@ -8,6 +8,7 @@
 
 ### Fixed
 - obey not required for child settings
+- table action
 
 ### Updated
 
