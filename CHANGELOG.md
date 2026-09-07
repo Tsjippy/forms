@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- obey not required for child settings
 
 ### Updated
 
