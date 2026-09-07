@@ -586,7 +586,7 @@ class Forms
         $posts = TSJIPPY\getFromDb(
             'all_forms',
             'forms',
-            "SELECT * FROM %i where post_content like %s",
+            "SELECT * FROM %i where post_content like %s and post_status='publish'",
             $wpdb->posts,
             $likeString
         );

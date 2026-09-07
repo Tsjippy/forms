@@ -410,7 +410,10 @@ class FormReminders extends Forms
      */
     public function getRequiredBlockReminders($userId)
     {
-        $blocksNeedingInput   = [];
+        $family             = new TSJIPPY\FAMILY\Family();
+        $isChild            = $family->isChild($userId);
+
+        $blocksNeedingInput = [];
 
         // Loop over all required blocks
         foreach ($this->requiredMetaBlocks as $block) {
@@ -431,13 +434,17 @@ class FormReminders extends Forms
                             !$inverse && empty($overlappingRoles)   // We have none of the roles so it does not apply to us
                         ) ||
                         (
-                            $inverse && !empty($overlappingRoles)   // We have one of the excludion roles so is does not apply to us
+                            $inverse && !empty($overlappingRoles)   // We have one of the excluding roles so is does not apply to us
                         )
                     )
                 ) ||
                 (
                     !empty($warningCondition) && 
                     !$this->checkIfConditionsAppliesToUser($warningCondition, $userId)
+                ) ||
+                (
+                    $isChild    &&
+                    $block->block['attrs']['notChild']
                 )
             ) {
                 continue;
