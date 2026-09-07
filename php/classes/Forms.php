@@ -524,15 +524,13 @@ class Forms
      */
     public function reset(){
         // Reset form data
-        $this->formData->blockId = null;
-        $this->formData->postId = null;
-        $this->formData->post   = null;
+        $this->formData     = new stdClass();
 
-        $this->blockMapping   = [];
+        $this->blockMapping = [];
 
-        $this->formBlocks     = [];
+        $this->formBlocks   = [];
 
-        $this->formBlock        = [];
+        $this->formBlock    = [];
     }
 
     /**
@@ -596,7 +594,7 @@ class Forms
 
             $this->forms[]   = [
                 'formData'  => clone($this->formData),
-                'blocks'  => $this->formBlocks,
+                'blocks'    => $this->formBlocks,
                 'formBlock' => $this->formBlock,
             ];
         }
@@ -658,14 +656,14 @@ class Forms
         $this->formData->postId = $post->ID;
 
         if(empty($blockId)){
-            $blockId    = $this->formData->blockId;
+            $blockId    = $this->formData->blockId ?? 0;
         }
 
         $blocks = parse_blocks($post->post_content);
 
         foreach($blocks as $block){
             if(
-                ($block['attrs']['blockId'] ?? '') == $blockId ||               // This is the block we need
+                ($block['attrs']['blockId'] ?? '') === $blockId ||               // This is the block we need
                 (
                     empty($blockId) &&
                     $block['blockName'] == "tsjippy-forms/formbuilder"  // Just take the first form on the page

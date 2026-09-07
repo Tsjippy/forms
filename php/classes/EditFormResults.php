@@ -193,8 +193,6 @@ class EditFormResults extends DisplayFormResults
             return false;
         }
 
-        global $wpdb;
-
         // Add the index to the archived indexes
         if ($archive) {
             $result = TSJIPPY\insertInDb(
@@ -251,8 +249,6 @@ class EditFormResults extends DisplayFormResults
      */
     public function archiveSubmission($archive, $subId = null)
     {
-        global $wpdb;
-
         if (is_numeric($this->submissionId)) {
             $submissionId    = $this->submissionId;
         } elseif (!empty($this->submission->id)) {
@@ -323,14 +319,14 @@ class EditFormResults extends DisplayFormResults
         //loop over all the forms
         foreach ($this->forms as $form) {
             //check if auto archive is turned on for this form
-            if (empty($form->auto_archive_block)) {
+            if (empty($form['formData']->auto_archive_block)) {
                 continue;
             }
 
-            $this->getForm($form->postId, $form->blockId);
+            $this->getForm($form['formData']->postId, $form['formData']->blockId);
 
-            $triggerId    = $form->auto_archive_block;
-            $triggerValue = $form->auto_archive_value;
+            $triggerId    = $form['formData']->auto_archive_block;
+            $triggerValue = $form['formData']->auto_archive_value;
 
             if (empty($triggerId) || empty($triggerValue)) {
                 continue;

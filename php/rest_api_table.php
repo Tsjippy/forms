@@ -27,6 +27,24 @@ function addFormResultUrls($urls)
     return $urls;
 }
 
+/**
+ * Check if the current user has the permission needed for the requested action
+ */
+function submissionPermission(){
+    $settings          = TSJIPPY\sanitize($_POST);
+
+    // Check if table edit permissions
+    $formsTable        = new DisplayFormResults($settings['shortcode-id']);
+    if( $formsTable->tableEditPermissions){
+        return true;
+    }
+
+    // Check if this is our own submission
+    $submissions    = $formsTable->getSubmissions(submissionId:$settings['submission-id']);
+
+    return ($submissions[0]->user_id ?? false) == get_current_user_id();
+}
+
 add_action('rest_api_init', __NAMESPACE__ . '\restApiInitTable');
 /**
  * Initializes the REST API routes for form table actions
@@ -136,11 +154,7 @@ function restApiInitTable()
         array(
             'methods'             => \WP_REST_Server::CREATABLE,
             'callback'            => __NAMESPACE__ . '\removeSubmission',
-            'permission_callback' => function () {
-                $settings          = TSJIPPY\sanitize($_POST);
-                $formsTable        = new DisplayFormResults();
-                return $formsTable->tableEditPermissions;
-            },
+            'permission_callback' => __NAMESPACE__ . '\submissionPermission',
             'args'                => array(
                 'submission-id'   => array(
                     'required'    => true,
@@ -159,11 +173,7 @@ function restApiInitTable()
         array(
             'methods'             => \WP_REST_Server::CREATABLE,
             'callback'            => __NAMESPACE__ . '\archiveSubmission',
-            'permission_callback' => function () {
-                $settings          = TSJIPPY\sanitize($_POST);
-                $formsTable        = new DisplayFormResults();
-                return $formsTable->tableEditPermissions;
-            },
+            'permission_callback' => __NAMESPACE__ . '\submissionPermission',
             'args'                => array(
                 'form-id'         => array(
                     'required'    => true,
@@ -188,7 +198,7 @@ function restApiInitTable()
         array(
             'methods'             => \WP_REST_Server::CREATABLE,
             'callback'            => __NAMESPACE__ . '\editValue',
-            'permission_callback' => '__return_true',     // Allow public access, the function itself will check if the user has permissions to edit the value or not
+            'permission_callback' => __NAMESPACE__ . '\submissionPermission',     // Allow public access, the function itself will check if the user has permissions to edit the value or not
             'args'                => array(
                 'submission-id'   => array(
                     'required'    => true,
@@ -216,7 +226,7 @@ function restApiInitTable()
         array(
             'methods'             => \WP_REST_Server::CREATABLE,
             'callback'            => __NAMESPACE__ . '\getInputHtml',
-            'permission_callback' => '__return_true',                        // Allow public access, the function itself will check if the user has permissions to view the input or not
+            'permission_callback' => __NAMESPACE__ . '\submissionPermission',                      // Allow public access, the function itself will check if the user has permissions to view the input or not
             'args'                => array(
                 'block-id'      => array(
                     'required'    => true,
@@ -417,12 +427,7 @@ function archiveSubmission()
         $archive = false;
     }
 
-    $subId        = null;
-    if (is_numeric($_POST['subid'] ?? '')) {
-        $subId        = $_POST['subid'];
-    }
-
-    $message    = $formTable->archiveSubmission($archive, $subId);
+    $message    = $formTable->archiveSubmission($archive, $requestData['subid'] ?? null);
 
     return $message;
 }

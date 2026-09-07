@@ -155,8 +155,7 @@ return array(
 			'actions' => array(
 				'type' => 'array',
 				'default' => array(
-					'archive',
-					'delete'
+					
 				)
 			),
 			'user_meta' => array(
@@ -169,7 +168,7 @@ return array(
 					
 				)
 			),
-			'auto_archive_element' => array(
+			'auto_archive_block' => array(
 				'type' => 'string',
 				'default' => ''
 			),

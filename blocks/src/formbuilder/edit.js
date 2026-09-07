@@ -31,6 +31,7 @@ import { EmailSettings } from './emails/EmailSettings.js';
 import { FormReminderPanel } from './form-reminders/FormReminderPanel.js';
 
 import * as forms from './../../../js/forms.js';
+import { Spinner } from '@wordpress/components';
 
 const TEMPLATE = [
     [
@@ -51,6 +52,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	/* Local state for available roles and actions fetched from the API. */
 	const [availableRoles, setAvailableRoles] = useState([]);
 	const [availableActions, setAvailableActions] = useState([]);
+	const [availableActionsLoading, setAvailableActionsLoading] = useState(true);
 	const [isEmailsFormVisible, setEmailsFormVisibility] = useState(false);
 	const [isRemindersFormVisible, setRemindersFormVisibility] = useState(false);
 
@@ -81,12 +83,18 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 	/* Load available actions from the server for the inspector panel. */
 	useEffect(() => {
+		setAvailableActionsLoading(true);
+
 		apiFetch({
 			path: `${tsjippy.restApiPrefix}/forms/get_form_actions`,
 			method: 'POST',
-		}).then((res) => {
-			setAvailableActions(Array.isArray(res) ? res : []);
-		});
+		})
+			.then((res) => {
+				setAvailableActions(Array.isArray(res) ? res : []);
+			})
+			.finally(() => {
+				setAvailableActionsLoading(false);
+			});
 	}, []);
 
 	/* Read inner blocks so the editor can inspect nested form blocks if needed. */
@@ -184,12 +192,18 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 	/* Build action checkboxes for the inspector panel. */
 	const ActionCheckboxes = () => {
+		if(availableActionsLoading){
+			return(
+				<Spinner/>
+			);
+		}
+
 		if (!availableActions.length) {
 			return <p>{__('No actions available.', 'tsjippy')}</p>;
 		}
 
 		return availableActions.map((action) => {
-			const actionSlug = action.slug || action.value || action;
+			const actionSlug  = action.slug || action.value || action;
 			const actionLabel = action.label || action.name || actionSlug;
 
 			return (

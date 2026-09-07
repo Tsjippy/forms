@@ -51,10 +51,7 @@
     },
     "actions": {
       "type": "array",
-      "default": [
-        "archive",
-        "delete"
-      ]
+      "default": []
     },
     "user_meta": {
       "type": "boolean",
@@ -64,7 +61,7 @@
       "type": "array",
       "default": []
     },
-    "auto_archive_element": {
+    "auto_archive_block": {
       "type": "string",
       "default": ""
     },
