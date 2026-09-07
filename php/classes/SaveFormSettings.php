@@ -20,10 +20,9 @@ class SaveFormSettings extends Forms
      * @param    bool    $all      Whether to show all blocks or only the visible ones
      * @param    int     $pageSize The number of blocks to show per page
      * @param    string  $postId   The post id to get the form for
-     * @param    string  $formUrl  The url of the form
      * @param    int     $userId   The user id to get the form for
      */
-    public function __construct($blockId='', $all=false, $pageSize=50, $postId='', $formUrl='', $userId=0)
+    public function __construct($blockId='', $all=false, $pageSize=50, $postId='', $userId=0)
     {
         parent::__construct(blockId: $blockId, all: $all, pageSize:$pageSize, postId:$postId, userId:$userId);
     }
@@ -31,9 +30,9 @@ class SaveFormSettings extends Forms
     /**
      * Prepares an data for storages in db
      *
-     * @param    string            $table        The table to insert/update the data into
+     * @param    string           $table       The table to insert/update the data into
      * @param     object|array    $data        The data to be stored
-     * @param    array            $where        The where clause for updates
+     * @param    array            $where       The where clause for updates
      * @param    array            $whereFormat The format of the where clause
      *
      * @return    array                        The data ready for db injection

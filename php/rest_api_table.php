@@ -112,7 +112,7 @@ function restApiInitTable()
             'callback'            => __NAMESPACE__ . '\saveTableSettings',
             'permission_callback' => function () {
                 $settings          = TSJIPPY\sanitize($_POST);
-                $formsTable        = new DisplayFormResults();
+                $formsTable        = new DisplayFormResults($settings['shortcode-id']);
                 return $formsTable->tableEditPermissions;
             },
             'args'                => array(
@@ -356,6 +356,7 @@ function saveColumnSettings($wpRest = [])
 function saveTableSettings()
 {
     $tableSettings     = TSJIPPY\sanitize($_POST['table-settings']);
+    $shortcodeId       =  (int) $_POST['shortcode-id'];
 
     // Check invalid filter names
     if (isset($tableSettings->filter)) {
@@ -372,7 +373,7 @@ function saveTableSettings()
     //update table settings
     $forms    = new SaveFormSettings();
 
-    $result = $forms->insertOrUpdateData($forms->shortcodeTable, $tableSettings, ['id' => (int) $_POST['shortcode-id']]);
+    $result = $forms->insertOrUpdateData($forms->shortcodeTable, $tableSettings, ['id' => $shortcodeId]);
 
     if (is_wp_error($result)) {
         return $result;
@@ -386,17 +387,18 @@ function saveTableSettings()
  */
 function removeSubmission()
 {
-    $formTable    = new EditFormResults(TSJIPPY\sanitize($_POST));
+    $settings     = TSJIPPY\sanitize($_POST);
+    $formTable    = new EditFormResults($settings['shortcode-id']);
 
-    $result        = $formTable->deleteSubmission((int) $_POST['submission-id']);
+    $result        = $formTable->deleteSubmission($settings['submission-id']);
 
     if (is_wp_error($result)) {
         return $result;
     }
 
-    do_action('tsjippy-forms-entry-removed', $formTable, (int) $_POST['submission-id']);
+    do_action('tsjippy-forms-entry-removed', $formTable, $settings['submission-id']);
 
-    return "Entry with id {$_POST['submission-id']} succesfully removed";
+    return "Entry with id {$settings['submission-id']} succesfully removed";
 }
 
 /**
@@ -406,8 +408,8 @@ function archiveSubmission()
 {
     $requestData                = TSJIPPY\sanitize($_POST);
     $formTable                  = new EditFormResults();
-    $formTable->submissionId    = (int) $_POST['submission-id'];
-    $action                     = TSJIPPY\sanitize($_POST['action']);
+    $formTable->submissionId    = $requestData['submission-id'];
+    $action                     = $requestData['action'];
 
     if ($action    == 'archive') {
         $archive = true;
@@ -433,7 +435,7 @@ function getInputHtml()
     $requestData = TSJIPPY\sanitize($_POST);
     $formTable   = new DisplayFormResults();
 
-    $formTable->parseSubmissions('', (int) $_POST['submission-id']);
+    $formTable->parseSubmissions('', $requestData['submission-id']);
 
     // Get the form id from the submission and load the form
     $formTable->getForm($formTable->submission->post_id, $formTable->submission->block_id);
@@ -442,7 +444,7 @@ function getInputHtml()
 
     $formTable->userId  = $userId;
 
-    $blockId          = (int) $_POST['block-id'];
+    $blockId          = $requestData['block-id'];
 
     $block            = $formTable->getBlockById($blockId);
 
@@ -450,7 +452,7 @@ function getInputHtml()
         return new \WP_Error('No block found', "No block found with id '$blockId'");
     }
 
-    $value        = $formTable->getSubmissionValue((int) $_POST['submission-id'], $blockId, isset($_POST['subid']) ? (int) $_POST['subid'] : null);
+    $value        = $formTable->getSubmissionValue($requestData['submission-id'], $blockId, $requestData['subid'] ?? null);
 
     // Get block html
     $html         = render_block($block);
@@ -473,18 +475,19 @@ function getInputHtml()
  */
 function editValue()
 {
-    $formTable               = new EditFormResults(TSJIPPY\sanitize($_POST));
+    $settings                = TSJIPPY\sanitize($_POST);
+    $formTable               = new EditFormResults();
 
-    $formTable->submissionId = (int) $_POST['submission-id'];
+    $formTable->submissionId = $settings['submission-id'];
 
-    $blockId               = (int) $_POST['block-id'];
+    $blockId                 = $settings['block-id'];
 
-    $subId                   = (int) $_POST['subid'];
+    $subId                   = $settings['subid'];
     if ($subId == '') {
         $subId    = null;
     }
 
-    $newValue                = json_decode(TSJIPPY\sanitize($_POST['new-value'], 'textarea_field'));
+    $newValue                = json_decode(TSJIPPY\sanitize($settings['new-value'], 'textarea_field'));
 
     $oldValue                = $formTable->getSubmissionValue($formTable->submissionId, $blockId, $subId);
 
@@ -502,9 +505,9 @@ function editValue()
     }
 
     //get transformed value
-    $block        = $formTable->getBlockById($blockId);
-    $submissions    = $formTable->getSubmissions('', $formTable->submissionId);
-    $transValue     = $formTable->transformInputData($newValue, $block, $submissions[0]);
+    $block       = $formTable->getBlockById($blockId);
+    $submissions = $formTable->getSubmissions('', $formTable->submissionId);
+    $transValue  = $formTable->transformInputData($newValue, $block, $submissions[0]);
 
     //send message back to js
     return [

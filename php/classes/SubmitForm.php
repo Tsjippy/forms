@@ -24,7 +24,7 @@ class SubmitForm extends SaveFormSettings
      */
     public function __construct($blockId='', $postId='', $all=false, $pageSize=50, $formUrl='', $userId=0)
     {
-        parent::__construct(blockId: $blockId, postId:$postId, all: $all, pageSize:$pageSize, formUrl:$formUrl, userId:$userId);
+        parent::__construct(blockId: $blockId, postId:$postId, all: $all, pageSize:$pageSize, userId:$userId);
     }
 
     /**

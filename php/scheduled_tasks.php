@@ -38,3 +38,9 @@ function formReminder()
 
     $forms->sendFormReminders();
 }
+
+
+add_action('init', function(){
+    //autoArchiveFormEntries();
+    //formReminder();
+});

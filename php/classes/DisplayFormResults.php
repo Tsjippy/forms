@@ -1785,31 +1785,6 @@ class DisplayFormResults extends SubmitForm
                                 $foundBlocks[$matches[1]] = $block->blockId;
                             }
                         }
-
-                        if (!empty($foundBlocks)) {
-                            ?>
-                            <div class="table-rights-wrapper">
-                                <h4>
-                                    Select fields where you want to create seperate rows for
-                                </h4>
-                                <?php
-
-                                foreach ($foundBlocks as $block => $id) {
-                                    $name    = ucfirst(strtolower(str_replace('_', ' ', $block)));
-
-                                    //Check which option is the selected one
-                                    ?>
-                                    <label>
-                                        <input type='checkbox' name='form-settings[split][<?php echo esc_attr($id); ?>]' value='1' <?php if (in_array($id, $this->formData->split_blocks)) echo 'checked'; ?>>
-                                        <?php echo esc_html($name); ?>
-                                    </label>
-                                    <br>
-                                    <?php
-                                }
-                                ?>
-                            </div>
-                            <?php
-                        }
                         ?>
                         <div class="table-rights-wrapper">
                             <h4>
@@ -1904,68 +1879,6 @@ class DisplayFormResults extends SubmitForm
                                     <?php if (!($this->tableSettings->archived ?? false)) echo 'checked'; ?>>
                                 No
                             </label>
-                        </div>
-
-                        <!-- We can define auto archive field both on table and on form settings-->
-                        <div class="table-rights-wrapper">
-                            <h4 class="label">
-                                Auto archive results
-                            </h4>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="form-settings[autoarchive]"
-                                    value="1"
-                                    <?php if ($this->tableSettings->autoarchive ?? false) echo 'checked'; ?>>
-                                Yes
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="form-settings[autoarchive]"
-                                    value="0"
-                                    <?php if (!($this->tableSettings->autoarchive ?? false)) echo 'checked'; ?>>
-                                No
-                            </label>
-                        </div>
-
-                        <div
-                            class='auto-archive-logic
-                            <?php if ($this->tableSettings->autoarchive ?? false) echo 'hidden'; ?>'>
-                            Auto archive a (sub) entry when field<br>
-                            <select name="form-settings[autoarchive-el]" class='inline' style="margin-right:10px;">
-                                <option value='' <?php if (empty($this->formData->autoarchive_el))  echo 'selected'; ?>>
-                                    ---
-                                </option>
-                                <?php
-
-                                foreach ($this->columnSettings as $key => $columnSetting) {
-                                    if (!is_array($columnSetting)) {
-                                        continue;
-                                    }
-
-                                    $name = $columnSetting['name'];
-
-                                    //Check which option is the selected one
-                                    if ($this->formData->autoarchive_el != '' && $this->formData->autoarchive_el == $key) {
-                                        $selected = 'selected="selected"';
-                                    } else {
-                                        $selected = '';
-                                    }
-                                ?>
-                                    <option
-                                        value='<?php echo esc_attr($key); ?>'
-                                        <?php if (($this->formData->autoarchive_el ?? '') == $key) {
-                                            echo 'selected';
-                                        } ?>>
-                                        <?php echo esc_html($name); ?>
-                                    </option>
-                                <?php
-                                }
-                                ?>
-                            </select>
-                            <label style="margin:0 10px;">equals</label>
-                            <input type='text' class='wide' name="form-settings[autoarchive-value]" value="<?php echo esc_attr($this->formData->autoarchive_value ?? ''); ?>" style='max-width:200px;'>
                         </div>
                     </div>
                 </div>
