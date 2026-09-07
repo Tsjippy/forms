@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- removed form settings from table settings screen
 
 ### Fixed
 - obey not required for child settings
