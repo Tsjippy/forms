@@ -4,13 +4,20 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [12.0.2] - 2026-09-07
+
+
+### Changed
 - removed form settings from table settings screen
 
 ### Fixed
 - obey not required for child settings
 - table action
-
-### Updated
 
 ## [12.0.1] - 2026-09-06
 

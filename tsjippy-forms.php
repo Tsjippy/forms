@@ -7,14 +7,14 @@ use TSJIPPY;
 /**
  * Plugin Name:          Tsjippy Forms
  * Description:          Versatile form builder
- * Version:              12.0.1
+ * Version:              12.0.2
  * Author:               Ewald Harmsen
  * AuthorURI:            harmseninnigeria.nl
  * Requires at least:    6.3
  * Requires PHP:         8.3
- * Tested up to:         7.0
+ * Tested up to:         7.1
  * Plugin URI:            https://github.com/Tsjippy/forms/
- * Tested:               7.0
+ * Tested:               7.1
  * TextDomain:            tsjippy
  * Requires Plugins:    
  * License: GPLv2 or later
