@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- show archived items button
 
 ### Updated
 
