@@ -19,8 +19,6 @@ class FormReminders extends Forms
 
     /**
      * Constructor
-     *
-     * @param   int $userId    The user id to get the reminders for
      */
     public function __construct()
     {
@@ -34,8 +32,6 @@ class FormReminders extends Forms
         
         // Get all blocks which should be submitted
         $this->getRequiredMetaBlocks();
-
-        $this->reminders  = [];
     }
 
     /**
@@ -235,6 +231,7 @@ class FormReminders extends Forms
      * Checks a given form for pending reminders
      *
      * @param   object  $formReminder   The form reminder object
+     * @param   int     $userId
      *
      * @return  void
      */
@@ -484,7 +481,7 @@ class FormReminders extends Forms
      * @param   string|object   $block       The block or block id to get the html for
      * @param   string          $type        The type of reminder to get the html for
      * @param   int             $childId     The user id of the child to include in the reminder text if applicable
-     * @return  string               The html for the block reminder
+     * @return  string                       The html for the block reminder
      *
      */
     protected function getBlockReminderHtml($block, $type = 'all', $childId = false)
@@ -517,11 +514,11 @@ class FormReminders extends Forms
         }
 
         /**
-         * Filters the link to an form or form block that needs to be submitted
+         * Filters the link to a form or form block that needs to be submitted
          * 
          * @param   string  $link       The hyperlink html
          * @param   object  $object     The current object
-         * @param   object  $block    The form block
+         * @param   object  $block      The form block
          * @param   string  $formUrl    The url
          * @param   string  $type        The type of reminder to get the html for
          * @param   int     $childId     The user id of the child to include in the reminder text if applicable
@@ -608,23 +605,11 @@ class FormReminders extends Forms
     {
         $today  = gmdate('D');
 
+        $users   = TSJIPPY\getUserAccounts();
+
         // Send e-mails for forms to be submitted
-        foreach ($this->formReminders[$today] as $formDetails) {
-            $this->formData = $formDetails['form'];
-
-            $formId = $this->formData->blockId;
-
-            // Do nothing if there are no reminders for this form
-            if (!isset($this->reminders[$formId])) {
-                continue;
-            }
-
-            // Load the e-mail settings
-            $this->getEmailSettings();
-
-            foreach ($this->reminders[$formId] as $userId) {
-                $this->sendEmail($userId);
-            }
+        foreach($users as $user){
+            $this->getUserReminders($user->ID);
         }
     }
 

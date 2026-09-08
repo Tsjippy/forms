@@ -82,3 +82,11 @@ form.wp-block-tsjippy-forms-formbuilder{
     background-color: lightgrey;
     padding: 3px;
 }
+
+.form-reminders{
+    h4, 
+    .tsjippy-warning-conditions__condition,
+    .components-button:not(.is-destructive){
+        margin-top: 25px;
+    }
+}

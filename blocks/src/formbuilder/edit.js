@@ -384,7 +384,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						: __('Show Emails Form', 'tsjippy')}
 				</PanelBody>
 
-				<PanelBody title={__('Form Reminders', 'tsjippy')} initialOpen={false} onToggle={ () => setRemindersFormVisibility((prev) => !prev)}>
+				<PanelBody title={__('Form Reminders', 'tsjippy')} className="reminders" initialOpen={false} onToggle={ () => setRemindersFormVisibility((prev) => !prev)}>
 					{isRemindersFormVisible
 						? __('Hide Reminders Form', 'tsjippy')
 						: __('Show Reminders Form', 'tsjippy')}

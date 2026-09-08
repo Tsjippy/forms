@@ -1,4 +1,6 @@
 import { Button, SelectControl, TextControl } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 const emptyCondition = {
     field: '',
@@ -7,6 +9,32 @@ const emptyCondition = {
 };
 
 export default function WarningConditions({ value = [], onChange }) {
+    const [metaKeys, setMetaKeys] = useState([]);
+    const [loadingMetaKeys, setLoadingMetaKeys] = useState(true);    
+
+    useEffect(() => {
+        setLoadingMetaKeys(true);
+
+        apiFetch({
+            path: `${tsjippy.restApiPrefix}/forms/get_user_meta_keys`,
+            method: 'POST',
+        })
+            .then((keys) => {
+                setMetaKeys(
+                    (keys || []).map((key) => ({
+                        label: key,
+                        value: key,
+                    }))
+                );
+            })
+            .catch(() => {
+                setMetaKeys([]);
+            })
+            .finally(() => {
+                setLoadingMetaKeys(false);
+            });
+    }, []);
+
     const conditions = Array.isArray(value) ? value : [];
 
     const addCondition = () => {
@@ -26,7 +54,7 @@ export default function WarningConditions({ value = [], onChange }) {
 
             return {
                 ...condition,
-                nextValue,
+                [key]: nextValue,
             };
         });
 
@@ -52,43 +80,82 @@ export default function WarningConditions({ value = [], onChange }) {
                     className="tsjippy-warning-conditions__condition"
                     key={index}
                 >
-                    <TextControl
-                        label="Field"
-                        value={condition.field || ''}
-                        onChange={(nextValue) =>
-                            updateCondition(index, 'field', nextValue)
+                    <SelectControl
+                        label="User Meta Key"
+                        value={condition.key || ''}
+                        options={[
+                            {
+                                label: loadingMetaKeys
+                                    ? 'Loading user meta keys...'
+                                    : 'Select a user meta key',
+                                value: '',
+                                disabled: true,
+                            },
+                            ...metaKeys,
+                        ]}
+                        disabled={loadingMetaKeys}
+                        onChange={(value) =>
+                            updateCondition(index, 'key', value)
                         }
                     />
 
                     <SelectControl
-                        label="Operator"
-                        value={condition.operator || 'equals'}
-                        options={[
-                            {
-                                label: 'Equals',
-                                value: 'equals',
-                            },
-                            {
-                                label: 'Does not equal',
-                                value: 'not_equals',
-                            },
-                            {
-                                label: 'Contains',
-                                value: 'contains',
-                            },
-                            {
-                                label: 'Is empty',
-                                value: 'empty',
-                            },
-                            {
-                                label: 'Is not empty',
-                                value: 'not_empty',
-                            },
-                        ]}
-                        onChange={(nextValue) =>
-                            updateCondition(index, 'operator', nextValue)
-                        }
-                    />
+                            label="Operator"
+                            value={condition.operator || 'equals'}
+                            options={[
+                                {
+                                    label: 'Submitted',
+                                    value: 'submitted',
+                                },
+                                {
+                                    label: 'Equals',
+                                    value: 'equals',
+                                },
+                                {
+                                    label: 'Not Equals',
+                                    value: 'not_equals',
+                                },
+                                {
+                                    label: 'Contains',
+                                    value: 'contains',
+                                },
+                                {
+                                    label: 'Does Not Contain',
+                                    value: 'not_contains',
+                                },
+                                {
+                                    label: 'Greater Than',
+                                    value: 'gt',
+                                },
+                                {
+                                    label: 'Greater Than Or Equal',
+                                    value: 'gte',
+                                },
+                                {
+                                    label: 'Less Than',
+                                    value: 'lt',
+                                },
+                                {
+                                    label: 'Less Than Or Equal',
+                                    value: 'lte',
+                                },
+                                {
+                                    label: 'Is Empty',
+                                    value: 'empty',
+                                },
+                                {
+                                    label: 'Is Not Empty',
+                                    value: 'not_empty',
+                                },
+                            ]}
+                            onChange={(value) =>
+                                updateCondition(
+                                    index,
+                                    'operator',
+                                    value
+                                )
+                            }
+                        />
 
                     <TextControl
                         label="Value"

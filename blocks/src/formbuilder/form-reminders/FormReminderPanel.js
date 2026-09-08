@@ -59,11 +59,8 @@ export function FormReminderPanel({
     }, [blockId]);
 
     const updateReminder = (key, value) => {
-        console.log(key)
-        console.log(value)
 
         setReminder((current) => {
-            console.log(current);
 
             let newReminder = {...current};
 
@@ -71,8 +68,6 @@ export function FormReminderPanel({
             
             return newReminder;
         });
-
-        console.log(reminder)
     };
 
     const handleRecurringToggle = (enabled) => {
@@ -147,7 +142,7 @@ export function FormReminderPanel({
     }, [frequency, reminder.frequency]);
 
     return (
-        <PanelBody title="Form Reminders" initialOpen>
+        <PanelBody title="Form Reminders" className="form-reminders" initialOpen>
             {notice && (
                 <Notice
                     status={notice.status}
