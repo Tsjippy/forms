@@ -62,10 +62,10 @@ function restApiInitTable()
                 return current_user_can('read');        // Allow access to logged in users, tto be able to save theire column visibility preferences
             },
             'args'                => array(
-                'form-id'         => array(
+                'block-id'         => array(
                     'required'    => true,
-                    'validate_callback' => function ($formId) {
-                        return is_numeric($formId);
+                    'validate_callback' => function ($blockId) {
+                        return is_numeric($blockId);
                     }
                 ),
                 'column-name'     => array('required'    => true),
@@ -84,10 +84,10 @@ function restApiInitTable()
                 return current_user_can('read');        // Allow access to logged in users, to be able to reset theire column visibility preferences
             },
             'args'                => array(
-                'form-id'         => array(
+                'block-id'         => array(
                     'required'    => true,
-                    'validate_callback' => function ($formId) {
-                        return is_numeric($formId);
+                    'validate_callback' => function ($blockId) {
+                        return is_numeric($blockId);
                     }
                 ),
             )
@@ -175,12 +175,6 @@ function restApiInitTable()
             'callback'            => __NAMESPACE__ . '\archiveSubmission',
             'permission_callback' => __NAMESPACE__ . '\submissionPermission',
             'args'                => array(
-                'form-id'         => array(
-                    'required'    => true,
-                    'validate_callback' => function ($formId) {
-                        return is_numeric($formId);
-                    }
-                ),
                 'submission-id'   => array(
                     'required'    => true,
                     'validate_callback' => function ($submissionId) {
@@ -250,10 +244,10 @@ function restApiInitTable()
             'callback'            => __NAMESPACE__ . '\getPage',
             'permission_callback' => '__return_true',                        // Allow public access
             'args'                => array(
-                'form-id'         => array(
+                'shortcode-id'         => array(
                     'required'    => true,
-                    'validate_callback' => function ($formId) {
-                        return is_numeric($formId);
+                    'validate_callback' => function ($shortcodeId) {
+                        return is_numeric($shortcodeId);
                     }
                 )
             )
@@ -268,33 +262,35 @@ function restApiInitTable()
  */
 function getPage()
 {
-    $settings    = TSJIPPY\sanitize($_POST);
     // phpcs:ignore
-    $displayFormResults = new DisplayFormResults(pageSize: TSJIPPY\sanitize($_REQUEST['pagesize'] ?? 50)); 
+    $settings    = TSJIPPY\sanitize($_POST);
+
+    $displayFormResults = new DisplayFormResults(shortcodeId: $settings['shortcode-id'], pageSize: $settings['pagesize'] ?? 50); 
 
     $displayFormResults->loadShortcodeData();
 
     $tables             = [];
 
-    // phpcs:ignore
-    $types              = [TSJIPPY\sanitize($_POST['type'])];
-    // phpcs:ignore
-    if (TSJIPPY\sanitize($_POST['type']) == 'all' && $displayFormResults->tableSettings->split_table) {
+    $types              = [$settings['type']];
+
+    if ($settings['type'] == 'all' && $displayFormResults->tableSettings->split_table) {
         $types          = ['own', 'others'];
     }
 
     // phpcs:ignore
-    if(!empty($_GET['only-own'])){
+    if(!empty($_REQUEST['only-own'])){
         $displayFormResults->onlyOwn      = true;
     }
 
     // phpcs:ignore
-    if(!empty($_GET['archived'])){
+    if(!empty($_REQUEST['archived'])){
         $displayFormResults->showArchived = true;
     }
 
     foreach ($types as $type) {
-        $tables[$type]                = $displayFormResults->renderTable($type);
+        $tableWrapper   = $displayFormResults->renderTable($type);
+
+        $tables[$type]  = $tableWrapper->ownerDocument->saveHTML();
     }
 
     return $tables;
@@ -308,14 +304,14 @@ function getPage()
  */
 function saveTablePrefs(\WP_REST_Request $request)
 {
-    $columnName                 = TSJIPPY\sanitize($request['column-name'] ?? '');
+    $columnName                 = $request->get_param('column-name');
 
     $userId                     = get_current_user_id();
-    $hiddenColumns              = (array)get_user_meta($userId, 'tsjippy_hidden_columns_' . (int) $request['form-id'] ?? '', true);
+    $hiddenColumns              = (array)get_user_meta($userId, 'tsjippy_hidden_columns_' . $request->get_param('block-id'), true);
 
     $hiddenColumns[$columnName] = 'hidden';
 
-    update_user_meta($userId, 'tsjippy_hidden_columns_' . (int) $request['form-id'], $hiddenColumns);
+    update_user_meta($userId, 'tsjippy_hidden_columns_' . $request['block-id'], $hiddenColumns);
 
     return 'Succesfully updated column settings';
 }
@@ -329,7 +325,7 @@ function saveTablePrefs(\WP_REST_Request $request)
 function deleteTablePrefs(\WP_REST_Request $request)
 {
     $userId        = get_current_user_id();
-    delete_user_meta($userId, 'tsjippy_hidden_columns_' . $request['form-id']);
+    delete_user_meta($userId, 'tsjippy_hidden_columns_' . $request->get_param('block-id'));
 
     return 'Succesfully reset column visibility';
 }

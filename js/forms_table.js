@@ -9,7 +9,7 @@ console.log("Formstable.js loaded");
 async function showHiddenColumns(target) {
   // store as preference
   let formData = new FormData();
-  formData.append("form-id", target.dataset.formId);
+  formData.append("block-id", target.dataset.formId);
 
   let response = await FormSubmit.fetchRestApi(
     "forms/delete_table_prefs",
@@ -68,7 +68,6 @@ async function removeSubmission(target) {
     let table        = target.closest("table");
 
     let formData = new FormData();
-    formData.append("form-id", table.dataset.formId);
     formData.append("submission-id", submissionId);
     formData.append("shortcode-id", table.dataset.shortcodeId);
 
@@ -96,7 +95,6 @@ async function archiveSubmission(target) {
   let response;
 
   let formData = new FormData();
-  formData.append("form-id", table.dataset.formId);
   formData.append("shortcode-id", table.dataset.shortcodeId);
   formData.append("submission-id", submissionId);
   formData.append("action", action);
@@ -203,9 +201,30 @@ function changeArchiveButton(element, action) {
 }
 
 function updatePageNav(navWrapper, pageNr) {
-  navWrapper.querySelector(".current").classList.remove("current");
+  let current   = navWrapper.querySelector(".current");
+  let requested = navWrapper.querySelector(`[data-nr="${pageNr}"]`);
 
-  navWrapper.querySelector(`[data-nr="${pageNr}"]`).classList.add("current");
+  /**
+   * Create the page link if it does not exist
+   */
+  if(requested == null){
+    let newPageLink = current.cloneNode(true);
+
+    newPageLink.dataset.nr  = pageNr;
+    newPageLink.innerText   = parseInt(pageNr) + 1;
+
+    const el = [...navWrapper.querySelectorAll('.page-number')]
+    .find(el => Number(el.dataset.nr) >= pageNr);
+
+    navWrapper.querySelector(`.page-number-wrapper`).insertBefore(newPageLink, el);
+
+    requested = newPageLink;
+  }
+
+  // Update the current selected page
+  current.classList.remove("current");
+
+  requested.classList.add("current");
 
   // hide prev button
   if (pageNr == 0) {
@@ -229,7 +248,9 @@ function updatePageNav(navWrapper, pageNr) {
  * @param {in} page			The page number to fetch
  * @returns
  */
-async function getPage(target, action) {
+async function getPage(target, action, page=-1) {
+  let force = page != -1;
+
   // we only have one wrapper
   let wrapper = target.closest(".form.table-wrapper");
 
@@ -255,44 +276,47 @@ async function getPage(target, action) {
 
   let pageSize = tableWrapper.querySelector(`select.page-size`).value;
 
+  const loadedPage = tableWrapper.querySelector(`[data-page="${page}"]`);
+
   /**
    * We reqested another page
    */
   if (action == "page") {
-    let navWrapper = target.closest(".form-result-navigation");
+    let navWrapper = target.closest(`.form-results-wrapper`).querySelector(`.form-result-navigation`);
 
-    // get the requested page number
+    // get the current page number
     let curPage = parseInt(
       navWrapper.querySelector(".page-number-wrapper .current").dataset.nr,
     );
     var page;
 
-    if (target.matches(".next")) {
-      page = curPage + 1;
-    } else if (target.matches(".prev")) {
-      page = curPage - 1;
-    } else {
-      page = target.dataset.nr;
+    if(page == -1){
+      if (target.matches(".next")) {
+        page = curPage + 1;
+      } else if (target.matches(".prev")) {
+        page = curPage - 1;
+      } else {
+        page = target.dataset.nr;
+      }
     }
 
     updatePageNav(navWrapper, page);
 
-    let loadedPage = tableWrapper.querySelector(`[data-page="${page}"]`);
+    table.classList.add("hidden");
 
     // check if the requested page is already loaded and show it
-    if (loadedPage != null) {
+    if (loadedPage != null && !force) {
       loadedPage.classList.remove("hidden");
 
       return;
     }
-    table.classList.add("hidden");
 
     Main.showLoader(table, false, 100, "Loading data");
   } else if (action == "sort" || action == "size") {
 
-  /**
-   * Sorting
-   */
+    /**
+     * Sorting
+     */
     tableWrapper.classList.add(table.dataset.type);
     tableWrapper.innerHTML = Main.showLoader(
       "",
@@ -324,7 +348,6 @@ async function getPage(target, action) {
     formData = new FormData(wrapper.querySelector("form.filter-options"));
   }
 
-  formData.append("form-id", formId);
   formData.append("page-number", page);
   formData.append("shortcode-id", shortcodeId);
   formData.append("type", type);
@@ -349,6 +372,10 @@ async function getPage(target, action) {
   }
   formData.append("archived", archived);
   formData.append("only-own", onlyOwn);
+
+  if (params["all"]) {
+    formData.append("all", true);
+  }
 
   if (tableWrapper.dataset.sortcol) {
     formData.append("sortcol", tableWrapper.dataset.sortcol);
@@ -377,6 +404,10 @@ async function getPage(target, action) {
         wrapper.querySelector(`.form-results-wrapper.${tableType}`).outerHTML =
           tableHtml;
       }
+    }
+    
+    if (loadedPage != null && force) {
+      loadedPage.remove();
     }
 
     document
@@ -564,7 +595,7 @@ const hideColumn = async (target) => {
 
     // store as preference
     var formData = new FormData();
-    formData.append("form-id", table.dataset.formId);
+    formData.append("block-id", table.dataset.formId);
     formData.append("column-name", cell.id);
 
     await FormSubmit.fetchRestApi("forms/save_table_prefs", formData);
@@ -582,48 +613,10 @@ const hideColumn = async (target) => {
   }
 };
 
-async function requestNewFormResults(target) {
-  let wrapper = target.closest(".form.table-wrapper");
-  let button = target.outerHTML;
-
-  let formData = new FormData();
-  let formId = wrapper.querySelector(".tsjippy.table.form-data.table").dataset
-    .formId;
-  let shortcodeId = wrapper.querySelector(".tsjippy.table.form-data.table")
-    .dataset.shortcodeId;
-
-  formData.append("form-id", formId);
-  formData.append("shortcode-id", shortcodeId);
-
-  const url = new URL(window.location);
-  if (url.searchParams.get("only-own")) {
-    formData.append("only-own", true);
-  }
-
-  if (url.searchParams.get("all")) {
-    formData.append("all", true);
-  }
-
-  if (url.searchParams.get("archived")) {
-    formData.append("archived", true);
-  }
-
-  let loader = Main.showLoader(target, false, 50, "Requesting form results...");
-  wrapper.innerHTML = loader.outerHTML;
-
-  let response = await FormSubmit.fetchRestApi(
-    "forms/show_form_results",
-    formData,
-  );
-
-  if (response) {
-    wrapper.innerHTML = response;
-  } else {
-    loader.outerHTML = button;
-  }
-}
-
 async function archivedEntriesSwitch(target) {
+  /**
+   * Change url
+   */
   const url = new URL(window.location);
   if (target.matches(".archive-switch-show")) {
     url.searchParams.set("archived", true);
@@ -632,7 +625,32 @@ async function archivedEntriesSwitch(target) {
   }
   window.history.pushState({}, "", url);
 
-  requestNewFormResults(target);
+  /**
+   * Change button
+   */
+  if(target.matches(`.archive-switch-show`)){
+    target.classList.replace('archive-switch-show', 'archive-switch-hide');
+
+    target.innerText  = target.innerText.replace('Show', 'Hide');
+  }else{
+    target.classList.replace('archive-switch-hide', 'archive-switch-show');
+    target.innerText  = target.innerText.replace('Hide', 'Show');
+  }
+
+  await getPage(target, 'page', 0);
+
+  /**
+   * Show navigator if needed
+   */
+  let wrapper           = target.closest(`.form-results-wrapper`);
+  let navigation        = wrapper.querySelector(`.form-result-navigation`);
+  let pageSizeSelector  = wrapper.querySelector(`div.page-size`);
+
+  if(wrapper.querySelector(`[data-page="0"]`).rows.length > wrapper.querySelector(`select.page-size`).value){
+    navigation.classList.remove('hidden');
+    pageSizeSelector.classList.remove('hidden');
+    navigation.querySelector(`.next`).classList.remove('hidden');
+  }
 }
 
 async function onlyOwnSwitch(target) {
@@ -646,27 +664,24 @@ async function onlyOwnSwitch(target) {
   }
   window.history.pushState({}, "", url);
 
-  requestNewFormResults(target);
+  getPage(target, 'page', 0);
 }
 
 document.addEventListener("click", (event) => {
   let target = event.target;
 
+  // Save column settings
   if (target.name == "submit_column_setting") {
     saveColumnSettings(target);
-  } else if (target.name == "submit_table_setting") {
+  } 
+  
+  // Save table settings
+  else if (target.name == "submit_table_setting") {
     saveTableSettings(target);
-  } else if (target.name == "form-settings[autoarchive]") {
-    //show auto archive fields
-    let el = target
-      .closest(".table-rights-wrapper")
-      .querySelector(".auto-archive-logic");
-    if (target.value == "1") {
-      el.classList.remove("hidden");
-    } else {
-      el.classList.add("hidden");
-    }
-  } else if (
+  } 
+  
+  // Get a new page
+  else if (
     target.closest(".form-result-navigation") != null &&
     (target.matches(".next") ||
       target.matches(".prev") ||
@@ -688,7 +703,10 @@ document.addEventListener("click", (event) => {
   //Actions
   else if (target.matches(".delete.forms-table-action")) {
     removeSubmission(target);
-  } else if (
+  } 
+  
+  // archive submission
+  else if (
     target.matches(".archive.forms-table-action, .unarchive.forms-table-action")
   ) {
     archiveSubmission(target);
@@ -697,12 +715,22 @@ document.addEventListener("click", (event) => {
   //Open settings modal
   else if (target.classList.contains("edit-formshortcode-settings")) {
     Main.showModal(document.querySelector(".modal.form-shortcode-settings"));
-  } else if (target.matches("form .table-permissions-rights-form")) {
+  } 
+  
+  // show table forms
+  else if (target.matches("form .table-permissions-rights-form")) {
     target
       .closest("div")
       .querySelector(".permission-wrapper")
       .classList.toggle("hidden");
-  } else {
+  } 
+
+  // Request archived / non-archived results
+  else if(target.matches(`.archive-switch-hide`) || target.matches(`.archive-switch-show`)){
+    archivedEntriesSwitch(target)
+  }
+  
+  else {
     return;
   }
 

@@ -2187,30 +2187,16 @@ class DisplayFormResults extends SubmitForm
      */
     public function navigationMenu($parent)
     {
-
-        if ($this->total <= $this->pageSize) {
-            return;
-        }
-
         $pageCount =  ceil($this->total / $this->pageSize);
 
-        $navigator  = addElement('div', $parent, ['class' => 'form-result-navigation']);
+        $navigator  = addElement('div', $parent, ['class' => ($this->total <= $this->pageSize ? 'hidden ' : '') . ' form-result-navigation']);
 
         // include a back button if we are not on the first page
-        $class = 'hidden';
-        if ($this->currentPage > 0) {
-            $class = '';
-        }
-
         $attributes = [
-            'class' => 'button small prev',
+            'class' => ($this->currentPage == 0 ? 'hidden ' : '') . 'button small prev',
             'name'  => 'prev',
             'value' => 'prev'
         ];
-
-        if ($this->currentPage == 0) {
-            $attributes['class']    .= ' hidden';
-        }
 
         addElement('button', $navigator, $attributes, "← Previous");
 
@@ -2230,11 +2216,7 @@ class DisplayFormResults extends SubmitForm
             // Display 1 more as we start on zero
             $pageNr    = $x + 1;
 
-            $class    = '';
-            if ($this->currentPage == $x) {
-                $class    = "current";
-            }
-            addElement('span', $pageNumberWrapper, ['class' => "page-number $class", 'data-nr' => $x], $pageNr);
+            addElement('span', $pageNumberWrapper, ['class' => ($this->currentPage == $x ? 'current ' : '') . "page-number", 'data-nr' => $x], $pageNr);
         }
 
         // Include a next button if we are not on the last page
@@ -2245,7 +2227,7 @@ class DisplayFormResults extends SubmitForm
 
         addElement('button', $navigator, ['class' => "button small next $class", 'name' => 'next', 'value' => 'next'], "Next →");
 
-        $pageSizeSelector    =  addElement("select", $parent, ['class' => 'page-size']);
+        $pageSizeSelector    =  addElement("select", $parent, ['class' => ($this->total <= $this->pageSize ? 'hidden ' : '') . 'page-size']);
 
         foreach ([1000, 500, 200, 100, 50, 40, 20, 10] as $size) {
             $attributes    = [];
