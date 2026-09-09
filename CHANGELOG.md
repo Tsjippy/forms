@@ -9,6 +9,7 @@
 - show archived items button
 - form reminders
 - form reminders
+- multi inputs without [] in the name
 
 ### Updated
 
