@@ -88,7 +88,7 @@ class FormReminders extends Forms
             $day = gmdate('D', strtotime($formReminder->reminder_start_date));
 
             // This is a form that saves its data in the user meta, so we use different logic for that
-            if (!empty($this->formData->save_in_meta)) {
+            if (!empty($this->formData->user_meta)) {
                 continue;
             }
 
@@ -132,7 +132,7 @@ class FormReminders extends Forms
 
                 $this->formData = $formDetails['form'];
 
-                if($this->processDefaultForm($formReminder, $userId)){
+                if($this->formNeedsReminder($formReminder, $userId)){
                     $forms[]    = $formDetails['form'];
                 }
             }
@@ -235,7 +235,7 @@ class FormReminders extends Forms
      *
      * @return  void
      */
-    protected function processDefaultForm($formReminder, $userId)
+    protected function formNeedsReminder($formReminder, $userId)
     {
         // Get all submissions created inside the current submission window
         $query            = "SELECT * FROM %i WHERE post_id=%d and block_id=%d and user_id=%d";
@@ -261,8 +261,8 @@ class FormReminders extends Forms
     /**
      * Checks if a given set of conditions applies to the current user. Returns true if there is a match
      *
-     * @param    object   $conditions        The block conditions
-     * @param    int      $userId            The user id
+     * @param    object   $conditions     The block conditions
+     * @param    int      $userId         The user id
      * @param    array    $submissions    The submissions to check
      *
      * @return    bool                    true if no conditions or the condition apply, false if it does not apply
@@ -300,22 +300,29 @@ class FormReminders extends Forms
 
         $applies = null;
 
-        foreach ($conditions as $condition) {
-            foreach($condition->rules as $check){
-                // get the user value
-                $metaKey = $check['meta-key'];
-                if(!str_starts_with($metaKey, 'tsjippy_')){
-                    $metaKey    = "tsjippy_$metaKey";
-                }
-                $value        = get_user_meta($userId, $metaKey);
+        // Parse form conditions into block conditions format
+        if(isset($conditions[0]['key'])){
+            $conditions = [$conditions];
+        }
 
-                $metaIndex  = trim($check['meta-key-index'] ?? '');
-                if (!empty($metaIndex)) {
-                    if (!empty($value[$metaIndex])) {
-                        $value        = $value[$metaIndex];
-                    } else {
-                        $value        = '';
-                    }
+        foreach ($conditions as $condition) {
+            foreach($condition as $check){
+                if(isset($condition->rules)){
+                    $condition  = $condition->rules;
+                }
+
+                if(!is_array($check)){
+                    continue;
+                }
+
+                // get the user value
+                $metaKey = $check['key'];
+                $value   = get_user_meta($userId, $metaKey);
+
+                if(empty($value) && !str_starts_with($metaKey, 'tsjippy_')){
+                    $metaKey    = "tsjippy_$metaKey";
+
+                    $value   = get_user_meta($userId, $metaKey);
                 }
 
                 if (is_array($value)) {
@@ -326,22 +333,22 @@ class FormReminders extends Forms
                     }
                 }
 
-                if (is_array($value) && $check['equation'] != 'submitted' && isset($value[0])) {
+                if (is_array($value) && $check['operator'] != 'submitted' && isset($value[0])) {
                     $value    = $value[0];
                 }
 
                 // Get the compare value
                 $checkValue    = '';
-                if (isset($check['conditional-value'])) {
-                    $checkValue        = $check['conditional-value'];
-                    $conditionalValue  = strtotime($check['conditional-value']);
+                if (isset($check['value'])) {
+                    $checkValue        = $check['value'];
+                    $conditionalValue  = strtotime($check['value']);
                     if ($conditionalValue && gmdate('Y', $conditionalValue) < 2200) {
                         $checkValue    = gmdate('Y-m-d', $conditionalValue);
                     }
                 }
 
                 // compare the values
-                switch ($check['equation']) {
+                switch ($check['operator']) {
                     case '==':
                         $result    = $value == $checkValue;
                         break;
@@ -351,8 +358,26 @@ class FormReminders extends Forms
                     case '>':
                         $result    = $value > $checkValue;
                         break;
+                    case '>=':
+                        $result    = $value >= $checkValue;
+                        break;
                     case '<':
                         $result    = $value < $checkValue;
+                        break;
+                    case '<=':
+                        $result    = $value <= $checkValue;
+                        break;
+                    case 'contains':
+                        $result    = str_contains($value, $checkValue);
+                        break;
+                    case 'not_contains':
+                        $result    = !str_contains($value, $checkValue);
+                        break;
+                    case 'empty':
+                        $result    = empty($checkValue);
+                        break;
+                    case 'not_empty':
+                        $result    = !empty($checkValue);
                         break;
                     case 'submitted':
                         $result    = false;
@@ -393,6 +418,10 @@ class FormReminders extends Forms
                     }
                 }
             }
+        }
+
+        if(empty($applies)){
+            $applies    = true;
         }
 
         return $applies;
@@ -479,12 +508,12 @@ class FormReminders extends Forms
      * Get the html for a specific block
      *
      * @param   string|object   $block       The block or block id to get the html for
-     * @param   string          $type        The type of reminder to get the html for
+     * @param   bool            $onlyEmail   The type of reminder to get the html for
      * @param   int             $childId     The user id of the child to include in the reminder text if applicable
      * @return  string                       The html for the block reminder
      *
      */
-    protected function getBlockReminderHtml($block, $type = 'all', $childId = false)
+    protected function getBlockReminderHtml($block, $onlyEmail = false, $childId = false)
     {
         /**
          * Load the block if only block id is given
@@ -498,7 +527,7 @@ class FormReminders extends Forms
             }
         }
 
-        if ( $type != 'all' && !$block->$type) {
+        if ( $onlyEmail && !$block->remindByEmail) {
             return '';
         }
 
@@ -520,44 +549,43 @@ class FormReminders extends Forms
          * @param   object  $object     The current object
          * @param   object  $block      The form block
          * @param   string  $formUrl    The url
-         * @param   string  $type        The type of reminder to get the html for
+         * @param   string  $onlyEmail  Only e-mail reminders or not
          * @param   int     $childId     The user id of the child to include in the reminder text if applicable
          * @return  string               The html for the block reminder
          */
-        return apply_filters('tsjippy-forms-reminder-link', "<a href='$formUrl#{$block->slug}'>$name</a>", $this, $block, $formUrl, $type, $childId);
+        return apply_filters('tsjippy-forms-reminder-link', "<a href='$formUrl#{$block->slug}'>$name</a>", $this, $block, $formUrl, $onlyEmail, $childId);
     }
 
     /**
      * Gets the html for a form reminder
-     * @param   int     $blockId        The block id to get the html for
-     * @param   string  $childName     The name of the child to include in the reminder text if applicable
-     * @return  string                  The html for the form reminder
+     * @param   object    $formData  The block id to get the html for
+     * @param   bool|int  $childId   The child id to include in the reminder text if applicable
+     * @return  string               The html for the form reminder
      */
-    protected function getFormReminderHtml($blockId, $childName)
-    {
-        $this->getForm(blockId: $blockId);
-        
-        $formUrl    = get_permalink($this->formData->post);
+    protected function getFormReminderHtml($formData, $childId)
+    {        
+        $formUrl    = get_permalink($formData->post);
 
-        $formName   = $this->formData->name;
+        $formName   = $formData->name;
 
-        $text       = "Fill in the $formName form";
-        if (!empty($childName)) {
-            $text   .= " for $childName";
+        $text       = $formName;
+        if (!empty($childId)) {
+            $name   = get_userdata($childId)->first_name;
+            $text   .= " for $name";
         }
 
-        return "<li><a href='$formUrl'>$text</a></li>";
+        return "Please submit the \"<a href='$formUrl'>$text</a>\" form";
     }
 
     /**
      * Gets the reminder html for a given user id
      *
      * @param   int $userId     The user id to get the reminder html for
-     * @param   string $type    The type of reminders to include in the html, either 'mandatory', 'recommended' or 'all'
+     * @param   bool            $onlyEmail   The type of reminder to get the html for
      *
      * @return  string          The reminder html for the given user id
      */
-    public function getReminderHtml($userId, $type)
+    public function getReminderHtml($userId, $onlyEmail=false)
     {
         $family        = new TSJIPPY\FAMILY\Family();
         $child         = false;
@@ -571,26 +599,32 @@ class FormReminders extends Forms
 
         // HTML for individual blocks on a meta form
         if (!empty($reminders['blocks'])) {
+            $html   .= "<h5>Please fill in more account info:</h5>";
+
+            $html   .= "<ul>";
             foreach ($reminders['blocks'] as $block) {
                 // Load the form data
                 $this->getForm(post: $block->postId, blockId: $block->blockId);
-                $result = $this->getBlockReminderHtml($block, $type, $child);
+                $result = $this->getBlockReminderHtml($block, $onlyEmail, $child);
 
                 if (!empty($result)) {
                     $html   .= "<li>$result</li>";
                 }
             }
+            $html   .= "</ul>";
         }
 
         // Forms to be submitted
         if (!empty($reminders['forms'])) {
-            foreach ($reminders['forms'] as $formId) {
-                $html .= $this->getFormReminderHtml($formId, $child);
+            if(count($reminders['forms']) == 1){
+                $html   .= $this->getFormReminderHtml($reminders['forms'][0], $child);
+            }else{
+                $html   .= "<h3>Submit these forms</h3><br><ul>";
+                foreach ($reminders['forms'] as $formData) {
+                    $html .= $this->getFormReminderHtml($formData, $child);
+                }
+                $html   .= "</ul>";
             }
-        }
-
-        if (!empty($html)) {
-            $html    = "<ul>$html</ul>";
         }
 
         $html    = apply_filters("tsjippy-forms-manadatory-html-filter", $html, $userId, $this);

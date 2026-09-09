@@ -630,7 +630,7 @@ class DisplayFormResults extends SubmitForm
             $this->getFormBySubmissionId($submissionId);
         }
 
-        if (!empty($this->formData->save_in_meta)) {
+        if (!empty($this->formData->user_meta)) {
             return $this->getMetaKeyFormSubmissions($userId, $all);
         }
 

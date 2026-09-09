@@ -154,10 +154,14 @@ export function FormReminderPanel({
             )}
 
             {isLoading && (
+                <>
                 <div className="tsjippy-formbuilder-reminders__loading">
                     <Spinner />
                     <span>Loading reminder settings...</span>
                 </div>
+                <br />
+                <br />
+                </>
             )}
 
             {/* {!triggerFound && (

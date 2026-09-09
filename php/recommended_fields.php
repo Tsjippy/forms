@@ -34,7 +34,7 @@ function addChildFields($html, $userId, $object)
     return $html;
 }
 
-//add_action('tsjippy-user-management-dashboard-warnings', __NAMESPACE__ . '\dashboardWarnings');
+add_action('tsjippy-user-management-dashboard-warnings', __NAMESPACE__ . '\dashboardWarnings');
 /**
  * Displays the dashboard warnings for the user
  *
@@ -44,7 +44,7 @@ function dashboardWarnings($userId)
 {
     $forms    = new FormReminders();
 
-    $html     = $forms->getReminderHtml($userId, 'recommended');
+    $html     = $forms->getReminderHtml($userId);
 
     if (empty($html)) {
         ?>
@@ -53,11 +53,6 @@ function dashboardWarnings($userId)
         </p>
         <?php
     } else {
-        ?>
-        <h3>
-            Please finish your account:
-        </h3>
-        <?php
         echo wp_kses_post($html);
     }
 }

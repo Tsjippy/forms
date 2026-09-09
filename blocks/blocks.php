@@ -85,14 +85,6 @@ function initBlocks()
         'tsjippy-forms/missing-form-inputs',
         array(
             'title'           => __( 'Missing Form Entries', '%TEXTDOMAIN%' ),
-            'attributes'      => [
-                'type' => [
-                    'label'   => __( 'Which type', '%TEXTDOMAIN%' ),
-                    'type'    => 'string',
-                    'enum'    => ['mandatory', 'recommended', 'all'],
-                    'default' => 'all',
-                ]
-            ],
             'render_callback' => __NAMESPACE__ . '\missingFormFields',
             'supports'        => array(
                 'autoRegister' => true,
@@ -509,12 +501,12 @@ function missingFormFields($atts)
     $html    = '';
 
     $forms      = new FormReminders();
-    $fieldHtml  = $forms->getReminderHtml($forms->userId, $atts['type'] ?? 'all');
+    $fieldHtml  = $forms->getReminderHtml($forms->userId);
 
     $family     = new TSJIPPY\FAMILY\Family();
 
     foreach($family->getChildren($forms->userId) as $child){
-        $fieldHtml  .= $forms->getReminderHtml($child, $atts['type'] ?? 'all');
+        $fieldHtml  .= $forms->getReminderHtml($child);
     }
 
     if (!empty($fieldHtml)) {
@@ -571,7 +563,7 @@ function showFormSelector($atts = [])
             }
 
             // Remove any form that saves its data in the usermeta
-            if ($a['no_meta'] && $form->save_in_meta) {
+            if ($a['no_meta'] && $form->user_meta) {
                 unset($forms[$key]);
             }
         }

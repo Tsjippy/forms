@@ -100,62 +100,62 @@ export default function WarningConditions({ value = [], onChange }) {
                     />
 
                     <SelectControl
-                            label="Operator"
-                            value={condition.operator || 'equals'}
-                            options={[
-                                {
-                                    label: 'Submitted',
-                                    value: 'submitted',
-                                },
-                                {
-                                    label: 'Equals',
-                                    value: 'equals',
-                                },
-                                {
-                                    label: 'Not Equals',
-                                    value: 'not_equals',
-                                },
-                                {
-                                    label: 'Contains',
-                                    value: 'contains',
-                                },
-                                {
-                                    label: 'Does Not Contain',
-                                    value: 'not_contains',
-                                },
-                                {
-                                    label: 'Greater Than',
-                                    value: 'gt',
-                                },
-                                {
-                                    label: 'Greater Than Or Equal',
-                                    value: 'gte',
-                                },
-                                {
-                                    label: 'Less Than',
-                                    value: 'lt',
-                                },
-                                {
-                                    label: 'Less Than Or Equal',
-                                    value: 'lte',
-                                },
-                                {
-                                    label: 'Is Empty',
-                                    value: 'empty',
-                                },
-                                {
-                                    label: 'Is Not Empty',
-                                    value: 'not_empty',
-                                },
-                            ]}
-                            onChange={(value) =>
-                                updateCondition(
-                                    index,
-                                    'operator',
-                                    value
-                                )
-                            }
-                        />
+                        label="Operator"
+                        value={condition.operator || 'equals'}
+                        options={[
+                            {
+                                label: 'has submitted',
+                                value: 'submitted',
+                            },
+                            {
+                                label: 'Equals',
+                                value: '==',
+                            },
+                            {
+                                label: 'Not Equals',
+                                value: '!=',
+                            },
+                            {
+                                label: 'Contains',
+                                value: 'contains',
+                            },
+                            {
+                                label: 'Does Not Contain',
+                                value: 'not_contains',
+                            },
+                            {
+                                label: 'Greater Than',
+                                value: '>',
+                            },
+                            {
+                                label: 'Greater Than Or Equal',
+                                value: '>=',
+                            },
+                            {
+                                label: 'Less Than',
+                                value: '<',
+                            },
+                            {
+                                label: 'Less Than Or Equal',
+                                value: '<=',
+                            },
+                            {
+                                label: 'Is Empty',
+                                value: 'empty',
+                            },
+                            {
+                                label: 'Is Not Empty',
+                                value: 'not_empty',
+                            },
+                        ]}
+                        onChange={(value) =>
+                            updateCondition(
+                                index,
+                                'operator',
+                                value
+                            )
+                        }
+                    />
 
                     <TextControl
                         label="Value"

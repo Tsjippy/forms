@@ -16,7 +16,7 @@ export function normaliseReminderResponse(response, emptyReminder) {
 
 export function getDateWindowLimits(reminder) {
     const frequency = parseInt(reminder.frequency, 10);
-    const period = reminder.period;
+    const period    = reminder.period;
 
     if (!frequency || !period) {
         return {
@@ -26,7 +26,6 @@ export function getDateWindowLimits(reminder) {
     }
 
     const today   = new Date();
-
     const minDate = new Date(today);
     const maxDate = new Date(today);
 
@@ -52,7 +51,7 @@ export function getDateWindowLimits(reminder) {
     }
 
     return {
-        min: formatDateForInput(minDate),
+        min: reminder.reminder_start_date || formatDateForInput(minDate),
         max: formatDateForInput(maxDate),
     };
 }

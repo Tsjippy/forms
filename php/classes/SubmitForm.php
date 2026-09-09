@@ -620,7 +620,7 @@ class SubmitForm extends SaveFormSettings
     {
         global $wpdb;
 
-        if (!empty($this->formData->save_in_meta)) {
+        if (!empty($this->formData->user_meta)) {
             return;
         }
 
@@ -715,8 +715,14 @@ class SubmitForm extends SaveFormSettings
     {
         $updateUserData    = false;
 
+        $user               = get_userdata($this->userId);
+
+        if(!$user){
+            return false;
+        }
+
         //get user data as array
-        $userData      = (array)get_userdata($this->userId)->data;
+        $userData      = (array)$user->data;
         foreach ($formresults as $key => &$result) {
             $subKey    = false;
 
@@ -810,8 +816,8 @@ class SubmitForm extends SaveFormSettings
     /**
      * Save a form submission to the db
      * 
-     * @param    int        $userId        The user id to save the form for
-     * @param    array    $request        The request data to save
+     * @param    int      $userId  The user id to save the form for
+     * @param    array    $request The request data to save
      */
     public function formSubmit($userId, $request)
     {
@@ -826,7 +832,7 @@ class SubmitForm extends SaveFormSettings
         $this->userId                        = $this->user->ID;
 
         // Check if we are submitting for another user
-        if (is_numeric($userId)) {
+        if ($userId > 0) {
             //If we are submitting for someone else and we do not have the right to save the form for someone else
             if (
                 array_intersect_key($this->userRoles, $this->submitRoles) === false &&
@@ -848,16 +854,18 @@ class SubmitForm extends SaveFormSettings
 
         $orgFormResults                      = $request;
 
-        // check for required empty blocks
-        foreach ($this->formBlocks as $block) {
-            // block is required but has no value
-            if (
-                $block->required && 
-                !isset($this->nonInputs[$block->type]) && 
-                ($request[str_replace('[]', '', $block->slug)] ?? '') === '' &&
-                empty($_FILES[$block->slug."-files"])
-            ) {
-                return new \WP_Error('Error', "$block->name is required!");
+        // check for required empty blocks if not a meta form
+        if(!($this->formBlock['attrs']['user_meta'] ?? false)){
+            foreach ($this->formBlocks as $block) {
+                // block is required but has no value
+                if (
+                    $block->required && 
+                    !isset($this->nonInputs[$block->type]) && 
+                    ($request[str_replace('[]', '', $block->slug)] ?? '') === '' &&
+                    empty($_FILES[$block->slug."-files"])
+                ) {
+                    return new \WP_Error('Error', "$block->name is required!");
+                }
             }
         }
 
@@ -871,7 +879,13 @@ class SubmitForm extends SaveFormSettings
         unset($request['user-id']);
         unset($request['_wpnonce']);
 
-        $request    = TSJIPPY\cleanUpNestedArray($request);
+        /**
+         * Cleanup form results if not a meta form
+         * We do not want to clean up meta form results to allow value deletion
+         */
+        if (empty($this->formData->user_meta)) {
+            $request    = TSJIPPY\cleanUpNestedArray($request);
+        }
 
         /**
          * Filters the form results
@@ -895,7 +909,7 @@ class SubmitForm extends SaveFormSettings
         }
 
         // Save to submission table
-        if (empty($this->formData->save_in_meta)) {
+        if (empty($this->formData->user_meta)) {
             $result    = $this->saveToSubmissionTable($formresults, $formUrl, $message);
         } 
         

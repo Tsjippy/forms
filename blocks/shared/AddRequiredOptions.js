@@ -279,11 +279,11 @@ export default function UserMetaRequiredControls({
                             options={[
                                 {
                                     label: 'Equals',
-                                    value: 'equals',
+                                    value: '==',
                                 },
                                 {
                                     label: 'Not Equals',
-                                    value: 'not_equals',
+                                    value: '!=',
                                 },
                                 {
                                     label: 'Contains',
@@ -295,19 +295,19 @@ export default function UserMetaRequiredControls({
                                 },
                                 {
                                     label: 'Greater Than',
-                                    value: 'gt',
+                                    value: '>',
                                 },
                                 {
                                     label: 'Greater Than Or Equal',
-                                    value: 'gte',
+                                    value: '>=',
                                 },
                                 {
                                     label: 'Less Than',
-                                    value: 'lt',
+                                    value: '<',
                                 },
                                 {
                                     label: 'Less Than Or Equal',
-                                    value: 'lte',
+                                    value: '<=',
                                 },
                                 {
                                     label: 'Is Empty',

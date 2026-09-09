@@ -81,8 +81,6 @@ function addNode(target){
 
       // update the settings for the clone
       for (const key in settings) {
-        console.log(`${key}: ${settings[key]}`);
-
         if (typeof settings[key] == "string") {
           settings[key] = settings[key].replace(
             /(.*)([0-9])/,
@@ -103,6 +101,34 @@ function addNode(target){
 
   //target.remove();
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  /**
+   * Scroll to input
+   */
+  if (window.location.hash) {
+    var hash = window.location.hash.replace("#", "");
+
+    var hashElement = document.querySelector(`[name^="${hash}"]`);
+
+    if (hashElement != null) {
+      console.log(hashElement);
+      hashElement.classList.add("highlight");
+      hashElement.focus();
+      hashElement.scrollIntoView({ block: "center" });
+    }
+  }
+
+  /**
+   * Unrequire all required inputs if it is a meta form
+   */
+  document.querySelectorAll(`form[data-meta]`).forEach((form) => {
+    form.querySelectorAll(`:required`).forEach((input) => {
+      input.required  = false;
+    });
+  });
+});
 
 //we are online again
 window.addEventListener("online", function () {

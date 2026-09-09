@@ -26,6 +26,7 @@ export default function save({ attributes }) {
       autocomplete={attributes.autocomplete}
       data-formName={attributes.name}
       data-blockId={attributes.blockId}
+      data-meta={attributes.user_meta ? 'true' : undefined}
       {...blockProps}
     >
       <input type="hidden" name="block-id" value={attributes.blockId} />
