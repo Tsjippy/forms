@@ -6,12 +6,17 @@
 ### Changed
 
 ### Fixed
+
+### Updated
+
+## [12.0.3] - 2026-09-09
+
+
+### Fixed
 - show archived items button
 - form reminders
 - form reminders
 - multi inputs without [] in the name
-
-### Updated
 
 ## [12.0.2] - 2026-09-07
 
