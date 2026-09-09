@@ -8,6 +8,7 @@
 ### Fixed
 - show archived items button
 - form reminders
+- form reminders
 
 ### Updated
 
