@@ -48,7 +48,7 @@ export const Multiple = ( props ) => {
 
                             <input
                                 type="hidden"
-                                name={props?.attributes?.name}
+                                name={props?.attributes?.name + '[]'}
                                 value={value}
                             />
 

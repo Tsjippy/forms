@@ -348,9 +348,7 @@ class SubmitForm extends SaveFormSettings
      */
     public function sendEmail($trigger = 'submitted', $replaceValues = [])
     {
-        $this->getEmailSettings();
-
-        foreach ($this->emailSettings as $key => $email) {
+        foreach ($this->getEmailSettings() as $key => $email) {
             if (!$this->checkEmailConditions($email, $trigger)) {
                 continue;
             }
@@ -713,9 +711,9 @@ class SubmitForm extends SaveFormSettings
      */
     public function saveToUserMetaTable($formresults)
     {
-        $updateUserData    = false;
+        $updateUserData = false;
 
-        $user               = get_userdata($this->userId);
+        $user           = get_userdata($this->userId);
 
         if(!$user){
             return false;

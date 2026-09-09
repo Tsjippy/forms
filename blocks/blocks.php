@@ -264,7 +264,11 @@ function preFillForm($blockContent, $block, $defaultValue){
     /**
      * Set checked option
      */
-    elseif(is_array($defaultValue) && in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])){
+    elseif(in_array($block['attrs']['type'] ?? '', ['radio', 'checkbox'])){
+        if(!is_array($defaultValue)){
+            $defaultValue   = [$defaultValue];
+        }
+        
         foreach($defaultValue as $value){
             $blockContent = str_replace("value=\"$value\"", "value=\"$value\" checked=\"checked\"", $blockContent);
         }

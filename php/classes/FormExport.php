@@ -75,16 +75,7 @@ class FormExport extends SaveFormSettings
         /**
          * Form E-mails
          */
-        $emailSettings    = TSJIPPY\getFromDb(
-            "get_email_settings_$postId",
-            'forms',
-            "select * from %i where post_id=%d and block_id=%d", 
-            $this->formEmailTable, 
-            $this->formData->postId, 
-            $this->formData->blockId
-        );
-
-        foreach ($emailSettings as &$emailSetting) {
+        foreach ($this->getEmailSettings() as &$emailSetting) {
             unset($emailSetting->post_id);
         }
 

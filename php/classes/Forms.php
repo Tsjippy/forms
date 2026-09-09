@@ -497,6 +497,10 @@ class Forms
             return new WP_Error('forms', "no form is loaded");
         }
 
+        if(!empty($this->emailSettings)){
+            return $this->emailSettings;
+        }
+
         $this->emailSettings =  TSJIPPY\getFromDb(
             "get_email_settings_" . $this->formData->blockId,
             "forms",
@@ -516,6 +520,8 @@ class Forms
 
             $this->emailSettings = $emails;
         }
+
+        return $this->emailSettings;
     }
 
     /**

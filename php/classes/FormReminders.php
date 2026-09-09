@@ -102,16 +102,17 @@ class FormReminders extends Forms
     /**
      * Gets the reminders for a given user id
      *
-     * @param   int $userId    The user id to get the reminders for
+     * @param   int     $userId    The user id to get the reminders for
+     * @param   bool    $onlyEmail
      *
      * @return  array           The reminders for the given user id
      */
-    public function getUserReminders($userId)
+    public function getUserReminders($userId, $onlyEmail=false)
     {
         /**
          * Get all the blocks on meta forms
          */
-        $blocks   = $this->getRequiredBlockReminders($userId);
+        $blocks   = $this->getRequiredBlockReminders($userId, $onlyEmail);
 
         /**
          * Get forms
@@ -133,7 +134,10 @@ class FormReminders extends Forms
                 $this->formData = $formDetails['form'];
 
                 if($this->formNeedsReminder($formReminder, $userId)){
-                    $forms[]    = $formDetails['form'];
+                    if(!isset($forms[$day])){
+                        $forms[$day]    = [];
+                    }
+                    $forms[$day][]    = $formDetails['form'];
                 }
             }
         }
@@ -430,11 +434,12 @@ class FormReminders extends Forms
     /**
      * Builds the reminders array
      * 
-     * @param   int $userId
+     * @param   int     $userId
+     * @param   bool    $onlyEmail
      *
      * @return    string                The html
      */
-    public function getRequiredBlockReminders($userId)
+    public function getRequiredBlockReminders($userId, $onlyEmail=false)
     {
         $family             = new TSJIPPY\FAMILY\Family();
         $isChild            = $family->isChild($userId);
@@ -443,6 +448,10 @@ class FormReminders extends Forms
 
         // Loop over all required blocks
         foreach ($this->requiredMetaBlocks as $block) {
+            if ( $onlyEmail && !($block->block['attrs']['remindByEmail'] ?? false )) {
+                continue;
+            }
+
             // Load the form data
             $this->getForm($block->postId);
 
@@ -527,10 +536,6 @@ class FormReminders extends Forms
             }
         }
 
-        if ( $onlyEmail && !$block->remindByEmail) {
-            return '';
-        }
-
         $formUrl    = get_permalink($this->formData->postId);       
 
         //Show a nice name
@@ -574,7 +579,7 @@ class FormReminders extends Forms
             $text   .= " for $name";
         }
 
-        return "Please submit the \"<a href='$formUrl'>$text</a>\" form";
+        return "<a href='$formUrl'>$text</a>";
     }
 
     /**
@@ -595,7 +600,7 @@ class FormReminders extends Forms
 
         $html          = '';
 
-        $reminders     = $this->getUserReminders($userId);
+        $reminders     = $this->getUserReminders($userId, $onlyEmail);
 
         // HTML for individual blocks on a meta form
         if (!empty($reminders['blocks'])) {
@@ -617,11 +622,11 @@ class FormReminders extends Forms
         // Forms to be submitted
         if (!empty($reminders['forms'])) {
             if(count($reminders['forms']) == 1){
-                $html   .= $this->getFormReminderHtml($reminders['forms'][0], $child);
+                $html   .= "Please submit the \"" . $this->getFormReminderHtml($reminders['forms'][0], $child) . "\"";
             }else{
                 $html   .= "<h3>Submit these forms</h3><br><ul>";
                 foreach ($reminders['forms'] as $formData) {
-                    $html .= $this->getFormReminderHtml($formData, $child);
+                    $html .= "<li>" . $this->getFormReminderHtml($formData, $child) . "</li>";
                 }
                 $html   .= "</ul>";
             }
@@ -633,49 +638,105 @@ class FormReminders extends Forms
     }
 
     /**
+     * Gets the form reminder html for use in a reminder e-mail
+     * 
+     * @param   int|\WP_User $user
+     */
+    public function getEmailHtmlReminder($user, $isChild=false){
+        if(is_numeric($user)){
+            $user   = get_userdata($user);
+        }
+
+        $today  = gmdate('D');
+
+        // Get the block and form reminders
+        $reminders  = $this->getUserReminders($user->ID, true);
+
+        if(empty($reminders['blocks']) && empty($reminders['forms'][$today])){
+            return '';
+        }
+
+        if($isChild){
+            $html   = '';
+        }else{
+            $html   = "Hi $user->first_name,<br>";
+        }
+
+        if(!empty($reminders['blocks'])){
+            $html   .= "Please be reminded to fill in some remaining account data:<br><ul>";
+            // Get the html for each block
+            foreach($reminders['blocks'] as $block){
+                $html .= "<li>" . $this->getBlockReminderHtml($block, true) . "</li>";
+            }
+            $html   .= "</ul><br>";
+        }
+
+        if(!empty($reminders['forms'][$today] )){
+            if(count($reminders['forms'][$today]) == 1){
+                $html   .= "Please submit the " . $this->getFormReminderHtml($reminders['forms'][$today][0], $isChild ? $user->ID : false) . " form";
+            }else{
+                $html   .= "Please be reminded to submit these forms:<br><ul>";
+                // Get the html for each form
+                foreach($reminders['forms'][$today] as $forms){
+                    foreach($forms as $form){
+                        $html .= "<li>" . $this->getFormReminderHtml($form, $isChild ? $user->ID : false) . "</li>";
+                    }
+                }
+            }
+        }
+
+        return $html;
+    }
+
+    /**
      * Sends reminders by e-mail to submit or update a form
      */
     public function sendFormReminders()
     {
-        $today  = gmdate('D');
-
         $users   = TSJIPPY\getUserAccounts();
+
+        $family  = new TSJIPPY\FAMILY\Family();
 
         // Send e-mails for forms to be submitted
         foreach($users as $user){
-            $this->getUserReminders($user->ID);
+            $html       = $this->getEmailHtmlReminder($user);
+            
+            /**
+             * Do the same for each child
+             */
+            foreach($family->getChildren($user->ID) as $childId){
+                $html .= $this->getEmailHtmlReminder($childId, true);
+            }
+
+            $this->sendEmail($user, $html);
         }
     }
 
     /**
      * Sends an e-mail reminder to a user
      *
-     * @param   int     $userId        The user id to send the e-mail to
+     * @param   \WP_User     $user        The user  to send the e-mail to
      * @param   string  $html          The html content for the e-mail
      */
-    protected function sendEmail($userId, $html = '')
+    protected function sendEmail($user, $html = '')
     {
-        $user   = get_userdata($userId);
-
-        // Invalid user id given
+        // Invalid user given
         if (!$user) {
             return;
         }
 
-        foreach ($this->emailSettings as $mail) {
+        foreach ($this->getEmailSettings() as $mail) {
             $mail   = (object)$mail;
 
             if ($mail->trigger['type'] != 'shouldsubmit') {
                 continue;
             }
 
-            $from       = $mail->from;
+            $from       = $mail->sender['email'];
 
-            $to         = $mail->to;
+            $recipient  = $user->user_email;
 
-            $subject    = $mail->subject;
-
-            $message    = $mail->message;
+            $subject    = 'Please update your information';
 
             $headers    = [];
 
@@ -691,23 +752,12 @@ class FormReminders extends Forms
                 }
             }
 
-            if (str_contains($to, '%')) {
-                $recipient  = $user->user_email;
-            } else {
-                $recipient  = $to;
-            }
-
-            if (!empty($html) && !str_contains($message, '%reminders%')) {
-                $message .= '%reminders%';
-            }
-
             $msg      = $this->processPlaceholders(
-                $message,
+                $html,
                 [
-                    'formurl'   => $this->formData->url,
+                    'formurl'   => get_permalink($this->formData->post),
                     'name'      => $user->first_name,
-                    'email'     => $user->user_email,
-                    'reminders' => $html
+                    'email'     => $user->user_email
                 ]
             );
 
