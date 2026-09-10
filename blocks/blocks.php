@@ -498,10 +498,6 @@ function strReplaceFirst($search, $replace, $subject) {
  */
 function missingFormFields($atts)
 {
-    if(!is_user_logged_in()){
-        return '';
-    }
-
     $html    = '';
 
     $forms      = new FormReminders();
@@ -510,7 +506,7 @@ function missingFormFields($atts)
     $family     = new TSJIPPY\FAMILY\Family();
 
     foreach($family->getChildren($forms->userId) as $child){
-        $fieldHtml  .= $forms->getReminderHtml($child);
+        $fieldHtml  .= '<br>'.$forms->getReminderHtml($child);
     }
 
     if (!empty($fieldHtml)) {

@@ -259,7 +259,7 @@ class FormReminders extends Forms
             $values
         );
 
-        return $this->checkIfConditionsAppliesToUser($formReminder->conditions, $userId, $submissions);
+        return !$this->checkIfConditionsAppliesToUser($formReminder->conditions, $userId, $submissions);
     }
 
     /**
@@ -425,7 +425,7 @@ class FormReminders extends Forms
         }
 
         if(empty($applies)){
-            $applies    = true;
+            $applies    = false;
         }
 
         return $applies;
@@ -573,13 +573,13 @@ class FormReminders extends Forms
 
         $formName   = $formData->name;
 
-        $text       = $formName;
+        $text       = '';
         if (!empty($childId)) {
             $name   = get_userdata($childId)->first_name;
-            $text   .= " for $name";
+            $text   = " for $name";
         }
 
-        return "<a href='$formUrl'>$text</a>";
+        return "<a href='$formUrl'>$formName</a>$text";
     }
 
     /**
@@ -622,11 +622,13 @@ class FormReminders extends Forms
         // Forms to be submitted
         if (!empty($reminders['forms'])) {
             if(count($reminders['forms']) == 1){
-                $html   .= "Please submit the \"" . $this->getFormReminderHtml($reminders['forms'][0], $child) . "\"";
+                $html   .= "Please submit the " . $this->getFormReminderHtml(array_values($reminders['forms'])[0][0], $child);
             }else{
                 $html   .= "<h3>Submit these forms</h3><br><ul>";
-                foreach ($reminders['forms'] as $formData) {
-                    $html .= "<li>" . $this->getFormReminderHtml($formData, $child) . "</li>";
+                foreach ($reminders['forms'] as $days) {
+                    foreach($days as $formData){
+                        $html .= "<li>" . $this->getFormReminderHtml($formData, $child) . "</li>";
+                    }
                 }
                 $html   .= "</ul>";
             }
