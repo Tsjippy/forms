@@ -5,7 +5,6 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
 import { useBlockProps, InnerBlocks  } from '@wordpress/block-editor';
-import { Multiple } from './../input/components/Multiple.js';
 
 /**
  * The save function defines the way in which the different attributes should
@@ -19,22 +18,17 @@ import { Multiple } from './../input/components/Multiple.js';
 export default function save({ attributes }) {
 	const blockProps 		= useBlockProps.save();
 
-	const labelComponent	= (addBlockId) => {
-		return (
-			<label 
-				data-blockid={addBlockId ? attributes.blockId : undefined}
-			>
-				<h4 className="label-text">
-					{attributes.text}
-				</h4>
-				
-				<br></br>
-				<InnerBlocks.Content />
-			</label>
-		);
-	};
-
 	return (
-		labelComponent(true)
+		<label 
+			{...blockProps}
+			data-blockid={attributes.blockId }
+		>
+			<h4 className="label-text">
+				{attributes.text}
+			</h4>
+			
+			<br></br>
+			<InnerBlocks.Content />
+		</label>
 	);
 }

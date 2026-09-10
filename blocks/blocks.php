@@ -153,9 +153,10 @@ function addFormsCategory( $categories) {
 
 add_filter( 'pre_render_block', function($skip, $parsedBlock, $parentBlock ){
     if(
-        ($parentBlock->name ?? '') == 'tsjippy-forms/label' &&  // THis block has a label parent
+        ($parentBlock->name ?? '') == 'tsjippy-forms/label' &&  // This block has a label parent
         ($parsedBlock['attrs']['multiple'] ?? false) &&   // and it can have multiple values &&
-        (!in_array($parsedBlock['attrs']['type'] ?? '', ['text', 'email', 'tel', 'url']))
+        (!in_array($parsedBlock['attrs']['type'] ?? '', ['text', 'email', 'tel', 'url'])) && // not one of these inputs
+        $parsedBlock['blockName'] != "tsjippy-forms/file" // It is not a file input
     ){
         return '';
     }
@@ -191,10 +192,10 @@ function renderMultiInput($values, $blockContent, $block, $label = null){
         $blockContent = str_replace(['value="%value-placeholder%"', '%value-placeholder%'], ['', $listItems], $blockContent);
     }
     
-    /**
+     /**
      * Other multi-inputs
      */
-    else{
+    elseif($block['blockName'] != "tsjippy-forms/input"){
         ob_start();
         ?>
         <div class="required flex" style="width: '85%';">
@@ -405,9 +406,19 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
         $exploded     = explode('[', $metaKey);
 
         if(count($exploded) > 1){
-            $defaultValue = $defaultValues[$exploded[0]][0] ?? '';
+            $defaultValue = $defaultValues[$exploded[0]] ?? '';
             if(is_array($defaultValue)){
-                $defaultValue = $defaultValue[str_replace(']', '', $exploded[1])];
+                $index        = str_replace(']', '', $exploded[1]);
+
+                if(isset($defaultValue[$index])){
+                    $defaultValue = $defaultValue[$index];
+                }elseif($defaultValue[0][$index]){
+                    $defaultValue = $defaultValue[0][$index];
+                }
+
+                if(is_array($defaultValue) && isset($exploded[2]) && isset($defaultValue[$exploded[2]])){
+                    $defaultValue   = $defaultValue[$exploded[2]];
+                }
             }
         }else{
             $defaultValue = $defaultValues[$metaKey] ?? '';
