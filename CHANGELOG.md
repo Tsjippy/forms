@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- issue with multifile block
 
 ### Updated
+
+## [12.0.5] - 2026-09-10
+
+
+### Fixed
+- issue with multifile block
 
 ## [12.0.4] - 2026-09-10
 
