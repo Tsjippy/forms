@@ -12,13 +12,14 @@ if (! defined('ABSPATH')) {
 /** @disregard P1008 */
 $uploader = new TSJIPPY\FILEUPLOAD\FileUploadHtml(get_current_user_id(), library: $attributes['library'] ?? false);
 
+/** @disregard P1008 */
 $uploader->getUploadHtml(
     inputName: $attributes['name'] ?? 'upload', 
     targetDir: $attributes['targetDir'] ?? '', 
     multiple: $attributes['multiple'] ?? false, 
     options: $attributes['options'] ?? [], 
     editBeforeUpload: $attributes['edit'] ?? false, 
-    metaKey: $attributes['metaKey'] ?? '', 
+    metaKey: $attributes['metaKey'] ?: ($attributes['name'] ?? ''), 
     auto: false, 
     echo: true
 );

@@ -622,7 +622,7 @@ class FormReminders extends Forms
         // Forms to be submitted
         if (!empty($reminders['forms'])) {
             if(count($reminders['forms']) == 1){
-                $html   .= "Please submit the " . $this->getFormReminderHtml(array_values($reminders['forms'])[0][0], $child);
+                $html   .= "Please submit the " . $this->getFormReminderHtml(array_values($reminders['forms'])[0][0], $child) . " form.<br>";
             }else{
                 $html   .= "<h3>Submit these forms</h3><br><ul>";
                 foreach ($reminders['forms'] as $days) {

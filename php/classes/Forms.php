@@ -1654,9 +1654,6 @@ class Forms
         // Sort on key
         ksort($this->defaultValues);
 
-        // Make sure all data is unserialized
-        $this->defaultValues      = map_deep($this->defaultValues, 'maybe_unserialize');
-
         foreach (TSJIPPY\getUserAccounts(false, false, [], [], [], true) as $user) {
             $this->defaultArrayValues['all_users'][$user->ID] = $user->display_name;
         }
@@ -1733,6 +1730,10 @@ class Forms
         $this->defaultArrayValues    = apply_filters('tsjippy-forms-add-form-multi-defaults', $this->defaultArrayValues, $this->userId);
 
         ksort($this->defaultArrayValues);
+
+         // Make sure all data is unserialized
+        $this->defaultValues      = map_deep($this->defaultValues, 'maybe_unserialize');
+        $this->defaultArrayValues = map_deep($this->defaultArrayValues, 'maybe_unserialize');
 
         wp_cache_set("default-meta-values-".$this->userId, $this->defaultValues, 'tsjippy_forms');
         wp_cache_set("default-array-meta-values-".$this->userId, $this->defaultArrayValues, 'tsjippy_forms');

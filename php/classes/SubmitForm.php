@@ -787,6 +787,10 @@ class SubmitForm extends SaveFormSettings
                     } elseif(is_array($result)){
                         $prevValues = get_user_meta($this->userId, $key);
 
+                        if(count($prevValues) == 1 && is_array($prevValues[0])){
+                            $prevValues = $prevValues[0];
+                        }
+
                         $added      = array_diff($result, $prevValues);
                         $removed    = array_diff($prevValues, $result);
 

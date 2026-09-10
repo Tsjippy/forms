@@ -3,6 +3,7 @@ import { PanelBody, TextControl, TextareaControl, ToggleControl, Spinner } from 
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import ServerSideRender from '@wordpress/server-side-render';
+import { useSelect } from '@wordpress/data';
 
 import UserMetaRequiredControls from '../../shared/AddRequiredOptions';
 
@@ -33,6 +34,22 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 		return () => clearTimeout(timeoutId);
 	}, [name, setAttributes]);
+
+	const userMetaEnabled = useSelect(
+		(select) => {
+			const editor = select('core/block-editor');
+
+			const parentId = editor.getBlockParentsByBlockName(
+				clientId,
+				'tsjippy-forms/formbuilder'
+			)?.[0];
+
+			return (
+				editor.getBlock(parentId)?.attributes?.user_meta === true
+			);
+		},
+		[clientId, attributes.required]
+	);
 
 	return (
 		<>
@@ -86,11 +103,13 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					onChange = { ( checked ) => setAttributes({ edit: checked })}
 				/>
 
-				<TextControl
-					label    = { __("Store the uploaded file path/attachment id in this user meta key", 'tsjippy')}
-					value    = { attributes.metaKey || '' }
-					onChange = { ( value ) => setAttributes({ metaKey: value })}
-				/>
+				{!userMetaEnabled &&
+					<TextControl
+						label    = { __("Store the uploaded file path/attachment id in this user meta key", 'tsjippy')}
+						value    = { attributes.metaKey || '' }
+						onChange = { ( value ) => setAttributes({ metaKey: value })}
+					/>
+				}
 			</PanelBody>
 		</InspectorControls>
     			

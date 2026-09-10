@@ -257,7 +257,8 @@ function preFillForm($blockContent, $block, $defaultValue){
     if(
         $block['blockName'] == 'tsjippy-forms/label' &&  // This block has a label parent
         ($block['innerBlocks'][0]['attrs']['multiple'] ?? false) &&   // and it can have multiple values &&
-        (!in_array($block['innerBlocks'][0]['attrs']['type'] ?? '', ['text', 'email', 'tel', 'url']))
+        (!in_array($block['innerBlocks'][0]['attrs']['type'] ?? '', ['text', 'email', 'tel', 'url'])) && // not one of these inputs
+        $block['innerBlocks'][0]['blockName'] != "tsjippy-forms/file" // It is not a file input
     ){
         $blockContent = renderMultiInput($defaultValue, $block['innerBlocks'][0]['innerHTML'], $block['innerBlocks'][0], $blockContent);
     }
@@ -385,6 +386,12 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
     
     $forms  = new Forms(userId: $instance->context['userId'] ?? 0);
 
+    $type   = str_replace('tsjippy-forms/', '', $block['blockName']);
+
+    if($type != 'label' && isset($forms->nonInputs[$type])){
+        return $blockContent;
+    }
+
     $forms->buildDefaultsArray();
 
     $defaultValues  = array_merge($forms->defaultArrayValues, $forms->defaultValues);
@@ -393,7 +400,18 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
      * Set default value
      */
     if(empty($block['attrs']['dynamic_value'])){
-        $defaultValue = $defaultValues[$block['attrs']['name'] ?? ''] ?? '';
+        $metaKey      = $block['attrs']['name'] ?? '';
+
+        $exploded     = explode('[', $metaKey);
+
+        if(count($exploded) > 1){
+            $defaultValue = $defaultValues[$exploded[0]][0] ?? '';
+            if(is_array($defaultValue)){
+                $defaultValue = $defaultValue[str_replace(']', '', $exploded[1])];
+            }
+        }else{
+            $defaultValue = $defaultValues[$metaKey] ?? '';
+        }
     }else{
         $defaultValue = $defaultValues[$block['attrs']['dynamic_value']] ?? '';
     }
