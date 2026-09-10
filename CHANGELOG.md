@@ -6,10 +6,15 @@
 ### Changed
 
 ### Fixed
-- form reminders
-- prefill file input
 
 ### Updated
+
+## [12.0.4] - 2026-09-10
+
+
+### Fixed
+- form reminders
+- prefill file input
 
 ## [12.0.3] - 2026-09-09
 
