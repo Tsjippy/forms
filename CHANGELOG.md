@@ -2,15 +2,22 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- support for indexed meta values
 
 ### Changed
 
 ### Fixed
-- bug
-- display bug
 
 ### Updated
+
+## [12.0.6] - 2026-09-11
+
+
+### Added
+- support for indexed meta values
+
+### Fixed
+- bug
+- display bug
 
 ## [12.0.5] - 2026-09-10
 
