@@ -787,19 +787,24 @@ class SubmitForm extends SaveFormSettings
                     } elseif(is_array($result)){
                         $prevValues = get_user_meta($this->userId, $key);
 
+                        // We are dealing with an multi-indexed meta value like meta_key[test] = 2
                         if(count($prevValues) == 1 && is_array($prevValues[0])){
-                            $prevValues = $prevValues[0];
+                            update_user_meta($this->userId, $key, $result);
                         }
+                        
+                        // Multiple enties with the same meta key
+                        else{
 
-                        $added      = array_diff($result, $prevValues);
-                        $removed    = array_diff($prevValues, $result);
+                            $added      = array_diff($result, $prevValues);
+                            $removed    = array_diff($prevValues, $result);
 
-                        foreach($added as $value){
-                            add_user_meta($this->userId, $key, $value);
-                        }
+                            foreach($added as $value){
+                                add_user_meta($this->userId, $key, $value);
+                            }
 
-                        foreach($removed as $value){
-                            delete_user_meta($this->userId, $key, $value);
+                            foreach($removed as $value){
+                                delete_user_meta($this->userId, $key, $value);
+                            }
                         }
                     }else {
                         update_user_meta($this->userId, $key, $result);
