@@ -578,6 +578,7 @@ class DisplayFormResults extends SubmitForm
         $baseQuery            .= "SELECT * FROM Submissions WHERE 1=1";
 
         if (!empty($finalWhere)) {
+            TSJIPPY\printArray($finalWhere, $where);
             $baseQuery .= " AND " . implode(' AND ', $finalWhere);
         }
 
@@ -734,7 +735,7 @@ class DisplayFormResults extends SubmitForm
                 $this->currentPage++;
             }
 
-            $start    = $this->currentPage * $this->pageSize;
+            $start    = max($this->currentPage * $this->pageSize, 0);
         } else {
             $start                = 0;
             $this->currentPage    = 0;
