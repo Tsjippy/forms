@@ -410,7 +410,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 						isEmailsFormVisible ? 
 							<EmailSettings
 								blockId={attributes.blockId}
-								formBlocks={[]}
+								formBlocks={inputBlocks}
 							/>
 						:
 							isRemindersFormVisible ? 

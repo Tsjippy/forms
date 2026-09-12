@@ -13,7 +13,7 @@ export default function PlaceholderPicker({
         '%time_last_edited%',
         '%viewhash%',
         ...formBlocks.map(
-            (field) => `%${field.slug}%`
+            (block) => `%${block.attributes.name}%`
         ),
     ];
 

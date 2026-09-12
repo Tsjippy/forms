@@ -23,8 +23,8 @@ export default function EmailTriggerPanel({
 			value: '',
 		},
 		...formBlocks.map((field) => ({
-			label: field.label,
-			value: field.id,
+			label: field.attributes.name,
+			value: field.attributes.blockId,
 		})),
 	];
 
@@ -90,14 +90,7 @@ export default function EmailTriggerPanel({
                     <SelectControl
                         label="Field"
                         value={value.block || ''}
-                        options={[
-                            {
-                                label:
-                                    'Select Field',
-                                value: '',
-                            },
-                            ...formBlocks,
-                        ]}
+                        options={fieldOptions}
                         onChange={(block) =>
                             update({ block })
                         }

@@ -15,8 +15,8 @@ export default function ConditionalRules({
 			value: '',
 		},
 		...formBlocks.map((field) => ({
-			label: field.label,
-			value: field.id,
+			label: field.attributes.name,
+			value: field.attributes.blockId,
 		})),
 	];
 
