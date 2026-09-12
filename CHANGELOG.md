@@ -7,6 +7,7 @@
 - removed 'tested up to'
 
 ### Fixed
+- copy input names
 
 ### Updated
 
