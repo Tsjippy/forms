@@ -1403,7 +1403,7 @@ class DisplayFormResults extends SubmitForm
     /**
      * Show the column settings form
      *
-     * @param string $class            Optional class to add to the form
+     * @param string $class           Optional class to add to the form
      * @param array $viewRoles        Array of roles that can be selected for view permissions
      * @param array $editRoles        Array of roles that can be selected for edit permissions
      *
