@@ -723,7 +723,7 @@ class FormReminders extends Forms
     protected function sendEmail($user, $html = '')
     {
         // Invalid user given
-        if (!$user) {
+        if (!$user || empty($html)) {
             return;
         }
 
