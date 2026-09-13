@@ -658,6 +658,10 @@ class Forms
             $this->reset();
         }
 
+        if(empty($post)){
+            return false;
+        }
+
         $this->formData->post   = $post;
         $this->formData->postId = $post->ID;
 

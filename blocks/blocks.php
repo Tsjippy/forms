@@ -387,7 +387,7 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
     
     $forms  = new Forms(userId: $instance->context['userId'] ?? 0);
 
-    $type   = str_replace('tsjippy-forms/', '', $block['blockName']);
+    $type   = str_replace('tsjippy-forms/', '', $block['blockName'] ?? '');
 
     if($type != 'label' && isset($forms->nonInputs[$type])){
         return $blockContent;
@@ -452,8 +452,8 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
     /**
      * Check if our filtered attribute exists in the block data
      */
-    $id = esc_attr( $block['attrs']['blockId'] );
-    if ( !empty( $block['attrs']['blockId'] ) && !str_contains($blockContent, "data-blockid='$id'")) {
+    $id = esc_attr( $block['attrs']['blockId'] ?? '');
+    if ( !empty( $id ) && !str_contains($blockContent, "data-blockid='$id'")) {
         $processor = new \WP_HTML_Tag_Processor( $blockContent );
 
         if ( $processor->next_tag() ) {

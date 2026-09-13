@@ -352,7 +352,7 @@ class FormReminders extends Forms
                 }
 
                 // compare the values
-                switch ($check['operator']) {
+                switch ($check['operator'] ?? '') {
                     case '==':
                         $result    = $value == $checkValue;
                         break;
