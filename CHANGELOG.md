@@ -4,12 +4,19 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [12.0.7] - 2026-09-13
+
+
+### Changed
 - removed 'tested up to'
 
 ### Fixed
 - copy input names
-
-### Updated
 
 ## [12.0.6] - 2026-09-11
 
