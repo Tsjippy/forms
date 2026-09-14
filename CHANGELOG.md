@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- error when post not set
 
 ### Updated
 
