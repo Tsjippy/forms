@@ -389,7 +389,7 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
 
     $type   = str_replace('tsjippy-forms/', '', $block['blockName'] ?? '');
 
-    if($type != 'label' && isset($forms->nonInputs[$type])){
+    if(empty($type) && ($type != 'label' && isset($forms->nonInputs[$type]))){
         return $blockContent;
     }
 
@@ -592,7 +592,7 @@ function showFormSelector($atts = [])
             }
 
             // Remove any form that saves its data in the usermeta
-            if ($a['no_meta'] && $form->user_meta) {
+            if (($a['no_meta'] ?? false) && $form->user_meta) {
                 unset($forms[$key]);
             }
         }

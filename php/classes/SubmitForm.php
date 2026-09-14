@@ -609,12 +609,11 @@ class SubmitForm extends SaveFormSettings
      * Save a form submission to the submission table
      *
      * @param    array    $formresults    the form result from post
-     * @param    string    $formUrl        The url of the form
      * @param    string    $message        The message passed by reference to adjust
      *
      * @return    WP_Error|true            The error if one exists or true
      */
-    public function saveToSubmissionTable($formresults, $formUrl, &$message)
+    public function saveToSubmissionTable($formresults, &$message)
     {
         global $wpdb;
 
@@ -688,11 +687,11 @@ class SubmitForm extends SaveFormSettings
 
         $placeholders['id']      = $this->submission->id;
 
-        $placeholders['formurl'] = $formUrl;
-
         $placeholders['blockid']  = $this->submission->block_id;
 
         $placeholders['postid']  = $this->submission->post_id;
+
+        $placeholders['formurl'] = get_permalink($this->submission->post_id);
 
         $this->sendEmail('submitted', $placeholders);
 
@@ -878,8 +877,6 @@ class SubmitForm extends SaveFormSettings
 
         $this->submission->archived         = false;
 
-        $formUrl                            = $request['formurl'];
-
         // remove the action and other unnesesary info
         unset($request['block-id']);
         unset($request['post-id']);
@@ -917,7 +914,7 @@ class SubmitForm extends SaveFormSettings
 
         // Save to submission table
         if (empty($this->formData->user_meta)) {
-            $result    = $this->saveToSubmissionTable($formresults, $formUrl, $message);
+            $result    = $this->saveToSubmissionTable($formresults, $message);
         } 
         
         // Save to user meta

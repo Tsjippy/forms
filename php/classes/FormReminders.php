@@ -232,15 +232,14 @@ class FormReminders extends Forms
     }
 
     /**
-     * Checks a given form for pending reminders
+     * Check if a form was submitted by a given user
      *
      * @param   object  $formReminder   The form reminder object
      * @param   int     $userId
      *
-     * @return  void
+     * @return  bool
      */
-    protected function formNeedsReminder($formReminder, $userId)
-    {
+    protected function checkIfSubmitted($formReminder, $userId){
         // Get all submissions created inside the current submission window
         $query            = "SELECT * FROM %i WHERE post_id=%d and block_id=%d and user_id=%d";
         $values            = [
@@ -259,19 +258,37 @@ class FormReminders extends Forms
             $values
         );
 
-        return !$this->checkIfConditionsAppliesToUser($formReminder->conditions, $userId, $submissions);
+        // We already submitted this period
+        return !empty($submissions);
+    }
+
+    /**
+     * Checks a given form for pending reminders
+     *
+     * @param   object  $formReminder   The form reminder object
+     * @param   int     $userId
+     *
+     * @return  bool
+     */
+    protected function formNeedsReminder($formReminder, $userId)
+    {
+        // We already submitted this form within this period
+        if( $this->checkIfSubmitted($formReminder, $userId)){
+            return false;
+        }
+
+        return !$this->checkIfConditionsAppliesToUser($formReminder, $userId);
     }
 
     /**
      * Checks if a given set of conditions applies to the current user. Returns true if there is a match
      *
-     * @param    object   $conditions     The block conditions
-     * @param    int      $userId         The user id
-     * @param    array    $submissions    The submissions to check
+     * @param   object  $formReminder   The form reminder object
+     * @param    int    $userId         The user id
      *
      * @return    bool                    true if no conditions or the condition apply, false if it does not apply
      */
-    public function checkIfConditionsAppliesToUser($conditions, $userId, $submissions = '')
+    public function checkIfConditionsAppliesToUser($formReminder, $userId)
     {
         $family = new TSJIPPY\FAMILY\Family();
 
@@ -282,11 +299,11 @@ class FormReminders extends Forms
             return false;
         }
 
-        if (!is_array($conditions) || empty($conditions)) {
+        if (!is_array($formReminder->conditions) || empty($formReminder->conditions)) {
             return true;
         }
 
-        $conditions    = TSJIPPY\cleanUpNestedArray($conditions);
+        $conditions    = TSJIPPY\cleanUpNestedArray($formReminder->conditions);
 
         // Check if the the roles overlap
         if (isset($conditions['roles'])) {
@@ -384,22 +401,8 @@ class FormReminders extends Forms
                         $result    = !empty($checkValue);
                         break;
                     case 'submitted':
-                        $result    = false;
+                        $result    = $this->checkIfSubmitted($formReminder, $value);
 
-                        // check if the given user_id has submitted the form already
-                        foreach ($submissions as $submission) {
-                            if (is_array($value)) {
-                                if (in_array($submission->user_id, $value)) {
-                                    $result    = true;
-                                    break;
-                                }
-                            } else {
-                                if ($submission->user_id == $value) {
-                                    $result    = true;
-                                    break;
-                                }
-                            }
-                        }
                         break;
                     default:
                         $result = false;
@@ -479,7 +482,7 @@ class FormReminders extends Forms
                 ) ||
                 (
                     $isChild    &&
-                    $block->block['attrs']['notChild']
+                    ($block->block['attrs']['notChild'] ?? false)
                 )
             ) {
                 continue;
@@ -653,6 +656,11 @@ class FormReminders extends Forms
 
         // Get the block and form reminders
         $reminders  = $this->getUserReminders($user->ID, true);
+
+        // Only remind about blocks once a week
+        if($today != 'Mon'){
+            unset($reminders['blocks']);
+        }
 
         if(empty($reminders['blocks']) && empty($reminders['forms'][$today])){
             return '';
