@@ -6,15 +6,10 @@
 ### Changed
 
 ### Fixed
-
-### Updated
-
-## [12.0.9] - 2026-09-14
-
-
-### Fixed
 - error when post not set
 - check for form submissions
+
+### Updated
 
 ## [12.0.8] - 2026-09-13
 
