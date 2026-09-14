@@ -7,6 +7,7 @@
 
 ### Fixed
 - error when post not set
+- check for form submissions
 
 ### Updated
 
