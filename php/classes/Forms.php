@@ -649,10 +649,10 @@ class Forms
         
         if(
             
-            $post != $this->formData->post || 
+            $post != ($this->formData->post ?? '') || 
             (
                 is_numeric($post) && 
-                $post != $this->formData->postId
+                $post != ($this->formData->postId ?? -1)
             )
         ){
             $this->reset();
@@ -1653,7 +1653,7 @@ class Forms
         );
 
         // Filter the default values
-        $this->defaultValues      = apply_filters('tsjippy-forms-add-form-defaults', $this->defaultValues, $this->userId, $this->formData->slug);
+        $this->defaultValues      = apply_filters('tsjippy-forms-add-form-defaults', $this->defaultValues, $this->userId, ($this->formData->slug ?? ''));
 
         // Sort on key
         ksort($this->defaultValues);
