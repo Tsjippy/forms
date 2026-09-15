@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- bug in form reminders checking
 
 ### Updated
 
