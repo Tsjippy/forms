@@ -208,7 +208,7 @@ function restApiInitFormsNew()
             'methods'     => 'POST',
             'callback'     => function ($wpRestRequest) {
                 /**
-                 * Filters the forms actions
+                 * Filters the available form actions
                  * 
                  * @param   array   $actions The form table actions
                  */
@@ -395,7 +395,7 @@ function saveFormReminders($wpRestRequest)
  */
 function loadFormResults()
 {
-    $displayFormResults = new DisplayFormResults(['shortcode-id' => (int) $_POST['shortcode-id']]);
+    $displayFormResults = new DisplayFormResults((int) $_POST['shortcode-id']);
 
     return $displayFormResults->showFormresultsTable();
 }

@@ -2609,18 +2609,23 @@ class DisplayFormResults extends SubmitForm
     /**
      * New form results table
      *
-     * @param    int        $formId        the id of the form
+     * @param    int        $postId        the id of the post the form is on
+     * @param    string     $blockId       the id of the form block
      *
-     * @return    int                    The id of the new formtable
+     * @return    int|false                The id of the new formtable
      */
-    public function insertInDb($formId)
+    public function insertInDb($postId, $blockId)
     {
+        if(empty($blockId)){
+            return false;
+        }
+
         //add new row in db
         return TSJIPPY\insertInDb(
             $this->shortcodeTable,
             array(
-                'post_id'   => $formId,
-                'block_id'  => ''
+                'post_id'   => $postId,
+                'block_id'  => $blockId
             ),
             [
                 '%d'

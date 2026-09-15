@@ -641,24 +641,26 @@ function showFormSelector($atts = [])
          * Loop over the forms to add both the form and the submission data
          */
         foreach ($forms as $form) {
+            $form   = $form['formData'];
+
             $shortcodeData     = TSJIPPY\getFromDb(
-                "get_shortcodes_for_form_$form->id",
+                "get_shortcodes_for_form_$form->blockId",
                 "forms",
                 "SELECT * FROM %i WHERE block_id = %d",
                 $formTable->shortcodeTable,
-                $form->id
+                $form->blockId
             );
 
             //Create shortcode data if not existing
             if (empty($shortcodeData)) {
-                $shortcodeId   = $formTable->insertInDb($form->id);
+                $shortcodeId   = $formTable->insertInDb($form->postId, $form->blockId);
             } else {
                 $shortcodeId   = $shortcodeData[0]->id;
             }
 
             //Check if this form should be displayed
             // phpcs:ignore
-            if (isset($_REQUEST['form']) && ($_REQUEST['form'] == $form->slug || $_REQUEST['form'] == $form->id)) {
+            if (isset($_REQUEST['form']) && ($_REQUEST['form'] == $form->slug || $_REQUEST['form'] == $form->blockId)) {
                 $hidden = '';
             } else {
                 $hidden = ' hidden';
@@ -683,7 +685,7 @@ function showFormSelector($atts = [])
                 }
 
                 ?>
-                <div id='<?php echo esc_attr($id);?>-form' class='form-wrapper <?php echo esc_attr($formVis);?> form-load-trigger' data-form-id=<?php echo esc_attr($form->id);?>>
+                <div id='<?php echo esc_attr($id);?>-form' class='form-wrapper <?php echo esc_attr($formVis);?> form-load-trigger' data-form-id=<?php echo esc_attr($form->blockId);?>>
                 </div>
 
 

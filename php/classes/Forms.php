@@ -695,15 +695,6 @@ class Forms
 
                 foreach($block['attrs'] as $key => $attribute){
                     $this->formData->$key   = $attribute;
-
-                    if($key == 'actions'){
-                        /**
-                         * Filters the forms actions
-                         * 
-                         * @param   array   $actions The form table actions
-                         */
-                        $this->formData->actions   = apply_filters('tsjippy-forms-actions', (array) $attribute);
-                    }
                 }
 
                 if(empty($this->formData->slug)){
