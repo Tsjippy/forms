@@ -283,10 +283,10 @@ class FormReminders extends Forms
     /**
      * Checks if a given set of conditions applies to the current user. Returns true if there is a match
      *
-     * @param   object  $formReminder   The form reminder object
-     * @param    int    $userId         The user id
+     * @param   object  $formReminder   The form reminder object or an array with conditions
+     * @param   int     $userId         The user id
      *
-     * @return    bool                    true if no conditions or the condition apply, false if it does not apply
+     * @return   bool                    true if no conditions or the condition apply, false if it does not apply
      */
     public function checkIfConditionsAppliesToUser($formReminder, $userId)
     {
@@ -299,11 +299,18 @@ class FormReminders extends Forms
             return false;
         }
 
-        if (!is_array($formReminder->conditions) || empty($formReminder->conditions)) {
+        // Check if the formReminder is an object or already an array with conditions
+        if(is_array($formReminder)){
+            $conditions = $formReminder;
+        }else{
+            $conditions = $formReminder->condition;
+        }
+
+        if (!is_array($conditions) || empty($conditions)) {
             return true;
         }
 
-        $conditions    = TSJIPPY\cleanUpNestedArray($formReminder->conditions);
+        $conditions    = TSJIPPY\cleanUpNestedArray($conditions);
 
         // Check if the the roles overlap
         if (isset($conditions['roles'])) {
