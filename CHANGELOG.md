@@ -8,6 +8,7 @@
 ### Fixed
 - error when post not set
 - check for form submissions
+- sql bug
 
 ### Updated
 
