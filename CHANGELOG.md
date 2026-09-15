@@ -6,11 +6,16 @@
 ### Changed
 
 ### Fixed
+
+### Updated
+
+## [12.1.0] - 2026-09-15
+
+
+### Fixed
 - error when post not set
 - check for form submissions
 - sql bug
-
-### Updated
 
 ## [12.0.8] - 2026-09-13
 
