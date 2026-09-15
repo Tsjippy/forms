@@ -578,7 +578,6 @@ class DisplayFormResults extends SubmitForm
         $baseQuery            .= "SELECT * FROM Submissions WHERE 1=1";
 
         if (!empty($finalWhere)) {
-            TSJIPPY\printArray([$finalWhere, $where]);
             $baseQuery .= " AND " . implode(' AND ', $finalWhere);
         }
 

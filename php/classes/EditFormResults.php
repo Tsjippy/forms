@@ -378,7 +378,7 @@ class EditFormResults extends DisplayFormResults
             $submissions = $this->getSubmissions(
                 all:   true,
                 where: [
-                    "$triggerId $compare %s"
+                    "`$triggerId` $compare %s"
                 ],
                 values: [
                     $triggerValue
