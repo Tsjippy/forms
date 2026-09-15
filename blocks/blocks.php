@@ -554,7 +554,7 @@ function missingFormFields($atts)
 /**
  * Displays a form selector based on the provided attributes
  *
- * @param   array   $atts    The shortcode attributes
+ * @param   array   $atts    The block attributes
  *
  * @return  string           The HTML for the form selector
  */
@@ -568,35 +568,17 @@ function showFormSelector($atts = [])
 
     ob_start();
 
-    $a = shortcode_atts(array(
-        'exclude'   => [],
-        'no_meta'   => true
-    ), $atts);
-
     $formTable    = new DisplayFormResults();
-    $formTable->getForms();
 
-    $forms          = $formTable->forms;
-
+    $type   = null;
     // Remove any unwanted forms
-    if (!empty($a['exclude']) || $a['no_meta']) {
-        if (is_array($a['exclude'])) {
-            $exclusions = $a['exclude'];
-        } else {
-            $exclusions = explode(',', $a['exclude']);
-        }
-
-        foreach ($forms as $key => $form) {
-            if (in_array($form->slug, $exclusions) || empty($form->slug)) {
-                unset($forms[$key]);
-            }
-
-            // Remove any form that saves its data in the usermeta
-            if (($a['no_meta'] ?? false) && $form->user_meta) {
-                unset($forms[$key]);
-            }
-        }
+    if (!$atts['hide_meta_forms'] ?? false) {
+        $type   = 'normal';
     }
+
+    $formTable->getForms($type);
+
+    $forms       = $formTable->forms;
 
     //Sort form names by alphabeth
     usort($forms, function ($a, $b) {

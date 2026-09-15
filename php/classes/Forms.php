@@ -573,6 +573,8 @@ class Forms
 
     /**
      * Finds all blocks and post ids who are of the formbuilder type
+     * 
+     * @param   string  $type   empty for all, meta for meta only, normal for excluding meta forms
      */
     public function getForms($type=null){
         if(!empty($this->forms)){
@@ -581,18 +583,26 @@ class Forms
 
         global $wpdb;
 
+        $query      = "SELECT * FROM %i where post_content like %s and post_status='publish'";
+
         $likeString = '%'.$wpdb->esc_like('<!-- wp:tsjippy-forms/formbuilder').'%';
+
+        $extra      = '';
 
         if($type == 'meta'){
             $likeString .= $wpdb->esc_like('"user_meta":true').'%';
+        }elseif($type == 'normal'){
+            $query .= " and post_content not like %s";
+            $extra  = $wpdb->esc_like('"user_meta":true').'%';
         }
 
         $posts = TSJIPPY\getFromDb(
-            'all_forms',
+            "all_forms_$type",
             'forms',
-            "SELECT * FROM %i where post_content like %s and post_status='publish'",
+            $query,
             $wpdb->posts,
-            $likeString
+            $likeString,
+            $extra
         );
 
         foreach($posts as $post){
