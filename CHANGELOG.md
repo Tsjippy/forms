@@ -7,6 +7,7 @@
 
 ### Fixed
 - bug in form reminders checking
+- form selector
 
 ### Updated
 
