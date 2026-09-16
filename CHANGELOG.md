@@ -6,10 +6,16 @@
 ### Changed
 
 ### Fixed
-- bug in form reminders checking
-- form selector
 
 ### Updated
+
+## [12.1.1] - 2026-09-15
+
+
+### Fixed
+- bug in form reminders checking
+- form selector
+- form selector
 
 ## [12.1.0] - 2026-09-15
 
