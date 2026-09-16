@@ -2,13 +2,18 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- form-reset possibility
 
 ### Changed
 
 ### Fixed
 
 ### Updated
+
+## [12.1.3] - 2026-09-16
+
+
+### Added
+- form-reset possibility
 
 ## [12.1.2] - 2026-09-16
 
