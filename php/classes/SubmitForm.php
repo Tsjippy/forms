@@ -546,7 +546,7 @@ class SubmitForm extends SaveFormSettings
                         }
 
                         // Find the block id
-                        $blockId    = $this->getBlockBySlug($matches[1] . "[$in][$subKey]", 'id');
+                        $blockId    = $this->getBlockBySlug($matches[1] . "[$in][$subKey]", 'blockId');
 
                         // insert the value
                         TSJIPPY\insertInDb(
@@ -580,7 +580,7 @@ class SubmitForm extends SaveFormSettings
                         continue;
                     }
 
-                    $blockId = $this->getBlockBySlug($slug . '[' . $key . ']', 'id');
+                    $blockId = $this->getBlockBySlug($slug . '[' . $key . ']', 'blockId');
 
                     TSJIPPY\insertInDb(
                         $this->submissionValuesTableName,
