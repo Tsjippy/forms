@@ -37,6 +37,10 @@
 			"type": "boolean",
 			"default": true
 		},
+		"reset": {
+			"type": "boolean",
+			"default": true
+		},
 		"submission_message": {
 			"type": "string",
 			"default": "Succesfully received your request"

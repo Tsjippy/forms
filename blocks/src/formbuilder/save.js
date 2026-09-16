@@ -27,6 +27,7 @@ export default function save({ attributes }) {
       data-formName={attributes.name}
       data-blockId={attributes.blockId}
       data-meta={attributes.user_meta ? 'true' : undefined}
+      data-reset={attributes.reset ? 'true' : undefined}
       {...blockProps}
     >
       <input type="hidden" name="block-id" value={attributes.blockId} />

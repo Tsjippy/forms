@@ -140,6 +140,10 @@ return array(
 				'type' => 'boolean',
 				'default' => true
 			),
+			'reset' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
 			'submission_message' => array(
 				'type' => 'string',
 				'default' => 'Succesfully received your request'

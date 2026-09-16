@@ -309,6 +309,12 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					/>
 
 					<ToggleControl
+						label    = {__("Reset form after submission", "tsjippy")}
+						checked  = {!!attributes.reset}
+						onChange = {() => setAttributes({ reset: !attributes.reset }) }
+					/>
+
+					<ToggleControl
 						label    = {__("Save submissions in usermeta table", "tsjippy")}
 						checked  = {!!attributes.user_meta}
 						onChange = {() => setAttributes({ user_meta: !attributes.user_meta }) }
