@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- get blockId
 
 ### Updated
+
+## [12.1.2] - 2026-09-16
+
+
+### Fixed
+- get blockId
 
 ## [12.1.1] - 2026-09-15
 
