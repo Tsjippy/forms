@@ -1,3 +1,7 @@
+import{
+  prepareForValidation
+} from "../../../../tsjippy-shared-functionality/js/partials/form_submit_functions.js";
+
 /**
  * Show the next or previous formstep
  * @param {int} formstep index
@@ -21,7 +25,7 @@ function nextPrev(n, target) {
   //Check validity of this step if going forward
   if (n > 0) {
     // Prepare the elements on this tab
-    FormSubmit.prepareForValidation(x[currentTab]);
+    prepareForValidation(x[currentTab]);
 
     // Report validity of each required field
     let elements = x[currentTab].querySelectorAll(

@@ -19,7 +19,7 @@ function registerScripts()
     wp_register_style('tsjippy_forms_style', TSJIPPY\pathToUrl(PLUGINPATH . 'css/forms.min.css'), array(), PLUGINVERSION);
     wp_register_style('tsjippy_formtable_style', TSJIPPY\pathToUrl(PLUGINPATH . 'css/formtable.min.css'), array(), PLUGINVERSION);
 
-    wp_register_script('tsjippy_forms_script', TSJIPPY\pathToUrl(PLUGINPATH . 'js/forms.min.js'), array('tsjippy_formsubmit_script', 'tsjippy_fileupload_script'), PLUGINVERSION, true);
+    wp_register_script_module('@tsjippy/forms_script', TSJIPPY\pathToUrl(PLUGINPATH . 'js/forms.min.js'), array('@tsjippy/formsubmit_script', '@tsjippy/fileupload_script'), PLUGINVERSION);
 
-    wp_register_script('tsjippy_forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH . 'js/forms_table.min.js'), array('tsjippy_forms_script', 'tsjippy_table_script', 'wp-blocks', 'wp-element', 'wp-dom-ready'), PLUGINVERSION, true);
+    wp_register_script_module('@tsjippy/forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH . 'js/forms_table.min.js'), array('@tsjippy/forms_script', '@tsjippy/table_script'), PLUGINVERSION);
 }

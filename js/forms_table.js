@@ -1,5 +1,11 @@
 import Sortable from "sortablejs";
 
+import{
+  submitForm,
+  fetchRestApi
+} from "../../tsjippy-shared-functionality/js/partials/form_submit_functions.js";
+
+
 /**
  * We need to be carefull with this script as it has overlap with the main table.js
  */
@@ -11,7 +17,7 @@ async function showHiddenColumns(target) {
   let formData = new FormData();
   formData.append("block-id", target.dataset.formId);
 
-  let response = await FormSubmit.fetchRestApi(
+  let response = await fetchRestApi(
     "forms/delete_table_prefs",
     formData,
   );
@@ -23,7 +29,7 @@ async function showHiddenColumns(target) {
 }
 
 async function saveColumnSettings(target) {
-  let response = await FormSubmit.submitForm(
+  let response = await submitForm(
     target,
     "forms/save_column_settings",
   );
@@ -35,7 +41,7 @@ async function saveColumnSettings(target) {
 }
 
 async function saveTableSettings(target) {
-  let response = await FormSubmit.submitForm(
+  let response = await submitForm(
     target,
     "forms/save_table_settings",
   );
@@ -74,7 +80,7 @@ async function removeSubmission(target) {
     //display loading gif
     Main.showLoader(target);
 
-    let response = await FormSubmit.fetchRestApi(
+    let response = await fetchRestApi(
       "forms/remove_submission",
       formData,
     );
@@ -131,7 +137,7 @@ async function archiveSubmission(target) {
   //display loading gif
   Main.showLoader(target);
 
-  response = await FormSubmit.fetchRestApi(
+  response = await fetchRestApi(
     "forms/archive_submission",
     formData,
   );
@@ -385,7 +391,7 @@ async function getPage(target, action, page=-1) {
     formData.append("sortdir", tableWrapper.dataset.sortdir);
   }
 
-  let response = await FormSubmit.fetchRestApi("forms/get_page", formData);
+  let response = await fetchRestApi("forms/get_page", formData);
 
   if (response) {
     for (let [tableType, tableHtml] of Object.entries(response)) {
@@ -458,7 +464,7 @@ async function getInputHtml(target) {
   formData.append("shortcode-id", shortcodeId);
   formData.append("element-id", data.elementId);
 
-  let response = await FormSubmit.fetchRestApi(
+  let response = await fetchRestApi(
     "forms/get_input_html",
     formData,
   );
@@ -526,7 +532,7 @@ async function processFormsTableInput(target) {
       formData.append("shortcode-id", shortcodeId);
     }
 
-    let response = await FormSubmit.fetchRestApi("forms/edit_value", formData);
+    let response = await fetchRestApi("forms/edit_value", formData);
 
     target.classList.remove("editing");
 
@@ -598,7 +604,7 @@ const hideColumn = async (target) => {
     formData.append("block-id", table.dataset.formId);
     formData.append("column-name", cell.id);
 
-    await FormSubmit.fetchRestApi("forms/save_table_prefs", formData);
+    await fetchRestApi("forms/save_table_prefs", formData);
     // Table settings
   } else {
     if (target.classList.contains("visible")) {
@@ -748,7 +754,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let response = false;
 
     formData.append("shortcode-id", shortcodeId);
-    response = await FormSubmit.fetchRestApi(
+    response = await fetchRestApi(
       "forms/load_form_results",
       formData,
     );

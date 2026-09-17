@@ -1,4 +1,3 @@
-import { addStyles } from "../../tsjippy-shared-functionality/js/partials/load_assets.js";
 import {
   removeDefaultSelect,
   cloneNode,
@@ -9,6 +8,12 @@ import {
   changeFieldValue,
   changeFieldProperty,
 } from "./form_exports.js";
+
+import{
+  submitForm,
+  formReset
+} from "../../tsjippy-shared-functionality/js/partials/form_submit_functions.js";
+
 import { getFieldValue } from "../../tsjippy-shared-functionality/js/partials/field_value.js";
 export {
   getFieldValue,
@@ -45,13 +50,13 @@ async function saveFormInput(target) {
       }
     });
 
-  let response = await FormSubmit.submitForm(target, "forms/save_form_input");
+  let response = await submitForm(target, "forms/save_form_input");
 
   if (response) {
     Main.displayMessage(response);
 
     if (form.dataset.reset) {
-      FormSubmit.formReset(form);
+      formReset(form);
     }
   }
 }

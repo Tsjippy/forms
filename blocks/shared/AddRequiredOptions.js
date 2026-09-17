@@ -26,7 +26,7 @@ export default function UserMetaRequiredControls({
         setLoadingRoles(true);
 
 		apiFetch({
-			path: `${tsjippy.restApiPrefix}/forms/get_roles`,
+			path: `tsjippy/v2/forms/get_roles`,
 			method: 'POST',
 		}).then((res) => {
 			setAvailableRoles(Array.isArray(res) ? res : []);
@@ -63,7 +63,7 @@ export default function UserMetaRequiredControls({
         setLoadingMetaKeys(true);
 
         apiFetch({
-            path: `${tsjippy.restApiPrefix}/forms/get_user_meta_keys`,
+            path: `tsjippy/v2/forms/get_user_meta_keys`,
             method: 'POST',
         })
             .then((keys) => {

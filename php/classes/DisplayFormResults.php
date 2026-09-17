@@ -2433,7 +2433,7 @@ class DisplayFormResults extends SubmitForm
         do_action('tsjippy-forms-table-POST-actions');
 
         //Load js
-        wp_enqueue_script('tsjippy_forms_table_script');
+        wp_enqueue_script_module('@tsjippy/forms_table_script');
 
         $formTableWrapper   = addElement('div', '', ['class' => 'form table-wrapper']);
         $tableHead          = addElement('div', $formTableWrapper, ['class' => 'form table-head']);

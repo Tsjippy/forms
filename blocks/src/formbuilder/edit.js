@@ -74,7 +74,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	/* Load available roles from the server for the inspector panel. */
 	useEffect(() => {
 		apiFetch({
-			path: `${tsjippy.restApiPrefix}/forms/get_roles`,
+			path: `tsjippy/v2/forms/get_roles`,
 			method: 'POST',
 		}).then((res) => {
 			setAvailableRoles(Array.isArray(res) ? res : []);
@@ -86,7 +86,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		setAvailableActionsLoading(true);
 
 		apiFetch({
-			path: `${tsjippy.restApiPrefix}/forms/get_form_actions`,
+			path: `tsjippy/v2/forms/get_form_actions`,
 			method: 'POST',
 		})
 			.then((res) => {

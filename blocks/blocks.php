@@ -445,7 +445,7 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
         $jsPath     = plugin_dir_path(__DIR__) . "js/dynamic/{$formName}.js";
         
         if (file_exists($jsPath) && filesize($jsPath) > 0) {
-            wp_enqueue_script("tsjippy_forms_dynamic_{$formName}_js", TSJIPPY\pathToUrl($jsPath), array('tsjippy_forms_script'), PLUGINVERSION, true);
+            wp_enqueue_script_module("tsjippy_forms_dynamic_{$formName}_js", TSJIPPY\pathToUrl($jsPath), array('@tsjippy/forms_script'), PLUGINVERSION);
         }
     }
 
@@ -560,9 +560,9 @@ function missingFormFields($atts)
  */
 function showFormSelector($atts = [])
 {
-    wp_enqueue_script('tsjippy_forms_script');
+    wp_enqueue_script_module('@tsjippy/forms_script');
 
-    wp_enqueue_script('tsjippy_forms_table_script');
+    wp_enqueue_script_module('@tsjippy/forms_table_script');
 
     wp_enqueue_style('tsjippy_forms_style');
 
