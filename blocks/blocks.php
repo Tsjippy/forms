@@ -441,11 +441,11 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
      * Load dynamic forms script
      */
     if($block['blockName'] == "tsjippy-forms/formbuilder"){
-        $formName   = $block['attrs']['name'];
+        $formName   = trim($block['attrs']['name']);
         $jsPath     = plugin_dir_path(__DIR__) . "js/dynamic/{$formName}.js";
         
         if (file_exists($jsPath) && filesize($jsPath) > 0) {
-            wp_enqueue_script_module("tsjippy_forms_dynamic_{$formName}_js", TSJIPPY\pathToUrl($jsPath), array('@tsjippy/forms_script'), PLUGINVERSION);
+            wp_enqueue_script_module("@tsjippy/forms_dynamic_{$formName}_js", TSJIPPY\pathToUrl($jsPath), array('@tsjippy/forms_script'), PLUGINVERSION);
         }
     }
 

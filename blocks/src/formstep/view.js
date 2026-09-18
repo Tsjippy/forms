@@ -1,6 +1,6 @@
 import{
   prepareForValidation
-} from "../../../../tsjippy-shared-functionality/js/partials/form_submit_functions.js";
+} from "../../../js/form_submit_functions.js";
 
 /**
  * Show the next or previous formstep

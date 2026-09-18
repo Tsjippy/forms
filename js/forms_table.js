@@ -3,8 +3,11 @@ import Sortable from "sortablejs";
 import{
   submitForm,
   fetchRestApi
-} from "../../tsjippy-shared-functionality/js/partials/form_submit_functions.js";
+} from "./form_submit_functions.js";
 
+import {
+  getFieldValue
+} from "./field_value.js";
 
 /**
  * We need to be carefull with this script as it has overlap with the main table.js
@@ -498,7 +501,7 @@ async function processFormsTableInput(target) {
   let cell = target.closest("td");
   let data = cell.dataset;
   let submissionId = target.closest("tr").dataset.submissionId;
-  let value = FormFunctions.getFieldValue(target, cell, false);
+  let value = getFieldValue(target, cell, false);
   let shortcodeId = "";
 
   if (target.closest("[data-shortcode-id]") != null) {

@@ -1,31 +1,14 @@
 import {
-  removeDefaultSelect,
-  cloneNode,
   copyFormInput,
   fixNumbering,
   removeNode,
-  tidyMultiInputs,
   changeFieldValue,
-  changeFieldProperty,
 } from "./form_exports.js";
 
 import{
   submitForm,
   formReset
-} from "../../tsjippy-shared-functionality/js/partials/form_submit_functions.js";
-
-import { getFieldValue } from "../../tsjippy-shared-functionality/js/partials/field_value.js";
-export {
-  getFieldValue,
-  removeDefaultSelect,
-  cloneNode,
-  copyFormInput,
-  fixNumbering,
-  removeNode,
-  tidyMultiInputs,
-  changeFieldValue,
-  changeFieldProperty,
-};
+} from "./form_submit_functions.js";
 
 console.log("Forms.js is loaded");
 

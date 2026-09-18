@@ -255,7 +255,7 @@ function dynamicJs($conditions, $innerBlocks){
                     }
 
                     $actions[$conditionIndex]['action'] = 
-                "this.change_field_property(
+                "changeFieldProperty(
                     target,
                     '{$actionData['property-name']}',
                     $newValue,
@@ -371,11 +371,18 @@ function defaultJs($formName, $conditions, $innerBlocks){
     ob_start(); 
 
     ?>
+import {
+  tidyMultiInputs,
+  changeFieldProperty
+} from "../form_exports.js";
+
+import {
+  getFieldValue
+} from "../field_value.js";
+
 class <?php echo esc_attr($className);?> {
     // We could have multiple instances of the same form on one page
     forms = document.querySelectorAll(`form[data-formname="<?php echo esc_attr($formName);?>"]`);
-
-    change_field_property   = FormFunctions.changeFieldProperty;
 
     // Callback function to execute when mutations are observed
     onMutation = (mutationList, observer) => {
@@ -400,7 +407,7 @@ class <?php echo esc_attr($className);?> {
             form.addEventListener('input', (event) => this.handleConditions(event.target));
         });
 
-        FormFunctions.tidyMultiInputs();
+        tidyMultiInputs();
         
         // Loop over the blocks who's value is given in the url and set the value;
         if (typeof(urlSearchParams) == 'undefined') {
@@ -409,7 +416,7 @@ class <?php echo esc_attr($className);?> {
 
         Array.from(urlSearchParams).forEach (array => {
             this.forms.forEach(form => {
-                form.querySelectorAll(`[name^='${array[0]}' i]`).forEach (el => this.change_field_property(el, 'value', array[1], form));
+                form.querySelectorAll(`[name^='${array[0]}' i]`).forEach (el => changeFieldProperty(el, 'value', array[1], form));
             });
         });
 
@@ -433,7 +440,7 @@ class <?php echo esc_attr($className);?> {
     };
 
     getValue    = (blockid, form) => {
-        return FormFunctions.getFieldValue(form.querySelector(`[data-blockid='${blockid}']`), form);
+        return getFieldValue(form.querySelector(`[data-blockid='${blockid}']`), form);
     };
 
     handleConditions = (el) => {
@@ -546,7 +553,6 @@ function buildJs($block, $post){
             'value_',
             'elName',
             "\n",
-            "change_field_property",
             "init"
         ],
         [
@@ -555,7 +561,6 @@ function buildJs($block, $post){
             'v_',
             'n',
             '',
-            'cP',
             'i'
         ],
         $minifiedJs

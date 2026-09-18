@@ -12,16 +12,12 @@ import {
 	Button,
 	ToggleControl,
 	TextControl,
-	Placeholder,
-	SelectControl,
-	FormTokenField,
-	BaseControl
+	SelectControl
 } from '@wordpress/components';
-import { useState, useEffect, useCallback, RawHTML  } from '@wordpress/element';
+import { useState, useEffect, useCallback  } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useSelect } from '@wordpress/data';
 import { plus } from '@wordpress/icons';
-import { blockDefault } from '@wordpress/icons';
 
 import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';

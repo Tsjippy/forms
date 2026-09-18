@@ -118,7 +118,7 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'tsjippy_forms_script',
+		'viewScriptModule' => 'file:./view.js',
 		'attributes' => array(
 			'postId' => array(
 				'type' => 'number',
