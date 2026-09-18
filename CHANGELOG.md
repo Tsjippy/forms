@@ -5,6 +5,7 @@
 - form-reset possibility
 
 ### Changed
+- register js as modules
 
 ### Fixed
 
