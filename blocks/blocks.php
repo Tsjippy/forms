@@ -33,7 +33,7 @@ function initBlocks()
     // #endregion
     wp_register_block_types_from_metadata_collection( $buildPath, $manifestPath );
     // #region agent log
-    $registry = WP_Block_Type_Registry::get_instance();
+    $registry = \WP_Block_Type_Registry::get_instance();
     file_put_contents($logPath, json_encode([
         'sessionId' => '0a5746',
         'runId' => 'pre-fix',
