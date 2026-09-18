@@ -13,7 +13,40 @@ add_action('init', __NAMESPACE__ . '\initBlocks');
 function initBlocks()
 {
     // Register all js blocks
-    wp_register_block_types_from_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
+    $manifestPath = __DIR__ . '/build/blocks-manifest.php';
+    $buildPath = __DIR__ . '/build';
+    // #region agent log
+    $logPath = WP_CONTENT_DIR . '/plugins/debug-0a5746.log';
+    file_put_contents($logPath, json_encode([
+        'sessionId' => '0a5746',
+        'runId' => 'pre-fix',
+        'hypothesisId' => 'C',
+        'location' => 'tsjippy-forms/blocks/blocks.php:initBlocks',
+        'message' => 'Before metadata collection registration',
+        'data' => [
+            'buildDirExists' => is_dir($buildPath),
+            'manifestExists' => file_exists($manifestPath),
+            'functionExists' => function_exists('wp_register_block_types_from_metadata_collection'),
+        ],
+        'timestamp' => round(microtime(true) * 1000),
+    ]) . "\n", FILE_APPEND | LOCK_EX);
+    // #endregion
+    wp_register_block_types_from_metadata_collection( $buildPath, $manifestPath );
+    // #region agent log
+    $registry = WP_Block_Type_Registry::get_instance();
+    file_put_contents($logPath, json_encode([
+        'sessionId' => '0a5746',
+        'runId' => 'pre-fix',
+        'hypothesisId' => 'C',
+        'location' => 'tsjippy-forms/blocks/blocks.php:initBlocks:after',
+        'message' => 'After metadata collection registration',
+        'data' => [
+            'formbuilderRegistered' => $registry->is_registered('tsjippy-forms/formbuilder'),
+            'inputRegistered' => $registry->is_registered('tsjippy-forms/input'),
+        ],
+        'timestamp' => round(microtime(true) * 1000),
+    ]) . "\n", FILE_APPEND | LOCK_EX);
+    // #endregion
     
     register_block_type(
         'tsjippy-forms/form-selector',

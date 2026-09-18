@@ -23,5 +23,5 @@ function registerScripts()
 
     wp_register_script_module('@tsjippy/forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH . "js/forms_table" . TSJIPPY\JSEXTENSION), array('@tsjippy/forms_script', '@tsjippy/table_script'), PLUGINVERSION);
 
-    wp_register_script_module('@tsjippy/formsubmit_script', TSJIPPY\pathToUrl(PLUGINPATH ."js/formsubmit" . TSJIPPY\JSEXTENSION), array('@tsjippy\main'), PLUGINVERSION);
+    wp_register_script_module('@tsjippy/formsubmit_script', TSJIPPY\pathToUrl(PLUGINPATH ."js/formsubmit" . TSJIPPY\JSEXTENSION), array('@tsjippy/main'), PLUGINVERSION);
 }
