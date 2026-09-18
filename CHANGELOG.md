@@ -6,6 +6,7 @@
 
 ### Changed
 - register js as modules
+- js to modules
 
 ### Fixed
 
