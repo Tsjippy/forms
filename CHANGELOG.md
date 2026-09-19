@@ -11,6 +11,7 @@
 
 ### Fixed
 - block categories
+- a few react bugs
 
 ### Updated
 
