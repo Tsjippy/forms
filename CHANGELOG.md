@@ -9,6 +9,7 @@
 - js to modules
 
 ### Fixed
+- block categories
 
 ### Updated
 
