@@ -1,5 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { Multiple } from './Multiple.js';
+import { Fragment } from '@wordpress/element';
 
 import { usePrefill } from '../../../shared/usePrefill.js';
 
@@ -53,28 +54,27 @@ export function InputHtml({
                 data-blockid={attributes.blockId}
             >
                 {options.map((option, index) => (
-                    <>
-                    <label
-                        className={`checkbox-wrapper-label`}
-                        key={`${option.value}-${index}`}
-                        style={{ marginRight: '5px' }}
-                    >
-                        <input
-                            type={attributes.type}
-                            name={`${attributes.name}${attributes.type === 'checkbox' ? '[]' : ''}`}
-                            value={option.value}
-                            className="formbuilder"
-                            autoComplete="on"
-                            checked={ prefillValue.includes(option.value) }
-                            data-blockid={attributes.blockId}
-                            {...attributes.inputAttributes}
-                            required={attributes.required}
-                        />
-                        {__(option.label, 'tsjippy')}
-                    </label>
+                    <Fragment key={`${option.value}-${index}-wrapper`}>
+                        <label
+                            className={`checkbox-wrapper-label`}
+                            style={{ marginRight: '5px' }}
+                        >
+                            <input
+                                type={attributes.type}
+                                name={`${attributes.name}${attributes.type === 'checkbox' ? '[]' : ''}`}
+                                defaultValue={option.value}
+                                className="formbuilder"
+                                autoComplete="on"
+                                defaultChecked={ prefillValue.includes(option.value) }
+                                data-blockid={attributes.blockId}
+                                {...attributes.inputAttributes}
+                                required={attributes.required}
+                            />
+                            {__(option.label, 'tsjippy')}
+                        </label>
 
-                    {attributes.radioNewLine && <br />}
-                    </>
+                        {attributes.radioNewLine && <br />}
+                    </Fragment>
                 ))}
                 { isSaving && "%options-placeholder%" }
             </div>
@@ -94,9 +94,8 @@ export function InputHtml({
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
-            >
-                { isSaving || renderMultiple ? "%value-placeholder%" : prefillValue }
-            </textarea>
+                defaultValue={ isSaving || renderMultiple ? "%value-placeholder%" : prefillValue }
+            />
         );
     } 
     
@@ -113,7 +112,7 @@ export function InputHtml({
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
-                value = { isSaving ? "%value-placeholder%" :  prefillValue }
+                defaultValue = { isSaving ? "%value-placeholder%" :  prefillValue }
             />
         );
     }

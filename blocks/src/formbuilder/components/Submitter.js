@@ -10,7 +10,7 @@ export const FormSubmitter = ({attributes}) => {
 
     return (
         attributes.step_amount === 0 ?
-            <div class="submit-wrapper">
+            <div className="submit-wrapper">
                 <button type="button" className="button form-submit">
                     { __('Submit', 'tsjippy') + ' ' + attributes.name }
                 </button>

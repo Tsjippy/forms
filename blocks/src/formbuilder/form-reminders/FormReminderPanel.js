@@ -15,7 +15,6 @@ import emptyReminder from './reminderDefaults';
 import { getReminder, saveReminder } from './reminderApi';
 import {
     getDateWindowLimits,
-    hasShouldSubmitEmailTrigger,
     normaliseReminderResponse,
 } from './reminderUtils';
 
@@ -27,8 +26,6 @@ export function FormReminderPanel({
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [notice, setNotice] = useState(null);
-
-    //const triggerFound = hasShouldSubmitEmailTrigger(emailSettings);
     const recurringEnabled = !!reminder.frequency;
 
     const dateWindowLimits = getDateWindowLimits(reminder);
