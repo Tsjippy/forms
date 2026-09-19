@@ -4,7 +4,7 @@
 	"name": "tsjippy-forms/label",
 	"version": "0.1.0",
 	"title": "Form Input Label Wrapper",
-	"category": "form-elements",
+	"category": "form-blocks",
 	"icon": "forms",
 	"description": "Input element label for a form",
 	"example": {},

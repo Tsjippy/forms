@@ -4,7 +4,7 @@
 	"name": "tsjippy-forms/file",
 	"version": "0.1.0",
 	"title": "File Upload Input",
-	"category": "form-elements",
+	"category": "form-blocks",
 	"icon": "forms",
 	"description": "File upload input. Supports single and multiple file uploads. Can also be used to upload images.",
 	"example": {},

@@ -4,7 +4,7 @@
 	"name": "tsjippy-forms/input",
 	"version": "0.1.0",
 	"title": "Form Input",
-	"category": "form-elements",
+	"category": "form-blocks",
 	"icon": "forms",
 	"description": "Input element for a form",
 	"example": {},

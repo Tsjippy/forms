@@ -176,8 +176,8 @@ function addFormsCategory( $categories) {
         $categories,
         array(
             array(
-                'slug'  => 'form-blocks', // Your unique category slug
-                'title' => __( 'Elements for the formbuilder block', '%TEXTDOMAIN%' ), // Category display name
+                'slug'  => 'form-blocks', //  category slug
+                'title' => __( 'Child blocks for the formbuilder block', '%TEXTDOMAIN%' ), // Category display name
                 'icon'  => 'forms', // Optional Dashicon
             ),
         )

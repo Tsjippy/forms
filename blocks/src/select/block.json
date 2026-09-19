@@ -4,7 +4,7 @@
 	"name": "tsjippy-forms/select",
 	"version": "0.1.0",
 	"title": "Select",
-	"category": "form-elements",
+	"category": "form-blocks",
 	"icon": "forms",
 	"description": "Selector dropdown",
 	"example": {},

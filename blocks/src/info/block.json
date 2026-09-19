@@ -4,7 +4,7 @@
 	"name": "tsjippy-forms/info",
 	"version": "0.1.0",
 	"title": "Info element",
-	"category": "form-elements",
+	"category": "form-blocks",
 	"icon": "forms",
 	"description": "Shows an info icon and a message on hover",
 	"example": {},

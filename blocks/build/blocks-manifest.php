@@ -7,7 +7,7 @@ return array(
 		'name' => 'tsjippy-forms/datalist',
 		'version' => '0.1.0',
 		'title' => 'Datalist',
-		'category' => 'form-elements',
+		'category' => 'form-blocks',
 		'icon' => 'forms',
 		'description' => 'Datalist to be added to an form input',
 		'example' => array(
@@ -41,7 +41,7 @@ return array(
 		'name' => 'tsjippy-forms/file',
 		'version' => '0.1.0',
 		'title' => 'File Upload Input',
-		'category' => 'form-elements',
+		'category' => 'form-blocks',
 		'icon' => 'forms',
 		'description' => 'File upload input. Supports single and multiple file uploads. Can also be used to upload images.',
 		'example' => array(
@@ -105,7 +105,7 @@ return array(
 		'name' => 'tsjippy-forms/formbuilder',
 		'version' => '0.1.0',
 		'title' => 'Form Builder',
-		'category' => 'form-elements',
+		'category' => 'form-blocks',
 		'icon' => 'forms',
 		'description' => 'Form builder using blocks',
 		'example' => array(
@@ -204,7 +204,7 @@ return array(
 		'name' => 'tsjippy-forms/formstep',
 		'version' => '0.1.0',
 		'title' => 'Formstep element',
-		'category' => 'form-elements',
+		'category' => 'form-blocks',
 		'icon' => 'forms',
 		'description' => 'Allows splitting the form in steps',
 		'example' => array(
@@ -229,7 +229,7 @@ return array(
 		'name' => 'tsjippy-forms/info',
 		'version' => '0.1.0',
 		'title' => 'Info element',
-		'category' => 'form-elements',
+		'category' => 'form-blocks',
 		'icon' => 'forms',
 		'description' => 'Shows an info icon and a message on hover',
 		'example' => array(
@@ -254,7 +254,7 @@ return array(
 		'name' => 'tsjippy-forms/input',
 		'version' => '0.1.0',
 		'title' => 'Form Input',
-		'category' => 'form-elements',
+		'category' => 'form-blocks',
 		'icon' => 'forms',
 		'description' => 'Input element for a form',
 		'example' => array(
@@ -343,7 +343,7 @@ return array(
 		'name' => 'tsjippy-forms/label',
 		'version' => '0.1.0',
 		'title' => 'Form Input Label Wrapper',
-		'category' => 'form-elements',
+		'category' => 'form-blocks',
 		'icon' => 'forms',
 		'description' => 'Input element label for a form',
 		'example' => array(
@@ -375,7 +375,7 @@ return array(
 		'name' => 'tsjippy-forms/multi-wrap',
 		'version' => '0.1.0',
 		'title' => 'Form Multi Input Wrapper',
-		'category' => 'form-elements',
+		'category' => 'form-blocks',
 		'icon' => 'forms',
 		'description' => 'Allows the submission of multiple elements which are grouped together. Children details for example where you can add multiple children.',
 		'example' => array(
@@ -403,7 +403,7 @@ return array(
 		'name' => 'tsjippy-forms/select',
 		'version' => '0.1.0',
 		'title' => 'Select',
-		'category' => 'form-elements',
+		'category' => 'form-blocks',
 		'icon' => 'forms',
 		'description' => 'Selector dropdown',
 		'example' => array(

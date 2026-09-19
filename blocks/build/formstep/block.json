@@ -4,7 +4,7 @@
   "name": "tsjippy-forms/formstep",
   "version": "0.1.0",
   "title": "Formstep element",
-  "category": "form-elements",
+  "category": "form-blocks",
   "icon": "forms",
   "description": "Allows splitting the form in steps",
   "example": {},
