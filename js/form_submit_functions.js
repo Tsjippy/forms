@@ -260,15 +260,21 @@ export function markComplete() {
 }
 
 export async function fetchRestApi(url, formData = "", showErrors = true) {
+  const data   = JSON.parse(
+    document.getElementById(
+        'wp-script-module-data-@tsjippy/form_submit_functions'
+    ).textContent
+  );
+
   if (formData == "") {
     formData = new FormData();
   }
 
-  formData.append("_wpnonce", tsjippy.restNonce);
+  formData.append("_wpnonce", data.restNonce);
   let result;
   try {
     result = await fetch(
-      `${tsjippy.baseUrl}/wp-json${tsjippy.restApiPrefix}/${url}`,
+      `${data.baseUrl}/wp-json/tsjippy/v2/${url}`,
       {
         method: "POST",
         credentials: "same-origin",
@@ -312,7 +318,7 @@ export async function fetchRestApi(url, formData = "", showErrors = true) {
         );
       }
       console.error(
-        `${tsjippy.baseUrl}/wp-json${tsjippy.restApiPrefix}/${url}`,
+        `${data.baseUrl}/wp-json/tsjippy/v2/${url}`,
       );
       console.error(response);
     } else {
@@ -325,7 +331,7 @@ export async function fetchRestApi(url, formData = "", showErrors = true) {
 
       document.querySelector("body").insertAdjacentHTML("afterBegin", modal);
       Main.displayMessage(
-        `Error loading url ${tsjippy.baseUrl}/wp-json${tsjippy.restApiPrefix}/${url}<br><button class='button small' id='error-details' onclick='(function(){ document.getElementById("response-details").classList.remove("hidden"); })();'>Details</button><br><div class='hidden response-message'>${response}</div>`,
+        `Error loading url ${data.baseUrl}/wp-json/tsjippy/v2/${url}<br><button class='button small' id='error-details' onclick='(function(){ document.getElementById("response-details").classList.remove("hidden"); })();'>Details</button><br><div class='hidden response-message'>${response}</div>`,
         "error",
       );
     }

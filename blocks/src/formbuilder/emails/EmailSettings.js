@@ -23,7 +23,7 @@ export function EmailSettings({
 		setLoading(true);
 
         apiFetch({
-			path: `${tsjippy.restApiPrefix}/forms/get_form_emails`,
+			path: `tsjippy/v2/forms/get_form_emails`,
 			method: 'POST',
 			data: {
 				blockId: blockId
@@ -74,7 +74,7 @@ export function EmailSettings({
 		setSaving(true);
 
 		apiFetch({
-			path: `${tsjippy.restApiPrefix}/forms/save_form_emails`,
+			path: `tsjippy/v2/forms/save_form_emails`,
 			method: 'POST',
 			data: {
 				blockId: blockId,

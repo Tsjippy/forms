@@ -12,7 +12,7 @@ const DEFAULT_STATE = {
 
 async function fetchConditions(postId) {
     return apiFetch({
-        path: `${tsjippy.restApiPrefix}/forms/get_block_conditions`,
+        path: `tsjippy/v2/forms/get_block_conditions`,
         method: 'POST',
         data: {
             postId,

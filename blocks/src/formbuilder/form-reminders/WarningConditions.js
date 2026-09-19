@@ -16,7 +16,7 @@ export default function WarningConditions({ value = [], onChange }) {
         setLoadingMetaKeys(true);
 
         apiFetch({
-            path: `${tsjippy.restApiPrefix}/forms/get_user_meta_keys`,
+            path: `tsjippy/v2/forms/get_user_meta_keys`,
             method: 'POST',
         })
             .then((keys) => {

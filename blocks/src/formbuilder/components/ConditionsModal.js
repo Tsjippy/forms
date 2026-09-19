@@ -757,7 +757,7 @@ export default function ConditionsModal({
 	async function saveConditionsRequest(blockId, conditions, props) {
 		// update the conditions on the server
 		const savedConditions = await apiFetch({
-			path: `${tsjippy.restApiPrefix}/forms/save_block_conditions`,
+			path: `tsjippy/v2/forms/save_block_conditions`,
 			method: 'POST',
 			data: {
 				postId: postId,

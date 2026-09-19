@@ -35,7 +35,7 @@ const store = createReduxStore('tsjippy/prefill', {
                 dispatch({ type: 'SET_LOADING' });
 
                 const data = await apiFetch({
-                    path: `${tsjippy.restApiPrefix}/forms/get_prefill`,
+                    path: `tsjippy/v2/forms/get_prefill`,
                     method: 'POST',
                 });
 
