@@ -7,6 +7,7 @@
 ### Changed
 - register js as modules
 - js to modules
+- js
 
 ### Fixed
 - block categories
