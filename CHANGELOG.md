@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [12.1.4] - 2026-09-20
+
+
+### Added
 - form-reset possibility
 - form reset event: formReset formstep viewscript uses it
 
@@ -17,8 +28,6 @@
 - a few react bugs
 - [] name issues
 - prefill
-
-### Updated
 
 ## [12.1.2] - 2026-09-16
 
