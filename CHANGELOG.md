@@ -13,6 +13,7 @@
 ### Fixed
 - block categories
 - a few react bugs
+- [] name issues
 
 ### Updated
 
