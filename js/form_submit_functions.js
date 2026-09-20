@@ -44,6 +44,15 @@ export function formReset(form) {
       .querySelectorAll(".multi-step-controls .step.finish")
       .forEach((el) => el.classList.remove("finish"));
   }
+
+  // Create a CustomEvent
+  const customEvt = new CustomEvent('formReset', {
+    bubbles: true,                          // Allows event to bubble up through the DOM
+    cancelable: true                        // Allows event.preventDefault()
+  });
+
+  // Dispatch the event
+  form.dispatchEvent(customEvt);
 }
 
 /**

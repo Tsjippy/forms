@@ -62,7 +62,7 @@ export function InputHtml({
                             <input
                                 type={attributes.type}
                                 name={`${attributes.name}${attributes.type === 'checkbox' ? '[]' : ''}`}
-                                defaultValue={option.value}
+                                value={ option.value }
                                 className="formbuilder"
                                 autoComplete="on"
                                 defaultChecked={ isSaving ? undefined : prefillValue.includes(option.value) }

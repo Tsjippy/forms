@@ -135,6 +135,9 @@ export function getFieldValue(
   }
 
   if (lowercase) {
+    if(typeof(value) != 'string'){
+      return value;
+    }
     return value.toLowerCase();
   }
   return value;

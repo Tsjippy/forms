@@ -237,6 +237,11 @@ console.log("Formstep js loaded");
 // Display the first tab
 document.querySelectorAll(`form[data-formname]`).forEach((form) => {
   showFormStep(0, form);
+
+  // Reset to first formstep on form reset
+  form.addEventListener('formReset', ev => {
+    showFormStep(0, form);
+  });
 });
 
 // Add visibility listener

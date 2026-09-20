@@ -343,7 +343,7 @@ export function changeFieldValue(
     return;
   }
 
-  let name = "";
+  let name   = "";
   let target = "";
 
   if (selector instanceof Element) {
@@ -362,6 +362,11 @@ export function changeFieldValue(
     } catch {
       console.log(target);
     }
+  }
+
+  // This target has no value to change
+  if(target.value == undefined){
+    return;
   }
 
   let oldValue = getFieldValue(target, form, false, value);

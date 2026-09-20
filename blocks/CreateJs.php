@@ -256,11 +256,11 @@ function dynamicJs($conditions, $innerBlocks){
 
                     $actions[$conditionIndex]['action'] = 
                 "changeFieldProperty(
-                    target,
-                    '{$actionData['property-name']}',
-                    $newValue,
-                    form,
-                    '{$addition}'
+                        target,
+                        '{$actionData['property-name']}',
+                        $newValue,
+                        form,
+                        '{$addition}'
                 );";   
                 }else{
                     // Add, remove or toggle the hidden class
@@ -315,7 +315,7 @@ function dynamicJs($conditions, $innerBlocks){
                 }
 
                 // Perform the action
-                $targetQuery .= "\n\t\t\t\t\t". $actionData['action'] . ";";
+                $targetQuery .= "\n\t\t\t\t\t". $actionData['action'];
             $targetQuery .= "\n\t\t\t\t});";
 
             $actionStrings[$conditionIndex] .= $targetQuery;
