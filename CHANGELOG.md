@@ -3,6 +3,7 @@
 
 ### Added
 - form-reset possibility
+- form reset event: formReset formstep viewscript uses it
 
 ### Changed
 - register js as modules
