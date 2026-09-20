@@ -65,7 +65,7 @@ export function InputHtml({
                                 defaultValue={option.value}
                                 className="formbuilder"
                                 autoComplete="on"
-                                defaultChecked={ prefillValue.includes(option.value) }
+                                defaultChecked={ isSaving ? undefined : prefillValue.includes(option.value) }
                                 data-blockid={attributes.blockId}
                                 {...attributes.inputAttributes}
                                 required={attributes.required}
@@ -94,7 +94,8 @@ export function InputHtml({
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
-                defaultValue={ isSaving || renderMultiple ? "%value-placeholder%" : prefillValue }
+                defaultValue={ isSaving || renderMultiple ? undefined : prefillValue }
+                value={ isSaving || renderMultiple ? "%value-placeholder%" : undefined }
             />
         );
     } 
@@ -118,7 +119,8 @@ export function InputHtml({
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
-                defaultValue = { isSaving ? "%value-placeholder%" :  prefillValue }
+                defaultValue = { isSaving ? undefined :  prefillValue }
+                value = { isSaving ? "%value-placeholder%" :  undefined }
             />
         );
     }

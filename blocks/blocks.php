@@ -289,7 +289,7 @@ function renderMultiInput($values, $blockContent, $block, $label = null){
  * 
  * @param   string  $blockContent
  * @param   array   $block
- * @param   mixed   $defaultValue   value or array of values
+ * @param   mixed   $defaultValue value or array of values
  */
 function preFillForm($blockContent, $block, $defaultValue){
 

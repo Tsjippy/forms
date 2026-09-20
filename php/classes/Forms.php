@@ -961,7 +961,7 @@ class Forms
                 $slug    = $slugNew;
             } elseif (isset($this->blockMapping['slug'][$slug . '[]'])) {
                 // add []
-                $slug    = '[]';
+                $slug    .= '[]';
             } elseif (!empty($this->formData->split_blocks)) {
                 // only the last part of a splitted name is given
                 $mainName    = explode('[', $this->getBlockById($this->formData->split_blocks[0], 'slug'))[0];
