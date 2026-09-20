@@ -8,6 +8,7 @@
 - register js as modules
 - js to modules
 - js
+- js update
 
 ### Fixed
 - block categories
