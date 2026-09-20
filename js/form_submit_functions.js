@@ -2,7 +2,6 @@ import {
   showLoader 
 } from "../../tsjippy-shared-functionality/js/partials/show_loader.js";
 
-
 import { 
   displayMessage 
 } from "../../tsjippy-shared-functionality/js/partials/display_message.js";

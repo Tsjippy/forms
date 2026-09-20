@@ -15,7 +15,10 @@
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css",
-  "viewScriptModule": "file:./view.js",
+  "viewScriptModule": [
+    "@tsjippy/formsubmit_script",
+    "@tsjippy/forms_script"
+  ],
   "attributes": {
     "postId": {
       "type": "number",

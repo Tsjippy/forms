@@ -34,7 +34,7 @@ export const Multiple = ( props ) => {
         ['text', "email", "tel", "url"].includes(props?.attributes?.type) ?
             <div className={`${props?.blockProps?.className ?? ''} option-wrapper`}>
                 <ul className="list-selection-list">
-                    {(values.length ? values : ['']).map((value, index) => (
+                    {(values.length ? values : []).map((value, index) => (
                         <li
                             key={index}
                             className="list-selection"
@@ -48,7 +48,13 @@ export const Multiple = ( props ) => {
 
                             <input
                                 type="hidden"
-                                name={props?.attributes?.name + '[]'}
+                                name={
+                                    props?.attributes?.name
+                                        ? props.attributes.name.endsWith('[]')
+                                        ? props.attributes.name
+                                        : `${props.attributes.name}[]`
+                                        : undefined
+                                    }
                                 value={value}
                             />
 

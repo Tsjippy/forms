@@ -118,7 +118,10 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScriptModule' => 'file:./view.js',
+		'viewScriptModule' => array(
+			'@tsjippy/formsubmit_script',
+			'@tsjippy/forms_script'
+		),
 		'attributes' => array(
 			'postId' => array(
 				'type' => 'number',

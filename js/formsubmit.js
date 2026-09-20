@@ -1,4 +1,4 @@
-console.log("formsubmit loaded");
+console.log("Formsubmit loaded");
 
 import {
   markComplete
@@ -95,10 +95,12 @@ document.addEventListener("input", (ev) => {
 });
 
 document.addEventListener("click", (ev) => {
-  if (ev.target.matches(".selected-name")) {
-    ev.target
+  let mainInput =  ev.target
       .closest(".option-wrapper")
-      .querySelector(`input[type="text"], input[type="email"], input[type="tel"], input[type="url"]`).value = ev.target
+      .querySelector(`input[type="text"], input[type="email"], input[type="tel"], input[type="url"]`);
+
+  if (ev.target.matches(".selected-name")) {
+    mainInput.value = ev.target
       .closest(`.list-selection`)
       .querySelector(`input`).value;
 
@@ -110,14 +112,22 @@ document.addEventListener("click", (ev) => {
 
     ev.target.closest(".list-selection").remove();
   } else if (ev.target.matches(`.remove-list-selection`)) {
+
+    /**
+     * Make the input required again if needed
+     */
+    let remaining         = ev.target.closest(`.list-selection-list`).querySelectorAll(`li`).length;
+    let shouldBeRequired  = mainInput.dataset.required === '1';
+
+    if(shouldBeRequired && remaining === 1){
+      mainInput.required  = true;
+    }
+    
+    // Do the removal
     ev.target.closest(".list-selection").remove();
   } else if (ev.target.matches(`.add-list-selection`)) {
     // add button clicked
-    addListSelection(
-      ev.target
-        .closest(`.multi-text-input-wrapper`)
-        .querySelector(`input[type="text"], input[type="email"], input[type="tel"], input[type="url"]`),
-    );
+    addListSelection( mainInput );
   } else {
     return;
   }
@@ -157,6 +167,8 @@ function addListSelection(el) {
   if (el.value == "") {
     return;
   }
+
+  el.required = false;
 
   let li = document.createElement("li");
   li.classList.add("list-selection");

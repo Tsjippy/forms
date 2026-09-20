@@ -222,7 +222,15 @@ function renderMultiInput($values, $blockContent, $block, $label = null){
             $listItems   .= "</li>";
         }
 
-        $blockContent = str_replace(['value="%value-placeholder%"', '%value-placeholder%'], ['', $listItems], $blockContent);
+        /**
+         * Replace the placeholders
+         * Remove the required attribute if it has a value
+         */
+        $required     = 'required';
+        if(!empty($values)){
+            $required     = 'data-required=1';
+        }
+        $blockContent = str_replace(['value="%value-placeholder%"', '%value-placeholder%', 'required'], ['', $listItems, $required], $blockContent);
     }
     
      /**
@@ -434,7 +442,7 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
      * Set default value
      */
     if(empty($block['attrs']['dynamic_value'])){
-        $metaKey      = $block['attrs']['name'] ?? '';
+        $metaKey      = str_replace('[]', '', $block['attrs']['name'] ?? '');
 
         $exploded     = explode('[', $metaKey);
 

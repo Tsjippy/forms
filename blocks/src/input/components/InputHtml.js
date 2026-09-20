@@ -107,8 +107,14 @@ export function InputHtml({
             <input
                 {...(!renderMultiple ? blockProps : {})}
                 type={attributes.type}
-                name={attributes.name + (attributes.multiple ? '[]' : '')}
-                required={attributes.required}
+                name={
+                    attributes?.name
+                        ? attributes.multiple && !attributes.name.endsWith('[]')
+                        ? `${attributes.name}[]`
+                        : attributes.name
+                        : undefined
+                    }
+                required={ attributes.required }
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 {...attributes.inputAttributes}
