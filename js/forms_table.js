@@ -28,7 +28,7 @@ import {
 
 import { 
   attachNiceSelect 
-} from "../../tsjippy-shared-functionality/js/main.js";
+} from "../../tsjippy-shared-functionality/js/partials/nice_select.js";
 
 /**
  * We need to be carefull with this script as it has overlap with the main table.js

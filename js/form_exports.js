@@ -2,7 +2,7 @@ import { getFieldValue } from "./field_value.js";
 
 import { 
   attachNiceSelect 
-} from "../../tsjippy-shared-functionality/js/main.js";
+} from "../../tsjippy-shared-functionality/js/partials/nice_select.js";
 
 import { 
   displayTab 
