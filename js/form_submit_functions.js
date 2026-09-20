@@ -1,3 +1,12 @@
+import { 
+  showLoader 
+} from "../../tsjippy-shared-functionality/js/partials/show_loader.js";
+
+
+import { 
+  displayMessage 
+} from "../../tsjippy-shared-functionality/js/partials/display_message.js";
+
 export function formReset(form) {
   //reset form to the default
   form.reset();
@@ -85,7 +94,7 @@ export async function submitForm(target, url, extraData = "") {
   if (!validity) {
     form.querySelectorAll(":invalid").forEach((el) => {
       if (el.validationMessage != undefined) {
-        Main.displayMessage(
+        displayMessage(
           `${el.name} has an error:\n${el.validationMessage}`,
           "error",
         );
@@ -146,7 +155,7 @@ export async function submitForm(target, url, extraData = "") {
 
   text = text + "ing...";
 
-  target.innerHTML = Main.showLoader(null, false, 20, text, true, true);
+  target.innerHTML = showLoader(null, false, 20, text, true, true);
 
   //save any tinymce forms
   if (typeof tinymce !== "undefined") {
@@ -292,13 +301,13 @@ export async function fetchRestApi(url, formData = "", showErrors = true) {
     if (result.ok) {
       return json;
     } else if (json.code == "rest_cookie_invalid_nonce") {
-      Main.displayMessage("Please refresh the page and try again!", "error");
+      displayMessage("Please refresh the page and try again!", "error");
       return false;
     } else {
       if (json.data == null || json.data.status == 403) {
-        Main.displayMessage(json.message, "error", 2000);
+        displayMessage(json.message, "error", 2000);
       } else {
-        Main.displayMessage(
+        displayMessage(
           json.message + "\n" + JSON.stringify(json.data),
           "error",
         );
@@ -312,7 +321,7 @@ export async function fetchRestApi(url, formData = "", showErrors = true) {
 
     if (result.ok) {
       if (showErrors) {
-        Main.displayMessage(
+        displayMessage(
           `Problem parsing the json, refresh the page or try again.`,
           "error",
         );
@@ -330,7 +339,7 @@ export async function fetchRestApi(url, formData = "", showErrors = true) {
       modal += `</div>`;
 
       document.querySelector("body").insertAdjacentHTML("afterBegin", modal);
-      Main.displayMessage(
+      displayMessage(
         `Error loading url ${data.baseUrl}/wp-json/tsjippy/v2/${url}<br><button class='button small' id='error-details' onclick='(function(){ document.getElementById("response-details").classList.remove("hidden"); })();'>Details</button><br><div class='hidden response-message'>${response}</div>`,
         "error",
       );

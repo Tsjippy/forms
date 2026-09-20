@@ -2,6 +2,11 @@ import{
   prepareForValidation
 } from "../../../js/form_submit_functions.js";
 
+
+import { 
+  displayMessage 
+} from "../../../../tsjippy-shared-functionality/js/partials/display_message.js";
+
 /**
  * Show the next or previous formstep
  * @param {int} formstep index
@@ -267,7 +272,7 @@ document.addEventListener("nodeAdded", function (event) {
     .querySelector(".add.button")
     .textContent.replace("Add ", "");
 
-  Main.displayMessage(
+  displayMessage(
     `Succesfully added an extra ${text}<br>Its added as the next page.`,
   );
 });

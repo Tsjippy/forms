@@ -1,5 +1,13 @@
 import { getFieldValue } from "./field_value.js";
 
+import { 
+  attachNiceSelect 
+} from "../../tsjippy-shared-functionality/js/main.js";
+
+import { 
+  displayTab 
+} from "../../tsjippy-shared-functionality/js/partials/tabs.js";
+
 export function removeDefaultSelect(el) {
   Array.from(el.options).forEach(function (option) {
     option.defaultSelected = false;
@@ -60,7 +68,7 @@ export function cloneNode(originalNode, clear = true) {
     //remove any defaults
     removeDefaultSelect(select);
 
-    Main.attachNiceSelect(select);
+    attachNiceSelect(select);
   });
 
   return newNode;
@@ -100,7 +108,7 @@ export function copyFormInput(originalNode) {
     }
 
     //Add nice select
-    Main.attachNiceSelect(select);
+    attachNiceSelect(select);
 
     i++;
   });
@@ -261,7 +269,7 @@ export function removeNode(target) {
           prevButton.classList.add("active");
 
           //show the corresponding tab
-          Main.displayTab(prevButton);
+          displayTab(prevButton);
         } else {
           //try the next one
           let nextButton = buttonToRemove.nextElementSibling;
@@ -269,7 +277,7 @@ export function removeNode(target) {
             nextButton.classList.add("active");
 
             //show the corresponding tab
-            Main.displayTab(nextButton);
+            displayTab(nextButton);
           }
         }
       }

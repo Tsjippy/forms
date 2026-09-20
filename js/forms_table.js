@@ -9,6 +9,27 @@ import {
   getFieldValue
 } from "./field_value.js";
 
+import { 
+  showLoader 
+} from "../../tsjippy-shared-functionality/js/partials/show_loader.js";
+
+
+import { 
+  displayMessage 
+} from "../../tsjippy-shared-functionality/js/partials/display_message.js";
+
+import { 
+  showModal 
+} from "../../tsjippy-shared-functionality/js/partials/modals.js";
+
+import { 
+  Alert 
+} from "../../tsjippy-shared-functionality/js/partials/alert.js";
+
+import { 
+  attachNiceSelect 
+} from "../../tsjippy-shared-functionality/js/main.js";
+
 /**
  * We need to be carefull with this script as it has overlap with the main table.js
  */
@@ -26,7 +47,7 @@ async function showHiddenColumns(target) {
   );
 
   if (response) {
-    Main.displayMessage(response);
+    displayMessage(response);
     location.reload();
   }
 }
@@ -38,7 +59,7 @@ async function saveColumnSettings(target) {
   );
 
   if (response) {
-    Main.displayMessage(response);
+    displayMessage(response);
     location.reload();
   }
 }
@@ -50,7 +71,7 @@ async function saveTableSettings(target) {
   );
 
   if (response) {
-    Main.displayMessage(response);
+    displayMessage(response);
   }
 }
 
@@ -61,7 +82,7 @@ async function askConfirmation(text) {
     CancelButtonText: "Cancel",
   };
 
-  let alerter = new Main.Alert(
+  let alerter = new Alert(
     `Are you sure you want to ${text} this?`,
     "question",
     options,
@@ -81,7 +102,7 @@ async function removeSubmission(target) {
     formData.append("shortcode-id", table.dataset.shortcodeId);
 
     //display loading gif
-    Main.showLoader(target);
+    showLoader(target);
 
     let response = await fetchRestApi(
       "forms/remove_submission",
@@ -119,7 +140,7 @@ async function archiveSubmission(target) {
       CustomButtonPosition: 2,
     };
 
-    let alerter = new Main.Alert(
+    let alerter = new Alert(
       `Do you want to ${action} just this one or the whole request?`,
       "question",
       options,
@@ -138,7 +159,7 @@ async function archiveSubmission(target) {
   }
 
   //display loading gif
-  Main.showLoader(target);
+  showLoader(target);
 
   response = await fetchRestApi(
     "forms/archive_submission",
@@ -320,14 +341,14 @@ async function getPage(target, action, page=-1) {
       return;
     }
 
-    Main.showLoader(table, false, 100, "Loading data");
+    showLoader(table, false, 100, "Loading data");
   } else if (action == "sort" || action == "size") {
 
     /**
      * Sorting
      */
     tableWrapper.classList.add(table.dataset.type);
-    tableWrapper.innerHTML = Main.showLoader(
+    tableWrapper.innerHTML = showLoader(
       "",
       true,
       100,
@@ -343,7 +364,7 @@ async function getPage(target, action, page=-1) {
     wrapper.querySelectorAll(".form-results-wrapper").forEach((el) => {
       el.classList.add(el.querySelector("table").dataset.type);
 
-      el.innerHTML = Main.showLoader(el, true, 100, "Loading data", true);
+      el.innerHTML = showLoader(el, true, 100, "Loading data", true);
     });
   }
 
@@ -421,7 +442,7 @@ async function getPage(target, action, page=-1) {
 
     document
       .querySelectorAll("select:not(.nonice)")
-      .forEach((select) => Main.attachNiceSelect(select));
+      .forEach((select) => attachNiceSelect(select));
   } else {
     // restore prev data
     wrapper.innerHTML = orgContent;
@@ -437,7 +458,7 @@ function prepareInputs(target) {
   // Attache niceselects
   target.querySelectorAll("select").forEach((el) => {
     if (el._niceSelect == undefined) {
-      Main.attachNiceSelect(el);
+      attachNiceSelect(el);
     }
   });
 
@@ -452,7 +473,7 @@ async function getInputHtml(target) {
   let data = target.dataset;
   let submissionId = target.closest("tr").dataset.submissionId;
   let shortcodeId = target.closest("table").dataset.shortcodeId;
-  let loader = Main.showLoader(
+  let loader = showLoader(
     target.querySelector(".override-wrapper"),
     true,
     50,
@@ -515,7 +536,7 @@ async function processFormsTableInput(target) {
       .querySelectorAll(`button.save`)
       .forEach((el) => el.classList.add("hidden"));
 
-    Main.showLoader(
+    showLoader(
       cell.querySelector(".input-wrapper"),
       true,
       50,
@@ -563,7 +584,7 @@ async function processFormsTableInput(target) {
         cell.innerHTML = newValue;
       }
 
-      Main.displayMessage(response.message.replace("_", " "), "success", 3000);
+      displayMessage(response.message.replace("_", " "), "success", 3000);
 
       return;
     }
@@ -582,11 +603,11 @@ const copyContent = async (target) => {
       timer: 3000,
     };
 
-    new Main.Alert(`Copied '${text}'`, "success", options);
+    new Alert(`Copied '${text}'`, "success", options);
 
     navigator.clipboard.writeText(text);
   } catch (err) {
-    Main.displayMessage("Failed to copy: " + err, "error");
+    displayMessage("Failed to copy: " + err, "error");
   }
 };
 
@@ -723,7 +744,7 @@ document.addEventListener("click", (event) => {
 
   //Open settings modal
   else if (target.classList.contains("edit-formshortcode-settings")) {
-    Main.showModal(document.querySelector(".modal.form-shortcode-settings"));
+    showModal(document.querySelector(".modal.form-shortcode-settings"));
   } 
   
   // show table forms
@@ -747,7 +768,7 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  let html = Main.showLoader("", false, 100, "Please wait...", true);
+  let html = showLoader("", false, 100, "Please wait...", true);
 
   document.querySelectorAll(`.formdata-load-trigger`).forEach(async (el) => {
     el.innerHTML = html;

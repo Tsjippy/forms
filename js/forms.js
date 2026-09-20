@@ -10,6 +10,11 @@ import{
   formReset
 } from "./form_submit_functions.js";
 
+
+import { 
+  displayMessage 
+} from "../../tsjippy-shared-functionality/js/partials/display_message.js";
+
 console.log("Forms.js is loaded");
 
 async function saveFormInput(target) {
@@ -36,7 +41,7 @@ async function saveFormInput(target) {
   let response = await submitForm(target, "forms/save_form_input");
 
   if (response) {
-    Main.displayMessage(response);
+    displayMessage(response);
 
     if (form.dataset.reset) {
       formReset(form);
