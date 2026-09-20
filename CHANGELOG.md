@@ -9,6 +9,7 @@
 - js to modules
 - js
 - js update
+- load minification js depending on SCRIPT_DEBUG constant
 
 ### Fixed
 - block categories
