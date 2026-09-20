@@ -11,7 +11,13 @@ add_action('init', __NAMESPACE__ . '\initBlocks');
  * Register all blocks
  */
 function initBlocks()
-{    
+{
+    // Register all js blocks
+    $manifestPath = __DIR__ . '/build/blocks-manifest.php';
+    $buildPath = __DIR__ . '/build';
+
+    wp_register_block_types_from_metadata_collection( $buildPath, $manifestPath );
+    
     register_block_type(
         'tsjippy-forms/form-selector',
         array(
