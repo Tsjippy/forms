@@ -4,12 +4,14 @@
   "description": "Forms",
   "main": "./forms.js",
   "scripts": {
+    "form_submit_functions": "webpack --entry ./form_submit_functions.js --output-path . --output-filename form_submit_functions.min.js --progress --mode=production --devtool source-map",
     "formtable": "webpack --entry ./forms_table.js --output-path . --output-filename forms_table.min.js --progress --mode=production --devtool source-map",
     "forms": "webpack --config forms.config.js",
+    "form_submit_functions-watch": "webpack --watch --entry ./form_submit_functions.js --output-path . --output-filename form_submit_functions.min.js --progress --mode=production --devtool source-map",
     "formtable-watch": "webpack --watch --entry ./forms_table.js --output-path . --output-filename forms_table.min.js --progress --mode=production --devtool source-map",
     "forms-watch": "webpack --watch --config forms.config.js",
-    "all": "run-p  formtable forms",
-    "watch-all": "run-p formtable-watch forms-watch"
+    "all": "run-p  formtable forms form_submit_functions",
+    "watch-all": "run-p formtable-watch forms-watch form_submit_functions-watch"
   },
   "author": "Ewald Harmsen",
   "license": "ISC",

@@ -573,6 +573,6 @@ function buildJs($block, $post){
     }
 
     // Create minified version
-    file_put_contents($jsFilePath . '.min.js', $minifiedJs);
+    file_put_contents($jsFilePath . '' . TSJIPPY\JSEXTENSION, $minifiedJs);
 }
 
