@@ -331,13 +331,14 @@ function preFillForm($blockContent, $block, $defaultValue){
  * @param   string  $blockContent
  * @param   array   $block
  * @param   mixed   $defaultValue   value or array of values
+ * @param   array   $defaultValues
  */
-function addDataAndSelectOptions($blockContent, $block, $defaultValue){
+function addDataAndSelectOptions($blockContent, $block, $defaultValue, $defaultValues){
     $options    = [];
     if(empty($block['attrs']['options_dynamic'])){
         $optionData = '';
     }else{
-        $optionData = $multi[$block['attrs']['options_dynamic']] ?? [];
+        $optionData = $defaultValues[$block['attrs']['options_dynamic']] ?? [];
     }
 
     if(empty($optionData)){
@@ -446,7 +447,7 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
     /**
      * Add the options
      */
-    $blockContent   = addDataAndSelectOptions($blockContent, $block, $defaultValue);
+    $blockContent   = addDataAndSelectOptions($blockContent, $block, $defaultValue, $defaultValues);
 
     /**
      * Load dynamic forms script

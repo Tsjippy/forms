@@ -802,10 +802,6 @@ export default function ConditionsModal({
 	);
 
 	const handleSave = useCallback(async (blockId) => {
-		if (result.errors.length > 0) {
-			setFieldErrors(result.fieldErrors);
-		}
-
 		setIsSaving(true);
 
 		const result = validateConditions(draftConditions, setFieldErrors);
