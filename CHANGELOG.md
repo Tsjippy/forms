@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- condition warnings
 
 ### Updated
+
+## [12.1.5] - 2026-09-21
+
+
+### Fixed
+- condition warnings
 
 ## [12.1.4] - 2026-09-20
 
