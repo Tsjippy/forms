@@ -80,7 +80,7 @@ function isEquationRequiringValue(equation) {
 /**
  * Validate the current conditions object.
  */
-function validateConditions(conditions) {
+function validateConditions(conditions, setFieldErrors) {
 	const errors = [];
 	const fieldErrors = [{
 		rules: [{}],
@@ -109,26 +109,25 @@ function validateConditions(conditions) {
 	 * Loop over all conditions
 	 */
 	conditions.forEach((condition, conditionIndex) => {
+		if (!Array.isArray(condition.rules)) {
+			errors.push(
+				sprintf(
+					__('Condition %d must contain at least one rule.', 'tsjippy'),
+					conditionIndex + 1
+				)
+			);
 
-		if(condition.rules.length > 0) {
-			if (!Array.isArray(condition.rules)) {
-				errors.push(
-					sprintf(
-						__('Condition %d must contain at least one rule.', 'tsjippy'),
-						conditionIndex + 1
-					)
-				);
-
-				if (firstErrorTarget.section === null) {
-					firstErrorTarget.section = 'rules';
-					firstErrorTarget.conditionIndex = conditionIndex;
-					firstErrorTarget.ruleIndex = 0;
-					firstErrorTarget.fieldKey = 'conditionalField';
-				}
-
-				return;
+			if (firstErrorTarget.section === null) {
+				firstErrorTarget.section = 'rules';
+				firstErrorTarget.conditionIndex = conditionIndex;
+				firstErrorTarget.ruleIndex = 0;
+				firstErrorTarget.fieldKey = 'conditionalField';
 			}
 
+			return;
+		}
+
+		if(condition.rules.length > 0) {
 			if (!Array.isArray(condition.actions) || condition.actions.length === 0) {
 				errors.push(
 					sprintf(
@@ -182,9 +181,13 @@ function validateConditions(conditions) {
 				const value = rule?.['conditional-value'];
 
 				if (
-					value === undefined ||
-					value === null ||
-					String(value).trim() === ''
+					rule?.['equation'] !== '==' &&
+					rule?.['equation'] !== '!=' &&
+					(
+						value === undefined ||
+						value === null ||
+						value.trim()	=== ''
+					)
 				) {
 					ruleErrors.conditionalValue = __('Enter a value.', 'tsjippy');
 
@@ -250,6 +253,7 @@ function validateConditions(conditions) {
 				actionErrors.action = __('Select an action.', 'tsjippy');
 
 				if (firstErrorTarget.section === null) {
+					firstErrorTarget.conditionIndex = conditionIndex;
 					firstErrorTarget.section = 'actions';
 					firstErrorTarget.actionIndex = actionIndex;
 					firstErrorTarget.fieldKey = 'action';
@@ -261,6 +265,7 @@ function validateConditions(conditions) {
 					actionErrors.propertyName = __('Enter a property name.', 'tsjippy');
 
 					if (firstErrorTarget.section === null) {
+						firstErrorTarget.conditionIndex = conditionIndex;
 						firstErrorTarget.section = 'actions';
 						firstErrorTarget.actionIndex = actionIndex;
 						firstErrorTarget.fieldKey = 'propertyName';
@@ -271,6 +276,7 @@ function validateConditions(conditions) {
 					actionErrors.propertyValue = __('Enter a property value.', 'tsjippy');
 
 					if (firstErrorTarget.section === null) {
+						firstErrorTarget.conditionIndex = conditionIndex;
 						firstErrorTarget.section = 'actions';
 						firstErrorTarget.actionIndex = actionIndex;
 						firstErrorTarget.fieldKey = 'propertyValue';
@@ -291,6 +297,8 @@ function validateConditions(conditions) {
 			}
 		});
 	});
+
+	setFieldErrors(fieldErrors);
 
 	return {
 		errors,
@@ -453,7 +461,7 @@ export default function ConditionsModal({
 	}, [focusTarget]);
 
 	const validation = useMemo(() => {
-		return validateConditions(draftConditions);
+		return validateConditions(draftConditions, setFieldErrors);
 	}, [draftConditions]);
 
 	const isValid = validation.errors.length === 0;
@@ -493,7 +501,12 @@ export default function ConditionsModal({
 			const next = deepClone(prev);
 
 			// Create the new condition
-			const newCondition	 = deepClone(next[0]);
+			const newCondition = next[0]
+				? deepClone(next[0])
+				: {
+					rules: [createEmptyRule()],
+					actions: [createEmptyAction()],
+				};
 			newCondition.rules	 = [createEmptyRule()];
 			newCondition.actions = [createEmptyAction()];
 			newCondition.id 	 = undefined;
@@ -537,7 +550,7 @@ export default function ConditionsModal({
 				// Add a new sub-rule
 				if (
 					key === 'combinator' &&
-					!next[ruleIndex + 1]
+					!next[conditionIndex].rules[ruleIndex + 1]
 				) {
 					next[conditionIndex].rules[ruleIndex + 1] = createEmptyRule();
 				}
@@ -607,7 +620,11 @@ export default function ConditionsModal({
 				});
 
 				clone.actions.forEach(action => {
-					action['action']	= (action['action'] == 'show' ? 'hide' : 'show');
+					if (action.action === 'show') {
+						action.action = 'hide';
+					} else if (action.action === 'hide') {
+						action.action = 'show';
+					}
 				});
 
 				/**
@@ -694,12 +711,8 @@ export default function ConditionsModal({
 		setDraftConditions((prev) => {
 			const next = deepClone(prev);
 
-			console.log(next)
-
 			next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
 			next[conditionIndex].actions.push(createEmptyAction());
-
-			console.log(next)
 
 			return next;
 		});
@@ -710,8 +723,6 @@ export default function ConditionsModal({
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
 
-				console.log(next)
-
 				next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
 
 				if (!next[conditionIndex].actions[actionIndex]) {
@@ -719,8 +730,6 @@ export default function ConditionsModal({
 				}
 
 				next[conditionIndex].actions[actionIndex][key] = value;
-
-				console.log(next)
 
 				return next;
 			});
@@ -754,7 +763,7 @@ export default function ConditionsModal({
 	 * Internal API helper for saving conditions.
 	 * This is used by the store-owned save action and is not exported.
 	 */
-	async function saveConditionsRequest(blockId, conditions, props) {
+	const saveConditionsRequest = useCallback(async (blockId, conditions, props) => {
 		// update the conditions on the server
 		const savedConditions = await apiFetch({
 			path: `tsjippy/v2/forms/save_block_conditions`,
@@ -767,10 +776,12 @@ export default function ConditionsModal({
 		});
 
 		// update the form version to make sure the latest js is downloaded on clients
-		props.setAttributes({version: props.attributes.version++});
+		props.setAttributes({
+			version: (props.attributes.version || 0) + 1
+		});
 
 		return savedConditions;
-	}
+	}, [postId]);
 
 	const isLoading = useSelect(
 		(select) =>
@@ -791,9 +802,13 @@ export default function ConditionsModal({
 	);
 
 	const handleSave = useCallback(async (blockId) => {
+		if (result.errors.length > 0) {
+			setFieldErrors(result.fieldErrors);
+		}
+
 		setIsSaving(true);
 
-		const result = validateConditions(draftConditions);
+		const result = validateConditions(draftConditions, setFieldErrors);
 
 		if (result.errors.length > 0) {
 			setFieldErrors(result.fieldErrors);
@@ -855,12 +870,13 @@ export default function ConditionsModal({
 		}
 	}, [conditions, clearSuccessMessage, showToastSuccess]);
 
+
 	const renderRuleRow	  = (rule, ruleIndex, conditionIndex) => {
 		const isPulsed =
 			pulseTarget &&
 			pulseTarget.section === 'rules' &&
 			pulseTarget.ruleIndex === ruleIndex;
-						
+
 		return (
 			<div
 				key={ruleIndex}
@@ -1031,7 +1047,7 @@ export default function ConditionsModal({
 			<div
 				key       = {conditionIndex}
 				className = {`condition-row ${
-					Array.isArray(condition) && condition.length === 0
+					Array.isArray(condition['rules']) && condition['rules'].length === 0
 						? 'condition-row--empty'
 						: ''
 				}`}
