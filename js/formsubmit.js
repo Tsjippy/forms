@@ -97,7 +97,7 @@ document.addEventListener("input", (ev) => {
 document.addEventListener("click", (ev) => {
   let mainInput =  ev.target
       .closest(".option-wrapper")
-      .querySelector(`input[type="text"], input[type="email"], input[type="tel"], input[type="url"]`);
+      ?.querySelector(`input[type="text"], input[type="email"], input[type="tel"], input[type="url"]`);
 
   if (ev.target.matches(".selected-name")) {
     mainInput.value = ev.target
