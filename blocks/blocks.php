@@ -457,8 +457,7 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
         $jsPath     = plugin_dir_path(__DIR__) . "js/dynamic/{$formName}.js";
         
         if (file_exists($jsPath) && filesize($jsPath) > 0) {
-            wp_enqueue_script_module("@tsjippy/forms_dynamic_{$formName}_js", TSJIPPY\pathToUrl($jsPath), array("nice-select2", "@tsjippy/tabs", "@tsjippy/nice_select", '@tsjippy/forms_script', "@tsjippy/form_exports", "@tsjippy/field_value", "@tsjippy/form_submit_functions", "@tsjippy/display_message"), PLUGINVERSION);
-
+            wp_enqueue_script_module("@tsjippy/forms_dynamic_{$formName}_js", TSJIPPY\pathToUrl($jsPath), array("@tsjippy/modals", "@tsjippy/alert", "@tsjippy/show_loader", "nice-select2", "@tsjippy/tabs", "@tsjippy/nice_select", '@tsjippy/forms_script', "@tsjippy/form_exports", "@tsjippy/field_value", "@tsjippy/form_submit_functions", "@tsjippy/display_message"), PLUGINVERSION);
         }
     }
 
