@@ -2,7 +2,7 @@ console.log("Formsubmit loaded");
 
 import {
   markComplete
-} from "./form_submit_functions.js";
+} from "@tsjippy/form_submit_functions";
 
 document
   .querySelectorAll("form.tsjippy-form-wrapper")

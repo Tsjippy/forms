@@ -374,11 +374,11 @@ function defaultJs($formName, $conditions, $innerBlocks){
 import {
   tidyMultiInputs,
   changeFieldProperty
-} from "../form_exports.js";
+} from "@tsjippy/form_exports";
 
 import {
   getFieldValue
-} from "../field_value.js";
+} from "@tsjippy/field_value";
 
 class <?php echo esc_attr($className);?> {
     // We could have multiple instances of the same form on one page

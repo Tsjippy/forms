@@ -1,11 +1,11 @@
 import{
   prepareForValidation
-} from "../../../js/form_submit_functions.js";
+} from "@tsjippy/form_submit_functions";
 
 
 import { 
   displayMessage 
-} from "../../../../tsjippy-shared-functionality/js/partials/display_message.js";
+} from "@tsjippy/display_message";
 
 /**
  * Show the next or previous formstep

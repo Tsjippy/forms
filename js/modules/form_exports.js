@@ -1,12 +1,12 @@
-import { getFieldValue } from "./field_value.js";
+import { getFieldValue } from "@tsjippy/field_value";
 
 import { 
   attachNiceSelect 
-} from "../../tsjippy-shared-functionality/js/partials/nice_select.js";
+} from "@tsjippy/nice_select";
 
 import { 
   displayTab 
-} from "../../tsjippy-shared-functionality/js/partials/tabs.js";
+} from "@tsjippy/tabs";
 
 export function removeDefaultSelect(el) {
   Array.from(el.options).forEach(function (option) {

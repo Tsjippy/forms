@@ -16,22 +16,67 @@ add_action('admin_enqueue_scripts', __NAMESPACE__ . '\registerScripts');
  */
 function registerScripts()
 {
+    /**
+     * CSS
+     */
     wp_register_style('tsjippy_forms_style', TSJIPPY\pathToUrl(PLUGINPATH . 'css/forms.min.css'), array(), PLUGINVERSION);
 
     wp_register_style('tsjippy_formtable_style', TSJIPPY\pathToUrl(PLUGINPATH . 'css/formtable.min.css'), array(), PLUGINVERSION);
 
-    wp_register_script_module('@tsjippy/form_submit_functions', TSJIPPY\pathToUrl(PLUGINPATH ."js/form_submit_functions" . TSJIPPY\JSEXTENSION), array(), PLUGINVERSION);
+    /**
+     * Modules
+     */
+    wp_register_script_module('@tsjippy/field_value', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/field_value.js"), array(), PLUGINVERSION);
 
-    wp_register_script_module('@tsjippy/formsubmit_script', TSJIPPY\pathToUrl(PLUGINPATH ."js/formsubmit" . TSJIPPY\JSEXTENSION), array('@tsjippy/main', '@tsjippy/form_submit_functions'), PLUGINVERSION);
+    $deps   = SCRIPT_DEBUG ? [ 
+        "@tsjippy/field_value",
+        "@tsjippy/tabs",
+        "@tsjippy/nice_select"
+    ] :
+    [];
+    wp_register_script_module('@tsjippy/form_exports', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/form_exports.js"), $deps, PLUGINVERSION);
 
-    wp_register_script_module('@tsjippy/forms_script', TSJIPPY\pathToUrl(PLUGINPATH . "js/forms" . TSJIPPY\JSEXTENSION), array('@tsjippy/formsubmit_script', '@tsjippy/fileupload_script'), PLUGINVERSION);
-
-    wp_register_script_module('@tsjippy/forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH . "js/forms_table" . TSJIPPY\JSEXTENSION), array('@tsjippy/forms_script', '@tsjippy/table_script'), PLUGINVERSION);
-
+    $deps   = SCRIPT_DEBUG ? [ 
+        "@tsjippy/show_loader", 
+        "@tsjippy/display_message"
+    ] :
+    [];
+    wp_register_script_module('@tsjippy/form_submit_functions', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/form_submit_functions.js"), $deps, PLUGINVERSION);
+    
     add_filter( 'script_module_data_@tsjippy/form_submit_functions', function($data){
         $data['baseUrl']       = get_home_url();
         $data['restNonce']     = wp_create_nonce('wp_rest');
 
         return $data; 
     } );
+
+    /**
+     * Scripts
+     */
+    $deps   = SCRIPT_DEBUG ? [  
+        '@tsjippy/form_submit_functions', 
+        "@tsjippy/field_value", 
+        "@tsjippy/show_loader", 
+        "@tsjippy/display_message", 
+        "@tsjippy/modals",
+        "@tsjippy/alert",
+        "@tsjippy/nice_select"
+    ] :
+    [];
+    wp_register_script_module('@tsjippy/forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH . "js/forms_table" . TSJIPPY\JSEXTENSION), $deps, PLUGINVERSION);
+
+    $deps   = SCRIPT_DEBUG ? [  
+        '@tsjippy/form_submit_functions', 
+        "@tsjippy/form_exports", 
+        "@tsjippy/display_message"
+    ] :
+    [];
+    wp_register_script_module('@tsjippy/forms_script', TSJIPPY\pathToUrl(PLUGINPATH . "js/forms" . TSJIPPY\JSEXTENSION), $deps, PLUGINVERSION);
+
+    $deps   = SCRIPT_DEBUG ? [  
+        '@tsjippy/form_submit_functions'
+    ] :
+    [];
+    wp_register_script_module('@tsjippy/formsubmit_script', TSJIPPY\pathToUrl(PLUGINPATH ."js/formsubmit" . TSJIPPY\JSEXTENSION), $deps, PLUGINVERSION);
+
 }

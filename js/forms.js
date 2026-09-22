@@ -3,17 +3,16 @@ import {
   fixNumbering,
   removeNode,
   changeFieldValue,
-} from "./form_exports.js";
+} from "@tsjippy/form_exports";
 
 import{
   submitForm,
   formReset
-} from "./form_submit_functions.js";
-
+} from "@tsjippy/form_submit_functions";
 
 import { 
   displayMessage 
-} from "../../tsjippy-shared-functionality/js/partials/display_message.js";
+} from "@tsjippy/display_message";
 
 console.log("Forms.js is loaded");
 

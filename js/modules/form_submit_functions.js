@@ -1,10 +1,10 @@
 import { 
   showLoader 
-} from "../../tsjippy-shared-functionality/js/partials/show_loader.js";
+} from "@tsjippy/show_loader";
 
 import { 
   displayMessage 
-} from "../../tsjippy-shared-functionality/js/partials/display_message.js";
+} from "@tsjippy/display_message";
 
 export function formReset(form) {
   //reset form to the default

@@ -3,32 +3,32 @@ import Sortable from "sortablejs";
 import{
   submitForm,
   fetchRestApi
-} from "./form_submit_functions.js";
+} from "@tsjippy/form_submit_functions";
 
 import {
   getFieldValue
-} from "./field_value.js";
+} from "@tsjippy/field_value";
 
 import { 
   showLoader 
-} from "../../tsjippy-shared-functionality/js/partials/show_loader.js";
+} from "@tsjippy/show_loader";
 
 
 import { 
   displayMessage 
-} from "../../tsjippy-shared-functionality/js/partials/display_message.js";
+} from "@tsjippy/display_message";
 
 import { 
   showModal 
-} from "../../tsjippy-shared-functionality/js/partials/modals.js";
+} from "@tsjippy/modals";
 
 import { 
   Alert 
-} from "../../tsjippy-shared-functionality/js/partials/alert.js";
+} from "@tsjippy/alert";
 
 import { 
   attachNiceSelect 
-} from "../../tsjippy-shared-functionality/js/partials/nice_select.js";
+} from "@tsjippy/nice_select";
 
 /**
  * We need to be carefull with this script as it has overlap with the main table.js
