@@ -8,6 +8,7 @@
 
 ### Fixed
 - fill with dynamic options
+- bug
 
 ### Updated
 
