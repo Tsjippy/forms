@@ -4,13 +4,20 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+### Updated
+
+## [12.1.6] - 2026-09-22
+
+
+### Changed
 - js refactor
 
 ### Fixed
 - fill with dynamic options
 - bug
-
-### Updated
 
 ## [12.1.5] - 2026-09-21
 
