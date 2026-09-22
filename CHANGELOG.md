@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- js refactor
 
 ### Fixed
 - fill with dynamic options
