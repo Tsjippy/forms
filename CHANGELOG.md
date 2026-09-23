@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- dynamic blocks deps
 
 ### Changed
 
