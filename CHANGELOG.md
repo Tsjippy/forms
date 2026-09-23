@@ -2,14 +2,21 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
-- dynamic blocks deps
 
 ### Changed
-- dynamic js in content folder to prevent deletion on update
 
 ### Fixed
 
 ### Updated
+
+## [12.1.8] - 2026-09-23
+
+
+### Added
+- dynamic blocks deps
+
+### Changed
+- dynamic js in content folder to prevent deletion on update
 
 ## [12.1.7] - 2026-09-22
 
