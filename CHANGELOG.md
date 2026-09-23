@@ -5,6 +5,7 @@
 - dynamic blocks deps
 
 ### Changed
+- dynamic js in content folder to prevent deletion on update
 
 ### Fixed
 
