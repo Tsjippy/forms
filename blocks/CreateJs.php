@@ -541,8 +541,11 @@ function buildJs($block, $post){
     //Create js file
     $jsFileName = str_replace(' ', '_', strtolower(trim($formName)));
 
-    wp_mkdir_p(plugin_dir_path(__DIR__) . "js/dynamic/");
-    $jsFilePath = plugin_dir_path(__DIR__) . "js/dynamic/{$jsFileName}";
+    // Create folder
+    $folder = WP_CONTENT_DIR . '/tsjippy_dynamic_js';
+    wp_mkdir_p($folder);
+
+    $jsFilePath = "$folder/{$jsFileName}";
     file_put_contents($jsFilePath . '.js', $js);
 
     //replace long strings for shorter ones
@@ -573,6 +576,6 @@ function buildJs($block, $post){
     }
 
     // Create minified version
-    file_put_contents($jsFilePath . '' . TSJIPPY\JSEXTENSION, $minifiedJs);
+    file_put_contents($jsFilePath . '.min.js', $minifiedJs);
 }
 
