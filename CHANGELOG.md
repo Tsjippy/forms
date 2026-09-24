@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- edit form results
 
 ### Updated
 
