@@ -573,7 +573,7 @@ async function processFormsTableInput(target) {
       }
 
       //Update all occurences of this field
-      if (data["subid"] != undefined) {
+      if (data["subid"] == undefined) {
         let targets = table.querySelectorAll(
           `tr[data-submission-id="${submissionId}"] td[data-block-id="${data.blockId}"]`,
         );
@@ -681,20 +681,6 @@ async function archivedEntriesSwitch(target) {
     pageSizeSelector.classList.remove('hidden');
     navigation.querySelector(`.next`).classList.remove('hidden');
   }
-}
-
-async function onlyOwnSwitch(target) {
-  const url = new URL(window.location);
-  if (target.matches(".only-own-switch-on")) {
-    url.searchParams.set("only-own", true);
-    url.searchParams.delete("all", true);
-  } else {
-    url.searchParams.set("all", true);
-    url.searchParams.delete("only-own");
-  }
-  window.history.pushState({}, "", url);
-
-  getPage(target, 'page', 0);
 }
 
 document.addEventListener("click", (event) => {

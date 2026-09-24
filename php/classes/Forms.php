@@ -1217,7 +1217,14 @@ class Forms
 
         if (!empty($this->submissions)) {
             foreach ($this->submissions as $submission) {
-                if ($submission->id == $submissionId && isset($submission->{$blockId})) {
+                if (
+                    $submission->id == $submissionId && 
+                    isset($submission->{$blockId}) &&
+                    (
+                        empty($subId) ||
+                        $submission->sub_id == $subId
+                    )
+                ) {
                     return $submission->{$blockId};
                 }
             }
