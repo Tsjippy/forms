@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- updating splitted form submission data
 
 ### Updated
 
