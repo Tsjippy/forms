@@ -443,12 +443,12 @@ class Forms
 
     /**
      * Get a form by submission id
-     * @param    int            $submisisonId    The id of the submission for which to retrieve the form
-     * @return    object                        The form data object or WP_Error on failure
+     * @param    int     $submisisonId  The id of the submission for which to retrieve the form
+     * @return   object                 The form data object or WP_Error on failure
      */
     public function getFormBySubmissionId($submisisonId)
     {
-        $postId        = TSJIPPY\getFromDb(
+        $ids        = TSJIPPY\getFromDb(
             "get_form_by_submission_id_$submisisonId",
             "forms",
             "SELECT block_id, post_id FROM %i WHERE id = %d LIMIT 1",
@@ -456,11 +456,13 @@ class Forms
             $submisisonId
         );
 
-        if (empty($postId)) {
+        if (empty($ids)) {
             return new WP_Error('forms', "No form found for submission id $submisisonId");
         }
 
-        return $postId;
+        $this->getForm($ids->post_id, $ids->block_id);
+
+        return $ids;
     }
 
     /**
@@ -1175,18 +1177,44 @@ class Forms
     /**
      * Get submission value
      *
-     * @param    int        $submissionId    The id of a submission
-     * @param    string    $blockId        The block_id of the submission value
-     * @param    int        $subId            The sub id in case of multiple values for the same key
-     * @param    bool    $returnArray    Wheter to return an array of values, default false
+     * @param    int    $submissionId   The id of a submission
+     * @param    string $blockId        The block_id of the submission value
+     * @param    int    $subId          The sub id in case of multiple values for the same key
+     * @param    bool   $returnArray    Wheter to return an array of values, default false
      */
     public function getSubmissionValue($submissionId, $blockId, $subId = '', $returnArray = false)
     {
         global $wpdb;
 
         /**
+         * Check if we should check for block id or split name
+         */ 
+        if(str_contains($this->formBlocks[$this->blockMapping['id'][$blockId]]->slug ?? '', '[')){
+            $slug   = $this->formBlocks[$this->blockMapping['id'][$blockId]]->slug;
+
+            // Base slug followed by one or more numbers between [] followed by a keyword between []
+            $pattern    = "/.*?\[[0-9]+\]\[([^\]]+)\]/i";
+
+            // This slug matches the pattern, value is given under the keyword, not blockid
+            if (preg_match($pattern, $slug, $matches)) {
+                $blockId = $matches[1];
+            }
+        }
+
+        /**
          * Check if the requested submission is already in the submissions property, if so return the value from there instead of querying the database
          */
+        if (
+            !empty($this->submission) && 
+            $this->submission->id == $submissionId &&
+            (
+                empty($subId) ||
+                $this->submission->sub_id == $subId
+            )
+        ) {
+            return $this->submission->{$blockId};
+        }
+
         if (!empty($this->submissions)) {
             foreach ($this->submissions as $submission) {
                 if ($submission->id == $submissionId && isset($submission->{$blockId})) {

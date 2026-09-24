@@ -6,6 +6,8 @@ import {
   displayMessage 
 } from "@tsjippy/display_message";
 
+import "@tsjippy/nonce_script";
+
 export function formReset(form) {
   //reset form to the default
   form.reset();
@@ -279,7 +281,7 @@ export function markComplete() {
 export async function fetchRestApi(url, formData = "", showErrors = true) {
   const data   = JSON.parse(
     document.getElementById(
-        'wp-script-module-data-@tsjippy/form_submit_functions'
+        'wp-script-module-data-@tsjippy/nonce_script'
     ).textContent
   );
 

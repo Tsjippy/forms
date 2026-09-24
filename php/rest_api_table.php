@@ -438,30 +438,30 @@ function getInputHtml()
 
     $formTable->parseSubmissions('', $requestData['submission-id']);
 
-    // Get the form id from the submission and load the form
-    $formTable->getForm($formTable->submission->post_id, $formTable->submission->block_id);
-
     $userId             = $formTable->submission->user_id;
 
     $formTable->userId  = $userId;
 
-    $blockId          = $requestData['block-id'];
+    $blockId            = $requestData['block-id'];
 
-    $block            = $formTable->getBlockById($blockId);
+    $block              = $formTable->getBlockById($blockId);
 
     if (!$block) {
         return new \WP_Error('No block found', "No block found with id '$blockId'");
     }
 
-    $value        = $formTable->getSubmissionValue($requestData['submission-id'], $blockId, $requestData['subid'] ?? null);
+    /**
+     * Get the value and insert into block html
+     */
+    $block->block['attrs']['defaultValue'] = $formTable->getSubmissionValue($requestData['submission-id'], $blockId, $requestData['subid'] ?? null);
 
     // Get block html
-    $html         = render_block($block);
+    $html         = render_block($block->block);
 
     /**
      * Check if this block needs a datalist
      */
-    $listBlockId    = $block['attrs']['list'] ?? '';
+    $listBlockId    = $block->block['attrs']['list'] ?? '';
 
     if(!empty($listBlockId)){
         $listBlock  = $formTable->getBlockById($listBlockId);
@@ -490,6 +490,9 @@ function editValue()
 
     $newValue                = json_decode(TSJIPPY\sanitize($settings['new-value'], 'textarea_field'));
 
+    /**
+     * Check if an db update is needed
+     */
     $oldValue                = $formTable->getSubmissionValue($formTable->submissionId, $blockId, $subId);
 
     if ($oldValue == $newValue) {
@@ -499,13 +502,17 @@ function editValue()
         return new WP_Error('tsjippy-forms', "Old value '$oldValue' is the same as the new value!");
     }
 
-    // update the submissiom
+    /** 
+     * update the submissiom
+     */
     $result        = $formTable->updateSubmission($blockId, $newValue, $subId);
     if (is_wp_error($result)) {
         return $result;
     }
 
-    //get transformed value
+    /**
+     * get transformed value
+     */
     $block       = $formTable->getBlockById($blockId);
     $submissions = $formTable->getSubmissions('', $formTable->submissionId);
     $transValue  = $formTable->transformInputData($newValue, $block, $submissions[0]);

@@ -165,7 +165,7 @@ document.addEventListener("click", function (event) {
 document.addEventListener("change", (ev) => {
   // select all elements with a datalist attached
   if (ev.target.matches("input[list]") && ev.target.name.includes("[")) {
-    ev.stopImmediatePropagation();
+    ev.stopPropagation();
 
     let el = ev.target.list.querySelector(`[value="${ev.target.value}" i]`);
 

@@ -405,38 +405,43 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
         return $blockContent;
     }
 
-    $forms->buildDefaultsArray();
+    // Default value set in rest_api_table
+    if(!empty($block['attrs']['defaultValue'])){
+        $defaultValue   = $block['attrs']['defaultValue'];
+    }else{
+        $forms->buildDefaultsArray();
 
-    $defaultValues  = array_merge($forms->defaultArrayValues, $forms->defaultValues);
+        $defaultValues  = array_merge($forms->defaultArrayValues, $forms->defaultValues);
 
-    /**
-     * Set default value
-     */
-    if(empty($block['attrs']['dynamic_value'])){
-        $metaKey      = str_replace('[]', '', $block['attrs']['name'] ?? '');
+        /**
+         * Set default value
+         */
+        if(empty($block['attrs']['dynamic_value'])){
+            $metaKey      = str_replace('[]', '', $block['attrs']['name'] ?? '');
 
-        $exploded     = explode('[', $metaKey);
+            $exploded     = explode('[', $metaKey);
 
-        if(count($exploded) > 1){
-            $defaultValue = $defaultValues[$exploded[0]] ?? '';
-            if(is_array($defaultValue)){
-                $index        = str_replace(']', '', $exploded[1]);
+            if(count($exploded) > 1){
+                $defaultValue = $defaultValues[$exploded[0]] ?? '';
+                if(is_array($defaultValue)){
+                    $index        = str_replace(']', '', $exploded[1]);
 
-                if(isset($defaultValue[$index])){
-                    $defaultValue = $defaultValue[$index];
-                }elseif($defaultValue[0][$index]){
-                    $defaultValue = $defaultValue[0][$index];
+                    if(isset($defaultValue[$index])){
+                        $defaultValue = $defaultValue[$index];
+                    }elseif($defaultValue[0][$index]){
+                        $defaultValue = $defaultValue[0][$index];
+                    }
+
+                    if(is_array($defaultValue) && isset($exploded[2]) && isset($defaultValue[$exploded[2]])){
+                        $defaultValue   = $defaultValue[$exploded[2]];
+                    }
                 }
-
-                if(is_array($defaultValue) && isset($exploded[2]) && isset($defaultValue[$exploded[2]])){
-                    $defaultValue   = $defaultValue[$exploded[2]];
-                }
+            }else{
+                $defaultValue = $defaultValues[$metaKey] ?? '';
             }
         }else{
-            $defaultValue = $defaultValues[$metaKey] ?? '';
+            $defaultValue = $defaultValues[$block['attrs']['dynamic_value']] ?? '';
         }
-    }else{
-        $defaultValue = $defaultValues[$block['attrs']['dynamic_value']] ?? '';
     }
 
     /**
@@ -460,7 +465,7 @@ function updateBlockHtml( $blockContent, $block, $instance ) {
         $jsPath = "$folder/{$jsFileName}" . TSJIPPY\JSEXTENSION;
         
         if (file_exists($jsPath) && filesize($jsPath) > 0) {
-            wp_enqueue_script_module("@tsjippy/forms_dynamic_{$jsFileName}_js", TSJIPPY\pathToUrl($jsPath), array("@tsjippy/modals", "@tsjippy/alert", "@tsjippy/show_loader", "nice-select2", "@tsjippy/tabs", "@tsjippy/nice_select", '@tsjippy/forms_script', "@tsjippy/form_exports", "@tsjippy/field_value", "@tsjippy/form_submit_functions", "@tsjippy/display_message"), PLUGINVERSION);
+            wp_enqueue_script_module("@tsjippy/forms_dynamic_{$jsFileName}_js", TSJIPPY\pathToUrl($jsPath), array("@tsjippy/nonce_script", "@tsjippy/modals", "@tsjippy/alert", "@tsjippy/show_loader", "nice-select2", "@tsjippy/tabs", "@tsjippy/nice_select", '@tsjippy/forms_script', "@tsjippy/form_exports", "@tsjippy/field_value", "@tsjippy/form_submit_functions", "@tsjippy/display_message"), PLUGINVERSION);
         }
     }
 
@@ -577,6 +582,7 @@ function showFormSelector($atts = [])
 {
     wp_enqueue_script_module('@tsjippy/forms_script');
 
+    wp_enqueue_script_module('@tsjippy/table_script');
     wp_enqueue_script_module('@tsjippy/forms_table_script');
 
     wp_enqueue_style('tsjippy_forms_style');
@@ -775,8 +781,13 @@ function addGlobalAttributes( $args ) {
     return $args;
 }
 
-function my_custom_post_view_config( $view_config ) {
+/**
+ * Changes the pages page
+ * 
+ * @param   mixed $viewConfig
+ */
+function my_custom_post_view_config( $viewConfig ) {
     // Modify view configuration, fields, or filters here
-    return $view_config;
+    return $viewConfig;
 }
 add_filter( 'get_entity_view_config_posttype_page', __NAMESPACE__.'\my_custom_post_view_config' );

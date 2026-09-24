@@ -486,7 +486,7 @@ async function getInputHtml(target) {
   }
   formData.append("submission-id", submissionId);
   formData.append("shortcode-id", shortcodeId);
-  formData.append("element-id", data.elementId);
+  formData.append("block-id", data.blockId);
 
   let response = await fetchRestApi(
     "forms/get_input_html",
@@ -546,7 +546,7 @@ async function processFormsTableInput(target) {
     // Submit new value and receive the filtered value back
     let formData = new FormData();
     formData.append("submission-id", submissionId);
-    formData.append("element-id", data.elementId);
+    formData.append("block-id", data.blockId);
     formData.append("new-value", JSON.stringify(value));
     if (data.subid != undefined) {
       formData.append("subid", data.subid);
@@ -575,7 +575,7 @@ async function processFormsTableInput(target) {
       //Update all occurences of this field
       if (data["subid"] != undefined) {
         let targets = table.querySelectorAll(
-          `tr[data-submission-id="${submissionId}"] td[data-element-id="${data.elementId}"]`,
+          `tr[data-submission-id="${submissionId}"] td[data-block-id="${data.blockId}"]`,
         );
         targets.forEach((td) => {
           td.innerHTML = newValue;
@@ -764,7 +764,7 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  event.stopImmediatePropagation();
+  event.stopPropagation();
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -824,7 +824,7 @@ document.addEventListener("change", (event) => {
     return;
   }
 
-  event.stopImmediatePropagation();
+  event.stopPropagation();
 });
 
 document.addEventListener(

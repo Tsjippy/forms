@@ -274,11 +274,11 @@ class SubmitForm extends SaveFormSettings
 
         $changedBlockId    = (int) $_POST['block-id'] ?? '';
 
-        // check if a certain block is changed to a certain value
+        // One block is changed
         if ($trigger == 'fieldchanged') {
 
             // the changed block is not the conditional block)
-            if ($changedBlockId != $email->conditional_field) {
+            if ($changedBlockId != $email->trigger['conditionalField']) {
                 return false;
             }
 
@@ -298,9 +298,12 @@ class SubmitForm extends SaveFormSettings
             if ($formValue != $compareValue && $formValue != str_replace(' ', '_', $compareValue)) {
                 return false;
             }
-        } elseif (
+        } 
+        
+        // More fields are changed
+        elseif (
             $trigger == 'fieldschanged'                                    &&        // an block has been changed
-            !in_array($changedBlockId, $email->conditional_fields)            // and the block is not in the conditional fields array
+            !in_array($changedBlockId, $email->trigger['conditionalFields'])            // and the block is not in the conditional fields array
         ) {
             return false;
         } elseif ($trigger == 'submitted' && $email->trigger['type'] == 'submittedcond') {    // check if the submit condition is matched
@@ -318,10 +321,10 @@ class SubmitForm extends SaveFormSettings
 
             // get the value to compare with
             if (is_numeric($email->submitted_trigger['value-block'] ?? '')) {
-                $compareBlock    = $this->getBlockById($email->submitted_trigger['value-block']);
-                $compareElValue    = $this->submission->{$compareBlock->slug};
+                $compareBlock   = $this->getBlockById($email->submitted_trigger['value-block']);
+                $compareElValue = $this->submission->{$compareBlock->slug};
             } else {
-                $compareElValue    = $email->submitted_trigger['value'];
+                $compareElValue = $email->submitted_trigger['value'];
             }
 
             if (is_array($elValue)) {

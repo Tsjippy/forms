@@ -132,7 +132,7 @@ document.addEventListener("click", (ev) => {
     return;
   }
 
-  ev.stopImmediatePropagation();
+  ev.stopPropagation();
 });
 
 //Add a keyboard listener

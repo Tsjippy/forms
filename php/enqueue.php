@@ -41,14 +41,9 @@ function registerScripts()
         "@tsjippy/display_message"
     ] :
     [];
-    wp_register_script_module('@tsjippy/form_submit_functions', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/form_submit_functions.js"), $deps, PLUGINVERSION);
-    
-    add_filter( 'script_module_data_@tsjippy/form_submit_functions', function($data){
-        $data['baseUrl']       = get_home_url();
-        $data['restNonce']     = wp_create_nonce('wp_rest');
 
-        return $data; 
-    } );
+    $deps[] = "@tsjippy/nonce_script";
+    wp_register_script_module('@tsjippy/form_submit_functions', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/form_submit_functions.js"), $deps, PLUGINVERSION);
 
     /**
      * Scripts
@@ -63,6 +58,8 @@ function registerScripts()
         "@tsjippy/nice_select"
     ] :
     [];
+
+    $deps[] = "@tsjippy/nonce_script";
     wp_register_script_module('@tsjippy/forms_table_script', TSJIPPY\pathToUrl(PLUGINPATH . "js/forms_table" . TSJIPPY\JSEXTENSION), $deps, PLUGINVERSION);
 
     $deps   = SCRIPT_DEBUG ? [  
@@ -77,6 +74,8 @@ function registerScripts()
         '@tsjippy/form_submit_functions'
     ] :
     [];
+
+    $deps[] = "@tsjippy/nonce_script";
     wp_register_script_module('@tsjippy/formsubmit_script', TSJIPPY\pathToUrl(PLUGINPATH ."js/formsubmit" . TSJIPPY\JSEXTENSION), $deps, PLUGINVERSION);
 
 }
