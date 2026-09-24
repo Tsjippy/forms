@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- updating splitted form submission data
 
 ### Updated
+
+## [12.2.1] - 2026-09-24
+
+
+### Fixed
+- updating splitted form submission data
 
 ## [12.2.0] - 2026-09-24
 
