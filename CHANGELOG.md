@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- form bugs
 
 ### Updated
+
+## [12.2.3] - 2026-09-25
+
+
+### Fixed
+- form bugs
 
 ## [12.2.2] - 2026-09-25
 
