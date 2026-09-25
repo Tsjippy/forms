@@ -54,19 +54,16 @@ export default function RuleRow({
 	return (
 		<div className={`rule-row inner ${
 			Object.keys(ruleErrors).length > 0  ? 'invalid' : ''
-		}`}>			
-			<SelectControl
-				label={__('Conditional Field', 'tsjippy')}
-				value={rule?.['conditional-field'] || ''}
-				options={[
-					{ label: __('Select block', 'tsjippy'), value: '' },
-					...(formBlockOptions || []),
-				]}
-				onChange={(block) =>
+		}`}>
+			<TextControl
+				label			= {__('Conditional Field', 'tsjippy')}
+				value			= {rule?.['conditional-field'] || ''}
+				onChange		= {(block) =>
 					onUpdate(conditionIndex, ruleIndex, 'conditional-field', block)
 				}
-				help={ruleErrors.conditionalField || ''}
-				data-field-key="conditionalField"
+				help			= {ruleErrors.conditionalField || ''}
+				data-field-key	= "conditionalField"
+				list           	= "possible-blocks"
 			/>
 
 			<SelectControl

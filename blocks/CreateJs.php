@@ -335,6 +335,17 @@ function dynamicJs($conditions, $innerBlocks){
                     // Replace possible removed variables
                     $if = str_replace(array_keys($removedVars), $removedVars, $if);
 
+                    if(
+                        $key === $lastKey && 
+                        (
+                            str_contains($if, '&&') ||
+                            str_contains($if, '||')
+                        )
+                    ){
+                        $if = rtrim($if, '&&');
+                        $if = rtrim($if, '||');
+                    }
+
                     echo "\n\t\t\t\t" . $if;
 
                     // This is not the last if and it has no combinator add one
@@ -456,8 +467,6 @@ class <?php echo esc_attr($className);?> {
                     el     = select;
                     elName = select.name;
                 }
-            }else{
-                return;
             }
         }
 
@@ -475,7 +484,7 @@ class <?php echo esc_attr($className);?> {
     };
 
     processFields = (el) => {
-        // Ge the name of the input that just got changed
+        // Get the name of the input that just got changed
         let blockId = el.dataset.blockid;
 
         if(blockId == undefined){

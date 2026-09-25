@@ -1,4 +1,4 @@
-import Sortable from "sortablejs";
+import Sortable from '@tsjippy/sortable';
 
 import{
   submitForm,

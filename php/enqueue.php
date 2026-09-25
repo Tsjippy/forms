@@ -26,6 +26,8 @@ function registerScripts()
     /**
      * Modules
      */
+    wp_register_script_module('@tsjippy/sortable', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/sortable.core.esm.js"), array(), PLUGINVERSION);
+
     wp_register_script_module('@tsjippy/multi_input', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/multi-input.esm.js"), array(), PLUGINVERSION);
 
     wp_register_script_module('@tsjippy/field_value', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/field_value.js"), array(), PLUGINVERSION);
@@ -57,7 +59,8 @@ function registerScripts()
         "@tsjippy/display_message", 
         "@tsjippy/modals",
         "@tsjippy/alert",
-        "@tsjippy/nice_select"
+        "@tsjippy/nice_select",
+        '@tsjippy/sortable'
     ] :
     [];
 

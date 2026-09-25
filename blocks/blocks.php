@@ -312,6 +312,16 @@ function preFillForm($blockContent, $block, $defaultValue){
         $blockContent = str_replace('%value-placeholder%', $defaultValue, $blockContent);
     }
 
+    /**
+     * Process placeholders
+     */
+    // replace a valid date string
+    if (preg_match('/%([a-z]*)%/', $blockContent, $matches) && strtotime((string)$matches[1])) {
+        $replaceValue    = gmdate('Y-m-d', strtotime((string)$matches[1]));
+
+        $blockContent = str_replace($matches[0], $replaceValue, $blockContent);
+    }
+
     return $blockContent;
 }
 

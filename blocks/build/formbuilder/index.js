@@ -1306,16 +1306,13 @@ function RuleRow({
   /* Render the editable UI for one rule entry. */
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
     className: `rule-row inner ${Object.keys(ruleErrors).length > 0 ? 'invalid' : ''}`,
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.TextControl, {
       label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Conditional Field', 'tsjippy'),
       value: rule?.['conditional-field'] || '',
-      options: [{
-        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select block', 'tsjippy'),
-        value: ''
-      }, ...(formBlockOptions || [])],
       onChange: block => onUpdate(conditionIndex, ruleIndex, 'conditional-field', block),
       help: ruleErrors.conditionalField || '',
-      "data-field-key": "conditionalField"
+      "data-field-key": "conditionalField",
+      list: "possible-blocks"
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
       label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Equation', 'tsjippy'),
       value: rule?.equation || '',

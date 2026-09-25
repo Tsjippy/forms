@@ -308,7 +308,9 @@ export default function Edit({
             </InspectorControls>
 
             <div {...blockProps}>
-                { legend } input
+                Type: { legend }
+                <br></br>
+                { attributes.name ? `Name: ${attributes.name}` : ''}
                 <br></br>
                 
                 {
