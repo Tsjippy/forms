@@ -4,6 +4,7 @@
 ### Added
 
 ### Changed
+- multi-input to seperate library
 
 ### Fixed
 
