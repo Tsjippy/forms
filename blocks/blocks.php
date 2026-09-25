@@ -43,11 +43,11 @@ function initBlocks()
     $formNames  = [];
 
     foreach($forms->forms as $form){
-        if(empty($form->name)){
+        if(empty($form['formData']->name)){
             continue;
         }
 
-        $formNames[]    = trim($form->slug);
+        $formNames[]    = trim($form['formData']->slug);
     }
 
     register_block_type(
@@ -180,17 +180,8 @@ function renderMultiInput($values, $blockContent, $block, $label = null){
     /**
      * text or similar multi-input
      */
-    if(in_array($block['attrs']['type'] ?? 'text' , ['text', "email", "tel", "text", "url"])){
-        $listItems   = '';
-        foreach($values as $value){
-            $listItems   .= "<li class='list-selection'>";
-                $listItems   .= "<button type='button' class='small remove-list-selection'>";
-                    $listItems   .= "<span class='remove-list-selection'>×</span>";
-                $listItems   .= "</button>";
-                $listItems   .= "<input type='hidden' class='no-reset' name='{$block['attrs']['name']}' value='$value'>";
-                $listItems   .= "<span class='selected-name'>$value</span>";
-            $listItems   .= "</li>";
-        }
+    if(in_array($block['attrs']['type'] ?? 'text' , ['text', "email", "tel", "url"])){
+        $valuesString   = "data-prefill='" . json_encode($values) . "'";
 
         /**
          * Replace the placeholders
@@ -200,7 +191,7 @@ function renderMultiInput($values, $blockContent, $block, $label = null){
         if(!empty($values)){
             $required     = 'data-required=1';
         }
-        $blockContent = str_replace(['value="%value-placeholder%"', '%value-placeholder%', 'required'], ['', $listItems, $required], $blockContent);
+        $blockContent = str_replace(['value="%value-placeholder%"', 'required'], [$valuesString, $required], $blockContent);
     }
     
      /**
@@ -348,7 +339,7 @@ function addDataAndSelectOptions($blockContent, $block, $defaultValue, $defaultV
     foreach($optionData as $key => $value){
         // Data list
         if($block['blockName'] == "tsjippy-forms/datalist"){
-            $option = "<option dataset-value='$key' ";
+            $option = "<option data-value='$key' ";
             if(is_array($value)){
                 $option .= "value='{$value['value']}'>{$value['display']}</option>";
             }else{

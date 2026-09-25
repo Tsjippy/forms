@@ -108,19 +108,15 @@ export function InputHtml({
             <input
                 {...(!renderMultiple ? blockProps : {})}
                 type={attributes.type}
-                name={
-                    attributes?.name
-                        ? attributes.multiple && !attributes.name.endsWith('[]')
-                        ? `${attributes.name}[]`
-                        : attributes.name
-                        : undefined
-                    }
+                name={ attributes.name }
                 required={ attributes.required }
                 data-blockid={attributes.blockId}
                 autoComplete="on"
+                multiple={attributes.multiple}
                 {...attributes.inputAttributes}
                 defaultValue = { isSaving ? undefined :  prefillValue }
                 value = { isSaving ? "%value-placeholder%" :  undefined }
+                data-uselistvalue = { attributes.multiple ? attributes.datalistvalue : undefined}
             />
         );
     }

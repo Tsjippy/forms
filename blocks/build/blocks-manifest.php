@@ -119,6 +119,7 @@ return array(
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
 		'viewScriptModule' => array(
+			'@tsjippy/nonce_script',
 			'@tsjippy/formsubmit_script',
 			'@tsjippy/forms_script'
 		),
@@ -218,7 +219,10 @@ return array(
 		),
 		'textdomain' => 'tsjippy',
 		'editorScript' => 'file:./index.js',
-		'viewScript' => 'file:./view.js',
+		'viewScript' => array(
+			'@tsjippy/nonce_script',
+			'file:./view.js'
+		),
 		'attributes' => array(
 			'text' => array(
 				'type' => 'string',
@@ -335,6 +339,10 @@ return array(
 				)
 			),
 			'radioNewLine' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'datalistvalue' => array(
 				'type' => 'boolean',
 				'default' => false
 			)

@@ -215,6 +215,19 @@ export default function Edit({
                             setAttributes({ multiple })
                         }
                     />
+                    
+                    {attributes.multiple && ['url', 'email', 'text', 'tel'].includes(attributes.type) &&
+                        <ToggleControl
+                            label={__(
+                                'Use the datalist value as value',
+                                'tsjippy'
+                            )}
+                            checked={!!attributes.datalistvalue}
+                            onChange={(datalistvalue) =>
+                                setAttributes({ datalistvalue })
+                            }
+                        />
+                    }                    
 
                     <ToggleControl
                         label={__(

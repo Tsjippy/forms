@@ -23,32 +23,11 @@ export default function save({ attributes }) {
     const blockProps = useBlockProps.save();
 
     return (
-        ['text', "email", "tel", "text", "url"].includes(attributes.type) && attributes.multiple ?
-            <div className={`${blockProps.className ?? ''} option-wrapper`}>
-                <ul className="list-selection-list">
-                    %value-placeholder%
-                </ul>
-                <div className="multi-text-input-wrapper">
-                    <InputHtml
-                        attributes={attributes}
-                        blockProps={blockProps}
-                        labelChild={false}
-                        isSaving={true}
-                    />
-                    <button
-                        type="button"
-                        className="small add-list-selection hidden"
-                    >
-                        add
-                    </button>
-                </div>
-            </div>
-        :
-            <InputHtml
-                attributes={attributes}
-                blockProps={blockProps}
-                labelChild={attributes.labelChild}
-                isSaving={true}
-            />
+        <InputHtml
+            attributes={attributes}
+            blockProps={blockProps}
+            labelChild={attributes.labelChild}
+            isSaving={true}
+        />
     );
 }

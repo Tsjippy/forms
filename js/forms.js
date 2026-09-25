@@ -14,6 +14,10 @@ import {
   displayMessage 
 } from "@tsjippy/display_message";
 
+import {
+  attachAll
+} from "@tsjippy/multi_input";
+
 console.log("Forms.js is loaded");
 
 async function saveFormInput(target) {
@@ -120,6 +124,11 @@ document.addEventListener("DOMContentLoaded", () => {
       input.required  = false;
     });
   });
+
+  /**
+   * Add multi htmls
+   */
+  attachAll();
 });
 
 //we are online again

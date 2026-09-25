@@ -641,8 +641,8 @@ class Forms
                 $this->getForms();
 
                 foreach($this->forms as $form){
-                    if($form->blockId == $blockId){
-                        $post   = $form->postId;
+                    if($form['formData']->blockId == $blockId){
+                        $post   = $form['formData']->postId;
                         break;
                     }
                 }
@@ -870,7 +870,7 @@ class Forms
         $this->getForms();
 
         foreach ($this->forms as $form) {
-            $this->slugs[] = $form->slug;
+            $this->slugs[] = $form['formData']->slug;
         }
 
         $html = "<select name='form-selector'>";

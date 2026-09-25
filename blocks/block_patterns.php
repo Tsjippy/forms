@@ -40,7 +40,7 @@ register_block_pattern(
 
 <!-- wp:tsjippy-forms/label {"text":"Your phonenumber(s)","childAttr":{"multiple":true,"add_button_content":"+","remove_button_content":"-","type":"tel"},"blockId":"299","formbuilderChild":true} -->
 <label data-blockid="299"><h4 class="label-text">Your phonenumber(s)</h4><br/><!-- wp:tsjippy-forms/input {"type":"tel","name":"phonenumbers","dynamic_value":"phonenumbers","multiple":true,"required":true,"blockId":"0ff0cd7d-d927-4d37-a22c-04e07fd49e04","formbuilderChild":true} -->
-<div class="wp-block-tsjippy-forms-input option-wrapper"><ul class="list-selection-list">%value-placeholder%</ul><div class="multi-text-input-wrapper"><input class="wp-block-tsjippy-forms-input" type="tel" name="phonenumbers" required data-blockid="0ff0cd7d-d927-4d37-a22c-04e07fd49e04" autocomplete="on" value="%value-placeholder%"/><button type="button" class="small add-list-selection hidden">add</button></div></div>
+<input class="wp-block-tsjippy-forms-input" type="tel" name="phonenumbers" required data-blockid="0ff0cd7d-d927-4d37-a22c-04e07fd49e04" autocomplete="on" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -157,7 +157,7 @@ register_block_pattern(
 
 <!-- wp:tsjippy-forms/label {"text":"Phonenumber","childAttr":{"multiple":true,"add_button_content":"+","remove_button_content":"-","type":"tel"},"blockId":"138","formbuilderChild":true} -->
 <label data-blockid="138"><h4 class="label-text">Phonenumber</h4><br/><!-- wp:tsjippy-forms/input {"type":"tel","name":"phonenumbers","inputAttributes":{"pattern":"+[0-9]{9,}"},"multiple":true,"required":true,"blockId":"74d89683-81a1-453f-99dc-ab34289ce334","formbuilderChild":true,"notChild":true,"remindByEmail":true} -->
-<div class="wp-block-tsjippy-forms-input option-wrapper"><ul class="list-selection-list">%value-placeholder%</ul><div class="multi-text-input-wrapper"><input class="wp-block-tsjippy-forms-input" type="tel" name="phonenumbers" required data-blockid="74d89683-81a1-453f-99dc-ab34289ce334" autocomplete="on" pattern="+[0-9]{9,}" value="%value-placeholder%"/><button type="button" class="small add-list-selection hidden">add</button></div></div>
+<input class="wp-block-tsjippy-forms-input" type="tel" name="phonenumbers" required data-blockid="74d89683-81a1-453f-99dc-ab34289ce334" autocomplete="on" pattern="+[0-9]{9,}" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -280,7 +280,7 @@ register_block_pattern(
 
 <!-- wp:tsjippy-forms/label {"text":"Your Phonenumbers","childAttr":{"multiple":true,"add_button_content":"+","remove_button_content":"-","type":"tel"},"blockId":"03583644-2523-4f3b-93ae-b69fb32fba03","formbuilderChild":true} -->
 <label data-blockid="03583644-2523-4f3b-93ae-b69fb32fba03"><h4 class="label-text">Your Phonenumbers</h4><br/><!-- wp:tsjippy-forms/input {"type":"tel","name":"phone_number","inputAttributes":{"list":"phones"},"dynamic_value":"phonenumbers","multiple":true,"required":true,"blockId":"610","formbuilderChild":true} -->
-<div class="wp-block-tsjippy-forms-input option-wrapper"><ul class="list-selection-list">%value-placeholder%</ul><div class="multi-text-input-wrapper"><input class="wp-block-tsjippy-forms-input" type="tel" name="phone_number" required data-blockid="610" autocomplete="on" list="phones" value="%value-placeholder%"/><button type="button" class="small add-list-selection hidden">add</button></div></div>
+<input class="wp-block-tsjippy-forms-input" type="tel" name="phone_number" required data-blockid="610" autocomplete="on" list="phones" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -290,7 +290,7 @@ register_block_pattern(
 
 <!-- wp:tsjippy-forms/label {"text":"Indicate people travelling with you","childAttr":{"multiple":true,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"611","formbuilderChild":true} -->
 <label data-blockid="611"><h4 class="label-text">Indicate people travelling with you</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"passengers","inputAttributes":{"list":"users"},"multiple":true,"blockId":"614","formbuilderChild":true} -->
-<div class="wp-block-tsjippy-forms-input option-wrapper"><ul class="list-selection-list">%value-placeholder%</ul><div class="multi-text-input-wrapper"><input class="wp-block-tsjippy-forms-input" type="text" name="passengers" data-blockid="614" autocomplete="on" list="users" value="%value-placeholder%"/><button type="button" class="small add-list-selection hidden">add</button></div></div>
+<input class="wp-block-tsjippy-forms-input" type="text" name="passengers" data-blockid="614" autocomplete="on" list="users" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 

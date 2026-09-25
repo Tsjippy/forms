@@ -18,6 +18,7 @@ import { useState, useEffect, useCallback  } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useSelect } from '@wordpress/data';
 import { plus } from '@wordpress/icons';
+import { Spinner } from '@wordpress/components';
 
 import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';
@@ -25,9 +26,6 @@ import './filters/storeClientIdInAttributes.js';
 import { FormSubmitter } from './components/Submitter.js';
 import { EmailSettings } from './emails/EmailSettings.js';
 import { FormReminderPanel } from './form-reminders/FormReminderPanel.js';
-
-import * as forms from './../../../js/forms.js';
-import { Spinner } from '@wordpress/components';
 
 const TEMPLATE = [
     [

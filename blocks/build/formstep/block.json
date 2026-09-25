@@ -13,7 +13,10 @@
   },
   "textdomain": "tsjippy",
   "editorScript": "file:./index.js",
-  "viewScript": "file:./view.js",
+  "viewScript": [
+    "@tsjippy/nonce_script",
+    "file:./view.js"
+  ],
   "attributes": {
     "text": {
       "type": "string",

@@ -26,6 +26,8 @@ function registerScripts()
     /**
      * Modules
      */
+    wp_register_script_module('@tsjippy/multi_input', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/multi-input.esm.js"), array(), PLUGINVERSION);
+
     wp_register_script_module('@tsjippy/field_value', TSJIPPY\pathToUrl(PLUGINPATH ."js/modules/field_value.js"), array(), PLUGINVERSION);
 
     $deps   = SCRIPT_DEBUG ? [ 
@@ -65,7 +67,8 @@ function registerScripts()
     $deps   = SCRIPT_DEBUG ? [  
         '@tsjippy/form_submit_functions', 
         "@tsjippy/form_exports", 
-        "@tsjippy/display_message"
+        "@tsjippy/display_message",
+        '@tsjippy/multi_input'
     ] :
     [];
     wp_register_script_module('@tsjippy/forms_script', TSJIPPY\pathToUrl(PLUGINPATH . "js/forms" . TSJIPPY\JSEXTENSION), $deps, PLUGINVERSION);

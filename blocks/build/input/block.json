@@ -74,6 +74,10 @@
     "radioNewLine": {
       "type": "boolean",
       "default": false
+    },
+    "datalistvalue": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

@@ -16,6 +16,7 @@
 	"editorStyle": "file:./index.css",
 	"style": "file:./style-index.css",
 	"viewScriptModule": [
+		"@tsjippy/nonce_script",
 		"@tsjippy/formsubmit_script",
 		"@tsjippy/forms_script"
 	],

@@ -521,14 +521,12 @@ class SubmitForm extends SaveFormSettings
      */
     public function parseSplittedData(&$formresults)
     {
-        if (!isset($this->formData->split)) {
+        if (!isset($this->formData->split_blocks)) {
             return;
         }
 
-        global $wpdb;
-
         // loop over all split blocks
-        foreach ($this->formData->split as $index => $id) {
+        foreach ($this->formData->split_blocks as $index => $id) {
             // get the name of the split block
             $slug    = $this->getBlockById($id, 'slug');
 
@@ -666,7 +664,9 @@ class SubmitForm extends SaveFormSettings
 
             if ($key == 'viewhash') {
                 $blockId = -7;
-            } else {
+            } 
+            
+            else {
                 $blockId    = $this->getBlockBySlug($key, 'blockId');
                 if (!$blockId) {
                     continue;

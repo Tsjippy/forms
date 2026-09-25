@@ -21,7 +21,6 @@ export const Multiple = ( props ) => {
             : [];
 
     var childEl = props.inner;
-    var label = null;
     React.Children.toArray(props.inner.props.children).forEach((child) => {
         if (React.isValidElement(child)) {
             childEl = child;

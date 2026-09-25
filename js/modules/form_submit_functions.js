@@ -58,7 +58,7 @@ export function formReset(form) {
 }
 
 /**
- *
+ * Prepares for form validation by unrequiring elements that are not visiible
  * @param {node} wrapper 	The Wrapper element of the inputs to be prepared
  */
 export function prepareForValidation(wrapper) {

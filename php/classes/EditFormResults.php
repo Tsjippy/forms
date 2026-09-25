@@ -401,7 +401,7 @@ class EditFormResults extends DisplayFormResults
         //check if all subfields are archived or empty
         $allArchived = true;
 
-        $splitIds    = $this->formData->split;
+        $splitIds    = $this->formData->split_blocks;
 
         foreach ($splitIds as $id) {
             if (!$id) {

@@ -2,7 +2,6 @@ import{
   prepareForValidation
 } from "@tsjippy/form_submit_functions";
 
-
 import { 
   displayMessage 
 } from "@tsjippy/display_message";

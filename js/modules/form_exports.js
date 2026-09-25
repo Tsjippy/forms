@@ -428,7 +428,7 @@ export function changeFieldValue(
         }
       }
     }
-    //the target has a list attached to it
+    // Process a date value
   } else if (target.type == "date") {
     target.value = value;
 
@@ -467,7 +467,10 @@ export function changeFieldValue(
         }
       }
     }
-  } else if (target.list != null) {
+  } 
+  
+  // the target has a list attached to it
+  else if (target.list != null) {
     let dataListOption = target.list.querySelector(`[data-value="${value}" i]`);
 
     //we found a match
