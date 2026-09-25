@@ -4,11 +4,16 @@
 ### Added
 
 ### Changed
-- multi-input to seperate library
 
 ### Fixed
 
 ### Updated
+
+## [12.2.2] - 2026-09-25
+
+
+### Changed
+- multi-input to seperate library
 
 ## [12.2.1] - 2026-09-24
 
