@@ -8,6 +8,7 @@
 - finalized conditions overview screen
 
 ### Fixed
+- create js check for checked value
 
 ### Updated
 
