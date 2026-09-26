@@ -5,6 +5,7 @@
 - conditions overview
 
 ### Changed
+- finalized conditions overview screen
 
 ### Fixed
 
