@@ -260,17 +260,6 @@ function validateConditions(conditions, setFieldErrors) {
 						firstErrorTarget.fieldKey = 'propertyName';
 					}
 				}
-
-				if (!actionItem?.['property-value']) {
-					actionErrors.propertyValue = __('Enter a property value.', 'tsjippy');
-
-					if (firstErrorTarget.section === null) {
-						firstErrorTarget.conditionIndex = conditionIndex;
-						firstErrorTarget.section = 'actions';
-						firstErrorTarget.actionIndex = actionIndex;
-						firstErrorTarget.fieldKey = 'propertyValue';
-					}
-				}
 			}
 
 			if (Object.keys(actionErrors).length > 0) {

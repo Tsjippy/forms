@@ -195,42 +195,54 @@ function dynamicJs($conditions, $innerBlocks){
                     }
                     
                     else{
-                        $varName    = "value_{$conditionIndex}_$ruleIndex";
-
-                        // Add the var
-                        $vars[$varName]     = "this.getValue('{$rule['conditional-field']}', form);";
-
-                        $compareFrom  = $varName;
-
-                        $compareValue = strtolower($rule['conditional-value'] ?? '');
-
-                        // Wrap in " if not a number
-                        if(!is_numeric($compareValue)){
-                            $compareValue   = "'" . $compareValue . "'";
-                        }
-
-                        if(!empty($rule['conditional-field-2'])){
-                            $vars["{$varName}_2"] = "this.getValue('{$rule['conditional-field-2']}', form);";
-
-                            $compareValue   = "{$varName}_2";
-                        }
-
                         $comparator = $rule['equation'];
+                        $blockId    = $rule['conditional-field'];
 
-                        // When adding or subsrtracting we first need to calculate the compare value
-                        if(isset(['+' => 1, '-' => 1][$comparator])){
-                            $compareFrom  = $varName . ' ' . $comparator . ' ' . $varName . "_2";
+                        if(str_contains($comparator, 'checked')){
+                            $queryString    = "form.querySelectorAll(`[data-blockid='$blockId']:checked`).length";
+                            if($comparator == 'checked'){
+                                $queryString    .= " > 0";
+                            }else{
+                                $queryString    .= " == 0";
+                            }
+                            
+                            $comparators[$conditionIndex][] = $queryString . ' '.($rule['combinator'] ?? '');
+                        }else{
+                            $varName    = "value_{$conditionIndex}_$ruleIndex";
 
-                            $comparator   = $rule['equation2'];
+                            // Add the var
+                            $vars[$varName]     = "this.getValue('$blockId', form);";
+
+                            $compareFrom  = $varName;
+
+                            $compareValue = strtolower($rule['conditional-value'] ?? '');
+
+                            // Wrap in " if not a number
+                            if(!is_numeric($compareValue)){
+                                $compareValue   = "'" . $compareValue . "'";
+                            }
+
+                            if(!empty($rule['conditional-field-2'])){
+                                $vars["{$varName}_2"] = "this.getValue('{$rule['conditional-field-2']}', form);";
+
+                                $compareValue   = "{$varName}_2";
+                            }
+
+                            // When adding or subsrtracting we first need to calculate the compare value
+                            if(isset(['+' => 1, '-' => 1][$comparator])){
+                                $compareFrom  = $varName . ' ' . $comparator . ' ' . $varName . "_2";
+
+                                $comparator   = $rule['equation2'];
+                            }
+
+                            // replace ' value' string when comparing with the value of another block 
+                            $comparator = str_replace(' value', '', $comparator);
+                            
+                            /**
+                             * Actual comparison
+                             */
+                            $comparators[$conditionIndex][] = $compareFrom . ' ' . $comparator . ' ' . $compareValue . ' '.($rule['combinator'] ?? '');
                         }
-
-                        // 
-                        $comparator = str_replace(' value', '', $comparator);
-                        
-                        /**
-                         * Actual comparison
-                         */
-                        $comparators[$conditionIndex][] = $compareFrom . ' ' . $comparator . ' ' . $compareValue . ' '.($rule['combinator'] ?? '');
                     }
                 }
             }
