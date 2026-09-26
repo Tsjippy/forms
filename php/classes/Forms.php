@@ -1411,7 +1411,11 @@ class Forms
      * 
      * @param string  $postId  post id
      */
-    public function getAllBlockConditions($postId){
+    public function getAllBlockConditions($postId = ''){
+        if(empty($postId)){
+            $postId = $this->formData->postId;
+        }
+
         return TSJIPPY\getFromDb(
             "block-conditions-post-$postId", 
             'forms',
@@ -1422,21 +1426,21 @@ class Forms
     }
 
     /**
-     * Gets the conditions for a post
+     * Gets the conditions for a block
      * 
-     * @param int  $postId  post id
+     * @param int  $blockId  block id
      */
-    public function getBlockConditions($postId=''){
-        if(empty($postId)){
-            $postId = $this->formData->postId;
+    public function getBlockConditions($blockId=''){
+        if(empty($blockId)){
+            $blockId = $this->formData->blockId;
         }
         
         return TSJIPPY\getFromDb(
-            "block-conditions-block-$postId", 
+            "block-conditions-block-$blockId", 
             'forms',
-            "select * from %i where post_id=%d",
+            "select * from %i where block_id=%d",
             $this->blockConditionsTableName,
-            $postId
+            $blockId
         );
     }
 

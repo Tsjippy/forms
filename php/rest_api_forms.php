@@ -271,7 +271,7 @@ function restApiInitFormsNew()
                 $postId   = TSJIPPY\sanitize($wpRest->get_param('postId') ?? '');
                 
                 $forms = new Forms(postId:$postId);
-                return $forms->getBlockConditions();
+                return $forms->getAllBlockConditions();
             },
             'permission_callback'     => __NAMESPACE__ . '\checkPermissions',
         )

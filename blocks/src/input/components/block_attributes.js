@@ -28,6 +28,8 @@ export const inputSchema = {
     { attribute: "id", expectedType: "string" },
     { attribute: "class", expectedType: "string" },
     { attribute: "style", expectedType: "string" },
+    { attribute: "onInput", expectedType: "string" },
+    { attribute: "onInvalid", expectedType: "string" },
     { attribute: "disabled", expectedType: "boolean" },
     { attribute: "title", expectedType: "string" },
     { attribute: "lang", expectedType: "string" },

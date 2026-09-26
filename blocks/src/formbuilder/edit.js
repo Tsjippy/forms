@@ -24,6 +24,7 @@ import './editor.scss';
 import './filters/addButtonToInnerBlocks.js';
 import './filters/storeClientIdInAttributes.js';
 import { FormSubmitter } from './components/Submitter.js';
+import { ConditionsOverview } from './components/ConditionsOverview.js';
 import { EmailSettings } from './emails/EmailSettings.js';
 import { FormReminderPanel } from './form-reminders/FormReminderPanel.js';
 
@@ -49,6 +50,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	const [availableActionsLoading, setAvailableActionsLoading] = useState(true);
 	const [isEmailsFormVisible, setEmailsFormVisibility] = useState(false);
 	const [isRemindersFormVisible, setRemindersFormVisibility] = useState(false);
+	const [isConditionsVisible, setConditionsVisibility] = useState(false);
 
 	/**
 	 * Store post id
@@ -105,7 +107,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 	);
 
 	// Load all conditions once
-	useSelect(
+	const formConditions = useSelect(
 		(select) => select('tsjippy-forms/conditions-store').getFormConditions(attributes.postId),
 		[attributes.postId]
 	);
@@ -315,6 +317,12 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					/>
 				</PanelBody>
 
+				<PanelBody title={__('Block Conditions', 'tsjippy')} className="Block-conditions" initialOpen={false} onToggle={ () => setConditionsVisibility((prev) => !prev)}>
+					{isConditionsVisible
+						? __('Hide Block Conditions', 'tsjippy')
+						: __('Show Block Conditions', 'tsjippy')}
+				</PanelBody>
+
 				<PanelBody title={__('Roles', 'tsjippy')} initialOpen={false}>
 					<RoleCheckboxes />
 				</PanelBody>
@@ -417,7 +425,16 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 								<FormReminderPanel
 									blockId= { attributes.blockId }
 									saveInMeta = { attributes.user_meta }
-								/>			
+								/>
+							:
+								isConditionsVisible ?
+									<PanelBody title="Block Conditions Overview" className="block-conditions-overview">
+										<h4>Block Conditions Overview</h4>
+										<ConditionsOverview 
+											conditions={formConditions}
+											blocks={innerBlocks}
+										/>
+									</PanelBody>
 								:
 								<>
 									<InnerBlocks

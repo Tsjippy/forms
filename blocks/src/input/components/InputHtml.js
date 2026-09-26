@@ -10,6 +10,14 @@ export function InputHtml({
     labelChild,
     isSaving = false,
 }) {
+    let val = attributes.inputAttributes.oninvalid;
+    delete attributes.inputAttributes.oninvalid;
+
+    attributes.inputAttributes.onInvalid    = val;
+
+    val = attributes.inputAttributes.oninput;
+    delete attributes.inputAttributes.oninput;
+    attributes.inputAttributes.onInput    = val;
 
     let html;
 

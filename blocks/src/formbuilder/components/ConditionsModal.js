@@ -953,7 +953,7 @@ export default function ConditionsModal({
 					/>
 
 					<datalist id="block-properties">
-						{datalistOptions.map((attribute) => <option value={attribute}></option>)}
+						{datalistOptions.map((attribute) => <option value={attribute} key={attribute}></option>)}
 					</datalist>
 
 					<span class='condition-label' style={{marginTop: ' 25px'}}>To</span>
@@ -968,7 +968,7 @@ export default function ConditionsModal({
 					/>
 
 					<datalist id="possible-blocks">
-						{formBlockOptions.map((data) => <option value={"the-value-of-"+data.value}>{data.label}</option>)}
+						{formBlockOptions.map((data) => <option value={"the-value-of-"+data.value} key={data.value}>{data.label}</option>)}
 					</datalist>
 
 					{ 

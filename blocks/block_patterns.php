@@ -332,8 +332,8 @@ register_block_pattern(
 <!-- /wp:tsjippy-forms/label -->
 
 <!-- wp:tsjippy-forms/label {"text":"Flight Number","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"628","formbuilderChild":true} -->
-<label data-blockid="628"><h4 class="label-text">Flight Number</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[1][flightnr]","inputAttributes":{"pattern":"","oninvalid":"this.setCustomValidity('Please add your flight number in the format AA1234')","oninput":"this.setCustomValidity('')","value":"^[a-zA-Z]{1,2}\u005cs*[0-9]{1,5}$"},"onlyOnInherited":true,"blockId":"629","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="travel[1][flightnr]" data-blockid="629" autocomplete="on" pattern="" oninvalid="this.setCustomValidity('Please add your flight number in the format AA1234')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="628"><h4 class="label-text">Flight Number</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[1][flightnr]","inputAttributes":{"pattern":"","onInvalid":"this.setCustomValidity('Please add your flight number in the format AA1234')","onInput":"this.setCustomValidity('')","value":"^[a-zA-Z]{1,2}\u005cs*[0-9]{1,5}$"},"onlyOnInherited":true,"blockId":"629","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="travel[1][flightnr]" data-blockid="629" autocomplete="on" pattern="" onInvalid="this.setCustomValidity('Please add your flight number in the format AA1234')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -356,8 +356,8 @@ register_block_pattern(
 
 <!-- wp:group {"blockId":"648","hidden":true,"formbuilderChild":true,"layout":{"type":"flex","orientation":"vertical"}} -->
 <div class="wp-block-group"><!-- wp:tsjippy-forms/label {"text":"Starting address including state","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"649","formbuilderChild":true} -->
-<label data-blockid="649"><h4 class="label-text">Starting address including state</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[3][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","oninvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","oninput":"this.setCustomValidity('')"},"onlyOnInherited":true,"blockId":"650","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="travel[3][from]" data-blockid="650" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" oninvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="649"><h4 class="label-text">Starting address including state</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[3][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","onInvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","onInput":"this.setCustomValidity('')"},"onlyOnInherited":true,"blockId":"650","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="travel[3][from]" data-blockid="650" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" onInvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -382,8 +382,8 @@ register_block_pattern(
 <!-- /wp:tsjippy-forms/label -->
 
 <!-- wp:tsjippy-forms/label {"text":"Flight Number","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"682","formbuilderChild":true} -->
-<label data-blockid="682"><h4 class="label-text">Flight Number</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"flightnr1","inputAttributes":{"pattern":"","oninvalid":"this.setCustomValidity('Please add your flight number in the format AA1234')","oninput":"this.setCustomValidity('')"},"blockId":"683","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="flightnr1" data-blockid="683" autocomplete="on" pattern="" oninvalid="this.setCustomValidity('Please add your flight number in the format AA1234')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="682"><h4 class="label-text">Flight Number</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"flightnr1","inputAttributes":{"pattern":"","onInvalid":"this.setCustomValidity('Please add your flight number in the format AA1234')","onInput":"this.setCustomValidity('')"},"blockId":"683","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="flightnr1" data-blockid="683" autocomplete="on" pattern="" onInvalid="this.setCustomValidity('Please add your flight number in the format AA1234')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -402,8 +402,8 @@ register_block_pattern(
 
 <!-- wp:group {"blockId":"689","hidden":true,"formbuilderChild":true,"layout":{"type":"flex","orientation":"vertical"}} -->
 <div class="wp-block-group"><!-- wp:tsjippy-forms/label {"text":"Where will you spend the night?","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"690","formbuilderChild":true} -->
-<label data-blockid="690"><h4 class="label-text">Where will you spend the night?</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[5][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","oninvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","oninput":"this.setCustomValidity('')"},"blockId":"691","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="travel[5][from]" data-blockid="691" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" oninvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="690"><h4 class="label-text">Where will you spend the night?</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[5][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","onInvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","onInput":"this.setCustomValidity('')"},"blockId":"691","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="travel[5][from]" data-blockid="691" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" onInvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -425,8 +425,8 @@ register_block_pattern(
 <!-- /wp:group -->
 
 <!-- wp:tsjippy-forms/label {"text":"Final destination","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"700","hidden":true,"formbuilderChild":true} -->
-<label data-blockid="700"><h4 class="label-text">Final destination</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"final_destination_1","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","oninvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","oninput":"this.setCustomValidity('')"},"blockId":"701","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="final_destination_1" data-blockid="701" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" oninvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="700"><h4 class="label-text">Final destination</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"final_destination_1","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","onInvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","onInput":"this.setCustomValidity('')"},"blockId":"701","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="final_destination_1" data-blockid="701" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" onInvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -458,8 +458,8 @@ register_block_pattern(
 <!-- /wp:tsjippy-forms/label -->
 
 <!-- wp:tsjippy-forms/label {"text":"Flight Number","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"712","formbuilderChild":true} -->
-<label data-blockid="712"><h4 class="label-text">Flight Number</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[11][flightnr]","inputAttributes":{"pattern":"","oninvalid":"this.setCustomValidity('Please add your flight number in the format AA1234')","oninput":"this.setCustomValidity('')"},"onlyOnInherited":true,"blockId":"713","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="travel[11][flightnr]" data-blockid="713" autocomplete="on" pattern="" oninvalid="this.setCustomValidity('Please add your flight number in the format AA1234')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="712"><h4 class="label-text">Flight Number</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[11][flightnr]","inputAttributes":{"pattern":"","onInvalid":"this.setCustomValidity('Please add your flight number in the format AA1234')","onInput":"this.setCustomValidity('')"},"onlyOnInherited":true,"blockId":"713","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="travel[11][flightnr]" data-blockid="713" autocomplete="on" pattern="" onInvalid="this.setCustomValidity('Please add your flight number in the format AA1234')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -470,8 +470,8 @@ register_block_pattern(
 
 <!-- wp:group {"blockId":"721","hidden":true,"formbuilderChild":true,"layout":{"type":"flex","orientation":"vertical"}} -->
 <div class="wp-block-group"><!-- wp:tsjippy-forms/label {"text":"Where will you spend the night","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"onlyOnInherited":true,"blockId":"723","formbuilderChild":true} -->
-<label data-blockid="723"><h4 class="label-text">Where will you spend the night</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[12][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","oninvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","oninput":"this.setCustomValidity('')","list":"guesthouses"},"blockId":"724","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="travel[12][from]" data-blockid="724" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" oninvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" oninput="this.setCustomValidity('')" list="guesthouses" value="%value-placeholder%"/>
+<label data-blockid="723"><h4 class="label-text">Where will you spend the night</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[12][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","onInvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","onInput":"this.setCustomValidity('')","list":"guesthouses"},"blockId":"724","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="travel[12][from]" data-blockid="724" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" onInvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" onInput="this.setCustomValidity('')" list="guesthouses" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -488,8 +488,8 @@ register_block_pattern(
 
 <!-- wp:group {"blockId":"732","hidden":true,"formbuilderChild":true,"layout":{"type":"flex","orientation":"vertical"}} -->
 <div class="wp-block-group"><!-- wp:tsjippy-forms/label {"text":"Starting address including state","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"733","formbuilderChild":true} -->
-<label data-blockid="733"><h4 class="label-text">Starting address including state</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[13][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","oninvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","oninput":"this.setCustomValidity('')"},"onlyOnInherited":true,"blockId":"734","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="travel[13][from]" data-blockid="734" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" oninvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="733"><h4 class="label-text">Starting address including state</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[13][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","onInvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","onInput":"this.setCustomValidity('')"},"onlyOnInherited":true,"blockId":"734","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="travel[13][from]" data-blockid="734" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" onInvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -520,8 +520,8 @@ register_block_pattern(
 <!-- /wp:tsjippy-forms/label -->
 
 <!-- wp:tsjippy-forms/label {"text":"Flight Number","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"766","formbuilderChild":true} -->
-<label data-blockid="766"><h4 class="label-text">Flight Number</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"flightnr2","inputAttributes":{"pattern":"^[a-zA-Z]{2}u005cs*[0-9]{1,4}u005cs*$","oninvalid":"this.setCustomValidity('Please add your flight number in the format AA1234')","oninput":"this.setCustomValidity('')"},"blockId":"767","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="flightnr2" data-blockid="767" autocomplete="on" pattern="^[a-zA-Z]{2}u005cs*[0-9]{1,4}u005cs*$" oninvalid="this.setCustomValidity('Please add your flight number in the format AA1234')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="766"><h4 class="label-text">Flight Number</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"flightnr2","inputAttributes":{"pattern":"^[a-zA-Z]{2}u005cs*[0-9]{1,4}u005cs*$","onInvalid":"this.setCustomValidity('Please add your flight number in the format AA1234')","onInput":"this.setCustomValidity('')"},"blockId":"767","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="flightnr2" data-blockid="767" autocomplete="on" pattern="^[a-zA-Z]{2}u005cs*[0-9]{1,4}u005cs*$" onInvalid="this.setCustomValidity('Please add your flight number in the format AA1234')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -544,8 +544,8 @@ register_block_pattern(
 <!-- /wp:paragraph -->
 
 <!-- wp:tsjippy-forms/label {"text":"Where will you spend the night?","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"775","formbuilderChild":true} -->
-<label data-blockid="775"><h4 class="label-text">Where will you spend the night?</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[15][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","oninvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","oninput":"this.setCustomValidity('')"},"blockId":"776","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="travel[15][from]" data-blockid="776" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" oninvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="775"><h4 class="label-text">Where will you spend the night?</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"travel[15][from]","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","onInvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","onInput":"this.setCustomValidity('')"},"blockId":"776","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="travel[15][from]" data-blockid="776" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" onInvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label -->
 
@@ -567,8 +567,8 @@ register_block_pattern(
 <!-- /wp:group -->
 
 <!-- wp:tsjippy-forms/label {"text":"Final destination","childAttr":{"multiple":false,"add_button_content":"+","remove_button_content":"-","type":"text"},"blockId":"785","hidden":true,"formbuilderChild":true} -->
-<label data-blockid="785"><h4 class="label-text">Final destination</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"final_destination_2","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","oninvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","oninput":"this.setCustomValidity('')"},"blockId":"786","formbuilderChild":true} -->
-<input class="wp-block-tsjippy-forms-input" type="text" name="final_destination_2" data-blockid="786" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" oninvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" oninput="this.setCustomValidity('')" value="%value-placeholder%"/>
+<label data-blockid="785"><h4 class="label-text">Final destination</h4><br/><!-- wp:tsjippy-forms/input {"type":"text","name":"final_destination_2","inputAttributes":{"placeholder":"1 some street, some state","pattern":".{3,},.{3,}","onInvalid":"this.setCustomValidity('Please add your streetname, then a comma, then your statename')","onInput":"this.setCustomValidity('')"},"blockId":"786","formbuilderChild":true} -->
+<input class="wp-block-tsjippy-forms-input" type="text" name="final_destination_2" data-blockid="786" autocomplete="on" placeholder="1 some street, some state" pattern=".{3,},.{3,}" onInvalid="this.setCustomValidity('Please add your streetname, then a comma, then your statename')" onInput="this.setCustomValidity('')" value="%value-placeholder%"/>
 <!-- /wp:tsjippy-forms/input --></label>
 <!-- /wp:tsjippy-forms/label --></div>
 <!-- /wp:tsjippy-forms/formstep -->
