@@ -956,7 +956,7 @@ export default function ConditionsModal({
 						{datalistOptions.map((attribute) => <option value={attribute} key={attribute}></option>)}
 					</datalist>
 
-					<span class='condition-label' style={{marginTop: ' 25px'}}>To</span>
+					<span className='condition-label' style={{marginTop: ' 25px'}}>To</span>
 
 					<TextControl
 						label          = {__('Property value', 'tsjippy')}
@@ -1036,13 +1036,12 @@ export default function ConditionsModal({
 		}
 
 		/**
-		 * Loop over all conditons
+		 * Loop over all conditions
 		 */
 		return draftConditions.map((condition, conditionIndex) => (
-			<>
 			<div
-				key       = {conditionIndex}
-				className = {`condition-row ${
+				key={condition.id || conditionIndex}
+				className={`condition-row ${
 					Array.isArray(condition['rules']) && condition['rules'].length === 0
 						? 'condition-row--empty'
 						: ''
@@ -1111,8 +1110,7 @@ export default function ConditionsModal({
 					</Button>
 				</div>
 			</div>
-			</>
-		))
+		));
 	}
 
 	const renderContent = useCallback((blockProps) => {

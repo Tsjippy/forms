@@ -1,6 +1,6 @@
 import { 
-    useMemo,
-    useState 
+  useMemo,
+  useState 
 } from '@wordpress/element';
 
 import { 
@@ -35,18 +35,15 @@ function normalizeConditionsData(conditionsData) {
     return [];
   }
 
-  // If already an array, return it directly
   if (Array.isArray(conditionsData)) {
     return conditionsData;
   }
 
-  // Flatten object values (handles both { id: item } and { block_id: [items] })
   return Object.entries(conditionsData).reduce((acc, [key, value]) => {
     if (Array.isArray(value)) {
       return acc.concat(value);
     }
     if (value && typeof value === 'object') {
-      // Retain key as block_id if block_id isn't explicitly set inside the object
       const item = { block_id: key, ...value };
       return acc.concat(item);
     }
@@ -71,19 +68,20 @@ function analyzeBlockConditions(conditionsData, blocks) {
   }
 
   const actionCounts = { setProperty: 0, visibility: 0, dynamicBounds: 0, total: 0 };
-  const fieldDependentsMap = new Map(); // Source Field -> Set of Target Block IDs
-  const fieldImpactMap = new Map();     // Source Field -> Count of Evaluations Triggered
+  const fieldDependentsMap = new Map();
+  const fieldImpactMap = new Map();
   const edgeCasesSet = new Set();
-  
-  let hasInconsistentTypes = false;
 
   conditions.forEach((conditionObj) => {
+    // FIX: Extract targetBlockId before validating conditionObj to avoid ReferenceError
+    const targetBlockId = String(conditionObj?.block_id || 'Unknown Block');
+    const blockName = blocks[targetBlockId] || 'Unknown Name';
+
     if (!conditionObj || typeof conditionObj !== 'object') {
-      edgeCasesSet.add(` Incomplete or malformed condition payload detected. On block ${targetBlockId} (${blocks[targetBlockId]})`);
+      edgeCasesSet.add(`Incomplete or malformed condition payload detected on block ${targetBlockId} (${blockName}).`);
       return;
     }
 
-    const targetBlockId = String(conditionObj.block_id || 'Unknown Block');
     const rulesList = Array.isArray(conditionObj.rules) ? conditionObj.rules : [];
     const actionsList = Array.isArray(conditionObj.actions) ? conditionObj.actions : [];
 
@@ -104,17 +102,15 @@ function analyzeBlockConditions(conditionsData, blocks) {
       }
     });
 
-    // 2. Process Rules (Triggers and Dependencies)
+    // 2. Process Rules
     rulesList.forEach((rule) => {
       if (typeof rule['conditional-field'] === 'number') {
-        hasInconsistentTypes = true;
-        edgeCasesSet.add(`Inconsistent data types: "conditional-field" contains mixed string and integer keys. On block ${targetBlockId} (${blocks[targetBlockId]})`);
+        edgeCasesSet.add(`Inconsistent data types: "conditional-field" contains mixed string and integer keys on block ${targetBlockId} (${blockName}).`);
       }
 
       const triggerField = String(rule['conditional-field'] || rule.field || 'Unknown Field');
       const equation = rule.equation || '';
 
-      // Track Source -> Target Relationship
       if (triggerField && targetBlockId) {
         if (!fieldDependentsMap.has(triggerField)) {
           fieldDependentsMap.set(triggerField, new Set());
@@ -122,28 +118,24 @@ function analyzeBlockConditions(conditionsData, blocks) {
         fieldDependentsMap.get(triggerField).add(targetBlockId);
       }
 
-      // Track Impact Frequency
       if (triggerField) {
         fieldImpactMap.set(triggerField, (fieldImpactMap.get(triggerField) || 0) + 1);
       }
 
-      // Dynamic Operator / Listener Edge Cases
       if (equation.includes('value') && rule['conditional-field-2']) {
-        edgeCasesSet.add(`Field-to-field dynamic comparison detected ('== value' operators). On block ${targetBlockId} (${blocks[targetBlockId]})`);
+        edgeCasesSet.add(`Field-to-field dynamic comparison detected ('== value' operators) on block ${targetBlockId} (${blockName}).`);
       }
       if (['changed', 'visible', 'invisible'].includes(equation)) {
-        edgeCasesSet.add(`Dynamic state listeners ("changed", "visible", "invisible") required. On block ${targetBlockId} (${blocks[targetBlockId]})`);
+        edgeCasesSet.add(`Dynamic state listeners ("changed", "visible", "invisible") required on block ${targetBlockId} (${blockName}).`);
       }
     });
   });
 
-  // Build Dependency Chains
   const dependencyChains = Array.from(fieldDependentsMap.entries()).map(([source, targets]) => ({
     source,
     targets: Array.from(targets)
   }));
 
-  // Identify Top Trigger Fields
   const triggers = Array.from(fieldImpactMap.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4)
@@ -168,21 +160,24 @@ function analyzeBlockConditions(conditionsData, blocks) {
   };
 }
 
-function parseBlocks(blocks){
-    let blockArray  = {};
+function parseBlocks(blocks) {
+  let blockArray = {};
+  if (!Array.isArray(blocks)) return blockArray;
 
-    blocks.forEach(block => {
-        blockArray[block.attributes.blockId]    = block.attributes.name ?? block.attributes.text ?? block.name;
-    });
+  blocks.forEach(block => {
+    if (block?.attributes?.blockId) {
+      blockArray[block.attributes.blockId] = block.attributes.name ?? block.attributes.text ?? block.name;
+    }
+  });
 
-    return blockArray;
+  return blockArray;
 }
 
 export function ConditionsOverview({ conditions = {}, blocks = [] }) {
-    const parsedBlocks  = parseBlocks(blocks);
+  const parsedBlocks = useMemo(() => parseBlocks(blocks), [blocks]);
 
-  // Compute analytics dynamically when conditions object changes
-  const analysis = useMemo(() => analyzeBlockConditions(conditions, parsedBlocks), [conditions]);
+  // FIX: Include blocks in useMemo dependencies so analysis updates if block names change
+  const analysis = useMemo(() => analyzeBlockConditions(conditions, parsedBlocks), [conditions, parsedBlocks]);
   const [activeModalBlock, setActiveModalBlock] = useState(null);
 
   const stats = [
@@ -192,24 +187,26 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
     { label: 'Detected Edge Cases', count: analysis.edgeCases.length, icon: warning, color: '#d63638' },
   ];
 
-  function closePopUp(){
+  function closePopUp() {
     setActiveModalBlock(null);
   }
 
-  console.log(activeModalBlock)
-
   return (
     <div className="wp-dynamic-conditions-wrap" style={{ maxWidth: '1100px', margin: '20px 0' }}>
-        {activeModalBlock && (
-            <ConditionsModal
-                isVisible={true}
-                onClose={closePopUp}
-                blockId={activeModalBlock}
-                allNestedBlocks={blocks}
-                blockProps={blocks.filter(block => block.attributes.blockId == activeModalBlock )[0]}
-            />
-        )
-        }
+      {/* FIX: Added key prop to force clean mount/unmount and passed onRequestClose */}
+      {activeModalBlock && (
+        <ConditionsModal
+          key={activeModalBlock}
+          isVisible={true}
+          isOpen={true}
+          onClose={closePopUp}
+          onRequestClose={closePopUp}
+          blockId={activeModalBlock}
+          allNestedBlocks={blocks}
+          blockProps={blocks.find(block => String(block?.attributes?.blockId) === String(activeModalBlock))}
+        />
+      )}
+
       <Card>
         <CardHeader style={{ padding: '16px 24px', borderBottom: '1px solid #c3c4c7' }}>
           <Flex align="center" justify="space-between">
@@ -252,14 +249,13 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
             ))}
           </div>
 
-          {/* WordPress Core TabPanel Navigation */}
           <TabPanel
             className="wp-conditions-tab-panel"
             activeClass="is-active"
             tabs={[
-              { name: 'rules', title: 'Overview & Stats', key:'rules' },
-              { name: 'graph', title: `Dependency Chains (${analysis.dependencyChains.length})`, key:'graph' },
-              { name: 'edge-cases', title: `Edge Cases (${analysis.edgeCases.length})`, key:'edge-cases' },
+              { name: 'rules', title: 'Overview & Stats', key: 'rules' },
+              { name: 'graph', title: `Dependency Chains (${analysis.dependencyChains.length})`, key: 'graph' },
+              { name: 'edge-cases', title: `Edge Cases (${analysis.edgeCases.length})`, key: 'edge-cases' },
             ]}
           >
             {(tab) => {
@@ -299,7 +295,6 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
                       </li>
                     </ul>
 
-                    {/* Root Triggers */}
                     <h3 style={{ fontSize: '15px', fontWeight: 600, margin: '24px 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Icon icon={flash} /> Top Trigger Blocks
                     </h3>
@@ -332,16 +327,17 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
                         {analysis.dependencyChains.map((chain, index) => (
                           <div key={index} style={{ padding: '12px 16px', border: '1px solid #c3c4c7', borderRadius: '4px', background: '#f6f7f7' }}>
                             <div style={{ fontSize: '12px', color: '#50575e', marginBottom: '8px' }}>
-                              Trigger Block:  Block #{chain.source} {parsedBlocks[chain.source] ? `(${parsedBlocks[chain.source]})` : ''}
+                              Trigger Block: Block #{chain.source} {parsedBlocks[chain.source] ? `(${parsedBlocks[chain.source]})` : ''}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                               <Icon icon={arrowRight} size={16} />
                               <span style={{ fontSize: '12px', color: '#646970' }}>Affects Blocks:</span>
-                              {chain.targets.map((blockId, idx) => (
+                              {chain.targets.map((blockId) => (
                                 <Button
-                                    variant="link"
-                                    onClick={() => setActiveModalBlock(blockId)}
-                                    style={{
+                                  key={blockId}
+                                  variant="link"
+                                  onClick={() => setActiveModalBlock(blockId)}
+                                  style={{
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: '#2271b1',
@@ -352,9 +348,9 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
                                     height: 'auto',
                                     textDecoration: 'none',
                                     cursor: 'pointer'
-                                    }}
+                                  }}
                                 >
-                                    #{blockId} ({parsedBlocks[blockId] ?? ''})
+                                  #{blockId} ({parsedBlocks[blockId] ?? ''})
                                 </Button>
                               ))}
                             </div>
