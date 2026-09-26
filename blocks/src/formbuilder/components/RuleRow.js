@@ -30,6 +30,7 @@ export default function RuleRow({
 	canMoveRuleDown,
 	ruleErrors = {},
 }) {
+	console.log(ruleErrors)
 	/* Available equation choices for the main equation dropdown. */
 	const equationOptions = [
 		{ label: __('has changed', 'tsjippy'), value: 'changed' },
@@ -55,6 +56,10 @@ export default function RuleRow({
 		<div className={`rule-row inner ${
 			Object.keys(ruleErrors).length > 0  ? 'invalid' : ''
 		}`}>
+			<datalist id="possible-blocks">
+				{formBlockOptions.map((data) => <option value={data.value} key={data.value}>{data.label}</option>)}
+			</datalist>
+
 			<TextControl
 				label			= {__('Conditional Field', 'tsjippy')}
 				value			= {rule?.['conditional-field'] || ''}
@@ -83,18 +88,15 @@ export default function RuleRow({
 			{(rule?.equation ?? '') !== '' && (
 				<>
 					{['== value', '!= value', '> value', '< value', '+', '-'].includes(rule.equation) && (
-						<SelectControl
-							label={__('Second block', 'tsjippy')}
-							value={rule?.['conditional-field-2'] || ''}
-							options={[
-								{ label: __('Select second block', 'tsjippy'), value: '' },
-								...(formBlockOptions || []),
-							]}
-							onChange={(block) =>
+						<TextControl
+							label			= {__('Second block', 'tsjippy')}
+							value			= {rule?.['conditional-field-2'] || ''}
+							onChange		= {(block) =>
 								onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', block)
 							}
-							help={ruleErrors.conditionalField2 || ''}
-							data-field-key="conditionalField2"
+							help			= {ruleErrors.conditionalField2 || ''}
+							data-field-key	= "conditionalField2"
+							list           	= "possible-blocks"
 						/>
 					)}
 

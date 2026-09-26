@@ -14,18 +14,43 @@ import {
   Button
 } from '@wordpress/components';
 
-import { 
-  branch, 
-  layers, 
-  warning, 
-  controls, 
+import {  
   seen, 
-  flash, 
   arrowRight, 
   check 
 } from '@wordpress/icons';
 
 import ConditionsModal from './ConditionsModal';
+
+const warningIcon = (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2L1 21h22L12 2zm0 3.5L20.1 19H3.9L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z" />
+  </svg>
+);
+
+const flashIcon = (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M7 2v11h3v9l7-12h-4l4-8H7z" />
+  </svg>
+);
+
+const layersIcon = (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z" />
+  </svg>
+);
+
+const branchIcon = (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18 14a3 3 0 0 0-2.82 2H11a1 1 0 0 1-1-1V8.82A3.001 3.001 0 0 0 12 6a3 3 0 1 0-4 2.82V15a3 3 0 0 0 3 3h4.18A3.001 3.001 0 1 0 18 14zm-8-8a1 1 0 1 1-1 1 1 1 0 0 1 1-1zm0 12a1 1 0 1 1 1-1 1 1 0 0 1-1 1zm8 0a1 1 0 1 1 1-1 1 1 0 0 1-1 1z"/>
+  </svg>
+);
+
+const controlsIcon = (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z" />
+  </svg>
+);
 
 /**
  * Normalizes input: Converts an object structure into a flat array of condition items.
@@ -78,7 +103,11 @@ function analyzeBlockConditions(conditionsData, blocks) {
     const blockName = blocks[targetBlockId] || 'Unknown Name';
 
     if (!conditionObj || typeof conditionObj !== 'object') {
-      edgeCasesSet.add(`Incomplete or malformed condition payload detected on block ${targetBlockId} (${blockName}).`);
+      edgeCasesSet.add(JSON.stringify({
+        text: 'Incomplete or malformed condition payload detected on block',
+        blockId: targetBlockId,
+        blockName
+      }));
       return;
     }
 
@@ -104,11 +133,15 @@ function analyzeBlockConditions(conditionsData, blocks) {
 
     // 2. Process Rules
     rulesList.forEach((rule) => {
-      if (typeof rule['conditional-field'] === 'number') {
-        edgeCasesSet.add(`Inconsistent data types: "conditional-field" contains mixed string and integer keys on block ${targetBlockId} (${blockName}).`);
+      if (blocks[rule['conditional-field']] === undefined) {
+        edgeCasesSet.add(JSON.stringify({
+          text: 'Invalid trigger block id on block',
+          blockId: targetBlockId,
+          blockName
+        }));
       }
 
-      const triggerField = String(rule['conditional-field'] || rule.field || 'Unknown Field');
+      const triggerField = String(rule['conditional-field'] || false);
       const equation = rule.equation || '';
 
       if (triggerField && targetBlockId) {
@@ -122,11 +155,20 @@ function analyzeBlockConditions(conditionsData, blocks) {
         fieldImpactMap.set(triggerField, (fieldImpactMap.get(triggerField) || 0) + 1);
       }
 
-      if (equation.includes('value') && rule['conditional-field-2']) {
-        edgeCasesSet.add(`Field-to-field dynamic comparison detected ('== value' operators) on block ${targetBlockId} (${blockName}).`);
+      if (equation.includes('value') && blocks[rule['conditional-field-2']] == undefined) {
+        edgeCasesSet.add(JSON.stringify({
+          text: "Invalid comparison block id on block",
+          blockId: targetBlockId,
+          blockName
+        }));
       }
-      if (['changed', 'visible', 'invisible'].includes(equation)) {
-        edgeCasesSet.add(`Dynamic state listeners ("changed", "visible", "invisible") required on block ${targetBlockId} (${blockName}).`);
+
+      if (!triggerField && ['changed', 'visible', 'invisible'].includes(equation)) {
+        edgeCasesSet.add(JSON.stringify({
+          text: 'Dynamic state listeners ("changed", "visible", "invisible") required on block',
+          blockId: targetBlockId,
+          blockName
+        }));
       }
     });
   });
@@ -145,11 +187,20 @@ function analyzeBlockConditions(conditionsData, blocks) {
       level: impactCount > 3 ? 'High Impact' : 'Medium Impact'
     }));
 
-  const edgeCases = Array.from(edgeCasesSet).map((msg, i) => ({
-    id: i + 1,
-    title: `Detected Anomaly #${i + 1}`,
-    description: msg
-  }));
+  const edgeCases = Array.from(edgeCasesSet).map((item, i) => {
+    let parsed = { text: item };
+    try {
+      parsed = JSON.parse(item);
+    } catch (e) {}
+
+    return {
+      id: i + 1,
+      title: `Detected Anomaly #${i + 1}`,
+      description: parsed.text || item,
+      blockId: parsed.blockId || null,
+      blockName: parsed.blockName || null
+    };
+  });
 
   return {
     actionCounts,
@@ -181,10 +232,10 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
   const [activeModalBlock, setActiveModalBlock] = useState(null);
 
   const stats = [
-    { label: 'Set Property Actions', count: analysis.actionCounts.setProperty, icon: controls, color: '#2271b1' },
+    { label: 'Set Property Actions', count: analysis.actionCounts.setProperty, icon: controlsIcon, color: '#2271b1' },
     { label: 'Visibility Toggles', count: analysis.actionCounts.visibility, icon: seen, color: '#8c52ff' },
-    { label: 'Dynamic Bounds', count: analysis.actionCounts.dynamicBounds, icon: flash, color: '#dba617' },
-    { label: 'Detected Edge Cases', count: analysis.edgeCases.length, icon: warning, color: '#d63638' },
+    { label: 'Dynamic Bounds', count: analysis.actionCounts.dynamicBounds, icon: flashIcon, color: '#dba617' },
+    { label: 'Detected Edge Cases', count: analysis.edgeCases.length, icon: warningIcon, color: '#d63638' },
   ];
 
   function closePopUp() {
@@ -212,7 +263,7 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
           <Flex align="center" justify="space-between">
             <FlexItem>
               <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Icon icon={branch} />
+                <Icon icon={branchIcon} />
                 Dynamic Conditional Rules Overview
               </h2>
               <p style={{ margin: '4px 0 0 0', color: '#646970', fontSize: '13px' }}>
@@ -263,7 +314,7 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
                 return (
                   <div style={{ marginTop: '20px' }}>
                     <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Icon icon={layers} /> Action Patterns
+                      <Icon icon={layersIcon} /> Action Patterns
                     </h3>
                     <ul style={{ listStyle: 'none', margin: 0, padding: 0, border: '1px solid #c3c4c7', borderRadius: '4px' }}>
                       <li style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -296,7 +347,7 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
                     </ul>
 
                     <h3 style={{ fontSize: '15px', fontWeight: 600, margin: '24px 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Icon icon={flash} /> Top Trigger Blocks
+                      <Icon icon={flashIcon} /> Top Trigger Blocks
                     </h3>
                     {analysis.triggers.length > 0 ? (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
@@ -370,16 +421,69 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
                     {analysis.edgeCases.length > 0 ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {analysis.edgeCases.map((item) => (
-                          <div key={item.id} style={{ padding: '12px 16px', borderLeft: '4px solid #dba617', borderTop: '1px solid #c3c4c7', borderRight: '1px solid #c3c4c7', borderBottom: '1px solid #c3c4c7', background: '#fff' }}>
+                          <div
+                            key={item.id}
+                            style={{
+                              padding: '12px 16px',
+                              borderLeft: '4px solid #dba617',
+                              borderTop: '1px solid #c3c4c7',
+                              borderRight: '1px solid #c3c4c7',
+                              borderBottom: '1px solid #c3c4c7',
+                              background: '#fff'
+                            }}
+                          >
                             <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <Icon icon={warning} style={{ color: '#dba617' }} /> {item.title}
+                              <Icon icon={warningIcon} style={{ color: '#dba617' }} /> {item.title}
                             </strong>
-                            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#50575e' }}>{item.description}</p>
+                            <div
+                              style={{
+                                margin: '6px 0 0 0',
+                                fontSize: '13px',
+                                color: '#50575e',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                flexWrap: 'wrap'
+                              }}
+                            >
+                              <span>{item.description}</span>
+                              {item.blockId && (
+                                <Button
+                                  key={item.blockId}
+                                  variant="link"
+                                  onClick={() => setActiveModalBlock(item.blockId)}
+                                  style={{
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: '#2271b1',
+                                    padding: '2px 8px',
+                                    background: '#f0f6fc',
+                                    border: '1px solid #c3c4c7',
+                                    borderRadius: '3px',
+                                    height: 'auto',
+                                    textDecoration: 'none',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  #{item.blockId} ({item.blockName || parsedBlocks[item.blockId] || ''})
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div style={{ padding: '12px 16px', borderLeft: '4px solid #00a32a', background: '#f0fdf4', color: '#00a32a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div
+                        style={{
+                          padding: '12px 16px',
+                          borderLeft: '4px solid #00a32a',
+                          background: '#f0fdf4',
+                          color: '#00a32a',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                      >
                         <Icon icon={check} />
                         <span>No structural anomalies or edge cases detected in the current payload.</span>
                       </div>

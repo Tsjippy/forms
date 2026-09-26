@@ -64,14 +64,8 @@ function deepClone(value) {
  */
 function isEquationRequiringValue(equation) {
 	return [
-		'==',
-		'!=',
 		'>',
 		'<',
-		'== value',
-		'!= value',
-		'> value',
-		'< value',
 		'+',
 		'-',
 	].includes(equation);
@@ -177,26 +171,21 @@ function validateConditions(conditions, setFieldErrors) {
 				}
 			}
 
-			if (isEquationRequiringValue(rule?.equation)) {
-				const value = rule?.['conditional-value'];
+			if (
+				isEquationRequiringValue(rule?.equation) &&
+				(
+					rule?.['conditional-value'] === undefined ||
+					rule?.['conditional-value'] === null ||
+					rule?.['conditional-value'].trim()	=== ''
+				)
+			) {
+				ruleErrors.conditionalValue = __('Enter a value.', 'tsjippy');
 
-				if (
-					rule?.['equation'] !== '==' &&
-					rule?.['equation'] !== '!=' &&
-					(
-						value === undefined ||
-						value === null ||
-						value.trim()	=== ''
-					)
-				) {
-					ruleErrors.conditionalValue = __('Enter a value.', 'tsjippy');
-
-					if (firstErrorTarget.section === null) {
-						firstErrorTarget.section = 'rules';
-						firstErrorTarget.conditionIndex = conditionIndex;
-						firstErrorTarget.ruleIndex = ruleIndex;
-						firstErrorTarget.fieldKey = 'conditionalValue';
-					}
+				if (firstErrorTarget.section === null) {
+					firstErrorTarget.section = 'rules';
+					firstErrorTarget.conditionIndex = conditionIndex;
+					firstErrorTarget.ruleIndex = ruleIndex;
+					firstErrorTarget.fieldKey = 'conditionalValue';
 				}
 			}
 
