@@ -9,6 +9,7 @@
 - select value or dynamic value
 
 ### Fixed
+- bug in storing conditions
 
 ### Updated
 
