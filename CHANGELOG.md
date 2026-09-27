@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [12.2.4] - 2026-09-26
+
+
+### Added
 - conditions overview
 
 ### Changed
@@ -9,8 +20,6 @@
 
 ### Fixed
 - create js check for checked value
-
-### Updated
 
 ## [12.2.3] - 2026-09-25
 
