@@ -290,6 +290,50 @@ function restApiInitFormsNew()
                 $conditions = TSJIPPY\sanitize($wpRest->get_param('conditions') ?? []);
 
                 /**
+                 * Decode sanitized entities for equation fields before processing
+                 */
+                foreach ($conditions as &$condition) {
+                    if (!isset($condition['rules']) || !is_array($condition['rules'])) {
+                        continue;
+                    }
+                    
+                    foreach ($condition['rules'] as &$rule) {
+                        if (isset($rule['equation'])) {
+                            $rule['equation'] = htmlspecialchars_decode($rule['equation'], ENT_QUOTES);
+                        }
+                        if (isset($rule['equation-2'])) {
+                            $rule['equation-2'] = htmlspecialchars_decode($rule['equation-2'], ENT_QUOTES);
+                        }
+
+                        // conditional-field-2
+                        if (
+                            !isset(['== value' => 1, '!= value' => 1, '> value' => 1, '< value' => 1, '+' => 1, '-' => 1][$rule['equation']]) &&
+                            !empty($rule['conditional-field-2'])
+                        ) {
+                            unset($rule['conditional-field-2']);
+                        }
+
+                        // equation-2
+                        if (
+                            !isset(['+' => 1, '-' => 1][$rule['equation']]) &&
+                            !empty($rule['equation-2'])
+                        ) {
+                            unset($rule['equation-2']);
+                        }
+
+                        // conditional-value
+                        if (
+                            !isset(['==' => 1, '!=' => 1, '>' => 1, '<' => 1, '+' => 1, '-' => 1][$rule['equation']]) &&
+                            !empty($rule['conditional-value'])
+                        ) {
+                            unset($rule['conditional-value']);
+                        }
+                    }
+                    unset($rule);
+                }
+                unset($condition);
+
+                /**
                  * Makes sure we do not store unnecesary data
                  */
                 foreach($conditions as &$condition){
