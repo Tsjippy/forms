@@ -3,6 +3,7 @@ import {
 	Button,
 	SelectControl,
 	TextControl,
+	ComboboxControl
 } from '@wordpress/components';
 import {
 	plus,
@@ -49,25 +50,22 @@ export default function RuleRow({
 		{ label: __('Is visible', 'tsjippy'), value: 'visible' },
 		{ label: __('Is not visible', 'tsjippy'), value: 'invisible' },
 	];
-
+	
+	console.log(rule)
 	/* Render the editable UI for one rule entry. */
 	return (
 		<div className={`rule-row inner ${
 			Object.keys(ruleErrors).length > 0  ? 'invalid' : ''
-		}`}>
-			<datalist id="possible-blocks">
-				{formBlockOptions.map((data) => <option value={data.value} key={data.value}>{data.label}</option>)}
-			</datalist>
-
-			<TextControl
-				label			= {__('Conditional Field', 'tsjippy')}
-				value			= {rule?.['conditional-field'] || ''}
-				onChange		= {(block) =>
+		}`}>			
+			<ComboboxControl
+				label={__('Conditional Field', 'tsjippy')}
+				value={String(rule?.['conditional-field'] || '')}
+				options={formBlockOptions}
+				onChange={(block) =>
 					onUpdate(conditionIndex, ruleIndex, 'conditional-field', block)
 				}
-				help			= {ruleErrors.conditionalField || ''}
-				data-field-key	= "conditionalField"
-				list           	= "possible-blocks"
+				help={ruleErrors.conditionalField || ''}
+				data-field-key="conditionalField"
 			/>
 
 			<SelectControl
@@ -87,15 +85,15 @@ export default function RuleRow({
 			{(rule?.equation ?? '') !== '' && (
 				<>
 					{['== value', '!= value', '> value', '< value', '+', '-'].includes(rule.equation) && (
-						<TextControl
+						<ComboboxControl
 							label			= {__('Second block', 'tsjippy')}
-							value			= {rule?.['conditional-field-2'] || ''}
+							value			= {String(rule?.['conditional-field-2'] || '')}
+							options			= {formBlockOptions}
 							onChange		= {(block) =>
 								onUpdate(conditionIndex, ruleIndex, 'conditional-field-2', block)
 							}
 							help			= {ruleErrors.conditionalField2 || ''}
 							data-field-key	= "conditionalField2"
-							list           	= "possible-blocks"
 						/>
 					)}
 
