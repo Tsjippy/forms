@@ -4,16 +4,11 @@
 ### Added
 
 ### Changed
+- removed console.log command
 
 ### Fixed
 
 ### Updated
-
-## [12.2.5] - 2026-09-27
-
-
-### Changed
-- removed console.log command
 
 ## [12.2.4] - 2026-09-26
 
