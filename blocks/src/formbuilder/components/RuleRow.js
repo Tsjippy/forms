@@ -51,7 +51,6 @@ export default function RuleRow({
 		{ label: __('Is not visible', 'tsjippy'), value: 'invisible' },
 	];
 	
-	console.log(rule)
 	/* Render the editable UI for one rule entry. */
 	return (
 		<div className={`rule-row inner ${

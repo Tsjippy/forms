@@ -1,5 +1,5 @@
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Spinner, Notice, SelectControl, TextControl, __experimentalNumberControl as NumberControl } from '@wordpress/components';
+import { Button, Spinner, Notice, SelectControl, TextControl, __experimentalNumberControl as NumberControl, ComboboxControl } from '@wordpress/components';
 import {
 	useEffect,
 	useMemo,
@@ -13,15 +13,12 @@ import { useBlocksAsSelectOptions } from '../hooks/useBlocksAsSelectOptions.js';
 import {
 	plus,
 	trash,
-	copy,
-	arrowUp,
-	arrowDown,
 	undo
 } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
 
 import RuleRow from './RuleRow';
-import {inputSchema} from './../../input/components/block_attributes.js';
+import { inputSchema } from './../../input/components/block_attributes.js';
 
 /**
  * Create a blank condition object.
@@ -41,15 +38,15 @@ function createEmptyRule() {
  * Create a blank action object.
  */
 function createEmptyAction() {
-    return {
-        'targets': [],
-        'action': '',
-        'property-name': '',
-        'property-value': '',
-        'property-name1': '',
-        'action-value': '',
-        'addition': '',
-    };
+	return {
+		'targets': [],
+		'action': '',
+		'property-name': '',
+		'property-value': '',
+		'property-name1': '',
+		'action-value': '',
+		'addition': '',
+	};
 }
 
 /**
@@ -89,7 +86,7 @@ function validateConditions(conditions, setFieldErrors) {
 		fieldKey: null,
 	};
 
-	if(!Array.isArray(conditions) || conditions.length === 0){
+	if (!Array.isArray(conditions) || conditions.length === 0) {
 		return {
 			errors,
 			fieldErrors,
@@ -97,7 +94,7 @@ function validateConditions(conditions, setFieldErrors) {
 		};
 	}
 
-	conditions    = Array.isArray(conditions) ? conditions : [];
+	conditions = Array.isArray(conditions) ? conditions : [];
 
 	/**
 	 * Loop over all conditions
@@ -121,7 +118,7 @@ function validateConditions(conditions, setFieldErrors) {
 			return;
 		}
 
-		if(condition.rules.length > 0) {
+		if (condition.rules.length > 0) {
 			if (!Array.isArray(condition.actions) || condition.actions.length === 0) {
 				errors.push(
 					sprintf(
@@ -176,7 +173,7 @@ function validateConditions(conditions, setFieldErrors) {
 				(
 					rule?.['conditional-value'] === undefined ||
 					rule?.['conditional-value'] === null ||
-					rule?.['conditional-value'].trim()	=== ''
+					rule?.['conditional-value'].trim() === ''
 				)
 			) {
 				ruleErrors.conditionalValue = __('Enter a value.', 'tsjippy');
@@ -223,7 +220,7 @@ function validateConditions(conditions, setFieldErrors) {
 				fieldErrors[conditionIndex].rules[ruleIndex] = ruleErrors;
 				errors.push(
 					sprintf(
-						__('Condition %1$d, rule %2$d has validation errors.', 'tsjippy'),
+						__('Condition %1$d, rule \%2$d has validation errors.', 'tsjippy'),
 						conditionIndex + 1,
 						ruleIndex + 1
 					)
@@ -235,7 +232,7 @@ function validateConditions(conditions, setFieldErrors) {
 		 * Loop over all actions of this condition
 		 * And check validity
 		 */
-		condition.actions.forEach((actionItem, actionIndex) => {
+		(condition.actions || []).forEach((actionItem, actionIndex) => {
 			const actionErrors = {};
 
 			if (!actionItem?.action) {
@@ -249,7 +246,7 @@ function validateConditions(conditions, setFieldErrors) {
 				}
 			}
 
-			if (actionItem?.action == 'set-property') {
+			if (actionItem?.action === 'set-property') {
 				if (!actionItem?.['property-name']) {
 					actionErrors.propertyName = __('Enter a property name.', 'tsjippy');
 
@@ -293,39 +290,34 @@ export default function ConditionsModal({
 	onClose,
 	blockId,
 	allNestedBlocks,
-	blockProps
+	blockProps = {}
 }) {
 	const { setCondition } = useDispatch(
 		'tsjippy-forms/conditions-store'
 	);
 
 	const { updateBlockAttributes } = useDispatch('core/block-editor');
-
 	const { createSuccessNotice, createErrorNotice } = useDispatch('core/notices');
 
 	const conditions = useSelect(
-		(select) => select('tsjippy-forms/conditions-store').getConditions(blockId),
+		(select) => select('tsjippy-forms/conditions-store')?.getConditions(blockId),
 		[blockId]
 	);
 
-	/**
-	 * A conditions is an array of condition arrays
-	 * Each condition has one or more rules
-	 * And one or more actions
-	 */
 	const [draftConditions, setDraftConditions] = useState([]);
 	const [successMessage, setSuccessMessage] = useState('');
 	const [isSaving, setIsSaving] = useState(false);
 	const [fieldErrors, setFieldErrors] = useState({});
 	const [focusTarget, setFocusTarget] = useState(null);
 	const [pulseTarget, setPulseTarget] = useState(null);
+	const [filterValue, setFilterValue] = useState('');
+
 	const formBlockOptions = useBlocksAsSelectOptions(allNestedBlocks, blockId);
 	const modalRef = useRef(null);
 	const previousBodyOverflow = useRef('');
 
 	useEffect(() => {
 		if (isVisible && Array.isArray(conditions)) {
-
 			setDraftConditions(deepClone(conditions));
 		}
 	}, [isVisible, conditions]);
@@ -454,6 +446,11 @@ export default function ConditionsModal({
 		setSuccessMessage('');
 	}, []);
 
+	const resetErrors = useCallback(() => {
+		clearSuccessMessage();
+		setFieldErrors({});
+	}, [clearSuccessMessage]);
+
 	const showToastSuccess = useCallback(
 		(message) => {
 			createSuccessNotice(message, {
@@ -480,35 +477,27 @@ export default function ConditionsModal({
 		setDraftConditions((prev) => {
 			const next = deepClone(prev);
 
-			// Create the new condition
 			const newCondition = next[0]
 				? deepClone(next[0])
 				: {
 					rules: [createEmptyRule()],
 					actions: [createEmptyAction()],
 				};
-			newCondition.rules	 = [createEmptyRule()];
+			newCondition.rules = [createEmptyRule()];
 			newCondition.actions = [createEmptyAction()];
-			newCondition.id 	 = undefined;
+			newCondition.id = undefined;
 
-			// Add to the array
 			next.push(newCondition);
 
 			return next;
 		});
-	}, [clearSuccessMessage]);
+	}, [resetErrors]);
 
-	/**
-	 * Update one rule on one condition.
-	 */
 	const updateRuleCondition = useCallback(
 		(conditionIndex, ruleIndex, key, value) => {
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
 
-				/**
-				 * Create base structure if it does not exist yet
-				 */
 				if (!next[conditionIndex]) {
 					next[conditionIndex] = [];
 				}
@@ -527,7 +516,6 @@ export default function ConditionsModal({
 
 				next[conditionIndex].rules[ruleIndex][key] = value;
 
-				// Add a new sub-rule
 				if (
 					key === 'combinator' &&
 					!next[conditionIndex].rules[ruleIndex + 1]
@@ -540,7 +528,7 @@ export default function ConditionsModal({
 
 			resetErrors();
 		},
-		[clearSuccessMessage]
+		[resetErrors]
 	);
 
 	const addRule = useCallback((conditionIndex) => {
@@ -552,7 +540,7 @@ export default function ConditionsModal({
 			next[conditionIndex].rules.push(createEmptyRule());
 			return next;
 		});
-	}, [clearSuccessMessage]);
+	}, [resetErrors]);
 
 	const addReverseCondition = useCallback(
 		(conditionIndex) => {
@@ -561,23 +549,12 @@ export default function ConditionsModal({
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
 
-				/**
-				 * Make sure rules and actions are arrays
-				 */
 				next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
 				next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
 
-				/**
-				 * Clone the data
-				 */
 				let clone = deepClone(next[conditionIndex]);
-
-				// Unset the condition id as this is a new one
 				clone.id = undefined;
 
-				/**
-				 * Inverse the rules
-				 */
 				const reverseOperators = {
 					'==': '!=',
 					'!=': '==',
@@ -596,7 +573,7 @@ export default function ConditionsModal({
 				};
 
 				clone.rules.forEach(rule => {
-					rule['equation']	= reverseOperators[rule['equation']];
+					rule['equation'] = reverseOperators[rule['equation']];
 				});
 
 				clone.actions.forEach(action => {
@@ -607,15 +584,12 @@ export default function ConditionsModal({
 					}
 				});
 
-				/**
-				 * Insert the condition
-				 */
 				next.splice(conditionIndex + 1, 0, clone);
 
 				return next;
 			});
 		},
-		[clearSuccessMessage]
+		[resetErrors]
 	);
 
 	const deleteCondition = useCallback(
@@ -624,12 +598,11 @@ export default function ConditionsModal({
 
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-
 				next.splice(conditionIndex, 1);
 				return next;
 			});
 		},
-		[clearSuccessMessage]
+		[resetErrors]
 	);
 
 	const deleteRule = useCallback(
@@ -639,28 +612,24 @@ export default function ConditionsModal({
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
 
-
 				if (!next[conditionIndex].rules) {
 					return next;
 				}
 
-				// Remove the rule
 				next[conditionIndex].rules.splice(ruleIndex, 1);
 
 				return next;
 			});
 		},
-		[clearSuccessMessage]
+		[resetErrors]
 	);
 
 	const moveRule = useCallback(
 		(conditionIndex, ruleIndex, direction) => {
 			resetErrors();
 
-
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-
 
 				next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
 
@@ -670,19 +639,14 @@ export default function ConditionsModal({
 					return next;
 				}
 
-				// Store the sub rule we are moving
 				const temp = next[conditionIndex].rules[ruleIndex];
-
-				// Store the rule that is currently in the desired location in the index of the rule we are moving
 				next[conditionIndex].rules[ruleIndex] = next[conditionIndex].rules[targetIndex];
-
-				// Store the rule in the new index
 				next[conditionIndex].rules[targetIndex] = temp;
 
 				return next;
 			});
 		},
-		[clearSuccessMessage]
+		[resetErrors]
 	);
 
 	const addAction = useCallback((conditionIndex) => {
@@ -696,7 +660,7 @@ export default function ConditionsModal({
 
 			return next;
 		});
-	}, [clearSuccessMessage]);
+	}, [resetErrors]);
 
 	const updateAction = useCallback(
 		(conditionIndex, actionIndex, key, value) => {
@@ -716,7 +680,7 @@ export default function ConditionsModal({
 
 			resetErrors();
 		},
-		[clearSuccessMessage]
+		[resetErrors]
 	);
 
 	const deleteAction = useCallback(
@@ -731,31 +695,27 @@ export default function ConditionsModal({
 				return next;
 			});
 		},
-		[clearSuccessMessage]
+		[resetErrors]
 	);
 
+	const postId = useSelect((select) =>
+		select('core/editor')?.getCurrentPostId?.(),
+		[]
+	);
 
-	const postId = useSelect( ( select ) => 
-		select( 'core/editor' ).getCurrentPostId()
-	, [] );
+	const targetPostId = blockProps?.attributes?.postId || postId;
 
-	/**
-	 * Internal API helper for saving conditions.
-	 * This is used by the store-owned save action and is not exported.
-	 */
-	const saveConditionsRequest = useCallback(async (blockId, conditions, props) => {
-		// update the conditions on the server
+	const saveConditionsRequest = useCallback(async (targetBlockId, conditionsToSave, props) => {
 		const savedConditions = await apiFetch({
 			path: `tsjippy/v2/forms/save_block_conditions`,
 			method: 'POST',
 			data: {
-				postId: postId,
-				blockId: blockId,
-				conditions: conditions,
+				postId: targetPostId,
+				blockId: targetBlockId,
+				conditions: conditionsToSave,
 			},
 		});
 
-		// update the form version to make sure the latest js is downloaded on clients
 		if (props?.clientId) {
 			updateBlockAttributes(props.clientId, {
 				version: (props.attributes?.version || 0) + 1
@@ -763,27 +723,24 @@ export default function ConditionsModal({
 		}
 
 		return savedConditions;
-	}, [postId]);
+	}, [targetPostId, updateBlockAttributes]);
 
 	const isLoading = useSelect(
-		(select) =>
-			select('tsjippy-forms/conditions-store').isLoading(blockProps.attributes.postId),
-		[blockProps.attributes.postId]
+		(select) => select('tsjippy-forms/conditions-store')?.isLoading?.(targetPostId) ?? false,
+		[targetPostId]
 	);
 
 	const error = useSelect(
-		(select) =>
-			select('tsjippy-forms/conditions-store').getError(blockProps.attributes.postId),
-		[blockProps.attributes.postId]
+		(select) => select('tsjippy-forms/conditions-store')?.getError?.(targetPostId) ?? null,
+		[targetPostId]
 	);
 
 	const hasLoaded = useSelect(
-		(select) =>
-			select('tsjippy-forms/conditions-store').hasLoaded(blockProps.attributes.postId),
-		[blockProps.attributes.postId]
+		(select) => select('tsjippy-forms/conditions-store')?.hasLoaded?.(targetPostId) ?? false,
+		[targetPostId]
 	);
 
-	const handleSave = useCallback(async (blockId) => {
+	const handleSave = useCallback(async (targetBlockId) => {
 		setIsSaving(true);
 
 		const result = validateConditions(draftConditions, setFieldErrors);
@@ -802,54 +759,47 @@ export default function ConditionsModal({
 
 		try {
 			const savedConditions = await saveConditionsRequest(
-				blockId,
+				targetBlockId,
 				draftConditions,
 				blockProps
 			);
 
 			setCondition(
-				blockId,
+				targetBlockId,
 				Array.isArray(savedConditions)
 					? savedConditions
 					: draftConditions
 			);
 
 			resetErrors();
-
 			setSuccessMessage(__('Conditions saved successfully.', 'tsjippy'));
-
 			showToastSuccess(__('Conditions saved.', 'tsjippy'));
-		} catch (error) {
+		} catch (err) {
 			showToastError(
-				error?.message || 'Failed to save conditions.'
+				err?.message || __('Failed to save conditions.', 'tsjippy')
 			);
 		}
 
 		setIsSaving(false);
 	}, [
-		blockId,
 		draftConditions,
 		blockProps,
+		saveConditionsRequest,
 		setCondition,
+		resetErrors,
 		showToastSuccess,
 		showToastError,
 	]);
 
-	const resetErrors = () => {
-		clearSuccessMessage();
-		setFieldErrors({});
-	}
-
 	const handleReset = useCallback(() => {
-		if(Array.isArray(conditions)){
+		if (Array.isArray(conditions)) {
 			resetErrors();
 			setDraftConditions(deepClone(conditions));
 			showToastSuccess(__('Changes reset.', 'tsjippy'));
 		}
-	}, [conditions, clearSuccessMessage, showToastSuccess]);
+	}, [conditions, resetErrors, showToastSuccess]);
 
-
-	const renderRuleRow	  = (rule, ruleIndex, conditionIndex) => {
+	const renderRuleRow = (rule, ruleIndex, conditionIndex) => {
 		const isPulsed =
 			pulseTarget &&
 			pulseTarget.section === 'rules' &&
@@ -868,28 +818,32 @@ export default function ConditionsModal({
 					ruleIndex={ruleIndex}
 					formBlockOptions={formBlockOptions}
 					onUpdate={updateRuleCondition}
-					onDeleteRule={ () => deleteRule(conditionIndex, ruleIndex) }
-					onMoveRuleUp={ () =>  moveRule(conditionIndex, ruleIndex, -1) }
-					onMoveRuleDown={ () => moveRule(conditionIndex, ruleIndex, 1) }
-					canMoveRuleUp={ ruleIndex > 0}
-					canMoveRuleDown={ ruleIndex < draftConditions[conditionIndex].rules.length - 1}
-					ruleErrors={ fieldErrors[conditionIndex]?.rules?.[ruleIndex] || {}}
+					onDeleteRule={() => deleteRule(conditionIndex, ruleIndex)}
+					onMoveRuleUp={() => moveRule(conditionIndex, ruleIndex, -1)}
+					onMoveRuleDown={() => moveRule(conditionIndex, ruleIndex, 1)}
+					canMoveRuleUp={ruleIndex > 0}
+					canMoveRuleDown={ruleIndex < draftConditions[conditionIndex].rules.length - 1}
+					ruleErrors={fieldErrors[conditionIndex]?.rules?.[ruleIndex] || {}}
 				/>
-				
 			</div>
 		);
 	};
 
-	const renderActionRow = (actionItem, actionIndex, conditionIndex, blockProps) => {
+	const renderActionRow = (actionItem, actionIndex, conditionIndex, props) => {
 		const actionErrors = fieldErrors[conditionIndex]?.actions?.[actionIndex] || {};
 		const isPulsed =
 			pulseTarget &&
 			pulseTarget.section === 'actions' &&
 			pulseTarget.actionIndex === actionIndex;
 
-		const datalistOptions	= [];
-		inputSchema.sharedAttributes.concat(inputSchema.types[blockProps.attributes.type] || []).forEach(data => datalistOptions.push(data.attribute));
-		inputSchema.ariaAttributes.forEach(data => datalistOptions.push('aria-' + data.attribute));
+		const datalistOptions = [];
+		const inputType = props?.attributes?.type;
+
+		inputSchema.sharedAttributes
+			.concat(inputSchema.types[inputType] || [])
+			.forEach(data => datalistOptions.push(data.attribute));
+		inputSchema.ariaAttributes
+			.forEach(data => datalistOptions.push('aria-' + data.attribute));
 		datalistOptions.sort();
 
 		const actionOptions = [
@@ -899,13 +853,13 @@ export default function ConditionsModal({
 			{ label: __('Toggle visibility', 'tsjippy'), value: 'toggle' },
 		];
 
-		if (blockProps.name === 'tsjippy-forms/input' || blockProps.name === 'tsjippy-forms/select' ) {
+		if (props?.name === 'tsjippy-forms/input' || props?.name === 'tsjippy-forms/select') {
 			actionOptions.push({
 				label: __('Set property', 'tsjippy'),
 				value: 'set-property',
 			});
 		}
-		
+
 		return (
 			<div
 				key={actionIndex}
@@ -913,65 +867,98 @@ export default function ConditionsModal({
 					Object.keys(actionErrors).length > 0 ? 'invalid' : ''
 				} ${isPulsed ? 'pulse' : ''}`}
 				data-action-index={actionIndex}
-			>	
+			>
 				<SelectControl
 					label={__('Action', 'tsjippy')}
 					value={actionItem?.action || ''}
-					options={ actionOptions }
+					options={actionOptions}
 					onChange={(value) => updateAction(conditionIndex, actionIndex, 'action', value)}
 					help={actionErrors.action || ''}
 					data-field-key="action"
 				/>
 
-				{(actionItem?.action || '') == 'set-property' ?
+				{(actionItem?.action || '') === 'set-property' && (
 					<>
-					<TextControl
-						label={__('Property name', 'tsjippy')}
-						value={actionItem?.['property-name'] || ''}
-						onChange={(value) => updateAction(conditionIndex, actionIndex, 'property-name', value)}
-						help={actionErrors.propertyName || ''}
-						data-field-key="propertyName"
-						list='block-properties'
-					/>
+						<TextControl
+							label={__('Property name', 'tsjippy')}
+							value={actionItem?.['property-name'] || ''}
+							onChange={(value) => updateAction(conditionIndex, actionIndex, 'property-name', value)}
+							help={actionErrors.propertyName || ''}
+							data-field-key="propertyName"
+							list='block-properties'
+						/>
 
-					<datalist id="block-properties">
-						{datalistOptions.map((attribute) => <option value={attribute} key={attribute}></option>)}
-					</datalist>
+						<datalist id="block-properties">
+							{datalistOptions.map((attribute) => (
+								<option value={attribute} key={attribute}></option>
+							))}
+						</datalist>
 
-					<span className='condition-label' style={{marginTop: ' 25px'}}>To</span>
+						<span className='condition-label' style={{ marginTop: '25px' }}>To</span>
 
-					<TextControl
-						label          = {__('Property value', 'tsjippy')}
-						value          = {actionItem?.['property-value'] || ''}
-						onChange       = {(value) => updateAction(conditionIndex, actionIndex, 'property-value', value)}
-						help           = {actionErrors.propertyValue || ''}
-						data-field-key = "propertyValue"
-						list           = "possible-blocks"
-					/>
+						<ComboboxControl
+							label={__('Property value', 'tsjippy')}
+							value={actionItem?.['property-value'] || ''}
+							options={(() => {
+								const mappedOptions = formBlockOptions.map((data) => ({
+									value: `the-value-of-${data.value}`,
+									label: `The value of '${data.label}'`,
+								}));
 
-					<datalist id="possible-blocks">
-						{formBlockOptions.map((data) => <option value={"the-value-of-"+data.value} key={data.value}>{data.label}</option>)}
-					</datalist>
+								const currentValue = actionItem?.['property-value'];
+								const currentInputValue = filterValue?.trim();
 
-					{ 
-						// If we selected another block to be the value of this property we should allow to add extra to the value
-						['date', 'number', 'range', 'week', 'month'].includes(blockProps.attributes.type) && (actionItem?.['property-value'] || '').includes("the-value-of-") ?
-							<NumberControl
-							    label              = { __( 'Amount to add to the block value', 'tsjippy') }
-								isShiftStepEnabled = { true }
-								onChange           = {(value) => updateAction(conditionIndex, actionIndex, 'addition', value)}
-								shiftStep          = { 1 }
-								value              = {actionItem?.['addition'] || ''}
-								spinControls       = 'custom'
-							/>
-							: ''
-					}
+								if (
+									currentInputValue &&
+									!mappedOptions.some(
+										(opt) => opt.value === currentInputValue || opt.label === currentInputValue
+									)
+								) {
+									mappedOptions.unshift({
+										value: currentInputValue,
+										label: `Fixed value: "${currentInputValue}"`,
+									});
+								}
+
+								if (
+									currentValue &&
+									!mappedOptions.some((opt) => opt.value === currentValue)
+								) {
+									mappedOptions.unshift({
+										value: currentValue,
+										label: currentValue,
+									});
+								}
+
+								return mappedOptions;
+							})()}
+							onFilterValueChange={(inputValue) => {
+								setFilterValue(inputValue || '');
+							}}
+							onChange={(value) => {
+								const finalValue = value !== undefined ? value : (filterValue || '');
+								updateAction(conditionIndex, actionIndex, 'property-value', finalValue);
+							}}
+							help={actionErrors.propertyValue || ''}
+							data-field-key="propertyValue"
+						/>
+
+						{['date', 'number', 'range', 'week', 'month'].includes(inputType) &&
+							(actionItem?.['property-value'] || '').includes("the-value-of-") && (
+								<NumberControl
+									label={__('Amount to add to the block value', 'tsjippy')}
+									isShiftStepEnabled={true}
+									onChange={(value) => updateAction(conditionIndex, actionIndex, 'addition', value)}
+									shiftStep={1}
+									value={actionItem?.['addition'] || ''}
+									spinControls='custom'
+								/>
+							)}
 					</>
-					: ''
-				}
+				)}
 
 				<Button
-					style= {{marginTop: '20px'}}
+					style={{ marginTop: '20px' }}
 					variant="secondary"
 					isDestructive
 					onClick={() => deleteAction(conditionIndex, actionIndex)}
@@ -979,20 +966,15 @@ export default function ConditionsModal({
 				>
 					{__('Delete action', 'tsjippy')}
 				</Button>
-
-				<h4>Apply Actions to these blocks as well</h4>
+				<br />
+				<h4>{__('Apply Actions to these blocks as well', 'tsjippy')}</h4>
 				<SelectControl
 					multiple
 					label={__('Target blocks', 'tsjippy')}
 					value={actionItem?.targets || []}
-					options={[
-						...(formBlockOptions || []),
-					]}
+					options={[...(formBlockOptions || [])]}
 					onChange={(values) => {
-						const targets = Array.isArray(values)
-							? values
-							: [values];
-
+						const targets = Array.isArray(values) ? values : [values];
 						updateAction(
 							conditionIndex,
 							actionIndex,
@@ -1005,8 +987,8 @@ export default function ConditionsModal({
 		);
 	};
 
-	const displayConditions = (blockProps) => {
-		if(!Array.isArray(draftConditions) || draftConditions.length === 0){
+	const displayConditions = (props) => {
+		if (!Array.isArray(draftConditions) || draftConditions.length === 0) {
 			return (
 				<>
 					<p>{__('No conditions defined yet.', 'tsjippy')}</p>
@@ -1017,12 +999,9 @@ export default function ConditionsModal({
 			);
 		}
 
-		/**
-		 * Loop over all conditions
-		 */
 		return draftConditions.map((condition, conditionIndex) => (
 			<div
-				key={condition.id || conditionIndex}
+				key={condition.id || `condition-${conditionIndex}`}
 				className={`condition-row ${
 					Array.isArray(condition['rules']) && condition['rules'].length === 0
 						? 'condition-row--empty'
@@ -1032,10 +1011,10 @@ export default function ConditionsModal({
 			>
 				<span className="condition-label">If</span>
 
-				{((condition.rules || []).length === 0 ) ? (
+				{((condition.rules || []).length === 0) ? (
 					<>
 						<p>{__('No rules defined yet.', 'tsjippy')}</p>
-						<Button variant="primary" onClick={ () => addRule(conditionIndex) }>
+						<Button variant="primary" onClick={() => addRule(conditionIndex)}>
 							{__('Add rule', 'tsjippy')}
 						</Button>
 					</>
@@ -1043,49 +1022,47 @@ export default function ConditionsModal({
 					condition.rules.map((rule, ruleIndex) => renderRuleRow(rule, ruleIndex, conditionIndex))
 				)}
 
-				<br></br> 
+				<br />
 
 				<span className="condition-label">Then</span>
 
-				{((condition.actions || []).length === 0 ) ? (
+				{((condition.actions || []).length === 0) ? (
 					<>
 						<p>{__('No actions defined yet.', 'tsjippy')}</p>
-						<Button variant="primary" onClick={ () => addAction(conditionIndex) }>
+						<Button variant="primary" onClick={() => addAction(conditionIndex)}>
 							{__('Add action', 'tsjippy')}
 						</Button>
 					</>
 				) : (
-					condition.actions.map((action, actionIndex) => renderActionRow(action, actionIndex, conditionIndex, blockProps))
+					condition.actions.map((action, actionIndex) =>
+						renderActionRow(action, actionIndex, conditionIndex, props)
+					)
 				)}
-				
-				{ (blockProps.name === 'tsjippy-forms/input' || blockProps.name === 'tsjippy-forms/select' ) &&
+
+				{(props?.name === 'tsjippy-forms/input' || props?.name === 'tsjippy-forms/select') && (
 					<div className="actions">
 						<Button variant="secondary" onClick={() => addAction(conditionIndex)} icon={plus}>
 							{__('Add another action', 'tsjippy')}
 						</Button>
 					</div>
-				}
+				)}
 
-				{/* Action buttons for managing the current condition and rule. */}
 				<div className="actions">
-					{
-						// Add a reverse button only for show/hide actions and simple conditions
-						condition.actions.length == 1 && ['show', 'hide'].includes(condition.actions[0]['action']) &&
-						<Button
-							variant="secondary"
-							onClick={() => addReverseCondition(conditionIndex)}
-							icon={undo}
-						>
-							{__('Add Opposite Condition', 'tsjippy')}
-						</Button>
-					}
+					{condition.actions?.length === 1 &&
+						['show', 'hide'].includes(condition.actions[0]?.['action']) && (
+							<Button
+								variant="secondary"
+								onClick={() => addReverseCondition(conditionIndex)}
+								icon={undo}
+							>
+								{__('Add Opposite Condition', 'tsjippy')}
+							</Button>
+						)}
 
 					<Button
 						variant="secondary"
 						isDestructive
-						onClick={() =>
-							deleteCondition(conditionIndex)
-						}
+						onClick={() => deleteCondition(conditionIndex)}
 						icon={trash}
 					>
 						{__('Delete condition', 'tsjippy')}
@@ -1093,14 +1070,14 @@ export default function ConditionsModal({
 				</div>
 			</div>
 		));
-	}
+	};
 
-	const renderContent = useCallback((blockProps) => {
+	const renderContent = (props) => {
 		if (isLoading && !hasLoaded) {
 			return (
 				<>
-				Fetching Condition Data... 
-				<Spinner /> 
+					{__('Fetching Condition Data...', 'tsjippy')}
+					<Spinner />
 				</>
 			);
 		}
@@ -1127,8 +1104,7 @@ export default function ConditionsModal({
 
 				<div ref={modalRef}>
 					<h3>{__('Conditions', 'tsjippy')}</h3>
-
-					{ displayConditions(blockProps) }
+					{displayConditions(props)}
 				</div>
 
 				<div style={{ marginTop: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1138,7 +1114,7 @@ export default function ConditionsModal({
 
 					<Button
 						variant="primary"
-						onClick={() => handleSave(blockProps.attributes.blockId)}
+						onClick={() => handleSave(props?.attributes?.blockId || blockId)}
 						disabled={!isDirty || !isValid || isSaving}
 						accessibleWhenDisabled={true}
 					>
@@ -1165,31 +1141,7 @@ export default function ConditionsModal({
 				)}
 			</>
 		);
-	}, [
-		addAction,
-		addRule,
-		addCondition,
-		clearSuccessMessage,
-		conditions,
-		deleteCondition,
-		deleteRule,
-		draftConditions,
-		error,
-		fieldErrors,
-		formBlockOptions,
-		handleClose,
-		handleReset,
-		handleSave,
-		hasLoaded,
-		isDirty,
-		isLoading,
-		isSaving,
-		moveRule,
-		pulseTarget,
-		successMessage,
-		updateAction,
-		updateRuleCondition,
-	]);
+	};
 
 	if (!isVisible || typeof document === 'undefined') {
 		return null;
@@ -1216,8 +1168,8 @@ export default function ConditionsModal({
 						stroke="currentColor"
 						strokeWidth="2"
 					>
-						<line x1="18" y1="6" x2="6" y2="18"></line>
-						<line x1="6" y1="6" x2="18" y2="18"></line>
+						<line x1="18" y1="6" x2="6" y2="18" />
+						<line x1="6" y1="6" x2="18" y2="18" />
 					</svg>
 				</span>
 
