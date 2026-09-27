@@ -5,6 +5,7 @@
 
 ### Changed
 - removed console.log command
+- use comboboxcontrol for block selectors
 
 ### Fixed
 
