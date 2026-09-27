@@ -836,7 +836,7 @@ export default function ConditionsModal({
 			pulseTarget.section === 'actions' &&
 			pulseTarget.actionIndex === actionIndex;
 
-		const datalistOptions = [];
+		const datalistOptions = ['value'];
 		const inputType = props?.attributes?.type;
 
 		inputSchema.sharedAttributes
