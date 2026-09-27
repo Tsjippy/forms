@@ -60,7 +60,6 @@ function buildBlock(block) {
 }
 
 function sendBlockContent(block, postId){
-    console.log(block);
     const content = wp.blocks.serialize(
         buildBlock(block)
     );

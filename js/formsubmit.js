@@ -19,8 +19,6 @@ window.addEventListener("beforeunload", (event) => {
 
   // check all pending
   document.querySelectorAll("[data-pending]").forEach((el) => {
-    console.log(el);
-    console.log(`${el.defaultValue} - ${el.value}`);
     event.preventDefault();
   });
 
@@ -31,8 +29,6 @@ window.addEventListener("beforeunload", (event) => {
     )
     .forEach((el) => {
       if (el.defaultValue != el.value) {
-        console.log(el);
-        console.log(`${el.defaultValue} - ${el.value}`);
         event.preventDefault();
       }
     });
@@ -44,8 +40,6 @@ window.addEventListener("beforeunload", (event) => {
     )
     .forEach((el) => {
       if (el.defaultChecked != el.checked) {
-        console.log(el);
-        console.log(`${el.defaultChecked} - ${el.checked}`);
         event.preventDefault();
       }
     });
@@ -59,8 +53,6 @@ window.addEventListener("beforeunload", (event) => {
         el.options[el.selectedIndex] != undefined &&
         !el.options[el.selectedIndex].defaultSelected
       ) {
-        console.log(el);
-        console.log(el.options[el.selectedIndex].defaultSelected);
         event.preventDefault();
       }
     });

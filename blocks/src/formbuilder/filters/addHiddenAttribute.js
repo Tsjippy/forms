@@ -34,7 +34,6 @@ addFilter(
 const withHiddenControl = createHigherOrderComponent(
 	( BlockEdit ) => {
 		return ( props ) => {
-			//console.log(props);
 			const { attributes, setAttributes, clientId } = props;
 
 			const { getBlockParents, getBlockName } =

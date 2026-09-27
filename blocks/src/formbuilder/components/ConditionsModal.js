@@ -299,6 +299,8 @@ export default function ConditionsModal({
 		'tsjippy-forms/conditions-store'
 	);
 
+	const { updateBlockAttributes } = useDispatch('core/block-editor');
+
 	const { createSuccessNotice, createErrorNotice } = useDispatch('core/notices');
 
 	const conditions = useSelect(
@@ -754,9 +756,11 @@ export default function ConditionsModal({
 		});
 
 		// update the form version to make sure the latest js is downloaded on clients
-		props.setAttributes({
-			version: (props.attributes.version || 0) + 1
-		});
+		if (props?.clientId) {
+			updateBlockAttributes(props.clientId, {
+				version: (props.attributes?.version || 0) + 1
+			});
+		}
 
 		return savedConditions;
 	}, [postId]);

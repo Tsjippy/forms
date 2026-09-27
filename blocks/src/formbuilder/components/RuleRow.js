@@ -30,7 +30,6 @@ export default function RuleRow({
 	canMoveRuleDown,
 	ruleErrors = {},
 }) {
-	console.log(ruleErrors)
 	/* Available equation choices for the main equation dropdown. */
 	const equationOptions = [
 		{ label: __('has changed', 'tsjippy'), value: 'changed' },
