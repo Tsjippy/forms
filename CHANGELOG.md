@@ -2,6 +2,7 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+- show anchor name
 
 ### Changed
 - removed console.log command
