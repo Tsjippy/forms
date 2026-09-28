@@ -98,7 +98,6 @@ function analyzeBlockConditions(conditionsData, blocks) {
   const edgeCasesSet = new Set();
 
   conditions.forEach((conditionObj) => {
-    // FIX: Extract targetBlockId before validating conditionObj to avoid ReferenceError
     const targetBlockId = String(conditionObj?.block_id || 'Unknown Block');
     const blockName = blocks[targetBlockId] || 'Unknown Name';
 
@@ -111,14 +110,24 @@ function analyzeBlockConditions(conditionsData, blocks) {
       return;
     }
 
-    const rulesList = Array.isArray(conditionObj.rules) ? conditionObj.rules : [];
+    const rulesList   = Array.isArray(conditionObj.rules) ? conditionObj.rules : [];
     const actionsList = Array.isArray(conditionObj.actions) ? conditionObj.actions : [];
+
+    if (actionsList.length === 0) {
+      edgeCasesSet.add(JSON.stringify({
+        text: 'No actions defined for block',
+        blockId: targetBlockId,
+        blockName
+      }));
+    }
+
+    console.log(actionsList);
 
     // 1. Process Actions
     actionsList.forEach((act) => {
       actionCounts.total += 1;
-      const actionName = String(act.action || act['action-type'] || '').toLowerCase();
-      const propType = String(act.property || act['property-type'] || '').toLowerCase();
+      const actionName  = String(act.action || act['action-type'] || '').toLowerCase();
+      const propType    = String(act.property || act['property-type'] || '').toLowerCase();
 
       if (['show', 'hide', 'visible', 'invisible'].includes(actionName)) {
         actionCounts.visibility += 1;
@@ -155,7 +164,7 @@ function analyzeBlockConditions(conditionsData, blocks) {
         fieldImpactMap.set(triggerField, (fieldImpactMap.get(triggerField) || 0) + 1);
       }
 
-      if (equation.includes('value') && blocks[rule['conditional-field-2']] == undefined) {
+      if (equation.includes('value') && blocks[rule['conditional-field-2']] === undefined) {
         edgeCasesSet.add(JSON.stringify({
           text: "Invalid comparison block id on block",
           blockId: targetBlockId,
@@ -244,14 +253,11 @@ export function ConditionsOverview({ conditions = {}, blocks = [] }) {
 
   return (
     <div className="wp-dynamic-conditions-wrap" style={{ maxWidth: '1100px', margin: '20px 0' }}>
-      {/* FIX: Added key prop to force clean mount/unmount and passed onRequestClose */}
       {activeModalBlock && (
         <ConditionsModal
           key={activeModalBlock}
           isVisible={true}
-          isOpen={true}
           onClose={closePopUp}
-          onRequestClose={closePopUp}
           blockId={activeModalBlock}
           allNestedBlocks={blocks}
           blockProps={blocks.find(block => String(block?.attributes?.blockId) === String(activeModalBlock))}

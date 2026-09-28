@@ -20,9 +20,6 @@ import apiFetch from '@wordpress/api-fetch';
 import RuleRow from './RuleRow';
 import { inputSchema } from './../../input/components/block_attributes.js';
 
-/**
- * Create a blank condition object.
- */
 function createEmptyRule() {
 	return {
 		'conditional-field': '',
@@ -34,9 +31,6 @@ function createEmptyRule() {
 	};
 }
 
-/**
- * Create a blank action object.
- */
 function createEmptyAction() {
 	return {
 		'targets': [],
@@ -49,16 +43,10 @@ function createEmptyAction() {
 	};
 }
 
-/**
- * Deep clone a plain object/array.
- */
 function deepClone(value) {
 	return JSON.parse(JSON.stringify(value || {}));
 }
 
-/**
- * Check whether an equation requires a value.
- */
 function isEquationRequiringValue(equation) {
 	return [
 		'>',
@@ -68,9 +56,6 @@ function isEquationRequiringValue(equation) {
 	].includes(equation);
 }
 
-/**
- * Validate the current conditions object.
- */
 function validateConditions(conditions, setFieldErrors) {
 	const errors = [];
 	const fieldErrors = [{
@@ -96,9 +81,6 @@ function validateConditions(conditions, setFieldErrors) {
 
 	conditions = Array.isArray(conditions) ? conditions : [];
 
-	/**
-	 * Loop over all conditions
-	 */
 	conditions.forEach((condition, conditionIndex) => {
 		if (!Array.isArray(condition.rules)) {
 			errors.push(
@@ -136,12 +118,7 @@ function validateConditions(conditions, setFieldErrors) {
 			}
 		}
 
-		/**
-		 * Loop over all rules of this condition
-		 * And check validity
-		 */
 		condition.rules.forEach((rule, ruleIndex) => {
-
 			((fieldErrors[conditionIndex] ||= {}).rules ||= [])[ruleIndex] ||= {};
 
 			const ruleErrors = {};
@@ -220,7 +197,8 @@ function validateConditions(conditions, setFieldErrors) {
 				fieldErrors[conditionIndex].rules[ruleIndex] = ruleErrors;
 				errors.push(
 					sprintf(
-						__('Condition %1$d, rule \%2$d has validation errors.', 'tsjippy'),
+						// FIXED TYPO: removed backslash before %2$d
+						__('Condition %1$d, rule %2$d has validation errors.', 'tsjippy'),
 						conditionIndex + 1,
 						ruleIndex + 1
 					)
@@ -228,10 +206,6 @@ function validateConditions(conditions, setFieldErrors) {
 			}
 		});
 
-		/**
-		 * Loop over all actions of this condition
-		 * And check validity
-		 */
 		(condition.actions || []).forEach((actionItem, actionIndex) => {
 			const actionErrors = {};
 
@@ -282,9 +256,6 @@ function validateConditions(conditions, setFieldErrors) {
 	};
 }
 
-/**
- * Conditions modal UI.
- */
 export default function ConditionsModal({
 	isVisible,
 	onClose,
@@ -292,10 +263,7 @@ export default function ConditionsModal({
 	allNestedBlocks,
 	blockProps = {}
 }) {
-	const { setCondition } = useDispatch(
-		'tsjippy-forms/conditions-store'
-	);
-
+	const { setCondition } = useDispatch('tsjippy-forms/conditions-store');
 	const { updateBlockAttributes } = useDispatch('core/block-editor');
 	const { createSuccessNotice, createErrorNotice } = useDispatch('core/notices');
 
@@ -323,9 +291,7 @@ export default function ConditionsModal({
 	}, [isVisible, conditions]);
 
 	useEffect(() => {
-		if (!successMessage) {
-			return;
-		}
+		if (!successMessage) return;
 
 		const timer = window.setTimeout(() => {
 			setSuccessMessage('');
@@ -335,9 +301,7 @@ export default function ConditionsModal({
 	}, [successMessage]);
 
 	useEffect(() => {
-		if (!isVisible || typeof document === 'undefined') {
-			return;
-		}
+		if (!isVisible || typeof document === 'undefined') return;
 
 		previousBodyOverflow.current = document.body.style.overflow;
 		document.body.style.overflow = 'hidden';
@@ -348,17 +312,13 @@ export default function ConditionsModal({
 	}, [isVisible]);
 
 	const handleClose = useCallback(() => {
-		const isDirty =
-			JSON.stringify(draftConditions) !== JSON.stringify(conditions);
+		const isDirty = JSON.stringify(draftConditions) !== JSON.stringify(conditions);
 
 		if (isDirty) {
 			const ok = window.confirm(
 				__('You have unsaved changes. Close without saving?', 'tsjippy')
 			);
-
-			if (!ok) {
-				return;
-			}
+			if (!ok) return;
 		}
 
 		onClose();
@@ -373,9 +333,7 @@ export default function ConditionsModal({
 	}, []);
 
 	useEffect(() => {
-		if (!isVisible) {
-			return;
-		}
+		if (!isVisible) return;
 
 		const handleKeyDown = (event) => {
 			if (event.key === 'Escape') {
@@ -384,19 +342,13 @@ export default function ConditionsModal({
 		};
 
 		window.addEventListener('keydown', handleKeyDown);
-
-		return () => {
-			window.removeEventListener('keydown', handleKeyDown);
-		};
+		return () => window.removeEventListener('keydown', handleKeyDown);
 	}, [isVisible, handleClose]);
 
 	useEffect(() => {
-		if (!focusTarget || !modalRef.current || !focusTarget.section) {
-			return;
-		}
+		if (!focusTarget || !modalRef.current || !focusTarget.section) return;
 
 		const { section, conditionIndex, ruleIndex, actionIndex, fieldKey } = focusTarget;
-
 		let selector = '';
 
 		if (section === 'rules') {
@@ -416,11 +368,7 @@ export default function ConditionsModal({
 		if (field && typeof field.focus === 'function') {
 			window.requestAnimationFrame(() => {
 				field.focus();
-				field.scrollIntoView({
-					behavior: 'smooth',
-					block: 'center',
-				});
-
+				field.scrollIntoView({ behavior: 'smooth', block: 'center' });
 				setPulseTarget(focusTarget);
 
 				window.setTimeout(() => {
@@ -453,42 +401,27 @@ export default function ConditionsModal({
 
 	const showToastSuccess = useCallback(
 		(message) => {
-			createSuccessNotice(message, {
-				type: 'snackbar',
-				isDismissible: true,
-			});
+			createSuccessNotice(message, { type: 'snackbar', isDismissible: true });
 		},
 		[createSuccessNotice]
 	);
 
 	const showToastError = useCallback(
 		(message) => {
-			createErrorNotice(message, {
-				type: 'snackbar',
-				isDismissible: true,
-			});
+			createErrorNotice(message, { type: 'snackbar', isDismissible: true });
 		},
 		[createErrorNotice]
 	);
 
 	const addCondition = useCallback(() => {
 		resetErrors();
-
 		setDraftConditions((prev) => {
 			const next = deepClone(prev);
-
-			const newCondition = next[0]
-				? deepClone(next[0])
-				: {
-					rules: [createEmptyRule()],
-					actions: [createEmptyAction()],
-				};
-			newCondition.rules = [createEmptyRule()];
-			newCondition.actions = [createEmptyAction()];
-			newCondition.id = undefined;
-
+			const newCondition = {
+				rules: [createEmptyRule()],
+				actions: [createEmptyAction()],
+			};
 			next.push(newCondition);
-
 			return next;
 		});
 	}, [resetErrors]);
@@ -497,35 +430,21 @@ export default function ConditionsModal({
 		(conditionIndex, ruleIndex, key, value) => {
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-
-				if (!next[conditionIndex]) {
-					next[conditionIndex] = [];
-				}
-
-				if (!next[conditionIndex].rules) {
-					next[conditionIndex].rules = [];
-				}
-
-				if (!next[conditionIndex].actions) {
-					next[conditionIndex].actions = [];
-				}
-
+				if (!next[conditionIndex]) next[conditionIndex] = {};
+				if (!next[conditionIndex].rules) next[conditionIndex].rules = [];
+				if (!next[conditionIndex].actions) next[conditionIndex].actions = [];
 				if (!next[conditionIndex].rules[ruleIndex]) {
 					next[conditionIndex].rules[ruleIndex] = createEmptyRule();
 				}
 
 				next[conditionIndex].rules[ruleIndex][key] = value;
 
-				if (
-					key === 'combinator' &&
-					!next[conditionIndex].rules[ruleIndex + 1]
-				) {
+				if (key === 'combinator' && !next[conditionIndex].rules[ruleIndex + 1]) {
 					next[conditionIndex].rules[ruleIndex + 1] = createEmptyRule();
 				}
 
 				return next;
 			});
-
 			resetErrors();
 		},
 		[resetErrors]
@@ -533,7 +452,6 @@ export default function ConditionsModal({
 
 	const addRule = useCallback((conditionIndex) => {
 		resetErrors();
-
 		setDraftConditions((prev) => {
 			const next = deepClone(prev);
 			next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
@@ -545,14 +463,12 @@ export default function ConditionsModal({
 	const addReverseCondition = useCallback(
 		(conditionIndex) => {
 			resetErrors();
-
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-
 				next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
 				next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
 
-				let clone = deepClone(next[conditionIndex]);
+				const clone = deepClone(next[conditionIndex]);
 				clone.id = undefined;
 
 				const reverseOperators = {
@@ -577,15 +493,11 @@ export default function ConditionsModal({
 				});
 
 				clone.actions.forEach(action => {
-					if (action.action === 'show') {
-						action.action = 'hide';
-					} else if (action.action === 'hide') {
-						action.action = 'show';
-					}
+					if (action.action === 'show') action.action = 'hide';
+					else if (action.action === 'hide') action.action = 'show';
 				});
 
 				next.splice(conditionIndex + 1, 0, clone);
-
 				return next;
 			});
 		},
@@ -595,7 +507,6 @@ export default function ConditionsModal({
 	const deleteCondition = useCallback(
 		(conditionIndex) => {
 			resetErrors();
-
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
 				next.splice(conditionIndex, 1);
@@ -608,16 +519,10 @@ export default function ConditionsModal({
 	const deleteRule = useCallback(
 		(conditionIndex, ruleIndex) => {
 			resetErrors();
-
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-
-				if (!next[conditionIndex].rules) {
-					return next;
-				}
-
+				if (!next[conditionIndex].rules) return next;
 				next[conditionIndex].rules.splice(ruleIndex, 1);
-
 				return next;
 			});
 		},
@@ -627,12 +532,9 @@ export default function ConditionsModal({
 	const moveRule = useCallback(
 		(conditionIndex, ruleIndex, direction) => {
 			resetErrors();
-
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-
 				next[conditionIndex].rules = Array.isArray(next[conditionIndex].rules) ? next[conditionIndex].rules : [];
-
 				const targetIndex = ruleIndex + direction;
 
 				if (targetIndex < 0 || targetIndex >= next[conditionIndex].rules.length) {
@@ -651,13 +553,10 @@ export default function ConditionsModal({
 
 	const addAction = useCallback((conditionIndex) => {
 		resetErrors();
-
 		setDraftConditions((prev) => {
 			const next = deepClone(prev);
-
 			next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
 			next[conditionIndex].actions.push(createEmptyAction());
-
 			return next;
 		});
 	}, [resetErrors]);
@@ -666,18 +565,13 @@ export default function ConditionsModal({
 		(conditionIndex, actionIndex, key, value) => {
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-
 				next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
-
 				if (!next[conditionIndex].actions[actionIndex]) {
 					next[conditionIndex].actions[actionIndex] = createEmptyAction();
 				}
-
 				next[conditionIndex].actions[actionIndex][key] = value;
-
 				return next;
 			});
-
 			resetErrors();
 		},
 		[resetErrors]
@@ -686,10 +580,8 @@ export default function ConditionsModal({
 	const deleteAction = useCallback(
 		(conditionIndex, actionIndex) => {
 			resetErrors();
-
 			setDraftConditions((prev) => {
 				const next = deepClone(prev);
-
 				next[conditionIndex].actions = Array.isArray(next[conditionIndex].actions) ? next[conditionIndex].actions : [];
 				next[conditionIndex].actions.splice(actionIndex, 1);
 				return next;
@@ -698,11 +590,7 @@ export default function ConditionsModal({
 		[resetErrors]
 	);
 
-	const postId = useSelect((select) =>
-		select('core/editor')?.getCurrentPostId?.(),
-		[]
-	);
-
+	const postId = useSelect((select) => select('core/editor')?.getCurrentPostId?.(), []);
 	const targetPostId = blockProps?.attributes?.postId || postId;
 
 	const saveConditionsRequest = useCallback(async (targetBlockId, conditionsToSave, props) => {
@@ -742,54 +630,29 @@ export default function ConditionsModal({
 
 	const handleSave = useCallback(async (targetBlockId) => {
 		setIsSaving(true);
-
 		const result = validateConditions(draftConditions, setFieldErrors);
 
 		if (result.errors.length > 0) {
 			setFieldErrors(result.fieldErrors);
 			setFocusTarget(result.firstErrorTarget);
 			setPulseTarget(result.firstErrorTarget);
-			showToastError(
-				__('Please fix the invalid conditions before saving.', 'tsjippy')
-			);
-
+			showToastError(__('Please fix the invalid conditions before saving.', 'tsjippy'));
 			setIsSaving(false);
 			return;
 		}
 
 		try {
-			const savedConditions = await saveConditionsRequest(
-				targetBlockId,
-				draftConditions,
-				blockProps
-			);
-
-			setCondition(
-				targetBlockId,
-				Array.isArray(savedConditions)
-					? savedConditions
-					: draftConditions
-			);
-
+			const savedConditions = await saveConditionsRequest(targetBlockId, draftConditions, blockProps);
+			setCondition(targetBlockId, Array.isArray(savedConditions) ? savedConditions : draftConditions);
 			resetErrors();
 			setSuccessMessage(__('Conditions saved successfully.', 'tsjippy'));
 			showToastSuccess(__('Conditions saved.', 'tsjippy'));
 		} catch (err) {
-			showToastError(
-				err?.message || __('Failed to save conditions.', 'tsjippy')
-			);
+			showToastError(err?.message || __('Failed to save conditions.', 'tsjippy'));
 		}
 
 		setIsSaving(false);
-	}, [
-		draftConditions,
-		blockProps,
-		saveConditionsRequest,
-		setCondition,
-		resetErrors,
-		showToastSuccess,
-		showToastError,
-	]);
+	}, [draftConditions, blockProps, saveConditionsRequest, setCondition, resetErrors, showToastSuccess, showToastError]);
 
 	const handleReset = useCallback(() => {
 		if (Array.isArray(conditions)) {
@@ -800,10 +663,7 @@ export default function ConditionsModal({
 	}, [conditions, resetErrors, showToastSuccess]);
 
 	const renderRuleRow = (rule, ruleIndex, conditionIndex) => {
-		const isPulsed =
-			pulseTarget &&
-			pulseTarget.section === 'rules' &&
-			pulseTarget.ruleIndex === ruleIndex;
+		const isPulsed = pulseTarget && pulseTarget.section === 'rules' && pulseTarget.ruleIndex === ruleIndex;
 
 		return (
 			<div
@@ -831,10 +691,7 @@ export default function ConditionsModal({
 
 	const renderActionRow = (actionItem, actionIndex, conditionIndex, props) => {
 		const actionErrors = fieldErrors[conditionIndex]?.actions?.[actionIndex] || {};
-		const isPulsed =
-			pulseTarget &&
-			pulseTarget.section === 'actions' &&
-			pulseTarget.actionIndex === actionIndex;
+		const isPulsed = pulseTarget && pulseTarget.section === 'actions' && pulseTarget.actionIndex === actionIndex;
 
 		const datalistOptions = ['value'];
 		const inputType = props?.attributes?.type;
@@ -863,9 +720,7 @@ export default function ConditionsModal({
 		return (
 			<div
 				key={actionIndex}
-				className={`rule-row inner item ${
-					Object.keys(actionErrors).length > 0 ? 'invalid' : ''
-				} ${isPulsed ? 'pulse' : ''}`}
+				className={`rule-row inner item ${Object.keys(actionErrors).length > 0 ? 'invalid' : ''} ${isPulsed ? 'pulse' : ''}`}
 				data-action-index={actionIndex}
 			>
 				<SelectControl
@@ -910,9 +765,7 @@ export default function ConditionsModal({
 
 								if (
 									currentInputValue &&
-									!mappedOptions.some(
-										(opt) => opt.value === currentInputValue || opt.label === currentInputValue
-									)
+									!mappedOptions.some((opt) => opt.value === currentInputValue || opt.label === currentInputValue)
 								) {
 									mappedOptions.unshift({
 										value: currentInputValue,
@@ -920,10 +773,7 @@ export default function ConditionsModal({
 									});
 								}
 
-								if (
-									currentValue &&
-									!mappedOptions.some((opt) => opt.value === currentValue)
-								) {
+								if (currentValue && !mappedOptions.some((opt) => opt.value === currentValue)) {
 									mappedOptions.unshift({
 										value: currentValue,
 										label: currentValue,
@@ -932,9 +782,7 @@ export default function ConditionsModal({
 
 								return mappedOptions;
 							})()}
-							onFilterValueChange={(inputValue) => {
-								setFilterValue(inputValue || '');
-							}}
+							onFilterValueChange={(inputValue) => setFilterValue(inputValue || '')}
 							onChange={(value) => {
 								const finalValue = value !== undefined ? value : (filterValue || '');
 								updateAction(conditionIndex, actionIndex, 'property-value', finalValue);
@@ -975,12 +823,7 @@ export default function ConditionsModal({
 					options={[...(formBlockOptions || [])]}
 					onChange={(values) => {
 						const targets = Array.isArray(values) ? values : [values];
-						updateAction(
-							conditionIndex,
-							actionIndex,
-							'targets',
-							[...new Set(targets)]
-						);
+						updateAction(conditionIndex, actionIndex, 'targets', [...new Set(targets)]);
 					}}
 				/>
 			</div>
@@ -1003,15 +846,13 @@ export default function ConditionsModal({
 			<div
 				key={condition.id || `condition-${conditionIndex}`}
 				className={`condition-row ${
-					Array.isArray(condition['rules']) && condition['rules'].length === 0
-						? 'condition-row--empty'
-						: ''
+					Array.isArray(condition['rules']) && condition['rules'].length === 0 ? 'condition-row--empty' : ''
 				}`}
 				data-condition-index={conditionIndex}
 			>
 				<span className="condition-label">If</span>
 
-				{((condition.rules || []).length === 0) ? (
+				{!Array.isArray(condition.rules) || condition.rules.length === 0 ? (
 					<>
 						<p>{__('No rules defined yet.', 'tsjippy')}</p>
 						<Button variant="primary" onClick={() => addRule(conditionIndex)}>
@@ -1023,7 +864,6 @@ export default function ConditionsModal({
 				)}
 
 				<br />
-
 				<span className="condition-label">Then</span>
 
 				{((condition.actions || []).length === 0) ? (
@@ -1048,16 +888,15 @@ export default function ConditionsModal({
 				)}
 
 				<div className="actions">
-					{condition.actions?.length === 1 &&
-						['show', 'hide'].includes(condition.actions[0]?.['action']) && (
-							<Button
-								variant="secondary"
-								onClick={() => addReverseCondition(conditionIndex)}
-								icon={undo}
-							>
-								{__('Add Opposite Condition', 'tsjippy')}
-							</Button>
-						)}
+					{condition.actions?.length === 1 && ['show', 'hide'].includes(condition.actions[0]?.['action']) && (
+						<Button
+							variant="secondary"
+							onClick={() => addReverseCondition(conditionIndex)}
+							icon={undo}
+						>
+							{__('Add Opposite Condition', 'tsjippy')}
+						</Button>
+					)}
 
 					<Button
 						variant="secondary"
@@ -1093,11 +932,7 @@ export default function ConditionsModal({
 		return (
 			<>
 				{successMessage && (
-					<Notice
-						status="success"
-						isDismissible
-						onRemove={clearSuccessMessage}
-					>
+					<Notice status="success" isDismissible onRemove={clearSuccessMessage}>
 						{successMessage}
 					</Notice>
 				)}
@@ -1143,36 +978,17 @@ export default function ConditionsModal({
 		);
 	};
 
-	if (!isVisible || typeof document === 'undefined') {
-		return null;
-	}
+	if (!isVisible || typeof document === 'undefined') return null;
 
 	return createPortal(
-		<div
-			id="block-conditions-modal"
-			className="modal"
-			onClick={handleOverlayClick}
-		>
-			<div
-				className="modal-content"
-				onClick={stopPropagation}
-				onKeyDown={stopPropagation}
-				style={{ maxWidth: '90vw' }}
-			>
+		<div id="block-conditions-modal" className="modal" onClick={handleOverlayClick}>
+			<div className="modal-content" onClick={stopPropagation} onKeyDown={stopPropagation} style={{ maxWidth: '90vw' }}>
 				<span className="close mobile-sticky" onClick={handleClose}>
-					<svg
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						strokeWidth="2"
-					>
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 						<line x1="18" y1="6" x2="6" y2="18" />
 						<line x1="6" y1="6" x2="18" y2="18" />
 					</svg>
 				</span>
-
 				{renderContent(blockProps)}
 			</div>
 		</div>,

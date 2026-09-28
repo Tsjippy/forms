@@ -22,7 +22,7 @@ wp.hooks.addFilter(
                 {...props}
                 wrapperProps={{
                     ...props.wrapperProps,
-                    'data-block-label': props.block.name.split('/')[1],
+                    'data-block-label': `${props.block.name.split('/')[1]}  ${props.attributes.anchor ?? ''}`,
                 }}
             />
         );

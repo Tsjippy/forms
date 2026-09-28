@@ -56,11 +56,19 @@ export default function Edit({
     );
 
     const storeAttributeAttributes = (value, name) => {
+        console.log(value);
+        const updatedInputAttributes = {
+            ...(attributes.inputAttributes || {}),
+        };
+
+        if (value === "" || value === null || value === undefined) {
+            delete updatedInputAttributes[name];
+        } else {
+            updatedInputAttributes[name] = value;
+        }
+
         setAttributes({
-            inputAttributes: {
-                ...(attributes.inputAttributes || {}),
-                [name]:value,
-            },
+            inputAttributes: updatedInputAttributes,
         });
     };
 

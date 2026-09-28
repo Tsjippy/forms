@@ -1487,6 +1487,7 @@ class Forms
          */
         foreach($conditions as &$condition){
             $condition['post_id']   = $postId;
+            $condition['block_id']  = $blockId;
 
             ksort($condition);
 

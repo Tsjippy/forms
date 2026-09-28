@@ -75,7 +75,11 @@ export function InputHtml({
                                 autoComplete="on"
                                 defaultChecked={ isSaving ? undefined : prefillValue.includes(option.value) }
                                 data-blockid={attributes.blockId}
-                                {...attributes.inputAttributes}
+                                {...Object.fromEntries(
+                                    Object.entries(attributes.inputAttributes || {}).filter(
+                                        ([_, val]) => val !== "" && val !== null && val !== undefined
+                                    )
+                                )}
                                 required={attributes.required}
                             />
                             {__(option.label, 'tsjippy')}
@@ -101,7 +105,11 @@ export function InputHtml({
                 required={attributes.required}
                 data-blockid={attributes.blockId}
                 autoComplete="on"
-                {...attributes.inputAttributes}
+                {...Object.fromEntries(
+                    Object.entries(attributes.inputAttributes || {}).filter(
+                        ([_, val]) => val !== "" && val !== null && val !== undefined
+                    )
+                )}
                 defaultValue={ isSaving || renderMultiple ? undefined : prefillValue }
                 value={ isSaving || renderMultiple ? "%value-placeholder%" : undefined }
             />
@@ -121,7 +129,11 @@ export function InputHtml({
                 data-blockid={attributes.blockId}
                 autoComplete="on"
                 multiple={attributes.multiple}
-                {...attributes.inputAttributes}
+                {...Object.fromEntries(
+                    Object.entries(attributes.inputAttributes || {}).filter(
+                        ([_, val]) => val !== "" && val !== null && val !== undefined
+                    )
+                )}
                 defaultValue = { isSaving ? undefined :  prefillValue }
                 value = { isSaving ? "%value-placeholder%" :  undefined }
                 data-uselistvalue = { attributes.multiple ? attributes.datalistvalue : undefined}

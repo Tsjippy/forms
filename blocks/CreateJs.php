@@ -252,7 +252,17 @@ function dynamicJs($conditions, $innerBlocks){
              */
             $actions[$conditionIndex] = [];
 
-            foreach($condition->actions as $actionData){
+            foreach($condition->actions as $index => $actionData){
+                if(empty($condition->block_id)){
+                    $forms  = new Forms();
+
+                    $forms->deleteBlockCondition($condition->id);
+                    
+                    unset($condition[$index]);
+
+                    continue;
+                }
+
                 if($actionData['action'] == 'set-property'){
                     $addition   = $actionData['addition'] ?? '';
 
@@ -287,7 +297,6 @@ function dynamicJs($conditions, $innerBlocks){
                     $actions[$conditionIndex]['action'] = "target.classList.$action('hidden');";
                 }
 
-                
                 $actions[$conditionIndex]['targets'] = array_merge([$condition->block_id], $actionData['targets'] ?? []);
             }
         }
@@ -314,6 +323,12 @@ function dynamicJs($conditions, $innerBlocks){
         $actionStrings   = [];
 
         foreach($actions as $conditionIndex => $actionData){
+            $actionData['targets']  = TSJIPPY\cleanUpNestedArray($actionData['targets']);
+
+            if(empty($actionData['targets'])){
+                TSJIPPY\printArray(["No target ids found:", $condition]);
+                continue;
+            }
             $querySelector = "[data-blockid='" . implode("'], [data-blockid='", $actionData['targets']) . "']";
 
             // The block(s) to perform the action on
