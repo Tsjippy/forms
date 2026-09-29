@@ -2,6 +2,17 @@
 ## [Unreleased] - yyyy-mm-dd
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Updated
+
+## [12.2.6] - 2026-09-28
+
+
+### Added
 - show anchor name
 
 ### Changed
@@ -11,8 +22,6 @@
 
 ### Fixed
 - bug in storing conditions
-
-### Updated
 
 ## [12.2.4] - 2026-09-26
 
