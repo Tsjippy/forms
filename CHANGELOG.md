@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- edit form result input when input is hidden on the form
 
 ### Updated
 
