@@ -450,6 +450,8 @@ async function getPage(target, action, page=-1) {
 }
 
 function prepareInputs(target) {
+  target.querySelectorAll("input, select, textarea").forEach(el => el.classList.remove('hidden'));
+
   // attach upload listenerss
   target
     .querySelectorAll(".file-upload-wrap")
