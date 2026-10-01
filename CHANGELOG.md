@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- edit form result input when input is hidden on the form
 
 ### Updated
+
+## [12.2.7] - 2026-10-01
+
+
+### Fixed
+- edit form result input when input is hidden on the form
 
 ## [12.2.6] - 2026-09-28
 
