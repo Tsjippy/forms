@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- include block and post id in submission data
 
 ### Updated
+
+## [12.3.2] - 2026-11-16
+
+
+### Fixed
+- include block and post id in submission data
 
 ## [12.3.1] - 2026-10-04
 
