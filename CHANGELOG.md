@@ -6,6 +6,7 @@
 ### Changed
 
 ### Fixed
+- include block and post id in submission data
 
 ### Updated
 
