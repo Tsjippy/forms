@@ -472,17 +472,17 @@ function prepareInputs(target) {
 }
 
 async function getInputHtml(target) {
-  let data = target.dataset;
-  let submissionId = target.closest("tr").dataset.submissionId;
-  let shortcodeId = target.closest("table").dataset.shortcodeId;
-  let loader = showLoader(
+  let data          = target.dataset;
+  let submissionId  = target.closest("tr").dataset.submissionId;
+  let shortcodeId   = target.closest("table").dataset.shortcodeId;
+  let loader        = showLoader(
     target.querySelector(".override-wrapper"),
     true,
     50,
     "Loading...",
   );
 
-  let formData = new FormData();
+  let formData      = new FormData();
   if (data.subid != undefined) {
     formData.append("subid", data.subid);
   }

@@ -59,10 +59,10 @@ class EditFormResults extends DisplayFormResults
         /**
          * Filters the form results
          *
-         * @param mixed            $value            The value to set
-         * @param int            $blockId        The block id of the value
-         * @param int            $subId            The sub id of the value
-         * @param object        $object            The EditFormResults Instance
+         * @param mixed     $value      The value to set
+         * @param int       $blockId    The block id of the value
+         * @param int       $subId      The sub id of the value
+         * @param object    $object     The EditFormResults Instance
          */
         $value                 = apply_filters('tsjippy-forms-before-updating-formdata', $value, $blockId, $subId, $this);
 
@@ -92,7 +92,9 @@ class EditFormResults extends DisplayFormResults
             $formats[]                = '%d';
         }
 
-        // Update the main submission data
+        /**
+         * Update the main submission data
+         */
         $result = TSJIPPY\updateDbValue(
             $this->submissionTableName,
             $data,
@@ -108,7 +110,10 @@ class EditFormResults extends DisplayFormResults
 
         if (is_wp_error($result)) {
             return $result;
-        } elseif (!$result) {
+        } 
+        
+        // Result is false maybe because the value is the same, so we check if the value is actually the same as the current value in the database
+        elseif (!$result) {
             $column   = array_keys($data)[0];
 
             $curValue = TSJIPPY\getFromDb(

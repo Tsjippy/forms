@@ -12,43 +12,43 @@ if (! defined('ABSPATH')) {
 
 class Forms
 {
-    public bool        $all;            // do not page submissions
-    public bool        $editRights;
-    public array       $blockMapping;
-    public array       $emailSettings;
-    public object      $formData;
-    public array       $formBlocks;
-    public string      $formEmailTable;
-    public object|null $formReminder;
-    public string      $formReminderTable;
-    public array|WP_Error       $forms;
-    public array       $formBlock;
-    public string      $jsFileName;
-    public array       $wpMetaKeys;
-    public array       $wpUserKeys;
-    public string      $objectName;
-    public bool        $onlyOwn;
-    public int         $pageSize;
-    public string      $shortcodeColumnSettingsTable;
-    public int         $shortcodeId;
-    public string      $shortcodeTable;
-    public bool        $showArchived;
-    public array       $slugs;
-    public object|null $submission;
-    public array       $submissions;
-    public string      $submissionTableName;
-    public string      $submissionValuesTableName;
-    public string      $blockConditionsTableName;
-    public array       $submitRoles;
-    protected array    $tableFormats;
-    public \WP_User    $user;
-    public int         $userId;
-    protected string   $userIdBlockName;
-    public array       $userRoles;
-    public array        $defaultArrayValues;
-    public array        $defaultValues;
-    public array        $usermeta;
-    public array        $nonInputs;
+    public bool             $all;            // do not page submissions
+    public bool             $editRights;
+    public array            $blockMapping;
+    public array            $emailSettings;
+    public object           $formData;
+    public array            $formBlocks;
+    public string           $formEmailTable;
+    public object|null      $formReminder;
+    public string           $formReminderTable;
+    public array|WP_Error   $forms;
+    public array            $formBlock;
+    public string           $jsFileName;
+    public array            $wpMetaKeys;
+    public array            $wpUserKeys;
+    public string           $objectName;
+    public bool             $onlyOwn;
+    public int              $pageSize;
+    public string           $shortcodeColumnSettingsTable;
+    public int              $shortcodeId;
+    public string           $shortcodeTable;
+    public bool             $showArchived;
+    public array            $slugs;
+    public object|null      $submission;
+    public array            $submissions;
+    public string           $submissionTableName;
+    public string           $submissionValuesTableName;
+    public string           $blockConditionsTableName;
+    public array            $submitRoles;
+    protected array         $tableFormats;
+    public \WP_User         $user;
+    public int              $userId;
+    protected string        $userIdBlockName;
+    public array            $userRoles;
+    public array            $defaultArrayValues;
+    public array            $defaultValues;
+    public array            $usermeta;
+    public array            $nonInputs;
 
     /**
      * Constructor
@@ -64,11 +64,10 @@ class Forms
         global $wpdb;
 
         $this->all                          = $all;
-        $this->blockMapping               = [];
+        $this->blockMapping                 = [];
         $this->emailSettings                = [];
-        $this->formData                     = new stdClass();
         $this->formEmailTable               = $wpdb->prefix . 'tsjippy_form_emails';
-        $this->formBlocks                 = [];
+        $this->formBlocks                   = [];
         $this->formReminder                 = null;
         $this->formReminderTable            = $wpdb->prefix . 'tsjippy_form_reminders';
         $this->forms                        = [];
@@ -95,10 +94,9 @@ class Forms
         $this->userId                       = $this->user->ID;  // The user id for who we retrieve a form (results)
         $this->userIdBlockName              = '';
         $this->userRoles                    = array_flip($this->user->roles);
-        $this->formData->blockId            = $blockId;
-        $this->formData->postId             = $postId;
-        $this->formData->post               = null;
-        $this->formData->split_blocks       = [];
+
+        // Set the initial formData object with the provided blockId and postId
+        $this->reset();
 
         $this->wpUserKeys                   = [
             'user_nicename'     => 1,
@@ -152,7 +150,8 @@ class Forms
         $postAuthor    = 0;
         // phpcs:ignore
         if ($postId != -1) {
-            $this->formData->post        = get_post($postId);
+            $this->formData->postId     = $postId;
+            $this->formData->post       = get_post($postId);
             if (!empty($this->post)) {
                 $postAuthor    = $this->formData->post->post_author;
             }
@@ -174,6 +173,8 @@ class Forms
         }
 
         if(!empty($blockId) || $postId != -1){
+            $this->formData->blockId    = $blockId;
+            
             $this->getForm();
 
             $this->getAllformBlocks();
@@ -531,14 +532,13 @@ class Forms
      *
      */
     public function reset(){
-        // Reset form data
-        $this->formData     = new stdClass();
-
-        $this->blockMapping = [];
-
-        $this->formBlocks   = [];
-
-        $this->formBlock    = [];
+        // Reset form data        
+        $this->formData                 = new stdClass();
+        $this->formData->post           = null;
+        $this->formData->split_blocks   = [];
+        $this->blockMapping             = [];
+        $this->formBlocks               = [];
+        $this->formBlock                = [];
     }
 
     /**

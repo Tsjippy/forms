@@ -499,12 +499,12 @@ class DisplayFormResults extends SubmitForm
         /**
          * Build the Common Table Expressions (CTE) needed to make the pivot query
          */
-        $splitBlocks      = $this->formData->split_blocks;
-        $existingColumns    = ['id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
+        $splitBlocks        = $this->formData->split_blocks;
+        $existingColumns    = ['id', 'post_id', 'time_created', 'time_last_edited', 'user_id', 'archived', 'submitter_id'];
 
         $columns            = $existingColumns;
 
-        $columnsString      = "S.block_id as form_block_id, S.".implode(', S.', $columns);
+        $columnsString      = "S.block_id as form_block_id, S." . implode(', S.', $columns);
 
         $innerJoinString    = '';
 
@@ -533,9 +533,9 @@ class DisplayFormResults extends SubmitForm
         }
 
         // merge the value arrays back in the right order
-        $values        = array_merge($rawValues, $values);
+        $values     = array_merge($rawValues, $values);
 
-        $rawWhere    = implode(' AND ', $rawWhere);
+        $rawWhere   = implode(' AND ', $rawWhere);
 
         // ECT for all the values
         $ect                 = "-- Table with raw data on several rows, where only the block_id and value are unique\n"
@@ -553,7 +553,7 @@ class DisplayFormResults extends SubmitForm
         /**
          * Transpose rows to columns for values with an empty sub_id (non splitted)
          */
-        $columnsString        = implode(", \n\t\t", $columns);
+        $columnsString        = "\t\tblock_id,\n\t\t" . implode(", \n\t\t", $columns);
         $ect               .= ", \n-- Table where the rows are transposed to columns\nEmptySubIdValues AS (\n\tSELECT \n\t\t$columnsString";
         $toColumn            = [];
 

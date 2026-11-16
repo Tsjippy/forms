@@ -202,8 +202,8 @@ function restApiInitTable()
                 ),
                 'block-id'      => array(
                     'required'    => true,
-                    'validate_callback' => function ($submissionId) {
-                        return is_numeric($submissionId);
+                    'validate_callback' => function ($blockId) {
+                        return is_numeric($blockId);
                     }
                 ),
                 'new-value'       => array(
@@ -224,6 +224,9 @@ function restApiInitTable()
             'args'                => array(
                 'block-id'      => array(
                     'required'    => true,
+                    'validate_callback' => function ($blockId) {
+                        return is_numeric($blockId);
+                    }
                 ),
                 'submission-id'   => array(
                     'required'    => true,
@@ -433,8 +436,8 @@ function archiveSubmission()
  */
 function getInputHtml()
 {
-    $requestData = TSJIPPY\sanitize($_POST);
-    $formTable   = new DisplayFormResults();
+    $requestData        = TSJIPPY\sanitize($_POST);
+    $formTable          = new DisplayFormResults();
 
     $formTable->parseSubmissions('', $requestData['submission-id']);
 
