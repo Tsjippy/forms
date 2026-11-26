@@ -72,7 +72,7 @@ function restApiInitFormsNew()
             'methods'                 => 'POST',
             'callback'                 =>     function () {
                 // phpcs:ignore
-                $settings       = TSJIPPY\sanitize($_POST);
+                $settings       = TSJIPPY\sanitize($_POST, 'textarea_field');
 
                 $formBuilder    = new SubmitForm(blockId:$settings['block-id'], postId:$settings['post-id'], userId:get_current_user_id());
 
@@ -396,9 +396,9 @@ function restApiInitFormsNew()
  */
 function saveFormEmails($wpRestRequest)
 {
-    $saver    = new SaveFormSettings();
+    $saver          = new SaveFormSettings();
 
-    $formEmails     = TSJIPPY\sanitize($wpRestRequest->get_param('emails') ?? []);
+    $formEmails     = TSJIPPY\sanitize($wpRestRequest->get_param('emails') ?? [], 'wp_kses_post');
 
     $result         = $saver->saveFormEmails($formEmails, (int) $wpRestRequest->get_param('blockId'));
 

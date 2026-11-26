@@ -479,7 +479,7 @@ function getInputHtml()
  */
 function editValue()
 {
-    $settings                = TSJIPPY\sanitize($_POST);
+    $settings                = TSJIPPY\sanitize($_POST, 'wp_kses_post');
     $formTable               = new EditFormResults();
 
     $formTable->submissionId = $settings['submission-id'];
@@ -491,7 +491,7 @@ function editValue()
         $subId    = null;
     }
 
-    $newValue                = json_decode(TSJIPPY\sanitize($settings['new-value'], 'textarea_field'));
+    $newValue                = json_decode($settings['new-value']);
 
     /**
      * Check if an db update is needed
