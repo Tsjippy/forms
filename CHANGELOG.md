@@ -6,9 +6,14 @@
 ### Changed
 
 ### Fixed
-- incorrect sanitation
 
 ### Updated
+
+## [12.3.3] - 2026-11-26
+
+
+### Fixed
+- incorrect sanitation
 
 ## [12.3.2] - 2026-11-16
 
